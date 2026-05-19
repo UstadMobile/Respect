@@ -166,7 +166,6 @@ class AssignmentEditViewModel(
                             ),
                             dataLoadParams = params
                         ).map { result ->
-                            println("<<<<Result: $result")
                             result.statements
                                 .filter { it.isAssignmentStatement }
                                 .maxByOrNull {

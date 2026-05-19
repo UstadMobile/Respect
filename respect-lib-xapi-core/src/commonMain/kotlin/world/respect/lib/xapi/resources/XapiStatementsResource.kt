@@ -10,6 +10,7 @@ import world.respect.lib.serializers.InstantAsISO8601
 import world.respect.lib.xapi.ext.getUuidOrNull
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.AssignmentResult
+import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import kotlin.uuid.Uuid
@@ -99,9 +100,7 @@ interface XapiStatementsResource {
         assignmentActivityId: String,
     ): Flow<List<AssignmentResult>>
 
-    fun getAssignmentCompletions(
-        listParams: GetStatementParams
-    ): Flow<List<AssignmentResult>>
+    fun getAssignmentSummaries(): Flow<List<AssignmentSummary>>
 
     suspend fun getLastStoredTimestampForActivity(activityId: String): Long?
 

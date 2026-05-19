@@ -10,6 +10,8 @@ import io.ktor.util.date.GMTDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -45,15 +47,7 @@ import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_VERSION
 import world.respect.lib.xapi.exceptions.XapiBadRequestException
 import world.respect.lib.xapi.exceptions.XapiForbiddenException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
-import world.respect.lib.xapi.model.XapiStatementRef
-import world.respect.lib.xapi.model.AssignmentResult
-import world.respect.lib.xapi.model.XAPI_RESULT_EXTENSION_PROGRESS
-import world.respect.lib.xapi.model.XapiActivity
-import world.respect.lib.xapi.model.XapiAgent
-import world.respect.lib.xapi.model.XapiStatement
-import world.respect.lib.xapi.model.XapiStatementResult
-import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
-import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.model.*
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import kotlin.time.Instant
@@ -460,32 +454,33 @@ class XapiStatementsResourceDb(
         }
     }
 
-    override fun getAssignmentCompletions(
-        listParams: GetStatementParams
-    ): Flow<List<AssignmentResult>> {
-        return getAsFlow(
-            listParams = listParams,
-            dataLoadParams = DataLoadParams()
-        ).map { state ->
-            state.dataOrNull()?.statements?.mapNotNull { statement ->
-                val actor = statement.actor
-                val personUid = when (actor) {
-                    is XapiAgent -> actor.account?.name ?: actor.mbox ?: actor.openid ?: actor.name
-                    else -> null
-                } ?: return@mapNotNull null
-                val personName = actor.name
-                val activityId = (statement.`object` as? XapiActivity)?.id ?: return@mapNotNull null
-                val result = statement.result
-                AssignmentResult(
-                    personUid = personUid,
-                    personName = personName,
-                    activityId = activityId,
-                    completion = result?.completion,
-                    success = result?.success,
-                    scoreScaled = result?.score?.scaled,
-                    progress = result?.extensions?.get(XAPI_RESULT_EXTENSION_PROGRESS)?.toString()?.toIntOrNull()
+    override fun getAssignmentSummaries(): Flow<List<AssignmentSummary>> {
+        val recipeActivityUid = uidNumberMapper(CATEGORY_ASSIGNMENT_RECIPE)
+        return schoolDb.getStatementDao().getAssignmentSummariesFlow(
+            assignVerbId = VERB_ASSIGN,
+            recipeActivityUid = recipeActivityUid,
+            deadlineExtKey = EXT_DEADLINE
+        ).map { rows ->
+            rows.map { row ->
+                val deadline = row.deadlineJson?.let {
+                    runCatching {
+                        (json.parseToJsonElement(it) as? JsonPrimitive)?.contentOrNull?.let { str ->
+                            Instant.parse(str)
+                        }
+                    }.getOrNull()
+                }
+
+                AssignmentSummary(
+                    activityId = row.activityId,
+                    title = row.title ?: "Untitled",
+                    className = row.className ?: "Unknown Class",
+                    lastModified = Instant.fromEpochMilliseconds(row.lastModified),
+                    deadline = deadline,
+                    completedCount = row.completedCount,
+                    totalCount = row.totalCount,
+                    learningUnitManifestUrls = row.learningUnitsConcat?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
                 )
-            } ?: emptyList()
+            }
         }
     }
 

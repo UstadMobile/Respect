@@ -18,18 +18,12 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.isStudent
-import world.respect.datalayer.school.model.Assignment
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.xapi.model.VERB_ASSIGN
-import world.respect.lib.xapi.model.VERB_COMPLETED
-import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
-import world.respect.libutil.ext.appendEndpointSegments
+import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectSessionAndPerson
-import world.respect.shared.domain.xapi.XapiAssignmentMapper
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assignment
 import world.respect.shared.generated.resources.assignments
@@ -40,30 +34,16 @@ import world.respect.shared.util.AssignmentListScreenFilter
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel.Companion.ACTIVITY_ID_PATH
 import kotlin.uuid.ExperimentalUuidApi
 
-data class AssignmentRow(
-    val assignment: Assignment,
-    val className: String,
-    val completedCount: Int = 0,
-    val totalCount: Int = 0,
-    val isCompleted: Boolean = false
-) {
-    val uid: String get() = assignment.uid
-    val title: String get() = assignment.title
-    val deadline get() = assignment.deadline
-    val learningUnits get() = assignment.learningUnits
-}
-
 data class AssignmentListUiState(
-    val assignments: List<AssignmentRow> = emptyList(),
+    val assignments: List<AssignmentSummary> = emptyList(),
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { emptyFlow() },
     val selectedFilter: AssignmentListScreenFilter = AssignmentListScreenFilter.ALL,
     val isStudent: Boolean = false,
     val personName: String = "",
-    val completedCount: Int = 0,
-    val totalCount: Int = 0,
+    val totalAssignmentsCount: Int = 0,
+    val completedAssignmentsCount: Int = 0,
 ) {
     /**
      * Returns the display label for a given filter based on current state counts.
@@ -71,8 +51,8 @@ data class AssignmentListUiState(
     fun getLabelForFilter(filter: AssignmentListScreenFilter): String {
         return when (filter) {
             AssignmentListScreenFilter.ALL -> filter.displayName
-            AssignmentListScreenFilter.COMPLETED -> "${filter.displayName} ($completedCount)"
-            AssignmentListScreenFilter.PENDING -> "${filter.displayName} (${totalCount - completedCount})"
+            AssignmentListScreenFilter.COMPLETED -> "${filter.displayName} ($completedAssignmentsCount)"
+            AssignmentListScreenFilter.PENDING -> "${filter.displayName} (${totalAssignmentsCount - completedAssignmentsCount})"
         }
     }
 }
@@ -91,7 +71,7 @@ class AssignmentListViewModel(
     private val _uiState = MutableStateFlow(AssignmentListUiState())
     val uiState: StateFlow<AssignmentListUiState> = _uiState.asStateFlow()
 
-    private var allRows: List<AssignmentRow> = emptyList()
+    private var allSummaries: List<AssignmentSummary> = emptyList()
 
     init {
         _appUiState.update {
@@ -128,100 +108,48 @@ class AssignmentListViewModel(
                     )
                 }
 
-                loadData(selectedAcct)
+                loadData()
             }
         }
     }
 
-    private fun loadData(sessionAndPerson: RespectSessionAndPerson?) {
-        val schoolUrl = sessionAndPerson?.session?.account?.school?.self
+    private fun loadData() {
         viewModelScope.launch {
-            val state = schoolDataSource.xapiStatementsResource.get(
-                listParams = GetStatementParams(
-                    activity = XapiAssignmentMapper.CATEGORY_ASSIGNMENT_RECIPE,
-                    relatedActivities = true,
-                    verb = VERB_ASSIGN
-                ),
-                dataLoadParams = DataLoadParams()
-            )
-
-            val statements = state.dataOrNull()?.statements ?: emptyList()
-
-            // Map xAPI Statements directly to AssignmentRow UI Model
-            allRows = statements.mapNotNull { statement ->
-                val assignment =
-                    XapiAssignmentMapper.toAssignment(statement) ?: return@mapNotNull null
-                AssignmentRow(
-                    assignment = assignment,
-                    className = statement.actor.name ?: UNKNOWN_CLASS_NAME
-                )
-            }.distinctBy { it.assignment.uid }
-                .sortedByDescending { it.assignment.lastModified }
-
-            updateFilteredRows()
-            viewModelScope.launch {
-                schoolDataSource.xapiStatementsResource.getAssignmentCompletions(
-                    listParams = GetStatementParams(
-                        verb = VERB_COMPLETED,
-                    )
-                ).collect { allResults ->
-                    val completionsByAssignment = allResults.groupBy { it.activityId }
-
-                    // Update rows with completion data
-                    allRows = allRows.map { row ->
-                        val assignmentActivityId =
-                            "$schoolUrl$XAPI_ASSIGNMENT_BASE_PATH${row.assignment.uid}"
-                        val results = completionsByAssignment[assignmentActivityId] ?: emptyList()
-                        val students = results.distinctBy { it.personUid }
-                        val completed = students.count { it.completion == true }
-                        val total = students.size
-                        val isFinished = total > 0 && completed == total
-                        row.copy(
-                            completedCount = completed,
-                            totalCount = total,
-                            isCompleted = isFinished
-                        )
-                    }
-                    updateFilteredRows()
-                }
+            schoolDataSource.xapiStatementsResource.getAssignmentSummaries().collect { summaries ->
+                allSummaries = summaries
+                updateFilteredAssignments()
             }
         }
     }
 
-    private fun updateFilteredRows() {
+    private fun updateFilteredAssignments() {
         _uiState.update { state ->
-            val filtered = allRows.filter { row ->
+            val filtered = allSummaries.filter { summary ->
                 when (state.selectedFilter) {
                     AssignmentListScreenFilter.ALL -> true
-                    AssignmentListScreenFilter.COMPLETED -> row.isCompleted
-                    AssignmentListScreenFilter.PENDING -> !row.isCompleted
+                    AssignmentListScreenFilter.COMPLETED -> summary.isCompleted
+                    AssignmentListScreenFilter.PENDING -> !summary.isCompleted
                 }
             }
             state.copy(
                 assignments = filtered,
-                completedCount = allRows.count { it.isCompleted },
-                totalCount = allRows.size
+                completedAssignmentsCount = allSummaries.count { it.isCompleted },
+                totalAssignmentsCount = allSummaries.size
             )
         }
     }
 
     fun onFilterChanged(filter: AssignmentListScreenFilter) {
         _uiState.update { it.copy(selectedFilter = filter) }
-        updateFilteredRows()
+        updateFilteredAssignments()
     }
 
-    fun onClickAssignment(assignment: Assignment) {
-        val schoolUrl = accountManager.activeAccount?.school?.self
-        val assignmentActivityId = requireNotNull(schoolUrl) { "Missing schoolUrl" }
-            .appendEndpointSegments(ACTIVITY_ID_PATH, assignment.uid)
-            .toString()
-        println("<<<<AssignmentActivityId: $assignmentActivityId")
-        println("<<<<Assignment: ${assignment.uid}")
+    fun onClickAssignment(summary: AssignmentSummary) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 AssignmentDetail(
-                    uid = assignment.uid,
-                    assignmentActivityId = assignmentActivityId
+                    uid = summary.uid,
+                    assignmentActivityId = summary.activityId
                 )
             )
         )
@@ -245,9 +173,6 @@ class AssignmentListViewModel(
     }
 
     companion object {
-        private const val PATH_SEPARATOR = "/"
-        private const val XAPI_ASSIGNMENT_BASE_PATH = "/xapi/activities/assignment/"
-        private const val UNKNOWN_CLASS_NAME = "Unknown Class"
         private const val EMPTY_STRING = ""
     }
 }

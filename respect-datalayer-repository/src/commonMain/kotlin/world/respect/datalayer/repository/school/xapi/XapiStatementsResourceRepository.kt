@@ -12,6 +12,8 @@ import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.xapi.model.AssignmentResult
+import world.respect.lib.xapi.model.AssignmentSummary
+import world.respect.lib.xapi.model.CATEGORY_ASSIGNMENT_RECIPE
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -96,11 +98,13 @@ class XapiStatementsResourceRepository(
         }
     }
 
-    override fun getAssignmentCompletions(
-        listParams: GetStatementParams
-    ): Flow<List<AssignmentResult>> {
+
+    override fun getAssignmentSummaries(): Flow<List<AssignmentSummary>> {
         val remoteSyncFlow = remote.getAsFlow(
-            listParams = listParams,
+            listParams = GetStatementParams(
+                activity = CATEGORY_ASSIGNMENT_RECIPE,
+                relatedActivities = true
+            ),
             dataLoadParams = DataLoadParams()
         ).onEach { remoteState ->
             remoteState.dataOrNull()?.let {
@@ -108,7 +112,7 @@ class XapiStatementsResourceRepository(
             }
         }
 
-        return local.getAssignmentCompletions(listParams).combine(remoteSyncFlow) { localData, _ ->
+        return local.getAssignmentSummaries().combine(remoteSyncFlow) { localData, _ ->
             localData
         }
     }

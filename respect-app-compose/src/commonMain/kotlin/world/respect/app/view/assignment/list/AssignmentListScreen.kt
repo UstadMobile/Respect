@@ -37,11 +37,11 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
-import world.respect.lib.dataloadstate.DataLoadingState
-import world.respect.datalayer.school.model.Assignment
 import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.libutil.ext.resolve
 import world.respect.libutil.util.time.toDisplayDateString
 import world.respect.shared.generated.resources.Res
@@ -69,7 +69,7 @@ fun AssignmentListScreen(
 fun AssignmentListScreen(
     uiState: AssignmentListUiState,
     onFilterSelected: (AssignmentListScreenFilter) -> Unit,
-    onClickAssignment: (Assignment) -> Unit = { },
+    onClickAssignment: (AssignmentSummary) -> Unit = { },
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -82,7 +82,7 @@ fun AssignmentListScreen(
                 FilterChip(
                     selected = uiState.selectedFilter == filter,
                     onClick = { onFilterSelected(filter) },
-                    label = { Text(uiState.getLabelForFilter(filter)) }, // Much cleaner!
+                    label = { Text(uiState.getLabelForFilter(filter)) },
                     shape = RoundedCornerShape(50)
                 )
             }
@@ -90,21 +90,22 @@ fun AssignmentListScreen(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(
                 items = uiState.assignments,
-                key = { item -> item.uid }
-            ) { row ->
+                key = { item -> item.activityId }
+            ) { summary ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onClickAssignment(row.assignment) }
+                        .clickable { onClickAssignment(summary) }
                         .defaultItemPadding(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy((-12).dp) // Negative space for overlap
+                        horizontalArrangement = Arrangement.spacedBy((-12).dp)
                     ) {
-                        row.learningUnits.take(3).forEach { unit ->
+                        summary.learningUnitManifestUrls.take(1).forEach { manifestUrlStr ->
+                            val manifestUrl = remember(manifestUrlStr) { Url(manifestUrlStr) }
                             AssignmentLearningUnitIcon(
-                                manifestUrl = unit.learningUnitManifestUrl,
+                                manifestUrl = manifestUrl,
                                 learningUnitInfoFlow = uiState.learningUnitInfoFlow
                             )
                         }
@@ -114,12 +115,12 @@ fun AssignmentListScreen(
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = row.title,
+                            text = summary.title,
                             style = MaterialTheme.typography.titleMedium
                         )
 
-                        val dueDateStr = remember(row.deadline) {
-                            row.deadline?.toDisplayDateString() ?: ""
+                        val dueDateStr = remember(summary.deadline) {
+                            summary.deadline?.toDisplayDateString() ?: ""
                         }
 
                         if (uiState.isStudent) {
@@ -148,7 +149,7 @@ fun AssignmentListScreen(
                                     )
                                     Spacer(Modifier.width(4.dp))
                                     Text(
-                                        text = "${row.completedCount}/${row.totalCount}" + stringResource(Res.string.task_completed),
+                                        text = "${summary.completedCount}/${summary.totalCount}" + stringResource(Res.string.task_completed),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Color.Gray
                                     )
@@ -169,8 +170,8 @@ fun AssignmentListScreen(
                     }
 
                     if (uiState.isStudent) {
-                        val percent = if (row.totalCount > 0) {
-                            (row.completedCount.toFloat() / row.totalCount.toFloat() * 100).toInt()
+                        val percent = if (summary.totalCount > 0) {
+                            (summary.completedCount.toFloat() / summary.totalCount.toFloat() * 100).toInt()
                         } else {
                             0
                         }
@@ -196,7 +197,7 @@ fun AssignmentListScreen(
                                 tint = Color.Gray
                             )
                             Spacer(Modifier.width(6.dp))
-                            Text(row.className, style = MaterialTheme.typography.bodySmall)
+                            Text(summary.className, style = MaterialTheme.typography.bodySmall)
                         }
 
                         Row(
@@ -213,7 +214,7 @@ fun AssignmentListScreen(
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = "${row.completedCount}/${row.totalCount}" + stringResource(Res.string.student_completed),
+                                text = "${summary.completedCount}/${summary.totalCount}" + stringResource(Res.string.student_completed),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray
                             )

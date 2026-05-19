@@ -20,6 +20,7 @@ import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.xapi.model.AssignmentResult
+import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -87,10 +88,8 @@ class XapiStatementsResourceHttp(
         throw UnsupportedOperationException("getAssignmentResult on http NOT supported - this operation is only supported on local database source")
     }
 
-    override fun getAssignmentCompletions(
-        listParams: GetStatementParams
-    ): Flow<List<AssignmentResult>> {
-        throw UnsupportedOperationException("getAssignmentCompletions on http NOT supported - this operation is only supported on local database source")
+    override fun getAssignmentSummaries(): Flow<List<AssignmentSummary>> {
+        throw UnsupportedOperationException("getAssignmentSummaries on http NOT supported - this operation is only supported on local database source")
     }
 
     override suspend fun getLastStoredTimestampForActivity(activityId: String): Long? {

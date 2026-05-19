@@ -22,9 +22,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.isStudent
-import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
-import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
@@ -38,7 +36,6 @@ import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.xapi.XapiDummyDataGenerator
 import world.respect.shared.domain.xapi.actorName
 import world.respect.shared.domain.xapi.assignmentLearningUnits
 import world.respect.shared.domain.xapi.activityDefinitionTitle
@@ -76,7 +73,6 @@ data class AssignmentDetailUiState(
 class AssignmentDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
-    private val dummyDataGenerator: XapiDummyDataGenerator,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -90,9 +86,6 @@ class AssignmentDetailViewModel(
     val uiState = _uiState.asStateFlow()
 
     private var _canEdit = false
-
-    private val schoolUrl = accountManager.activeAccount?.school?.self
-
 
     private val assignmentActivityId: String = route.assignmentActivityId
 
@@ -154,52 +147,41 @@ class AssignmentDetailViewModel(
                             personGuid = person?.guid ?: ""
                         )
                     }
-                    updateAppUiState()
+                    val isFullscreen = _uiState.value.isFullscreen
+                    _appUiState.update {
+                        it.copy(
+                            hideAppBar = isFullscreen,
+                            hideBottomNavigation = isFullscreen,
+                            fabState = it.fabState.copy(
+                                visible = _canEdit && !isFullscreen
+                            ),
+                            fullscreenToggleVisible = true,
+                            isFullscreen = isFullscreen,
+                            onToggleFullscreen = ::onToggleFullscreen
+                        )
+                    }
                 }
             }
         }
 
-        // Load gradebook users and their progress
         viewModelScope.launch {
             statementsStream.distinctUntilChangedBy { it.dataOrNull()?.actorName }
                 .collectLatest { statementState ->
                     val xapiStatement = statementState.dataOrNull() ?: return@collectLatest
                     val activityId = (xapiStatement.`object` as? XapiActivity)?.id ?: ""
 
-                    //TODO NEED TO REMOVE THIS
-
-                    // Get all students
-                    schoolDataSource.personDataSource.list(
-                        loadParams = DataLoadParams(),
-                        params = PersonDataSource.GetListParams(
-                            filterByClazzUid = xapiStatement.actorName,
-                            filterByEnrolmentRole = EnrollmentRoleEnum.STUDENT
+                    // Observe progress
+                    schoolDataSource.xapiStatementsResource
+                        .getAssignmentResult(
+                            assignmentActivityId = activityId,
                         )
-                    ).dataOrNull()?.let { students ->
-
-                        // Generate dummy statements using the generator
-                        val dummyStatements = dummyDataGenerator.generateDummyStatements(
-                            students = students,
-                            assignment = xapiStatement,
-                            schoolUrl = schoolUrl.toString()
-                        )
-
-                        // Post statements
-                        schoolDataSource.xapiStatementsResource.post(dummyStatements)
-
-                        // Observe progress
-                        schoolDataSource.xapiStatementsResource
-                            .getAssignmentResult(
-                                assignmentActivityId = activityId,
-                            )
-                            .collect { progressList ->
-                                _uiState.update {
-                                    it.copy(assignmentProgressRow = progressList)
-                                }
-                                updateStatusCounts()
-                                updateFilteredProgressRow()
+                        .collect { progressList ->
+                            _uiState.update {
+                                it.copy(assignmentProgressRow = progressList)
                             }
-                    }
+                            updateStatusCounts()
+                            updateFilteredProgressRow()
+                        }
                 }
         }
     }
@@ -248,22 +230,6 @@ class AssignmentDetailViewModel(
         else -> AssignmentStatusFilter.NOT_STARTED
     }
 
-    private fun updateAppUiState() {
-        val isFullscreen = _uiState.value.isFullscreen
-        _appUiState.update {
-            it.copy(
-                hideAppBar = isFullscreen,
-                hideBottomNavigation = isFullscreen,
-                fabState = it.fabState.copy(
-                    visible = _canEdit && !isFullscreen
-                ),
-                fullscreenToggleVisible = true,
-                isFullscreen = isFullscreen,
-                onToggleFullscreen = ::onToggleFullscreen
-            )
-        }
-    }
-
     fun onClickEdit() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
@@ -301,6 +267,18 @@ class AssignmentDetailViewModel(
 
     fun onToggleFullscreen() {
         _uiState.update { it.copy(isFullscreen = !it.isFullscreen) }
-        updateAppUiState()
+        val isFullscreen = _uiState.value.isFullscreen
+        _appUiState.update {
+            it.copy(
+                hideAppBar = isFullscreen,
+                hideBottomNavigation = isFullscreen,
+                fabState = it.fabState.copy(
+                    visible = _canEdit && !isFullscreen
+                ),
+                fullscreenToggleVisible = true,
+                isFullscreen = isFullscreen,
+                onToggleFullscreen = ::onToggleFullscreen
+            )
+        }
     }
 }

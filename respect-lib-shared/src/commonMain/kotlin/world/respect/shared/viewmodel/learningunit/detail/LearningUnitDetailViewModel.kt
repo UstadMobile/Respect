@@ -136,6 +136,7 @@ class LearningUnitDetailViewModel(
                     LaunchAppUseCase.LaunchRequest(
                         app = respectApp,
                         learningUnitId = launchUrl,
+                        assignmentActivityId = route.assignmentActivityId,
                     )
                 )
             }catch(e: Throwable) {

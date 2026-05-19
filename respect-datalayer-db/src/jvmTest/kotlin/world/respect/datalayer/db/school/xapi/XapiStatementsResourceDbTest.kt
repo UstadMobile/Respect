@@ -20,10 +20,15 @@ import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.test.res.forXapiSampleStatements
+import world.respect.lib.test.res.xapiSampleStatements
+import world.respect.lib.xapi.model.XapiStatementRef
+import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementFormatEnum
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
@@ -89,7 +94,7 @@ class XapiStatementsResourceDbTest {
     }
 
     @Test
-    fun givenStatement_canStoreAndRetrieve() {
+    fun givenStatement_whenStoredAndRetrieved_thenShouldMatch() {
         runBlocking {
             forXapiSampleStatements { statement ->
                 testSchoolDb(temporaryFolder.newFolder()) { db ->
@@ -151,5 +156,70 @@ class XapiStatementsResourceDbTest {
             }
         }
     }
+
+    @Test
+    fun givenStatementInserted_whenVoided_thenShouldNotShowUp() {
+        val sampleStmt = xapiSampleStatements().first()
+        runBlocking {
+            testSchoolDb(temporaryFolder.newFolder()) { db ->
+                val stmtUuid = Uuid.random()
+                val statement = Json.decodeFromJsonElement(
+                    XapiStatement.serializer(), sampleStmt.jsonObject
+                ).copy(id = stmtUuid)
+
+                val dataSource = db.toDataSource(
+                    authenticatedUserUid = "1",
+                    schoolUrl = Url("http://localhost:8098/"),
+                )
+
+                val getStmtParams = XapiStatementsResource.GetStatementParams(
+                    statementId = stmtUuid
+                )
+
+                dataSource.xapiStatementsResource.post(listOf(statement))
+
+                assertXapiStatementCanonicallyEqual(
+                    expected = statement,
+                    actual = dataSource.xapiStatementsResource.get(
+                        listParams = getStmtParams
+                    ).dataOrNull()?.statements?.firstOrNull()!!
+                )
+
+                val voidingStatement = XapiStatement(
+                    actor = statement.actor,
+                    verb = XapiVerb(id = XapiVerb.ID_VOIDED),
+                    `object` = XapiStatementRef(id = stmtUuid.toString())
+                )
+                dataSource.xapiStatementsResource.post(listOf(voidingStatement))
+
+                GetStatementFormatEnum.entries.forEach { format ->
+                    assertNull(
+                        dataSource.xapiStatementsResource.get(
+                            listParams = getStmtParams.copy(
+                                format = format
+                            )
+                        ).dataOrNull()?.statements?.firstOrNull()
+                    )
+                }
+
+                val getByVoidedParams = XapiStatementsResource.GetStatementParams(
+                    voidedStatementId = stmtUuid
+                )
+                assertEquals(
+                    expected = statement,
+                    actual = dataSource.xapiStatementsResource.get(
+                        getByVoidedParams.copy(format = GetStatementFormatEnum.EXACT)
+                    ).dataOrNull()?.statements?.firstOrNull()
+                )
+                assertXapiStatementCanonicallyEqual(
+                    expected = statement,
+                    actual = dataSource.xapiStatementsResource.get(
+                        getByVoidedParams.copy(format = GetStatementFormatEnum.CANONICAL)
+                    ).dataOrNull()?.statements?.firstOrNull()!!
+                )
+            }
+        }
+    }
+
 
 }

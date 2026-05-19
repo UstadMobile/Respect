@@ -127,6 +127,8 @@ data class XapiStatementEntity(
     val isSubStatement: Boolean = false,
 
     val statementVersion: String? = null,
+
+    val stmtVoid: Boolean = false,
 ) {
     companion object {
         const val TABLE_ID = 60

@@ -75,10 +75,10 @@ import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
 
 data class ClazzDetailUiState(
-    val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
+    val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
     val students: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
-    val pendingTeachers:IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
-    val pendingStudents: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
+    val pendingTeachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
+    val pendingStudents: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
 
     val listOfPending: List<Person> = emptyList(),
     val chipOptions: List<FilterChipsOption> = emptyList(),
@@ -98,8 +98,9 @@ data class ClazzDetailUiState(
     val showStudentGrouping: Boolean = false,
     val isStudentGroupingExpanded: Boolean = true,
     val groupStatements: List<XapiStatement> = emptyList(),
+    val groups: List<XapiGroup> = emptyList(),
     val addPersonPermissions: List<Long> = emptyList()
-    ) {
+) {
 
     fun showApproveOption(person: Person): Boolean {
         return person.roles.firstOrNull()?.let {
@@ -149,9 +150,9 @@ class ClazzDetailViewModel(
         }
     }
 
-    private val teacherPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.TEACHER)
+    private val teacherPagingSource = pagingSourceByRole(EnrollmentRoleEnum.TEACHER)
 
-    private val studentPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
+    private val studentPagingSource = pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
 
     private val teachersPendingPagingSource = pagingSourceByRole(EnrollmentRoleEnum.PENDING_TEACHER)
 
@@ -262,7 +263,7 @@ class ClazzDetailViewModel(
                                 )
                             )
                         )
-                    }catch(e: Throwable) {
+                    } catch (e: Throwable) {
                         e.printStackTrace()
                     }
                 }
@@ -293,7 +294,7 @@ class ClazzDetailViewModel(
                     )
                 )
             )
-         }
+        }
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
@@ -379,9 +380,9 @@ class ClazzDetailViewModel(
                 }.map {
                     it.copy(
                         lastModified = modTime,
-                        status = if(it.beginDate == today) {
+                        status = if (it.beginDate == today) {
                             StatusEnum.TO_BE_DELETED //probably was just added by mistake
-                        }else {
+                        } else {
                             it.status
                         },
                         endDate = today,
@@ -391,7 +392,7 @@ class ClazzDetailViewModel(
 
                 schoolDataSource.enrollmentDataSource.store(enrollmentsToStore)
 
-            }catch(e: Throwable) {
+            } catch (e: Throwable) {
                 //do something
                 Napier.e("onClickRemovePersonFromClass ERROR", throwable = e)
                 snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
@@ -440,27 +441,28 @@ class ClazzDetailViewModel(
             dataLoadParams = DataLoadParams()
         ).collect { dataLoadState ->
 
-                val statementResult = dataLoadState.dataOrNull() ?: return@collect
+            val statementResult = dataLoadState.dataOrNull() ?: return@collect
 
-                // Sort by timestamp to get the latest version of each group, keep only the latest statement per group
-                val latestStatementPerGroup = statementResult.statements
-                    .filter { it.verb.id == VERB_SAVED }
-                    .sortedByDescending { it.timestamp ?: it.stored }
-                    .mapNotNull { statement ->
-                        val group = statement.`object` as? XapiGroup
-                        val groupId = group?.account?.name
-                        if (groupId != null) {
-                            groupId to statement
-                        } else {
-                            null
-                        }
+            // Sort by timestamp to get the latest version of each group, keep only the latest statement per group
+            val latestGroups = statementResult.statements
+                .filter { it.verb.id == VERB_SAVED }
+                .sortedByDescending { it.timestamp ?: it.stored }
+                .mapNotNull { statement ->
+                    val group = statement.`object` as? XapiGroup
+                    val groupId = group?.account?.name
+                    if (groupId != null) {
+                        groupId to group
+                    } else {
+                        null
                     }
-                    .distinctBy { it.first }
-                    .map { it.second }
-
-                _uiState.update { prev ->
-                    prev.copy(groupStatements = latestStatementPerGroup)
                 }
+                .distinctBy { it.first }
+                .map { it.second }
+
+            _uiState.update { prev ->
+                prev.copy(groups = latestGroups)
+            }
+
         }
     }
 

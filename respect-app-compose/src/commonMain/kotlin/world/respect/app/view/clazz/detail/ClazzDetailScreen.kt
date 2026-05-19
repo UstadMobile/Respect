@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -58,7 +59,6 @@ import world.respect.shared.generated.resources.teacher
 import world.respect.shared.generated.resources.teachers
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
-import world.respect.lib.xapi.model.XapiGroup
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.generated.resources.create_group
 import world.respect.shared.generated.resources.groups
@@ -383,8 +383,8 @@ fun ClazzDetailScreen(
                     headlineContent = {
                         Text(
                             modifier = Modifier.padding(top = 24.dp),
-                            text = if (uiState.groupStatements.isNotEmpty())
-                                "${stringResource(Res.string.groups)} (${uiState.groupStatements.size})"
+                            text = if (uiState.groups.isNotEmpty())
+                                "${stringResource(Res.string.groups)} (${uiState.groups.size})"
                             else
                                 stringResource(Res.string.groups)
                         )
@@ -429,10 +429,9 @@ fun ClazzDetailScreen(
                     )
                 }
 
-                items(uiState.groupStatements.size) { index ->
-                    val statement = uiState.groupStatements[index]
-                    val group = statement.`object` as? XapiGroup
-                    val groupId = group?.account?.name ?: return@items
+                items(uiState.groups.size) { index ->
+                    val group = uiState.groups[index]
+                    val groupId = group.account?.name ?: return@items
                     val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
 
                     ListItem(
@@ -443,7 +442,7 @@ fun ClazzDetailScreen(
                                        },
                         leadingContent = {
                             Box(
-                                modifier = Modifier.size(40.dp),
+                                modifier = Modifier.width(40.dp),
                             ) {
                                 val displayMembers = memberNames.take(3)
                                 displayMembers.forEachIndexed { i, name ->
@@ -462,9 +461,6 @@ fun ClazzDetailScreen(
                         },
                         headlineContent = {
                             Text(text = "${group.name} (${memberNames.size})")
-                        },
-                        supportingContent = {
-                            Text(text = "${memberNames.size} ${stringResource(Res.string.students)}")
                         }
                     )
                 }

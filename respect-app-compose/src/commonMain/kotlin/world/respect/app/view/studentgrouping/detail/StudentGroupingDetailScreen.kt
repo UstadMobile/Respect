@@ -70,11 +70,8 @@ fun StudentGroupingDetailScreen(
     ) {
         item {
             ListItem(
-                modifier = Modifier.clickable {},
                 leadingContent = {
-                    Box(
-                        modifier = Modifier.size(40.dp),
-                    ) {
+
                         val displayMembers = uiState.groupMembers.take(3)
                         displayMembers.forEachIndexed { i, name ->
                             Box(
@@ -88,7 +85,7 @@ fun StudentGroupingDetailScreen(
                                 )
                             }
                         }
-                    }
+
                 },
                 headlineContent = {
                     val label = if (uiState.groupMembers.size > 1)

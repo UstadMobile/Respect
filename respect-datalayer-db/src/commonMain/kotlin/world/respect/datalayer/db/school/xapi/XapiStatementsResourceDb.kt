@@ -8,7 +8,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
 import io.ktor.util.date.GMTDate
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
@@ -22,42 +21,47 @@ import world.respect.datalayer.db.school.xapi.adapters.identifierHash
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
 import world.respect.datalayer.db.school.xapi.adapters.toVerbEntities
+import world.respect.datalayer.db.school.xapi.adapters.toXapiAssignmentResult
 import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
 import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityDao
+import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
+import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
+import world.respect.datalayer.school.xapi.ext.allDefinedActivities
+import world.respect.lib.xapi.model.XapiStatement
+import kotlin.time.Clock
+import kotlin.uuid.Uuid
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityObjectTypeEnum
 import world.respect.datalayer.db.school.xapi.ext.allActivityUids
 import world.respect.datalayer.db.school.xapi.ext.allActorUids
 import world.respect.datalayer.ext.appendIfNotNull
-import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
-import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.datalayer.school.xapi.ext.allActors
-import world.respect.datalayer.school.xapi.ext.allDefinedActivities
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
-import world.respect.datalayer.school.xapi.ext.copyWithIdIfNotSet
 import world.respect.datalayer.school.xapi.ext.distinctMerged
+import world.respect.datalayer.school.xapi.ext.copyWithIdIfNotSet
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
-import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_CONSISTENT_THROUGH
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_VERSION
+import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
+import world.respect.lib.xapi.composites.XapiAssignmentProgress
 import world.respect.lib.xapi.exceptions.XapiBadRequestException
 import world.respect.lib.xapi.exceptions.XapiForbiddenException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
-import world.respect.lib.xapi.model.AssignmentResult
-import world.respect.lib.xapi.model.AssignmentSummary
-import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 import world.respect.lib.xapi.model.XapiVerb
-import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
-import kotlin.time.Clock
 import kotlin.time.Instant
-import kotlin.uuid.Uuid
 
 class XapiStatementsResourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -437,34 +441,6 @@ class XapiStatementsResourceDb(
             }
         }
     }
-    override fun getAssignmentResult(
-        assignmentActivityId: String,
-    ): Flow<List<AssignmentResult>> {
-        val assignmentUidNum = uidNumberMapper(assignmentActivityId)
-        return schoolDb.getStatementDao().getAssignmentProgressFlow(
-            assignmentActivityUidNum = assignmentUidNum,
-        ).map { rows ->
-            rows.map { row ->
-                AssignmentResult(
-                    personUid = row.personUid,
-                    personName = row.personName,
-                    activityId = row.activityId,
-                    completion = row.completion,
-                    success = row.success,
-                    scoreScaled = row.scoreScaled,
-                    progress = row.progress
-                )
-            }
-        }
-    }
-
-
-
-    override suspend fun getLastStoredTimestampForActivity(activityId: String): Long? {
-        val activityUidNum = uidNumberMapper(activityId)
-        val timestamp = schoolDb.getStatementDao().getLastStoredTimestampForActivity(activityUidNum)
-        return timestamp
-    }
 
     override suspend fun getByUuid(uuid: Uuid): XapiStatement? {
         return get(
@@ -474,6 +450,56 @@ class XapiStatementsResourceDb(
 
     override suspend fun findByUidList(uids: List<String>): List<XapiStatement> {
         TODO()
+    }
+
+    override fun getAssignmentProgress(
+        activityId: String
+    ): Flow<DataLoadState<List<XapiActorAndAssignmentProgress>>> {
+        //Get the statement itself to get the actor and list of assigned activities.
+        return getAsFlow(
+            listParams = GetStatementParams(
+                activity = activityId,
+                relatedActivities = false,
+                format = XapiStatementsResource.GetStatementFormatEnum.CANONICAL,
+            ),
+            dataLoadParams = DataLoadParams(),
+        ).map { statementResult ->
+            val assignmentStatement = statementResult.dataOrNull()?.statements
+                ?.mostRecentByTimestampOrNull()
+
+            if(assignmentStatement == null) {
+                NoDataLoadedState(reason = NoDataLoadedState.Reason.NOT_FOUND)
+            }else {
+                val assignedActivities = assignmentStatement.context?.contextActivities?.grouping
+                    ?: emptyList()
+
+                val actorsToShow = when(val statementActor = assignmentStatement.actor){
+                    is XapiAgent -> listOf(statementActor)
+                    is XapiGroup -> statementActor.member ?: throw IllegalStateException(
+                        "getAssignmentResults: XapiGroup should include members when retrieved using canonical format"
+                    )
+                }
+
+                val dbAssignmentResults = schoolDb.getStatementDao().getAssignmentResults(
+                    uidNumberMapper(activityId)
+                ).groupBy { it.actorUid }
+
+                DataReadyState(
+                    data = actorsToShow.map { actor ->
+                        val actorUidNum = actor.identifierHash(uidNumberMapper)
+                        XapiActorAndAssignmentProgress(
+                            actor = actor,
+                            progress = assignedActivities.map { activity ->
+                                dbAssignmentResults[actorUidNum]?.firstOrNull {
+                                    it.activityUid == uidNumberMapper(activity.id)
+                                }?.toXapiAssignmentResult(activity.id)
+                                    ?: XapiAssignmentProgress.emptyResult(activityId)
+                            }
+                        )
+                    }
+                )
+            }
+        }
     }
 
     companion object {

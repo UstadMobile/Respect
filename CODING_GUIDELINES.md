@@ -38,7 +38,7 @@ All SQL code shoud follow [SQLStyle.guide](https://www.sqlstyle.guide/)
   typing the same thing again, or making a completely new code that does almost the same thing as 
   existing code. Use domain use cases, inheritence, and extension functions as appropriate. When
   logic is duplicated, any bug would also be duplicated, maintenance will be harder, the code will 
-  be harder to understand, etc.
+  be harder to understand, etc. Do not use two variables for the same purpose.
 * Don't silently ignore null instead of throwing exceptions/showing error messages: do not use 
   inappropriate ```?.let```, ```?.also``` etc. Code that silently ignores when something is wrong 
   is **MUCH** worse (and harder to debug/find any error) than code that throws an exception. Don't 
@@ -54,6 +54,9 @@ All SQL code shoud follow [SQLStyle.guide](https://www.sqlstyle.guide/)
 * Never manually specify UI styles unless explicitly noted. Use the theme defaults so that the UI 
   will be consistent and handle dark mode, different default font size preferences, etc appropriately.
 * Always provide a contentDescription for any icon button that does not have text for accessibility.
+* Never commit code you can't understand and explain. It's OK to use AI, external sites (e.g. stackoverflow etc),
+  it's not OK to use code you don't understand (e.g. AI generated code, complex regexs, etc) because
+  one then doesn't know when it _won't_ work.
 
 #### Avoid terms that could reasonably be considered racist and/or discriminatory
 

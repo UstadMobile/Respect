@@ -2,16 +2,15 @@ package world.respect.datalayer.repository.school.xapi
 
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
+import world.respect.lib.dataloadstate.ext.combineWithRemote
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.ext.combineWithRemote
-import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.xapi.model.AssignmentResult
+import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -77,26 +76,25 @@ class XapiStatementsResourceRepository(
         )
     }
 
-
-    override fun getAssignmentResult(assignmentActivityId: String): Flow<List<AssignmentResult>> {
-        val remoteSyncFlow = remote.getAsFlow(
-            listParams = GetStatementParams(
-                activity = assignmentActivityId,
-                relatedActivities = true
-            ),
-            dataLoadParams = DataLoadParams()
-        ).onEach { remoteState ->
-            remoteState.dataOrNull()?.let {
-                local.updateLocal(it.statements)
+    override fun getAssignmentProgress(
+        activityId: String
+    ): Flow<DataLoadState<List<XapiActorAndAssignmentProgress>>> {
+        return local.getAssignmentProgress(
+            activityId
+        ).combineWithRemote(
+            remoteFlow = remote.getAsFlow(
+                listParams = GetStatementParams(
+                    activity = activityId,
+                    relatedActivities = true,
+                ),
+                dataLoadParams = DataLoadParams()
+            ).onEach { remoteState ->
+                val remoteData = remoteState.dataOrNull()
+                if(remoteData != null) {
+                    local.updateLocal(remoteData.statements)
+                }
             }
-        }
-
-        return local.getAssignmentResult(assignmentActivityId).combine(remoteSyncFlow) { localData, _ ->
-            localData
-        }
+        )
     }
 
-    override suspend fun getLastStoredTimestampForActivity(activityId: String): Long? {
-        return local.getLastStoredTimestampForActivity(activityId)
-    }
 }

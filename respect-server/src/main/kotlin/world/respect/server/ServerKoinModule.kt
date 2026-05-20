@@ -74,6 +74,7 @@ import world.respect.shared.domain.account.username.filterusername.FilterUsernam
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
+import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -410,6 +411,16 @@ fun serverKoinModule(
                 schoolPrimaryKeyGenerator = get(),
                 authenticatedUser = accountScopeId.accountPrincipalId,
                 schoolDataSource = get(),
+            )
+        }
+
+        factory<UpdateClazzStudentXapiGroupUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            UpdateClazzStudentXapiGroupUseCase(
+                schoolDataSource = get(),
+                authenticatedUserPrincipalId = accountScopeId.accountPrincipalId,
+                schoolUrl = accountScopeId.schoolUrl,
             )
         }
 

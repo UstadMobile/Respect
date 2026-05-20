@@ -1,5 +1,6 @@
 package world.respect.datalayer.school.ext
 
+import io.ktor.http.Url
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -8,6 +9,8 @@ import world.respect.datalayer.exceptions.ForbiddenException
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiAgent
 
 fun Person?.assertPersonHasRole(
     role: PersonRoleEnum
@@ -49,4 +52,16 @@ fun Person.inviteCodeOrNull(): String? {
 
 fun Person.inviteUidOrNull(): String? {
     return metadata?.get(Person.METADATA_KEY_INVITE_UID)?.jsonPrimitive?.contentOrNull
+}
+
+fun Person.asXapiAgent(
+    accountUrl: Url
+) : XapiAgent {
+    return XapiAgent(
+        name = "$givenName $familyName",
+        account = XapiAccount(
+            homePage = accountUrl.toString(),
+            name = username ?: guid
+        )
+    )
 }

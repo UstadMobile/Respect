@@ -384,7 +384,7 @@ class XapiStatementsResourceDbTest {
 
                         assertEquals(
                             statement.resultProgressExtension,
-                            result.progress
+                            result.progress,
                         )
                     }
                 }

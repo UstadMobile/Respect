@@ -453,13 +453,11 @@ class ClazzDetailViewModel(
                         ?: Instant.DISTANT_PAST
                 }
                 .map { statement ->
-
                     checkNotNull(statement.`object` as? XapiGroup) {
                         "Expected XapiGroup object in statement ${statement.id}"
                     }
                 }
                 .distinctBy { group ->
-
                     checkNotNull(group.account?.name) {
                         "Group account name missing"
                     }

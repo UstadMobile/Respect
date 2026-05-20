@@ -45,18 +45,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.number
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.findIcons
+import world.respect.lib.xapi.ext.calculatePercentage
 import world.respect.libutil.ext.resolve
-import world.respect.shared.domain.xapi.assignmentDeadline
 import world.respect.shared.domain.xapi.assignmentDescription
-import world.respect.shared.domain.xapi.assignmentLearningUnits
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assigned_to
 import world.respect.shared.generated.resources.average
@@ -91,7 +88,6 @@ fun AssignmentDetailScreen(
     onStatusFilterChanged: (AssignmentStatusFilter) -> Unit = { },
     onClickLearningUnit: (AssignmentLearningUnitRef) -> Unit = { },
 ) {
-    val assignment = uiState.xApiStatement.dataOrNull()
     val horizontalScrollState = rememberScrollState()
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -99,10 +95,10 @@ fun AssignmentDetailScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .defaultItemPadding()
             ) {
                 Text(
-                    text = assignment?.assignmentDescription ?: "",
+                    text = uiState.xApiStatement.dataOrNull()?.assignmentDescription ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -118,17 +114,8 @@ fun AssignmentDetailScreen(
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.Gray
                         )
-                        val dueDateStr = remember(assignment) {
-                            assignment?.assignmentDeadline?.let { instant ->
-                                val localDate =
-                                    instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-                                "${localDate.dayOfMonth.toString().padStart(2, '0')}/" +
-                                        "${localDate.month.number.toString().padStart(2, '0')}/" +
-                                        "${localDate.year}"
-                            } ?: ""
-                        }
                         Text(
-                            text = dueDateStr,
+                            text = uiState.xApiStatement.dataOrNull()?.assignmentDescription ?: "",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
@@ -139,10 +126,8 @@ fun AssignmentDetailScreen(
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.Gray
                         )
-                        val assignedTo =
-                            if (uiState.isStudent) uiState.personName else assignment?.actor?.name.orEmpty()
                         Text(
-                            text = assignedTo,
+                            text = if (uiState.isStudent) uiState.assigneeStudentName else uiState.xApiStatement.dataOrNull()?.actor?.name.orEmpty(),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
@@ -151,7 +136,7 @@ fun AssignmentDetailScreen(
                 HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp, bottom = 4.dp),
+                        .defaultItemPadding(top = 16.dp, bottom = 4.dp),
                     thickness = 1.dp
                 )
             }
@@ -181,12 +166,11 @@ fun AssignmentDetailScreen(
         }
 
         if (uiState.isStudent) {
-            val units = assignment?.assignmentLearningUnits ?: emptyList()
-
+            val units = uiState.units
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
+                    .defaultItemPadding(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(units) { unit ->
@@ -207,19 +191,10 @@ fun AssignmentDetailScreen(
                 val taskColWidth = (TASK_COLUMN_WIDTH).dp
                 val headerHeight = minOf(maxHeight / 2, (HEADER_HEIGHT).dp)
 
-                val assignmentResults = remember(uiState.assignmentProgressRow) {
-                    uiState.assignmentProgressRow.distinctBy { it.personUid }
-                }
-                val progressMap = remember(uiState.filteredProgressRow) {
-                    uiState.filteredProgressRow.groupBy { it.personUid }
-                        .mapValues { entry -> entry.value.associateBy { it.activityId } }
-                }
+                val assignmentResults = uiState.assignmentProgressRow.distinctBy { it.personUid }
+                val progressMap = uiState.progressMap
+                val filteredUnits = uiState.filteredUnits
 
-                val units = assignment?.assignmentLearningUnits ?: emptyList()
-                val filteredUnits = remember(uiState.filteredProgressRow, units) {
-                    val activityIds = uiState.filteredProgressRow.map { it.activityId }.toSet()
-                    units.filter { unit -> activityIds.contains(unit.learningUnitManifestUrl.toString()) }
-                }
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     // STICKY HEADER: Task Icons and Names
                     stickyHeader {
@@ -278,22 +253,11 @@ fun AssignmentDetailScreen(
                                             .horizontalScroll(horizontalScrollState)
                                     ) {
                                         filteredUnits.forEach { unit ->
-                                            val progress =
-                                                progressMap[student.personUid]?.get(unit.learningUnitManifestUrl.toString())
-                                            val percent = progress?.progress
-                                                ?: progress?.scoreScaled?.let { (it * 100).toInt() }
-                                            GradeCell(percent, taskColWidth)
+                                            val progress = progressMap[student.personUid]?.get(unit.learningUnitManifestUrl.toString())
+                                            GradeCell(progress?.calculatePercentage(), taskColWidth)
                                         }
                                         // Average Score Cell
-                                        val studentProgressValues =
-                                            progressMap[student.personUid]?.values?.mapNotNull {
-                                                it.progress
-                                                    ?: it.scoreScaled?.let { s -> (s * 100).toInt() }
-                                            }
-                                        val avg = if (!studentProgressValues.isNullOrEmpty()) {
-                                            studentProgressValues.average()
-                                        } else null
-                                        AverageCell(avg, taskColWidth)
+                                        AverageCell(uiState.getAverageForStudent(student.personUid), taskColWidth)
                                     }
                                 }
                             }
@@ -344,7 +308,7 @@ fun StudentLearningUnitItem(
             }
         }
 
-    val percent = progress?.progress ?: progress?.scoreScaled?.let { (it * 100).toInt() } ?: 0
+    val percent = progress?.calculatePercentage() ?: 0
     val (bgColor, textColor) = when {
         percent >= 90 -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
         percent > 0 -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer

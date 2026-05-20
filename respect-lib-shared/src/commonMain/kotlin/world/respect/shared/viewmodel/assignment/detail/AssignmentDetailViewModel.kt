@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -22,9 +21,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.isStudent
-import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
-import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
@@ -36,11 +33,12 @@ import world.respect.lib.xapi.model.AssignmentResult
 import world.respect.lib.xapi.model.VERB_ASSIGN
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.ext.calculatePercentage
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.xapi.activityDefinitionTitle
 import world.respect.shared.domain.xapi.actorName
 import world.respect.shared.domain.xapi.assignmentLearningUnits
-import world.respect.shared.domain.xapi.activityDefinitionTitle
 import world.respect.shared.domain.xapi.isAssignmentStatement
 import world.respect.shared.ext.whenSubscribed
 import world.respect.shared.generated.resources.Res
@@ -67,9 +65,44 @@ data class AssignmentDetailUiState(
     val selectedStatusFilter: AssignmentStatusFilter = AssignmentStatusFilter.ALL,
     val isFullscreen: Boolean = false,
     val isStudent: Boolean = false,
-    val personName: String = "",
+    val assigneeStudentName: String = "",
     val personGuid: String = ""
-)
+) {
+
+    /**
+     * All learning units associated with this assignment, extracted from the assignment's xAPI definition.
+     */
+    val units: List<AssignmentLearningUnitRef>
+        get() = xApiStatement.dataOrNull()?.assignmentLearningUnits ?: emptyList()
+
+    /**
+     * The learning units that should be displayed in the header, filtered by those present in the current progress rows.
+     */
+    val filteredUnits: List<AssignmentLearningUnitRef>
+        get() {
+            val activityIds = filteredProgressRow.map { it.activityId }.toSet()
+            return units.filter { it.learningUnitManifestUrl.toString() in activityIds }
+        }
+
+    /**
+     * A map for O(1) progress lookup, grouped by student (personUid) then by learning unit (activityId).
+     */
+    val progressMap: Map<String, Map<String, AssignmentResult>>
+        get() = filteredProgressRow.groupBy { it.personUid }
+            .mapValues { entry -> entry.value.associateBy { it.activityId } }
+
+    /**
+     * Calculates the average completion percentage across all filtered units for a specific student.
+     */
+    fun getAverageForStudent(personUid: String): Double? {
+        val studentProgressValues = progressMap[personUid]?.values?.mapNotNull {
+            it.calculatePercentage()
+        }
+        return if (!studentProgressValues.isNullOrEmpty()) {
+            studentProgressValues.average()
+        } else null
+    }
+}
 
 @OptIn(ExperimentalUuidApi::class)
 class AssignmentDetailViewModel(
@@ -121,16 +154,12 @@ class AssignmentDetailViewModel(
         }.shareIn(viewModelScope, SharingStarted.Lazily)
 
         viewModelScope.launch {
-            statementsStream.collect { entity ->
+            statementsStream.collect { statementState ->
                 _uiState.update {
-                    it.copy(
-                        xApiStatement = entity
-                    )
+                    it.copy(xApiStatement = statementState)
                 }
-                updateStatusCounts()
-
                 _appUiState.update {
-                    it.copy(title = entity.dataOrNull()?.activityDefinitionTitle?.asUiText())
+                    it.copy(title = statementState.dataOrNull()?.activityDefinitionTitle?.asUiText())
                 }
             }
         }
@@ -145,7 +174,7 @@ class AssignmentDetailViewModel(
                     _uiState.update {
                         it.copy(
                             isStudent = isStudent,
-                            personName = person?.fullName() ?: "",
+                            assigneeStudentName = person?.fullName() ?: "",
                             personGuid = person?.guid ?: ""
                         )
                     }
@@ -167,16 +196,17 @@ class AssignmentDetailViewModel(
         }
 
         viewModelScope.launch {
-            statementsStream.distinctUntilChangedBy { it.dataOrNull()?.actorName }
-                .collectLatest { statementState ->
-                    val xapiStatement = statementState.dataOrNull() ?: return@collectLatest
+            _uiState
+                .map { it.xApiStatement }
+                .distinctUntilChangedBy { it.dataOrNull()?.actorName }
+                .collect { statementState ->
+                    val xapiStatement = statementState.dataOrNull()
+                        ?: return@collect
                     val activityId = (xapiStatement.`object` as? XapiActivity)?.id ?: ""
 
                     // Observe progress
                     schoolDataSource.xapiStatementsResource
-                        .getAssignmentResult(
-                            assignmentActivityId = activityId,
-                        )
+                        .getAssignmentResult(assignmentActivityId = activityId)
                         .collect { progressList ->
                             _uiState.update {
                                 it.copy(assignmentProgressRow = progressList)

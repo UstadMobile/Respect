@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
@@ -17,20 +16,34 @@ import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.lib.dataloadstate.DataLoadParams
-import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.DataLoadingState
-import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.isReadyAndSettled
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.xapi.model.VERB_ASSIGN
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiObjectType
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
+import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.xapi.activityDefinitionTitle
+import world.respect.shared.domain.xapi.actorName
+import world.respect.shared.domain.xapi.assignmentLearningUnits
+import world.respect.shared.domain.xapi.createBlankAssignmentStatement
+import world.respect.shared.domain.xapi.isAssignmentStatement
+import world.respect.shared.domain.xapi.withClass
+import world.respect.shared.domain.xapi.withLearningUnits
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_assignment
 import world.respect.shared.generated.resources.edit_assignment
@@ -48,12 +61,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
-import world.respect.lib.xapi.model.*
-import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
-import world.respect.shared.domain.xapi.*
-import world.respect.libutil.ext.appendEndpointSegments
 import kotlin.time.Clock
-import kotlin.toString
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -63,11 +71,7 @@ data class AssignmentEditUiState(
     val nameError: UiText? = null,
     val classOptions: List<Clazz> = emptyList(),
     val classError: UiText? = null,
-    val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
-        flowOf(
-            DataLoadingState()
-        )
-    },
+    val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { flowOf(DataLoadingState()) },
 ) {
     val fieldsEnabled: Boolean
         get() = statementData.isReadyAndSettled()
@@ -96,20 +100,18 @@ class AssignmentEditViewModel(
 
     private val debouncer = LaunchDebouncer(viewModelScope)
 
-    val schoolUrl = accountManager.activeAccount?.school?.self
+    private val schoolUrl = accountManager.activeAccount?.school?.self
+        ?: throw IllegalStateException("No active school account found")
 
+    private val assignmentActivityId = route.assignmentActivityId ?: run {
+        schoolUrl.appendEndpointSegments(ACTIVITY_ID_PATH, Uuid.random().toString()).toString()
+    }
     private fun LearningUnitSelection.toRef(): AssignmentLearningUnitRef {
         return AssignmentLearningUnitRef(
             learningUnitManifestUrl = this.learningUnitManifestUrl,
             appManifestUrl = this.appManifestUrl,
         )
     }
-    private val assignmentActivityId = route.assignmentActivityId ?: run {
-        requireNotNull(schoolUrl) { "Missing schoolUrl" }
-            .appendEndpointSegments(ACTIVITY_ID_PATH, Uuid.random().toString())
-            .toString()
-    }
-
 
     init {
         _appUiState.update { prev ->
@@ -140,18 +142,6 @@ class AssignmentEditViewModel(
                     learningUnitInfoFlow = ::learningUnitInfoFlowFor
                 )
             }
-
-            val currentPerson = accountManager.selectedAccountAndPersonFlow.first()?.person
-                ?: return@launchWithLoadingIndicator
-            val instructor = XapiAgent(
-                name = currentPerson.fullName(),
-                account = XapiAccount(
-                    homePage = schoolUrl.toString(),
-                    name = currentPerson.guid
-                ),
-                objectType = XapiObjectType.Agent
-            )
-
             if (route.assignmentActivityId != null) {
                 loadEntity(
                     json = json,
@@ -183,6 +173,15 @@ class AssignmentEditViewModel(
                     }
                 )
             } else {
+                val currentPerson = accountManager.selectedAccountAndPersonFlow.first()?.person?: return@launchWithLoadingIndicator
+                val instructor = XapiAgent(
+                    name = currentPerson.fullName(),
+                    account = XapiAccount(
+                        homePage = schoolUrl.toString(),
+                        name = currentPerson.guid
+                    ),
+                    objectType = XapiObjectType.Agent
+                )
                 _uiState.update { prev ->
                     prev.copy(
                         statementData = DataReadyState(
@@ -317,10 +316,7 @@ class AssignmentEditViewModel(
         val assignment = uiState.value.statementData.dataOrNull() ?: return
 
         launchWithLoadingIndicator {
-            val updatedStatement = assignment.copy(
-                id = assignment.id ?: Uuid.random(),
-                timestamp = Clock.System.now()
-            )
+            val updatedStatement = assignment.copy(timestamp = Clock.System.now())
 
             schoolDataSource.xapiStatementsResource.post(listOf(updatedStatement))
 

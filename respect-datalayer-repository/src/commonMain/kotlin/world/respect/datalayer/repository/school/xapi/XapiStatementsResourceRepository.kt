@@ -10,6 +10,7 @@ import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -67,6 +68,27 @@ class XapiStatementsResourceRepository(
             listParams = listParams, dataLoadParams = dataLoadParams
         ).combineWithRemote(
             remote.getAsFlow(listParams, dataLoadParams).onEach { remoteState ->
+                val remoteData = remoteState.dataOrNull()
+                if(remoteData != null) {
+                    local.updateLocal(remoteData.statements)
+                }
+            }
+        )
+    }
+
+    override fun getAssignmentProgress(
+        activityId: String
+    ): Flow<DataLoadState<List<XapiActorAndAssignmentProgress>>> {
+        return local.getAssignmentProgress(
+            activityId
+        ).combineWithRemote(
+            remoteFlow = remote.getAsFlow(
+                listParams = GetStatementParams(
+                    activity = activityId,
+                    relatedActivities = true,
+                ),
+                dataLoadParams = DataLoadParams()
+            ).onEach { remoteState ->
                 val remoteData = remoteState.dataOrNull()
                 if(remoteData != null) {
                     local.updateLocal(remoteData.statements)

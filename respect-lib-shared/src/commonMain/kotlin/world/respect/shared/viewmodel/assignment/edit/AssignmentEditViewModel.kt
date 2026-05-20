@@ -17,7 +17,6 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
@@ -30,9 +29,6 @@ import world.respect.lib.dataloadstate.ext.isReadyAndSettled
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.model.VERB_ASSIGN
-import world.respect.lib.xapi.model.XapiAccount
-import world.respect.lib.xapi.model.XapiAgent
-import world.respect.lib.xapi.model.XapiObjectType
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.libutil.ext.appendEndpointSegments
@@ -42,8 +38,8 @@ import world.respect.shared.domain.xapi.actorName
 import world.respect.shared.domain.xapi.assignmentLearningUnits
 import world.respect.shared.domain.xapi.createBlankAssignmentStatement
 import world.respect.shared.domain.xapi.isAssignmentStatement
-import world.respect.shared.domain.xapi.withClass
 import world.respect.shared.domain.xapi.withLearningUnits
+import world.respect.shared.ext.studentsXapiGroup
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_assignment
 import world.respect.shared.generated.resources.edit_assignment
@@ -173,15 +169,7 @@ class AssignmentEditViewModel(
                     }
                 )
             } else {
-                val currentPerson = accountManager.selectedAccountAndPersonFlow.first()?.person?: return@launchWithLoadingIndicator
-                val instructor = XapiAgent(
-                    name = currentPerson.fullName(),
-                    account = XapiAccount(
-                        homePage = schoolUrl.toString(),
-                        name = currentPerson.guid
-                    ),
-                    objectType = XapiObjectType.Agent
-                )
+                val instructor = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent ?: return@launchWithLoadingIndicator
                 _uiState.update { prev ->
                     prev.copy(
                         statementData = DataReadyState(
@@ -230,11 +218,7 @@ class AssignmentEditViewModel(
         _uiState.update {
             it.copy(
                 statementData = DataReadyState(
-                    statement.withClass(
-                        classUid = clazz.guid,
-                        className = clazz.title,
-                        schoolUrl = schoolUrl
-                    )
+                    statement.copy(actor = clazz.studentsXapiGroup(schoolUrl))
                 ),
                 assignee = clazz.title,
                 classError = null,

@@ -161,6 +161,10 @@ class AssignmentDetailViewModel(
                 _appUiState.update {
                     it.copy(title = statementState.dataOrNull()?.activityDefinitionTitle?.asUiText())
                 }
+                // Only load progress after we have the assignment metadata
+                statementState.dataOrNull()?.let {
+                    loadAssignmentProgress(assignmentActivityId)
+                }
             }
         }
 
@@ -194,31 +198,25 @@ class AssignmentDetailViewModel(
                 }
             }
         }
+    }
 
+    private fun loadAssignmentProgress(activityId: String) {
         viewModelScope.launch {
-            _uiState
-                .map { it.xApiStatement }
-                .distinctUntilChangedBy { it.dataOrNull()?.actorName }
-                .collect { statementState ->
-                    val xapiStatement = statementState.dataOrNull()
-                        ?: return@collect
-                    val activityId = (xapiStatement.`object` as? XapiActivity)?.id ?: ""
+            schoolDataSource.xapiStatementsResource
+                .getAssignmentProgress(activityId = activityId)
+                .collect { progressState ->
+                    println("debug >>> progressList: $activityId")
+                    println("debug >>> progressList: $progressState")
 
-                    // Observe progress
-                    schoolDataSource.xapiStatementsResource
-                        .getAssignmentProgress(activityId = activityId)
-                        .collect { progressList ->
-                            println("debug >>> progressList: $progressList")
-//                            _uiState.update {
-//                                it.copy(assignmentProgressRow = progressList)
-//                            }
-                            updateStatusCounts()
-                            updateFilteredProgressRow()
-                        }
+                    val progressList = progressState.dataOrNull() ?: emptyList()
+//                    _uiState.update {
+//                        it.copy(assignmentProgressList = convertedProgress)
+//                    }
+                    updateStatusCounts()
+                    updateFilteredProgressRow()
                 }
         }
     }
-
     private fun updateFilteredProgressRow() {
         val fullList = _uiState.value.assignmentProgressList
         val filter = _uiState.value.selectedStatusFilter

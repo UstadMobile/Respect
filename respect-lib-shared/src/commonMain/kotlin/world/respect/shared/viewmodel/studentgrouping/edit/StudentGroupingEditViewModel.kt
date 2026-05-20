@@ -23,6 +23,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.xapi.model.VERB_SAVED
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiContext
 import world.respect.lib.xapi.model.XapiContextActivities
 import world.respect.lib.xapi.model.XapiGroup
@@ -34,8 +35,9 @@ import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.libutil.util.time.localDateInCurrentTimeZone
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.xapi.createVoidingStatement
-import world.respect.shared.domain.xapi.toXapiAgent
+import world.respect.datalayer.db.school.ext.fullName
+import world.respect.lib.xapi.model.VERB_VOIDED
+import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit_group
 import world.respect.shared.generated.resources.create_group
@@ -49,6 +51,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import kotlin.getValue
+import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -190,19 +193,35 @@ class StudentGroupingEditViewModel(
         }
         launchWithLoadingIndicator {
 
-            val person = respectAccountManager.selectedAccountAndPersonFlow.first()?.person
+            val sessionAndPerson = respectAccountManager.selectedAccountAndPersonFlow.first()
                 ?: throw IllegalStateException("No person selected when trying to save group")
 
-            val actor = person.toXapiAgent(schoolSelfUrl.toString())
+            val actor = sessionAndPerson.xapiAgent
 
             if (existingStatementId != null) {
-                val voidingStatement = createVoidingStatement(actor, existingStatementId)
+                val voidingStatement = XapiStatement(
+                    actor = actor,
+                    verb = XapiVerb(id = VERB_VOIDED),
+                    `object` = XapiStatementRef(
+                        objectType = XapiObjectType.StatementRef,
+                        id = existingStatementId
+                    ),
+                    timestamp = Clock.System.now()
+                )
                 schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
             }
 
             //  Create a new statement with the updated group information
+            val xapiHomePage = sessionAndPerson.session.account.school.xapi.toString()
             val members = _uiState.value.selectedStudents.map { student ->
-                student.toXapiAgent(schoolSelfUrl.toString())
+                XapiAgent(
+                    name = student.fullName(),
+                    objectType = XapiObjectType.Agent,
+                    account = XapiAccount(
+                        name = student.guid,
+                        homePage = xapiHomePage
+                    )
+                )
             }
 
             val groupId = route.groupId ?: Uuid.random().toString()
@@ -225,7 +244,7 @@ class StudentGroupingEditViewModel(
                 actor = actor,
                 verb = verb,
                 `object` = group,
-                timestamp = kotlin.time.Clock.System.now(),
+                timestamp = Clock.System.now(),
                 context = XapiContext(
                     contextActivities = XapiContextActivities(
                         parent = listOf(

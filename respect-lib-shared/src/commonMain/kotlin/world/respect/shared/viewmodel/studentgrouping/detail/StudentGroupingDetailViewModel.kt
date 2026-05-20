@@ -15,11 +15,12 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.xapi.model.VERB_SAVED
+import world.respect.lib.xapi.model.VERB_VOIDED
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.xapi.createXapiAgentForQuery
-import world.respect.shared.domain.xapi.toXapiAgent
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.navigation.NavCommand
@@ -30,9 +31,13 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.lib.xapi.model.XapiGroup.Companion.RESULT_KEY_GROUP_UPDATED
 import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
-import world.respect.shared.domain.xapi.createVoidingStatement
+import world.respect.lib.xapi.model.XapiObjectType
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatementRef
+import world.respect.lib.xapi.model.XapiVerb
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue
+import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 
@@ -117,12 +122,20 @@ class StudentGroupingDetailViewModel(
             val statementId = _uiState.value.statementGroupId
                 ?: throw IllegalStateException("Statement ID not found when trying to delete group")
 
-            val person = respectAccountManager.selectedAccountAndPersonFlow.firstOrNull()?.person
+            val sessionAndPerson = respectAccountManager.selectedAccountAndPersonFlow.firstOrNull()
                 ?: throw IllegalStateException("No person selected when trying to delete group")
 
-            val actor = person.toXapiAgent(schoolSelfUrl.toString())
+            val actor = sessionAndPerson.xapiAgent
 
-            val voidingStatement = createVoidingStatement(actor, statementId)
+            val voidingStatement = XapiStatement(
+                actor = actor,
+                verb = XapiVerb(id = VERB_VOIDED),
+                `object` = XapiStatementRef(
+                    objectType = XapiObjectType.StatementRef,
+                    id = statementId
+                ),
+                timestamp = Clock.System.now()
+            )
             schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
             _navCommandFlow.tryEmit(NavCommand.PopUp())
 
@@ -133,7 +146,13 @@ class StudentGroupingDetailViewModel(
     private fun loadGroupDetail() {
         viewModelScope.launch {
             // Query by agent (the group itself) using its account identifier
-            val groupAgent = createXapiAgentForQuery(route.groupId, schoolSelfUrl.toString())
+            val groupAgent = XapiAgent(
+                objectType = XapiObjectType.Agent,
+                account = XapiAccount(
+                    name = route.groupId,
+                    homePage = schoolSelfUrl.toString()
+                )
+            )
 
             schoolDataSource.xapiStatementsResource.getAsFlow(
                 listParams = XapiStatementsResource.GetStatementParams(

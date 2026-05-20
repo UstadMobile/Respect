@@ -155,25 +155,29 @@ class StudentGroupingDetailViewModel(
                 if (groupStatement != null) {
                     val group = groupStatement.`object` as XapiGroup
                     val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
-                    val statementId = groupStatement.id?.toString()
+                    val statementId = checkNotNull(groupStatement.id) {
+                        "Group statement id should not be null"
+                    }
+                    val groupName = checkNotNull(group.name) {
+                        "Group name should not be null"
+                    }
 
-                    // Extract classId from context activities parent
                     val classActivityId = groupStatement.context?.contextActivities?.parent
                         ?.firstOrNull()?.id
                     val classId = classActivityId?.removePrefix("${schoolSelfUrl}${CLASS}")
 
                     _uiState.update { prev ->
                         prev.copy(
-                            groupName = group.name ?: "",
+                            groupName = groupName,
                             groupMembers = memberNames,
-                            statementGroupId = statementId,
+                            statementGroupId = statementId.toString(),
                             classId = classId
                         )
                     }
 
                     _appUiState.update {
                         it.copy(
-                            title = group.name?.asUiText() ?: "".asUiText()
+                            title = group.name?.asUiText()
                         )
                     }
                 }

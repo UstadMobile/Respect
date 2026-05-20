@@ -441,17 +441,19 @@ class ClazzDetailViewModel(
             val statementResult = dataLoadState.dataOrNull() ?: return@collect
 
             // Sort by timestamp to get the latest version of each group, keep only the latest statement per group
+
             val latestGroups = statementResult.statements
                 .filter { it.verb.id == VERB_SAVED }
                 .sortedByDescending { it.timestamp ?: it.stored }
-                .mapNotNull { statement ->
-                    val group = statement.`object` as? XapiGroup
-                    val groupId = group?.account?.name
-                    if (groupId != null) {
-                        groupId to group
-                    } else {
-                        null
+                .map { statement ->
+                    val group = checkNotNull(statement.`object` as? XapiGroup) {
+                        "Expected XapiGroup object in statement ${statement.id}"
                     }
+                    val groupId = checkNotNull(group.account?.name) {
+                        "Group account name missing in statement ${statement.id}"
+                    }
+
+                    groupId to group
                 }
                 .distinctBy { it.first }
                 .map { it.second }

@@ -90,15 +90,13 @@ fun StudentGroupingEditScreen(
                 "Student item should not be null"
             }
 
-            val isSelected = student.guid in uiState.selectedStudentIds
+            val isSelected = person.guid in uiState.selectedStudentIds
 
             PersonListItemWithMenu(
                 person = person,
                 isSelected = isSelected,
                 onCheckedChange = { checked ->
-                    student?.let {
-                        onStudentCheckedChange(it, checked)
-                    }
+                    onStudentCheckedChange(person, checked)
                 }
             )
         }

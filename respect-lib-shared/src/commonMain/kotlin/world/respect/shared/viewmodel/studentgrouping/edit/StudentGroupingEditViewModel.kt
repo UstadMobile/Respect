@@ -58,11 +58,9 @@ data class StudentGroupingEditUiState(
     val groupNameError: UiText? = null,
     val students: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
     val selectedStudents: List<Person> = emptyList(),
+    val selectedStudentIds: Set<String> = emptySet(),
     val statementId: String? = null
-) {
-    val selectedStudentIds: Set<String>
-        get() = selectedStudents.map { it.guid }.toSet()
-}
+)
 
 class StudentGroupingEditViewModel(
     savedStateHandle: SavedStateHandle,
@@ -131,9 +129,11 @@ class StudentGroupingEditViewModel(
                         relatedActivities = true,
                     ),
                     dataLoadParams = DataLoadParams()
-                ).dataOrNull() ?: return@launch
+                ).dataOrNull()
+                    ?: throw IllegalStateException(
+                        "Failed to load statements for classActivityId=$classActivityId"
+                    )
 
-                // Find the latest statement for this group by sorting by timestamp
                 val groupStatement = statementResult.statements
                     .filter { statement ->
                         val group = statement.`object` as? XapiGroup
@@ -142,7 +142,9 @@ class StudentGroupingEditViewModel(
                     .maxByOrNull {
                         it.timestamp ?: it.stored ?: Instant.DISTANT_PAST
                     }
-                    ?: return@launch
+                    ?: throw IllegalStateException(
+                        "Could not find statement for groupId=$groupId"
+                    )
 
                 val group = groupStatement.`object` as XapiGroup
 
@@ -164,6 +166,7 @@ class StudentGroupingEditViewModel(
                     prev.copy(
                         groupName = groupName ?: "",
                         selectedStudents = persons,
+                        selectedStudentIds = persons.map { it.guid }.toSet(),
                         statementId = statementId.toString()
                     )
                 }
@@ -261,7 +264,10 @@ class StudentGroupingEditViewModel(
                 prev.selectedStudents.filterNot { it.guid == person.guid }
             }
 
-            prev.copy(selectedStudents = updated)
+            prev.copy(
+                selectedStudents = updated,
+                selectedStudentIds = updated.map { it.guid }.toSet()
+            )
         }
     }
 

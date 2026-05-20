@@ -132,7 +132,7 @@ class AssignmentListViewModel(
                 allSummaries = state.dataOrNull()?.statements
                     ?.filter { it.isAssignmentStatement }
                     ?.map { stmt ->
-                        // TODO CURRENTLY ONY SHOW THE ASSIGNMENT NAME IN THE LIST.
+                        // TODO CURRENTLY ONLY SHOW THE ASSIGNMENT NAME IN THE LIST.
                         AssignmentSummary(
                             activityId = (stmt.`object` as? XapiActivity)?.id ?: "",
                             title = stmt.activityDefinitionTitle,
@@ -144,6 +144,7 @@ class AssignmentListViewModel(
                             learningUnitManifestUrls = stmt.assignmentLearningUnits.map { it.learningUnitManifestUrl.toString() }
                         )
                     } ?: emptyList()
+
                 updateFilteredAssignments()
             }
         }

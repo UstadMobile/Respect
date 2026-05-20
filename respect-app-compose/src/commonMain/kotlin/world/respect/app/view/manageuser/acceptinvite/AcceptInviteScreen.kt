@@ -25,6 +25,7 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.child
 import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.loading
 import world.respect.shared.generated.resources.next
@@ -122,7 +123,16 @@ fun AcceptInviteScreen(
                     }
 
                     else -> {
-                        //Do nothing else
+                        RespectDetailField(
+                            modifier = Modifier.defaultItemPadding(),
+                            label = { Text(stringResource(Res.string.role)) },
+                            value = { Text(stringResource(invite.roleLabel)) }
+                        )
+                        RespectDetailField(
+                            modifier = Modifier.defaultItemPadding(),
+                            label = { Text(stringResource(Res.string.child)) },
+                            value = { Text(uiState.inviteInfo?.childName?:"") }
+                        )
                     }
                 }
 

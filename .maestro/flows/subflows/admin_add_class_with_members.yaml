@@ -12,46 +12,51 @@ appId: world.respect.app
     id: "app_title"
     text: "Add class"
 - tapOn: "Class name*"
-- inputText: "New Class"
+- inputText: ${CLASSNAME}
 - tapOn: "Save"
 
 - runFlow:
     file: "admin_add_new_student_to_class.yaml"
     env:
+      CLASSNAME: "TestClass"
       FIRSTNAME: StudentA
       LASTNAME: User
 - runFlow:
     file: "admin_add_new_student_to_class.yaml"
     env:
+      CLASSNAME: "TestClass"
       FIRSTNAME: StudentB
       LASTNAME: User
 - runFlow:
     file: "admin_add_new_student_to_class.yaml"
     env:
+      CLASSNAME: "TestClass"
       FIRSTNAME: StudentC
       LASTNAME: User
 - runFlow:
     file: "admin_add_new_student_to_class.yaml"
     env:
+      CLASSNAME: "TestClass"
       FIRSTNAME: StudentD
       LASTNAME: User
 
 - runFlow:
     file: "admin_add_new_teacher_to_class.yaml"
     env:
+      CLASSNAME: "TestClass"
       FIRSTNAME: TeacherA
       LASTNAME: User
 
 - runFlow:
     file: "create_account_for_class_member.yaml"
     env:
-      CLASSNAME: "New Class"
+      CLASSNAME: "TestClass"
       MEMBERNAME: TeacherA User
       MEMBERUSERNAME: teacherauser
 
 - runFlow:
     file: "create_account_for_class_member.yaml"
     env:
-      CLASSNAME: "New Class"
+      CLASSNAME: "TestClass"
       MEMBERNAME: StudentA User
       MEMBERUSERNAME: studentauser

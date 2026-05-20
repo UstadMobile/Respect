@@ -27,7 +27,7 @@ class GetXapiLaunchUrlUseCaseAndroid(
         learningUnitUrl: Url,
         assignmentActivityId: String?,
     ): Url {
-        val activePerson = accountManager.selectedAccountAndPersonFlow.first()
+        val activeSession = accountManager.selectedAccountAndPersonFlow.first()
             ?: throw IllegalStateException("Cannot launch when there is no active person")
 
         return URLBuilder(learningUnitUrl).apply {
@@ -47,16 +47,11 @@ class GetXapiLaunchUrlUseCaseAndroid(
                     "auth",
                     "Basic $basicAuth"
                 )
-                set("actor",
-                    XapiAgent(
-                        name = activePerson.person.fullName(),
-                        account = XapiAccount(
-                            homePage = schoolUrl.toString(),
-                            name = activePerson.person.username ?: throw IllegalStateException("Launcher must have username")
-                        )
-                    ).let {
-                        json.encodeToString(XapiAgent.serializer(), it)
-                    }
+                set(
+                    name ="actor",
+                    value = json.encodeToString(
+                        XapiAgent.serializer(), activeSession.xapiAgent
+                    )
                 )
                 set("activity_id", learningUnitUrl.toString())
             }

@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.RoomRawQuery
 import kotlinx.coroutines.flow.Flow
+import world.respect.datalayer.db.school.xapi.composites.XapiAssignmentResultRow
 import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
 import world.respect.datalayer.db.school.xapi.composites.XapiSubstatementAndVerbEntity
 import world.respect.datalayer.db.school.xapi.composites.XapiTimes
@@ -109,6 +110,67 @@ interface XapiStatementEntityDao {
         voidStmtIdLo: Long
     )
 
+    /**
+     * Get a result with one row per combination of assigned actor (including group members) and
+     * assigned activity id as per the assignment recipe. Each row includes summary stats for the
+     * given combination: if it was completed, successful, progress, score, etc.
+     *
+     * This is currently based on using an aggregate query and group by to get the required results.
+     * An alternative (valid) approach would be to use a CTE based on JOIN to create a row per
+     * combination, and then use subqueries. The aggregate functions should be marginally more
+     * efficient as it avoids the need to run a separate subquery for each field: the statements can
+     * be selected, grouped, and then we can get all the required fields in one go.
+     */
+    @Query("""
+        WITH LatestAssignmentStatementIds(idHi, idLo, actorUid) AS (
+                 SELECT XapiStatementEntity.statementIdHi AS idHi,
+                        XapiStatementEntity.statementIdLo AS idLo,
+                        XapiStatementEntity.statementActorUid AS actorUid
+                   FROM XapiStatementEntity
+                  WHERE XapiStatementEntity.statementObjectUid1 = :assignmentActivityIdNum
+                    AND XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.ACTIVITY}
+                    AND NOT XapiStatementEntity.stmtVoid
+               ORDER BY XapiStatementEntity.timestamp DESC
+                  LIMIT 1),
+             
+             AgentActorUids(uid) AS (
+                   SELECT (SELECT actorUid FROM LatestAssignmentStatementIds) AS uid
+                     UNION
+                    SELECT XapiGroupMemberActorJoin.gmajMemberActorUid AS uid
+                      FROM XapiGroupMemberActorJoin
+                     WHERE XapiGroupMemberActorJoin.gmajMemberActorUid = 
+                           (SELECT actorUid FROM LatestAssignmentStatementIds)),
+             
+             AssignedActivityUids(assignedActivityUid) AS (
+                    SELECT XapiStatementContextActivityJoin.scajToActivityUid AS assignedActivityUid
+                      FROM XapiStatementContextActivityJoin
+                    WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = 
+                          (SELECT idHi FROM LatestAssignmentStatementIds)
+                      AND XapiStatementContextActivityJoin.scajFromStatementIdLo = 
+                          (SELECT idLo FROM LatestAssignmentStatementIds)  
+             )
+
+             -- Use aggregate functions with Group by actor, activity to get the required progress
+             -- info per actor and activity.
+             SELECT XapiStatementEntity.statementActorUid AS actorUid,
+                    XapiStatementEntity.statementObjectUid1 AS activityUid,
+                    MAX(XapiStatementEntity.extensionProgress) AS progress,
+                    MAX(XapiStatementEntity.resultCompletion) AS completed,
+                    MAX(XapiStatementEntity.resultSuccess) AS successful,
+                    MAX(XapiStatementEntity.resultScoreScaled) AS rawScore
+               FROM XapiStatementEntity
+              WHERE XapiStatementEntity.statementObjectUid1 IN(
+                    SELECT DISTINCT AssignedActivityUids.assignedActivityUid 
+                      FROM AssignedActivityUids)
+                AND XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.ACTIVITY}
+                AND NOT XapiStatementEntity.stmtVoid
+                AND XapiStatementEntity.statementActorUid IN 
+                    (SELECT uid FROM AgentActorUids)
+           GROUP BY XapiStatementEntity.statementActorUid, XapiStatementEntity.statementObjectUid1
+    """)
+    suspend fun getAssignmentResults(
+        assignmentActivityIdNum: Long
+    ): List<XapiAssignmentResultRow>
 
 
     @RawQuery

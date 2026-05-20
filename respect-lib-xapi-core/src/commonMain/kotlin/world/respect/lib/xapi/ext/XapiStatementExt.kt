@@ -77,4 +77,10 @@ fun List<XapiStatement>.lastModifiedGMTStringForRetrievedStatements(
     ).toHttpDate()
 }
 
+fun List<XapiStatement>.mostRecentByTimestampOrNull() : XapiStatement? {
+    return maxByOrNull { it.timestamp ?: EPOCH }
+}
 
+fun List<XapiStatement>.mostRecentByTimestamp(): XapiStatement {
+    return mostRecentByTimestampOrNull() ?: throw IllegalArgumentException("No statements in list")
+}

@@ -88,10 +88,6 @@ class XapiStatementsResourceHttp(
         throw UnsupportedOperationException("getAssignmentResult on http NOT supported - this operation is only supported on local database source")
     }
 
-    override fun getAssignmentSummaries(): Flow<List<AssignmentSummary>> {
-        throw UnsupportedOperationException("getAssignmentSummaries on http NOT supported - this operation is only supported on local database source")
-    }
-
     override suspend fun getLastStoredTimestampForActivity(activityId: String): Long? {
         throw UnsupportedOperationException("getLastStoredTimestampForActivity on http NOT supported - this operation is only supported on local database source")
     }

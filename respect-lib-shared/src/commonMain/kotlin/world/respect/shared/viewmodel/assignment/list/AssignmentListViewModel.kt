@@ -20,10 +20,17 @@ import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.model.AssignmentSummary
+import world.respect.lib.xapi.model.VERB_ASSIGN
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.RespectSessionAndPerson
+import world.respect.shared.domain.xapi.activityDefinitionTitle
+import world.respect.shared.domain.xapi.assignmentDeadline
+import world.respect.shared.domain.xapi.assignmentLearningUnits
+import world.respect.shared.domain.xapi.isAssignmentStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assignment
 import world.respect.shared.generated.resources.assignments
@@ -34,6 +41,7 @@ import world.respect.shared.util.AssignmentListScreenFilter
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 
 data class AssignmentListUiState(
@@ -117,8 +125,25 @@ class AssignmentListViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            schoolDataSource.xapiStatementsResource.getAssignmentSummaries().collect { summaries ->
-                allSummaries = summaries
+            schoolDataSource.xapiStatementsResource.getAsFlow(
+                listParams = GetStatementParams(verb = VERB_ASSIGN),
+                dataLoadParams = DataLoadParams()
+            ).collect { state ->
+                allSummaries = state.dataOrNull()?.statements
+                    ?.filter { it.isAssignmentStatement }
+                    ?.map { stmt ->
+                        // TODO CURRENTLY ONY SHOW THE ASSIGNMENT NAME IN THE LIST.
+                        AssignmentSummary(
+                            activityId = (stmt.`object` as? XapiActivity)?.id ?: "",
+                            title = stmt.activityDefinitionTitle,
+                            className = stmt.actor.name ?: "",
+                            lastModified = stmt.timestamp ?: Clock.System.now(),
+                            deadline = stmt.assignmentDeadline,
+                            completedCount = 0,
+                            totalCount = 0,
+                            learningUnitManifestUrls = stmt.assignmentLearningUnits.map { it.learningUnitManifestUrl.toString() }
+                        )
+                    } ?: emptyList()
                 updateFilteredAssignments()
             }
         }

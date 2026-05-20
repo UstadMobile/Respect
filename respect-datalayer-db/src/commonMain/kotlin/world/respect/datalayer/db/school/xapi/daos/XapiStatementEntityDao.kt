@@ -11,7 +11,6 @@ import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEnt
 import world.respect.datalayer.db.school.xapi.composites.XapiSubstatementAndVerbEntity
 import world.respect.datalayer.db.school.xapi.composites.XapiTimes
 import world.respect.datalayer.db.school.xapi.entities.XapiAssignmentProgressEntityRow
-import world.respect.datalayer.db.school.xapi.entities.XapiAssignmentSummaryEntityRow
 import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
 import world.respect.datalayer.school.model.report.StatementReportRow
@@ -134,42 +133,6 @@ interface XapiStatementEntityDao {
     fun getAssignmentProgressFlow(
         assignmentActivityUidNum: Long,
     ): Flow<List<XapiAssignmentProgressEntityRow>>
-
-    @Query("""
-        SELECT 
-            AssignStmt.statementObjectActivityId AS activityId,
-            (SELECT almeValue FROM XapiActivityLangMapEntry WHERE almeActivityUid = AssignStmt.statementObjectUid1 AND almeProperty = 1 LIMIT 1) AS title,
-            Actor.actorName AS className,
-            CAST(strftime('%s', AssignStmt.timestamp) AS LONG) * 1000 AS lastModified,
-            (SELECT aeeJson FROM XapiActivityExtensionEntity WHERE aeeActivityUid = AssignStmt.statementObjectUid1 AND aeeKey = :deadlineExtKey LIMIT 1) AS deadlineJson,
-            (SELECT COUNT(DISTINCT Stmt.statementActorUid) 
-             FROM XapiStatementEntity Stmt 
-             WHERE Stmt.statementObjectActivityId = AssignStmt.statementObjectActivityId 
-               AND Stmt.resultCompletion = 1) AS completedCount,
-            (SELECT COUNT(DISTINCT Stmt.statementActorUid) 
-             FROM XapiStatementEntity Stmt 
-             WHERE Stmt.statementObjectActivityId = AssignStmt.statementObjectActivityId) AS totalCount,
-            (SELECT GROUP_CONCAT(scajToActivityId) 
-             FROM XapiStatementContextActivityJoin 
-             WHERE scajFromStatementIdHi = AssignStmt.statementIdHi 
-               AND scajFromStatementIdLo = AssignStmt.statementIdLo 
-               AND scajContextType = 2) AS learningUnitsConcat
-        FROM XapiStatementEntity AssignStmt
-        JOIN XapiActorEntity Actor ON AssignStmt.statementActorUid = Actor.actorUid
-        JOIN XapiStatementContextActivityJoin CtxJoin ON (AssignStmt.statementIdHi = CtxJoin.scajFromStatementIdHi AND AssignStmt.statementIdLo = CtxJoin.scajFromStatementIdLo)
-        WHERE AssignStmt.statementVerbId = :assignVerbId
-          AND CtxJoin.scajToActivityUid = :recipeActivityUid
-          AND NOT AssignStmt.isSubStatement
-          AND NOT AssignStmt.stmtVoid
-        GROUP BY AssignStmt.statementObjectActivityId
-        ORDER BY AssignStmt.timestamp DESC
-    """)
-    fun getAssignmentSummariesFlow(
-        assignVerbId: String,
-        recipeActivityUid: Long,
-        deadlineExtKey: String
-    ): Flow<List<XapiAssignmentSummaryEntityRow>>
-
 
     @Query("SELECT MAX(stored) FROM XapiStatementEntity Stmt JOIN XapiStatementContextActivityJoin CtxJoin ON (Stmt.statementIdHi = CtxJoin.scajFromStatementIdHi AND Stmt.statementIdLo = CtxJoin.scajFromStatementIdLo) WHERE CtxJoin.scajToActivityUid = :activityUidNum")
     suspend fun getLastStoredTimestampForActivity(activityUidNum: Long): Long?

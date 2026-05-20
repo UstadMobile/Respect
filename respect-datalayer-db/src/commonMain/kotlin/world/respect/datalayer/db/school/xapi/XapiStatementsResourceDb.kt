@@ -8,10 +8,9 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
 import io.ktor.util.date.GMTDate
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.contentOrNull
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -29,7 +28,6 @@ import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityObject
 import world.respect.datalayer.db.school.xapi.ext.allActivityUids
 import world.respect.datalayer.db.school.xapi.ext.allActorUids
 import world.respect.datalayer.ext.appendIfNotNull
-import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
@@ -42,17 +40,23 @@ import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_CONSISTENT_THROUGH
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_VERSION
 import world.respect.lib.xapi.exceptions.XapiBadRequestException
 import world.respect.lib.xapi.exceptions.XapiForbiddenException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
-import world.respect.lib.xapi.model.*
+import world.respect.lib.xapi.model.AssignmentResult
+import world.respect.lib.xapi.model.AssignmentSummary
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatementRef
+import world.respect.lib.xapi.model.XapiStatementResult
+import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
+import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
-import kotlin.time.Instant
-import kotlin.text.get
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 class XapiStatementsResourceDb(
@@ -449,36 +453,6 @@ class XapiStatementsResourceDb(
                     success = row.success,
                     scoreScaled = row.scoreScaled,
                     progress = row.progress
-                )
-            }
-        }
-    }
-
-    override fun getAssignmentSummaries(): Flow<List<AssignmentSummary>> {
-        val recipeActivityUid = uidNumberMapper(CATEGORY_ASSIGNMENT_RECIPE)
-        return schoolDb.getStatementDao().getAssignmentSummariesFlow(
-            assignVerbId = VERB_ASSIGN,
-            recipeActivityUid = recipeActivityUid,
-            deadlineExtKey = EXT_DEADLINE
-        ).map { rows ->
-            rows.map { row ->
-                val deadline = row.deadlineJson?.let {
-                    runCatching {
-                        (json.parseToJsonElement(it) as? JsonPrimitive)?.contentOrNull?.let { str ->
-                            Instant.parse(str)
-                        }
-                    }.getOrNull()
-                }
-
-                AssignmentSummary(
-                    activityId = row.activityId,
-                    title = row.title ?: "Untitled",
-                    className = row.className ?: "Unknown Class",
-                    lastModified = Instant.fromEpochMilliseconds(row.lastModified),
-                    deadline = deadline,
-                    completedCount = row.completedCount,
-                    totalCount = row.totalCount,
-                    learningUnitManifestUrls = row.learningUnitsConcat?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
                 )
             }
         }

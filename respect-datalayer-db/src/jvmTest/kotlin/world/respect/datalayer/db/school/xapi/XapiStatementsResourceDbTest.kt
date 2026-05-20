@@ -1,8 +1,11 @@
 package world.respect.datalayer.db.school.xapi
 
 import io.ktor.http.Url
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import world.respect.datalayer.db.school.testSchoolDb
@@ -16,15 +19,28 @@ import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedActivities
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
+import world.respect.datalayer.school.xapi.ext.idStr
+import world.respect.datalayer.school.xapi.ext.resultProgressExtension
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.test.res.forXapiSampleStatements
 import world.respect.lib.test.res.xapiSampleStatements
+import world.respect.lib.xapi.model.XAPI_RESULT_EXTENSION_PROGRESS
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiActivityDefinition
+import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiContext
+import world.respect.lib.xapi.model.XapiContextActivities
+import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiResult
 import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementFormatEnum
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
+import kotlin.random.Random
+import kotlin.random.nextInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -217,6 +233,161 @@ class XapiStatementsResourceDbTest {
                         getByVoidedParams.copy(format = GetStatementFormatEnum.CANONICAL)
                     ).dataOrNull()?.statements?.firstOrNull()!!
                 )
+            }
+        }
+    }
+
+
+    fun randomNullableBoolean(): Boolean? {
+        return when(val i = Random.nextInt(-1 until 2)) {
+            -1 -> null
+            0 -> false
+            1 -> true
+            else -> throw IllegalStateException(i.toString())
+        }
+    }
+
+    @Test
+    fun givenAssignmentAndCompletionStatementsMade_whenGetProgressCalled_thenSummariesShouldMatch() {
+        runBlocking {
+            testSchoolDb(temporaryFolder.newFolder()) { db ->
+                val assignmentActivityId = "http://localhost:8098/assignment-activity-id"
+                val assignmentTasks = (1..3).map { "http://localhost:8098/assignment/task$it" }
+
+                val dataSource = db.toDataSource(
+                    authenticatedUserUid = "1",
+                    schoolUrl = Url("http://localhost:8098/"),
+                )
+
+                val teacherAgent = XapiAgent(
+                    name = "Teacher",
+                    account = XapiAccount(
+                        homePage = "http://localhost:8098/",
+                        name = "teacher"
+                    )
+                )
+
+                val studentGroup = XapiGroup(
+                    name = "Students",
+                    account = XapiAccount(
+                        homePage = "http://localhost:8098/class/1",
+                        name = "students"
+                    ),
+                    member = (1..5).map {
+                        XapiAgent(
+                            name = "Student $it",
+                            account = XapiAccount(
+                                homePage = "http://localhost:8098/student/$it",
+                                name = "student$it"
+                            )
+                        )
+                    }
+                )
+
+                val createGroupStmt = XapiStatement(
+                    actor = teacherAgent,
+                    verb = XapiVerb("http://activitystrea.ms/schema/1.0/saved"),
+                    `object` = studentGroup,
+                )
+
+                dataSource.xapiStatementsResource.post(listOf(createGroupStmt))
+
+                val setAssignmentStmt = XapiStatement(
+                    actor = studentGroup.copy(member = null),
+                    verb = XapiVerb("http://activitystrea.ms/schema/1.0/assign"),
+                    `object` = XapiActivity(
+                        id = assignmentActivityId,
+                        definition = XapiActivityDefinition(
+                            type = "http://id.tincanapi.com/activitytype/school-assignment"
+                        )
+                    ),
+                    context = XapiContext(
+                        instructor = teacherAgent,
+                        contextActivities = XapiContextActivities(
+                            grouping = assignmentTasks.map {
+                                XapiActivity(
+                                    id = it,
+                                )
+                            }
+                        )
+                    )
+                )
+
+                dataSource.xapiStatementsResource.post(listOf(setAssignmentStmt))
+
+                val progressStatements = studentGroup.member!!.flatMap { studentActor ->
+                    assignmentTasks.map { assignmentActivityId ->
+                        XapiStatement(
+                            actor = studentActor,
+                            verb = XapiVerb(XapiVerb.ID_COMPLETED),
+                            `object` = XapiActivity(id = assignmentActivityId),
+                            result = XapiResult(
+                                score = XapiResult.Score(
+                                    scaled = Random.nextDouble(
+                                        0.toDouble(), 1.toDouble()
+                                    ).toFloat()
+                                ),
+                                success = randomNullableBoolean(),
+                                completion = randomNullableBoolean(),
+                                extensions = JsonObject(
+                                    mapOf(
+                                        XAPI_RESULT_EXTENSION_PROGRESS to JsonPrimitive(Random.nextInt(100))
+                                    )
+                                )
+                            ),
+                            context = XapiContext(
+                                contextActivities = XapiContextActivities(
+                                    grouping = listOf(
+                                        XapiActivity(id = assignmentActivityId)
+                                    )
+                                )
+                            )
+                        )
+                    }
+                }.also {
+                    dataSource.xapiStatementsResource.post(it)
+                }
+
+                val assignmentResults = dataSource.xapiStatementsResource.getAssignmentProgress(
+                    assignmentActivityId
+                ).first().dataOrNull()
+
+                assertNotNull(assignmentResults)
+
+                studentGroup.member!!.forEach { student ->
+                    assignmentTasks.forEach { taskActivityId ->
+                        val result = assignmentResults.first {
+                            it.actor.idStr == student.idStr //canoncical comparison
+                        }.progress.first {
+                            it.activityId == taskActivityId
+                        }
+
+                        val statement = progressStatements.first {
+                            val stmtActivity = it.`object` as? XapiActivity
+                            it.actor == student && stmtActivity?.id == taskActivityId
+                        }
+
+                        assertEquals(
+                            statement.result?.success,
+                            result.successful
+                        )
+
+                        assertEquals(
+                            statement.result?.completion,
+                            result.completed,
+                        )
+
+                        assertEquals(
+                            statement.result?.score?.scaled,
+                            result.rawScore,
+                        )
+
+                        assertEquals(
+                            statement.resultProgressExtension,
+                            result.progress
+                        )
+                    }
+                }
             }
         }
     }

@@ -301,6 +301,11 @@ class RespectAccountManager(
             ?: throw IllegalStateException("require scope for selected account: no account selected")
     }
 
+    fun requireActiveSchoolUrl(): Url {
+        return activeAccount?.school?.self
+            ?: throw IllegalStateException("require school url for active account: no account selected")
+    }
+
     suspend fun switchProfile(personUid: String) {
         val currentSession = _activeSession.value
             ?: throw IllegalStateException("switchProfile: no active session")

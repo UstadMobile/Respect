@@ -58,6 +58,7 @@ import world.respect.datalayer.school.ext.writePermissionFlag
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
+import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.viewmodel.RespectViewModel
@@ -120,6 +121,8 @@ class ClazzDetailViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val route: ClazzDetail = savedStateHandle.toRoute()
+
+    private val updateClazzStudentXapiGroupUseCase: UpdateClazzStudentXapiGroupUseCase by inject()
 
     private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
         return PagingSourceFactoryHolder {
@@ -226,7 +229,7 @@ class ClazzDetailViewModel(
                 ).collect { navResult ->
                     val personToEnrol = navResult.result as? Person ?: return@collect
 
-                    try {
+                    snackBarDispatcher.tryOrShowSnackbarOnError {
                         schoolDataSource.enrollmentDataSource.store(
                             listOf(
                                 Enrollment(
@@ -242,8 +245,10 @@ class ClazzDetailViewModel(
                                 )
                             )
                         )
-                    }catch(e: Throwable) {
-                        e.printStackTrace()
+
+                        if(enrolmentRole == EnrollmentRoleEnum.STUDENT) {
+                            updateClazzStudentXapiGroupUseCase(route.guid)
+                        }
                     }
                 }
             }

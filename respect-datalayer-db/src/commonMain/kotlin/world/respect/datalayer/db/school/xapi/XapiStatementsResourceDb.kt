@@ -147,7 +147,7 @@ class XapiStatementsResourceDb(
             val verbLangMapEntries = schoolDb.getVerbLangMapEntryDao()
                 .takeIf { !idOnly }
                 ?.findByVerbUidPair(
-                    uid1 = entity.verbEntity.verbUid,
+                    uid1 = entity.verbEntity?.verbUid ?: 0,
                     uid2 = substatementEntity?.verbEntity?.verbUid ?: 0,
                 ) ?: emptyList()
 

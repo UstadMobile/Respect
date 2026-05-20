@@ -11,6 +11,7 @@ import world.respect.datalayer.school.PersonPasswordDataSourceLocal
 import world.respect.datalayer.school.PersonQrCodeBadgeDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.SchoolAppDataSourceLocal
+import world.respect.datalayer.school.SchoolConfigSettingDataSourceLocal
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
 
@@ -46,5 +47,7 @@ interface SchoolDataSourceLocal: SchoolDataSource {
     override val opdsPublicationDataSource: OpdsPublicationDataSourceLocal
 
     override val opdsFeedDataSource: OpdsFeedDataSourceLocal
+
+    override val schoolConfigSettingDataSource: SchoolConfigSettingDataSourceLocal
 
 }

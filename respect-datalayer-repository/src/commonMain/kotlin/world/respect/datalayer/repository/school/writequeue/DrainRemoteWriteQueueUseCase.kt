@@ -69,6 +69,10 @@ class DrainRemoteWriteQueueUseCase(
                         repository.inviteDataSource.sendToRemote(listOf(item))
                     }
 
+                    WriteQueueItem.Model.SCHOOL_CONFIG_SETTING -> {
+                        repository.schoolConfigSettingDataSource.sendToRemote(listOf(item))
+                    }
+
                     WriteQueueItem.Model.OPDS_FEED -> {
                         val dataLoad = repository.opdsFeedDataSource.local.getByUrl(
                             url = Url(item.uid),

@@ -192,93 +192,96 @@ fun AssignmentDetailScreen(
                 val headerHeight = minOf(maxHeight / 2, (HEADER_HEIGHT).dp)
 
                 val assignmentResults = uiState.assignmentProgressList.distinctBy { it.personUid }
-                val progressMap = uiState.progressMap
-                val filteredUnits = uiState.filteredUnits
 
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    // STICKY HEADER: Task Icons and Names
-                    stickyHeader {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(headerHeight),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Spacer(
-                                Modifier
-                                    .width(nameColWidth)
-                                    .height(headerHeight)
-                            )
+                if (assignmentResults.isNotEmpty()) {
+                    val progressMap = uiState.progressMap
+                    val filteredUnits = uiState.filteredUnits
 
-                            // Scrollable Task Headers
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        // STICKY HEADER: Task Icons and Names
+                        stickyHeader {
                             Row(
                                 modifier = Modifier
-                                    .fillMaxHeight()
-                                    .horizontalScroll(horizontalScrollState),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
+                                    .fillMaxWidth()
+                                    .height(headerHeight),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                filteredUnits.forEach { unit ->
-                                    TaskHeaderCell(unit, uiState, taskColWidth, headerHeight)
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .width(taskColWidth)
-                                        .height(headerHeight),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = stringResource(Res.string.average),
-                                        modifier = Modifier.rotate(-90f),
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                        }
-                    }
+                                Spacer(
+                                    Modifier
+                                        .width(nameColWidth)
+                                        .height(headerHeight)
+                                )
 
-                    when {
-                        assignmentResults.isNotEmpty() -> {
-                            items(assignmentResults, key = { it.personUid }) { student ->
-                                Row(modifier = Modifier.fillMaxWidth()) {
-                                    // Fixed Student Name Column
-                                    StudentNameCell(student.personName ?: "Unknown", nameColWidth)
-                                    // Scrollable Grades/Progress Cells
-                                    Row(
+                                // Scrollable Task Headers
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .horizontalScroll(horizontalScrollState),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    filteredUnits.forEach { unit ->
+                                        TaskHeaderCell(
+                                            unit,
+                                            uiState,
+                                            taskColWidth,
+                                            headerHeight
+                                        )
+                                    }
+                                    Box(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .horizontalScroll(horizontalScrollState)
+                                            .width(taskColWidth)
+                                            .height(headerHeight),
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        filteredUnits.forEach { unit ->
-                                            val progress = progressMap[student.personUid]?.get(unit.learningUnitManifestUrl.toString())
-                                            GradeCell(progress?.calculatePercentage(), taskColWidth)
-                                        }
-                                        // Average Score Cell
-                                        AverageCell(uiState.getAverageForStudent(student.personUid), taskColWidth)
+                                        Text(
+                                            text = stringResource(Res.string.average),
+                                            modifier = Modifier.rotate(-90f),
+                                            textAlign = TextAlign.Center,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
                                     }
                                 }
                             }
                         }
 
-                        else -> {
-                            item("empty_state") {
-                                Box(
+                        items(assignmentResults, key = { it.personUid }) { student ->
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                // Fixed Student Name Column
+                                StudentNameCell(student.personName ?: "Unknown", nameColWidth)
+                                // Scrollable Grades/Progress Cells
+                                Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(32.dp),
-                                    contentAlignment = Alignment.Center
+                                        .horizontalScroll(horizontalScrollState)
                                 ) {
-                                    Text(
-                                        text = stringResource(Res.string.no_student_data_available),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    filteredUnits.forEach { unit ->
+                                        val progress =
+                                            progressMap[student.personUid]?.get(unit.learningUnitManifestUrl.toString())
+                                        GradeCell(progress?.calculatePercentage(), taskColWidth)
+                                    }
+                                    // Average Score Cell
+                                    AverageCell(
+                                        uiState.getAverageForStudent(student.personUid),
+                                        taskColWidth
                                     )
                                 }
                             }
                         }
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.no_student_data_available),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
             }
@@ -446,7 +449,7 @@ fun StudentNameCell(name: String, width: Dp) {
     Box(
         modifier = Modifier
             .width(width)
-            .fillMaxHeight()
+            .height(48.dp)
             .padding(8.dp),
         contentAlignment = Alignment.CenterStart
     ) {
@@ -488,7 +491,7 @@ fun GradeCell(percent: Int?, width: Dp) {
     Box(
         modifier = Modifier
             .width(width)
-            .fillMaxHeight()
+            .height(48.dp)
             .padding(4.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -524,7 +527,7 @@ fun AverageCell(avg: Double?, width: Dp) {
     Box(
         modifier = Modifier
             .width(width)
-            .fillMaxHeight(),
+            .height(48.dp),
         contentAlignment = Alignment.Center
     ) {
         if (avg == null) {

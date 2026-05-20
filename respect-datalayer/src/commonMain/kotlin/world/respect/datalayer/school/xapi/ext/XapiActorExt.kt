@@ -22,9 +22,18 @@ fun List<XapiActor>.distinctMerged(): List<XapiActor> {
     val actorsById = groupBy { it.idStr }
     return actorsById.map { (_, actors) ->
         val first = actors.first()
-        if(first is XapiGroup && !first.isAnonymous) {
-            //edge case to handle: if member is null, keep it null, so that the store routine knows
-            //not to attempt to update the member list.
+        val isIdentifiedGroup = first is XapiGroup && !first.isAnonymous
+        val actorsAsGroups = if(isIdentifiedGroup) {
+            actors.mapNotNull { it as? XapiGroup }
+        }else {
+            emptyList()
+        }
+
+        val hasMembersDefined = isIdentifiedGroup && actorsAsGroups.any { it.member != null }
+
+        //If member is null, keep it null, so that the store routine knows
+        //not to attempt to update the member list.
+        if(isIdentifiedGroup && hasMembersDefined) {
             first.copy(
                 member = actors.mapNotNull {
                     (it as? XapiGroup)?.member

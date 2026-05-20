@@ -11,7 +11,9 @@ import world.respect.datalayer.school.model.StatusEnum
  * Verb as per the xAPI spec. Verb only has two properties ( id and display ) as per the spec:
  * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#243-verb
  *
- * Joins with VerbXLangMapEntry to handle the display langmap
+ * Joins with VerbXLangMapEntry to handle the display langmap.
+ *
+ * No VerbEntity will be saved if the display property is defined as per allDefinedVerbs.
  *
  * @param verbUid The XXHash64 of verbUrlId
  */

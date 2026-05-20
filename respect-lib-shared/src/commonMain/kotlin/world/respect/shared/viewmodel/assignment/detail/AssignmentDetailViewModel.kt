@@ -59,7 +59,7 @@ data class AssignmentDetailUiState(
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
         flowOf(DataLoadingState())
     },
-    val assignmentProgressRow: List<AssignmentResult> = emptyList(),
+    val assignmentProgressList: List<AssignmentResult> = emptyList(),
     val statusCounts: Map<AssignmentStatusFilter, Int> = emptyMap(),
     val filteredProgressRow: List<AssignmentResult> = emptyList(),
     val selectedStatusFilter: AssignmentStatusFilter = AssignmentStatusFilter.ALL,
@@ -206,11 +206,12 @@ class AssignmentDetailViewModel(
 
                     // Observe progress
                     schoolDataSource.xapiStatementsResource
-                        .getAssignmentResult(assignmentActivityId = activityId)
+                        .getAssignmentProgress(activityId = activityId)
                         .collect { progressList ->
-                            _uiState.update {
-                                it.copy(assignmentProgressRow = progressList)
-                            }
+                            println("debug >>> progressList: $progressList")
+//                            _uiState.update {
+//                                it.copy(assignmentProgressRow = progressList)
+//                            }
                             updateStatusCounts()
                             updateFilteredProgressRow()
                         }
@@ -219,7 +220,7 @@ class AssignmentDetailViewModel(
     }
 
     private fun updateFilteredProgressRow() {
-        val fullList = _uiState.value.assignmentProgressRow
+        val fullList = _uiState.value.assignmentProgressList
         val filter = _uiState.value.selectedStatusFilter
         val filtered = when (filter) {
             AssignmentStatusFilter.ALL -> fullList
@@ -237,7 +238,7 @@ class AssignmentDetailViewModel(
     private fun updateStatusCounts() {
         val units =
             _uiState.value.xApiStatement.dataOrNull()?.assignmentLearningUnits ?: emptyList()
-        val progressByStudent = _uiState.value.assignmentProgressRow.groupBy { it.personUid }
+        val progressByStudent = _uiState.value.assignmentProgressList.groupBy { it.personUid }
 
         val statusCounts = progressByStudent.values
             .map { results -> getStudentStatus(results, units) }

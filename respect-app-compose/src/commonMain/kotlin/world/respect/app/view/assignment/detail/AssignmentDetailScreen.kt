@@ -191,7 +191,7 @@ fun AssignmentDetailScreen(
                 val taskColWidth = (TASK_COLUMN_WIDTH).dp
                 val headerHeight = minOf(maxHeight / 2, (HEADER_HEIGHT).dp)
 
-                val assignmentResults = uiState.assignmentProgressRow.distinctBy { it.personUid }
+                val assignmentResults = uiState.assignmentProgressList.distinctBy { it.personUid }
                 val progressMap = uiState.progressMap
                 val filteredUnits = uiState.filteredUnits
 
@@ -302,8 +302,8 @@ fun StudentLearningUnitItem(
     val title = publication?.metadata?.title?.getTitle() ?: "Loading..."
 
     val progress =
-        remember(uiState.assignmentProgressRow, unit.learningUnitManifestUrl, uiState.personGuid) {
-            uiState.assignmentProgressRow.find {
+        remember(uiState.assignmentProgressList, unit.learningUnitManifestUrl, uiState.personGuid) {
+            uiState.assignmentProgressList.find {
                 it.personUid == uiState.personGuid && it.activityId == unit.learningUnitManifestUrl.toString()
             }
         }

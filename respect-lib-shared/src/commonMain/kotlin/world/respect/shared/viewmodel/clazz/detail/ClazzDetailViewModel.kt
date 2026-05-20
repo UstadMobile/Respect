@@ -75,10 +75,10 @@ import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
 import kotlin.time.Instant
 
 data class ClazzDetailUiState(
-    val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
+    val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
     val students: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
-    val pendingTeachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
-    val pendingStudents: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
+    val pendingTeachers:IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
+    val pendingStudents: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
 
     val listOfPending: List<Person> = emptyList(),
     val chipOptions: List<FilterChipsOption> = emptyList(),
@@ -108,7 +108,6 @@ data class ClazzDetailUiState(
     }
 
 }
-
 
 class ClazzDetailViewModel(
     savedStateHandle: SavedStateHandle,
@@ -149,9 +148,9 @@ class ClazzDetailViewModel(
         }
     }
 
-    private val teacherPagingSource = pagingSourceByRole(EnrollmentRoleEnum.TEACHER)
+    private val teacherPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.TEACHER)
 
-    private val studentPagingSource = pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
+    private val studentPagingSource =  pagingSourceByRole(EnrollmentRoleEnum.STUDENT)
 
     private val teachersPendingPagingSource = pagingSourceByRole(EnrollmentRoleEnum.PENDING_TEACHER)
 
@@ -268,6 +267,7 @@ class ClazzDetailViewModel(
                 }
             }
         }
+
     }
 
     fun onClickAddPersonToClazz(roleType: EnrollmentRoleEnum) {
@@ -292,7 +292,7 @@ class ClazzDetailViewModel(
                     )
                 )
             )
-        }
+         }
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {

@@ -86,9 +86,7 @@ fun StudentGroupingEditScreen(
             }
         ) { student ->
 
-            val person = checkNotNull(student) {
-                "Student item should not be null"
-            }
+            val person = student ?: return@respectPagingItems
 
             val isSelected = person.guid in uiState.selectedStudentIds
 

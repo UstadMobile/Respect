@@ -130,7 +130,7 @@ class ClazzDetailViewModel(
 
     private val route: ClazzDetail = savedStateHandle.toRoute()
 
-    private val schoolSelfUrl: String = accountManager.activeAccount?.school?.self?.toString()
+    private val schoolSelfUrl = accountManager.activeAccount?.school?.self
         ?: throw IllegalStateException("schoolSelfUrl is required but activeAccount or school is null")
 
     private val classActivityId = "${schoolSelfUrl}${CLASS}${route.guid}"
@@ -452,15 +452,31 @@ class ClazzDetailViewModel(
                         ?: statement.stored
                         ?: Instant.DISTANT_PAST
                 }
-                .map { statement ->
-                    checkNotNull(statement.`object` as? XapiGroup) {
-                        "Expected XapiGroup object in statement ${statement.id}"
+                .mapNotNull { statement ->
+                    val group = statement.`object` as? XapiGroup
+                    if (group == null) {
+                        Napier.w("observeGroupsFromXapi: Expected XapiGroup in statement ${statement.id}, skipping")
                     }
+                    group
+                }
+                .filter { group ->
+                    val name = group.account?.name
+                    if (name == null) {
+                        Napier.w("observeGroupsFromXapi: Group account name missing, skipping")
+                    }
+                    name != null
                 }
                 .distinctBy { group ->
-                    checkNotNull(group.account?.name) {
-                        "Group account name missing"
+                    group.account?.name
+                }
+                .map { group ->
+                    val filteredMembers = group.member?.filter { agent ->
+                        if (agent.name == null) {
+                            Napier.w("observeGroupsFromXapi: member agent has no name in group ${group.account?.name}, skipping")
+                        }
+                        agent.name != null
                     }
+                    group.copy(member = filteredMembers)
                 }
 
             _uiState.update { prev ->

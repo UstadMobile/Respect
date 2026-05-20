@@ -435,14 +435,12 @@ fun ClazzDetailScreen(
 
                 items(
                     items = uiState.groups,
-                    key = { group ->
-                        requireNotNull(group.account?.name)
-                    }
+                    key = { group -> group.account?.name ?: "" }
                 ) { group ->
-                    val groupId = requireNotNull(group.account?.name)
+                    val groupId = group.account?.name ?: return@items
 
                     val memberNames = group.member
-                        ?.mapNotNull { it.name }
+                        ?.map { it.name.orEmpty() }
                         ?: emptyList()
 
                     ListItem(

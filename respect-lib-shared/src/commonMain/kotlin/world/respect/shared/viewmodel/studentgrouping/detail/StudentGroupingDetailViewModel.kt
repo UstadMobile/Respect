@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel.studentgrouping.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -94,7 +95,10 @@ class StudentGroupingDetailViewModel(
 
     fun onClickEdit() {
         val classId = _uiState.value.classId
-            ?: throw IllegalStateException("classId not loaded when trying to edit group")
+        if (classId == null) {
+            Napier.e("onClickEdit: classId not loaded when trying to edit group")
+            return
+        }
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 StudentGroupingEdit(
@@ -161,7 +165,11 @@ class StudentGroupingDetailViewModel(
                 ),
                 dataLoadParams = DataLoadParams()
             ).collect { dataLoadState ->
-                val statementResult = dataLoadState.dataOrNull() ?: return@collect
+                val statementResult = dataLoadState.dataOrNull()
+                if (statementResult == null) {
+                    Napier.d("loadGroupDetail: data not yet loaded, waiting")
+                    return@collect
+                }
 
                 // Find the latest statement for this group by sorting by timestamp
                 val groupStatement = statementResult.statements
@@ -173,12 +181,22 @@ class StudentGroupingDetailViewModel(
 
                 if (groupStatement != null) {
                     val group = groupStatement.`object` as XapiGroup
-                    val memberNames = group.member?.mapNotNull { it.name } ?: emptyList()
-                    val statementId = checkNotNull(groupStatement.id) {
-                        "Group statement id should not be null"
+                    val memberNames = group.member?.mapNotNull { agent ->
+                        val name = agent.name
+                        if (name == null) {
+                            Napier.w("loadGroupDetail: member agent has no name, skipping")
+                        }
+                        name
+                    } ?: emptyList()
+                    val statementId = groupStatement.id
+                    if (statementId == null) {
+                        Napier.e("loadGroupDetail: Group statement id is null, skipping update")
+                        return@collect
                     }
-                    val groupName = checkNotNull(group.name) {
-                        "Group name should not be null"
+                    val groupName = group.name
+                    if (groupName == null) {
+                        Napier.e("loadGroupDetail: Group name is null, skipping update")
+                        return@collect
                     }
 
                     val classActivityId = groupStatement.context?.contextActivities?.parent

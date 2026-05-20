@@ -5,13 +5,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
+import io.github.aakira.napier.Napier
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
@@ -61,9 +62,11 @@ data class StudentGroupingEditUiState(
     val groupNameError: UiText? = null,
     val students: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
     val selectedStudents: List<Person> = emptyList(),
-    val selectedStudentIds: Set<String> = emptySet(),
     val statementId: String? = null
-)
+) {
+    val selectedStudentIds: Set<String>
+        get() = selectedStudents.map { it.guid }.toSet()
+}
 
 class StudentGroupingEditViewModel(
     savedStateHandle: SavedStateHandle,
@@ -125,29 +128,30 @@ class StudentGroupingEditViewModel(
         route.groupId?.let { groupId ->
             @OptIn(ExperimentalUuidApi::class)
             viewModelScope.launch {
-                val statementResult = schoolDataSource.xapiStatementsResource.get(
-                    listParams = XapiStatementsResource.GetStatementParams(
-                        verb = VERB_SAVED,
-                        activity = classActivityId,
-                        relatedActivities = true,
-                    ),
-                    dataLoadParams = DataLoadParams()
-                ).dataOrNull()
-                    ?: throw IllegalStateException(
-                        "Failed to load statements for classActivityId=$classActivityId"
-                    )
+                try {
+                    val statementResult = schoolDataSource.xapiStatementsResource.get(
+                        listParams = XapiStatementsResource.GetStatementParams(
+                            verb = VERB_SAVED,
+                            activity = classActivityId,
+                            relatedActivities = true,
+                        ),
+                        dataLoadParams = DataLoadParams()
+                    ).dataOrNull()
+                        ?: throw IllegalStateException(
+                            "Failed to load statements for classActivityId=$classActivityId"
+                        )
 
-                val groupStatement = statementResult.statements
-                    .filter { statement ->
-                        val group = statement.`object` as? XapiGroup
-                        group?.account?.name == groupId
-                    }
-                    .maxByOrNull {
-                        it.timestamp ?: it.stored ?: Instant.DISTANT_PAST
-                    }
-                    ?: throw IllegalStateException(
-                        "Could not find statement for groupId=$groupId"
-                    )
+                    val groupStatement = statementResult.statements
+                        .filter { statement ->
+                            val group = statement.`object` as? XapiGroup
+                            group?.account?.name == groupId
+                        }
+                        .maxByOrNull {
+                            it.timestamp ?: it.stored ?: Instant.DISTANT_PAST
+                        }
+                        ?: throw IllegalStateException(
+                            "Could not find statement for groupId=$groupId"
+                        )
 
                 val group = groupStatement.`object` as XapiGroup
 
@@ -155,23 +159,35 @@ class StudentGroupingEditViewModel(
                 val statementId = groupStatement.id
 
                 val memberIds = group.member
-                    ?.mapNotNull { it.account?.name }
+                    ?.mapNotNull { agent ->
+                        val name = agent.account?.name
+                        if (name == null) {
+                            Napier.w("StudentGroupingEditViewModel: member agent has no account name, skipping: $agent")
+                        }
+                        name
+                    }
                     ?: emptyList()
 
                 val persons = memberIds.mapNotNull { id ->
-                    schoolDataSource.personDataSource.findByGuid(
+                    val person = schoolDataSource.personDataSource.findByGuid(
                         DataLoadParams(),
                         id
                     ).dataOrNull()
+                    if (person == null) {
+                        Napier.w("StudentGroupingEditViewModel: could not find person with guid=$id")
+                    }
+                    person
                 }
 
                 _uiState.update { prev ->
                     prev.copy(
                         groupName = groupName ?: "",
                         selectedStudents = persons,
-                        selectedStudentIds = persons.map { it.guid }.toSet(),
                         statementId = statementId.toString()
                     )
+                }
+                } catch (e: Exception) {
+                    Napier.e("StudentGroupingEditViewModel: error loading group", throwable = e)
                 }
             }
         }
@@ -193,7 +209,7 @@ class StudentGroupingEditViewModel(
         }
         launchWithLoadingIndicator {
 
-            val sessionAndPerson = respectAccountManager.selectedAccountAndPersonFlow.first()
+            val sessionAndPerson = respectAccountManager.selectedAccountAndPersonFlow.firstOrNull()
                 ?: throw IllegalStateException("No person selected when trying to save group")
 
             val actor = sessionAndPerson.xapiAgent
@@ -211,15 +227,13 @@ class StudentGroupingEditViewModel(
                 schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
             }
 
-            //  Create a new statement with the updated group information
-            val xapiHomePage = sessionAndPerson.session.account.school.xapi.toString()
             val members = _uiState.value.selectedStudents.map { student ->
                 XapiAgent(
                     name = student.fullName(),
                     objectType = XapiObjectType.Agent,
                     account = XapiAccount(
                         name = student.guid,
-                        homePage = xapiHomePage
+                        homePage = schoolSelfUrl.toString()
                     )
                 )
             }
@@ -284,8 +298,7 @@ class StudentGroupingEditViewModel(
             }
 
             prev.copy(
-                selectedStudents = updated,
-                selectedStudentIds = updated.map { it.guid }.toSet()
+                selectedStudents = updated
             )
         }
     }

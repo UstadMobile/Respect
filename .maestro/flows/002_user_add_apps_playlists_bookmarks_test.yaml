@@ -235,7 +235,7 @@ onFlowComplete:
 - inputText: "Homework 1"
 - tapOn: "Class"
 - tapOn: "New Class"
-- tapOn: "Date"
+- tapOn: "Due date"
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.futureDate}

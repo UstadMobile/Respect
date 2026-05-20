@@ -72,6 +72,7 @@ import world.respect.lib.xapi.model.VERB_SAVED
 import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
+import kotlin.time.Instant
 
 data class ClazzDetailUiState(
     val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory(),
@@ -429,6 +430,7 @@ class ClazzDetailViewModel(
 
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     private suspend fun observeGroupsFromXapi() {
+
         schoolDataSource.xapiStatementsResource.getAsFlow(
             listParams = XapiStatementsResource.GetStatementParams(
                 verb = VERB_SAVED,
@@ -438,30 +440,34 @@ class ClazzDetailViewModel(
             dataLoadParams = DataLoadParams()
         ).collect { dataLoadState ->
 
-            val statementResult = dataLoadState.dataOrNull() ?: return@collect
-
-            // Sort by timestamp to get the latest version of each group, keep only the latest statement per group
+            val statementResult = dataLoadState.dataOrNull()
+                ?: return@collect
 
             val latestGroups = statementResult.statements
-                .filter { it.verb.id == VERB_SAVED }
-                .sortedByDescending { it.timestamp ?: it.stored }
+                .filter { statement ->
+                    statement.verb.id == VERB_SAVED
+                }
+                .sortedByDescending { statement ->
+                    statement.timestamp
+                        ?: statement.stored
+                        ?: Instant.DISTANT_PAST
+                }
                 .map { statement ->
-                    val group = checkNotNull(statement.`object` as? XapiGroup) {
+
+                    checkNotNull(statement.`object` as? XapiGroup) {
                         "Expected XapiGroup object in statement ${statement.id}"
                     }
-                    val groupId = checkNotNull(group.account?.name) {
-                        "Group account name missing in statement ${statement.id}"
-                    }
-
-                    groupId to group
                 }
-                .distinctBy { it.first }
-                .map { it.second }
+                .distinctBy { group ->
+
+                    checkNotNull(group.account?.name) {
+                        "Group account name missing"
+                    }
+                }
 
             _uiState.update { prev ->
                 prev.copy(groups = latestGroups)
             }
-
         }
     }
 

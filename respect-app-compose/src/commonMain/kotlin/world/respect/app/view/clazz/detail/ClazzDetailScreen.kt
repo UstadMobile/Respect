@@ -156,7 +156,7 @@ fun ClazzDetailScreen(
             )
         }
 
-        if ((uiState.showAddTeacher || uiState.showAddStudent) &&
+        if (uiState.isAdminOrTeacher &&
             (pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0
         ) {
             item("pending_header") {
@@ -196,7 +196,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isPendingExpanded) {
-            if (uiState.showAddTeacher) {
+            if (uiState.isAdminOrTeacher) {
                 respectPagingItems(
                     items = pendingTeacherLazyPagingItems,
                     key = { person, index ->
@@ -215,7 +215,7 @@ fun ClazzDetailScreen(
                 }
             }
 
-            if (uiState.showAddStudent) {
+            if (uiState.isAdminOrTeacher) {
                 respectPagingItems(
                     items = pendingStudentLazyPagingItems,
                     key = { person, index ->
@@ -268,7 +268,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isTeachersExpanded) {
-            if (uiState.showAddTeacher) {
+            if (uiState.isAdminOrTeacher) {
                 item("add_teacher") {
                     ListItem(
                         modifier = Modifier.clickable {
@@ -297,7 +297,7 @@ fun ClazzDetailScreen(
             ) { teacher ->
                 PersonListItemWithMenu(
                     person = teacher,
-                    showMenu = uiState.showAddTeacher,
+                    showMenu = uiState.isAdminOrTeacher,
                     onClickRemove = { onClickRemovePersonFromClass(it, EnrollmentRoleEnum.TEACHER) },
                     onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.TEACHER) },
                     onClick = onClickPerson,
@@ -338,7 +338,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isStudentsExpanded) {
-            if(uiState.showAddStudent) {
+            if(uiState.isAdminOrTeacher) {
                 item("add_student") {
                     ListItem(
                         modifier = Modifier.clickable {
@@ -372,13 +372,13 @@ fun ClazzDetailScreen(
                         onClickRemovePersonFromClass(it, EnrollmentRoleEnum.STUDENT)
                     },
                     onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.STUDENT) },
-                    showMenu = uiState.showAddStudent,
+                    showMenu = uiState.isAdminOrTeacher,
                     onClick = onClickPerson,
                 )
             }
         }
 
-        if (uiState.showStudentGrouping) {
+        if (uiState.isAdminOrTeacher) {
 
             item("student_grouping_header") {
                 ListItem(

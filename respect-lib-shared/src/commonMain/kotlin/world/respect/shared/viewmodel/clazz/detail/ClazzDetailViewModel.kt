@@ -94,9 +94,7 @@ data class ClazzDetailUiState(
     val isTeachersExpanded: Boolean = true,
     val isStudentsExpanded: Boolean = true,
     val inviteCodePrefix: String? = null,
-    val showAddStudent: Boolean = false,
-    val showAddTeacher: Boolean = false,
-    val showStudentGrouping: Boolean = false,
+    val isAdminOrTeacher: Boolean = false,
     val isStudentGroupingExpanded: Boolean = true,
     val groups: List<XapiGroup> = emptyList(),
     val addPersonPermissions: List<Long> = emptyList()
@@ -223,9 +221,7 @@ class ClazzDetailViewModel(
                 accountManager.selectedAccountAndPersonFlow.collect { selectedAccountAndPerson ->
                     _uiState.update { prev ->
                         prev.copy(
-                            showAddStudent = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
-                            showAddTeacher = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
-                            showStudentGrouping = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true
+                            isAdminOrTeacher = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true
                         )
                     }
 

@@ -7,8 +7,9 @@ import kotlinx.serialization.json.Json
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.serializers.InstantAsISO8601
-import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
+import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.ext.getUuidOrNull
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
@@ -103,7 +104,8 @@ interface XapiStatementsResource {
      */
     fun getAssignmentProgress(
         activityId: String,
-    ): Flow<DataLoadState<List<XapiActorAndAssignmentProgress>>>
+        filterByActor: XapiActor? = null,
+    ): Flow<DataLoadState<AssignmentAndProgress>>
 
     companion object {
 

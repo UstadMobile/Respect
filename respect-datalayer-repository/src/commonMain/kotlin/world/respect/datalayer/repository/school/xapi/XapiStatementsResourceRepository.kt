@@ -10,7 +10,8 @@ import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
+import world.respect.lib.xapi.composites.AssignmentAndProgress
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -87,8 +88,9 @@ class XapiStatementsResourceRepository(
     }
 
     override fun getAssignmentProgress(
-        activityId: String
-    ): Flow<DataLoadState<List<XapiActorAndAssignmentProgress>>> {
+        activityId: String,
+        filterByActor: XapiActor?,
+    ): Flow<DataLoadState<AssignmentAndProgress>> {
         return local.getAssignmentProgress(
             activityId
         ).combineWithRemote(

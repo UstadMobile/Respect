@@ -48,12 +48,14 @@ import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_CONSISTENT_THROUGH
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_VERSION
+import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
 import world.respect.lib.xapi.composites.XapiAssignmentProgress
 import world.respect.lib.xapi.exceptions.XapiBadRequestException
 import world.respect.lib.xapi.exceptions.XapiForbiddenException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.xapi.model.XapiStatementRef
@@ -453,8 +455,9 @@ class XapiStatementsResourceDb(
     }
 
     override fun getAssignmentProgress(
-        activityId: String
-    ): Flow<DataLoadState<List<XapiActorAndAssignmentProgress>>> {
+        activityId: String,
+        filterByActor: XapiActor?,
+    ): Flow<DataLoadState<AssignmentAndProgress>> {
         //Get the statement itself to get the actor and list of assigned activities.
         return getAsFlow(
             listParams = GetStatementParams(
@@ -485,18 +488,21 @@ class XapiStatementsResourceDb(
                 ).groupBy { it.actorUid }
 
                 DataReadyState(
-                    data = actorsToShow.map { actor ->
-                        val actorUidNum = actor.identifierHash(uidNumberMapper)
-                        XapiActorAndAssignmentProgress(
-                            actor = actor,
-                            progress = assignedActivities.map { activity ->
-                                dbAssignmentResults[actorUidNum]?.firstOrNull {
-                                    it.activityUid == uidNumberMapper(activity.id)
-                                }?.toXapiAssignmentResult(activity.id)
-                                    ?: XapiAssignmentProgress.emptyResult(activityId)
-                            }
-                        )
-                    }
+                    data = AssignmentAndProgress(
+                        assignmentStatement = assignmentStatement,
+                        progress = actorsToShow.map { actor ->
+                            val actorUidNum = actor.identifierHash(uidNumberMapper)
+                            XapiActorAndAssignmentProgress(
+                                actor = actor,
+                                progress = assignedActivities.map { activity ->
+                                    dbAssignmentResults[actorUidNum]?.firstOrNull {
+                                        it.activityUid == uidNumberMapper(activity.id)
+                                    }?.toXapiAssignmentResult(activity.id)
+                                        ?: XapiAssignmentProgress.emptyResult(activityId)
+                                }
+                            )
+                        }
+                    )
                 )
             }
         }

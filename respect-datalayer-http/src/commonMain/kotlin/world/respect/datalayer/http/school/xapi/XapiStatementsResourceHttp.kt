@@ -19,7 +19,8 @@ import world.respect.datalayer.http.school.SchoolUrlBasedDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
+import world.respect.lib.xapi.composites.AssignmentAndProgress
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
@@ -82,8 +83,9 @@ class XapiStatementsResourceHttp(
     }
 
     override fun getAssignmentProgress(
-        activityId: String
-    ): Flow<DataLoadState<List<XapiActorAndAssignmentProgress>>> {
+        activityId: String,
+        filterByActor: XapiActor?
+    ): Flow<DataLoadState<AssignmentAndProgress>> {
         throw IllegalStateException("GetAssignmentResults over HTTP is not supported")
     }
 }

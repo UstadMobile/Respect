@@ -25,3 +25,7 @@ An activity can use this extension as follows:
 
 There are different ways to launch xAPI (e.g. CMI5, Rustici Launch method, etc) that then resolve
 to a URL, but there _isn't_ a single way to go from a given activity ID to a launch URL.
+
+Mapping rules:
+* The OpdsPublication Metadata identifier _SHOULD_ match the Xapi Activity Id whenever possible.
+

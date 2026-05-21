@@ -66,7 +66,8 @@ data class AssignmentDetailUiState(
     val isFullscreen: Boolean = false,
     val isStudent: Boolean = false,
     val assigneeStudentName: String = "",
-    val personGuid: String = ""
+    val personGuid: String = "",
+    val canEdit: Boolean = false,
 ) {
 
     /**
@@ -153,8 +154,6 @@ class AssignmentDetailViewModel(
 
     val uiState = _uiState.asStateFlow()
 
-    private var _canEdit = false
-
     private val assignmentActivityId: String = route.assignmentActivityId
 
     init {
@@ -206,7 +205,7 @@ class AssignmentDetailViewModel(
                 accountManager.selectedAccountAndPersonFlow.collect { selectedAccount ->
                     val person = selectedAccount?.person
                     val isStudent = person?.isStudent() == true
-                    _canEdit = person?.isAdminOrTeacher() == true
+                    val canEdit = person?.isAdminOrTeacher() == true
 
                     _uiState.update {
                         it.copy(
@@ -221,7 +220,7 @@ class AssignmentDetailViewModel(
                             hideAppBar = isFullscreen,
                             hideBottomNavigation = isFullscreen,
                             fabState = it.fabState.copy(
-                                visible = _canEdit && !isFullscreen
+                                visible = canEdit && !isFullscreen
                             ),
                             fullscreenToggleVisible = true,
                             isFullscreen = isFullscreen,
@@ -280,16 +279,16 @@ class AssignmentDetailViewModel(
 
     fun onToggleFullscreen() {
         _uiState.update { it.copy(isFullscreen = !it.isFullscreen) }
-        val isFullscreen = _uiState.value.isFullscreen
+        val currentState = _uiState.value
         _appUiState.update {
             it.copy(
-                hideAppBar = isFullscreen,
-                hideBottomNavigation = isFullscreen,
+                hideAppBar = currentState.isFullscreen,
+                hideBottomNavigation = currentState.isFullscreen,
                 fabState = it.fabState.copy(
-                    visible = _canEdit && !isFullscreen
+                    visible = currentState.canEdit && !currentState.isFullscreen
                 ),
                 fullscreenToggleVisible = true,
-                isFullscreen = isFullscreen,
+                isFullscreen = currentState.isFullscreen,
                 onToggleFullscreen = ::onToggleFullscreen
             )
         }

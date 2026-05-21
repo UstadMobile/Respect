@@ -55,6 +55,7 @@ import world.respect.lib.xapi.ext.calculatePercentage
 import world.respect.lib.xapi.ext.personName
 import world.respect.lib.xapi.ext.personUid
 import world.respect.libutil.ext.resolve
+import world.respect.libutil.util.time.toDisplayDateString
 import world.respect.shared.domain.xapi.assignmentDeadline
 import world.respect.shared.domain.xapi.assignmentDescription
 import world.respect.shared.domain.xapi.getUnitTitle
@@ -119,7 +120,7 @@ fun AssignmentDetailScreen(
                             color = Color.Gray
                         )
                         Text(
-                            text = uiState.xApiStatement.dataOrNull()?.assignmentDeadline?.toString() ?: "",
+                            text = uiState.xApiStatement.dataOrNull()?.assignmentDeadline?.toDisplayDateString() ?: "",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )

@@ -277,7 +277,6 @@ class AssignmentDetailViewModel(
             NavCommand.Navigate(
                 LearningUnitDetail.create(
                     learningUnitManifestUrl = ref.learningUnitManifestUrl,
-                    appManifestUrl = ref.appManifestUrl,
                 )
             )
         )

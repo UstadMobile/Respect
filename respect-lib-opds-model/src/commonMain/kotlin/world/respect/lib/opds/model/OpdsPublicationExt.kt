@@ -9,8 +9,10 @@ const val REL_RESPECT_DEFAULT_CATALOG = "https://respect.ustadmobile.com/ns/defa
 
 fun OpdsPublication.findLearningUnitAcquisitionLinks(): List<ReadiumLink> {
     return links.filter { link ->
-        link.rel?.any { it.startsWith("http://opds-spec.org/acquisition") } == true &&
-                LEARNING_UNIT_MIME_TYPES.any { link.type?.startsWith(it) == true }
+        link.rel?.any {
+            it.startsWith("http://opds-spec.org/acquisition") } == true &&
+                LEARNING_UNIT_MIME_TYPES.any { link.type?.startsWith(it) == true
+        }
     }
 }
 

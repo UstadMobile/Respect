@@ -105,7 +105,6 @@ class AssignmentEditViewModel(
     private fun LearningUnitSelection.toRef(): AssignmentLearningUnitRef {
         return AssignmentLearningUnitRef(
             learningUnitManifestUrl = this.learningUnitManifestUrl,
-            appManifestUrl = this.appManifestUrl,
         )
     }
 

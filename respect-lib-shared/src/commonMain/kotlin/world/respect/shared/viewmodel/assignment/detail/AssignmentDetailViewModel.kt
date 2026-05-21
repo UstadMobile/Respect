@@ -116,22 +116,17 @@ data class AssignmentDetailUiState(
         )
 
     /**
-     * Progress map for ALL students (not just filtered) - used for averages
-     */
-    val allProgressMap: Map<String, Map<String, XapiAssignmentProgress>>
-        get() = assignmentProgressList.associate { row ->
-            row.personUid to row.progress.associateBy { it.activityId }
-        }
-
-    /**
      * Calculates the average completion percentage across all tasks for a specific student.
      * Returns null if student has no progress entries for any task.
      */
     fun getAverageForStudent(personUid: String): Double? {
-        val studentProgress = allProgressMap[personUid] ?: return null
+        val studentProgress = assignmentProgressList.find { it.personUid == personUid }
+            ?: return null
 
         val percentages = tasks.mapNotNull { task ->
-            studentProgress[task.learningUnitManifestUrl.toString()]?.calculatePercentage()
+            studentProgress.progress
+                .find { it.activityId == task.learningUnitManifestUrl.toString() }
+                ?.calculatePercentage()
         }
 
         return if (percentages.isNotEmpty()) percentages.average() else null

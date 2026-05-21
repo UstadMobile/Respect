@@ -199,7 +199,6 @@ fun AssignmentDetailScreen(
                 val assignmentResults = uiState.rowsToDisplay
 
                 if (assignmentResults.isNotEmpty()) {
-                    val progressMap = uiState.allProgressMap
                     val tasks = uiState.tasks
 
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -263,8 +262,9 @@ fun AssignmentDetailScreen(
                                         .horizontalScroll(horizontalScrollState)
                                 ) {
                                     tasks.forEach { unit ->
-                                        val progress =
-                                            progressMap[student.personUid]?.get(unit.learningUnitManifestUrl.toString())
+                                        val progress = student.progress.find {
+                                            it.activityId == unit.learningUnitManifestUrl.toString()
+                                        }
                                         GradeCell(progress?.calculatePercentage(), taskColWidth)
                                     }
                                     // Average Score Cell

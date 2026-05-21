@@ -114,19 +114,6 @@ fun XapiStatement.withDeadline(deadline: Instant?): XapiStatement {
 }
 
 @OptIn(ExperimentalUuidApi::class)
-fun XapiStatement.withClass(classUid: String, className: String, schoolUrl: Url?): XapiStatement {
-    val newActor = XapiGroup(
-        name = className,
-        account = XapiAccount(
-            homePage = schoolUrl.toString(),
-            name = classUid
-        ),
-        objectType = XapiObjectType.Group
-    )
-    return copy(actor = newActor)
-}
-
-@OptIn(ExperimentalUuidApi::class)
 fun XapiStatement.withLearningUnits(learningUnits: List<AssignmentLearningUnitRef>): XapiStatement {
     val newGrouping = learningUnits.map { ref ->
         XapiActivity(

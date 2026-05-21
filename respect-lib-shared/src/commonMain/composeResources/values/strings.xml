@@ -511,6 +511,11 @@
     <string name="lesson_assessment">Lesson/assessment</string>
     <string name="deadline">Deadline</string>
 
+    <string name="all_students">All</string>
+    <string name="completed_status">Completed</string>
+    <string name="in_progress_status">In-progress</string>
+    <string name="not_started_status">Not Started</string>
+
     <string name="due_date">Due date</string>
     <string name="family_members">Family members</string>
     <string name="family_member">Family member</string>
@@ -525,6 +530,7 @@
 
     <string name="pending_student">Pending student</string>
     <string name="pending_teacher">Pending teacher</string>
+    <string name="pending">Pending</string>
 
     <string name="edit_enrollment">Edit enrollment</string>
 

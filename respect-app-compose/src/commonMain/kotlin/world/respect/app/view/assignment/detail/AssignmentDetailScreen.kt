@@ -161,7 +161,7 @@ fun AssignmentDetailScreen(
                     onClick = { onStatusFilterChanged(filter) },
                     label = {
                         Text(
-                            text = "${filter.displayName} ($count)",
+                            text = "${stringResource(filter.titleRes)} ($count)",
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     },

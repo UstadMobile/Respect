@@ -2,6 +2,7 @@ package world.respect.datalayer.db.school.adapters
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import io.ktor.http.Url
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.entities.AssignmentEntity
 import world.respect.datalayer.db.school.entities.AssignmentLearningResourceRefEntity
@@ -31,7 +32,6 @@ fun AssignmentEntities.toModel(): Assignment {
         learningUnits = learningUnits.map {
             AssignmentLearningUnitRef(
                 learningUnitManifestUrl = it.alrrLearningUnitManifestUrl,
-                appManifestUrl = it.alrrAppManifestUrl
             )
         },
     )
@@ -58,7 +58,7 @@ fun Assignment.toEntities(
                 alrrAeUidNum = assignmentUidNum,
                 alrrLearningUnitManifestUrl = it.learningUnitManifestUrl,
                 alrrLearningUnitManifestUrlHash = uidNumberMapper(it.learningUnitManifestUrl.toString()),
-                alrrAppManifestUrl = it.appManifestUrl,
+                alrrAppManifestUrl = Url("http://localhost/"),//This is removed in the assignments branch
             )
         }
     )

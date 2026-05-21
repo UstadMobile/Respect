@@ -160,7 +160,6 @@ class AppsDetailViewModel(
                 NavCommand.Navigate(
                     LearningUnitDetail.create(
                         learningUnitManifestUrl = route.manifestUrl.resolve(publicationHref),
-                        appManifestUrl = route.manifestUrl,
                         refererUrl = refererUrl?.let { Url(it) },
                         expectedIdentifier = publication.metadata.identifier?.toString()
                     )

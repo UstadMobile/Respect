@@ -147,6 +147,7 @@ fun LearningUnitDetailScreen(
                 onClick = {
                     onClickOpen()
                 },
+                enabled = uiState.buttonsEnabled,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(Res.string.open))

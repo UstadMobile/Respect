@@ -6,5 +6,4 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AssignmentLearningUnitRef(
     val learningUnitManifestUrl: Url,
-    val appManifestUrl: Url,
 )

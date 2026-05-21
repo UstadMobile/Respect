@@ -535,7 +535,6 @@ class CreateAccount(
 @Serializable
 class LearningUnitDetail(
     private val learningUnitManifestUrlStr: String,
-    private val appManifestUrlStr: String,
     private val refererUrlStr: String? = null,
     val expectedIdentifier: String? = null,
     val assignmentActivityId: String? = null,
@@ -547,20 +546,15 @@ class LearningUnitDetail(
     @Transient
     val refererUrl = refererUrlStr?.let { Url(it) }
 
-    @Transient
-    val appManifestUrl = Url(appManifestUrlStr)
-
     companion object {
 
         fun create(
             learningUnitManifestUrl: Url,
-            appManifestUrl: Url,
             refererUrl: Url? = null,
             expectedIdentifier: String? = null,
             assignmentActivityId: String? = null,
         ) = LearningUnitDetail(
             learningUnitManifestUrlStr = learningUnitManifestUrl.toString(),
-            appManifestUrlStr = appManifestUrl.toString(),
             refererUrlStr = refererUrl?.toString(),
             expectedIdentifier = expectedIdentifier,
             assignmentActivityId = assignmentActivityId,

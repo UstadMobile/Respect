@@ -1,8 +1,8 @@
 # Assignment xAPI Recipe
 
 Use this recipe when an assignment is being set by one actor (e.g. a teacher) for another actor
-(e.g. a group of students). An assignment can contain one or more activities to be completed by
-the assignee(s).
+(e.g. a group of students). An assignment can contain one or more tasks (each of which is an 
+Activity with an Activity ID) to be completed by the assignee(s).
 
 ## Core
 

@@ -81,7 +81,7 @@ fun AssignmentDetailScreen(
     AssignmentDetailScreen(
         uiState = uiState,
         onStatusFilterChanged = viewModel::onStatusFilterChanged,
-        onClickLearningUnit = viewModel::onClickLearningUnit
+        onClickTask = viewModel::onClickTask
     )
 }
 
@@ -90,7 +90,7 @@ fun AssignmentDetailScreen(
 fun AssignmentDetailScreen(
     uiState: AssignmentDetailUiState,
     onStatusFilterChanged: (AssignmentStatusFilter) -> Unit = { },
-    onClickLearningUnit: (AssignmentLearningUnitRef) -> Unit = { },
+    onClickTask: (AssignmentLearningUnitRef) -> Unit = { },
 ) {
     val horizontalScrollState = rememberScrollState()
 
@@ -170,7 +170,7 @@ fun AssignmentDetailScreen(
         }
 
         if (uiState.isStudent) {
-            val units = uiState.units
+            val units = uiState.tasks
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -181,7 +181,7 @@ fun AssignmentDetailScreen(
                     StudentLearningUnitItem(
                         unit = unit,
                         uiState = uiState,
-                        onClick = { onClickLearningUnit(unit) }
+                        onClick = { onClickTask(unit) }
                     )
                 }
             }
@@ -195,11 +195,11 @@ fun AssignmentDetailScreen(
                 val taskColWidth = (TASK_COLUMN_WIDTH).dp
                 val headerHeight = minOf(maxHeight / 2, (HEADER_HEIGHT).dp)
 
-                val assignmentResults = uiState.filteredProgressRow
+                val assignmentResults = uiState.rowsToDisplay
 
                 if (assignmentResults.isNotEmpty()) {
-                    val progressMap = uiState.progressMap
-                    val filteredUnits = uiState.filteredUnits
+                    val progressMap = uiState.allProgressMap
+                    val tasks = uiState.tasks
 
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         // STICKY HEADER: Task Icons and Names
@@ -224,7 +224,7 @@ fun AssignmentDetailScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.Center
                                 ) {
-                                    filteredUnits.forEach { unit ->
+                                    tasks.forEach { unit ->
                                         TaskHeaderCell(
                                             unit,
                                             uiState,
@@ -261,7 +261,7 @@ fun AssignmentDetailScreen(
                                         .fillMaxWidth()
                                         .horizontalScroll(horizontalScrollState)
                                 ) {
-                                    filteredUnits.forEach { unit ->
+                                    tasks.forEach { unit ->
                                         val progress =
                                             progressMap[student.personUid]?.get(unit.learningUnitManifestUrl.toString())
                                         GradeCell(progress?.calculatePercentage(), taskColWidth)
@@ -300,7 +300,7 @@ fun StudentLearningUnitItem(
     onClick: () -> Unit
 ) {
     val infoFlow =
-        remember(unit.learningUnitManifestUrl) { uiState.learningUnitInfoFlow(unit.learningUnitManifestUrl) }
+        remember(unit.learningUnitManifestUrl) { uiState.taskInfoFlow(unit.learningUnitManifestUrl) }
     val state by infoFlow.collectAsState(DataLoadingState())
     val publication = state.dataOrNull()
     val iconLink = publication?.images?.firstOrNull()
@@ -413,7 +413,7 @@ fun TaskHeaderCell(
     width: Dp,
     height: Dp
 ) {
-    val info by uiState.learningUnitInfoFlow(unit.learningUnitManifestUrl)
+    val info by uiState.taskInfoFlow(unit.learningUnitManifestUrl)
         .collectAsState(DataLoadingState())
 
     val title = uiState.xApiStatement.dataOrNull()?.getUnitTitle(unit.learningUnitManifestUrl.toString())

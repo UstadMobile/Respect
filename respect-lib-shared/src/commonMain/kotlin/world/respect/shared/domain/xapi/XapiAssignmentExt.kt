@@ -25,7 +25,6 @@ object XapiAssignmentConstants {
     const val CATEGORY_ASSIGNMENT_RECIPE = "https://id.ustadmobile.com/xapi/activities/assignment-recipe"
     const val EXT_DEADLINE = "https://id.ustadmobile.com/xapi/extension/deadline"
     const val EXT_CREATED = "https://id.ustadmobile.com/xapi/extension/created"
-    const val EXT_APP_MANIFEST = "https://id.ustadmobile.com/xapi/extension/app-manifest"
     const val ACTIVITY_TYPE_ASSIGNMENT = "http://id.tincanapi.com/activitytype/school-assignment"
 }
 
@@ -59,9 +58,7 @@ val XapiStatement.assignmentDeadline: Instant?
 val XapiStatement.assignmentLearningUnits: List<AssignmentLearningUnitRef>
     get() = context?.contextActivities?.grouping?.mapNotNull { groupingActivity ->
         val manifestUrl = runCatching { Url(groupingActivity.id) }.getOrNull() ?: return@mapNotNull null
-        val appUrlStr = (groupingActivity.definition?.extensions?.get(XapiAssignmentConstants.EXT_APP_MANIFEST) as? JsonPrimitive)?.contentOrNull
-        val appUrl = appUrlStr?.let { runCatching { Url(it) }.getOrNull() } ?: manifestUrl
-        AssignmentLearningUnitRef(manifestUrl, appUrl)
+        AssignmentLearningUnitRef(manifestUrl)
     } ?: emptyList()
 
 @OptIn(ExperimentalUuidApi::class)
@@ -135,9 +132,6 @@ fun XapiStatement.withLearningUnits(learningUnits: List<AssignmentLearningUnitRe
         XapiActivity(
             id = ref.learningUnitManifestUrl.toString(),
             objectType = XapiObjectType.Activity,
-            definition = XapiActivityDefinition(
-                extensions = mapOf(XapiAssignmentConstants.EXT_APP_MANIFEST to JsonPrimitive(ref.appManifestUrl.toString()))
-            )
         )
     }
     val newContext = (context ?: XapiContext()).copy(

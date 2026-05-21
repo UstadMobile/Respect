@@ -58,12 +58,10 @@ import kotlin.uuid.ExperimentalUuidApi
 
 data class AssignmentDetailUiState(
     val xApiStatement: DataLoadState<XapiStatement> = DataLoadingState(),
-    val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
+    val taskInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
         flowOf(DataLoadingState())
     },
     val assignmentProgressList: List<XapiActorAndAssignmentProgress> = emptyList(),
-    val statusCounts: Map<AssignmentStatusFilter, Int> = emptyMap(),
-    val filteredProgressRow: List<XapiActorAndAssignmentProgress> = emptyList(),
     val selectedStatusFilter: AssignmentStatusFilter = AssignmentStatusFilter.ALL,
     val isFullscreen: Boolean = false,
     val isStudent: Boolean = false,
@@ -72,38 +70,70 @@ data class AssignmentDetailUiState(
 ) {
 
     /**
-     * All learning units associated with this assignment, extracted from the assignment's xAPI definition.
+     * All tasks associated with this assignment, extracted from the assignment's xAPI definition.
      */
-    val units: List<AssignmentLearningUnitRef>
+    val tasks: List<AssignmentLearningUnitRef>
         get() = xApiStatement.dataOrNull()?.assignmentLearningUnits ?: emptyList()
 
-    /**
-     * The learning units that should be displayed in the header, filtered by those present in the current progress rows.
-     */
-    val filteredUnits: List<AssignmentLearningUnitRef>
-        get() {
-            val activityIds = filteredProgressRow.flatMap { it.progress }.map { it.activityId }.toSet()
-            return units.filter { it.learningUnitManifestUrl.toString() in activityIds }
+    private val taskActivityIds: List<String>
+        get() = tasks.map { it.learningUnitManifestUrl.toString() }
+
+
+    val numStudents: Int get() = assignmentProgressList.size
+
+    val numCompleted: Int get() = assignmentProgressList.count {
+        it.isCompleted(taskActivityIds)
+    }
+
+    val numInProgress: Int get() = assignmentProgressList.count {
+        it.isStarted && !it.isCompleted(taskActivityIds)
+    }
+
+    val numNotStarted: Int get() = assignmentProgressList.count { !it.isStarted }
+
+
+    val rowsToDisplay: List<XapiActorAndAssignmentProgress>
+        get() = when (selectedStatusFilter) {
+            AssignmentStatusFilter.ALL -> assignmentProgressList
+            AssignmentStatusFilter.COMPLETED -> assignmentProgressList.filter {
+                it.isCompleted(taskActivityIds)
+            }
+            AssignmentStatusFilter.IN_PROGRESS -> assignmentProgressList.filter {
+                it.isStarted && !it.isCompleted(taskActivityIds)
+            }
+            AssignmentStatusFilter.NOT_STARTED -> assignmentProgressList.filter {
+                !it.isStarted
+            }
         }
 
+    val statusCounts: Map<AssignmentStatusFilter, Int>
+        get() = mapOf(
+            AssignmentStatusFilter.ALL to numStudents,
+            AssignmentStatusFilter.COMPLETED to numCompleted,
+            AssignmentStatusFilter.IN_PROGRESS to numInProgress,
+            AssignmentStatusFilter.NOT_STARTED to numNotStarted
+        )
+
     /**
-     * A map for O(1) progress lookup, grouped by student (personUid) then by learning unit (activityId).
+     * Progress map for ALL students (not just filtered) - used for averages
      */
-    val progressMap: Map<String, Map<String, XapiAssignmentProgress>>
-        get() = filteredProgressRow.associate { row ->
+    val allProgressMap: Map<String, Map<String, XapiAssignmentProgress>>
+        get() = assignmentProgressList.associate { row ->
             row.personUid to row.progress.associateBy { it.activityId }
         }
 
     /**
-     * Calculates the average completion percentage across all filtered units for a specific student.
+     * Calculates the average completion percentage across all tasks for a specific student.
+     * Returns null if student has no progress entries for any task.
      */
     fun getAverageForStudent(personUid: String): Double? {
-        val studentProgressValues = progressMap[personUid]?.values?.mapNotNull {
-            it.calculatePercentage()
+        val studentProgress = allProgressMap[personUid] ?: return null
+
+        val percentages = tasks.mapNotNull { task ->
+            studentProgress[task.learningUnitManifestUrl.toString()]?.calculatePercentage()
         }
-        return if (!studentProgressValues.isNullOrEmpty()) {
-            studentProgressValues.average()
-        } else null
+
+        return if (percentages.isNotEmpty()) percentages.average() else null
     }
 }
 
@@ -139,7 +169,7 @@ class AssignmentDetailViewModel(
         }
         _uiState.update {
             it.copy(
-                learningUnitInfoFlow = ::learningUnitInfoFlowFor
+                taskInfoFlow = ::taskInfoFlowFor
             )
         }
 
@@ -212,48 +242,8 @@ class AssignmentDetailViewModel(
                     _uiState.update {
                         it.copy(assignmentProgressList = progressList)
                     }
-                    updateStatusCounts()
-                    updateFilteredProgressRow()
                 }
         }
-    }
-    private fun updateFilteredProgressRow() {
-        val fullList = _uiState.value.assignmentProgressList
-        val filter = _uiState.value.selectedStatusFilter
-        val unitActivityIds = _uiState.value.units.map { it.learningUnitManifestUrl.toString() }
-
-        val filtered = when (filter) {
-            AssignmentStatusFilter.ALL -> fullList
-            AssignmentStatusFilter.COMPLETED -> fullList.filter { it.isCompleted(unitActivityIds) }
-            AssignmentStatusFilter.IN_PROGRESS -> fullList.filter {
-                it.isStarted && !it.isCompleted(unitActivityIds)
-            }
-            AssignmentStatusFilter.NOT_STARTED -> fullList.filter { !it.isStarted }
-        }
-        _uiState.update { it.copy(filteredProgressRow = filtered) }
-    }
-
-    private fun updateStatusCounts() {
-        val unitActivityIds = _uiState.value.units.map { it.learningUnitManifestUrl.toString() }
-        val progressRows = _uiState.value.assignmentProgressList
-
-        val statusCounts = progressRows
-            .map { row -> getStudentStatus(row, unitActivityIds) }
-            .groupingBy { it }
-            .eachCount()
-            .toMutableMap()
-            .apply { put(AssignmentStatusFilter.ALL, progressRows.size) }
-
-        _uiState.update { it.copy(statusCounts = statusCounts) }
-    }
-
-    private fun getStudentStatus(
-        row: XapiActorAndAssignmentProgress,
-        unitActivityIds: List<String>
-    ): AssignmentStatusFilter = when {
-        row.isCompleted(unitActivityIds) -> AssignmentStatusFilter.COMPLETED
-        row.isStarted -> AssignmentStatusFilter.IN_PROGRESS
-        else -> AssignmentStatusFilter.NOT_STARTED
     }
 
     fun onClickEdit() {
@@ -266,13 +256,13 @@ class AssignmentDetailViewModel(
         )
     }
 
-    fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
+    fun taskInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
         return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = url, params = DataLoadParams(), null, null
         )
     }
 
-    fun onClickLearningUnit(ref: AssignmentLearningUnitRef) {
+    fun onClickTask(ref: AssignmentLearningUnitRef) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 LearningUnitDetail.create(
@@ -286,7 +276,6 @@ class AssignmentDetailViewModel(
         _uiState.update {
             it.copy(selectedStatusFilter = filter)
         }
-        updateFilteredProgressRow()
     }
 
     fun onToggleFullscreen() {

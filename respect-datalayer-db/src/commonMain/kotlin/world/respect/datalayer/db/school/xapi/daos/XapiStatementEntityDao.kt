@@ -138,7 +138,7 @@ interface XapiStatementEntityDao {
                      UNION
                     SELECT XapiGroupMemberActorJoin.gmajMemberActorUid AS uid
                       FROM XapiGroupMemberActorJoin
-                     WHERE XapiGroupMemberActorJoin.gmajMemberActorUid = 
+                     WHERE XapiGroupMemberActorJoin.gmajGroupActorUid = 
                            (SELECT actorUid FROM LatestAssignmentStatementIds)),
              
              AssignedActivityUids(assignedActivityUid) AS (
@@ -206,7 +206,7 @@ interface XapiStatementEntityDao {
             
         SELECT XapiStatementEntity.*, XapiVerbEntity.*
           FROM XapiStatementEntity
-               JOIN XapiVerbEntity
+               LEFT JOIN XapiVerbEntity
                     ON (    XapiVerbEntity.verbUid = XapiStatementEntity.statementVerbUid)
                LEFT JOIN XapiStatementEntity AS SubStatementEntity
                     ON (    XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.SUBSTATEMENT}
@@ -252,7 +252,7 @@ interface XapiStatementEntityDao {
                -- Handle activity parameter
            AND (      :activityUid = 0
                    OR (     XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.ACTIVITY}
-                       AND XapiStatementEntity.statementObjectUid1 = :activityUid)
+                        AND XapiStatementEntity.statementObjectUid1 = :activityUid)
                    OR (     :relatedActivities    
                         AND (    -- As per spec check if substatement activity matches when relatedActivities is set  
                                  (     SubStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.ACTIVITY} 

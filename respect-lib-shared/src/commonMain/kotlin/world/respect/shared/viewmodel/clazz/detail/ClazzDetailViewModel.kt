@@ -60,6 +60,7 @@ import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.shared.navigation.StudentGroupingDetail
 import world.respect.shared.navigation.StudentGroupingEdit
+import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.viewmodel.RespectViewModel
@@ -129,6 +130,8 @@ class ClazzDetailViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val route: ClazzDetail = savedStateHandle.toRoute()
+
+    private val updateClazzStudentXapiGroupUseCase: UpdateClazzStudentXapiGroupUseCase by inject()
 
     private val schoolSelfUrl = accountManager.activeAccount?.school?.self
         ?: throw IllegalStateException("schoolSelfUrl is required but activeAccount or school is null")
@@ -245,7 +248,7 @@ class ClazzDetailViewModel(
                 ).collect { navResult ->
                     val personToEnrol = navResult.result as? Person ?: return@collect
 
-                    try {
+                    snackBarDispatcher.tryOrShowSnackbarOnError {
                         schoolDataSource.enrollmentDataSource.store(
                             listOf(
                                 Enrollment(
@@ -261,8 +264,10 @@ class ClazzDetailViewModel(
                                 )
                             )
                         )
-                    }catch(e: Throwable) {
-                        e.printStackTrace()
+
+                        if(enrolmentRole == EnrollmentRoleEnum.STUDENT) {
+                            updateClazzStudentXapiGroupUseCase(route.guid)
+                        }
                     }
                 }
             }

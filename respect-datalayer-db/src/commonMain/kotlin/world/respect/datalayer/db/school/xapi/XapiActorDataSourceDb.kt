@@ -67,7 +67,6 @@ class XapiActorDataSourceDb(
                 )
             }
             schoolDb.getActorDao().insertOrIgnoreListAsync(allActorEntities)
-
         }
     }
 

@@ -4,6 +4,7 @@ import io.ktor.http.Url
 import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiObjectType
 import world.respect.libutil.ext.appendEndpointSegments
 
 fun Clazz.activityId(
@@ -22,6 +23,7 @@ fun Clazz.studentsXapiGroup(
         account = XapiAccount(
             homePage = activityId(schoolUrl),
             name = "students"
-        )
+        ),
+        objectType = XapiObjectType.Group,
     )
 }

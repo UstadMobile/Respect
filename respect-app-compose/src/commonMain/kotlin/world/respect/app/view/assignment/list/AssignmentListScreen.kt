@@ -46,11 +46,18 @@ import world.respect.libutil.ext.resolve
 import world.respect.libutil.util.time.toDisplayDateString
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assigned_to
+import world.respect.shared.generated.resources.calendar_month
+import world.respect.shared.generated.resources.change
+import world.respect.shared.generated.resources.menu
+import world.respect.shared.generated.resources.percentage_format
 import world.respect.shared.generated.resources.student_completed
+import world.respect.shared.generated.resources.task
 import world.respect.shared.generated.resources.task_completed
+import world.respect.shared.generated.resources.track_changes
 import world.respect.shared.util.AssignmentListScreenFilter
 import world.respect.shared.viewmodel.assignment.list.AssignmentListUiState
 import world.respect.shared.viewmodel.assignment.list.AssignmentListViewModel
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -75,7 +82,7 @@ fun AssignmentListScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .defaultItemPadding(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             AssignmentListScreenFilter.entries.forEach { filter ->
@@ -128,7 +135,7 @@ fun AssignmentListScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = Icons.Default.CalendarMonth,
-                                        contentDescription = null,
+                                        contentDescription = stringResource(Res.string.calendar_month),
                                         modifier = Modifier.size(14.dp),
                                         tint = Color.Gray
                                     )
@@ -143,13 +150,15 @@ fun AssignmentListScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
                                         imageVector = Icons.Default.TaskAlt,
-                                        contentDescription = null,
+                                        contentDescription = stringResource(Res.string.task),
                                         modifier = Modifier.size(14.dp),
                                         tint = Color.Gray
                                     )
                                     Spacer(Modifier.width(4.dp))
                                     Text(
-                                        text = "${summary.completedCount}/${summary.totalCount}" + stringResource(Res.string.task_completed),
+                                        text = "${summary.completedCount}/${summary.totalCount}" + stringResource(
+                                            Res.string.task_completed
+                                        ),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = Color.Gray
                                     )
@@ -162,7 +171,11 @@ fun AssignmentListScreen(
                             )
                         } else {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.CalendarMonth, null, Modifier.size(14.dp))
+                                Icon(
+                                    Icons.Default.CalendarMonth,
+                                    contentDescription = stringResource(Res.string.calendar_month),
+                                    Modifier.size(14.dp)
+                                )
                                 Spacer(Modifier.width(4.dp))
                                 Text(dueDateStr, style = MaterialTheme.typography.bodySmall)
                             }
@@ -176,7 +189,7 @@ fun AssignmentListScreen(
                             0
                         }
                         Text(
-                            text = "$percent%",
+                            text = stringResource(Res.string.percentage_format, percent),
                             modifier = Modifier
                                 .clip(RoundedCornerShape(4.dp))
                                 .background(MaterialTheme.colorScheme.surfaceContainer)
@@ -192,7 +205,7 @@ fun AssignmentListScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                                contentDescription = null,
+                                contentDescription = stringResource(Res.string.menu),
                                 modifier = Modifier.size(16.dp),
                                 tint = Color.Gray
                             )
@@ -208,13 +221,15 @@ fun AssignmentListScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.TrackChanges,
-                                contentDescription = null,
+                                contentDescription = stringResource(Res.string.track_changes),
                                 modifier = Modifier.size(16.dp),
                                 tint = Color.Gray
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = "${summary.completedCount}/${summary.totalCount}" + stringResource(Res.string.student_completed),
+                                text = "${summary.completedCount}/${summary.totalCount}" + stringResource(
+                                    Res.string.student_completed
+                                ),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray
                             )

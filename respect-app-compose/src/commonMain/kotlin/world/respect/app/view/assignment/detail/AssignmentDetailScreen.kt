@@ -67,8 +67,8 @@ import world.respect.shared.generated.resources.deadline
 import world.respect.shared.generated.resources.no_data
 import world.respect.shared.generated.resources.no_student_data_available
 import world.respect.shared.generated.resources.percentage_format
+import world.respect.shared.generated.resources.task_image
 import world.respect.shared.util.AssignmentStatusFilter
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailUiState
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
 import kotlin.math.roundToInt
@@ -106,7 +106,8 @@ fun AssignmentDetailScreen(
                     .defaultItemPadding()
             ) {
                 Text(
-                    text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.assignmentDescription ?: "",
+                    text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.assignmentDescription
+                        ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -237,21 +238,21 @@ fun AssignmentDetailScreen(
                                     horizontalArrangement = Arrangement.Center
                                 ) {
                                     tasks.forEach { unit ->
-                                        // Collect the data needed for this task
                                         val manifestUrl = unit.manifestUrl ?: Url(unit.id)
+
                                         val info by uiState.taskInfoFlow(manifestUrl)
                                             .collectAsState(DataLoadingState())
 
-                                        val title = uiState.assignmentProgress.dataOrNull()?.assignmentStatement
-                                            ?.getUnitTitle(unit.id)
-                                            ?: info.dataOrNull()?.metadata?.title?.getTitle()
-                                            ?: ""
+                                        val title =
+                                            uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.getUnitTitle(
+                                                unit.id
+                                            ) ?: ""
 
                                         val iconUrl =
                                             info.dataOrNull()?.findIcons()?.firstOrNull()?.let {
-                                                manifestUrl.resolve(it.href)
-                                                    .toString()
+                                                manifestUrl.resolve(it.href).toString()
                                             }
+
                                         TaskHeaderCell(
                                             title,
                                             iconUrl,
@@ -338,10 +339,8 @@ fun AssignmentTaskListRow(
 
     val iconLink = state.dataOrNull()?.images?.firstOrNull()
 
-    // Use actual title from publication metadata if available, otherwise from xAPI statement
-    val title = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.getUnitTitle(unit.id)
-        ?: state.dataOrNull()?.metadata?.title?.getTitle()
-        ?: ""
+    val title =
+        uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.getUnitTitle(unit.id) ?: ""
 
     Row(
         modifier = Modifier
@@ -377,7 +376,7 @@ fun AssignmentTaskListRow(
             if (iconLink != null) {
                 AsyncImage(
                     model = manifestUrl.resolve(iconLink.href).toString(),
-                    contentDescription = null,
+                    contentDescription = stringResource(Res.string.task_image),
                     modifier = Modifier.size(14.dp)
                 )
             }
@@ -421,7 +420,7 @@ fun AssignmentProgressIndicator(
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 3.dp,
-                trackColor = ProgressIndicatorDefaults.circularTrackColor,
+                trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
                 strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
             )
             // Percentage text
@@ -476,7 +475,7 @@ fun TaskHeaderCell(
         if (iconUrl != null) {
             AsyncImage(
                 model = iconUrl,
-                contentDescription = null,
+                contentDescription = stringResource(Res.string.task_image),
                 modifier = Modifier.size(28.dp)
             )
         }

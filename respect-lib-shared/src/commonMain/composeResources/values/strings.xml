@@ -88,7 +88,7 @@
     <string name="learn_more">Learn More</string>
     <string name="percentage_format">%1$d%</string>
     <string name="no_data">--</string>
-
+    <string name="task_image">Task Image</string>
     <string name="password_placeholder">Enter your password</string>
     <string name="invitation">Invitation</string>
     <string name="invitation_for">Invitation for:</string>
@@ -597,6 +597,11 @@
     <string name="task_completed">task completed</string>
     <string name="task">Task</string>
     <string name="student_completed">student completed</string>
+    <string name="menu">Menu</string>
+    <string name="fingerprint">Fingerprint</string>
+    <string name="track_changes">TrackChanges</string>>
+    <string name="calendar_month">CalendarMonth</string>>
+
 
     <string name="xapi_verb_assigned">assigned</string>
 

@@ -67,15 +67,19 @@ import world.respect.shared.domain.xapi.withDeadline
 import world.respect.shared.domain.xapi.withDescription
 import world.respect.shared.domain.xapi.withTitle
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add
 import world.respect.shared.generated.resources.assign_to
 import world.respect.shared.generated.resources.assignment_title
+import world.respect.shared.generated.resources.close
 import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.due_date
 import world.respect.shared.generated.resources.fingerprint
 import world.respect.shared.generated.resources.no_tasks_selected_yet
 import world.respect.shared.generated.resources.please_click_plus_button_to_add_one
 import world.respect.shared.generated.resources.required
+import world.respect.shared.generated.resources.task
 import world.respect.shared.generated.resources.tasks
+import world.respect.shared.generated.resources.menu
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditUiState
@@ -109,14 +113,6 @@ fun AssignmentEditScreen(
     onClickRemoveLearningUnit: (AssignmentLearningUnitRef) -> Unit,
 ) {
     val assignment = uiState.statementData.dataOrNull()
-    val filteredOptions = if (uiState.assignee.isNotBlank()) {
-        uiState.classOptions.filter {
-            it.title.contains(uiState.assignee, ignoreCase = true)
-        }
-    } else {
-        uiState.classOptions
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -176,7 +172,7 @@ fun AssignmentEditScreen(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
-                filteredOptions.forEach { clazz ->
+                uiState.classOptions.forEach { clazz ->
                     DropdownMenuItem(
                         text = {
                             Text(clazz.title)
@@ -233,9 +229,16 @@ fun AssignmentEditScreen(
             shape = RoundedCornerShape(28.dp),
             border = BorderStroke(1.dp, Color.LightGray)
         ) {
-            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
+            Icon(
+                Icons.Default.Add,
+                contentDescription = stringResource(Res.string.add),
+                modifier = Modifier.size(20.dp)
+            )
             Spacer(Modifier.width(8.dp))
-            Text("Task", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                stringResource(Res.string.task),
+                style = MaterialTheme.typography.bodyLarge
+            )
             Spacer(Modifier.weight(1f))
         }
         Spacer(Modifier.height(16.dp))
@@ -276,7 +279,7 @@ fun TaskListItem(
     ) {
         Icon(
             imageVector = Icons.Default.Menu,
-            contentDescription = null,
+            contentDescription = stringResource(Res.string.menu),
             tint = Color.Gray,
             modifier = Modifier.size(20.dp)
         )
@@ -309,7 +312,7 @@ fun TaskListItem(
         IconButton(onClick = onRemove) {
             Icon(
                 Icons.Default.Close,
-                contentDescription = "Remove",
+                contentDescription = stringResource(Res.string.close),
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -324,7 +327,7 @@ fun EmptyTasksIllustration() {
     ) {
         Icon(
             painter = painterResource(Res.drawable.fingerprint),
-            contentDescription = null,
+            contentDescription = stringResource(Res.string.fingerprint),
             modifier = Modifier.size(120.dp),
             tint = Color.Unspecified
         )

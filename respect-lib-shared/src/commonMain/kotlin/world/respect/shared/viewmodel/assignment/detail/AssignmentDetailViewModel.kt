@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -29,15 +28,18 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.xapi.model.AssignmentResult
+import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
+import world.respect.lib.xapi.composites.XapiAssignmentProgress
 import world.respect.lib.xapi.model.VERB_ASSIGN
-import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.ext.calculatePercentage
+import world.respect.lib.xapi.ext.isCompleted
+import world.respect.lib.xapi.ext.isStarted
+import world.respect.lib.xapi.ext.personName
+import world.respect.lib.xapi.ext.personUid
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.xapi.activityDefinitionTitle
-import world.respect.shared.domain.xapi.actorName
 import world.respect.shared.domain.xapi.assignmentLearningUnits
 import world.respect.shared.domain.xapi.isAssignmentStatement
 import world.respect.shared.ext.whenSubscribed
@@ -59,9 +61,9 @@ data class AssignmentDetailUiState(
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
         flowOf(DataLoadingState())
     },
-    val assignmentProgressList: List<AssignmentResult> = emptyList(),
+    val assignmentProgressList: List<XapiActorAndAssignmentProgress> = emptyList(),
     val statusCounts: Map<AssignmentStatusFilter, Int> = emptyMap(),
-    val filteredProgressRow: List<AssignmentResult> = emptyList(),
+    val filteredProgressRow: List<XapiActorAndAssignmentProgress> = emptyList(),
     val selectedStatusFilter: AssignmentStatusFilter = AssignmentStatusFilter.ALL,
     val isFullscreen: Boolean = false,
     val isStudent: Boolean = false,
@@ -80,16 +82,17 @@ data class AssignmentDetailUiState(
      */
     val filteredUnits: List<AssignmentLearningUnitRef>
         get() {
-            val activityIds = filteredProgressRow.map { it.activityId }.toSet()
+            val activityIds = filteredProgressRow.flatMap { it.progress }.map { it.activityId }.toSet()
             return units.filter { it.learningUnitManifestUrl.toString() in activityIds }
         }
 
     /**
      * A map for O(1) progress lookup, grouped by student (personUid) then by learning unit (activityId).
      */
-    val progressMap: Map<String, Map<String, AssignmentResult>>
-        get() = filteredProgressRow.groupBy { it.personUid }
-            .mapValues { entry -> entry.value.associateBy { it.activityId } }
+    val progressMap: Map<String, Map<String, XapiAssignmentProgress>>
+        get() = filteredProgressRow.associate { row ->
+            row.personUid to row.progress.associateBy { it.activityId }
+        }
 
     /**
      * Calculates the average completion percentage across all filtered units for a specific student.
@@ -205,13 +208,10 @@ class AssignmentDetailViewModel(
             schoolDataSource.xapiStatementsResource
                 .getAssignmentProgress(activityId = activityId)
                 .collect { progressState ->
-                    println("debug >>> progressList: $activityId")
-                    println("debug >>> progressList: $progressState")
-
                     val progressList = progressState.dataOrNull() ?: emptyList()
-//                    _uiState.update {
-//                        it.copy(assignmentProgressList = convertedProgress)
-//                    }
+                    _uiState.update {
+                        it.copy(assignmentProgressList = progressList)
+                    }
                     updateStatusCounts()
                     updateFilteredProgressRow()
                 }
@@ -220,44 +220,39 @@ class AssignmentDetailViewModel(
     private fun updateFilteredProgressRow() {
         val fullList = _uiState.value.assignmentProgressList
         val filter = _uiState.value.selectedStatusFilter
+        val unitActivityIds = _uiState.value.units.map { it.learningUnitManifestUrl.toString() }
+
         val filtered = when (filter) {
             AssignmentStatusFilter.ALL -> fullList
-            AssignmentStatusFilter.COMPLETED -> fullList.filter { it.completion == true }
+            AssignmentStatusFilter.COMPLETED -> fullList.filter { it.isCompleted(unitActivityIds) }
             AssignmentStatusFilter.IN_PROGRESS -> fullList.filter {
-                it.completion == false && (it.progress ?: 0) > 0
+                it.isStarted && !it.isCompleted(unitActivityIds)
             }
-
-            AssignmentStatusFilter.NOT_STARTED -> fullList.filter { it.completion == false && (it.progress == null) }
+            AssignmentStatusFilter.NOT_STARTED -> fullList.filter { !it.isStarted }
         }
         _uiState.update { it.copy(filteredProgressRow = filtered) }
-
     }
 
     private fun updateStatusCounts() {
-        val units =
-            _uiState.value.xApiStatement.dataOrNull()?.assignmentLearningUnits ?: emptyList()
-        val progressByStudent = _uiState.value.assignmentProgressList.groupBy { it.personUid }
+        val unitActivityIds = _uiState.value.units.map { it.learningUnitManifestUrl.toString() }
+        val progressRows = _uiState.value.assignmentProgressList
 
-        val statusCounts = progressByStudent.values
-            .map { results -> getStudentStatus(results, units) }
+        val statusCounts = progressRows
+            .map { row -> getStudentStatus(row, unitActivityIds) }
             .groupingBy { it }
             .eachCount()
             .toMutableMap()
-            .apply { put(AssignmentStatusFilter.ALL, progressByStudent.size) }
+            .apply { put(AssignmentStatusFilter.ALL, progressRows.size) }
 
         _uiState.update { it.copy(statusCounts = statusCounts) }
     }
 
     private fun getStudentStatus(
-        results: List<AssignmentResult>,
-        units: List<AssignmentLearningUnitRef>
+        row: XapiActorAndAssignmentProgress,
+        unitActivityIds: List<String>
     ): AssignmentStatusFilter = when {
-        results.size == units.size && units.isNotEmpty() && results.all { it.completion == true } ->
-            AssignmentStatusFilter.COMPLETED
-
-        results.any { it.completion == true || (it.progress ?: 0) > 0 } ->
-            AssignmentStatusFilter.IN_PROGRESS
-
+        row.isCompleted(unitActivityIds) -> AssignmentStatusFilter.COMPLETED
+        row.isStarted -> AssignmentStatusFilter.IN_PROGRESS
         else -> AssignmentStatusFilter.NOT_STARTED
     }
 

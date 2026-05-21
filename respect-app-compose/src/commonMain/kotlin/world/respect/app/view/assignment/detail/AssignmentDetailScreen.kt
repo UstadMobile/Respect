@@ -52,8 +52,12 @@ import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.findIcons
 import world.respect.lib.xapi.ext.calculatePercentage
+import world.respect.lib.xapi.ext.personName
+import world.respect.lib.xapi.ext.personUid
 import world.respect.libutil.ext.resolve
+import world.respect.shared.domain.xapi.assignmentDeadline
 import world.respect.shared.domain.xapi.assignmentDescription
+import world.respect.shared.domain.xapi.getUnitTitle
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assigned_to
 import world.respect.shared.generated.resources.average
@@ -115,7 +119,7 @@ fun AssignmentDetailScreen(
                             color = Color.Gray
                         )
                         Text(
-                            text = uiState.xApiStatement.dataOrNull()?.assignmentDescription ?: "",
+                            text = uiState.xApiStatement.dataOrNull()?.assignmentDeadline?.toString() ?: "",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
@@ -191,7 +195,7 @@ fun AssignmentDetailScreen(
                 val taskColWidth = (TASK_COLUMN_WIDTH).dp
                 val headerHeight = minOf(maxHeight / 2, (HEADER_HEIGHT).dp)
 
-                val assignmentResults = uiState.assignmentProgressList.distinctBy { it.personUid }
+                val assignmentResults = uiState.filteredProgressRow
 
                 if (assignmentResults.isNotEmpty()) {
                     val progressMap = uiState.progressMap
@@ -250,7 +254,7 @@ fun AssignmentDetailScreen(
                         items(assignmentResults, key = { it.personUid }) { student ->
                             Row(modifier = Modifier.fillMaxWidth()) {
                                 // Fixed Student Name Column
-                                StudentNameCell(student.personName ?: "Unknown", nameColWidth)
+                                StudentNameCell(student.personName, nameColWidth)
                                 // Scrollable Grades/Progress Cells
                                 Row(
                                     modifier = Modifier
@@ -301,14 +305,17 @@ fun StudentLearningUnitItem(
     val publication = state.dataOrNull()
     val iconLink = publication?.images?.firstOrNull()
 
-    // Use actual title from publication metadata if available
-    val title = publication?.metadata?.title?.getTitle() ?: "Loading..."
+    // Use actual title from publication metadata if available, otherwise from xAPI statement
+    val title = uiState.xApiStatement.dataOrNull()?.getUnitTitle(unit.learningUnitManifestUrl.toString())
+        ?: publication?.metadata?.title?.getTitle()
+        ?: "Loading..."
 
     val progress =
         remember(uiState.assignmentProgressList, unit.learningUnitManifestUrl, uiState.personGuid) {
-            uiState.assignmentProgressList.find {
-                it.personUid == uiState.personGuid && it.activityId == unit.learningUnitManifestUrl.toString()
-            }
+            uiState.assignmentProgressList
+                .find { it.personUid == uiState.personGuid }
+                ?.progress
+                ?.find { it.activityId == unit.learningUnitManifestUrl.toString() }
         }
 
     val percent = progress?.calculatePercentage() ?: 0
@@ -409,6 +416,10 @@ fun TaskHeaderCell(
     val info by uiState.learningUnitInfoFlow(unit.learningUnitManifestUrl)
         .collectAsState(DataLoadingState())
 
+    val title = uiState.xApiStatement.dataOrNull()?.getUnitTitle(unit.learningUnitManifestUrl.toString())
+        ?: info.dataOrNull()?.metadata?.title?.getTitle()
+        ?: ""
+
     Column(
         modifier = Modifier
             .width(width)
@@ -421,7 +432,7 @@ fun TaskHeaderCell(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = info.dataOrNull()?.metadata?.title?.getTitle() ?: "",
+                text = title,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.rotate(-90f),

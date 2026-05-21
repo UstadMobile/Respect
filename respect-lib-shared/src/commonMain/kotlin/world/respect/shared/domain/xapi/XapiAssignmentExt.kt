@@ -65,6 +65,13 @@ val XapiStatement.assignmentLearningUnits: List<AssignmentLearningUnitRef>
     } ?: emptyList()
 
 @OptIn(ExperimentalUuidApi::class)
+fun XapiStatement.getUnitTitle(unitActivityId: String): String? {
+    return context?.contextActivities?.grouping
+        ?.find { it.id == unitActivityId }
+        ?.definition?.name?.values?.firstOrNull()
+}
+
+@OptIn(ExperimentalUuidApi::class)
 fun XapiStatement.withTitle(title: String): XapiStatement {
     val activity = `object` as? XapiActivity ?: return this
     val definition = activity.definition ?: XapiActivityDefinition()

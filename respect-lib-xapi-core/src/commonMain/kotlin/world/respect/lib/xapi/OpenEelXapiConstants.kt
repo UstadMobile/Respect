@@ -14,5 +14,11 @@ object OpenEelXapiConstants {
      */
     const val HEADER_XAPI_CONSISTENT_THROUGH = "X-Experience-API-Consistent-Through"
 
+    /**
+     * As per README_EXTENSIONS_PUBLICATION.md
+     */
+    const val ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK = "https://id.openeel.org/extensions/activity/webpub-manifest-link"
+
+
 
 }

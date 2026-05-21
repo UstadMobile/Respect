@@ -49,7 +49,12 @@ class XapiStatementsResourceRepository(
         dataLoadParams: DataLoadParams,
     ): DataLoadState<XapiStatementResult> {
         try {
-            val remoteResult = remote.get(listParams, dataLoadParams)
+            val remoteResult = remote.get(
+                listParams = listParams.copy(
+                    format = XapiStatementsResource.GetStatementFormatEnum.EXACT,
+                ),
+                dataLoadParams = dataLoadParams,
+            )
             remoteResult.dataOrNull()?.statements.takeIf { it?.isNotEmpty() == true }?.also {
                 local.updateLocal(it)
             }
@@ -67,7 +72,12 @@ class XapiStatementsResourceRepository(
         return local.getAsFlow(
             listParams = listParams, dataLoadParams = dataLoadParams
         ).combineWithRemote(
-            remote.getAsFlow(listParams, dataLoadParams).onEach { remoteState ->
+            remote.getAsFlow(
+                listParams = listParams.copy(
+                    format = XapiStatementsResource.GetStatementFormatEnum.EXACT,
+                ),
+                dataLoadParams = dataLoadParams,
+            ).onEach { remoteState ->
                 val remoteData = remoteState.dataOrNull()
                 if(remoteData != null) {
                     local.updateLocal(remoteData.statements)

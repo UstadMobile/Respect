@@ -157,6 +157,10 @@ class StudentGroupingEditViewModel(
 
                 val groupName = group.name
                 val statementId = groupStatement.id
+                if (statementId == null) {
+                    Napier.e("StudentGroupingEditViewModel: group statement id is null for groupId=$groupId, cannot edit")
+                    return@launch
+                }
 
                 val memberIds = group.member
                     ?.mapNotNull { agent ->

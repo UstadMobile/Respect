@@ -491,5 +491,7 @@ class ClazzDetailViewModel(
 
         const val RESULT_KEY_PREFIX = "result_"
 
+        const val STACK_COUNT=3
+
     }
 }

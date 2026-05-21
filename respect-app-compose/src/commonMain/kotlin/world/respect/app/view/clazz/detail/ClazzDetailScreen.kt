@@ -65,6 +65,7 @@ import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.generated.resources.create_group
 import world.respect.shared.generated.resources.groups
+import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companion.STACK_COUNT
 
 @Composable
 fun ClazzDetailScreen(
@@ -453,7 +454,7 @@ fun ClazzDetailScreen(
                             Box(
                                 modifier = Modifier.width(40.dp),
                             ) {
-                                val displayMembers = memberNames.take(3)
+                                val displayMembers = memberNames.take(STACK_COUNT)
                                 displayMembers.forEachIndexed { i, name ->
                                     Box(
                                         modifier = Modifier

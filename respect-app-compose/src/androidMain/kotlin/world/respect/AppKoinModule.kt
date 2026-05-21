@@ -1054,6 +1054,7 @@ val appKoinModule = module {
                 authenticatedUser = accountScopeId.accountPrincipalId,
                 json = get(),
                 accountManager = get(),
+                getXapiActivityForPublicationUseCase = get(),
             )
         }
 

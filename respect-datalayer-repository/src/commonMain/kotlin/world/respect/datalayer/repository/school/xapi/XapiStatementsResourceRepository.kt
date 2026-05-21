@@ -10,7 +10,8 @@ import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
+import world.respect.lib.xapi.composites.AssignmentAndProgress
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -49,7 +50,12 @@ class XapiStatementsResourceRepository(
         dataLoadParams: DataLoadParams,
     ): DataLoadState<XapiStatementResult> {
         try {
-            val remoteResult = remote.get(listParams, dataLoadParams)
+            val remoteResult = remote.get(
+                listParams = listParams.copy(
+                    format = XapiStatementsResource.GetStatementFormatEnum.EXACT,
+                ),
+                dataLoadParams = dataLoadParams,
+            )
             remoteResult.dataOrNull()?.statements.takeIf { it?.isNotEmpty() == true }?.also {
                 local.updateLocal(it)
             }
@@ -67,7 +73,12 @@ class XapiStatementsResourceRepository(
         return local.getAsFlow(
             listParams = listParams, dataLoadParams = dataLoadParams
         ).combineWithRemote(
-            remote.getAsFlow(listParams, dataLoadParams).onEach { remoteState ->
+            remote.getAsFlow(
+                listParams = listParams.copy(
+                    format = XapiStatementsResource.GetStatementFormatEnum.EXACT,
+                ),
+                dataLoadParams = dataLoadParams,
+            ).onEach { remoteState ->
                 val remoteData = remoteState.dataOrNull()
                 if(remoteData != null) {
                     local.updateLocal(remoteData.statements)
@@ -77,8 +88,9 @@ class XapiStatementsResourceRepository(
     }
 
     override fun getAssignmentProgress(
-        activityId: String
-    ): Flow<DataLoadState<List<XapiActorAndAssignmentProgress>>> {
+        activityId: String,
+        filterByActor: XapiActor?,
+    ): Flow<DataLoadState<AssignmentAndProgress>> {
         return local.getAssignmentProgress(
             activityId
         ).combineWithRemote(

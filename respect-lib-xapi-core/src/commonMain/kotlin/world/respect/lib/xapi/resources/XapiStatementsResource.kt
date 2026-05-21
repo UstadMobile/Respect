@@ -38,7 +38,7 @@ interface XapiStatementsResource {
     data class GetStatementParams(
         val statementId: Uuid? = null,
         val voidedStatementId: Uuid? = null,
-        val agent: XapiAgent? = null,
+        val agent: XapiActor? = null,
         val verb: String? = null,
         val activity: String? = null,
         val registration: Uuid? = null,

@@ -136,7 +136,6 @@ class LearningUnitListViewModel(
                 result = LearningUnitSelection(
                     learningUnitManifestUrl = learningUnitManifestUrl,
                     selectedPublication = publication,
-                    appManifestUrl = route.appManifestUrl,
                 )
             )
         ) {
@@ -144,7 +143,6 @@ class LearningUnitListViewModel(
                 value = NavCommand.Navigate(
                     LearningUnitDetail.create(
                         learningUnitManifestUrl = learningUnitManifestUrl,
-                        appManifestUrl = route.appManifestUrl,
                         refererUrl = Url(
                             refererUrl
                         ),

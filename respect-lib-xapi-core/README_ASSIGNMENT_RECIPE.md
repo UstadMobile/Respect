@@ -1,20 +1,20 @@
 # Assignment xAPI Recipe
 
 Use this recipe when an assignment is being set by one actor (e.g. a teacher) for another actor
-(e.g. a group of students). An assignment can contain one or more activities to be completed by
-the assignee(s).
+(e.g. a group of students). An assignment can contain one or more tasks (each of which is an
+Activity with an Activity ID) to be completed by the assignee(s).
 
 ## Core
 
-* Assignment statements include the Recipe ID ( https://id.ustadmobile.com/xapi/activities/assignment-recipe ) 
+* Assignment statements include the Recipe ID ( https://id.ustadmobile.com/xapi/activities/assignment-recipe )
   in the 'category' context activity list (this applies to the assignment statements, it does not
   apply to statements about the assignees completion of assigned activities).
-* Statements about the assignees completion of assigned activities MUST include the activity id of 
+* Statements about the assignees completion of assigned activities MUST include the activity id of
   the assignment in the contextActivities grouping property.
 * The agent of the assigned statement MUST be the assignee (can be an Agent or Group)
-* Statements generate an Activity ID that is unique for a given an assignment. As normal, the 
+* Statements generate an Activity ID that is unique for a given an assignment. As normal, the
   activity id should use a domain that the creator is authorized to use for this purpose.
-* If an assignment is changed then a new assigned statement is issued with the updated assignment. 
+* If an assignment is changed then a new assigned statement is issued with the updated assignment.
   The previous assignment for the same activity id SHOULD be voided.
 
 ## Verb
@@ -77,11 +77,21 @@ Use the following verb:
       "grouping": [
         {
           "id": "https://app.provider.com/activities/math/algebra1",
-          "objectType": "Activity"
+          "objectType": "Activity",
+          "definition": {
+            "extensions": {
+                "https://id.openeel.org/extensions/activity/webpub-manifest-link": "https://app.provider.com/activities/math/algebra1/manifest.json"
+            }
+          }
         },
         {
           "id": "https://app.anotherprovider.com/activities/physics/gravity",
-          "objectType": "Activity"
+          "objectType": "Activity",
+          "definition": {
+            "extensions": {
+                "https://id.openeel.org/extensions/activity/webpub-manifest-link": "https://app.anotherprovider.com/activities/physics/gravity/manifest.json"
+            }
+          }
         }
       ]
     }

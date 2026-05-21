@@ -11,6 +11,8 @@ import android.util.Log
 import androidx.core.net.toUri
 import io.github.aakira.napier.Napier
 import io.ktor.http.URLBuilder
+import world.respect.lib.opds.model.findLearningUnitAcquisitionLinks
+import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.Companion.RESPECT_LAUNCH_VERSION_PARAM_NAME
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.Companion.RESPECT_LAUNCH_VERSION_VALUE
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.LaunchRequest
@@ -40,12 +42,15 @@ class LaunchAppUseCaseAndroid(
     override suspend fun invoke(
         request: LaunchRequest
     ) {
-        val launchUrlBase = request.learningUnitId?.let {
-            getXapiLaunchUrlUseCase(
-                learningUnitUrl = it,
-                assignmentActivityId = request.assignmentActivityId,
-            )
-        } ?: return
+        val launchHref = request.publication.findLearningUnitAcquisitionLinks().firstOrNull()
+            ?.href ?: throw IllegalArgumentException("Publication has no suitable acquisition link to launch")
+
+
+        val launchUrlBase = getXapiLaunchUrlUseCase(
+            learningUnitUrl = request.publicationUrl.resolve(launchHref),
+            assignmentActivityId = request.assignmentActivityId,
+        )
+
         val launchUrl = URLBuilder(launchUrlBase).apply {
             parameters.append(
                 RESPECT_LAUNCH_VERSION_PARAM_NAME, RESPECT_LAUNCH_VERSION_VALUE
@@ -62,7 +67,7 @@ class LaunchAppUseCaseAndroid(
             if(Build.VERSION.SDK_INT >= 30) {
                 intent.flags = FLAG_ACTIVITY_REQUIRE_NON_BROWSER or FLAG_ACTIVITY_NEW_TASK
                 Napier.d(
-                    "LaunchAppUseCaseAndroid: attempting to launch ${request.learningUnitId} with RequireNonBrowser"
+                    "LaunchAppUseCaseAndroid: attempting to launch $launchUrl with RequireNonBrowser"
                 )
                 appContext.startActivity(intent)
                 return
@@ -98,7 +103,7 @@ class LaunchAppUseCaseAndroid(
             appContext,
             Class.forName(WEBVIEW_ACTIVITY_NAME)
         )
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.flags = FLAG_ACTIVITY_NEW_TASK
         val launchUrlStr = launchUrl.toString()
         intent.putExtra(EXTRA_URL, launchUrlStr)
         Napier.i("LaunchAppUseCaseAndroid: launching $launchUrlStr")

@@ -13,27 +13,20 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.shared.navigation.LearningUnitDetail
-import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.lib.dataloadstate.DataLoadParams
-import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.DataLoadingState
-import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
-import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.invalid_link
+import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.navigation.AssignmentEdit
+import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.exception.getUiTextOrGeneric
-import world.respect.shared.util.exception.withUiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
+import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.app.appstate.getTitle
@@ -41,7 +34,6 @@ import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
-    val app: DataLoadState<OpdsPublication> = DataLoadingState(),
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
@@ -101,17 +93,6 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
-                url = route.appManifestUrl,
-                params = DataLoadParams(),
-                referrerUrl = null,
-                expectedPublicationId = null,
-            ).collect { app ->
-                _uiState.update { it.copy(app = app) }
-            }
-        }
-
-        viewModelScope.launch {
             ustadCache.publicationPinState(route.learningUnitManifestUrl).collect { pinState ->
                 _uiState.update { it.copy(pinState = pinState) }
             }
@@ -122,20 +103,14 @@ class LearningUnitDetailViewModel(
 
     fun onClickOpen() {
         //If app is null, then UiState.buttonsEnabled is false, so fallback return should never happen
-        val respectApp = _uiState.value.app.dataOrNull() ?: return
         viewModelScope.launch {
             try {
-                val launchLink = _uiState.value.lessonDetail?.links?.firstOrNull { link ->
-                    link.rel?.any { it.startsWith("http://opds-spec.org/acquisition") } == true &&
-                            LEARNING_UNIT_MIME_TYPES.any { link.type?.startsWith(it) == true }
-                } ?: throw IllegalArgumentException().withUiText(Res.string.invalid_link.asUiText())
-
-                val launchUrl = route.learningUnitManifestUrl.resolve(launchLink.href)
+                val lessonPublication = _uiState.value.lessonDetail ?: throw IllegalStateException("Not ready")
 
                 launchAppUseCase(
                     LaunchAppUseCase.LaunchRequest(
-                        app = respectApp,
-                        learningUnitId = launchUrl,
+                        publicationUrl = route.learningUnitManifestUrl,
+                        publication = lessonPublication,
                         assignmentActivityId = route.assignmentActivityId,
                     )
                 )
@@ -148,7 +123,7 @@ class LearningUnitDetailViewModel(
 
     fun onClickDownload() {
         viewModelScope.launch {
-            try {
+            snackBarDispatcher.tryOrShowSnackbarOnError {
                 when(uiState.value.pinState.status) {
                     PublicationPinState.Status.NOT_PINNED -> {
                         ustadCache.pinPublication(route.learningUnitManifestUrl)
@@ -160,9 +135,6 @@ class LearningUnitDetailViewModel(
                         //Do nothing
                     }
                 }
-
-            }catch(t: Throwable) {
-                t.printStackTrace()
             }
         }
     }
@@ -177,7 +149,6 @@ class LearningUnitDetailViewModel(
                     learningUnitSelected = LearningUnitSelection(
                         learningUnitManifestUrl = route.learningUnitManifestUrl,
                         selectedPublication = publicationVal,
-                        appManifestUrl = route.appManifestUrl
                     )
                 )
             )

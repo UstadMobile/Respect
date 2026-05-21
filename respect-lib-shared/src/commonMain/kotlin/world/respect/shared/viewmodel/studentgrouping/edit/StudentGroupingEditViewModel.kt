@@ -162,7 +162,7 @@ class StudentGroupingEditViewModel(
                     ?.mapNotNull { agent ->
                         val name = agent.account?.name
                         if (name == null) {
-                            Napier.w("StudentGroupingEditViewModel: member agent has no account name, skipping: $agent")
+                            Napier.w("StudentGroupingEditViewModel: member agent has no account name")
                         }
                         name
                     }

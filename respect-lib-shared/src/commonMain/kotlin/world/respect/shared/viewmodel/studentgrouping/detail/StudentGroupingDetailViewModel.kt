@@ -184,18 +184,18 @@ class StudentGroupingDetailViewModel(
                     val memberNames = group.member?.mapNotNull { agent ->
                         val name = agent.name
                         if (name == null) {
-                            Napier.w("loadGroupDetail: member agent has no name, skipping")
+                            Napier.w("loadGroupDetail: member agent has no name")
                         }
                         name
                     } ?: emptyList()
                     val statementId = groupStatement.id
                     if (statementId == null) {
-                        Napier.e("loadGroupDetail: Group statement id is null, skipping update")
+                        Napier.e("loadGroupDetail: Group statement id is null")
                         return@collect
                     }
                     val groupName = group.name
                     if (groupName == null) {
-                        Napier.e("loadGroupDetail: Group name is null, skipping update")
+                        Napier.e("loadGroupDetail: Group name is null")
                         return@collect
                     }
 

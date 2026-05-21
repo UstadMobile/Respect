@@ -456,14 +456,14 @@ class ClazzDetailViewModel(
                 .mapNotNull { statement ->
                     val group = statement.`object` as? XapiGroup
                     if (group == null) {
-                        Napier.w("observeGroupsFromXapi: Expected XapiGroup in statement ${statement.id}, skipping")
+                        Napier.w("observeGroupsFromXapi: Expected XapiGroup in statement ${statement.id}")
                     }
                     group
                 }
                 .filter { group ->
                     val name = group.account?.name
                     if (name == null) {
-                        Napier.w("observeGroupsFromXapi: Group account name missing, skipping")
+                        Napier.w("observeGroupsFromXapi: Group account name missing")
                     }
                     name != null
                 }
@@ -473,7 +473,7 @@ class ClazzDetailViewModel(
                 .map { group ->
                     val filteredMembers = group.member?.filter { agent ->
                         if (agent.name == null) {
-                            Napier.w("observeGroupsFromXapi: member agent has no name in group ${group.account?.name}, skipping")
+                            Napier.w("observeGroupsFromXapi: member agent has no name in group ${group.account?.name}")
                         }
                         agent.name != null
                     }

@@ -4,8 +4,8 @@ import io.ktor.http.Url
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import world.respect.datalayer.school.model.AssignmentLearningUnitRef
+import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.model.VERB_ASSIGN
-import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActivityDefinition
 import world.respect.lib.xapi.model.XapiActor
@@ -27,6 +27,13 @@ object XapiAssignmentConstants {
     const val EXT_CREATED = "https://id.ustadmobile.com/xapi/extension/created"
     const val ACTIVITY_TYPE_ASSIGNMENT = "http://id.tincanapi.com/activitytype/school-assignment"
 }
+
+@OptIn(ExperimentalUuidApi::class)
+val XapiActivity.manifestUrl: Url?
+    get() = definition?.extensions?.get(OpenEelXapiConstants.ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK)
+        ?.let { (it as? JsonPrimitive)?.contentOrNull }
+        ?.let { runCatching { Url(it) }.getOrNull() }
+        ?: runCatching { Url(id) }.getOrNull()
 
 @OptIn(ExperimentalUuidApi::class)
 val XapiStatement.isAssignmentStatement: Boolean
@@ -57,8 +64,7 @@ val XapiStatement.assignmentDeadline: Instant?
 @OptIn(ExperimentalUuidApi::class)
 val XapiStatement.assignmentLearningUnits: List<AssignmentLearningUnitRef>
     get() = context?.contextActivities?.grouping?.mapNotNull { groupingActivity ->
-        val manifestUrl = runCatching { Url(groupingActivity.id) }.getOrNull() ?: return@mapNotNull null
-        AssignmentLearningUnitRef(manifestUrl)
+        groupingActivity.manifestUrl?.let { AssignmentLearningUnitRef(it) }
     } ?: emptyList()
 
 @OptIn(ExperimentalUuidApi::class)
@@ -124,6 +130,16 @@ fun XapiStatement.withLearningUnits(learningUnits: List<AssignmentLearningUnitRe
     val newContext = (context ?: XapiContext()).copy(
         contextActivities = (context?.contextActivities ?: XapiContextActivities()).copy(
             grouping = newGrouping
+        )
+    )
+    return copy(context = newContext)
+}
+
+@OptIn(ExperimentalUuidApi::class)
+fun XapiStatement.withLearningUnitActivities(activities: List<XapiActivity>): XapiStatement {
+    val newContext = (context ?: XapiContext()).copy(
+        contextActivities = (context?.contextActivities ?: XapiContextActivities()).copy(
+            grouping = activities
         )
     )
     return copy(context = newContext)

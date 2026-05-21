@@ -8,8 +8,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -17,31 +20,26 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.isStudent
-import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
-import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
-import world.respect.lib.xapi.composites.XapiAssignmentProgress
-import world.respect.lib.xapi.model.VERB_ASSIGN
-import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.ext.calculatePercentage
 import world.respect.lib.xapi.ext.isCompleted
 import world.respect.lib.xapi.ext.isStarted
-import world.respect.lib.xapi.ext.personName
 import world.respect.lib.xapi.ext.personUid
-import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiActor
+import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.xapi.activityDefinitionTitle
-import world.respect.shared.domain.xapi.assignmentLearningUnits
-import world.respect.shared.domain.xapi.isAssignmentStatement
+import world.respect.shared.domain.xapi.manifestUrl
 import world.respect.shared.ext.whenSubscribed
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
@@ -57,28 +55,29 @@ import kotlin.uuid.ExperimentalUuidApi
 
 
 data class AssignmentDetailUiState(
-    val xApiStatement: DataLoadState<XapiStatement> = DataLoadingState(),
     val taskInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
         flowOf(DataLoadingState())
     },
-    val assignmentProgressList: List<XapiActorAndAssignmentProgress> = emptyList(),
+    val assignmentProgress: DataLoadState<AssignmentAndProgress> = DataLoadingState(),
     val selectedStatusFilter: AssignmentStatusFilter = AssignmentStatusFilter.ALL,
     val isFullscreen: Boolean = false,
     val isStudent: Boolean = false,
-    val assigneeStudentName: String = "",
-    val personGuid: String = "",
     val canEdit: Boolean = false,
+    val filterActor: XapiActor? = null
 ) {
 
     /**
      * All tasks associated with this assignment, extracted from the assignment's xAPI definition.
      */
-    val tasks: List<AssignmentLearningUnitRef>
-        get() = xApiStatement.dataOrNull()?.assignmentLearningUnits ?: emptyList()
+    val tasks: List<XapiActivity>
+        get() = assignmentProgress.dataOrNull()?.assignmentStatement?.context?.contextActivities?.grouping ?: emptyList()
 
     private val taskActivityIds: List<String>
-        get() = tasks.map { it.learningUnitManifestUrl.toString() }
+        get() = tasks.map { it.id }
 
+
+    val assignmentProgressList: List<XapiActorAndAssignmentProgress>
+        get() = assignmentProgress.dataOrNull()?.progress ?: emptyList()
 
     val numStudents: Int get() = assignmentProgressList.size
 
@@ -125,14 +124,13 @@ data class AssignmentDetailUiState(
 
         val percentages = tasks.mapNotNull { task ->
             studentProgress.progress
-                .find { it.activityId == task.learningUnitManifestUrl.toString() }
+                .find { it.activityId == task.id }
                 ?.calculatePercentage()
         }
 
         return if (percentages.isNotEmpty()) percentages.average() else null
     }
 }
-
 @OptIn(ExperimentalUuidApi::class)
 class AssignmentDetailViewModel(
     savedStateHandle: SavedStateHandle,
@@ -151,6 +149,15 @@ class AssignmentDetailViewModel(
 
     private val assignmentActivityId: String = route.assignmentActivityId
 
+
+    // Create a shared flow for assignment progress
+    private val assignmentProgressFlow = schoolDataSource.xapiStatementsResource
+        .getAssignmentProgress(
+            activityId = assignmentActivityId,
+            filterByActor = _uiState.value.filterActor
+        )
+        .shareIn(viewModelScope, SharingStarted.Lazily)
+
     init {
         _appUiState.update {
             it.copy(
@@ -167,34 +174,44 @@ class AssignmentDetailViewModel(
             )
         }
 
-        // Load the assignment from xAPI statements
-        val statementsStream = schoolDataSource.xapiStatementsResource.getAsFlow(
-            listParams = GetStatementParams(
-                activity = assignmentActivityId,
-                verb = VERB_ASSIGN
-            ),
-            dataLoadParams = DataLoadParams()
-        ).map { state ->
-            state.map { result ->
-                result.statements.filter { it.isAssignmentStatement }
-            }.firstOrNotLoaded()
-        }.shareIn(viewModelScope, SharingStarted.Lazily)
-
         viewModelScope.launch {
-            statementsStream.collect { statementState ->
+            val filterActor = if (_uiState.value.isStudent) {
+                accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent
+            } else {
+                null
+            }
+            _uiState.update {
+                it.copy(filterActor = filterActor)
+            }
+            assignmentProgressFlow.collect { progressState ->
                 _uiState.update {
-                    it.copy(xApiStatement = statementState)
+                    it.copy(assignmentProgress = progressState)
                 }
-                _appUiState.update {
-                    it.copy(title = statementState.dataOrNull()?.activityDefinitionTitle?.asUiText())
-                }
-                // Only load progress after we have the assignment metadata
-                statementState.dataOrNull()?.let {
-                    loadAssignmentProgress(assignmentActivityId)
+                val assignmentStatement = progressState.dataOrNull()?.assignmentStatement
+                _appUiState.update { appState ->
+                    appState.copy(
+                        title = assignmentStatement?.activityDefinitionTitle?.asUiText()
+                    )
                 }
             }
         }
 
+        // Load the actor (group) to ensure all members are loaded
+        viewModelScope.launch {
+            assignmentProgressFlow
+                .mapNotNull { dataState ->
+                    dataState.dataOrNull()?.assignmentStatement?.actor as XapiActor
+                }.distinctUntilChanged().collectLatest { assignStmtActor ->
+                    schoolDataSource.xapiStatementsResource.get(
+                        listParams = XapiStatementsResource.GetStatementParams(
+                            agent = assignStmtActor,
+                            verb = XapiVerb.ID_SAVED
+                        )
+                    )
+                }
+        }
+
+        // Observe account changes for UI state
         viewModelScope.launch {
             _uiState.whenSubscribed {
                 accountManager.selectedAccountAndPersonFlow.collect { selectedAccount ->
@@ -205,10 +222,10 @@ class AssignmentDetailViewModel(
                     _uiState.update {
                         it.copy(
                             isStudent = isStudent,
-                            assigneeStudentName = person?.fullName() ?: "",
-                            personGuid = person?.guid ?: ""
+                            canEdit = canEdit
                         )
                     }
+
                     val isFullscreen = _uiState.value.isFullscreen
                     _appUiState.update {
                         it.copy(
@@ -224,19 +241,6 @@ class AssignmentDetailViewModel(
                     }
                 }
             }
-        }
-    }
-
-    private fun loadAssignmentProgress(activityId: String) {
-        viewModelScope.launch {
-            schoolDataSource.xapiStatementsResource
-                .getAssignmentProgress(activityId = activityId)
-                .collect { progressState ->
-                    val progressList = progressState.dataOrNull() ?: emptyList()
-                    _uiState.update {
-                        it.copy(assignmentProgressList = progressList)
-                    }
-                }
         }
     }
 
@@ -256,11 +260,14 @@ class AssignmentDetailViewModel(
         )
     }
 
-    fun onClickTask(ref: AssignmentLearningUnitRef) {
+    fun onClickTask(activity: XapiActivity) {
+        val manifestUrl = activity.manifestUrl ?: return
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 LearningUnitDetail.create(
-                    learningUnitManifestUrl = ref.learningUnitManifestUrl,
+                    learningUnitManifestUrl = manifestUrl,
+                    assignmentActivityId = assignmentActivityId,
+                    expectedIdentifier = activity.id,
                 )
             )
         )

@@ -86,6 +86,8 @@
     <string name="creating_account_for">Creating account for %s</string>
     <string name="password_cannot_be_empty">Password cannot be empty</string>
     <string name="learn_more">Learn More</string>
+    <string name="percentage_format">%1$d%</string>
+    <string name="no_data">--</string>
 
     <string name="password_placeholder">Enter your password</string>
     <string name="invitation">Invitation</string>
@@ -315,6 +317,7 @@
     <string name="top_5_schools">Top 5 Schools</string>
     <string name="top_5_students">Top 5 Students</string>
     <string name="percentage">Percentage</string>
+    <string name="percent_format">%1$d%%</string>
     <string name="indicators">Indicators</string>
     <string name="manage_indicators">Manage Indicators</string>
     <string name="indicator">Indicator</string>

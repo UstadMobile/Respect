@@ -22,13 +22,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Face
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -45,25 +43,30 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import io.ktor.http.Url
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
-import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.findIcons
+import world.respect.lib.xapi.composites.XapiAssignmentProgress
 import world.respect.lib.xapi.ext.calculatePercentage
 import world.respect.lib.xapi.ext.personName
 import world.respect.lib.xapi.ext.personUid
+import world.respect.lib.xapi.model.XapiActivity
 import world.respect.libutil.ext.resolve
 import world.respect.libutil.util.time.toDisplayDateString
 import world.respect.shared.domain.xapi.assignmentDeadline
 import world.respect.shared.domain.xapi.assignmentDescription
 import world.respect.shared.domain.xapi.getUnitTitle
+import world.respect.shared.domain.xapi.manifestUrl
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assigned_to
 import world.respect.shared.generated.resources.average
 import world.respect.shared.generated.resources.deadline
+import world.respect.shared.generated.resources.no_data
 import world.respect.shared.generated.resources.no_student_data_available
+import world.respect.shared.generated.resources.percentage_format
 import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailUiState
@@ -91,7 +94,7 @@ fun AssignmentDetailScreen(
 fun AssignmentDetailScreen(
     uiState: AssignmentDetailUiState,
     onStatusFilterChanged: (AssignmentStatusFilter) -> Unit = { },
-    onClickTask: (AssignmentLearningUnitRef) -> Unit = { },
+    onClickTask: (XapiActivity) -> Unit = { },
 ) {
     val horizontalScrollState = rememberScrollState()
 
@@ -103,7 +106,7 @@ fun AssignmentDetailScreen(
                     .defaultItemPadding()
             ) {
                 Text(
-                    text = uiState.xApiStatement.dataOrNull()?.assignmentDescription ?: "",
+                    text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.assignmentDescription ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -120,7 +123,8 @@ fun AssignmentDetailScreen(
                             color = Color.Gray
                         )
                         Text(
-                            text = uiState.xApiStatement.dataOrNull()?.assignmentDeadline?.toDisplayDateString() ?: "",
+                            text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.assignmentDeadline?.toDisplayDateString()
+                                ?: "",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
@@ -132,7 +136,7 @@ fun AssignmentDetailScreen(
                             color = Color.Gray
                         )
                         Text(
-                            text = if (uiState.isStudent) uiState.assigneeStudentName else uiState.xApiStatement.dataOrNull()?.actor?.name.orEmpty(),
+                            text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.actor?.name.orEmpty(),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
@@ -179,10 +183,18 @@ fun AssignmentDetailScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(units) { unit ->
-                    StudentLearningUnitItem(
+                    val studentProgress =
+                        uiState.assignmentProgressList.firstOrNull()
+
+                    val progress = remember(studentProgress, unit.id) {
+                        studentProgress?.progress
+                            ?.find { it.activityId == unit.id }
+                    }
+                    AssignmentTaskListRow(
                         unit = unit,
                         uiState = uiState,
-                        onClick = { onClickTask(unit) }
+                        onClickTask = { onClickTask(unit) },
+                        progress = progress
                     )
                 }
             }
@@ -225,9 +237,24 @@ fun AssignmentDetailScreen(
                                     horizontalArrangement = Arrangement.Center
                                 ) {
                                     tasks.forEach { unit ->
+                                        // Collect the data needed for this task
+                                        val manifestUrl = unit.manifestUrl ?: Url(unit.id)
+                                        val info by uiState.taskInfoFlow(manifestUrl)
+                                            .collectAsState(DataLoadingState())
+
+                                        val title = uiState.assignmentProgress.dataOrNull()?.assignmentStatement
+                                            ?.getUnitTitle(unit.id)
+                                            ?: info.dataOrNull()?.metadata?.title?.getTitle()
+                                            ?: ""
+
+                                        val iconUrl =
+                                            info.dataOrNull()?.findIcons()?.firstOrNull()?.let {
+                                                manifestUrl.resolve(it.href)
+                                                    .toString()
+                                            }
                                         TaskHeaderCell(
-                                            unit,
-                                            uiState,
+                                            title,
+                                            iconUrl,
                                             taskColWidth,
                                             headerHeight
                                         )
@@ -263,7 +290,7 @@ fun AssignmentDetailScreen(
                                 ) {
                                     tasks.forEach { unit ->
                                         val progress = student.progress.find {
-                                            it.activityId == unit.learningUnitManifestUrl.toString()
+                                            it.activityId == unit.id
                                         }
                                         GradeCell(progress?.calculatePercentage(), taskColWidth)
                                     }
@@ -294,133 +321,138 @@ fun AssignmentDetailScreen(
     }
 }
 
+// Student-side task list section on the detail screen
+
 @Composable
-fun StudentLearningUnitItem(
-    unit: AssignmentLearningUnitRef,
+fun AssignmentTaskListRow(
+    unit: XapiActivity,
     uiState: AssignmentDetailUiState,
-    onClick: () -> Unit
+    onClickTask: () -> Unit,
+    progress: XapiAssignmentProgress? = null,
 ) {
-    val infoFlow =
-        remember(unit.learningUnitManifestUrl) { uiState.taskInfoFlow(unit.learningUnitManifestUrl) }
+    val manifestUrl = unit.manifestUrl ?: Url(unit.id)
+
+    val infoFlow = remember(manifestUrl) { uiState.taskInfoFlow(manifestUrl) }
+
     val state by infoFlow.collectAsState(DataLoadingState())
-    val publication = state.dataOrNull()
-    val iconLink = publication?.images?.firstOrNull()
+
+    val iconLink = state.dataOrNull()?.images?.firstOrNull()
 
     // Use actual title from publication metadata if available, otherwise from xAPI statement
-    val title = uiState.xApiStatement.dataOrNull()?.getUnitTitle(unit.learningUnitManifestUrl.toString())
-        ?: publication?.metadata?.title?.getTitle()
-        ?: "Loading..."
-
-    val progress =
-        remember(uiState.assignmentProgressList, unit.learningUnitManifestUrl, uiState.personGuid) {
-            uiState.assignmentProgressList
-                .find { it.personUid == uiState.personGuid }
-                ?.progress
-                ?.find { it.activityId == unit.learningUnitManifestUrl.toString() }
-        }
-
-    val percent = progress?.calculatePercentage() ?: 0
-    val (bgColor, textColor) = when {
-        percent >= 90 -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
-        percent > 0 -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer
-        else -> MaterialTheme.colorScheme.surfaceContainer to MaterialTheme.colorScheme.onSurfaceVariant
-    }
+    val title = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.getUnitTitle(unit.id)
+        ?: state.dataOrNull()?.metadata?.title?.getTitle()
+        ?: ""
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .clickable { onClickTask() }
             .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Box(contentAlignment = Alignment.BottomStart) {
-            if (iconLink != null) {
-                AsyncImage(
-                    model = unit.learningUnitManifestUrl.resolve(iconLink.href).toString(),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(bgColor, RoundedCornerShape(4.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        title.lastOrNull()?.toString() ?: "?",
-                        color = Color.White,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                }
-            }
-            if (percent > 90) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.surfaceContainer,
-                    modifier = Modifier.size(16.dp).background(Color.White, CircleShape)
-                        .padding(1.dp)
-                )
-            }
-        }
-
-        Spacer(Modifier.width(16.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, style = MaterialTheme.typography.titleMedium)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Face,
-                    contentDescription = null,
-                    modifier = Modifier.size(14.dp),
-                    tint = Color.Gray
-                )
-                Spacer(Modifier.width(4.dp))
-            }
-        }
-
-        if (percent < 60) {
-            Box(
-                modifier = Modifier.size(32.dp).background(Color.White, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "$percent%",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontSize = 8.sp
-                )
-            }
-        } else {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(
+                    MaterialTheme.colorScheme.primaryContainer,
+                    RoundedCornerShape(8.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
-                text = "$percent%",
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(bgColor)
-                    .padding(horizontal = 6.dp, vertical = 2.dp),
-                style = MaterialTheme.typography.labelMedium,
-                color = textColor
+                text = title.firstOrNull()?.toString()?.uppercase() ?: "?",
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                style = MaterialTheme.typography.titleLarge
             )
         }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            if (iconLink != null) {
+                AsyncImage(
+                    model = manifestUrl.resolve(iconLink.href).toString(),
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+        }
+        AssignmentProgressIndicator(
+            percent = progress?.calculatePercentage() ?: 0,
+            isCompleted = progress?.completed == true
+        )
+    }
+}
+
+
+@Composable
+fun AssignmentProgressIndicator(
+    percent: Int,
+    isCompleted: Boolean,
+    modifier: Modifier = Modifier
+) {
+    if (!isCompleted) {
+        Box(
+            modifier = modifier
+                .size(40.dp)
+                .background(
+                    MaterialTheme.colorScheme.primaryContainer,
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            // Background track
+            CircularProgressIndicator(
+                progress = { 1f },
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                strokeWidth = 3.dp,
+                trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
+                strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
+            )
+            // Progress arc
+            CircularProgressIndicator(
+                progress = { percent / 100f },
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colorScheme.primary,
+                strokeWidth = 3.dp,
+                trackColor = ProgressIndicatorDefaults.circularTrackColor,
+                strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
+            )
+            // Percentage text
+            Text(
+                text = stringResource(Res.string.percentage_format, percent),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 10.sp
+            )
+        }
+    } else {
+
+        Text(
+            text = stringResource(Res.string.percentage_format, percent),
+            modifier = modifier
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSecondaryContainer
+        )
     }
 }
 
 @Composable
 fun TaskHeaderCell(
-    unit: AssignmentLearningUnitRef,
-    uiState: AssignmentDetailUiState,
+    title: String,
+    iconUrl: String?,
     width: Dp,
-    height: Dp
+    height: Dp,
 ) {
-    val info by uiState.taskInfoFlow(unit.learningUnitManifestUrl)
-        .collectAsState(DataLoadingState())
-
-    val title = uiState.xApiStatement.dataOrNull()?.getUnitTitle(unit.learningUnitManifestUrl.toString())
-        ?: info.dataOrNull()?.metadata?.title?.getTitle()
-        ?: ""
-
     Column(
         modifier = Modifier
             .width(width)
@@ -441,10 +473,6 @@ fun TaskHeaderCell(
                 style = MaterialTheme.typography.labelSmall
             )
         }
-        val iconUrl = info.dataOrNull()?.findIcons()?.firstOrNull()?.let {
-            unit.learningUnitManifestUrl.resolve(it.href).toString()
-        }
-
         if (iconUrl != null) {
             AsyncImage(
                 model = iconUrl,
@@ -494,12 +522,6 @@ fun StudentNameCell(name: String, width: Dp) {
 
 @Composable
 fun GradeCell(percent: Int?, width: Dp) {
-    val (bgColor, textColor) = when {
-        percent == null -> MaterialTheme.colorScheme.surfaceContainer to MaterialTheme.colorScheme.onSurfaceVariant
-        percent >= 90 -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.primary
-        percent > 0 -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.tertiary
-        else -> MaterialTheme.colorScheme.surfaceContainer to MaterialTheme.colorScheme.onSurfaceVariant
-    }
     Box(
         modifier = Modifier
             .width(width)
@@ -513,16 +535,27 @@ fun GradeCell(percent: Int?, width: Dp) {
                     .padding(horizontal = 4.dp, vertical = 4.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("--", color = textColor, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = stringResource(Res.string.no_data),
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         } else {
             Box(
                 modifier = Modifier
-                    .background(bgColor, shape = MaterialTheme.shapes.small)
+                    .background(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.small
+                    )
                     .padding(horizontal = 4.dp, vertical = 4.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("${percent}%", color = textColor, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = stringResource(Res.string.percentage_format, percent),
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
     }
@@ -530,12 +563,6 @@ fun GradeCell(percent: Int?, width: Dp) {
 
 @Composable
 fun AverageCell(avg: Double?, width: Dp) {
-    val (bgColor, textColor) = when {
-        avg == null -> MaterialTheme.colorScheme.surfaceContainer to MaterialTheme.colorScheme.onSurfaceVariant
-        avg >= 90 -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.primary
-        avg > 0 -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.tertiary
-        else -> MaterialTheme.colorScheme.surfaceContainer to MaterialTheme.colorScheme.onSurfaceVariant
-    }
     Box(
         modifier = Modifier
             .width(width)
@@ -548,18 +575,22 @@ fun AverageCell(avg: Double?, width: Dp) {
                     .padding(horizontal = 4.dp, vertical = 4.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("--", color = textColor, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = stringResource(Res.string.no_data),
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         } else {
             Box(
                 modifier = Modifier
                     .size(32.dp)
-                    .background(bgColor, shape = CircleShape),
+                    .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "${avg.roundToInt()}%",
-                    color = textColor,
+                    text = stringResource(Res.string.percentage_format, avg.roundToInt()),
+                    color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodySmall
                 )
             }

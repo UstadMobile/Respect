@@ -33,12 +33,13 @@ import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
 import world.respect.shared.domain.xapi.activityDefinitionTitle
 import world.respect.shared.domain.xapi.actorName
-import world.respect.shared.domain.xapi.assignmentLearningUnits
 import world.respect.shared.domain.xapi.createBlankAssignmentStatement
 import world.respect.shared.domain.xapi.isAssignmentStatement
-import world.respect.shared.domain.xapi.withLearningUnits
+import world.respect.shared.domain.xapi.manifestUrl
+import world.respect.shared.domain.xapi.withLearningUnitActivities
 import world.respect.shared.ext.studentsXapiGroup
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_assignment
@@ -90,6 +91,8 @@ class AssignmentEditViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
 
+    private val getXapiActivityForPublicationUseCase: GetXapiActivityForPublicationUseCase by inject()
+
     private val _uiState = MutableStateFlow(AssignmentEditUiState())
 
     val uiState = _uiState.asStateFlow()
@@ -101,11 +104,6 @@ class AssignmentEditViewModel(
 
     private val assignmentActivityId = route.assignmentActivityId ?: run {
         schoolUrl.appendEndpointSegments(ACTIVITY_ID_PATH, Uuid.random().toString()).toString()
-    }
-    private fun LearningUnitSelection.toRef(): AssignmentLearningUnitRef {
-        return AssignmentLearningUnitRef(
-            learningUnitManifestUrl = this.learningUnitManifestUrl,
-        )
     }
 
     init {
@@ -169,18 +167,18 @@ class AssignmentEditViewModel(
                 )
             } else {
                 val instructor = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent ?: return@launchWithLoadingIndicator
+                val baseStmt = createBlankAssignmentStatement(
+                    assignmentActivityId = assignmentActivityId,
+                    instructor = instructor
+                )
+                val initialStmt = route.learningUnitSelected?.let {
+                    val activity = getXapiActivityForPublicationUseCase(it.selectedPublication)
+                    baseStmt.withLearningUnitActivities(listOf(activity))
+                } ?: baseStmt
+
                 _uiState.update { prev ->
                     prev.copy(
-                        statementData = DataReadyState(
-                            createBlankAssignmentStatement(
-                                assignmentActivityId = assignmentActivityId,
-                                instructor = instructor
-                            ).let { stmt ->
-                                route.learningUnitSelected?.let {
-                                    stmt.withLearningUnits(listOf(it.toRef()))
-                                } ?: stmt
-                            }
-                        )
+                        statementData = DataReadyState(initialStmt)
                     )
                 }
             }
@@ -188,15 +186,16 @@ class AssignmentEditViewModel(
             viewModelScope.launch {
                 resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
                     val learningUnit = result.result as? LearningUnitSelection ?: return@collect
-                    val assignmentResourceRef = learningUnit.toRef()
+                    val activity = getXapiActivityForPublicationUseCase(learningUnit.selectedPublication)
 
                     _uiState.update { prev ->
                         val preStatementData = prev.statementData.dataOrNull() ?: return@update prev
+                        val currentActivities = preStatementData.context?.contextActivities?.grouping ?: emptyList()
 
                         prev.copy(
                             statementData = DataReadyState(
-                                data = preStatementData.withLearningUnits(
-                                    preStatementData.assignmentLearningUnits + assignmentResourceRef
+                                data = preStatementData.withLearningUnitActivities(
+                                    currentActivities + activity
                                 )
                             )
                         )
@@ -267,12 +266,11 @@ class AssignmentEditViewModel(
         val assignment = uiState.value.statementData.dataOrNull() ?: return
 
         _uiState.update { prev ->
+            val currentActivities = assignment.context?.contextActivities?.grouping ?: emptyList()
             prev.copy(
                 statementData = DataReadyState(
-                    data = assignment.withLearningUnits(
-                        assignment.assignmentLearningUnits.filter {
-                            it.learningUnitManifestUrl != ref.learningUnitManifestUrl
-                        }
+                    data = assignment.withLearningUnitActivities(
+                        currentActivities.filter { it.manifestUrl != ref.learningUnitManifestUrl }
                     )
                 )
             )

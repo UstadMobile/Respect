@@ -139,7 +139,7 @@ interface XapiStatementEntityDao {
                      UNION
                     SELECT XapiGroupMemberActorJoin.gmajMemberActorUid AS uid
                       FROM XapiGroupMemberActorJoin
-                     WHERE XapiGroupMemberActorJoin.gmajMemberActorUid = 
+                     WHERE XapiGroupMemberActorJoin.gmajGroupActorUid = 
                            (SELECT actorUid FROM LatestAssignmentStatementIds)),
              
              AssignedActivityUids(assignedActivityUid) AS (

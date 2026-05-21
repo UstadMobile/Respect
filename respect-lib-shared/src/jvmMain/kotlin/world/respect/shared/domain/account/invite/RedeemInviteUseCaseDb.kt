@@ -28,6 +28,7 @@ import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.Enrollment
+import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.libutil.ext.randomString
@@ -37,6 +38,7 @@ import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfi
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.account.username.checkusernameunique.CheckUsernameUniqueUseCase
+import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.SchoolDataSourceLocalProvider
 import world.respect.shared.util.toPerson
@@ -92,8 +94,9 @@ class RedeemInviteUseCaseDb(
             }
         }
 
+        val authenticatedPrincipleId = AuthenticatedUserPrincipalId(accountGuid)
         val schoolDataSourceVal = schoolDataSource(
-            schoolUrl = schoolUrl, AuthenticatedUserPrincipalId(accountGuid)
+            schoolUrl = schoolUrl, user = authenticatedPrincipleId,
         )
 
         if(accountPerson.username?.let { checkUsernameUniqueUseCase(it) } != true) {
@@ -122,6 +125,15 @@ class RedeemInviteUseCaseDb(
                     )
                 )
             )
+
+            if(enrollmentRole == EnrollmentRoleEnum.STUDENT) {
+                val updateXapiGroupUseCase = UpdateClazzStudentXapiGroupUseCase(
+                    schoolDataSource = schoolDataSourceVal,
+                    authenticatedUserPrincipalId = authenticatedPrincipleId,
+                    schoolUrl = schoolUrl,
+                )
+                updateXapiGroupUseCase(inviteFromDb.classUid)
+            }
         }
 
         val credential = redeemRequest.account.credential

@@ -6,6 +6,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import world.respect.lib.serializers.InstantAsISO8601
 import world.respect.lib.serializers.SingleItemToListTransformer
@@ -68,7 +69,7 @@ object XapiStatementTransformingSerializer: JsonTransformingSerializer<XapiState
     override fun transformSerialize(element: JsonElement): JsonElement {
         val jsonObject = element as JsonObject
         return buildJsonObject {
-            val objectType = jsonObject["objectType"]?.jsonPrimitive?.content
+            val objectType = jsonObject["objectType"]?.jsonPrimitive?.contentOrNull
             putAllExcept(
                 other = jsonObject,
                 exceptKeys = if(objectType == XapiObjectType.SubStatement.value) {

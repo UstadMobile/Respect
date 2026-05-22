@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import world.respect.lib.serializers.SingleItemToListTransformer
@@ -55,7 +56,7 @@ object XapiStatementObjectSerializer: JsonContentPolymorphicSerializer<XapiState
     override fun selectDeserializer(element: JsonElement): DeserializationStrategy<XapiStatementObject> {
 
         val objectType = element.jsonObject["objectType"]
-            ?.jsonPrimitive?.takeIf { it !is JsonNull }?.content?.let { XapiObjectType.valueOf(it) }
+            ?.jsonPrimitive?.contentOrNull?.let { XapiObjectType.valueOf(it) }
             ?: XapiObjectType.Activity
 
         return when(objectType) {

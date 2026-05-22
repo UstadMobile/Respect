@@ -97,7 +97,6 @@ fun AssignmentListScreen(
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(
                 items = uiState.assignments,
-                key = { item -> item.activityId }
             ) { summary ->
                 Row(
                     modifier = Modifier

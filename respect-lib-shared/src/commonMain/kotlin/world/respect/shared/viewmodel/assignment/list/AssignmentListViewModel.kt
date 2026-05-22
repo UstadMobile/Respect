@@ -131,17 +131,21 @@ class AssignmentListViewModel(
             ).collect { state ->
                 allSummaries = state.dataOrNull()?.statements
                     ?.filter { it.isAssignmentStatement }
-                    ?.map { stmt ->
-                        // TODO CURRENTLY ONLY SHOW THE ASSIGNMENT NAME IN THE LIST.
+                    ?.groupBy { (it.`object` as? XapiActivity)?.id ?: "" }
+                    ?.map { (activityId, statements) ->
+                        // Pick the most recent statement for this unique assignment activity
+                        val stmt = statements.maxBy { it.timestamp ?: it.stored ?: Clock.System.now() }
+                        val learningUnits = stmt.assignmentLearningUnits
                         AssignmentSummary(
-                            activityId = (stmt.`object` as? XapiActivity)?.id ?: "",
+                            activityId = activityId,
                             title = stmt.activityDefinitionTitle,
                             className = stmt.actor.name ?: "",
                             lastModified = stmt.timestamp ?: Clock.System.now(),
                             deadline = stmt.assignmentDeadline,
                             completedCount = 0,
-                            totalCount = 0,
-                            learningUnitManifestUrls = stmt.assignmentLearningUnits.map { it.learningUnitManifestUrl.toString() }
+                            totalCount = learningUnits.size,
+                            learningUnitManifestUrls = learningUnits.map { it.learningUnitManifestUrl.toString() },
+                            statementId = stmt.id?.toString() ?: ""
                         )
                     } ?: emptyList()
 

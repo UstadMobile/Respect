@@ -15,7 +15,8 @@ data class AssignmentSummary(
     val deadline: Instant?,
     val completedCount: Int,
     val totalCount: Int,
-    val learningUnitManifestUrls: List<String> = emptyList()
+    val learningUnitManifestUrls: List<String> = emptyList(),
+    val statementId: String = ""
 ) {
     val uid: String get() = activityId.substringAfterLast("/")
     val isCompleted: Boolean get() = totalCount > 0 && completedCount == totalCount

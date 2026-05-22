@@ -165,9 +165,11 @@ private fun PlaylistListItem(
 ) {
     val sectionCount = feed.groups?.size ?: 0
     val itemCount = feed.groups?.sumOf { group ->
-        (group.publications?.size ?: 0) + (group.navigation?.size ?: 0)
+        (group.publications?.size ?: 0) +
+                (group.navigation?.size ?: 0)
     } ?: 0
-         ListItem(
+
+    ListItem(
              modifier = Modifier
                  .fillMaxWidth()
                  .clickable { onClickFeed() },

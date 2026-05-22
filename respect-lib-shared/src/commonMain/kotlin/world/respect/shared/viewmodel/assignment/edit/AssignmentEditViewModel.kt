@@ -25,9 +25,11 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
 import world.respect.lib.dataloadstate.ext.isReadyAndSettled
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
 import world.respect.lib.xapi.model.VERB_ASSIGN
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
@@ -147,14 +149,10 @@ class AssignmentEditViewModel(
                             ),
                             dataLoadParams = params
                         ).map { result ->
-                            result.statements
-                                .filter { it.isAssignmentStatement }
-                                .maxByOrNull {
-                                    (it.timestamp ?: it.stored)?.toEpochMilliseconds()
-                                        ?: Long.MIN_VALUE
-                                }
-                                ?: throw IllegalStateException()
-                        }
+                            result.statements.mostRecentByTimestampOrNull()?.let {
+                                listOf(it)
+                            } ?: emptyList()
+                        }.firstOrNotLoaded()
                     },
                     uiUpdateFn = { entity ->
                         _uiState.update { prev ->
@@ -297,13 +295,9 @@ class AssignmentEditViewModel(
         val assignment = uiState.value.statementData.dataOrNull() ?: return
 
         launchWithLoadingIndicator {
-            val updatedStatement = assignment.copy(
-                id = null,
-                stored = null,
-                timestamp = Clock.System.now(),
+            schoolDataSource.xapiStatementsResource.post(
+                listOf(assignment.copy(id = Uuid.random()))
             )
-
-            schoolDataSource.xapiStatementsResource.post(listOf(updatedStatement))
 
             if (route.assignmentActivityId == null) {
                 _navCommandFlow.tryEmit(

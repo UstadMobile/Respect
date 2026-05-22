@@ -48,6 +48,7 @@ class XapiStatementsResourceHttp(
                     )
                 )
             }
+            parameters.appendIfNotNull("verb", verb)
             parameters.appendIfNotNull("activity", activity)
             parameters.appendIfNotNull("registration", registration)
             parameters.append("related_activities", relatedActivities.toString())

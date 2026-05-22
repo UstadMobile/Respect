@@ -13,6 +13,7 @@ import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 /**
@@ -67,6 +68,8 @@ interface XapiStatementsResource {
                     registration = params.getUuidOrNull("registration"),
                     relatedActivities = params["related_activities"]?.toBoolean() ?: false,
                     relatedAgents = params["related_agents"]?.toBoolean() ?: false,
+                    since = params["since"]?.let { Instant.parse(it) },
+                    until = params["until"]?.let { Instant.parse(it) },
                     limit = params["limit"]?.toInt(),
                     format = params["format"]?.let { GetStatementFormatEnum.fromValue(it) },
                     attachments = params["attachments"]?.toBoolean() ?: false,

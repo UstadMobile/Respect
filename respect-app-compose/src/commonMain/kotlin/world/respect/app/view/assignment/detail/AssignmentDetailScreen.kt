@@ -49,11 +49,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import io.ktor.http.Url
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
+import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findIcons
 import world.respect.lib.xapi.composites.XapiAssignmentProgress
 import world.respect.lib.xapi.ext.calculatePercentage
@@ -204,9 +208,11 @@ fun AssignmentDetailScreen(
 
                         AssignmentTaskListRow(
                             task = unit,
-                            uiState = uiState,
-                            onClickTask = { onClickTask(unit) },
-                            progress = progress
+                            taskTitle = uiState.assignmentProgress.dataOrNull()
+                                ?.assignmentStatement?.getUnitTitle(unit.id) ?: "",
+                            onTaskClick = { onClickTask(unit) },
+                            progress = progress,
+                            taskInfoFlow = uiState.taskInfoFlow
                         )
                     }
                 }
@@ -363,27 +369,25 @@ fun AssignmentDetailScreen(
 @Composable
 fun AssignmentTaskListRow(
     task: XapiActivity,
-    uiState: AssignmentDetailUiState,
-    onClickTask: () -> Unit,
+    taskTitle: String,
+    onTaskClick: () -> Unit,
     progress: XapiAssignmentProgress? = null,
+    taskInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>>,
 ) {
     val manifestUrl = task.manifestUrl
 
     val infoFlow = remember(manifestUrl) {
-        manifestUrl?.let { uiState.taskInfoFlow(it) } ?: flowOf(DataLoadingState())
+        manifestUrl?.let { taskInfoFlow(it) } ?: flowOf(DataLoadingState())
     }
 
     val state by infoFlow.collectAsState(DataLoadingState())
 
     val iconLink = state.dataOrNull()?.images?.firstOrNull()
 
-    val title =
-        uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.getUnitTitle(task.id) ?: ""
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClickTask() }
+            .clickable { onTaskClick() }
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -398,14 +402,14 @@ fun AssignmentTaskListRow(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = title.firstOrNull()?.toString()?.uppercase() ?: "?",
+                text = taskTitle.firstOrNull()?.toString()?.uppercase() ?: "",
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.titleLarge
             )
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = title,
+                text = taskTitle,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis

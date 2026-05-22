@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -42,7 +41,6 @@ import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.xapi.activityDefinitionTitle
 import world.respect.shared.domain.xapi.manifestUrl
-import world.respect.shared.ext.whenSubscribed
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.navigation.AssignmentDetail
@@ -65,7 +63,6 @@ data class AssignmentDetailUiState(
     val isFullscreen: Boolean = false,
     val isStudent: Boolean = false,
     val canEdit: Boolean = false,
-    val filterActor: XapiActor? = null
 ) {
 
     /**
@@ -232,9 +229,7 @@ class AssignmentDetailViewModel(
                             hideBottomNavigation = isFullscreen,
                             fabState = it.fabState.copy(
                                 visible = canEdit && !isFullscreen
-                            ),
-                            isFullscreen = isFullscreen,
-                            onToggleFullscreen = ::onToggleFullscreen
+                            )
                         )
                     }
                 }
@@ -278,7 +273,6 @@ class AssignmentDetailViewModel(
     }
 
     fun onToggleFullscreen() {
-        //Fix me
         _uiState.update { it.copy(isFullscreen = !it.isFullscreen) }
     }
 }

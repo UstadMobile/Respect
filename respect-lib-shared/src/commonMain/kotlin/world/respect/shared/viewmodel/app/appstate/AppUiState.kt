@@ -30,7 +30,4 @@ data class AppUiState(
     val actionBarButtonState: ActionBarButtonUiState = ActionBarButtonUiState(),
     val settingsIconVisible: Boolean? = null,
     val onClickSettings: (() -> Unit)? = null,
-    val fullscreenToggleVisible: Boolean = false,
-    val isFullscreen: Boolean = false,
-    val onToggleFullscreen: () -> Unit = { },
 )

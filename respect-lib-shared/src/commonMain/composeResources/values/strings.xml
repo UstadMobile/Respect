@@ -601,6 +601,7 @@
     <string name="fingerprint">Fingerprint</string>
     <string name="track_changes">TrackChanges</string>>
     <string name="calendar_month">CalendarMonth</string>>
+    <string name="toggle_fullscreen">Toggle Fullscreen</string>>
 
 
     <string name="xapi_verb_assigned">assigned</string>

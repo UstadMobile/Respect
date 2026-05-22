@@ -80,6 +80,8 @@ import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.task
 import world.respect.shared.generated.resources.tasks
 import world.respect.shared.generated.resources.menu
+import world.respect.shared.generated.resources.task_image
+import world.respect.shared.generated.resources.url
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditUiState
@@ -291,7 +293,7 @@ fun TaskListItem(
             model = iconLink?.let {
                 learningUnit.learningUnitManifestUrl.resolve(it.href).toString()
             },
-            contentDescription = null,
+            contentDescription = stringResource(Res.string.task_image),
             modifier = Modifier.size(40.dp).clip(RoundedCornerShape(4.dp))
         )
 

@@ -10,8 +10,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
@@ -131,7 +133,6 @@ data class AssignmentDetailUiState(
         return if (percentages.isNotEmpty()) percentages.average() else null
     }
 }
-@OptIn(ExperimentalUuidApi::class)
 class AssignmentDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
@@ -151,12 +152,6 @@ class AssignmentDetailViewModel(
 
 
     // Create a shared flow for assignment progress
-    private val assignmentProgressFlow = schoolDataSource.xapiStatementsResource
-        .getAssignmentProgress(
-            activityId = assignmentActivityId,
-            filterByActor = _uiState.value.filterActor
-        )
-        .shareIn(viewModelScope, SharingStarted.Lazily)
 
     init {
         _appUiState.update {
@@ -168,6 +163,7 @@ class AssignmentDetailViewModel(
                 )
             )
         }
+
         _uiState.update {
             it.copy(
                 taskInfoFlow = ::taskInfoFlowFor
@@ -175,58 +171,61 @@ class AssignmentDetailViewModel(
         }
 
         viewModelScope.launch {
-            val filterActor = if (_uiState.value.isStudent) {
-                accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent
-            } else {
-                null
-            }
-            _uiState.update {
-                it.copy(filterActor = filterActor)
-            }
-            assignmentProgressFlow.collect { progressState ->
+            accountManager.selectedAccountAndPersonFlow.filterNotNull().distinctUntilChanged().collectLatest { sessionAndPerson ->
+                val isStudent = sessionAndPerson.person.isStudent()
+                val canEdit = sessionAndPerson.person.isAdminOrTeacher()
+
                 _uiState.update {
-                    it.copy(assignmentProgress = progressState)
-                }
-                val assignmentStatement = progressState.dataOrNull()?.assignmentStatement
-                _appUiState.update { appState ->
-                    appState.copy(
-                        title = assignmentStatement?.activityDefinitionTitle?.asUiText()
+                    it.copy(
+                        isStudent = isStudent,
+                        canEdit = canEdit
                     )
                 }
-            }
-        }
 
-        // Load the actor (group) to ensure all members are loaded
-        viewModelScope.launch {
-            assignmentProgressFlow
-                .mapNotNull { dataState ->
-                    dataState.dataOrNull()?.assignmentStatement?.actor as XapiActor
-                }.distinctUntilChanged().collectLatest { assignStmtActor ->
-                    schoolDataSource.xapiStatementsResource.get(
-                        listParams = XapiStatementsResource.GetStatementParams(
-                            agent = assignStmtActor,
-                            verb = XapiVerb.ID_SAVED
-                        )
-                    )
+                val assignmentProgressFlow = schoolDataSource.xapiStatementsResource.getAssignmentProgress(
+                    activityId = route.assignmentActivityId,
+                    filterByActor = if(sessionAndPerson.person.isStudent()) {
+                        sessionAndPerson.xapiAgent
+                    }else {
+                        null
+                    }
+                ).shareIn(viewModelScope, SharingStarted.Lazily)
+
+                launch {
+                    assignmentProgressFlow.collect { assignmentAndProgress ->
+                        _appUiState.update { appState ->
+                            appState.copy(
+                                title = assignmentAndProgress.dataOrNull()?.assignmentStatement
+                                    ?.activityDefinitionTitle?.asUiText()
+                            )
+                        }
+
+                        _uiState.update {
+                            it.copy(assignmentProgress = assignmentAndProgress)
+                        }
+                    }
                 }
-        }
 
-        // Observe account changes for UI state
-        viewModelScope.launch {
-            _uiState.whenSubscribed {
-                accountManager.selectedAccountAndPersonFlow.collect { selectedAccount ->
-                    val person = selectedAccount?.person
-                    val isStudent = person?.isStudent() == true
-                    val canEdit = person?.isAdminOrTeacher() == true
-
-                    _uiState.update {
-                        it.copy(
-                            isStudent = isStudent,
-                            canEdit = canEdit
+                launch {
+                    //Load the statement for the assigned actor (e.g. group) to ensure the entire definition is loaded
+                    assignmentProgressFlow.mapNotNull {
+                        it.dataOrNull()?.assignmentStatement?.actor
+                    }.distinctUntilChanged().collect { assignedActor ->
+                        schoolDataSource.xapiStatementsResource.get(
+                            listParams = XapiStatementsResource.GetStatementParams(
+                                agent = assignedActor,
+                                verb = XapiVerb.ID_SAVED,
+                            )
                         )
                     }
+                }
+            }
+        }
 
-                    val isFullscreen = _uiState.value.isFullscreen
+        viewModelScope.launch {
+            _uiState.map { Pair(it.isFullscreen, it.canEdit) }
+                .distinctUntilChanged()
+                .collect { (isFullscreen, canEdit) ->
                     _appUiState.update {
                         it.copy(
                             hideAppBar = isFullscreen,
@@ -234,14 +233,13 @@ class AssignmentDetailViewModel(
                             fabState = it.fabState.copy(
                                 visible = canEdit && !isFullscreen
                             ),
-                            fullscreenToggleVisible = true,
                             isFullscreen = isFullscreen,
                             onToggleFullscreen = ::onToggleFullscreen
                         )
                     }
                 }
-            }
         }
+
     }
 
     fun onClickEdit() {
@@ -280,19 +278,7 @@ class AssignmentDetailViewModel(
     }
 
     fun onToggleFullscreen() {
+        //Fix me
         _uiState.update { it.copy(isFullscreen = !it.isFullscreen) }
-        val currentState = _uiState.value
-        _appUiState.update {
-            it.copy(
-                hideAppBar = currentState.isFullscreen,
-                hideBottomNavigation = currentState.isFullscreen,
-                fabState = it.fabState.copy(
-                    visible = currentState.canEdit && !currentState.isFullscreen
-                ),
-                fullscreenToggleVisible = true,
-                isFullscreen = currentState.isFullscreen,
-                onToggleFullscreen = ::onToggleFullscreen
-            )
-        }
     }
 }

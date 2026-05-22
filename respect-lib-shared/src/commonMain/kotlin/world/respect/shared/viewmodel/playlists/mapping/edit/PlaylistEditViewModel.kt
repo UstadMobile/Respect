@@ -454,9 +454,10 @@ class PlaylistEditViewModel(
                 )
                 fromSection.copy(publications = items)
             }
-            prev.copy(feed = prev.feed?.copy(groups = sections))
+             prev.copy(feed = prev.feed?.copy(groups = sections))
         }
     }
+
     fun onClickAddItem(sectionIndex: Int) {
         _uiState.update { it.copy(addItemTypeSectionIndex = sectionIndex) }
     }
@@ -464,6 +465,7 @@ class PlaylistEditViewModel(
     fun onDismissAddItemTypeBottomSheet() {
         _uiState.update { it.copy(addItemTypeSectionIndex = null) }
     }
+
     fun onClickAddItemBrowse() {
         val sectionIndex = _uiState.value.addItemTypeSectionIndex
             ?: throw IllegalStateException(
@@ -482,6 +484,7 @@ class PlaylistEditViewModel(
             )
         )
     }
+
     fun onClickAddItemUseLink() {
         val sectionIndex = _uiState.value.addItemTypeSectionIndex
             ?: throw IllegalStateException(

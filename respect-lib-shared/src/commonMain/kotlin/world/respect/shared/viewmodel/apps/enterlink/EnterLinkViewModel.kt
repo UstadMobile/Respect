@@ -87,7 +87,7 @@ class EnterLinkViewModel(
                     expectedPublicationId = null,
                 )
 
-                if(appResult is DataReadyState) {
+                if (appResult is DataReadyState) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
                             AppsDetail.create(linkUrl)
@@ -108,9 +108,9 @@ class EnterLinkViewModel(
 
     private fun isPlaylistShareLink(url: Url): Boolean {
         val segments = url.pathSegments.filter { it.isNotBlank() }
-        return segments.size >= 3 &&
-                segments[segments.size - 3] == RESPECT_SCHOOL_LINK_SEGMENT &&
-                segments[segments.size - 2] == CreatePlaylistShareLinkUseCase.PATH
+        return segments.size >= PLAYLIST_SHARE_LINK_SEGMENTS_TO_DROP &&
+                segments[segments.size - SCHOOL_LINK_SEGMENT_INDEX] == RESPECT_SCHOOL_LINK_SEGMENT &&
+                segments[segments.size - PLAYLIST_SHARE_PATH_INDEX] == CreatePlaylistShareLinkUseCase.PATH
     }
 
     private fun resolvePlaylistUrlFromShareLink(shareLink: Url): Url {
@@ -118,9 +118,15 @@ class EnterLinkViewModel(
         return URLBuilder(shareLink).apply {
             pathSegments = shareLink.pathSegments
                 .filter { it.isNotBlank() }
-                .dropLast(3) +
+                .dropLast(PLAYLIST_SHARE_LINK_SEGMENTS_TO_DROP) +
                     listOf(OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME, playlistUuid)
         }.build()
     }
+
+    companion object {
+        private const val PLAYLIST_SHARE_LINK_SEGMENTS_TO_DROP = 3
+        private const val SCHOOL_LINK_SEGMENT_INDEX = 3
+        private const val PLAYLIST_SHARE_PATH_INDEX = 2
     }
+}
 

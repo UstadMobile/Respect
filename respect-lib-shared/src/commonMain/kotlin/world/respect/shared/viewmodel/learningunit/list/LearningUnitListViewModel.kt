@@ -248,7 +248,8 @@ class LearningUnitListViewModel(
     }
 
     private fun toggleSelection(publication: OpdsPublication) {
-        val id = publication.metadata.identifier?.toString() ?: return
+        val id = publication.metadata.identifier?.toString()
+            ?: throw IllegalStateException("Publication has no identifier: ${publication.metadata.title}")
         _uiState.update { prev ->
             val updated = if (id in prev.selectedPublications) {
                 prev.selectedPublications - id
@@ -411,7 +412,8 @@ class PlaylistDetailViewModel(
     }
 
     fun onClickCopyPlaylist() {
-        val feed = _uiState.value.feed ?: return
+        val feed = _uiState.value.feed
+            ?: throw IllegalStateException("onClickCopyPlaylist called but feed is null")
         _uiState.update {
             it.copy(
                 showCopyDialog = true,
@@ -476,8 +478,10 @@ class PlaylistDetailViewModel(
 
     fun onDeleteDialogConfirm() {
         viewModelScope.launch {
-            val feed = _uiState.value.feed ?: return@launch
-            val selfUrl = feed.selfUrl() ?: return@launch
+            val feed = _uiState.value.feed
+                ?: throw IllegalStateException("feed is null")
+            val selfUrl = feed.selfUrl()
+                ?: throw IllegalStateException("Cannot delete playlist: feed has no self URL")
 
             schoolDataSource.opdsFeedDataSource.deleteByUrl(selfUrl)
 

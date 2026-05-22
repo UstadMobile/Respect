@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.playlists.mapping.edit
+package world.respect.shared.viewmodel.playlists.mapping.externallink
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -149,12 +149,12 @@ class ExternalLinkViewModel(
             links = listOf(
                 ReadiumLink(
                     href = state.url,
-                    rel = listOf("self"),
-                    type = "text/html",
+                    rel = listOf(REL_SELF),
+                    type = TYPE_HTML,
                 )
             ),
             images = state.imageUrl?.let {
-                listOf(ReadiumLink(href = it, type = "image/*"))
+                listOf(ReadiumLink(href = it, type = TYPE_IMAGE))
             }
         )
 
@@ -174,5 +174,10 @@ class ExternalLinkViewModel(
                 inclusive = false,
             )
         )
+    }
+    companion object {
+        private const val REL_SELF = "self"
+        private const val TYPE_HTML = "text/html"
+        private const val TYPE_IMAGE = "image/*"
     }
 }

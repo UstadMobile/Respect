@@ -15,17 +15,22 @@ class OpenExternalLinkUseCaseAndroid(
         try {
             val intent = Intent(
                 appContext,
-                Class.forName("world.respect.WebViewActivity")
+                Class.forName(WEB_VIEW_ACTIVITY_CLASS_NAME)
             )
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             intent.putExtra(LaunchAppUseCaseAndroid.EXTRA_URL, url)
             if (title != null) {
-                intent.putExtra("title", title)
+                intent.putExtra(EXTRA_TITLE, title)
             }
             appContext.startActivity(intent)
         } catch (e: Exception) {
             throw IllegalStateException("Failed to open external link: $url", e)
         }
+    }
+
+    companion object {
+        private const val WEB_VIEW_ACTIVITY_CLASS_NAME = "world.respect.WebViewActivity"
+        private const val EXTRA_TITLE = "title"
     }
 }
 

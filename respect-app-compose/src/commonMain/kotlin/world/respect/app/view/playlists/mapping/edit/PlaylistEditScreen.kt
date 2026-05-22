@@ -272,11 +272,14 @@ private fun PlaylistSectionEditItem(
                 .padding(horizontal = 16.dp),
         ) {
             IconButton(
-                onClick = {},
-                modifier = dragHandleModifier,
-            ) {
-                Icon(imageVector = Icons.Filled.DragHandle, contentDescription = null)
-            }
+                 onClick = {},
+                 modifier = dragHandleModifier,
+             ) {
+                 Icon(
+                     imageVector = Icons.Filled.DragHandle,
+                     contentDescription = stringResource(Res.string.move),
+                 )
+             }
 
             OutlinedTextField(
                 value = section.metadata.title,
@@ -399,17 +402,20 @@ private fun PlaylistNavItemRow(
             .fillMaxWidth()
             .testTag("nav_item_${sectionIndex}_$itemIndex"),
     ) {
-        IconButton(onClick = {}, modifier = dragHandleModifier) {
-            Icon(imageVector = Icons.Filled.DragHandle, contentDescription = null)
-        }
-        ListItem(
-            headlineContent = {
-                Text(
-                    text = navLink.title?.takeIf { it.isNotBlank() } ?: navLink.href,
-                )
-            },
-            modifier = Modifier.weight(1f),
-        )
+         IconButton(onClick = {}, modifier = dragHandleModifier) {
+             Icon(
+                 imageVector = Icons.Filled.DragHandle,
+                 contentDescription = stringResource(Res.string.move),
+             )
+         }
+         ListItem(
+             headlineContent = {
+                 Text(
+                     text = navLink.title?.takeIf { it.isNotBlank() } ?: navLink.href,
+                 )
+             },
+             modifier = Modifier.weight(1f),
+         )
         Box {
             ItemMenuButton(
                 sectionIndex = sectionIndex,
@@ -438,16 +444,19 @@ private fun PlaylistPublicationItemRow(
             .fillMaxWidth()
             .testTag("pub_item_${sectionIndex}_$itemIndex"),
     ) {
-        IconButton(onClick = {}, modifier = dragHandleModifier) {
-            Icon(imageVector = Icons.Filled.DragHandle, contentDescription = null)
-        }
-        ListItem(
-            headlineContent = { Text(text = publication.metadata.title.getTitle()) },
-            supportingContent = {
-                publication.metadata.description?.let { Text(text = it) }
-            },
-            modifier = Modifier.weight(1f),
-        )
+         IconButton(onClick = {}, modifier = dragHandleModifier) {
+             Icon(
+                 imageVector = Icons.Filled.DragHandle,
+                 contentDescription = stringResource(Res.string.move),
+             )
+         }
+         ListItem(
+             headlineContent = { Text(text = publication.metadata.title.getTitle()) },
+             supportingContent = {
+                 publication.metadata.description?.let { Text(text = it) }
+             },
+             modifier = Modifier.weight(1f),
+         )
         Box {
             ItemMenuButton(
                 sectionIndex = sectionIndex,

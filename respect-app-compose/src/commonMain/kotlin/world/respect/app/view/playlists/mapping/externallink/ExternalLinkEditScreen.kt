@@ -1,4 +1,4 @@
-package world.respect.app.view.playlists.mapping.edit
+package world.respect.app.view.playlists.mapping.externallink
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -38,8 +38,8 @@ import world.respect.shared.generated.resources.next
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.title
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.viewmodel.playlists.mapping.edit.ExternalLinkUiState
-import world.respect.shared.viewmodel.playlists.mapping.edit.ExternalLinkViewModel
+import world.respect.shared.viewmodel.playlists.mapping.externallink.ExternalLinkUiState
+import world.respect.shared.viewmodel.playlists.mapping.externallink.ExternalLinkViewModel
 @Composable
 fun ExternalLinkScreenForViewModel(
     viewModel: ExternalLinkViewModel,

@@ -76,5 +76,15 @@ class OpdsFeedDataSourceRepository(
 
     override suspend fun deleteByUrl(url: Url) {
         local.deleteByUrl(url)
+        val timeNow = systemTimeInMillis()
+        remoteWriteQueue.add(
+            listOf(
+                WriteQueueItem(
+                    model = WriteQueueItem.Model.OPDS_FEED,
+                    uid = url.toString(),
+                    timeQueued = timeNow,
+                )
+            )
+        )
     }
 }

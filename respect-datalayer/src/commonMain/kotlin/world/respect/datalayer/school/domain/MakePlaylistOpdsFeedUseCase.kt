@@ -31,7 +31,7 @@ class MakePlaylistOpdsFeedUseCase(
         val feedUrl = schoolUrl.appendEndpointSegments("playlist/$uuid")
 
         val ownerLink = ReadiumLink(
-            href = "${schoolUrl}user/$username",
+            href = getUserProfileUrl(schoolUrl, username),
             rel = listOf(REL_OWNER),
         )
 
@@ -46,6 +46,15 @@ class MakePlaylistOpdsFeedUseCase(
 
     companion object {
         const val REL_OWNER = "https://respect.ustadmobile.com/ns/owner"
+        private const val PATH_USER = "user"
+
+        /**
+         * Centralized way to build the user profile URL.
+         * Uses appendEndpointSegments from UrlExt.kt to ensure correct slash handling.
+         */
+        fun getUserProfileUrl(schoolUrl: Url, username: String): String {
+            return schoolUrl.appendEndpointSegments(PATH_USER, username).toString()
+        }
 
     }
 }

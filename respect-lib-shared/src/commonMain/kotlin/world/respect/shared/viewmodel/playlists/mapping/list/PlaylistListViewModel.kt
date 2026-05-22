@@ -40,6 +40,7 @@ data class PlaylistListUiState(
     val activeFilter: PlaylistFilter = PlaylistFilter.ALL,
     val isTeacherOrAdmin: Boolean = false,
     val activeUserOwnerHref: String = "",
+    val activeUsername: String = "",
     val isFabMenuExpanded: Boolean = false,
 ) {
     val showPlaylists: List<OpdsFeed>
@@ -88,14 +89,18 @@ class PlaylistListViewModel(
             accountManager.selectedAccountAndPersonFlow.collect { sessionAndPerson ->
                 val isTeacherOrAdmin = sessionAndPerson?.person?.isAdmin() == true
 
+                val username = sessionAndPerson?.let { getActiveUsernameUseCase() } ?: ""
                 val activeUserOwnerHref = sessionAndPerson?.let {
-                    val username = getActiveUsernameUseCase()
-                    "${it.session.account.school.self}user/$username"
+                    MakePlaylistOpdsFeedUseCase.getUserProfileUrl(
+                        schoolUrl = it.session.account.school.self,
+                        username = username
+                    )
                 } ?: ""
                 _uiState.update {
                     it.copy(
                         isTeacherOrAdmin = isTeacherOrAdmin,
                         activeUserOwnerHref = activeUserOwnerHref,
+                        activeUsername = username,
                     )
                 }
 

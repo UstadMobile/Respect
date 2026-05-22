@@ -22,7 +22,15 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.*
+import world.respect.shared.generated.resources.add_from_a_link
+import world.respect.shared.generated.resources.add_new
+import world.respect.shared.generated.resources.all
+import world.respect.shared.generated.resources.created_by
+import world.respect.shared.generated.resources.empty
+import world.respect.shared.generated.resources.my_playlists
+import world.respect.shared.generated.resources.no_playlist_yet
+import world.respect.shared.generated.resources.no_playlist_yet_description
+import world.respect.shared.generated.resources.sections_and_items
 import world.respect.shared.viewmodel.playlists.mapping.list.*
 
 @Composable
@@ -83,11 +91,11 @@ fun PlaylistListScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Image(
-                        painter = painterResource(Res.drawable.empty),
-                        contentDescription = null,
-                        modifier = Modifier.size(200.dp),
-                        contentScale = ContentScale.Fit,
-                    )
+                         painter = painterResource(Res.drawable.empty),
+                         contentDescription = stringResource(Res.string.no_playlist_yet),
+                         modifier = Modifier.size(200.dp),
+                         contentScale = ContentScale.Fit,
+                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(stringResource(Res.string.no_playlist_yet))
                     Text(stringResource(Res.string.no_playlist_yet_description))
@@ -103,6 +111,10 @@ fun PlaylistListScreen(
                     ) { _, feed ->
                         PlaylistListItem(
                             feed = feed,
+                            ownerUsername = if (feed.links.any {
+                                    it.rel?.contains(MakePlaylistOpdsFeedUseCase.REL_OWNER) == true
+                                            && it.href == uiState.activeUserOwnerHref
+                                }) uiState.activeUsername else null,
                             onClickFeed = { onClickPlaylist(feed) },
                         )
                     }
@@ -127,23 +139,19 @@ fun PlaylistListScreen(
                 horizontalAlignment = Alignment.End,
             ) {
                 ExtendedFloatingActionButton(
-                    modifier = Modifier
-                        .testTag("add_new"),
-                    onClick = onClickAddNew,
-                    icon =
-                        { Icon(Icons.Filled.Add, null) },
-                    text
-                    = { Text(stringResource(Res.string.add_new)) },
-                )
-                ExtendedFloatingActionButton(
-                    modifier = Modifier
-                        .testTag("add_from_a_link"),
-                    onClick = onClickAddFromLink,
-                    icon =
-                        { Icon(Icons.Filled.Link, null) },
-                    text =
-                        { Text(stringResource(Res.string.add_from_a_link)) },
-                )
+                     modifier = Modifier
+                         .testTag("add_new"),
+                     onClick = onClickAddNew,
+                     icon = { Icon(Icons.Filled.Add, null) },
+                     text = { Text(stringResource(Res.string.add_new)) },
+                 )
+                 ExtendedFloatingActionButton(
+                     modifier = Modifier
+                         .testTag("add_from_a_link"),
+                     onClick = onClickAddFromLink,
+                     icon = { Icon(Icons.Filled.Link, null) },
+                     text = { Text(stringResource(Res.string.add_from_a_link)) },
+                 )
             }
         }
     }
@@ -152,32 +160,23 @@ fun PlaylistListScreen(
 @Composable
 private fun PlaylistListItem(
     feed: OpdsFeed,
+    ownerUsername: String?,
     onClickFeed: () -> Unit,
 ) {
     val sectionCount = feed.groups?.size ?: 0
     val itemCount = feed.groups?.sumOf { group ->
         (group.publications?.size ?: 0) + (group.navigation?.size ?: 0)
     } ?: 0
-
-    val ownerUsername = feed.links
-        .firstOrNull { link ->
-            link.rel?.contains(MakePlaylistOpdsFeedUseCase.REL_OWNER) == true
-        }
-        ?.href
-        ?.trimEnd('/')
-        ?.substringAfterLast('/')
-        ?.takeIf { it.isNotBlank() }
-
-    ListItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClickFeed() },
-        leadingContent = {
-            Icon(
-                imageVector = Icons.Filled.Book,
-                contentDescription = null,
-            )
-        },
+         ListItem(
+             modifier = Modifier
+                 .fillMaxWidth()
+                 .clickable { onClickFeed() },
+             leadingContent = {
+                 Icon(
+                     imageVector = Icons.Filled.Book,
+                     contentDescription = feed.metadata.title,
+                 )
+             },
         headlineContent = {
             Text(feed.metadata.title)
         },

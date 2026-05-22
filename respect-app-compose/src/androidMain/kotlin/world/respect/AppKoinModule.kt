@@ -161,7 +161,6 @@ import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
-import world.respect.shared.domain.sharelink.CreatePlaylistShareLinkUseCase
 import world.respect.shared.domain.storage.CachePathsProviderAndroid
 import world.respect.shared.domain.storage.GetAndroidSdCardDirUseCase
 import world.respect.shared.domain.storage.GetOfflineStorageOptionsUseCaseAndroid
@@ -239,7 +238,7 @@ import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
-import world.respect.shared.viewmodel.playlists.mapping.edit.ExternalLinkViewModel
+import world.respect.shared.viewmodel.playlists.mapping.externallink.ExternalLinkViewModel
 import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
 import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel

@@ -9,7 +9,6 @@ import androidx.navigation.compose.composable
 import world.respect.app.view.acknowledgement.AcknowledgementScreen
 import world.respect.app.view.apps.detail.AppsDetailScreen
 import world.respect.app.view.apps.enterlink.EnterLinkScreen
-import world.respect.app.view.apps.launcher.AppLauncherScreen
 import world.respect.app.view.apps.list.AppListScreen
 import world.respect.app.view.assignment.detail.AssignmentDetailScreen
 import world.respect.app.view.assignment.edit.AssignmentEditScreen
@@ -48,7 +47,7 @@ import world.respect.app.view.person.passkeyList.PasskeyListScreen
 import world.respect.app.view.person.qrcode.InviteQrScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetPasswordScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetUsernameScreen
-import world.respect.app.view.playlists.mapping.edit.ExternalLinkScreenForViewModel
+import world.respect.app.view.playlists.mapping.externallink.ExternalLinkScreenForViewModel
 import world.respect.app.view.playlists.mapping.edit.PlaylistEditScreenForViewModel
 import world.respect.app.view.playlists.mapping.list.PlaylistListScreenForViewModel
 import world.respect.app.view.playlists.mapping.share.PlaylistShareScreenForViewModel
@@ -128,7 +127,6 @@ import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 import world.respect.shared.viewmodel.apps.enterlink.EnterLinkViewModel
-import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel

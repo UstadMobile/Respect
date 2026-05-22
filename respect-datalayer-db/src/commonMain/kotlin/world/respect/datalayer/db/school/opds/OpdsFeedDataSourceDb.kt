@@ -23,6 +23,7 @@ import world.respect.datalayer.db.school.opds.entities.OpdsFeedEntity
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
@@ -151,7 +152,7 @@ class OpdsFeedDataSourceDb(
         val playlistPrefix =
             schoolUrl.appendEndpointSegments(OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME)
                 .toString() + "/"
-        return schoolDb.getOpdsFeedEntityDao().findByUrlPrefixAsFlow(playlistPrefix)
+        return schoolDb.getOpdsFeedEntityDao().findByUrlPrefixAsFlow(playlistPrefix, includeDeleted = false)
             .map { feedEntities ->
                 schoolDb.useReaderConnection {
                     DataReadyState(
@@ -160,21 +161,18 @@ class OpdsFeedDataSourceDb(
                 }
             }
     }
-
     override suspend fun deleteByUrl(url: Url) {
         val feedUid = uidNumberMapper(url.toString())
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                schoolDb.getOpdsFeedEntityDao().deleteByFeedUid(feedUid)
-                schoolDb.getOpdsFeedMetadataEntityDao().deleteByFeedUid(feedUid)
-                schoolDb.getLangMapEntityDao().deleteAllByFeedUid(feedUid)
-                schoolDb.getReadiumLinkEntityDao().deleteAllByFeedUid(feedUid)
-                schoolDb.getOpdsPublicationEntityDao().deleteAllByFeedUid(feedUid)
-                schoolDb.getOpdsGroupEntityDao().deleteByFeedUid(feedUid)
+                schoolDb.getOpdsFeedEntityDao().updateStatusByFeedUid(
+                    feedUid = feedUid,
+                    status = StatusEnum.TO_BE_DELETED,
+                    lastModified = Clock.System.now()
+                )
             }
         }
     }
-
     override suspend fun updateLocal(
         url: Url,
         dataLoadResult: DataReadyState<OpdsFeed>,

@@ -297,7 +297,11 @@ class AssignmentEditViewModel(
         val assignment = uiState.value.statementData.dataOrNull() ?: return
 
         launchWithLoadingIndicator {
-            val updatedStatement = assignment.copy(timestamp = Clock.System.now())
+            val updatedStatement = assignment.copy(
+                id = null,
+                stored = null,
+                timestamp = Clock.System.now(),
+            )
 
             schoolDataSource.xapiStatementsResource.post(listOf(updatedStatement))
 

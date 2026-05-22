@@ -119,21 +119,6 @@ fun XapiStatement.withDeadline(deadline: Instant?): XapiStatement {
     )
 }
 
-@OptIn(ExperimentalUuidApi::class)
-fun XapiStatement.withLearningUnits(learningUnits: List<AssignmentLearningUnitRef>): XapiStatement {
-    val newGrouping = learningUnits.map { ref ->
-        XapiActivity(
-            id = ref.learningUnitManifestUrl.toString(),
-            objectType = XapiObjectType.Activity,
-        )
-    }
-    val newContext = (context ?: XapiContext()).copy(
-        contextActivities = (context?.contextActivities ?: XapiContextActivities()).copy(
-            grouping = newGrouping
-        )
-    )
-    return copy(context = newContext)
-}
 
 @OptIn(ExperimentalUuidApi::class)
 fun XapiStatement.withLearningUnitActivities(activities: List<XapiActivity>): XapiStatement {

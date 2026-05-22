@@ -61,7 +61,7 @@ fun Person.asXapiAgent(
         name = "$givenName $familyName",
         account = XapiAccount(
             homePage = accountUrl.toString(),
-            name = username ?: guid
+            name = guid,
         )
     )
 }

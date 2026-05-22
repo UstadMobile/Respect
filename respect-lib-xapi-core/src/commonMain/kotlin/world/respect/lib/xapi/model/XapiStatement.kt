@@ -71,7 +71,7 @@ object XapiStatementTransformingSerializer: JsonTransformingSerializer<XapiState
             val objectType = jsonObject["objectType"]?.jsonPrimitive?.content
             putAllExcept(
                 other = jsonObject,
-                exceptKeys = if(objectType == "SubStatement") {
+                exceptKeys = if(objectType == XapiObjectType.SubStatement.value) {
                     substatementExcludedProperties
                 }else {
                     statementExcludedProperties

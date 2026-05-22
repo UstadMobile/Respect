@@ -22,9 +22,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
@@ -37,13 +42,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import io.ktor.http.Url
+import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.lib.dataloadstate.DataLoadingState
@@ -68,6 +74,7 @@ import world.respect.shared.generated.resources.no_data
 import world.respect.shared.generated.resources.no_student_data_available
 import world.respect.shared.generated.resources.percentage_format
 import world.respect.shared.generated.resources.task_image
+import world.respect.shared.generated.resources.toggle_fullscreen
 import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailUiState
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
@@ -85,7 +92,8 @@ fun AssignmentDetailScreen(
     AssignmentDetailScreen(
         uiState = uiState,
         onStatusFilterChanged = viewModel::onStatusFilterChanged,
-        onClickTask = viewModel::onClickTask
+        onClickTask = viewModel::onClickTask,
+        onToggleFullscreen = viewModel::onToggleFullscreen
     )
 }
 
@@ -95,228 +103,256 @@ fun AssignmentDetailScreen(
     uiState: AssignmentDetailUiState,
     onStatusFilterChanged: (AssignmentStatusFilter) -> Unit = { },
     onClickTask: (XapiActivity) -> Unit = { },
+    onToggleFullscreen: () -> Unit = { },
 ) {
     val horizontalScrollState = rememberScrollState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        if (!uiState.isFullscreen) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultItemPadding()
-            ) {
-                Text(
-                    text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.assignmentDescription
-                        ?: "",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Row(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            if (!uiState.isFullscreen) {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        .defaultItemPadding()
                 ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(Res.string.deadline),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray
-                        )
-                        Text(
-                            text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.assignmentDeadline?.toDisplayDateString()
-                                ?: "",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
-                        )
+                    Text(
+                        text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.assignmentDescription
+                            ?: "",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(Res.string.deadline),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.Gray
+                            )
+                            Text(
+                                text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.assignmentDeadline?.toDisplayDateString()
+                                    ?: "",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(Res.string.assigned_to),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.Gray
+                            )
+                            Text(
+                                text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.actor?.name.orEmpty(),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.Gray
+                            )
+                        }
                     }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(Res.string.assigned_to),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.Gray
-                        )
-                        Text(
-                            text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.actor?.name.orEmpty(),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
-                        )
-                    }
-                }
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .defaultItemPadding(top = 16.dp, bottom = 4.dp),
-                    thickness = 1.dp
-                )
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = if (uiState.isFullscreen) 8.dp else 0.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            AssignmentStatusFilter.entries.forEach { filter ->
-                val count = uiState.statusCounts[filter] ?: 0
-                FilterChip(
-                    selected = uiState.selectedStatusFilter == filter,
-                    onClick = { onStatusFilterChanged(filter) },
-                    label = {
-                        Text(
-                            text = "${stringResource(filter.titleRes)} ($count)",
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    },
-                    shape = RoundedCornerShape(50)
-                )
-            }
-        }
-
-        if (uiState.isStudent) {
-            val units = uiState.tasks
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .defaultItemPadding(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(units) { unit ->
-                    val studentProgress =
-                        uiState.assignmentProgressList.firstOrNull()
-
-                    val progress = remember(studentProgress, unit.id) {
-                        studentProgress?.progress
-                            ?.find { it.activityId == unit.id }
-                    }
-                    AssignmentTaskListRow(
-                        unit = unit,
-                        uiState = uiState,
-                        onClickTask = { onClickTask(unit) },
-                        progress = progress
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultItemPadding(top = 16.dp, bottom = 4.dp),
+                        thickness = 1.dp
                     )
                 }
             }
-        } else {
-            BoxWithConstraints(
+
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .weight(1f)
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp, vertical = if (uiState.isFullscreen) 8.dp else 0.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val nameColWidth = minOf(maxWidth / 3, (NAME_COLUMN_WIDTH).dp)
-                val taskColWidth = (TASK_COLUMN_WIDTH).dp
-                val headerHeight = minOf(maxHeight / 2, (HEADER_HEIGHT).dp)
+                AssignmentStatusFilter.entries.forEach { filter ->
+                    val count = uiState.statusCounts[filter] ?: 0
+                    FilterChip(
+                        selected = uiState.selectedStatusFilter == filter,
+                        onClick = { onStatusFilterChanged(filter) },
+                        label = {
+                            Text(
+                                text = "${stringResource(filter.titleRes)} ($count)",
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                        },
+                        shape = RoundedCornerShape(50)
+                    )
+                }
+            }
 
-                val assignmentResults = uiState.rowsToDisplay
+            if (uiState.isStudent) {
+                val units = uiState.tasks
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .defaultItemPadding(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(units) { unit ->
+                        val studentProgress =
+                            uiState.assignmentProgressList.firstOrNull()
 
-                if (assignmentResults.isNotEmpty()) {
-                    val tasks = uiState.tasks
-
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        // STICKY HEADER: Task Icons and Names
-                        stickyHeader {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(headerHeight),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Spacer(
-                                    Modifier
-                                        .width(nameColWidth)
-                                        .height(headerHeight)
-                                )
-
-                                // Scrollable Task Headers
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .horizontalScroll(horizontalScrollState),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    tasks.forEach { unit ->
-                                        val manifestUrl = unit.manifestUrl ?: Url(unit.id)
-
-                                        val info by uiState.taskInfoFlow(manifestUrl)
-                                            .collectAsState(DataLoadingState())
-
-                                        val title =
-                                            uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.getUnitTitle(
-                                                unit.id
-                                            ) ?: ""
-
-                                        val iconUrl =
-                                            info.dataOrNull()?.findIcons()?.firstOrNull()?.let {
-                                                manifestUrl.resolve(it.href).toString()
-                                            }
-
-                                        TaskHeaderCell(
-                                            title,
-                                            iconUrl,
-                                            taskColWidth,
-                                            headerHeight
-                                        )
-                                    }
-                                    Box(
-                                        modifier = Modifier
-                                            .width(taskColWidth)
-                                            .height(headerHeight),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = stringResource(Res.string.average),
-                                            modifier = Modifier.rotate(-90f),
-                                            textAlign = TextAlign.Center,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                    }
-                                }
-                            }
+                        val progress = remember(studentProgress, unit.id) {
+                            studentProgress?.progress
+                                ?.find { it.activityId == unit.id }
                         }
 
-                        items(assignmentResults, key = { it.personUid }) { student ->
-                            Row(modifier = Modifier.fillMaxWidth()) {
-                                // Fixed Student Name Column
-                                StudentNameCell(student.personName, nameColWidth)
-                                // Scrollable Grades/Progress Cells
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .horizontalScroll(horizontalScrollState)
-                                ) {
-                                    tasks.forEach { unit ->
-                                        val progress = student.progress.find {
-                                            it.activityId == unit.id
-                                        }
-                                        GradeCell(progress?.calculatePercentage(), taskColWidth)
-                                    }
-                                    // Average Score Cell
-                                    AverageCell(
-                                        uiState.getAverageForStudent(student.personUid),
-                                        taskColWidth
-                                    )
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.no_student_data_available),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
+                        AssignmentTaskListRow(
+                            task = unit,
+                            uiState = uiState,
+                            onClickTask = { onClickTask(unit) },
+                            progress = progress
                         )
                     }
                 }
+            } else {
+                BoxWithConstraints(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f)
+                ) {
+                    val nameColWidth = minOf(maxWidth / 3, (NAME_COLUMN_WIDTH).dp)
+                    val taskColWidth = (TASK_COLUMN_WIDTH).dp
+                    val headerHeight = minOf(maxHeight / 2, (HEADER_HEIGHT).dp)
+
+                    val assignmentResults = uiState.rowsToDisplay
+
+                    if (assignmentResults.isNotEmpty()) {
+                        val tasks = uiState.tasks
+
+                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                            // STICKY HEADER: Task Icons and Names
+                            stickyHeader {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(headerHeight)
+                                        .background(MaterialTheme.colorScheme.surface),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Spacer(
+                                        Modifier
+                                            .width(nameColWidth)
+                                            .height(headerHeight)
+                                    )
+
+                                    // Scrollable Task Headers
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .horizontalScroll(horizontalScrollState),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        tasks.forEach { unit ->
+                                            val manifestUrl = unit.manifestUrl
+
+                                            val infoFlow = remember(manifestUrl) {
+                                                manifestUrl?.let { uiState.taskInfoFlow(it) } ?: flowOf(DataLoadingState())
+                                            }
+                                            val info by infoFlow.collectAsState(DataLoadingState())
+
+                                            val title = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.getUnitTitle(unit.id) ?: ""
+
+                                            val iconUrl =
+                                                info.dataOrNull()?.findIcons()?.firstOrNull()?.let {
+                                                    manifestUrl?.resolve(it.href).toString()
+                                                }
+
+                                            TaskHeaderCell(
+                                                title = title,
+                                                iconUrl = iconUrl,
+                                                width = taskColWidth,
+                                                height = headerHeight
+                                            )
+                                        }
+                                        Box(
+                                            modifier = Modifier
+                                                .width(taskColWidth)
+                                                .height(headerHeight),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = stringResource(Res.string.average),
+                                                modifier = Modifier.rotate(-90f),
+                                                textAlign = TextAlign.Center,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            items(assignmentResults, key = { it.personUid }) { student ->
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    // Fixed Student Name Column
+                                    StudentNameCell(student.personName, nameColWidth)
+                                    // Scrollable Grades/Progress Cells
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .horizontalScroll(horizontalScrollState)
+                                    ) {
+                                        tasks.forEach { unit ->
+                                            val progress = student.progress.find {
+                                                it.activityId == unit.id
+                                            }
+                                            GradeCell(progress?.calculatePercentage(), taskColWidth)
+                                        }
+                                        // Average Score Cell
+                                        AverageCell(
+                                            uiState.getAverageForStudent(student.personUid),
+                                            taskColWidth
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.no_student_data_available),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!uiState.isStudent) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .defaultItemPadding(bottom = 64.dp),
+                horizontalAlignment = Alignment.End
+            ) {
+                FloatingActionButton(
+                    onClick = onToggleFullscreen,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .testTag("fullscreen_toggle_button"),
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ) {
+                    Icon(
+                        imageVector = if (uiState.isFullscreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen,
+                        contentDescription = stringResource(Res.string.toggle_fullscreen)
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
             }
         }
     }
@@ -326,21 +362,23 @@ fun AssignmentDetailScreen(
 
 @Composable
 fun AssignmentTaskListRow(
-    unit: XapiActivity,
+    task: XapiActivity,
     uiState: AssignmentDetailUiState,
     onClickTask: () -> Unit,
     progress: XapiAssignmentProgress? = null,
 ) {
-    val manifestUrl = unit.manifestUrl ?: Url(unit.id)
+    val manifestUrl = task.manifestUrl
 
-    val infoFlow = remember(manifestUrl) { uiState.taskInfoFlow(manifestUrl) }
+    val infoFlow = remember(manifestUrl) {
+        manifestUrl?.let { uiState.taskInfoFlow(it) } ?: flowOf(DataLoadingState())
+    }
 
     val state by infoFlow.collectAsState(DataLoadingState())
 
     val iconLink = state.dataOrNull()?.images?.firstOrNull()
 
     val title =
-        uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.getUnitTitle(unit.id) ?: ""
+        uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.getUnitTitle(task.id) ?: ""
 
     Row(
         modifier = Modifier
@@ -373,7 +411,7 @@ fun AssignmentTaskListRow(
                 overflow = TextOverflow.Ellipsis
             )
 
-            if (iconLink != null) {
+            if (iconLink != null && manifestUrl != null) {
                 AsyncImage(
                     model = manifestUrl.resolve(iconLink.href).toString(),
                     contentDescription = stringResource(Res.string.task_image),

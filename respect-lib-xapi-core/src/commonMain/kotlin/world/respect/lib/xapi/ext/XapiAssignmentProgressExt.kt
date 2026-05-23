@@ -3,6 +3,13 @@ package world.respect.lib.xapi.ext
 import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
 import world.respect.lib.xapi.composites.XapiAssignmentProgress
 
+fun List<XapiAssignmentProgress>.averageScore(): XapiAssignmentProgress {
+    return XapiAssignmentProgress(
+        activityId = "",
+        scoreScaled = mapNotNull { it.scoreScaled }.takeIf { it.isNotEmpty() }?.average()?.toFloat()
+    )
+}
+
 /**
  * Calculates the display percentage for an assignment progress unit.
  */
@@ -16,10 +23,6 @@ val XapiActorAndAssignmentProgress.personUid: String
 val XapiActorAndAssignmentProgress.isStarted: Boolean
     get() = progress.any { it.completed == true || (it.progress ?: 0) > 0 }
 
-fun XapiActorAndAssignmentProgress.isCompleted(unitActivityIds: List<String>): Boolean {
-    if (unitActivityIds.isEmpty()) return false
-    val progressMap = progress.associateBy { it.activityId }
-    return unitActivityIds.all { id ->
-        progressMap[id]?.completed == true
-    }
+fun XapiActorAndAssignmentProgress.isCompleted(): Boolean {
+    return progress.all { it.completed == true }
 }

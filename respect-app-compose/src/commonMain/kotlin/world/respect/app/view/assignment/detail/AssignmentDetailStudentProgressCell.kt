@@ -57,10 +57,17 @@ fun AssignmentDetailStudentProgressCell(
                             }
                         )
                 ) {
+                    val currentTextStyle = LocalTextStyle.current
                     Text(
                         text = "${(score * 100).roundToInt()}%",
                         modifier = Modifier.align(Alignment.Center),
-                        style = LocalTextStyle.current.copy()//Can set color here if/when needed
+                        style = currentTextStyle.copy(
+                            color = if(progress.successful != null) {
+                                Color.White
+                            }else {
+                                currentTextStyle.color
+                            }
+                        )
                     )
                 }
             }

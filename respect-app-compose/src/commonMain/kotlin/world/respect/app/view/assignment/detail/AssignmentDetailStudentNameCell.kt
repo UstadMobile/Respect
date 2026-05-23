@@ -19,12 +19,12 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import world.respect.app.components.RespectPersonAvatar
 
 @Composable
-fun StudentNameCell(name: String, width: Dp) {
+fun StudentNameCell(
+    name: String,
+    modifier: Modifier
+) {
     Box(
-        modifier = Modifier
-            .width(width)
-            .height(48.dp)
-            .padding(8.dp),
+        modifier = modifier,
         contentAlignment = Alignment.CenterStart
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -46,5 +46,5 @@ fun StudentNameCell(name: String, width: Dp) {
 @Preview
 @Composable
 fun StudentNameCellPreview() {
-    StudentNameCell("John Doe", 120.dp)
+    StudentNameCell("John Doe", Modifier.width(120.dp).height(80.dp))
 }

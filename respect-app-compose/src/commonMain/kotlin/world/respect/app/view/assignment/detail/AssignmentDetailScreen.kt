@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.FullscreenExit
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
@@ -41,12 +42,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -66,9 +64,11 @@ import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
 import world.respect.lib.xapi.composites.XapiAssignmentProgress
 import world.respect.lib.xapi.ext.addActivityToContextActivitiesGrouping
+import world.respect.lib.xapi.ext.averageScore
 import world.respect.lib.xapi.ext.calculatePercentage
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiActivityDefinition
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.libutil.ext.resolve
 import world.respect.libutil.util.time.toDisplayDateString
@@ -81,18 +81,16 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assigned_to
 import world.respect.shared.generated.resources.average
 import world.respect.shared.generated.resources.deadline
-import world.respect.shared.generated.resources.no_data
-import world.respect.shared.generated.resources.no_student_data_available
+import world.respect.shared.generated.resources.no_matching_data_available_yet
 import world.respect.shared.generated.resources.percentage_format
 import world.respect.shared.generated.resources.task_image
 import world.respect.shared.generated.resources.toggle_fullscreen
 import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailUiState
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
-import kotlin.math.roundToInt
 
 private const val NAME_COLUMN_WIDTH = 120
-private const val TASK_COLUMN_WIDTH = 80
+private const val TASK_COLUMN_WIDTH = 64
 private const val HEADER_HEIGHT = 160
 
 @Composable
@@ -233,94 +231,97 @@ fun AssignmentDetailScreen(
                     val headerHeight = minOf(maxHeight / 2, (HEADER_HEIGHT).dp)
 
                     val assignmentResults = uiState.rowsToDisplay
+                    val tasks = uiState.tasks
 
-                    if (assignmentResults.isNotEmpty()) {
-                        val tasks = uiState.tasks
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        // STICKY HEADER: Task Icons and Names
+                        stickyHeader("header") {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(headerHeight)
+                                    .background(MaterialTheme.colorScheme.surface),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Spacer(
+                                    Modifier.width(nameColWidth).height(headerHeight)
+                                )
 
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            // STICKY HEADER: Task Icons and Names
-                            stickyHeader("header") {
+                                // Scrollable Task Headers
                                 Row(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(headerHeight)
-                                        .background(MaterialTheme.colorScheme.surface),
-                                    verticalAlignment = Alignment.CenterVertically
+                                        .fillMaxHeight()
+                                        .horizontalScroll(horizontalScrollState),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
                                 ) {
-                                    Spacer(
-                                        Modifier.width(nameColWidth).height(headerHeight)
-                                    )
-
-                                    // Scrollable Task Headers
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxHeight()
-                                            .horizontalScroll(horizontalScrollState),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        tasks.forEach { taskActivity ->
-                                            AssignmentDetailTaskHeader(
-                                                activity = taskActivity,
-                                                taskInfoFlow = uiState.taskInfoFlow,
-                                                taskColWidth = taskColWidth,
-                                                headerHeight = headerHeight
-                                            )
-                                        }
-
-                                        AssignmentDetailHeaderCell(
-                                            title = stringResource(Res.string.average),
-                                            width = taskColWidth,
-                                            height = headerHeight
+                                    tasks.forEach { taskActivity ->
+                                        AssignmentDetailTaskHeader(
+                                            activity = taskActivity,
+                                            taskInfoFlow = uiState.taskInfoFlow,
+                                            taskColWidth = taskColWidth,
+                                            headerHeight = headerHeight
                                         )
                                     }
-                                }
-                            }
 
-                            itemsIndexed(
-                                items = assignmentResults,
-                                key = { index, item -> item.actor.idStr ?: "a_$index" },
-                            ) { _, studentAndProgress ->
-                                Row(modifier = Modifier.fillMaxWidth()) {
-                                    // Fixed Student Name Column
-                                    StudentNameCell(
-                                        name = studentAndProgress.actor.name ?: "",
-                                        width = nameColWidth
+                                    AssignmentDetailHeaderCell(
+                                        title = stringResource(Res.string.average),
+                                        width = taskColWidth,
+                                        height = headerHeight
                                     )
-
-                                    // Scrollable Grades/Progress Cells
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .horizontalScroll(horizontalScrollState)
-                                    ) {
-                                        studentAndProgress.progress.forEach { progressItem ->
-                                            AssignmentDetailStudentProgressCell(
-                                                progress = progressItem,
-                                                modifier = Modifier.width(taskColWidth)
-                                            )
-                                        }
-
-//                                        // Average Score Cell
-//                                        AverageCell(
-//                                            uiState.getAverageForStudent(studentAndProgress.personUid),
-//                                            taskColWidth
-//                                        )
-                                    }
                                 }
                             }
                         }
-                    } else {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.no_student_data_available),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center
-                            )
+
+                        itemsIndexed(
+                            items = assignmentResults,
+                            key = { index, item -> item.actor.idStr ?: "a_$index" },
+                        ) { _, studentAndProgress ->
+                            Row(modifier = Modifier.fillMaxWidth()) {
+                                // Fixed Student Name Column
+                                StudentNameCell(
+                                    name = studentAndProgress.actor.name ?: "",
+                                    modifier = Modifier.width(nameColWidth)
+                                        .height(taskColWidth)
+                                        .padding(8.dp)
+                                )
+
+                                // Scrollable Grades/Progress Cells
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .horizontalScroll(horizontalScrollState)
+                                ) {
+                                    studentAndProgress.progress.forEach { progressItem ->
+                                        AssignmentDetailStudentProgressCell(
+                                            progress = progressItem,
+                                            modifier = Modifier.size(taskColWidth)
+                                        )
+                                    }
+
+                                    AssignmentDetailStudentProgressCell(
+                                        progress = studentAndProgress.progress.averageScore(),
+                                        modifier = Modifier.size(taskColWidth)
+                                    )
+                                }
+                            }
+                        }
+
+                        if(assignmentResults.isEmpty()) {
+                            item("no_students") {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Info,
+                                        contentDescription = null,
+                                    )
+
+                                    Text(stringResource(Res.string.no_matching_data_available_yet))
+                                }
+                            }
                         }
                     }
                 }
@@ -476,124 +477,77 @@ fun AssignmentProgressIndicator(
     }
 }
 
+private const val mockAssignmentId = "http://example.com/assignments/1"
 
-@Composable
-fun GradeCell(percent: Int?, width: Dp) {
-    Box(
-        modifier = Modifier
-            .width(width)
-            .height(48.dp)
-            .padding(4.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        if (percent == null) {
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 4.dp, vertical = 4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(Res.string.no_data),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodySmall
+private const val mockAssignmentTaskId1 = "http://example.app/math1"
+
+private val mockAssignmentUiState = AssignmentDetailUiState(
+    assignmentProgress = DataReadyState(
+        data = AssignmentAndProgress(
+            assignmentStatement = createBlankAssignmentStatement(
+                assignmentActivityId = mockAssignmentId,
+                instructor = XapiAgent(
+                    name = "Alice Instructor",
+                    account = XapiAccount("http://example.com", "42")
                 )
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .background(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        shape = MaterialTheme.shapes.small
+            ).addActivityToContextActivitiesGrouping(
+                XapiActivity(
+                    id = mockAssignmentTaskId1,
+                    definition = XapiActivityDefinition(
+                        name = mapOf("en-US" to "Math1")
                     )
-                    .padding(horizontal = 4.dp, vertical = 4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(Res.string.percentage_format, percent),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodySmall
                 )
-            }
-        }
-    }
-}
-
-@Composable
-fun AverageCell(avg: Double?, width: Dp) {
-    Box(
-        modifier = Modifier
-            .width(width)
-            .height(48.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        if (avg == null) {
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 4.dp, vertical = 4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(Res.string.no_data),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodySmall
+            ),
+            progress = listOf(
+                XapiActorAndAssignmentProgress(
+                    actor = XapiAgent(
+                        name = "Lisa Simpson",
+                        account = XapiAccount("http://example.com", "43")
+                    ),
+                    progress = listOf(
+                        XapiAssignmentProgress(
+                            activityId = mockAssignmentTaskId1,
+                            completed = true,
+                            successful = true,
+                            scoreScaled = 0.95f,
+                        )
+                    )
+                ),
+                XapiActorAndAssignmentProgress(
+                    actor = XapiAgent(
+                        name = "Bart Simpson",
+                        account = XapiAccount("http://example.com", "44")
+                    ),
+                    progress = listOf(
+                        XapiAssignmentProgress(
+                            activityId = mockAssignmentTaskId1,
+                            completed = true,
+                            successful = false,
+                            scoreScaled = 0.2f,
+                        )
+                    )
                 )
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer, shape = CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(Res.string.percentage_format, avg.roundToInt()),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
-    }
-}
-
+            )
+        )
+    )
+)
 
 @Composable
 @Preview
 fun AssignmentDetailScreenTeacherPreview() {
-    val assignmentId = "http://example.com/assignments/1"
-
-    val assignmentTaskId1 = "http://example.app/math1"
-
     AssignmentDetailScreen(
-        uiState = AssignmentDetailUiState(
+        uiState = mockAssignmentUiState
+    )
+}
+
+@Composable
+@Preview
+fun AssignmentDetailScreenTeacherEmptyPreview() {
+    AssignmentDetailScreen(
+        uiState = mockAssignmentUiState.copy(
             assignmentProgress = DataReadyState(
-                data = AssignmentAndProgress(
-                    assignmentStatement = createBlankAssignmentStatement(
-                        assignmentActivityId = assignmentId,
-                        instructor = XapiAgent(
-                            name = "Alice Instructor",
-                            account = XapiAccount("http://example.com", "42")
-                        )
-                    ).addActivityToContextActivitiesGrouping(
-                        XapiActivity(
-                            id = assignmentTaskId1,
-                        )
-                    ),
-                    progress = listOf(
-                        XapiActorAndAssignmentProgress(
-                            actor = XapiAgent(
-                                name = "Bob Student",
-                                account = XapiAccount("http://example.com", "43")
-                            ),
-                            progress = listOf(
-                                XapiAssignmentProgress(
-                                    activityId = assignmentTaskId1,
-                                    completed = true,
-                                    successful = true,
-                                    scoreScaled = 0.95f,
-                                )
-                            )
-                        )
-                    )
+                data = mockAssignmentUiState.assignmentProgress.dataOrNull()!!.copy(
+                    progress = emptyList()
                 )
             )
         )

@@ -71,39 +71,41 @@ data class AssignmentDetailUiState(
     val tasks: List<XapiActivity>
         get() = assignmentProgress.dataOrNull()?.assignmentStatement?.context?.contextActivities?.grouping ?: emptyList()
 
-    private val taskActivityIds: List<String>
-        get() = tasks.map { it.id }
-
 
     val assignmentProgressList: List<XapiActorAndAssignmentProgress>
         get() = assignmentProgress.dataOrNull()?.progress ?: emptyList()
 
-    val numStudents: Int get() = assignmentProgressList.size
+    val numStudents: Int
+        get() = assignmentProgressList.size
 
-    val numCompleted: Int get() = assignmentProgressList.count {
-        it.isCompleted(taskActivityIds)
+    val numCompleted: Int by lazy {
+        assignmentProgressList.count { it.isCompleted() }
     }
 
-    val numInProgress: Int get() = assignmentProgressList.count {
-        it.isStarted && !it.isCompleted(taskActivityIds)
+    val numInProgress: Int by lazy {
+        assignmentProgressList.count { it.isStarted && !it.isCompleted() }
     }
 
-    val numNotStarted: Int get() = assignmentProgressList.count { !it.isStarted }
+    val numNotStarted: Int by lazy {
+        assignmentProgressList.count { !it.isStarted }
+    }
 
-
-    val rowsToDisplay: List<XapiActorAndAssignmentProgress>
-        get() = when (selectedStatusFilter) {
+    val rowsToDisplay: List<XapiActorAndAssignmentProgress> by lazy {
+        when (selectedStatusFilter) {
             AssignmentStatusFilter.ALL -> assignmentProgressList
             AssignmentStatusFilter.COMPLETED -> assignmentProgressList.filter {
-                it.isCompleted(taskActivityIds)
+                it.isCompleted()
             }
+
             AssignmentStatusFilter.IN_PROGRESS -> assignmentProgressList.filter {
-                it.isStarted && !it.isCompleted(taskActivityIds)
+                it.isStarted && !it.isCompleted()
             }
+
             AssignmentStatusFilter.NOT_STARTED -> assignmentProgressList.filter {
                 !it.isStarted
             }
         }
+    }
 
     val statusCounts: Map<AssignmentStatusFilter, Int>
         get() = mapOf(
@@ -113,22 +115,6 @@ data class AssignmentDetailUiState(
             AssignmentStatusFilter.NOT_STARTED to numNotStarted
         )
 
-    /**
-     * Calculates the average completion percentage across all tasks for a specific student.
-     * Returns null if student has no progress entries for any task.
-     */
-    fun getAverageForStudent(personUid: String): Double? {
-        val studentProgress = assignmentProgressList.find { it.personUid == personUid }
-            ?: return null
-
-        val percentages = tasks.mapNotNull { task ->
-            studentProgress.progress
-                .find { it.activityId == task.id }
-                ?.calculatePercentage()
-        }
-
-        return if (percentages.isNotEmpty()) percentages.average() else null
-    }
 }
 class AssignmentDetailViewModel(
     savedStateHandle: SavedStateHandle,

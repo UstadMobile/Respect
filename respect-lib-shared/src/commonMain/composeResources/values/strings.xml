@@ -604,6 +604,7 @@
     <string name="calendar_month">CalendarMonth</string>>
     <string name="toggle_fullscreen">Toggle Fullscreen</string>>
 
+    <string name="no_matching_data_available_yet">No matching data available, yet</string>
 
     <string name="xapi_verb_assigned">assigned</string>
 

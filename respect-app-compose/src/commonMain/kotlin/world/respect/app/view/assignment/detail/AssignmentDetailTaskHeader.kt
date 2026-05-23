@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.flowOf
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.opds.model.LangMap
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findIcons
 import world.respect.lib.xapi.model.XapiActivity
@@ -32,14 +33,15 @@ fun AssignmentDetailTaskHeader(
     }
     val info by infoFlow.collectAsState(DataLoadingState())
 
-    val title = info.dataOrNull()?.metadata?.title?.getTitle() ?: ""
+    val title = info.dataOrNull()?.metadata?.title
+        ?: activity.definition?.name?.let { LangMap.fromMap(it) }
 
     val iconUrl = info.dataOrNull()?.findIcons()?.firstOrNull()?.let {
         manifestUrl?.resolve(it.href)
     }
 
     AssignmentDetailHeaderCell(
-        title = title,
+        title = title?.getTitle() ?: "",
         iconUrl = iconUrl,
         width = taskColWidth,
         height = headerHeight

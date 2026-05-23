@@ -47,7 +47,6 @@ val XapiStatement.isAssignmentStatement: Boolean
 val XapiStatement.activityDefinitionTitle: String
     get() = (this.`object` as? XapiActivity)?.definition?.name?.values?.firstOrNull() ?: ""
 
-@OptIn(ExperimentalUuidApi::class)
 val XapiStatement.assignmentDescription: String
     get() = (this.`object` as? XapiActivity)?.definition?.description?.values?.firstOrNull() ?: ""
 

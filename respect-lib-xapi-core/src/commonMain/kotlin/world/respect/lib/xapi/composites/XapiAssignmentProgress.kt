@@ -23,10 +23,10 @@ package world.respect.lib.xapi.composites
  */
 data class XapiAssignmentProgress(
     val activityId: String,
-    val completed: Boolean?,
-    val successful: Boolean?,
-    val scoreScaled: Float?,
-    val progress: Int?,
+    val completed: Boolean? = null,
+    val successful: Boolean? = null,
+    val scoreScaled: Float? = null,
+    val progress: Int? = null,
 ) {
 
     companion object {

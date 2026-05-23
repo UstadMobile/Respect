@@ -54,22 +54,27 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.school.xapi.ext.idStr
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.opds.model.findIcons
+import world.respect.lib.xapi.composites.AssignmentAndProgress
+import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
 import world.respect.lib.xapi.composites.XapiAssignmentProgress
+import world.respect.lib.xapi.ext.addActivityToContextActivitiesGrouping
 import world.respect.lib.xapi.ext.calculatePercentage
-import world.respect.lib.xapi.ext.personName
-import world.respect.lib.xapi.ext.personUid
+import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiAgent
 import world.respect.libutil.ext.resolve
 import world.respect.libutil.util.time.toDisplayDateString
 import world.respect.shared.domain.xapi.assignmentDeadline
 import world.respect.shared.domain.xapi.assignmentDescription
+import world.respect.shared.domain.xapi.createBlankAssignmentStatement
 import world.respect.shared.domain.xapi.getUnitTitle
 import world.respect.shared.domain.xapi.manifestUrl
 import world.respect.shared.generated.resources.Res
@@ -275,27 +280,32 @@ fun AssignmentDetailScreen(
                             itemsIndexed(
                                 items = assignmentResults,
                                 key = { index, item -> item.actor.idStr ?: "a_$index" },
-                            ) { _, student ->
+                            ) { _, studentAndProgress ->
                                 Row(modifier = Modifier.fillMaxWidth()) {
                                     // Fixed Student Name Column
-                                    StudentNameCell(student.personName, nameColWidth)
+                                    StudentNameCell(
+                                        name = studentAndProgress.actor.name ?: "",
+                                        width = nameColWidth
+                                    )
+
                                     // Scrollable Grades/Progress Cells
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .horizontalScroll(horizontalScrollState)
                                     ) {
-                                        tasks.forEach { unit ->
-                                            val progress = student.progress.find {
-                                                it.activityId == unit.id
-                                            }
-                                            GradeCell(progress?.calculatePercentage(), taskColWidth)
+                                        studentAndProgress.progress.forEach { progressItem ->
+                                            AssignmentDetailStudentProgressCell(
+                                                progress = progressItem,
+                                                modifier = Modifier.width(taskColWidth)
+                                            )
                                         }
-                                        // Average Score Cell
-                                        AverageCell(
-                                            uiState.getAverageForStudent(student.personUid),
-                                            taskColWidth
-                                        )
+
+//                                        // Average Score Cell
+//                                        AverageCell(
+//                                            uiState.getAverageForStudent(studentAndProgress.personUid),
+//                                            taskColWidth
+//                                        )
                                     }
                                 }
                             }
@@ -543,4 +553,49 @@ fun AverageCell(avg: Double?, width: Dp) {
             }
         }
     }
+}
+
+
+@Composable
+@Preview
+fun AssignmentDetailScreenTeacherPreview() {
+    val assignmentId = "http://example.com/assignments/1"
+
+    val assignmentTaskId1 = "http://example.app/math1"
+
+    AssignmentDetailScreen(
+        uiState = AssignmentDetailUiState(
+            assignmentProgress = DataReadyState(
+                data = AssignmentAndProgress(
+                    assignmentStatement = createBlankAssignmentStatement(
+                        assignmentActivityId = assignmentId,
+                        instructor = XapiAgent(
+                            name = "Alice Instructor",
+                            account = XapiAccount("http://example.com", "42")
+                        )
+                    ).addActivityToContextActivitiesGrouping(
+                        XapiActivity(
+                            id = assignmentTaskId1,
+                        )
+                    ),
+                    progress = listOf(
+                        XapiActorAndAssignmentProgress(
+                            actor = XapiAgent(
+                                name = "Bob Student",
+                                account = XapiAccount("http://example.com", "43")
+                            ),
+                            progress = listOf(
+                                XapiAssignmentProgress(
+                                    activityId = assignmentTaskId1,
+                                    completed = true,
+                                    successful = true,
+                                    scoreScaled = 0.95f,
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
 }

@@ -84,3 +84,28 @@ fun List<XapiStatement>.mostRecentByTimestampOrNull() : XapiStatement? {
 fun List<XapiStatement>.mostRecentByTimestamp(): XapiStatement {
     return mostRecentByTimestampOrNull() ?: throw IllegalArgumentException("No statements in list")
 }
+
+fun XapiStatement.contextOrBlank(): XapiContext {
+    return context ?: XapiContext()
+}
+
+/**
+ * Add the activityToAdd to the contextActivities.grouping list if not already found
+ */
+fun XapiStatement.addActivityToContextActivitiesGrouping(
+    activityToAdd: XapiActivity
+): XapiStatement {
+    return copy(
+        context = contextOrBlank().let { ctx ->
+            ctx.copy(
+                contextActivities = ctx.contextActivitiesOrBlank().let { ctxActivities ->
+                    ctxActivities.copy(
+                        grouping = (ctxActivities.grouping ?: emptyList()).addOrReplaceById(
+                            other = activityToAdd
+                        )
+                    )
+                }
+            )
+        }
+    )
+}

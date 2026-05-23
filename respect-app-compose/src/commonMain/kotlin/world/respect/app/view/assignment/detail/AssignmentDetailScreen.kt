@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -54,6 +55,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
+import world.respect.datalayer.school.xapi.ext.idStr
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
@@ -190,27 +192,26 @@ fun AssignmentDetailScreen(
             }
 
             if (uiState.isStudent) {
-                val units = uiState.tasks
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .defaultItemPadding(),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(units) { unit ->
+                    items(uiState.tasks) { task ->
                         val studentProgress =
                             uiState.assignmentProgressList.firstOrNull()
 
-                        val progress = remember(studentProgress, unit.id) {
+                        val progress = remember(studentProgress, task.id) {
                             studentProgress?.progress
-                                ?.find { it.activityId == unit.id }
+                                ?.find { it.activityId == task.id }
                         }
 
                         AssignmentTaskListRow(
-                            task = unit,
+                            task = task,
                             taskTitle = uiState.assignmentProgress.dataOrNull()
-                                ?.assignmentStatement?.getUnitTitle(unit.id) ?: "",
-                            onTaskClick = { onClickTask(unit) },
+                                ?.assignmentStatement?.getUnitTitle(task.id) ?: "",
+                            onTaskClick = { onClickTask(task) },
                             progress = progress,
                             taskInfoFlow = uiState.taskInfoFlow
                         )
@@ -233,7 +234,7 @@ fun AssignmentDetailScreen(
 
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                             // STICKY HEADER: Task Icons and Names
-                            stickyHeader {
+                            stickyHeader("header") {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -242,9 +243,7 @@ fun AssignmentDetailScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Spacer(
-                                        Modifier
-                                            .width(nameColWidth)
-                                            .height(headerHeight)
+                                        Modifier.width(nameColWidth).height(headerHeight)
                                     )
 
                                     // Scrollable Task Headers
@@ -255,48 +254,28 @@ fun AssignmentDetailScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.Center
                                     ) {
-                                        tasks.forEach { unit ->
-                                            val manifestUrl = unit.manifestUrl
-
-                                            val infoFlow = remember(manifestUrl) {
-                                                manifestUrl?.let { uiState.taskInfoFlow(it) } ?: flowOf(DataLoadingState())
-                                            }
-                                            val info by infoFlow.collectAsState(DataLoadingState())
-
-                                            val title = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.getUnitTitle(unit.id) ?: ""
-
-                                            val iconUrl =
-                                                info.dataOrNull()?.findIcons()?.firstOrNull()?.let {
-                                                    manifestUrl?.resolve(it.href).toString()
-                                                }
-
-                                            TaskHeaderCell(
-                                                title = title,
-                                                iconUrl = iconUrl,
-                                                width = taskColWidth,
-                                                height = headerHeight
+                                        tasks.forEach { taskActivity ->
+                                            AssignmentDetailTaskHeader(
+                                                activity = taskActivity,
+                                                taskInfoFlow = uiState.taskInfoFlow,
+                                                taskColWidth = taskColWidth,
+                                                headerHeight = headerHeight
                                             )
                                         }
-                                        Box(
-                                            modifier = Modifier
-                                                .width(taskColWidth)
-                                                .height(headerHeight),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = stringResource(Res.string.average),
-                                                modifier = Modifier.rotate(-90f),
-                                                textAlign = TextAlign.Center,
-                                                style = MaterialTheme.typography.labelSmall,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
+
+                                        AssignmentDetailHeaderCell(
+                                            title = stringResource(Res.string.average),
+                                            width = taskColWidth,
+                                            height = headerHeight
+                                        )
                                     }
                                 }
                             }
 
-                            items(assignmentResults, key = { it.personUid }) { student ->
+                            itemsIndexed(
+                                items = assignmentResults,
+                                key = { index, item -> item.actor.idStr ?: "a_$index" },
+                            ) { _, student ->
                                 Row(modifier = Modifier.fillMaxWidth()) {
                                     // Fixed Student Name Column
                                     StudentNameCell(student.personName, nameColWidth)
@@ -487,79 +466,6 @@ fun AssignmentProgressIndicator(
     }
 }
 
-@Composable
-fun TaskHeaderCell(
-    title: String,
-    iconUrl: String?,
-    width: Dp,
-    height: Dp,
-) {
-    Column(
-        modifier = Modifier
-            .width(width)
-            .height(height),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier.weight(1f),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = title,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.rotate(-90f),
-                textAlign = TextAlign.Start,
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
-        if (iconUrl != null) {
-            AsyncImage(
-                model = iconUrl,
-                contentDescription = stringResource(Res.string.task_image),
-                modifier = Modifier.size(28.dp)
-            )
-        }
-        Spacer(Modifier.height(8.dp))
-    }
-}
-
-@Composable
-fun StudentNameCell(name: String, width: Dp) {
-    Box(
-        modifier = Modifier
-            .width(width)
-            .height(48.dp)
-            .padding(8.dp),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .background(
-                        MaterialTheme.colorScheme.onSurfaceVariant,
-                        shape = MaterialTheme.shapes.small
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = name.firstOrNull()?.toString() ?: "?",
-                    color = MaterialTheme.colorScheme.surface,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = name,
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
 
 @Composable
 fun GradeCell(percent: Int?, width: Dp) {

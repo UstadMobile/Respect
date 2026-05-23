@@ -21,7 +21,7 @@ package world.respect.lib.xapi.composites
  *        none.
  *
  */
-data class XapiAssignmentProgress(
+data class XapiAssignmentTaskProgress(
     val activityId: String,
     val completed: Boolean? = null,
     val successful: Boolean? = null,
@@ -31,8 +31,8 @@ data class XapiAssignmentProgress(
 
     companion object {
 
-        fun emptyResult(activityId: String): XapiAssignmentProgress {
-            return XapiAssignmentProgress(
+        fun emptyResult(activityId: String): XapiAssignmentTaskProgress {
+            return XapiAssignmentTaskProgress(
                 activityId = activityId,
                 completed = null,
                 successful = null,

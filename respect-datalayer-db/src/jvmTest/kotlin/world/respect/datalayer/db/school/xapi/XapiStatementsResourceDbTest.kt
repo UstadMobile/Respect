@@ -358,7 +358,7 @@ class XapiStatementsResourceDbTest {
                     assignmentTasks.forEach { taskActivityId ->
                         val result = assignmentResults.progress.first {
                             it.actor.idStr == student.idStr //canoncical comparison
-                        }.progress.first {
+                        }.progressPerTask.first {
                             it.activityId == taskActivityId
                         }
 

@@ -21,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import world.respect.shared.generated.resources.Res
-import world.respect.lib.xapi.composites.XapiAssignmentProgress
+import world.respect.lib.xapi.composites.XapiAssignmentTaskProgress
 import world.respect.shared.generated.resources.completed_status
 import world.respect.shared.generated.resources.failed
 import kotlin.math.roundToInt
@@ -36,7 +36,7 @@ import kotlin.math.roundToInt
  */
 @Composable
 fun AssignmentDetailStudentProgressCell(
-    progress: XapiAssignmentProgress,
+    progress: XapiAssignmentTaskProgress,
     modifier: Modifier = Modifier,
 ) {
     val score = progress.scoreScaled
@@ -115,7 +115,7 @@ fun AssignmentDetailStudentProgressCell(
 fun AssignmentDetailStudentProgressCellPreview() {
     Row {
         AssignmentDetailStudentProgressCell(
-            progress = XapiAssignmentProgress(
+            progress = XapiAssignmentTaskProgress(
                 activityId = "",
                 completed = true,
                 successful = true,
@@ -125,7 +125,7 @@ fun AssignmentDetailStudentProgressCellPreview() {
         )
 
         AssignmentDetailStudentProgressCell(
-            progress = XapiAssignmentProgress(
+            progress = XapiAssignmentTaskProgress(
                 activityId = "",
                 completed = true,
                 successful = false,
@@ -135,7 +135,7 @@ fun AssignmentDetailStudentProgressCellPreview() {
         )
 
         AssignmentDetailStudentProgressCell(
-            progress = XapiAssignmentProgress(
+            progress = XapiAssignmentTaskProgress(
                 activityId = "",
                 completed = true,
             ),
@@ -143,7 +143,7 @@ fun AssignmentDetailStudentProgressCellPreview() {
         )
 
         AssignmentDetailStudentProgressCell(
-            progress = XapiAssignmentProgress(
+            progress = XapiAssignmentTaskProgress(
                 activityId = "",
                 completed = true,
                 successful = false,
@@ -152,7 +152,7 @@ fun AssignmentDetailStudentProgressCellPreview() {
         )
 
         AssignmentDetailStudentProgressCell(
-            progress = XapiAssignmentProgress(
+            progress = XapiAssignmentTaskProgress(
                 activityId = "",
                 progress = 75,
             ),
@@ -160,7 +160,7 @@ fun AssignmentDetailStudentProgressCellPreview() {
         )
 
         AssignmentDetailStudentProgressCell(
-            progress = XapiAssignmentProgress(
+            progress = XapiAssignmentTaskProgress(
                 activityId = "",
             ),
             modifier = Modifier.size(48.dp),

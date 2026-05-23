@@ -2,7 +2,6 @@ package world.respect.app.view.assignment.detail
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,69 +20,49 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
-import io.ktor.http.Url
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.school.xapi.ext.idStr
-import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
-import world.respect.lib.xapi.composites.XapiAssignmentProgress
+import world.respect.lib.xapi.composites.XapiAssignmentTaskProgress
 import world.respect.lib.xapi.ext.addActivityToContextActivitiesGrouping
 import world.respect.lib.xapi.ext.averageScore
-import world.respect.lib.xapi.ext.calculatePercentage
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActivityDefinition
 import world.respect.lib.xapi.model.XapiAgent
-import world.respect.libutil.ext.resolve
 import world.respect.libutil.util.time.toDisplayDateString
 import world.respect.shared.domain.xapi.assignmentDeadline
 import world.respect.shared.domain.xapi.assignmentDescription
 import world.respect.shared.domain.xapi.createBlankAssignmentStatement
-import world.respect.shared.domain.xapi.getUnitTitle
-import world.respect.shared.domain.xapi.manifestUrl
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assigned_to
 import world.respect.shared.generated.resources.average
 import world.respect.shared.generated.resources.deadline
 import world.respect.shared.generated.resources.no_matching_data_available_yet
-import world.respect.shared.generated.resources.percentage_format
-import world.respect.shared.generated.resources.task_image
 import world.respect.shared.generated.resources.toggle_fullscreen
 import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailUiState
@@ -196,28 +175,23 @@ fun AssignmentDetailScreen(
 
             if (uiState.isStudent) {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .defaultItemPadding(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    modifier = Modifier.fillMaxSize(),
                 ) {
-                    items(uiState.tasks) { task ->
-                        val studentProgress =
-                            uiState.assignmentProgressList.firstOrNull()
-
-                        val progress = remember(studentProgress, task.id) {
-                            studentProgress?.progress
-                                ?.find { it.activityId == task.id }
+                    uiState.rowsToDisplay.firstOrNull()?.also { studentProgress ->
+                        items(
+                            items = studentProgress.progressPerTask
+                        ) { taskProgress ->
+                            uiState.tasks.firstOrNull {
+                                it.id == taskProgress.activityId
+                            }?.also { activity ->
+                                AssignmentDetailTaskListItem(
+                                    activity = activity,
+                                    progress = taskProgress,
+                                    taskInfoFlow = uiState.taskInfoFlow,
+                                    onClickTask = onClickTask,
+                                )
+                            }
                         }
-
-                        AssignmentTaskListRow(
-                            task = task,
-                            taskTitle = uiState.assignmentProgress.dataOrNull()
-                                ?.assignmentStatement?.getUnitTitle(task.id) ?: "",
-                            onTaskClick = { onClickTask(task) },
-                            progress = progress,
-                            taskInfoFlow = uiState.taskInfoFlow
-                        )
                     }
                 }
             } else {
@@ -292,7 +266,7 @@ fun AssignmentDetailScreen(
                                         .fillMaxWidth()
                                         .horizontalScroll(horizontalScrollState)
                                 ) {
-                                    studentAndProgress.progress.forEach { progressItem ->
+                                    studentAndProgress.progressPerTask.forEach { progressItem ->
                                         AssignmentDetailStudentProgressCell(
                                             progress = progressItem,
                                             modifier = Modifier.size(taskColWidth)
@@ -300,7 +274,7 @@ fun AssignmentDetailScreen(
                                     }
 
                                     AssignmentDetailStudentProgressCell(
-                                        progress = studentAndProgress.progress.averageScore(),
+                                        progress = studentAndProgress.progressPerTask.averageScore(),
                                         modifier = Modifier.size(taskColWidth)
                                     )
                                 }
@@ -354,158 +328,38 @@ fun AssignmentDetailScreen(
     }
 }
 
-// Student-side task list section on the detail screen
 
-@Composable
-fun AssignmentTaskListRow(
-    task: XapiActivity,
-    taskTitle: String,
-    onTaskClick: () -> Unit,
-    progress: XapiAssignmentProgress? = null,
-    taskInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>>,
-) {
-    val manifestUrl = task.manifestUrl
+internal const val mockAssignmentId = "http://example.com/assignments/1"
 
-    val infoFlow = remember(manifestUrl) {
-        manifestUrl?.let { taskInfoFlow(it) } ?: flowOf(DataLoadingState())
-    }
+internal const val mockAssignmentTaskId1 = "http://example.app/math1"
 
-    val state by infoFlow.collectAsState(DataLoadingState())
+internal val mockAssignmentTaskActivity = XapiActivity(
+    id = mockAssignmentTaskId1,
+    definition = XapiActivityDefinition(
+        name = mapOf("en-US" to "Math1")
+    )
+)
 
-    val iconLink = state.dataOrNull()?.images?.firstOrNull()
+internal val mockAssignmentStatement = createBlankAssignmentStatement(
+    assignmentActivityId = mockAssignmentId,
+    instructor = XapiAgent(
+        name = "Alice Instructor",
+        account = XapiAccount("http://example.com", "42")
+    )
+).addActivityToContextActivitiesGrouping(mockAssignmentTaskActivity)
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onTaskClick() }
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .background(
-                    MaterialTheme.colorScheme.primaryContainer,
-                    RoundedCornerShape(8.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = taskTitle.firstOrNull()?.toString()?.uppercase() ?: "",
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                style = MaterialTheme.typography.titleLarge
-            )
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = taskTitle,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            if (iconLink != null && manifestUrl != null) {
-                AsyncImage(
-                    model = manifestUrl.resolve(iconLink.href).toString(),
-                    contentDescription = stringResource(Res.string.task_image),
-                    modifier = Modifier.size(14.dp)
-                )
-            }
-        }
-        AssignmentProgressIndicator(
-            percent = progress?.calculatePercentage() ?: 0,
-            isCompleted = progress?.completed == true
-        )
-    }
-}
-
-
-@Composable
-fun AssignmentProgressIndicator(
-    percent: Int,
-    isCompleted: Boolean,
-    modifier: Modifier = Modifier
-) {
-    if (!isCompleted) {
-        Box(
-            modifier = modifier
-                .size(40.dp)
-                .background(
-                    MaterialTheme.colorScheme.primaryContainer,
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            // Background track
-            CircularProgressIndicator(
-                progress = { 1f },
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                strokeWidth = 3.dp,
-                trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
-                strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
-            )
-            // Progress arc
-            CircularProgressIndicator(
-                progress = { percent / 100f },
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.primary,
-                strokeWidth = 3.dp,
-                trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
-                strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
-            )
-            // Percentage text
-            Text(
-                text = stringResource(Res.string.percentage_format, percent),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 10.sp
-            )
-        }
-    } else {
-
-        Text(
-            text = stringResource(Res.string.percentage_format, percent),
-            modifier = modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.secondaryContainer)
-                .padding(horizontal = 12.dp, vertical = 6.dp),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSecondaryContainer
-        )
-    }
-}
-
-private const val mockAssignmentId = "http://example.com/assignments/1"
-
-private const val mockAssignmentTaskId1 = "http://example.app/math1"
-
-private val mockAssignmentUiState = AssignmentDetailUiState(
+internal val mockAssignmentUiState = AssignmentDetailUiState(
     assignmentProgress = DataReadyState(
         data = AssignmentAndProgress(
-            assignmentStatement = createBlankAssignmentStatement(
-                assignmentActivityId = mockAssignmentId,
-                instructor = XapiAgent(
-                    name = "Alice Instructor",
-                    account = XapiAccount("http://example.com", "42")
-                )
-            ).addActivityToContextActivitiesGrouping(
-                XapiActivity(
-                    id = mockAssignmentTaskId1,
-                    definition = XapiActivityDefinition(
-                        name = mapOf("en-US" to "Math1")
-                    )
-                )
-            ),
+            assignmentStatement = mockAssignmentStatement,
             progress = listOf(
                 XapiActorAndAssignmentProgress(
                     actor = XapiAgent(
                         name = "Lisa Simpson",
                         account = XapiAccount("http://example.com", "43")
                     ),
-                    progress = listOf(
-                        XapiAssignmentProgress(
+                    progressPerTask = listOf(
+                        XapiAssignmentTaskProgress(
                             activityId = mockAssignmentTaskId1,
                             completed = true,
                             successful = true,
@@ -518,8 +372,8 @@ private val mockAssignmentUiState = AssignmentDetailUiState(
                         name = "Bart Simpson",
                         account = XapiAccount("http://example.com", "44")
                     ),
-                    progress = listOf(
-                        XapiAssignmentProgress(
+                    progressPerTask = listOf(
+                        XapiAssignmentTaskProgress(
                             activityId = mockAssignmentTaskId1,
                             completed = true,
                             successful = false,

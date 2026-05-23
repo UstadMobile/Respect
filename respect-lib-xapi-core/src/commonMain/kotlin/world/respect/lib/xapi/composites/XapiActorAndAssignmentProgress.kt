@@ -7,9 +7,9 @@ import world.respect.lib.xapi.model.XapiActor
  * ASSIGNMENT_RECIPE.
  *
  * @param actor the actor for which progress is being provided
- * @param progress a list of progress per assigned activityId.
+ * @param progressPerTask a list of progress per assigned activityId.
  */
 data class XapiActorAndAssignmentProgress(
     val actor: XapiActor,
-    val progress: List<XapiAssignmentProgress>,
+    val progressPerTask: List<XapiAssignmentTaskProgress>,
 )

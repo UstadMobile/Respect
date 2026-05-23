@@ -30,12 +30,11 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
-import world.respect.lib.xapi.ext.calculatePercentage
 import world.respect.lib.xapi.ext.isCompleted
+import world.respect.lib.xapi.ext.isInProgress
+import world.respect.lib.xapi.ext.isNotStarted
 import world.respect.lib.xapi.ext.isStarted
-import world.respect.lib.xapi.ext.personUid
 import world.respect.lib.xapi.model.XapiActivity
-import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
@@ -51,7 +50,7 @@ import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import kotlin.uuid.ExperimentalUuidApi
+import kotlin.collections.emptyList
 
 
 data class AssignmentDetailUiState(
@@ -91,18 +90,42 @@ data class AssignmentDetailUiState(
     }
 
     val rowsToDisplay: List<XapiActorAndAssignmentProgress> by lazy {
-        when (selectedStatusFilter) {
-            AssignmentStatusFilter.ALL -> assignmentProgressList
-            AssignmentStatusFilter.COMPLETED -> assignmentProgressList.filter {
-                it.isCompleted()
-            }
+        /*
+         * In student mode we filter the task list according to the selected status filter.
+         */
+        if(isStudent) {
+            assignmentProgressList.firstOrNull()?.let { studentProgress ->
+                listOf(
+                    XapiActorAndAssignmentProgress(
+                        actor = studentProgress.actor,
+                        progressPerTask = studentProgress.progressPerTask.filter {
+                            when(selectedStatusFilter) {
+                                AssignmentStatusFilter.ALL -> true
+                                AssignmentStatusFilter.COMPLETED -> it.isCompleted()
+                                AssignmentStatusFilter.IN_PROGRESS -> it.isInProgress()
+                                AssignmentStatusFilter.NOT_STARTED -> it.isNotStarted()
+                            }
+                        }
+                    )
+                )
+            } ?: emptyList()
+        }else {
+            /*
+             * In teacher/admin mode we filter the list of students according to the status filter.
+             */
+            when (selectedStatusFilter) {
+                AssignmentStatusFilter.ALL -> assignmentProgressList
+                AssignmentStatusFilter.COMPLETED -> assignmentProgressList.filter {
+                    it.isCompleted()
+                }
 
-            AssignmentStatusFilter.IN_PROGRESS -> assignmentProgressList.filter {
-                it.isStarted && !it.isCompleted()
-            }
+                AssignmentStatusFilter.IN_PROGRESS -> assignmentProgressList.filter {
+                    it.isStarted && !it.isCompleted()
+                }
 
-            AssignmentStatusFilter.NOT_STARTED -> assignmentProgressList.filter {
-                !it.isStarted
+                AssignmentStatusFilter.NOT_STARTED -> assignmentProgressList.filter {
+                    !it.isStarted
+                }
             }
         }
     }

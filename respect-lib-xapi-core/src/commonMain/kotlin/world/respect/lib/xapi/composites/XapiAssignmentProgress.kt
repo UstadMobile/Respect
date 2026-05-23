@@ -15,7 +15,7 @@ package world.respect.lib.xapi.composites
  * @param activityId the activityId this represents progress for
  * @param completed set as above
  * @param successful set as above
- * @param rawScore the highest raw score for this activityId, null if there are no matching
+ * @param scoreScaled the highest raw score for this activityId, null if there are no matching
  *        statements with a non-null score.
  * @param progress the maximum progress extension value on any matching statement, null if there is
  *        none.
@@ -25,7 +25,7 @@ data class XapiAssignmentProgress(
     val activityId: String,
     val completed: Boolean?,
     val successful: Boolean?,
-    val rawScore: Float?,
+    val scoreScaled: Float?,
     val progress: Int?,
 ) {
 
@@ -36,7 +36,7 @@ data class XapiAssignmentProgress(
                 activityId = activityId,
                 completed = null,
                 successful = null,
-                rawScore = null,
+                scoreScaled = null,
                 progress = null,
             )
         }

@@ -158,7 +158,7 @@ interface XapiStatementEntityDao {
                     MAX(XapiStatementEntity.extensionProgress) AS progress,
                     MAX(XapiStatementEntity.resultCompletion) AS completed,
                     MAX(XapiStatementEntity.resultSuccess) AS successful,
-                    MAX(XapiStatementEntity.resultScoreScaled) AS rawScore
+                    MAX(XapiStatementEntity.resultScoreScaled) AS scoreScaled
                FROM XapiStatementEntity
               WHERE XapiStatementEntity.statementObjectUid1 IN(
                     SELECT DISTINCT AssignedActivityUids.assignedActivityUid 

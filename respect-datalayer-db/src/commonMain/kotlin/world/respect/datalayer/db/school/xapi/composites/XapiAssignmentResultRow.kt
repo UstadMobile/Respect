@@ -6,5 +6,5 @@ class XapiAssignmentResultRow(
     val progress: Int?,
     val completed: Boolean?,
     val successful: Boolean?,
-    val rawScore: Float?,
+    val scoreScaled: Float?,
 )

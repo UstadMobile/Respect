@@ -10,7 +10,7 @@ fun XapiAssignmentResultRow.toXapiAssignmentResult(
         activityId = activityId,
         completed = completed,
         successful = successful,
-        rawScore = rawScore,
+        scoreScaled = scoreScaled,
         progress = progress,
     )
 }

@@ -54,6 +54,10 @@ fun Person.inviteUidOrNull(): String? {
     return metadata?.get(Person.METADATA_KEY_INVITE_UID)?.jsonPrimitive?.contentOrNull
 }
 
+/**
+ * Convention: accountUrl is now the school url. Eventually there will be no school url, only the
+ * xapi URL.
+ */
 fun Person.asXapiAgent(
     accountUrl: Url
 ) : XapiAgent {

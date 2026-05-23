@@ -379,7 +379,7 @@ class XapiStatementsResourceDbTest {
 
                         assertEquals(
                             statement.result?.score?.scaled,
-                            result.rawScore,
+                            result.scoreScaled,
                         )
 
                         assertEquals(

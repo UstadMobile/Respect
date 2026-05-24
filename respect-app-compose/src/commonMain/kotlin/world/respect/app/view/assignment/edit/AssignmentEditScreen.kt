@@ -1,7 +1,6 @@
 package world.respect.app.view.assignment.edit
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,9 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -21,9 +18,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -57,7 +54,6 @@ import world.respect.shared.domain.xapi.withDeadline
 import world.respect.shared.domain.xapi.withDescription
 import world.respect.shared.domain.xapi.withTitle
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.add
 import world.respect.shared.generated.resources.assign_to
 import world.respect.shared.generated.resources.assignment_title
 import world.respect.shared.generated.resources.description
@@ -210,39 +206,32 @@ fun AssignmentEditScreen(
             style = MaterialTheme.typography.titleMedium
         )
 
-        OutlinedButton(
-            onClick = { onClickAddLearningUnit() },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-            shape = RoundedCornerShape(28.dp),
-            border = BorderStroke(1.dp, Color.LightGray)
-        ) {
-            Icon(
-                Icons.Default.Add,
-                contentDescription = stringResource(Res.string.add),
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                stringResource(Res.string.task),
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(Modifier.weight(1f))
-        }
-        Spacer(Modifier.height(16.dp))
+        ListItem(
+            modifier = Modifier.clickable {
+                onClickAddLearningUnit()
+            },
+            headlineContent = {
+                Text(stringResource(Res.string.task))
+            },
+            leadingContent = {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = null,
+                )
+            }
+        )
 
         val currentTasks = assignment?.context?.contextActivities?.grouping ?: emptyList()
 
         if (currentTasks.isEmpty()) {
             EmptyTasksIllustration()
         } else {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                currentTasks.forEach { learningUnit ->
-                    TaskListItem(
-                        taskActivity = learningUnit,
-                        uiState = uiState,
-                        onRemove = { onClickRemoveLearningUnit(learningUnit) }
-                    )
-                }
+            currentTasks.forEach { learningUnit ->
+                AssignmentEditTaskListItem(
+                    taskActivity = learningUnit,
+                    uiState = uiState,
+                    onRemove = { onClickRemoveLearningUnit(learningUnit) }
+                )
             }
         }
     }
@@ -265,12 +254,10 @@ fun EmptyTasksIllustration() {
         Text(
             text = stringResource(Res.string.no_tasks_selected_yet),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.DarkGray
         )
         Text(
             text = stringResource(Res.string.please_click_plus_button_to_add_one),
             style = MaterialTheme.typography.bodySmall,
-            color = Color.Gray
         )
     }
 }

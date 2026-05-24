@@ -96,7 +96,11 @@ class AssignmentEditViewModel(
 
     private val getXapiActivityForPublicationUseCase: GetXapiActivityForPublicationUseCase by inject()
 
-    private val _uiState = MutableStateFlow(AssignmentEditUiState())
+    private val _uiState = MutableStateFlow(
+        AssignmentEditUiState(
+            learningUnitInfoFlow = ::learningUnitInfoFlowFor
+        )
+    )
 
     val uiState = _uiState.asStateFlow()
 
@@ -137,7 +141,6 @@ class AssignmentEditViewModel(
             _uiState.update {
                 it.copy(
                     classOptions = classes,
-                    learningUnitInfoFlow = ::learningUnitInfoFlowFor
                 )
             }
 

@@ -35,7 +35,7 @@ import world.respect.shared.viewmodel.assignment.edit.AssignmentEditUiState
 
 
 @Composable
-fun TaskListItem(
+fun AssignmentEditTaskListItem(
     taskActivity: XapiActivity,
     uiState: AssignmentEditUiState,
     onRemove: () -> Unit

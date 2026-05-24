@@ -18,7 +18,6 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.ClassDataSource
-import world.respect.datalayer.school.model.AssignmentLearningUnitRef
 import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
@@ -29,8 +28,11 @@ import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
 import world.respect.lib.dataloadstate.ext.isReadyAndSettled
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.xapi.ext.addActivityToContextActivitiesGrouping
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.ext.removeActivityFromContextActivitiesGrouping
 import world.respect.lib.xapi.model.VERB_ASSIGN
+import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.libutil.ext.appendEndpointSegments
@@ -39,9 +41,6 @@ import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPubl
 import world.respect.shared.domain.xapi.activityDefinitionTitle
 import world.respect.shared.domain.xapi.actorName
 import world.respect.shared.domain.xapi.createBlankAssignmentStatement
-import world.respect.shared.domain.xapi.isAssignmentStatement
-import world.respect.shared.domain.xapi.manifestUrl
-import world.respect.shared.domain.xapi.withLearningUnitActivities
 import world.respect.shared.ext.studentsXapiGroup
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_assignment
@@ -59,8 +58,9 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import world.respect.shared.viewmodel.app.appstate.Snack
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
-import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -85,6 +85,7 @@ class AssignmentEditViewModel(
     private val accountManager: RespectAccountManager,
     private val json: Json,
     private val resultReturner: NavResultReturner,
+    private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -101,8 +102,7 @@ class AssignmentEditViewModel(
 
     private val debouncer = LaunchDebouncer(viewModelScope)
 
-    private val schoolUrl = accountManager.activeAccount?.school?.self
-        ?: throw IllegalStateException("No active school account found")
+    private val schoolUrl = accountManager.requireActiveSchoolUrl()
 
     private val assignmentActivityId = route.assignmentActivityId ?: run {
         schoolUrl.appendEndpointSegments(ACTIVITY_ID_PATH, Uuid.random().toString()).toString()
@@ -125,7 +125,10 @@ class AssignmentEditViewModel(
                 hideBottomNavigation = true,
             )
         }
-        launchWithLoadingIndicator {
+
+        launchWithLoadingIndicator(
+            onShowError = { snackBarDispatcher.showSnackBar(Snack(it)) }
+        ) {
             val classes = schoolDataSource.classDataSource.list(
                 DataLoadParams(),
                 ClassDataSource.GetListParams()
@@ -137,6 +140,7 @@ class AssignmentEditViewModel(
                     learningUnitInfoFlow = ::learningUnitInfoFlowFor
                 )
             }
+
             if (route.assignmentActivityId != null) {
                 loadEntity(
                     json = json,
@@ -164,14 +168,15 @@ class AssignmentEditViewModel(
                     }
                 )
             } else {
-                val instructor = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent ?: return@launchWithLoadingIndicator
+                val instructor = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent
+                    ?: return@launchWithLoadingIndicator
                 val baseStmt = createBlankAssignmentStatement(
                     assignmentActivityId = assignmentActivityId,
                     instructor = instructor
                 )
                 val initialStmt = route.learningUnitSelected?.let {
                     val activity = getXapiActivityForPublicationUseCase(it.selectedPublication)
-                    baseStmt.withLearningUnitActivities(listOf(activity))
+                    baseStmt.addActivityToContextActivitiesGrouping(activity)
                 } ?: baseStmt
 
                 _uiState.update { prev ->
@@ -188,12 +193,11 @@ class AssignmentEditViewModel(
 
                     _uiState.update { prev ->
                         val preStatementData = prev.statementData.dataOrNull() ?: return@update prev
-                        val currentActivities = preStatementData.context?.contextActivities?.grouping ?: emptyList()
 
                         prev.copy(
                             statementData = DataReadyState(
-                                data = preStatementData.withLearningUnitActivities(
-                                    currentActivities + activity
+                                data = preStatementData.addActivityToContextActivitiesGrouping(
+                                    activity
                                 )
                             )
                         )
@@ -259,16 +263,15 @@ class AssignmentEditViewModel(
     }
 
     fun onClickRemoveLearningUnit(
-        ref: AssignmentLearningUnitRef
+        activity: XapiActivity
     ) {
         val assignment = uiState.value.statementData.dataOrNull() ?: return
 
         _uiState.update { prev ->
-            val currentActivities = assignment.context?.contextActivities?.grouping ?: emptyList()
             prev.copy(
                 statementData = DataReadyState(
-                    data = assignment.withLearningUnitActivities(
-                        currentActivities.filter { it.manifestUrl != ref.learningUnitManifestUrl }
+                    data = assignment.removeActivityFromContextActivitiesGrouping(
+                        idToRemove = activity.id
                     )
                 )
             )

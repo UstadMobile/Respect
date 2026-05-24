@@ -34,14 +34,15 @@ import world.respect.lib.xapi.ext.isCompleted
 import world.respect.lib.xapi.ext.isInProgress
 import world.respect.lib.xapi.ext.isNotStarted
 import world.respect.lib.xapi.ext.isStarted
+import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.xapi.activityDefinitionTitle
-import world.respect.shared.domain.xapi.manifestUrl
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
+import world.respect.shared.generated.resources.invalid_link
 import world.respect.shared.navigation.AssignmentDetail
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.LearningUnitDetail
@@ -50,6 +51,8 @@ import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.app.appstate.Snack
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import kotlin.collections.emptyList
 
 
@@ -142,6 +145,7 @@ data class AssignmentDetailUiState(
 class AssignmentDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
+    private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -263,7 +267,13 @@ class AssignmentDetailViewModel(
     }
 
     fun onClickTask(activity: XapiActivity) {
-        val manifestUrl = activity.manifestUrl ?: return
+        val manifestUrl = activity.definition?.webPubManifestAsUrlOrNull()
+
+        if(manifestUrl == null) {
+            snackBarDispatcher.showSnackBar(Snack(Res.string.invalid_link.asUiText()))
+            return
+        }
+
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 LearningUnitDetail.create(

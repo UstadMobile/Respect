@@ -24,9 +24,9 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.asLangMap
 import world.respect.lib.xapi.composites.XapiAssignmentTaskProgress
+import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.libutil.ext.resolve
-import world.respect.shared.domain.xapi.manifestUrl
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.task_image
 import world.respect.shared.viewmodel.app.appstate.getTitle
@@ -41,7 +41,7 @@ fun AssignmentDetailTaskListItem(
     val title = activity.definition?.name?.asLangMap()?.getTitle()
         ?: ""
 
-    val manifestUrl = activity.manifestUrl
+    val manifestUrl = activity.definition?.webPubManifestAsUrlOrNull()
 
     val taskInfoFlow = remember(
         manifestUrl, taskInfoFlow

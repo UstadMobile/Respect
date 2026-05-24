@@ -21,6 +21,8 @@ sealed class LangMap {
 
     companion object {
 
+        val EMPTY = LangMapStringValue("")
+
         fun fromMap(map: Map<String, String>) = LangMapObjectValue(map)
 
     }

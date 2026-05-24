@@ -22,6 +22,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.xapi.ext.webPubManifestOrNull
 import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.lib.xapi.model.VERB_ASSIGN
 import world.respect.lib.xapi.model.XapiActivity
@@ -29,8 +30,6 @@ import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParam
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.xapi.activityDefinitionTitle
 import world.respect.shared.domain.xapi.assignmentDeadline
-import world.respect.shared.domain.xapi.assignmentLearningUnits
-import world.respect.shared.domain.xapi.isAssignmentStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assignment
 import world.respect.shared.generated.resources.assignments
@@ -130,12 +129,11 @@ class AssignmentListViewModel(
                 dataLoadParams = DataLoadParams()
             ).collect { state ->
                 allSummaries = state.dataOrNull()?.statements
-                    ?.filter { it.isAssignmentStatement }
                     ?.groupBy { (it.`object` as? XapiActivity)?.id ?: "" }
                     ?.map { (activityId, statements) ->
                         // Pick the most recent statement for this unique assignment activity
                         val stmt = statements.maxBy { it.timestamp ?: it.stored ?: Clock.System.now() }
-                        val learningUnits = stmt.assignmentLearningUnits
+                        val learningUnits = stmt.context?.contextActivities?.grouping ?: emptyList()
                         AssignmentSummary(
                             activityId = activityId,
                             title = stmt.activityDefinitionTitle,
@@ -144,7 +142,9 @@ class AssignmentListViewModel(
                             deadline = stmt.assignmentDeadline,
                             completedCount = 0,
                             totalCount = learningUnits.size,
-                            learningUnitManifestUrls = learningUnits.map { it.learningUnitManifestUrl.toString() },
+                            learningUnitManifestUrls = learningUnits.mapNotNull {
+                                it.definition?.webPubManifestOrNull()
+                            },
                             statementId = stmt.id?.toString() ?: ""
                         )
                     } ?: emptyList()

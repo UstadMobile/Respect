@@ -1,10 +1,7 @@
 package world.respect.shared.domain.xapi
 
-import io.ktor.http.Url
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
-import world.respect.datalayer.school.model.AssignmentLearningUnitRef
-import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.model.VERB_ASSIGN
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActivityDefinition
@@ -29,21 +26,6 @@ object XapiAssignmentConstants {
 }
 
 @OptIn(ExperimentalUuidApi::class)
-val XapiActivity.manifestUrl: Url?
-    get() = definition?.extensions?.get(OpenEelXapiConstants.ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK)
-        ?.let { (it as? JsonPrimitive)?.contentOrNull }
-        ?.let { runCatching { Url(it) }.getOrNull() }
-        ?: runCatching { Url(id) }.getOrNull()
-
-@OptIn(ExperimentalUuidApi::class)
-val XapiStatement.isAssignmentStatement: Boolean
-    get() {
-        if (verb.id != VERB_ASSIGN) return false
-        val categories = context?.contextActivities?.category ?: emptyList()
-        return categories.any { it.id == XapiAssignmentConstants.CATEGORY_ASSIGNMENT_RECIPE }
-    }
-
-@OptIn(ExperimentalUuidApi::class)
 val XapiStatement.activityDefinitionTitle: String
     get() = (this.`object` as? XapiActivity)?.definition?.name?.values?.firstOrNull() ?: ""
 
@@ -60,18 +42,6 @@ val XapiStatement.assignmentDeadline: Instant?
         ?.let { (it as? JsonPrimitive)?.contentOrNull }
         ?.let { runCatching { Instant.parse(it) }.getOrNull() }
 
-@OptIn(ExperimentalUuidApi::class)
-val XapiStatement.assignmentLearningUnits: List<AssignmentLearningUnitRef>
-    get() = context?.contextActivities?.grouping?.mapNotNull { groupingActivity ->
-        groupingActivity.manifestUrl?.let { AssignmentLearningUnitRef(it) }
-    } ?: emptyList()
-
-@OptIn(ExperimentalUuidApi::class)
-fun XapiStatement.getUnitTitle(unitActivityId: String): String? {
-    return context?.contextActivities?.grouping
-        ?.find { it.id == unitActivityId }
-        ?.definition?.name?.values?.firstOrNull()
-}
 
 @OptIn(ExperimentalUuidApi::class)
 fun XapiStatement.withTitle(title: String): XapiStatement {
@@ -118,16 +88,6 @@ fun XapiStatement.withDeadline(deadline: Instant?): XapiStatement {
     )
 }
 
-
-@OptIn(ExperimentalUuidApi::class)
-fun XapiStatement.withLearningUnitActivities(activities: List<XapiActivity>): XapiStatement {
-    val newContext = (context ?: XapiContext()).copy(
-        contextActivities = (context?.contextActivities ?: XapiContextActivities()).copy(
-            grouping = activities
-        )
-    )
-    return copy(context = newContext)
-}
 
 @OptIn(ExperimentalUuidApi::class)
 fun createBlankAssignmentStatement(

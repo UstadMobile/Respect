@@ -109,3 +109,28 @@ fun XapiStatement.addActivityToContextActivitiesGrouping(
         }
     )
 }
+
+fun XapiStatement.removeActivityFromContextActivitiesGrouping(
+    idToRemove: String
+) : XapiStatement {
+    return copy(
+        context = contextOrBlank().let { ctx ->
+            ctx.copy(
+                contextActivities = ctx.contextActivitiesOrBlank().let { ctxActivities ->
+                    ctxActivities.copy(
+                        grouping = (ctxActivities.grouping ?: emptyList()).filter {
+                            it.id != idToRemove
+                        }
+                    )
+                }
+            )
+        }
+    )
+}
+
+fun XapiStatement.objectActivityOrNull(): XapiActivity? {
+    return `object` as? XapiActivity
+}
+
+
+

@@ -14,9 +14,9 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.LangMap
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findIcons
+import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.libutil.ext.resolve
-import world.respect.shared.domain.xapi.manifestUrl
 import world.respect.shared.viewmodel.app.appstate.getTitle
 
 @Composable
@@ -26,7 +26,7 @@ fun AssignmentDetailTaskHeader(
     taskColWidth: Dp,
     headerHeight: Dp,
 ) {
-    val manifestUrl = activity.manifestUrl
+    val manifestUrl = activity.definition?.webPubManifestAsUrlOrNull()
 
     val infoFlow = remember(manifestUrl) {
         manifestUrl?.let { taskInfoFlow(it) } ?: flowOf(DataLoadingState())

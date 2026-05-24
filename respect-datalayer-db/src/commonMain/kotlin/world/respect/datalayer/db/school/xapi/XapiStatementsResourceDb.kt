@@ -494,11 +494,11 @@ class XapiStatementsResourceDb(
                             val actorUidNum = actor.identifierHash(uidNumberMapper)
                             XapiActorAndAssignmentProgress(
                                 actor = actor,
-                                progress = assignedActivities.map { activity ->
+                                progress = assignedActivities.map { taskActivity ->
                                     dbAssignmentResults[actorUidNum]?.firstOrNull {
-                                        it.activityUid == uidNumberMapper(activity.id)
-                                    }?.toXapiAssignmentResult(activity.id)
-                                        ?: XapiAssignmentProgress.emptyResult(activityId)
+                                        it.activityUid == uidNumberMapper(taskActivity.id)
+                                    }?.toXapiAssignmentResult(taskActivity.id)
+                                        ?: XapiAssignmentProgress.emptyResult(taskActivity.id)
                                 }
                             )
                         }

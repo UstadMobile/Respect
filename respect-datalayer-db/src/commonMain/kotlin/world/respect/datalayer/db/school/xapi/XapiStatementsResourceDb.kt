@@ -50,7 +50,7 @@ import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_CONSISTENT_THROUG
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_VERSION
 import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
-import world.respect.lib.xapi.composites.XapiAssignmentProgress
+import world.respect.lib.xapi.composites.XapiAssignmentTaskProgress
 import world.respect.lib.xapi.exceptions.XapiBadRequestException
 import world.respect.lib.xapi.exceptions.XapiForbiddenException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
@@ -494,11 +494,11 @@ class XapiStatementsResourceDb(
                             val actorUidNum = actor.identifierHash(uidNumberMapper)
                             XapiActorAndAssignmentProgress(
                                 actor = actor,
-                                progress = assignedActivities.map { taskActivity ->
+                                progressPerTask = assignedActivities.map { taskActivity ->
                                     dbAssignmentResults[actorUidNum]?.firstOrNull {
                                         it.activityUid == uidNumberMapper(taskActivity.id)
                                     }?.toXapiAssignmentResult(taskActivity.id)
-                                        ?: XapiAssignmentProgress.emptyResult(taskActivity.id)
+                                        ?: XapiAssignmentTaskProgress.emptyResult(taskActivity.id)
                                 }
                             )
                         }

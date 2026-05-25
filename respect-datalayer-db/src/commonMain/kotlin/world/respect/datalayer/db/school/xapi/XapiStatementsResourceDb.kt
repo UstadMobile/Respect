@@ -59,7 +59,6 @@ import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiGroup
-import world.respect.lib.xapi.model.XapiObjectType
 import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
@@ -475,16 +474,35 @@ class XapiStatementsResourceDb(
             ),
             dataLoadParams = DataLoadParams(),
         ).map { statementResult ->
-            val assignmentStatement = statementResult.dataOrNull()?.statements
+            val exactAssignmentStmt = statementResult.dataOrNull()?.statements
                 ?.mostRecentByTimestampOrNull()
 
-            if(assignmentStatement == null) {
+            val canonicalAssignmentStmt = exactAssignmentStmt?.let {
+                get(
+                    listParams = GetStatementParams(
+                        statementId = exactAssignmentStmt.id,
+                        limit = 1,
+                    )
+                )
+            }?.dataOrNull()?.statements?.firstOrNull()
+
+            if(exactAssignmentStmt == null || canonicalAssignmentStmt == null) {
                 NoDataLoadedState(reason = NoDataLoadedState.Reason.NOT_FOUND)
             }else {
-                val assignedActivities = assignmentStatement.context?.contextActivities?.grouping
+                /*
+                 * The canonical statement will include the latest definition of the assignee (actor).
+                 * However we need the exact statement to
+                 *  a) Get the task activities in the correct order
+                 *  b) Be sure that the definition of each task activity includes the web pub manifest
+                 *     url extension (the canonical definition of the activity might change, e.g. if
+                 *     statements from the content itself don't include the web pub manifest).
+                 */
+                val assignmentStmt = exactAssignmentStmt.copy(actor = canonicalAssignmentStmt.actor)
+
+                val assignedActivities = exactAssignmentStmt.context?.contextActivities?.grouping
                     ?: emptyList()
 
-                val actorsToShow = when(val statementActor = assignmentStatement.actor){
+                val actorsToShow = when(val statementActor = exactAssignmentStmt.actor){
                     is XapiAgent -> listOf(statementActor)
                     is XapiGroup -> statementActor.member ?: throw IllegalStateException(
                         "getAssignmentResults: XapiGroup should include members when retrieved using canonical format"
@@ -497,7 +515,7 @@ class XapiStatementsResourceDb(
 
                 DataReadyState(
                     data = AssignmentAndProgress(
-                        assignmentStatement = assignmentStatement,
+                        assignmentStatement = assignmentStmt,
                         progress = actorsToShow.map { actor ->
                             val actorUidNum = actor.identifierHash(uidNumberMapper)
                             XapiActorAndAssignmentProgress(

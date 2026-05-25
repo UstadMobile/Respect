@@ -99,4 +99,5 @@ Use the following verb:
 }
 ```
 
-
+Notes:
+* xAPI does not guarantee preserving the order of activities in activitiesContext

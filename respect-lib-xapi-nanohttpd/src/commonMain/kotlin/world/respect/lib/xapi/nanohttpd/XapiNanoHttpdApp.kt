@@ -135,7 +135,9 @@ class XapiNanoHttpdApp(
                             )
                         )
 
-                        dataLoadState.toFixedLengthResponse(XapiStatementResult.serializer())
+                        dataLoadState.toFixedLengthResponse(XapiStatementResult.serializer()).also {
+                            it.addXapiCORSHeaders(session)
+                        }
                     }
 
                     Method.POST -> {
@@ -190,7 +192,9 @@ class XapiNanoHttpdApp(
                             "text/plain",
                             ByteArrayInputStream(byteArrayOf()),
                             0,
-                        )
+                        ).also {
+                            it.addXapiCORSHeaders(session)
+                        }
                     }
                 }
             }catch(e: Throwable) {
@@ -202,7 +206,9 @@ class XapiNanoHttpdApp(
                     responseStatus,
                     "text/plain",
                     e.message ?: "No error message",
-                )
+                ).also {
+                    it.addXapiCORSHeaders(session)
+                }
             }
         }
     }

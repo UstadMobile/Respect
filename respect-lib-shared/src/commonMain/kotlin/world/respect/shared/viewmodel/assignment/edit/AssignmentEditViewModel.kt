@@ -61,6 +61,7 @@ import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -302,7 +303,12 @@ class AssignmentEditViewModel(
 
         launchWithLoadingIndicator {
             schoolDataSource.xapiStatementsResource.post(
-                listOf(assignment.copy(id = Uuid.random()))
+                listOf(
+                    assignment.copy(
+                        id = Uuid.random(),
+                        timestamp = Clock.System.now(),
+                    )
+                )
             )
 
             if (route.assignmentActivityId == null) {

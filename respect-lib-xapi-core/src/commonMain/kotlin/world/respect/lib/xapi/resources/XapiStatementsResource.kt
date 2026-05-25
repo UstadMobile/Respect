@@ -9,6 +9,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.serializers.InstantAsISO8601
 import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.ext.getUuidOrNull
+import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
@@ -110,6 +111,12 @@ interface XapiStatementsResource {
         activityId: String,
         filterByAssigneeAgent: XapiAgent? = null,
     ): Flow<DataLoadState<AssignmentAndProgress>>
+
+    fun getAssignmentListAsFlow(
+        dataLoadParams: DataLoadParams = DataLoadParams(),
+        studentAgent: XapiAgent? = null,
+    ): Flow<List<AssignmentSummary>>
+
 
     companion object {
 

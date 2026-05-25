@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "7774426547b11ce4f913c89bcd783942",
+    "identityHash": "065ea20feb32da3d8c4a6f8c3bf40495",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -2073,7 +2073,19 @@
           "columnNames": [
             "scajUid"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "idx_statementctx_stmt_id",
+            "unique": false,
+            "columnNames": [
+              "scajFromStatementIdHi",
+              "scajFromStatementIdLo"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_statementctx_stmt_id` ON `${TABLE_NAME}` (`scajFromStatementIdHi`, `scajFromStatementIdLo`)"
+          }
+        ]
       },
       {
         "tableName": "XapiStatementEntity",
@@ -2408,7 +2420,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7774426547b11ce4f913c89bcd783942')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '065ea20feb32da3d8c4a6f8c3bf40495')"
     ]
   }
 }

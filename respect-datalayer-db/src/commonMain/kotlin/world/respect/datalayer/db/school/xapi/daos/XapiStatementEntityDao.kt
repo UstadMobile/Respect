@@ -10,11 +10,14 @@ import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.xapi.composites.XapiAssignmentResultRow
 import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
 import world.respect.datalayer.db.school.xapi.composites.XapiSubstatementAndVerbEntity
+import world.respect.datalayer.db.school.xapi.composites.XapiSummaryResultRow
 import world.respect.datalayer.db.school.xapi.composites.XapiTimes
-import world.respect.datalayer.db.school.xapi.entities.XapiAssignmentProgressEntityRow
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntryPropEnum
 import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementContextActivityJoinTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
 import world.respect.datalayer.school.model.report.StatementReportRow
+import world.respect.lib.xapi.OpenEelXapiConstants.ACTIVITY_EXTENSION_DEADLINE
 
 @Dao
 interface XapiStatementEntityDao {
@@ -100,17 +103,6 @@ interface XapiStatementEntityDao {
         statementIdLo: Long,
     ): Long?
 
-    @Query("""
-        UPDATE XapiStatementEntity
-           SET stmtVoid = 1
-         WHERE XapiStatementEntity.statementIdHi = :voidStmtIdHi
-           AND XapiStatementEntity.statementIdLo = :voidStmtIdLo
-    """)
-    suspend fun updateSetStatementVoided(
-        voidStmtIdHi: Long,
-        voidStmtIdLo: Long
-    )
-
     /**
      * Get a result with one row per combination of assigned actor (including group members) and
      * assigned activity id as per the assignment recipe. Each row includes summary stats for the
@@ -170,9 +162,15 @@ interface XapiStatementEntityDao {
                     SELECT DISTINCT AssignedActivityUids.assignedActivityUid 
                       FROM AssignedActivityUids)
                 AND XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.ACTIVITY}
-                AND NOT XapiStatementEntity.stmtVoid
                 AND XapiStatementEntity.statementActorUid IN 
                     (SELECT uid FROM AgentActorUids)
+                AND NOT XapiStatementEntity.stmtVoid
+                AND :assignmentActivityIdNum IN 
+                    (SELECT XapiStatementContextActivityJoin.scajToActivityUid
+                       FROM XapiStatementContextActivityJoin
+                      WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
+                        AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo
+                        AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
            GROUP BY XapiStatementEntity.statementActorUid, XapiStatementEntity.statementObjectUid1
     """)
     suspend fun getAssignmentResults(
@@ -180,37 +178,101 @@ interface XapiStatementEntityDao {
         filterByStudentActorUid: Long,
     ): List<XapiAssignmentResultRow>
 
+    /**
+     *
+     */
+    @Query("""
+        SELECT XapiStatementEntity.statementObjectUid1 AS activityUid,
+               XapiStatementEntity.statementObjectActivityId AS activityId,
+               NameLangMapEntry.almeValue AS title,
+               (SELECT COUNT(DISTINCT ProgressStmt.statementObjectUid1)
+                  FROM XapiStatementEntity ProgressStmt
+                 WHERE ProgressStmt.statementActorUid = :studentAgentActorUid
+                   AND XapiActivityEntity.actUid IN (
+                       SELECT XapiStatementContextActivityJoin.scajToActivityUid
+                         FROM XapiStatementContextActivityJoin
+                        WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = ProgressStmt.statementIdHi
+                          AND XapiStatementContextActivityJoin.scajFromStatementIdLo = ProgressStmt.statementIdLo)
+                   AND (    ProgressStmt.resultCompletion = 1
+                         OR ProgressStmt.statementVerbUid = :completeVerbUid)
+               ) AS numCompleted,
+               (SELECT COUNT(*) 
+                  FROM XapiStatementContextActivityJoin
+                 WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
+                   AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo) AS numTotal,
+               DeadlineExtensionEntity.aeeJson AS deadlineStr
+          FROM XapiStatementEntity
+               $SQL_JOIN_ASSIGNMENT_SUMMARY
+         WHERE XapiStatementEntity.statementVerbUid = :assignVerbUid
+           AND $SQL_STATEMENT_ENTITY_IS_MOST_RECENT_FOR_OBJECT_CLAUSE
+    """)
+    fun getAssignmentListForStudentAsFlow(
+        assignVerbUid: Long,
+        studentAgentActorUid: Long,
+        completeVerbUid: Long,
+    ): Flow<List<XapiSummaryResultRow>>
+
+    @Query("""
+        SELECT XapiStatementEntity.statementObjectUid1 AS activityUid,
+               XapiStatementEntity.statementObjectActivityId AS activityId,
+               NameLangMapEntry.almeValue AS title,
+               0 AS numCompleted,
+               0 AS numTotal,
+               DeadlineExtensionEntity.aeeJson AS deadlineStr
+          FROM XapiStatementEntity
+               $SQL_JOIN_ASSIGNMENT_SUMMARY
+         WHERE XapiStatementEntity.statementVerbUid = :assignVerbUid      
+           AND $SQL_STATEMENT_ENTITY_IS_MOST_RECENT_FOR_OBJECT_CLAUSE
+    """)
+    fun getAssignmentListAsFlow(
+        assignVerbUid: Long
+    ): Flow<List<XapiSummaryResultRow>>
+
+    @Query("""
+        UPDATE XapiStatementEntity
+           SET stmtVoid = 1
+         WHERE XapiStatementEntity.statementIdHi = :voidStmtIdHi
+           AND XapiStatementEntity.statementIdLo = :voidStmtIdLo
+    """)
+    suspend fun updateSetStatementVoided(
+        voidStmtIdHi: Long,
+        voidStmtIdLo: Long
+    )
 
     @RawQuery
     suspend fun runReportQuery(query: RoomRawQuery): List<StatementReportRow>
-
-    @Query("""
-        SELECT 
-            Stmt.statementActorUid AS personUid,
-            Actor.actorName AS personName,
-            Stmt.statementObjectActivityId AS activityId,
-            MAX(Stmt.resultCompletion) AS completion,
-            MAX(Stmt.resultSuccess) AS success,
-            MAX(COALESCE(Stmt.resultScoreScaled, Stmt.resultScoreRaw)) AS scoreScaled,
-            MAX(Stmt.extensionProgress) AS progress
-        FROM XapiStatementEntity Stmt
-        JOIN XapiActorEntity Actor ON Stmt.statementActorUid = Actor.actorUid
-        JOIN XapiStatementContextActivityJoin CtxJoin ON (Stmt.statementIdHi = CtxJoin.scajFromStatementIdHi AND Stmt.statementIdLo = CtxJoin.scajFromStatementIdLo)
-        WHERE CtxJoin.scajToActivityUid = :assignmentActivityUidNum
-        GROUP BY Stmt.statementActorUid, Stmt.statementObjectActivityId
-    """)
-    fun getAssignmentProgressFlow(
-        assignmentActivityUidNum: Long,
-    ): Flow<List<XapiAssignmentProgressEntityRow>>
-
-    @Query("SELECT MAX(stored) FROM XapiStatementEntity Stmt JOIN XapiStatementContextActivityJoin CtxJoin ON (Stmt.statementIdHi = CtxJoin.scajFromStatementIdHi AND Stmt.statementIdLo = CtxJoin.scajFromStatementIdLo) WHERE CtxJoin.scajToActivityUid = :activityUidNum")
-    suspend fun getLastStoredTimestampForActivity(activityUidNum: Long): Long?
 
     companion object {
 
         const val SINCE_UNSET = Long.MIN_VALUE
 
         const val UNTIL_UNSET = Long.MAX_VALUE
+
+        const val SQL_JOIN_ASSIGNMENT_SUMMARY = """
+            JOIN XapiActivityEntity
+                    ON XapiActivityEntity.actUid = XapiStatementEntity.statementObjectUid1
+               JOIN XapiActivityLangMapEntry NameLangMapEntry 
+                    ON NameLangMapEntry.almeUid = 
+                       (SELECT XapiActivityLangMapEntry.almeUid
+                          FROM XapiActivityLangMapEntry
+                         WHERE XapiActivityLangMapEntry.almeActivityUid = XapiActivityEntity.actUid
+                           AND XapiActivityLangMapEntry.almeProperty = ${XapiActivityLangMapEntryPropEnum.NAME_FLAG_INT}
+                         LIMIT 1)
+               LEFT JOIN XapiActivityExtensionEntity DeadlineExtensionEntity
+                         ON (DeadlineExtensionEntity.aeeActivityUid = XapiActivityEntity.actUid
+                             AND DeadlineExtensionEntity.aeeKey = '${ACTIVITY_EXTENSION_DEADLINE}')
+        """
+
+        const val SQL_STATEMENT_ENTITY_IS_MOST_RECENT_FOR_OBJECT_CLAUSE = """
+            (XapiStatementEntity.statementIdHi, XapiStatementEntity.statementIdLo) IN
+               (SELECT XapiStatementInner.statementIdHi, 
+                       XapiStatementInner.statementIdLo
+                  FROM XapiStatementEntity XapiStatementInner
+                 WHERE XapiStatementInner.statementObjectUid1 = XapiStatementEntity.statementObjectUid1
+                   AND XapiStatementInner.statementObjectType = XapiStatementEntity.statementObjectType
+              ORDER BY XapiStatementInner.timestamp DESC
+                 LIMIT 1)
+        """
 
         /*
          Begin statement query : This query is the same for both XapiStatementEntity

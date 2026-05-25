@@ -18,6 +18,5 @@ data class AssignmentSummary(
     val learningUnitManifestUrls: List<String> = emptyList(),
     val statementId: String = ""
 ) {
-    val uid: String get() = activityId.substringAfterLast("/")
     val isCompleted: Boolean get() = totalCount > 0 && completedCount == totalCount
 }

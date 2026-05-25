@@ -1,9 +1,14 @@
 package world.respect.datalayer.db.school.xapi.entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(
+    indices = [
+        Index(value = ["scajFromStatementIdHi", "scajFromStatementIdLo"], name = "idx_statementctx_stmt_id"),
+    ]
+)
 /**
  * Join that is used to handle ContextActivities as per:
  * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#2462-contextactivities-property

@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -18,18 +19,12 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.isStudent
+import world.respect.datalayer.school.ext.asXapiAgent
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.xapi.ext.webPubManifestOrNull
 import world.respect.lib.xapi.model.AssignmentSummary
-import world.respect.lib.xapi.model.VERB_ASSIGN
-import world.respect.lib.xapi.model.XapiActivity
-import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.xapi.activityDefinitionTitle
-import world.respect.shared.domain.xapi.assignmentDeadline
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assignment
 import world.respect.shared.generated.resources.assignments
@@ -40,7 +35,6 @@ import world.respect.shared.util.AssignmentListScreenFilter
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 
 data class AssignmentListUiState(
@@ -79,9 +73,10 @@ class AssignmentListViewModel(
     private val schoolDataSource: SchoolDataSource by inject()
 
     private val _uiState = MutableStateFlow(AssignmentListUiState())
+
     val uiState: StateFlow<AssignmentListUiState> = _uiState.asStateFlow()
 
-    private var allSummaries: List<AssignmentSummary> = emptyList()
+    private val schoolUrl = accountManager.requireActiveSchoolUrl()
 
     init {
         _appUiState.update {
@@ -117,61 +112,24 @@ class AssignmentListViewModel(
                         )
                     )
                 }
-                loadData()
-            }
-        }
-    }
 
-    private fun loadData() {
-        viewModelScope.launch {
-            schoolDataSource.xapiStatementsResource.getAsFlow(
-                listParams = GetStatementParams(verb = VERB_ASSIGN),
-                dataLoadParams = DataLoadParams()
-            ).collect { state ->
-                allSummaries = state.dataOrNull()?.statements
-                    ?.groupBy { (it.`object` as? XapiActivity)?.id ?: "" }
-                    ?.map { (activityId, statements) ->
-                        // Pick the most recent statement for this unique assignment activity
-                        val stmt = statements.maxBy { it.timestamp ?: it.stored ?: Clock.System.now() }
-                        val learningUnits = stmt.context?.contextActivities?.grouping ?: emptyList()
-                        AssignmentSummary(
-                            activityId = activityId,
-                            title = stmt.activityDefinitionTitle,
-                            className = stmt.actor.name ?: "",
-                            lastModified = stmt.timestamp ?: Clock.System.now(),
-                            deadline = stmt.assignmentDeadline,
-                            completedCount = 0,
-                            totalCount = learningUnits.size,
-                            learningUnitManifestUrls = learningUnits.mapNotNull {
-                                it.definition?.webPubManifestOrNull()
-                            },
-                            statementId = stmt.id?.toString() ?: ""
-                        )
-                    } ?: emptyList()
-
-                updateFilteredAssignments()
-            }
-        }
-    }
-
-    private fun updateFilteredAssignments() {
-        _uiState.update { state ->
-            val filtered = allSummaries.filter { summary ->
-                when (state.selectedFilter) {
-                    AssignmentListScreenFilter.ALL -> true
-                    AssignmentListScreenFilter.COMPLETED -> summary.isCompleted
-                    AssignmentListScreenFilter.PENDING -> !summary.isCompleted
+                val selectedStudent = selectedAcct?.person?.takeIf { it.isStudent() }
+                schoolDataSource.xapiStatementsResource.getAssignmentListAsFlow(
+                    dataLoadParams = DataLoadParams(),
+                    studentAgent = selectedStudent?.asXapiAgent(schoolUrl)
+                ).collectLatest { assignmentSummaries ->
+                    _uiState.update {
+                        it.copy(assignments = assignmentSummaries)
+                    }
                 }
             }
-            state.copy(
-                assignments = filtered,
-            )
         }
     }
+
+
 
     fun onFilterChanged(filter: AssignmentListScreenFilter) {
         _uiState.update { it.copy(selectedFilter = filter) }
-        updateFilteredAssignments()
     }
 
     fun onClickAssignment(summary: AssignmentSummary) {

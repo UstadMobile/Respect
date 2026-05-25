@@ -31,9 +31,9 @@ import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.ext.addActivityToContextActivitiesGrouping
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
 import world.respect.lib.xapi.ext.removeActivityFromContextActivitiesGrouping
-import world.respect.lib.xapi.model.VERB_ASSIGN
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.shared.domain.account.RespectAccountManager
@@ -153,7 +153,7 @@ class AssignmentEditViewModel(
                         schoolDataSource.xapiStatementsResource.get(
                             listParams = GetStatementParams(
                                 activity = assignmentActivityId,
-                                verb = VERB_ASSIGN
+                                verb = XapiVerb.ID_ASSIGN,
                             ),
                             dataLoadParams = params
                         ).map { result ->

@@ -11,6 +11,7 @@ import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.xapi.composites.AssignmentAndProgress
+import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
@@ -110,4 +111,9 @@ class XapiStatementsResourceRepository(
         )
     }
 
+    override fun getAssignmentListAsFlow(dataLoadParams: DataLoadParams, studentAgent: XapiAgent?): Flow<List<AssignmentSummary>> {
+        return local.getAssignmentListAsFlow(
+            dataLoadParams, studentAgent
+        )
+    }
 }

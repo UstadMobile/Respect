@@ -47,8 +47,7 @@ data class XapiActivityLangMapEntry(
     val almeValue: String,
 
     val almeLastModified: Instant = Clock.System.now(),
-
-    ) {
+) {
     companion object {
         const val TABLE_ID = 6442
     }

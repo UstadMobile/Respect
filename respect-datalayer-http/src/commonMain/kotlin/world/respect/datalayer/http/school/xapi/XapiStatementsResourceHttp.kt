@@ -21,6 +21,7 @@ import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.xapi.composites.AssignmentAndProgress
+import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -106,6 +107,10 @@ class XapiStatementsResourceHttp(
         activityId: String,
         filterByAssigneeAgent: XapiAgent?
     ): Flow<DataLoadState<AssignmentAndProgress>> {
+        throw IllegalStateException("GetAssignmentResults over HTTP is not supported")
+    }
+
+    override fun getAssignmentListAsFlow(dataLoadParams: DataLoadParams, studentAgent: XapiAgent?): Flow<List<AssignmentSummary>> {
         throw IllegalStateException("GetAssignmentResults over HTTP is not supported")
     }
 }

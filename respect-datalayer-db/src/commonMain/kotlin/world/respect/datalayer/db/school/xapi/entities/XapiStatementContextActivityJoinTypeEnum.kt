@@ -6,6 +6,10 @@ enum class XapiStatementContextActivityJoinTypeEnum(val dbFlag: Int) {
 
     companion object {
 
+        const val PARENT_FLAG_INT = 1
+
+        const val GROUP_FLAG_INT = 2
+
         fun fromDbFlag(value: Int): XapiStatementContextActivityJoinTypeEnum {
             return entries.first { it.dbFlag == value }
         }

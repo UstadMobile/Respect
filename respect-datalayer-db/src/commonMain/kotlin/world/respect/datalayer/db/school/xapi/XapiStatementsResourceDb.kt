@@ -55,6 +55,8 @@ import world.respect.lib.xapi.exceptions.XapiBadRequestException
 import world.respect.lib.xapi.exceptions.XapiForbiddenException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.model.AssignmentSummary
+import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiGroup
@@ -75,6 +77,14 @@ class XapiStatementsResourceDb(
     private val xapiActorDataSourceLocal: XapiActorDataSourceLocal,
     private val xapiVersion: String = XAPI_VERSION,
 ) : XapiStatementsResourceLocal {
+
+    private val authenticatedAgent = XapiAgent(
+        account = XapiAccount(
+            homePage = schoolUrl.toString(),
+            name = authenticatedUser.guid,
+        )
+    )
+
 
     suspend fun doUpsertStatement(
         stmt: XapiStatement
@@ -543,6 +553,37 @@ class XapiStatementsResourceDb(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    override fun getAssignmentListAsFlow(
+        dataLoadParams: DataLoadParams,
+        studentAgent: XapiAgent?
+    ): Flow<List<AssignmentSummary>> {
+        val flowIn = if(studentAgent != null) {
+            schoolDb.getStatementDao().getAssignmentListForStudentAsFlow(
+                assignVerbUid = uidNumberMapper(XapiVerb.ID_ASSIGN),
+                studentAgentActorUid = studentAgent.identifierHash(uidNumberMapper),
+                completeVerbUid = uidNumberMapper(XapiVerb.ID_COMPLETED),
+            )
+        }else {
+            schoolDb.getStatementDao().getAssignmentListAsFlow(
+                assignVerbUid = uidNumberMapper(XapiVerb.ID_ASSIGN),
+            )
+        }
+
+        return flowIn.map { list ->
+            list.map {
+                AssignmentSummary(
+                    activityId = it.activityId,
+                    title = it.title ?: "",
+                    className = "",
+                    lastModified = Clock.System.now(),
+                    deadline = null,
+                    completedCount = it.numCompleted,
+                    totalCount = it.numTotal
+                )
             }
         }
     }

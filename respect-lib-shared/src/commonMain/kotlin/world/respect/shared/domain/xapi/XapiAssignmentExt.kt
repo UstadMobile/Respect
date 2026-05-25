@@ -2,7 +2,6 @@ package world.respect.shared.domain.xapi
 
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
-import world.respect.lib.xapi.model.VERB_ASSIGN
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActivityDefinition
 import world.respect.lib.xapi.model.XapiActor
@@ -99,7 +98,7 @@ fun createBlankAssignmentStatement(
         id = Uuid.random(),
         actor = XapiGroup(name = "", objectType = XapiObjectType.Group),
         verb = XapiVerb(
-            id = VERB_ASSIGN,
+            id = XapiVerb.ID_ASSIGN,
         ),
         `object` = XapiActivity(
             objectType = XapiObjectType.Activity,

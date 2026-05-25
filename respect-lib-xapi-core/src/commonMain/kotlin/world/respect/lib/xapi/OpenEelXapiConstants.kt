@@ -19,6 +19,8 @@ object OpenEelXapiConstants {
      */
     const val ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK = "https://id.openeel.org/extensions/activity/webpub-manifest-link"
 
+    const val ACTIVITY_EXTENSION_DEADLINE = "https://id.ustadmobile.com/xapi/extension/deadline"
+
 
 
 }

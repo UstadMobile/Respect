@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.getScopeId
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
@@ -55,7 +56,9 @@ import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import kotlin.collections.emptyList
 
-
+/**
+ *
+ */
 data class AssignmentDetailUiState(
     val taskInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
         flowOf(DataLoadingState())
@@ -77,19 +80,42 @@ data class AssignmentDetailUiState(
     val assignmentProgressList: List<XapiActorAndAssignmentProgress>
         get() = assignmentProgress.dataOrNull()?.progress ?: emptyList()
 
-    val numStudents: Int
-        get() = assignmentProgressList.size
+    val numTotal: Int
+        get() = if(isStudent) {
+            assignmentProgressList.firstOrNull()?.progressPerTask?.size ?: 0
+        }else {
+            assignmentProgressList.size
+        }
 
     val numCompleted: Int by lazy {
-        assignmentProgressList.count { it.isCompleted() }
+        if(isStudent) {
+            assignmentProgressList.firstOrNull()?.progressPerTask?.count { it.isCompleted() } ?: 0
+        }else {
+            assignmentProgressList.count { it.isCompleted() }
+        }
+
     }
 
     val numInProgress: Int by lazy {
-        assignmentProgressList.count { it.isStarted && !it.isCompleted() }
+        if(isStudent) {
+            assignmentProgressList.firstOrNull()?.progressPerTask?.count {
+                (it.progress ?: 0) > 0 && !it.isCompleted()
+            } ?: 0
+        }else {
+            assignmentProgressList.count { it.isStarted && !it.isCompleted() }
+        }
+
     }
 
     val numNotStarted: Int by lazy {
-        assignmentProgressList.count { !it.isStarted }
+        if(isStudent) {
+            assignmentProgressList.firstOrNull()?.progressPerTask?.count {
+                it.isNotStarted()
+            } ?: 0
+        }else {
+            assignmentProgressList.count { !it.isStarted }
+        }
+
     }
 
     val rowsToDisplay: List<XapiActorAndAssignmentProgress> by lazy {
@@ -135,7 +161,7 @@ data class AssignmentDetailUiState(
 
     val statusCounts: Map<AssignmentStatusFilter, Int>
         get() = mapOf(
-            AssignmentStatusFilter.ALL to numStudents,
+            AssignmentStatusFilter.ALL to numTotal,
             AssignmentStatusFilter.COMPLETED to numCompleted,
             AssignmentStatusFilter.IN_PROGRESS to numInProgress,
             AssignmentStatusFilter.NOT_STARTED to numNotStarted

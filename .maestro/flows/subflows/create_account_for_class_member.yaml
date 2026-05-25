@@ -1,7 +1,11 @@
 appId: world.respect.app
 
 ---
-
+- runFlow:
+    when:
+      notVisible: "Classes"
+    commands:
+      - back
 - tapOn: "Classes"
 - assertVisible:
         id: "app_title"

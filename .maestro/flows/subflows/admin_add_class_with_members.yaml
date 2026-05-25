@@ -22,19 +22,18 @@ appId: world.respect.app
       FIRSTNAME: StudentA
       LASTNAME: User
 
-## More students needed on later tests
-#- runFlow:
-#    file: "admin_add_new_student_to_class.yaml"
-#    env:
-#      CLASSNAME: "TestClass"
-#      FIRSTNAME: StudentB
-#      LASTNAME: User
-#- runFlow:
-#    file: "admin_add_new_student_to_class.yaml"
-#    env:
-#      CLASSNAME: "TestClass"
-#      FIRSTNAME: StudentC
-#      LASTNAME: User
+- runFlow:
+    file: "admin_add_new_student_to_class.yaml"
+    env:
+      CLASSNAME: "TestClass"
+      FIRSTNAME: StudentB
+      LASTNAME: User
+- runFlow:
+    file: "admin_add_new_student_to_class.yaml"
+    env:
+      CLASSNAME: "TestClass"
+      FIRSTNAME: StudentC
+      LASTNAME: User
 #- runFlow:
 #    file: "admin_add_new_student_to_class.yaml"
 #    env:
@@ -62,3 +61,10 @@ appId: world.respect.app
       CLASSNAME: "TestClass"
       MEMBERNAME: StudentA User
       MEMBERUSERNAME: studentauser
+
+- runFlow:
+    file: "create_account_for_class_member.yaml"
+    env:
+      CLASSNAME: "TestClass"
+      MEMBERNAME: StudentB User
+      MEMBERUSERNAME: studentbuser

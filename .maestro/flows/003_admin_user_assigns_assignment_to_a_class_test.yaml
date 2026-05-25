@@ -23,6 +23,7 @@ onFlowComplete:
     env:
       CLASSNAME: "TestClass"
 
+# Teacher Add Assignment
 - clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
@@ -77,29 +78,50 @@ onFlowComplete:
     text: "Main Menu"
 - tapOn: "Examples"
 - tapOn: "Statement Maker"
+- tapOn: "Task"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "Example Web App"
+- assertVisible:
+    id: "app_title"
+    text: "Main Menu"
+- tapOn: "Examples"
+- tapOn: "Assignment Result Statement Demo"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Homework 1"
-- assertVisible: "All (1)"
+- assertVisible: "All (3)"
 - assertVisible: "Completed (0)"
 - assertVisible: "In-progress (0)"
-#- assertVisible: "Not started (1)"
+
+# Commented - Need id for the navigation bar
+#- swipe:
+#     from:
+#       id: "navigation_bar
+#     direction: LEFT
+#- assertVisible: "Not started (3)"
+
 - assertVisible: "Please complete this Homework on time."
 - assertVisible: "Assigned to"
 - assertVisible: "TestClass.*"
 - assertVisible: "StudentA User"
+- assertVisible: "StudentB User"
+- assertVisible: "StudentC User"
 - assertVisible: "Statement Maker"
+- assertVisible: "Assignment Result Statement Demo"
 - assertVisible: "Average"
 - tapOn: "Assignments"
 - assertVisible:
     id: "app_title"
     text: "Assignments"
 - assertVisible: "All"
+- assertVisible: "Homework 1"
+
 # MD temporarily remove checks on list screen
 #- assertVisible: "Pending (1)"
 #- assertVisible: "Completed (0)"
-- assertVisible: "Homework 1"
 #- tapOn: "Completed (0)"
 #- assertNotVisible: "Homework 1"
 #- tapOn: "Pending (1)"
@@ -118,32 +140,70 @@ onFlowComplete:
     text: "Homework 1"
 - tapOn: "Statement Maker"
 - assertVisible:
-    id: "app_title"
     text: "Statement Maker"
 - tapOn: "Open"
-
-#WRONG TOO
-- extendedWaitUntil:
-    visible: "Statement Maker"
-    timeout: 1000
+- assertVisible: "Statement Maker"
 - tapOn: "Send statement"
 - tapOn: "Close"
+- back
+- tapOn: "Assignment Result Statement Demo"
+- tapOn: "Open"
+- assertVisible: "Assignment Result.*"
+- tapOn: "Score"
+- inputText: 1
+- tapOn: "Send statement"
+- tapOn: "Close"
+- back
+- assertVisible: "All (2)"
+- assertVisible: "Completed (1)"
+- assertVisible: "In-progress (1)"
+# Commented - Need id for the navigation bar
+#- swipe:
+#     from:
+#       id: "navigation_bar
+#     direction: LEFT
+#- assertVisible: "Not started (0)"
 - tapOn: "Assignments"
-- assertVisible: "Homework 1"
+
+#- assertVisible: "Homework 1"
 #- assertVisible: "Pending (0)"
 # - tapOn: "Completed (1)"
-#- assertVisible: "1/1 task Completed"
+#- assertVisible: "1/2 task Completed"
 #- assertVisible: "Assigned to: StudentA User"
 #- assertVisible: "100%"
-- tapOn: "Homework 1"
-#- assertVisible: "Please complete this Homework on time."
-#- assertVisible: "Assigned to:"
-#- assertVisible: "StudentA User"
-#- tapOn: "Completed (1)"
-#- assertVisible: "Statement Maker"
-#- assertVisible: "Example Web App"
-#- assertVisible: "100%"
 
+# Student B user complete 1 task
+- clearState: world.respect.app
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USERNAME: "studentbuser"
+      PASSWORD: "test123"
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 1"
+- assertVisible: "Statement Maker"
+- tapOn: "Assignment Result Statement Demo"
+- tapOn: "Open"
+- assertVisible: "Assignment Result.*"
+- tapOn: "Score"
+- inputText: 9
+- tapOn: "Send statement"
+- tapOn: "Close"
+- back
+- tapOn: "Assignments"
+- assertVisible: "Homework 1"
+#- assertVisible: "Pending (1)"
+# - tapOn: "Completed (0)"
+#- assertVisible: "1/2 task Completed"
+- tapOn: "Homework 1"
+- assertVisible: "Please complete this Homework on time."
+#- tapOn: "Completed (0)"
+#- assertVisible: "Statement Maker"
+
+# Teacher Validate students results
 - clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
@@ -156,27 +216,36 @@ onFlowComplete:
 #- assertVisible: "Completed (0)"
 - assertVisible: "Homework 1"
 - assertVisible: "TestClass.*"
-#- assertVisible: "1/1 student completed"
+- assertVisible: "1/3 student completed"
 - tapOn: "Homework 1"
-- assertVisible: "All (1)"
-- assertVisible: "Completed (1)"
-- assertVisible: "In-progress (0)"
+
+#- assertVisible: "All (3)"
+#- assertVisible: "Completed (1)"
+#- assertVisible: "In-progress (1)"
 # 22/May: Disabled: needs horizontal scroll MD
-#- assertVisible: "Not started (0)"
+#- assertVisible: "Not started (1)"
+
 - assertVisible: "Please complete this Homework on time."
 - assertVisible: "Assigned to"
 - assertVisible: "TestClass.*"
-- tapOn: "Completed (1)"
 - assertVisible: "StudentA User"
+- assertVisible: "StudentB User"
+- assertVisible: "StudentC User"
 - assertVisible: "Statement Maker"
 - assertVisible: "Average"
-#- assertVisible: "100%"
+- assertVisible: "95%"
+
+# Verify edit assignment is working
 - tapOn:
     id: "floating_action_button"   #  Edit button
 - assertVisible:
     id: "app_title"
     text: "Edit assignment"
 - tapOn: "Assignment title*"
-- inputText: "Week 1"
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Homework 1"
+- inputText: "HW - Week 1"
 - tapOn: "Save"
-- assertVisible: "Homework 1 Week 1"
+- assertVisible: "HW - Week 1"

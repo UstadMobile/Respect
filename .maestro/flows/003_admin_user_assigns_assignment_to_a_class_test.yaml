@@ -137,7 +137,9 @@ onFlowComplete:
 - inputText: 1
 - tapOn: "Send statement"
 - tapOn: "Close"
-- back
+#- back
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
 - assertVisible: "All (2)"
 - assertVisible: "Completed (2)"
 - assertVisible: "In-progress (0)"
@@ -162,7 +164,9 @@ onFlowComplete:
 - inputText: 0.9
 - tapOn: "Send statement"
 - tapOn: "Close"
-- back
+#- back
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
 - assertVisible: "All (2)"
 - assertVisible: "Completed (1)"
 
@@ -192,6 +196,7 @@ onFlowComplete:
 - assertVisible: "Statement Maker"
 - assertVisible: "Average"
 - assertVisible: "95%"
+- assertVisible: "90%"
 
 # Verify edit assignment is working
 - tapOn:

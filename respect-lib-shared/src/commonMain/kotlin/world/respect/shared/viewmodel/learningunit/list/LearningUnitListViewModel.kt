@@ -167,10 +167,7 @@ class LearningUnitListViewModel(
             route.resultDest.resultKey != PlaylistEditViewModel.KEY_PLAYLIST
         ) {
             if (route.resultDest.resultKey == AssignmentEditViewModel.KEY_LEARNING_UNIT) {
-                val publicationHref = publication.links.find {
-                    it.rel?.contains(SELF) == true
-                }?.href.toString()
-                val learningUnitManifestUrl = route.opdsFeedUrl.resolve(publicationHref)
+                val learningUnitManifestUrl = resolvePublicationManifestUrl(publication)
                 resultReturner.sendResultIfResultExpected(
                     route = route,
                     navCommandFlow = _navCommandFlow,
@@ -189,17 +186,13 @@ class LearningUnitListViewModel(
             return
         }
         if (route.resultDest?.resultKey == PlaylistEditViewModel.KEY_PLAYLIST) {
-            val publicationHref = publication.links.find {
-                it.rel?.contains(SELF) == true
-            }?.href.toString()
-            val refererUrl = route.opdsFeedUrl.resolve(publicationHref).toString()
-            val learningUnitManifestUrl = route.opdsFeedUrl.resolve(publicationHref)
+            val learningUnitManifestUrl = resolvePublicationManifestUrl(publication)
             _navCommandFlow.tryEmit(
                 value = NavCommand.Navigate(
                     LearningUnitDetail.create(
                         learningUnitManifestUrl = learningUnitManifestUrl,
                         appManifestUrl = route.appManifestUrl,
-                        refererUrl = Url(refererUrl),
+                        refererUrl = Url(learningUnitManifestUrl.toString()),
                         expectedIdentifier = publication.metadata.identifier.toString()
                     )
                 )
@@ -212,12 +205,7 @@ class LearningUnitListViewModel(
             return
         }
 
-        val publicationHref = publication.links.find {
-            it.rel?.contains(SELF) == true
-        }?.href.toString()
-
-        val refererUrl = route.opdsFeedUrl.resolve(publicationHref).toString()
-        val learningUnitManifestUrl = route.opdsFeedUrl.resolve(publicationHref)
+        val learningUnitManifestUrl = resolvePublicationManifestUrl(publication)
 
         if (
             !resultReturner.sendResultIfResultExpected(
@@ -235,7 +223,7 @@ class LearningUnitListViewModel(
                     LearningUnitDetail.create(
                         learningUnitManifestUrl = learningUnitManifestUrl,
                         appManifestUrl = route.appManifestUrl,
-                        refererUrl = Url(refererUrl),
+                        refererUrl = Url(learningUnitManifestUrl.toString()),
                         expectedIdentifier = publication.metadata.identifier.toString()
                     )
                 )
@@ -275,11 +263,8 @@ class LearningUnitListViewModel(
                 pub.metadata.identifier?.toString() in currentState.selectedPublications
             }
             .map { publication ->
-                val publicationHref = publication.links.find {
-                    it.rel?.contains(SELF) == true
-                }?.href.toString()
                 LearningUnitSelection(
-                    learningUnitManifestUrl = route.opdsFeedUrl.resolve(publicationHref),
+                    learningUnitManifestUrl = resolvePublicationManifestUrl(publication),
                     selectedPublication = publication,
                     appManifestUrl = route.appManifestUrl,
                 )
@@ -329,6 +314,14 @@ class LearningUnitListViewModel(
             navCommandFlow = _navCommandFlow,
             result =  _uiState.value.selectedNavigation ?: return
         )
+    }
+    private fun resolvePublicationManifestUrl(publication: OpdsPublication): Url {
+        val publicationHref = publication.links.find {
+            it.rel?.contains(SELF) == true
+        }?.href ?: throw IllegalStateException(
+            "Publication has no self link: ${publication.metadata.title}"
+        )
+        return route.opdsFeedUrl.resolve(publicationHref)
     }
     companion object {
         const val SELF = "self"
@@ -431,9 +424,11 @@ class PlaylistDetailViewModel(
     }
 
     fun onCopyDialogConfirm() {
-        val feed = _uiState.value.feed ?: return
+        val feed = _uiState.value.feed
+            ?: throw IllegalStateException("onCopyDialogConfirm called but feed is null")
         val newName = _uiState.value.copyDialogName.trim()
-        if (newName.isBlank()) return
+        if (newName.isBlank())
+            throw IllegalStateException(" newName is blank")
 
         viewModelScope.launch {
             val activeAccount = accountManager.activeAccount
@@ -507,7 +502,7 @@ class PlaylistDetailViewModel(
         } ?: throw IllegalStateException(
             "Publication has no self link: ${publication.metadata.title}"
         )
-        if (selfLink.type == "text/html") {
+        if (selfLink.type == MIME_TYPE_HTML) {
             openExternalLinkUseCase(
                 url = selfLink.href,
                 title = publication.metadata.title.toString()
@@ -593,5 +588,6 @@ class PlaylistDetailViewModel(
     }
     companion object {
         const val ASSIGN_HEADER_SECTION_INDEX = -1
+        private const val MIME_TYPE_HTML = "text/html"
     }
 }

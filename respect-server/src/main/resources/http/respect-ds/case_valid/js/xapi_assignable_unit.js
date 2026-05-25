@@ -22,6 +22,8 @@ function onClickSendStatement() {
             id: searchParams.get("activity_id")
         },
         result: {
+            completion: true,
+            success: true,
             score: {
                 scaled: parseFloat(document.getElementById("score_text").value)
             }

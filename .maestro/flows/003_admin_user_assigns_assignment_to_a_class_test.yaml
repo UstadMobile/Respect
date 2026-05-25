@@ -128,6 +128,7 @@ onFlowComplete:
 - tapOn: "Open"
 - assertVisible: "Statement Maker"
 - tapOn: "Send statement"
+- assertVisible: "Statement sent.*"
 - tapOn: "Close"
 - back
 - tapOn: "Assignment Result Statement Demo"
@@ -136,8 +137,8 @@ onFlowComplete:
 - tapOn: "Score"
 - inputText: 1
 - tapOn: "Send statement"
+- assertVisible: "Statement sent.*"
 - tapOn: "Close"
-#- back
 - tapOn: "Assignments"
 - tapOn: "Homework 1"
 - assertVisible: "All (2)"
@@ -163,8 +164,8 @@ onFlowComplete:
 - tapOn: "Score"
 - inputText: 0.9
 - tapOn: "Send statement"
+- assertVisible: "Statement sent.*"
 - tapOn: "Close"
-#- back
 - tapOn: "Assignments"
 - tapOn: "Homework 1"
 - assertVisible: "All (2)"

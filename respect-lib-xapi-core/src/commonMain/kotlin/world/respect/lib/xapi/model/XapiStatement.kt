@@ -1,5 +1,7 @@
 package world.respect.lib.xapi.model
 
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KeepGeneratedSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
@@ -29,7 +31,9 @@ val XAPI_PROGRESSED_EXTENSIONS = listOf(
  *
  * @property objectType ObjectType is only found on a SubStatement, not a statement.
  */
-@Serializable
+@OptIn(ExperimentalSerializationApi::class)
+@Serializable(with = XapiStatementTransformingSerializer::class)
+@KeepGeneratedSerializer
 data class XapiStatement(
     val id: Uuid? = null,
     val actor: XapiActor,
@@ -59,7 +63,7 @@ data class XapiStatement(
  *
  */
 object XapiStatementTransformingSerializer: JsonTransformingSerializer<XapiStatement>(
-    XapiStatement.serializer()
+    XapiStatement.generatedSerializer()
 ) {
 
     private val statementExcludedProperties = listOf("objectType")

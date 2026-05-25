@@ -30,9 +30,11 @@ function onClickSendStatement() {
         }
     };
 
+    console.log("Xapi Send: Assignable unit: sending statement ");
     xapi.sendStatement({
         statement: myStatement
     }).then((result) => {
+        console.log("Xapi Send: Assignable unit: got result.");
         if(Array.isArray(result.data)) {
             document.getElementById("result").innerText = "Statement sent: " + result.data.join();
         }else {

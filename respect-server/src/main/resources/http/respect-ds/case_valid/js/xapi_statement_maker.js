@@ -19,9 +19,11 @@ function onClickMakeStatement() {
         actor: XAPI.getSearchQueryParamsAsObject(location.search).actor
     };
 
+    console.log("Xapi send: statement maker: sending");
     xapi.sendStatement({
         statement: statementWithActor
     }).then((result) => {
+        console.log("Xapi send: statement maker: got result");
          if(Array.isArray(result.data)) {
              document.getElementById("result").innerText = "Statement sent: " + result.data.join();
          }else {

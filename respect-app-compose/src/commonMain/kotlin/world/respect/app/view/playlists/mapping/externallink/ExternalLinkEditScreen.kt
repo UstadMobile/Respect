@@ -93,7 +93,6 @@ fun ExternalLinkScreen(
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
                         strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
                     Text(text = stringResource(Res.string.next))
@@ -110,11 +109,7 @@ fun ExternalLinkScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(80.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = MaterialTheme.shapes.extraLarge
-                        ),
+                        .size(80.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     if (uiState.imageUrl != null) {
@@ -129,7 +124,6 @@ fun ExternalLinkScreen(
                             imageVector = Icons.Filled.Language,
                             contentDescription = null,
                             modifier = Modifier.size(40.dp),
-                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -138,8 +132,6 @@ fun ExternalLinkScreen(
                 
                 Text(
                     text = stringResource(Res.string.add_thumbnail),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
                 )
             }
 

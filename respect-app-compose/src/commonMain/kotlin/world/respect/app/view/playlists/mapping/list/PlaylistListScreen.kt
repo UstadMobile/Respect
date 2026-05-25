@@ -194,7 +194,6 @@ private fun PlaylistListItem(
                 if (ownerUsername != null) {
                     Text(
                         text = stringResource(Res.string.created_by, ownerUsername),
-                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
             }

@@ -556,7 +556,6 @@ private fun SectionTypeBottomSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Text(
             text = stringResource(Res.string.choose_section_type),
-            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.defaultItemPadding(),
         )
         HorizontalDivider()
@@ -599,7 +598,6 @@ private fun AddItemTypeBottomSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Text(
             text = stringResource(Res.string.choose_item_type),
-            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.defaultItemPadding(),
         )
         HorizontalDivider()

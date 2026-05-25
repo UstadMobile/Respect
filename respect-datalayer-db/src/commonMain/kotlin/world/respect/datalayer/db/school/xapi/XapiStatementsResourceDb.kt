@@ -473,71 +473,76 @@ class XapiStatementsResourceDb(
             ),
             dataLoadParams = DataLoadParams(),
         ).map { statementResult ->
-            val exactAssignmentStmt = statementResult.dataOrNull()?.statements
-                ?.mostRecentByTimestampOrNull()
+            schoolDb.useReaderConnection { con ->
+                con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
+                    val exactAssignmentStmt = statementResult.dataOrNull()?.statements
+                        ?.mostRecentByTimestampOrNull()
 
-            val canonicalAssignmentStmt = exactAssignmentStmt?.let {
-                get(
-                    listParams = GetStatementParams(
-                        statementId = exactAssignmentStmt.id,
-                        limit = 1,
-                        format = XapiStatementsResource.GetStatementFormatEnum.CANONICAL,
-                    )
-                )
-            }?.dataOrNull()?.statements?.firstOrNull()
+                    val canonicalAssignmentStmt = exactAssignmentStmt?.let {
+                        get(
+                            listParams = GetStatementParams(
+                                statementId = exactAssignmentStmt.id,
+                                limit = 1,
+                                format = XapiStatementsResource.GetStatementFormatEnum.CANONICAL,
+                            )
+                        )
+                    }?.dataOrNull()?.statements?.firstOrNull()
 
-            if(exactAssignmentStmt == null || canonicalAssignmentStmt == null) {
-                NoDataLoadedState(reason = NoDataLoadedState.Reason.NOT_FOUND)
-            }else {
-                /*
-                 * The canonical statement will include the latest definition of the assignee (actor).
-                 * However we need the exact statement to
-                 *  a) Get the task activities in the correct order
-                 *  b) Be sure that the definition of each task activity includes the web pub manifest
-                 *     url extension (the canonical definition of the activity might change, e.g. if
-                 *     statements from the content itself don't include the web pub manifest).
-                 */
-                val assignmentStmt = exactAssignmentStmt.copy(actor = canonicalAssignmentStmt.actor)
+                    if(exactAssignmentStmt == null || canonicalAssignmentStmt == null) {
+                        NoDataLoadedState(reason = NoDataLoadedState.Reason.NOT_FOUND)
+                    }else {
+                        /*
+                         * The canonical statement will include the latest definition of the assignee (actor).
+                         * However we need the exact statement to
+                         *  a) Get the task activities in the correct order
+                         *  b) Be sure that the definition of each task activity includes the web pub manifest
+                         *     url extension (the canonical definition of the activity might change, e.g. if
+                         *     statements from the content itself don't include the web pub manifest).
+                         */
+                        val assignmentStmt = exactAssignmentStmt.copy(actor = canonicalAssignmentStmt.actor)
 
-                val assignedActivities = exactAssignmentStmt.context?.contextActivities?.grouping
-                    ?: emptyList()
+                        val assignedActivities = exactAssignmentStmt.context?.contextActivities?.grouping
+                            ?: emptyList()
 
-                val statementActor = assignmentStmt.actor
-                val actorsToShow : List<XapiAgent> = when {
-                    filterByAssigneeAgent != null -> listOfNotNull(filterByAssigneeAgent)
+                        val statementActor = assignmentStmt.actor
+                        val actorsToShow : List<XapiAgent> = when {
+                            filterByAssigneeAgent != null -> listOfNotNull(filterByAssigneeAgent)
 
-                    statementActor is XapiAgent -> listOf(statementActor)
+                            statementActor is XapiAgent -> listOf(statementActor)
 
-                    //Might not have loaded yet.
-                    statementActor is XapiGroup -> statementActor.member ?: emptyList()
+                            //Might not have loaded yet.
+                            statementActor is XapiGroup -> statementActor.member ?: emptyList()
 
-                    else -> {
-                        throw IllegalStateException("statement actor must be agent or group")
-                    }
-                }
+                            else -> {
+                                throw IllegalStateException("statement actor must be agent or group")
+                            }
+                        }
 
-                val dbAssignmentResults = schoolDb.getStatementDao().getAssignmentResults(
-                    assignmentActivityIdNum = uidNumberMapper(activityId),
-                    filterByStudentActorUid = filterByAssigneeAgent?.identifierHash(uidNumberMapper) ?: 0L,
-                ).groupBy { it.actorUid }
+                        val dbAssignmentResults = schoolDb.getStatementDao().getAssignmentResults(
+                            assignmentActivityIdNum = uidNumberMapper(activityId),
+                            filterByStudentActorUid = filterByAssigneeAgent
+                                ?.identifierHash(uidNumberMapper) ?: 0L,
+                        ).groupBy { it.actorUid }
 
-                DataReadyState(
-                    data = AssignmentAndProgress(
-                        assignmentStatement = assignmentStmt,
-                        progress = actorsToShow.map { actor ->
-                            val actorUidNum = actor.identifierHash(uidNumberMapper)
-                            XapiActorAndAssignmentProgress(
-                                actor = actor,
-                                progressPerTask = assignedActivities.map { taskActivity ->
-                                    dbAssignmentResults[actorUidNum]?.firstOrNull {
-                                        it.activityUid == uidNumberMapper(taskActivity.id)
-                                    }?.toXapiAssignmentResult(taskActivity.id)
-                                        ?: XapiAssignmentTaskProgress.emptyResult(taskActivity.id)
+                        DataReadyState(
+                            data = AssignmentAndProgress(
+                                assignmentStatement = assignmentStmt,
+                                progress = actorsToShow.map { actor ->
+                                    val actorUidNum = actor.identifierHash(uidNumberMapper)
+                                    XapiActorAndAssignmentProgress(
+                                        actor = actor,
+                                        progressPerTask = assignedActivities.map { taskActivity ->
+                                            dbAssignmentResults[actorUidNum]?.firstOrNull {
+                                                it.activityUid == uidNumberMapper(taskActivity.id)
+                                            }?.toXapiAssignmentResult(taskActivity.id)
+                                                ?: XapiAssignmentTaskProgress.emptyResult(taskActivity.id)
+                                        }
+                                    )
                                 }
                             )
-                        }
-                    )
-                )
+                        )
+                    }
+                }
             }
         }
     }

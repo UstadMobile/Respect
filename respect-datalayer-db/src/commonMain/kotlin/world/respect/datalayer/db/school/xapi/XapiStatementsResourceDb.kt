@@ -55,9 +55,11 @@ import world.respect.lib.xapi.exceptions.XapiBadRequestException
 import world.respect.lib.xapi.exceptions.XapiForbiddenException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.model.XapiObjectType
 import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
@@ -244,6 +246,12 @@ class XapiStatementsResourceDb(
     override suspend fun post(list: List<XapiStatement>): List<Uuid> {
         val statementsWithIdsSet = list.map {
             it.copyWithIdIfNotSet()
+        }
+
+        statementsWithIdsSet.forEach {
+            if(it.`object` !is XapiActivity && it.`object`.objectType == null) {
+                throw XapiBadRequestException("When StatementObject is not Activity, objectType MUST be set")
+            }
         }
 
         schoolDb.useWriterConnection { con ->

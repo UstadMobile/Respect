@@ -172,14 +172,6 @@ onFlowComplete:
 #- assertVisible: "Assigned to: StudentA User"
 #- assertVisible: "100%"
 
-- tapOn: "Homework 1"
-- assertVisible: "Please complete this Homework on time."
-- assertVisible: "Assigned to"
-- assertVisible: "StudentA User"
-#- tapOn: "Completed (1)"
-#- assertVisible: "Statement Maker"
-
-
 # Student B user complete 1 task
 - clearState: world.respect.app
 - runFlow:

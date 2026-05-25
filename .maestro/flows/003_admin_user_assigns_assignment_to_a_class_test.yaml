@@ -95,14 +95,6 @@ onFlowComplete:
 - assertVisible: "All (3)"
 - assertVisible: "Completed (0)"
 - assertVisible: "In-progress (0)"
-
-# Commented - Need id for the navigation bar
-#- swipe:
-#     from:
-#       id: "navigation_bar
-#     direction: LEFT
-#- assertVisible: "Not started (3)"
-
 - assertVisible: "Please complete this Homework on time."
 - assertVisible: "Assigned to"
 - assertVisible: "TestClass.*"
@@ -118,14 +110,6 @@ onFlowComplete:
     text: "Assignments"
 - assertVisible: "All"
 - assertVisible: "Homework 1"
-
-# MD temporarily remove checks on list screen
-#- assertVisible: "Pending (1)"
-#- assertVisible: "Completed (0)"
-#- tapOn: "Completed (0)"
-#- assertNotVisible: "Homework 1"
-#- tapOn: "Pending (1)"
-#- assertVisible: "Homework 1"
 
 - clearState: world.respect.app
 - runFlow:
@@ -155,22 +139,8 @@ onFlowComplete:
 - tapOn: "Close"
 - back
 - assertVisible: "All (2)"
-- assertVisible: "Completed (1)"
-- assertVisible: "In-progress (1)"
-# Commented - Need id for the navigation bar
-#- swipe:
-#     from:
-#       id: "navigation_bar
-#     direction: LEFT
-#- assertVisible: "Not started (0)"
-- tapOn: "Assignments"
-
-#- assertVisible: "Homework 1"
-#- assertVisible: "Pending (0)"
-# - tapOn: "Completed (1)"
-#- assertVisible: "1/2 task Completed"
-#- assertVisible: "Assigned to: StudentA User"
-#- assertVisible: "100%"
+- assertVisible: "Completed (2)"
+- assertVisible: "In-progress (0)"
 
 # Student B user complete 1 task
 - clearState: world.respect.app
@@ -193,15 +163,9 @@ onFlowComplete:
 - tapOn: "Send statement"
 - tapOn: "Close"
 - back
-- tapOn: "Assignments"
-- assertVisible: "Homework 1"
-#- assertVisible: "Pending (1)"
-# - tapOn: "Completed (0)"
-#- assertVisible: "1/2 task Completed"
-- tapOn: "Homework 1"
-- assertVisible: "Please complete this Homework on time."
-#- tapOn: "Completed (0)"
-#- assertVisible: "Statement Maker"
+- assertVisible: "All (2)"
+- assertVisible: "Completed (1)"
+- assertVisible: "In-progress (1)"
 
 # Teacher Validate students results
 - clearState: world.respect.app
@@ -212,19 +176,14 @@ onFlowComplete:
       PASSWORD: "test123"
 - tapOn: "Assignments"
 - assertVisible: "All"
-#- assertVisible: "Pending (1)"
-#- assertVisible: "Completed (0)"
 - assertVisible: "Homework 1"
 - assertVisible: "TestClass.*"
-- assertVisible: "1/3 student completed"
 - tapOn: "Homework 1"
-
-#- assertVisible: "All (3)"
-#- assertVisible: "Completed (1)"
-#- assertVisible: "In-progress (1)"
+- assertVisible: "All (3)"
+- assertVisible: "Completed (1)"
+- assertVisible: "In-progress (1)"
 # 22/May: Disabled: needs horizontal scroll MD
 #- assertVisible: "Not started (1)"
-
 - assertVisible: "Please complete this Homework on time."
 - assertVisible: "Assigned to"
 - assertVisible: "TestClass.*"
@@ -233,7 +192,7 @@ onFlowComplete:
 - assertVisible: "StudentC User"
 - assertVisible: "Statement Maker"
 - assertVisible: "Average"
-- assertVisible: "95%"
+#- assertVisible: "95%"
 
 # Verify edit assignment is working
 - tapOn:

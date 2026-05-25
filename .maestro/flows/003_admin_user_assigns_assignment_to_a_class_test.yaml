@@ -139,9 +139,8 @@ onFlowComplete:
 - tapOn: "Close"
 - back
 - assertVisible: "All (2)"
-- assertVisible: "Completed (1)"
-- assertVisible: "In-progress (1)"
-
+- assertVisible: "Completed (2)"
+- assertVisible: "In-progress (0)"
 
 # Student B user complete 1 task
 - clearState: world.respect.app
@@ -164,11 +163,9 @@ onFlowComplete:
 - tapOn: "Send statement"
 - tapOn: "Close"
 - back
-- tapOn: "Assignments"
-- assertVisible: "Homework 1"
-- tapOn: "Homework 1"
-- assertVisible: "Please complete this Homework on time."
-
+- assertVisible: "All (2)"
+- assertVisible: "Completed (1)"
+- assertVisible: "In-progress (1)"
 
 # Teacher Validate students results
 - clearState: world.respect.app
@@ -183,11 +180,10 @@ onFlowComplete:
 - assertVisible: "TestClass.*"
 - tapOn: "Homework 1"
 - assertVisible: "All (3)"
-#- assertVisible: "Completed (1)"
-#- assertVisible: "In-progress (1)"
+- assertVisible: "Completed (1)"
+- assertVisible: "In-progress (1)"
 # 22/May: Disabled: needs horizontal scroll MD
 #- assertVisible: "Not started (1)"
-
 - assertVisible: "Please complete this Homework on time."
 - assertVisible: "Assigned to"
 - assertVisible: "TestClass.*"

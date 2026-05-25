@@ -34,12 +34,6 @@ appId: world.respect.app
       CLASSNAME: "TestClass"
       FIRSTNAME: StudentC
       LASTNAME: User
-#- runFlow:
-#    file: "admin_add_new_student_to_class.yaml"
-#    env:
-#      CLASSNAME: "TestClass"
-#      FIRSTNAME: StudentD
-#      LASTNAME: User
 
 - runFlow:
     file: "admin_add_new_teacher_to_class.yaml"

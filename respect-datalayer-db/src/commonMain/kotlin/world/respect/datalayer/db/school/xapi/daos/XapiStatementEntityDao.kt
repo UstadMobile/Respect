@@ -121,12 +121,18 @@ interface XapiStatementEntityDao {
      * combination, and then use subqueries. The aggregate functions should be marginally more
      * efficient as it avoids the need to run a separate subquery for each field: the statements can
      * be selected, grouped, and then we can get all the required fields in one go.
+     *
+     * @param filterByStudentActorUid when not zero, filter to receive only statements from the given
+     *        student.
      */
     @Query("""
         WITH LatestAssignmentStatementIds(idHi, idLo, actorUid) AS (
                  SELECT XapiStatementEntity.statementIdHi AS idHi,
                         XapiStatementEntity.statementIdLo AS idLo,
-                        XapiStatementEntity.statementActorUid AS actorUid
+                        CASE(:filterByStudentActorUid)
+                            WHEN 0 THEN XapiStatementEntity.statementActorUid
+                            ELSE :filterByStudentActorUid
+                        END AS actorUid
                    FROM XapiStatementEntity
                   WHERE XapiStatementEntity.statementObjectUid1 = :assignmentActivityIdNum
                     AND XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.ACTIVITY}
@@ -170,7 +176,8 @@ interface XapiStatementEntityDao {
            GROUP BY XapiStatementEntity.statementActorUid, XapiStatementEntity.statementObjectUid1
     """)
     suspend fun getAssignmentResults(
-        assignmentActivityIdNum: Long
+        assignmentActivityIdNum: Long,
+        filterByStudentActorUid: Long,
     ): List<XapiAssignmentResultRow>
 
 

@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
-import org.koin.core.component.getScopeId
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
@@ -93,7 +92,6 @@ data class AssignmentDetailUiState(
         }else {
             assignmentProgressList.count { it.isCompleted() }
         }
-
     }
 
     val numInProgress: Int by lazy {
@@ -220,7 +218,7 @@ class AssignmentDetailViewModel(
 
                 val assignmentProgressFlow = schoolDataSource.xapiStatementsResource.getAssignmentProgress(
                     activityId = route.assignmentActivityId,
-                    filterByActor = if(sessionAndPerson.person.isStudent()) {
+                    filterByAssigneeAgent = if(sessionAndPerson.person.isStudent()) {
                         sessionAndPerson.xapiAgent
                     }else {
                         null

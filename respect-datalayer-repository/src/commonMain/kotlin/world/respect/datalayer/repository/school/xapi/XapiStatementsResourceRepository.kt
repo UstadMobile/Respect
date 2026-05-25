@@ -11,7 +11,7 @@ import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.xapi.composites.AssignmentAndProgress
-import world.respect.lib.xapi.model.XapiActor
+import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -89,10 +89,11 @@ class XapiStatementsResourceRepository(
 
     override fun getAssignmentProgress(
         activityId: String,
-        filterByActor: XapiActor?,
+        filterByAssigneeAgent: XapiAgent?,
     ): Flow<DataLoadState<AssignmentAndProgress>> {
         return local.getAssignmentProgress(
-            activityId
+            activityId = activityId,
+            filterByAssigneeAgent = filterByAssigneeAgent,
         ).combineWithRemote(
             remoteFlow = remote.getAsFlow(
                 listParams = GetStatementParams(

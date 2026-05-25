@@ -104,10 +104,11 @@ interface XapiStatementsResource {
      * as per the ASSIGNMENT_RECIPE
      *
      * @param activityId the xAPI activity id for the assignment itself
+     * @param filterByAssigneeAgent when not null, filter results to include only the given agent (eg one student)
      */
     fun getAssignmentProgress(
         activityId: String,
-        filterByActor: XapiActor? = null,
+        filterByAssigneeAgent: XapiAgent? = null,
     ): Flow<DataLoadState<AssignmentAndProgress>>
 
     companion object {

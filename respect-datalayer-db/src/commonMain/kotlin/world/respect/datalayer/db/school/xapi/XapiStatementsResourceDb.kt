@@ -56,7 +56,6 @@ import world.respect.lib.xapi.exceptions.XapiForbiddenException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
 import world.respect.lib.xapi.model.XapiActivity
-import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.xapi.model.XapiStatementRef
@@ -463,7 +462,7 @@ class XapiStatementsResourceDb(
 
     override fun getAssignmentProgress(
         activityId: String,
-        filterByActor: XapiActor?,
+        filterByAssigneeAgent: XapiAgent?,
     ): Flow<DataLoadState<AssignmentAndProgress>> {
         //Get the statement itself to get the actor and list of assigned activities.
         return getAsFlow(
@@ -482,6 +481,7 @@ class XapiStatementsResourceDb(
                     listParams = GetStatementParams(
                         statementId = exactAssignmentStmt.id,
                         limit = 1,
+                        format = XapiStatementsResource.GetStatementFormatEnum.CANONICAL,
                     )
                 )
             }?.dataOrNull()?.statements?.firstOrNull()
@@ -502,15 +502,23 @@ class XapiStatementsResourceDb(
                 val assignedActivities = exactAssignmentStmt.context?.contextActivities?.grouping
                     ?: emptyList()
 
-                val actorsToShow = when(val statementActor = exactAssignmentStmt.actor){
-                    is XapiAgent -> listOf(statementActor)
-                    is XapiGroup -> statementActor.member ?: throw IllegalStateException(
-                        "getAssignmentResults: XapiGroup should include members when retrieved using canonical format"
-                    )
+                val statementActor = assignmentStmt.actor
+                val actorsToShow : List<XapiAgent> = when {
+                    filterByAssigneeAgent != null -> listOfNotNull(filterByAssigneeAgent)
+
+                    statementActor is XapiAgent -> listOf(statementActor)
+
+                    //Might not have loaded yet.
+                    statementActor is XapiGroup -> statementActor.member ?: emptyList()
+
+                    else -> {
+                        throw IllegalStateException("statement actor must be agent or group")
+                    }
                 }
 
                 val dbAssignmentResults = schoolDb.getStatementDao().getAssignmentResults(
-                    uidNumberMapper(activityId)
+                    assignmentActivityIdNum = uidNumberMapper(activityId),
+                    filterByStudentActorUid = filterByAssigneeAgent?.identifierHash(uidNumberMapper) ?: 0L,
                 ).groupBy { it.actorUid }
 
                 DataReadyState(

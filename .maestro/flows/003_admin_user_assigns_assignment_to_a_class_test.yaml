@@ -137,7 +137,9 @@ onFlowComplete:
 - inputText: 1
 - tapOn: "Send statement"
 - tapOn: "Close"
-- back
+#- back
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
 - assertVisible: "All (2)"
 - assertVisible: "Completed (2)"
 - assertVisible: "In-progress (0)"
@@ -159,13 +161,14 @@ onFlowComplete:
 - tapOn: "Open"
 - assertVisible: "Assignment Result.*"
 - tapOn: "Score"
-- inputText: 9
+- inputText: 0.9
 - tapOn: "Send statement"
 - tapOn: "Close"
-- back
+#- back
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
 - assertVisible: "All (2)"
 - assertVisible: "Completed (1)"
-- assertVisible: "In-progress (1)"
 
 # Teacher Validate students results
 - clearState: world.respect.app
@@ -192,7 +195,8 @@ onFlowComplete:
 - assertVisible: "StudentC User"
 - assertVisible: "Statement Maker"
 - assertVisible: "Average"
-#- assertVisible: "95%"
+- assertVisible: "95%"
+- assertVisible: "90%"
 
 # Verify edit assignment is working
 - tapOn:

@@ -21,6 +21,14 @@ function onClickMakeStatement() {
 
     xapi.sendStatement({
         statement: statementWithActor
+    }).then((result) => {
+         if(Array.isArray(result.data)) {
+             document.getElementById("result").innerText = "Statement sent: " + result.data.join();
+         }else {
+             document.getElementById("result").innerText = "Statement sent: " + result.data.toString();
+         }
+
+         console.log(result);
     });
 }
 

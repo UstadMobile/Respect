@@ -159,13 +159,12 @@ onFlowComplete:
 - tapOn: "Open"
 - assertVisible: "Assignment Result.*"
 - tapOn: "Score"
-- inputText: 9
+- inputText: 0.9
 - tapOn: "Send statement"
 - tapOn: "Close"
 - back
 - assertVisible: "All (2)"
 - assertVisible: "Completed (1)"
-- assertVisible: "In-progress (1)"
 
 # Teacher Validate students results
 - clearState: world.respect.app
@@ -192,7 +191,7 @@ onFlowComplete:
 - assertVisible: "StudentC User"
 - assertVisible: "Statement Maker"
 - assertVisible: "Average"
-#- assertVisible: "95%"
+- assertVisible: "95%"
 
 # Verify edit assignment is working
 - tapOn:

@@ -16,7 +16,7 @@ data class AssignmentSummary(
     val completedCount: Int,
     val totalCount: Int,
     val learningUnitManifestUrls: List<String> = emptyList(),
-    val statementId: String = ""
+    val averageScore: Float? = null,
 ) {
     val isCompleted: Boolean get() = totalCount > 0 && completedCount == totalCount
 }

@@ -13,4 +13,5 @@ data class XapiSummaryResultRow(
     val numCompleted: Int,
     val numTotal: Int,
     val deadlineStr: String?,
+    val averageScoreScaled: Float? = null,
 )

@@ -69,6 +69,11 @@ fun AssignmentListItem(
 
                 Text("${summary.completedCount}/${summary.totalCount} ${stringResource(Res.string.completed_status)}")
             }
+        },
+        trailingContent = summary.averageScore?.let {
+            {
+                Text(it.toString())
+            }
         }
     )
 }

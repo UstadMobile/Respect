@@ -591,7 +591,8 @@ class XapiStatementsResourceDb(
                         lastModified = Clock.System.now(),
                         deadline = null,
                         completedCount = it.numCompleted,
-                        totalCount = it.numTotal
+                        totalCount = it.numTotal,
+                        averageScore = it.averageScoreScaled,
                     )
                 }
             )

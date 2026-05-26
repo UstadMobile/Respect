@@ -200,14 +200,32 @@ interface XapiStatementEntityDao {
                        SELECT XapiStatementContextActivityJoin.scajToActivityUid
                          FROM XapiStatementContextActivityJoin
                         WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = ProgressStmt.statementIdHi
-                          AND XapiStatementContextActivityJoin.scajFromStatementIdLo = ProgressStmt.statementIdLo)
+                          AND XapiStatementContextActivityJoin.scajFromStatementIdLo = ProgressStmt.statementIdLo
+                          AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
                    AND (    ProgressStmt.resultCompletion = 1
                          OR ProgressStmt.statementVerbUid = :completeVerbUid)
+                   AND NOT ProgressStmt.stmtVoid      
                ) AS numCompleted,
+               (
+                    SELECT AVG(ScoreByActivity.resultScoreScaled)
+                      -- Get the average of the maximum score per assigned unit activity id
+                      FROM (SELECT MAX(ScoreStmt.resultScoreScaled) AS resultScoreScaled
+                              FROM XapiStatementEntity ScoreStmt
+                             WHERE ScoreStmt.statementActorUid = :studentAgentActorUid
+                               AND XapiStatementEntity.statementObjectUid1 IN (
+                                    SELECT XapiStatementContextActivityJoin.scajToActivityUid
+                                      FROM XapiStatementContextActivityJoin
+                                     WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = ScoreStmt.statementIdHi
+                                       AND XapiStatementContextActivityJoin.scajFromStatementIdLo = ScoreStmt.statementIdLo
+                                       AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
+                               AND ScoreStmt.resultScoreScaled IS NOT NULL
+                          GROUP BY ScoreStmt.statementObjectUid1) AS ScoreByActivity
+               ) AS averageScoreScaled,
                (SELECT COUNT(*) 
                   FROM XapiStatementContextActivityJoin
                  WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
-                   AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo) AS numTotal,
+                   AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo
+                   AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT}) AS numTotal,
                DeadlineExtensionEntity.aeeJson AS deadlineStr
           FROM XapiStatementEntity
                $SQL_JOIN_ASSIGNMENT_SUMMARY
@@ -267,7 +285,8 @@ interface XapiStatementEntityDao {
                          FROM XapiGroupMemberActorJoin
                         WHERE XapiGroupMemberActorJoin.gmajGroupActorUid = XapiStatementEntity.statementActorUid)    
                ) AS numTotal,
-               DeadlineExtensionEntity.aeeJson AS deadlineStr
+               DeadlineExtensionEntity.aeeJson AS deadlineStr,
+               NULL AS averageScoreScaled
           FROM XapiStatementEntity
                $SQL_JOIN_ASSIGNMENT_SUMMARY
          WHERE XapiStatementEntity.statementVerbUid = :assignVerbUid   

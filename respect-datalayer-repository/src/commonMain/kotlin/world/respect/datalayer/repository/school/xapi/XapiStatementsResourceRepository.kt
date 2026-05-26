@@ -1,21 +1,26 @@
 package world.respect.datalayer.repository.school.xapi
 
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import world.respect.lib.dataloadstate.ext.combineWithRemote
-import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
+import world.respect.datalayer.school.xapi.ext.idStr
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.ext.combineWithRemote
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.model.AssignmentSummary
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
@@ -121,11 +126,37 @@ class XapiStatementsResourceRepository(
         studentAgent: XapiAgent?
     ): Flow<DataLoadState<List<AssignmentSummary>>> {
         return channelFlow {
+            val actorsToLoadFlow = MutableSharedFlow<List<XapiActor>>(
+                replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST
+            )
+
             launch {
                 local.getAssignmentListAsFlow(
                     dataLoadParams, studentAgent
-                ).collectLatest {
-                    send(it)
+                ).collectLatest { loadState ->
+                    send(loadState)
+
+                    val actors = loadState.dataOrNull()?.map { it.assignedActor }
+                        ?.distinctBy { it.idStr }
+
+                    if(!actors.isNullOrEmpty()) {
+                        actorsToLoadFlow.emit(actors)
+                    }
+                }
+            }
+
+            launch {
+                actorsToLoadFlow.distinctUntilChanged().collectLatest { actors ->
+                    actors.forEach { actor ->
+                        launch {
+                            this@XapiStatementsResourceRepository.get(
+                                listParams = GetStatementParams(
+                                    agent = actor,
+                                    verb = XapiVerb.ID_SAVED,
+                                )
+                            )
+                        }
+                    }
                 }
             }
 
@@ -140,7 +171,9 @@ class XapiStatementsResourceRepository(
                 }
             }
 
-            awaitClose {  }
+            awaitClose {
+                Napier.d("Closing assignment list flow")
+            }
         }
 
     }

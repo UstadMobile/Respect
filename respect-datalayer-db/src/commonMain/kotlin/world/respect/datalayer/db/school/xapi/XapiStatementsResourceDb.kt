@@ -580,7 +580,9 @@ class XapiStatementsResourceDb(
                     AssignmentSummary(
                         activityId = it.activityId,
                         title = it.title ?: "",
-                        className = "",
+                        assignedActor = ActorEntities(
+                            actor = it.actorEntity,
+                        ).toModel(idOnlyFormat = true),
                         lastModified = Clock.System.now(),
                         deadline = null,
                         completedCount = it.numCompleted,

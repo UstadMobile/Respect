@@ -10,7 +10,7 @@ import kotlin.time.Instant
 data class AssignmentSummary(
     val activityId: String,
     val title: String,
-    val className: String,
+    val assignedActor: XapiActor,
     val lastModified: Instant,
     val deadline: Instant?,
     val completedCount: Int,

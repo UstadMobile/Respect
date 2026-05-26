@@ -16,6 +16,8 @@ data class XapiVerb(
     companion object {
         const val ID_VOIDED = "http://adlnet.gov/expapi/verbs/voided"
 
+        const val ID_EXPERIENCED = "http://adlnet.gov/expapi/verbs/experienced"
+
         // As per https://github.com/AICC/CMI-5_Spec_Current/blob/quartz/cmi5_spec.md#933-completed
         const val ID_COMPLETED = "http://adlnet.gov/expapi/verbs/completed"
 

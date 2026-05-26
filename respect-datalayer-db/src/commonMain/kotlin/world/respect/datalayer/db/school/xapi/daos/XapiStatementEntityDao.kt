@@ -154,11 +154,11 @@ interface XapiStatementEntityDao {
              SELECT XapiStatementEntity.statementActorUid AS actorUid,
                     XapiStatementEntity.statementObjectUid1 AS activityUid,
                     MAX(XapiStatementEntity.extensionProgress) AS progress,
-                    MAX(XapiStatementEntity.resultCompletion) AS completed,
+                    MAX(XapiStatementEntity.resultCompletion) AS resultCompleted,
                     MAX(
                         CASE(XapiStatementEntity.statementVerbUid)
                             WHEN :completeVerbUid THEN 1
-                            ELSE 0
+                            ELSE NULL
                         END
                     ) AS verbCompleted,
                     MAX(XapiStatementEntity.resultSuccess) AS successful,
@@ -191,11 +191,12 @@ interface XapiStatementEntityDao {
     @Query("""
         SELECT XapiStatementEntity.statementObjectUid1 AS activityUid,
                XapiStatementEntity.statementObjectActivityId AS activityId,
+               XapiActorEntity.*,
                NameLangMapEntry.almeValue AS title,
                (SELECT COUNT(DISTINCT ProgressStmt.statementObjectUid1)
                   FROM XapiStatementEntity ProgressStmt
                  WHERE ProgressStmt.statementActorUid = :studentAgentActorUid
-                   AND XapiActivityEntity.actUid IN (
+                   AND XapiStatementEntity.statementObjectUid1 IN (
                        SELECT XapiStatementContextActivityJoin.scajToActivityUid
                          FROM XapiStatementContextActivityJoin
                         WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = ProgressStmt.statementIdHi
@@ -222,6 +223,7 @@ interface XapiStatementEntityDao {
     @Query("""
         SELECT XapiStatementEntity.statementObjectUid1 AS activityUid,
                XapiStatementEntity.statementObjectActivityId AS activityId,
+               XapiActorEntity.*,
                NameLangMapEntry.almeValue AS title,
                0 AS numCompleted,
                0 AS numTotal,
@@ -256,17 +258,18 @@ interface XapiStatementEntityDao {
         const val UNTIL_UNSET = Long.MAX_VALUE
 
         const val SQL_JOIN_ASSIGNMENT_SUMMARY = """
-            JOIN XapiActivityEntity
-                    ON XapiActivityEntity.actUid = XapiStatementEntity.statementObjectUid1
                JOIN XapiActivityLangMapEntry NameLangMapEntry 
-                    ON NameLangMapEntry.almeUid = 
-                       (SELECT XapiActivityLangMapEntry.almeUid
+                    ON (NameLangMapEntry.almeActivityUid, NameLangMapEntry.almeKeyHash) IN 
+                       (SELECT XapiActivityLangMapEntry.almeActivityUid,
+                               XapiActivityLangMapEntry.almeKeyHash
                           FROM XapiActivityLangMapEntry
-                         WHERE XapiActivityLangMapEntry.almeActivityUid = XapiActivityEntity.actUid
+                         WHERE XapiActivityLangMapEntry.almeActivityUid = XapiStatementEntity.statementObjectUid1
                            AND XapiActivityLangMapEntry.almeProperty = ${XapiActivityLangMapEntryPropEnum.NAME_FLAG_INT}
                          LIMIT 1)
+               JOIN XapiActorEntity
+                    ON XapiStatementEntity.statementActorUid = XapiActorEntity.actorUid
                LEFT JOIN XapiActivityExtensionEntity DeadlineExtensionEntity
-                         ON (DeadlineExtensionEntity.aeeActivityUid = XapiActivityEntity.actUid
+                         ON (DeadlineExtensionEntity.aeeActivityUid = XapiStatementEntity.statementObjectUid1
                              AND DeadlineExtensionEntity.aeeKey = '${ACTIVITY_EXTENSION_DEADLINE}')
         """
 

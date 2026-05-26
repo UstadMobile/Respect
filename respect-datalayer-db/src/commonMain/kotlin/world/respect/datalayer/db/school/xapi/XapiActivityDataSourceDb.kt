@@ -10,6 +10,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntry
 import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiObjectType
@@ -47,12 +48,12 @@ class XapiActivityDataSourceDb(
         timestamp: Instant,
     ) {
         val timeNow = Clock.System.now()
+        val timestampMillis = timestamp.toEpochMilliseconds()
 
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 activities.forEach { activity ->
                     val uid = uidNumberMapper(activity.id)
-                    val timestampMillis = timestamp.toEpochMilliseconds()
                     val entities = activity.toEntities(
                         uidNumberMapper = uidNumberMapper,
                         json = json,
@@ -93,9 +94,13 @@ class XapiActivityDataSourceDb(
                     entities.activityLangMapEntries.forEach { langMapEntry ->
                         schoolDb.getActivityLangMapEntryDao().updateIfChanged(
                             almeActivityUid = uid,
-                            almeProperty = langMapEntry.almeProperty.flag,
+                            almeKeyHash = XapiActivityLangMapEntry.keyHashFor(
+                                uidNumberMapper = uidNumberMapper,
+                                property = langMapEntry.almeProperty,
+                                almeInteractionId = langMapEntry.almeInteractionId,
+                                almeLangCode = langMapEntry.almeLangCode,
+                            ),
                             almeValue = langMapEntry.almeValue,
-                            almeInteractionId = langMapEntry.almeInteractionId,
                             changeTime = timestampMillis,
                         )
                     }

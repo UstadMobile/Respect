@@ -211,7 +211,7 @@ fun AssignmentListScreen(
                                 tint = Color.Gray
                             )
                             Spacer(Modifier.width(6.dp))
-                            Text(summary.className, style = MaterialTheme.typography.bodySmall)
+                            Text(summary.assignedActor.name ?: "", style = MaterialTheme.typography.bodySmall)
                         }
 
                         Row(

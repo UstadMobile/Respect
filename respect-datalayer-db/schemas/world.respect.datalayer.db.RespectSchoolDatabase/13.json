@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "065ea20feb32da3d8c4a6f8c3bf40495",
+    "identityHash": "59dce6bcfcfb76cb367c3290f3171620",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1804,17 +1804,17 @@
       },
       {
         "tableName": "XapiActivityLangMapEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `almeActivityUid` INTEGER NOT NULL, `almeProperty` INTEGER NOT NULL, `almeInteractionId` TEXT, `almeLangCode` TEXT NOT NULL, `almeValue` TEXT NOT NULL, `almeLastModified` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeActivityUid` INTEGER NOT NULL, `almeKeyHash` INTEGER NOT NULL, `almeProperty` INTEGER NOT NULL, `almeInteractionId` TEXT, `almeLangCode` TEXT NOT NULL, `almeValue` TEXT NOT NULL, `almeLastModified` INTEGER NOT NULL, PRIMARY KEY(`almeActivityUid`, `almeKeyHash`))",
         "fields": [
           {
-            "fieldPath": "almeUid",
-            "columnName": "almeUid",
+            "fieldPath": "almeActivityUid",
+            "columnName": "almeActivityUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "almeActivityUid",
-            "columnName": "almeActivityUid",
+            "fieldPath": "almeKeyHash",
+            "columnName": "almeKeyHash",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -1849,9 +1849,10 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": true,
+          "autoGenerate": false,
           "columnNames": [
-            "almeUid"
+            "almeActivityUid",
+            "almeKeyHash"
           ]
         },
         "indices": [
@@ -2420,7 +2421,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '065ea20feb32da3d8c4a6f8c3bf40495')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '59dce6bcfcfb76cb367c3290f3171620')"
     ]
   }
 }

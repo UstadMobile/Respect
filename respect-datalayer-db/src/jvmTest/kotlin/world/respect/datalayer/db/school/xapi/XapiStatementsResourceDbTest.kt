@@ -316,11 +316,19 @@ class XapiStatementsResourceDbTest {
                 dataSource.xapiStatementsResource.post(listOf(setAssignmentStmt))
 
                 val progressStatements = studentGroup.member!!.flatMap { studentActor ->
-                    assignmentTasks.map { assignmentActivityId ->
+                    assignmentTasks.map { assignmentTaskId ->
+                        val isComplete = randomNullableBoolean()
+
                         XapiStatement(
                             actor = studentActor,
-                            verb = XapiVerb(XapiVerb.ID_COMPLETED),
-                            `object` = XapiActivity(id = assignmentActivityId),
+                            verb = XapiVerb(
+                                id = if(isComplete == true) {
+                                    XapiVerb.ID_COMPLETED
+                                }else {
+                                    XapiVerb.ID_EXPERIENCED
+                                }
+                            ),
+                            `object` = XapiActivity(id = assignmentTaskId),
                             result = XapiResult(
                                 score = XapiResult.Score(
                                     scaled = Random.nextDouble(
@@ -328,7 +336,7 @@ class XapiStatementsResourceDbTest {
                                     ).toFloat()
                                 ),
                                 success = randomNullableBoolean(),
-                                completion = randomNullableBoolean(),
+                                completion = isComplete,
                                 extensions = JsonObject(
                                     mapOf(
                                         XAPI_RESULT_EXTENSION_PROGRESS to JsonPrimitive(Random.nextInt(100))

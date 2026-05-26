@@ -8,7 +8,7 @@ fun XapiAssignmentResultRow.toXapiAssignmentResult(
 ): XapiAssignmentTaskProgress {
     return XapiAssignmentTaskProgress(
         activityId = activityId,
-        completed = completed,
+        completed = verbCompleted ?: resultCompleted,
         successful = successful,
         scoreScaled = scoreScaled,
         progress = progress,

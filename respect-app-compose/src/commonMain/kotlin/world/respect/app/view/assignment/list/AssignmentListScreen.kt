@@ -78,6 +78,8 @@ fun AssignmentListScreen(
     onFilterSelected: (AssignmentListScreenFilter) -> Unit,
     onClickAssignment: (AssignmentSummary) -> Unit = { },
 ) {
+    val assignments = uiState.assignments.dataOrNull() ?: emptyList()
+
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -96,7 +98,7 @@ fun AssignmentListScreen(
         }
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(
-                items = uiState.assignments,
+                items = assignments,
             ) { summary ->
                 Row(
                     modifier = Modifier

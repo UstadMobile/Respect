@@ -532,6 +532,7 @@ class XapiStatementsResourceDb(
                             assignmentActivityIdNum = uidNumberMapper(activityId),
                             filterByStudentActorUid = filterByAssigneeAgent
                                 ?.identifierHash(uidNumberMapper) ?: 0L,
+                            completeVerbUid = uidNumberMapper(XapiVerb.ID_COMPLETED),
                         ).groupBy { it.actorUid }
 
                         DataReadyState(
@@ -560,7 +561,7 @@ class XapiStatementsResourceDb(
     override fun getAssignmentListAsFlow(
         dataLoadParams: DataLoadParams,
         studentAgent: XapiAgent?
-    ): Flow<List<AssignmentSummary>> {
+    ): Flow<DataLoadState<List<AssignmentSummary>>> {
         val flowIn = if(studentAgent != null) {
             schoolDb.getStatementDao().getAssignmentListForStudentAsFlow(
                 assignVerbUid = uidNumberMapper(XapiVerb.ID_ASSIGN),
@@ -574,17 +575,19 @@ class XapiStatementsResourceDb(
         }
 
         return flowIn.map { list ->
-            list.map {
-                AssignmentSummary(
-                    activityId = it.activityId,
-                    title = it.title ?: "",
-                    className = "",
-                    lastModified = Clock.System.now(),
-                    deadline = null,
-                    completedCount = it.numCompleted,
-                    totalCount = it.numTotal
-                )
-            }
+            DataReadyState(
+                data = list.map {
+                    AssignmentSummary(
+                        activityId = it.activityId,
+                        title = it.title ?: "",
+                        className = "",
+                        lastModified = Clock.System.now(),
+                        deadline = null,
+                        completedCount = it.numCompleted,
+                        totalCount = it.numTotal
+                    )
+                }
+            )
         }
     }
 

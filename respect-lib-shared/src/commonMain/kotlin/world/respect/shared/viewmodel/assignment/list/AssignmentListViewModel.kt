@@ -22,6 +22,8 @@ import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.datalayer.school.ext.asXapiAgent
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.shared.domain.account.RespectAccountManager
@@ -38,17 +40,17 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.uuid.ExperimentalUuidApi
 
 data class AssignmentListUiState(
-    val assignments: List<AssignmentSummary> = emptyList(),
+    val assignments: DataLoadState<List<AssignmentSummary>> = DataLoadingState(),
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { emptyFlow() },
     val selectedFilter: AssignmentListScreenFilter = AssignmentListScreenFilter.ALL,
     val isStudent: Boolean = false,
     val personName: String = "",
 ) {
     private val totalCount: Int
-        get() = assignments.size
+        get() = assignments.dataOrNull()?.size ?: 0
 
     private val completedCount: Int
-        get() = assignments.count { it.isCompleted }
+        get() = assignments.dataOrNull()?.count { it.isCompleted } ?: 0
     /**
      * Returns the display label for a given filter based on current state counts.
      */

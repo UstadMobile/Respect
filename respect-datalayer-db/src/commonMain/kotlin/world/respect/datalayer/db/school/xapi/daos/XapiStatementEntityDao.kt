@@ -155,6 +155,12 @@ interface XapiStatementEntityDao {
                     XapiStatementEntity.statementObjectUid1 AS activityUid,
                     MAX(XapiStatementEntity.extensionProgress) AS progress,
                     MAX(XapiStatementEntity.resultCompletion) AS completed,
+                    MAX(
+                        CASE(XapiStatementEntity.statementVerbUid)
+                            WHEN :completeVerbUid THEN 1
+                            ELSE 0
+                        END
+                    ) AS verbCompleted,
                     MAX(XapiStatementEntity.resultSuccess) AS successful,
                     MAX(XapiStatementEntity.resultScoreScaled) AS scoreScaled
                FROM XapiStatementEntity
@@ -175,6 +181,7 @@ interface XapiStatementEntityDao {
     """)
     suspend fun getAssignmentResults(
         assignmentActivityIdNum: Long,
+        completeVerbUid: Long,
         filterByStudentActorUid: Long,
     ): List<XapiAssignmentResultRow>
 

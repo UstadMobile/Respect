@@ -1,8 +1,12 @@
 package world.respect.datalayer.repository.school.xapi
 
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import world.respect.lib.dataloadstate.ext.combineWithRemote
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
@@ -15,6 +19,7 @@ import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
+import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import kotlin.time.Clock
@@ -111,9 +116,32 @@ class XapiStatementsResourceRepository(
         )
     }
 
-    override fun getAssignmentListAsFlow(dataLoadParams: DataLoadParams, studentAgent: XapiAgent?): Flow<List<AssignmentSummary>> {
-        return local.getAssignmentListAsFlow(
-            dataLoadParams, studentAgent
-        )
+    override fun getAssignmentListAsFlow(
+        dataLoadParams: DataLoadParams,
+        studentAgent: XapiAgent?
+    ): Flow<DataLoadState<List<AssignmentSummary>>> {
+        return channelFlow {
+            launch {
+                local.getAssignmentListAsFlow(
+                    dataLoadParams, studentAgent
+                ).collectLatest {
+                    send(it)
+                }
+            }
+
+            remote.get(
+                listParams = GetStatementParams(
+                    verb = XapiVerb.ID_ASSIGN,
+                )
+            ).also {
+                val remoteData = it.dataOrNull()
+                if(remoteData != null) {
+                    local.updateLocal(remoteData.statements)
+                }
+            }
+
+            awaitClose {  }
+        }
+
     }
 }

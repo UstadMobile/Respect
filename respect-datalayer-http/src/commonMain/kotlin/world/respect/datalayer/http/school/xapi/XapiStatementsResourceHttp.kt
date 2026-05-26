@@ -110,7 +110,7 @@ class XapiStatementsResourceHttp(
         throw IllegalStateException("GetAssignmentResults over HTTP is not supported")
     }
 
-    override fun getAssignmentListAsFlow(dataLoadParams: DataLoadParams, studentAgent: XapiAgent?): Flow<List<AssignmentSummary>> {
+    override fun getAssignmentListAsFlow(dataLoadParams: DataLoadParams, studentAgent: XapiAgent?): Flow<DataLoadState<List<AssignmentSummary>>> {
         throw IllegalStateException("GetAssignmentResults over HTTP is not supported")
     }
 }

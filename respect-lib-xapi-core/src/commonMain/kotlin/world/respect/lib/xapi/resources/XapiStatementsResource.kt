@@ -115,7 +115,7 @@ interface XapiStatementsResource {
     fun getAssignmentListAsFlow(
         dataLoadParams: DataLoadParams = DataLoadParams(),
         studentAgent: XapiAgent? = null,
-    ): Flow<List<AssignmentSummary>>
+    ): Flow<DataLoadState<List<AssignmentSummary>>>
 
 
     companion object {

@@ -46,6 +46,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_CONSISTENT_THROUGH
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_VERSION
 import world.respect.lib.xapi.composites.AssignmentAndProgress
@@ -570,6 +571,9 @@ class XapiStatementsResourceDb(
             )
         }else {
             schoolDb.getStatementDao().getAssignmentListAsFlow(
+                assignmentRecipeActivityUid = uidNumberMapper(
+                    OpenEelXapiConstants.CATEGORY_ASSIGNMENT_RECIPE
+                ),
                 assignVerbUid = uidNumberMapper(XapiVerb.ID_ASSIGN),
                 completedVerbUid = uidNumberMapper(XapiVerb.ID_COMPLETED),
             )

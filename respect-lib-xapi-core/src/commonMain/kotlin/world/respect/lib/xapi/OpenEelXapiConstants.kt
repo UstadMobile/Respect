@@ -21,6 +21,7 @@ object OpenEelXapiConstants {
 
     const val ACTIVITY_EXTENSION_DEADLINE = "https://id.ustadmobile.com/xapi/extension/deadline"
 
+    const val CATEGORY_ASSIGNMENT_RECIPE = "https://id.ustadmobile.com/xapi/activities/assignment-recipe"
 
 
 }

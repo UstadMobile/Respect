@@ -27,6 +27,7 @@ import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.test.res.forXapiSampleStatements
 import world.respect.lib.test.res.xapiSampleStatements
+import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XAPI_RESULT_EXTENSION_PROGRESS
 import world.respect.lib.xapi.model.XapiAccount
@@ -313,7 +314,10 @@ class XapiStatementsResourceDbTest {
                                 XapiActivity(
                                     id = it,
                                 )
-                            }
+                            },
+                            category = listOf(
+                                XapiActivity(id = OpenEelXapiConstants.CATEGORY_ASSIGNMENT_RECIPE)
+                            )
                         )
                     )
                 )

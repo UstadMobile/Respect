@@ -270,10 +270,17 @@ interface XapiStatementEntityDao {
                DeadlineExtensionEntity.aeeJson AS deadlineStr
           FROM XapiStatementEntity
                $SQL_JOIN_ASSIGNMENT_SUMMARY
-         WHERE XapiStatementEntity.statementVerbUid = :assignVerbUid      
+         WHERE XapiStatementEntity.statementVerbUid = :assignVerbUid   
+           AND :assignmentRecipeActivityUid IN (
+               SELECT XapiStatementContextActivityJoin.scajToActivityUid
+                 FROM XapiStatementContextActivityJoin
+                WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
+                  AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo
+                  AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.CATEGORY_FLAG_INT})
            AND $SQL_STATEMENT_ENTITY_IS_MOST_RECENT_FOR_OBJECT_CLAUSE
     """)
     fun getAssignmentListAsFlow(
+        assignmentRecipeActivityUid: Long,
         assignVerbUid: Long,
         completedVerbUid: Long,
     ): Flow<List<XapiSummaryResultRow>>

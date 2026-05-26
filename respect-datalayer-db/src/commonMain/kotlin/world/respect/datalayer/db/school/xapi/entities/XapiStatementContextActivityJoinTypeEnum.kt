@@ -10,6 +10,8 @@ enum class XapiStatementContextActivityJoinTypeEnum(val dbFlag: Int) {
 
         const val GROUP_FLAG_INT = 2
 
+        const val CATEGORY_FLAG_INT = 4
+
         fun fromDbFlag(value: Int): XapiStatementContextActivityJoinTypeEnum {
             return entries.first { it.dbFlag == value }
         }

@@ -23,7 +23,10 @@ data class XapiVerb(
 
         const val ID_SAVED = "http://activitystrea.ms/schema/1.0/saved"
 
-        const val ID_ASSIGN = "http://adlnet.gov/expapi/verbs/assign"
+        /**
+         * See https://registry.tincanapi.com/#uri/verb/88
+         */
+        const val ID_ASSIGN = "http://activitystrea.ms/schema/1.0/assign"
 
     }
 

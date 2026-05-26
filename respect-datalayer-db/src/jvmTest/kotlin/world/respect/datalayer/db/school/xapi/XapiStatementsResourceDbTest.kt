@@ -24,8 +24,10 @@ import world.respect.datalayer.school.xapi.ext.resultProgressExtension
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 import world.respect.datalayer.shared.XXHashUidNumberMapper
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.test.res.forXapiSampleStatements
 import world.respect.lib.test.res.xapiSampleStatements
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XAPI_RESULT_EXTENSION_PROGRESS
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
@@ -294,10 +296,13 @@ class XapiStatementsResourceDbTest {
 
                 val setAssignmentStmt = XapiStatement(
                     actor = studentGroup.copy(member = null),
-                    verb = XapiVerb("http://activitystrea.ms/schema/1.0/assign"),
+                    verb = XapiVerb(id = XapiVerb.ID_ASSIGN),
                     `object` = XapiActivity(
                         id = assignmentActivityId,
                         definition = XapiActivityDefinition(
+                            name = mapOf(
+                                "en-US" to "Test Assignment"
+                            ),
                             type = "http://id.tincanapi.com/activitytype/school-assignment"
                         )
                     ),
@@ -316,8 +321,14 @@ class XapiStatementsResourceDbTest {
                 dataSource.xapiStatementsResource.post(listOf(setAssignmentStmt))
 
                 val progressStatements = studentGroup.member!!.flatMap { studentActor ->
+                    val studentCompletedAll = Random.nextBoolean()
+
                     assignmentTasks.map { assignmentTaskId ->
-                        val isComplete = randomNullableBoolean()
+                        val isComplete = if(studentCompletedAll){
+                            true
+                        }else {
+                            randomNullableBoolean()
+                        }
 
                         XapiStatement(
                             actor = studentActor,
@@ -396,9 +407,38 @@ class XapiStatementsResourceDbTest {
                         )
                     }
                 }
+
+                val summaries = dataSource.xapiStatementsResource.getAssignmentListAsFlow(
+                    dataLoadParams = DataLoadParams(),
+                    studentAgent = null,
+                ).first().dataOrNull()
+
+                assertNotNull(summaries)
+
+                val summaryForAssignment = summaries.firstOrNull {
+                    it.activityId == assignmentActivityId
+                }
+
+                assertNotNull(summaryForAssignment)
+
+                assertEquals(
+                    studentGroup.member!!.size,
+                    summaryForAssignment.totalCount
+                )
+
+                assertEquals(
+                    expected = studentGroup.member!!.count { studentAgent ->
+                        assignmentTasks.all { assignedUnitId ->
+                            progressStatements.any {
+                                it.actor == studentAgent &&
+                                        it.objectActivityOrNull()?.id == assignedUnitId &&
+                                        it.verb.id == XapiVerb.ID_COMPLETED
+                            }
+                        }
+                    },
+                    actual = summaryForAssignment.completedCount
+                )
             }
         }
     }
-
-
 }

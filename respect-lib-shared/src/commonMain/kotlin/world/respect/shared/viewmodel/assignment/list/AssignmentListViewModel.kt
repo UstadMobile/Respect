@@ -14,7 +14,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
@@ -67,7 +66,6 @@ data class AssignmentListUiState(
 class AssignmentListViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
-    private val respectAppDataSource: RespectAppDataSource,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()

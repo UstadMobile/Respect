@@ -571,6 +571,7 @@ class XapiStatementsResourceDb(
         }else {
             schoolDb.getStatementDao().getAssignmentListAsFlow(
                 assignVerbUid = uidNumberMapper(XapiVerb.ID_ASSIGN),
+                completedVerbUid = uidNumberMapper(XapiVerb.ID_COMPLETED),
             )
         }
 

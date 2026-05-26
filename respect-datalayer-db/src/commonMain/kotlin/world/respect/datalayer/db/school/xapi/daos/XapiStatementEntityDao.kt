@@ -225,8 +225,47 @@ interface XapiStatementEntityDao {
                XapiStatementEntity.statementObjectActivityId AS activityId,
                XapiActorEntity.*,
                NameLangMapEntry.almeValue AS title,
-               0 AS numCompleted,
-               0 AS numTotal,
+               (SELECT COUNT(DISTINCT XapiActorInner.actorUid)
+                  FROM XapiActorEntity XapiActorInner
+                        -- Select ActorEntities that are assignees
+                 WHERE (    (     XapiActorInner.actorUid = XapiStatementEntity.statementActorUid
+                              AND XapiActorInner.actorObjectType = ${XapiEntityObjectTypeFlags.AGENT})
+                         OR XapiActorInner.actorUid IN 
+                            (SELECT XapiGroupMemberActorJoin.gmajMemberActorUid
+                               FROM XapiGroupMemberActorJoin
+                              WHERE XapiGroupMemberActorJoin.gmajGroupActorUid = XapiStatementEntity.statementActorUid)
+                       )
+                       -- Filter actors by those where the total of distinct completed statements
+                       -- equals the total  
+                       -- units for this assignment Do we need to double check the activity uid here?
+                   AND (
+                        (SELECT COUNT(DISTINCT ProgressStmt.statementObjectUid1)
+                           FROM XapiStatementEntity ProgressStmt
+                          WHERE ProgressStmt.statementActorUid = XapiActorInner.actorUid
+                            AND ProgressStmt.statementVerbUid = :completedVerbUid
+                            AND XapiStatementEntity.statementObjectUid1 IN (
+                                SELECT XapiStatementContextActivityJoin.scajToActivityUid
+                                  FROM XapiStatementContextActivityJoin
+                                 WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = ProgressStmt.statementIdHi
+                                   AND XapiStatementContextActivityJoin.scajFromStatementIdLo = ProgressStmt.statementIdLo
+                                   AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
+                            AND NOT ProgressStmt.stmtVoid       
+                        ) = (SELECT COUNT(*)
+                               FROM XapiStatementContextActivityJoin 
+                              WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
+                                AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo)
+                   )
+               
+               ) AS numCompleted,
+               (SELECT COUNT(*)
+                  FROM XapiActorEntity XapiActorInner
+                 WHERE (     XapiActorInner.actorUid = XapiStatementEntity.statementActorUid
+                         AND XapiActorInner.actorObjectType = ${XapiEntityObjectTypeFlags.AGENT})
+                   OR XapiActorInner.actorUid IN 
+                      (SELECT XapiGroupMemberActorJoin.gmajMemberActorUid
+                         FROM XapiGroupMemberActorJoin
+                        WHERE XapiGroupMemberActorJoin.gmajGroupActorUid = XapiStatementEntity.statementActorUid)    
+               ) AS numTotal,
                DeadlineExtensionEntity.aeeJson AS deadlineStr
           FROM XapiStatementEntity
                $SQL_JOIN_ASSIGNMENT_SUMMARY
@@ -234,7 +273,8 @@ interface XapiStatementEntityDao {
            AND $SQL_STATEMENT_ENTITY_IS_MOST_RECENT_FOR_OBJECT_CLAUSE
     """)
     fun getAssignmentListAsFlow(
-        assignVerbUid: Long
+        assignVerbUid: Long,
+        completedVerbUid: Long,
     ): Flow<List<XapiSummaryResultRow>>
 
     @Query("""
@@ -258,7 +298,7 @@ interface XapiStatementEntityDao {
         const val UNTIL_UNSET = Long.MAX_VALUE
 
         const val SQL_JOIN_ASSIGNMENT_SUMMARY = """
-               JOIN XapiActivityLangMapEntry NameLangMapEntry 
+               LEFT JOIN XapiActivityLangMapEntry NameLangMapEntry 
                     ON (NameLangMapEntry.almeActivityUid, NameLangMapEntry.almeKeyHash) IN 
                        (SELECT XapiActivityLangMapEntry.almeActivityUid,
                                XapiActivityLangMapEntry.almeKeyHash

@@ -253,7 +253,8 @@ interface XapiStatementEntityDao {
                         ) = (SELECT COUNT(*)
                                FROM XapiStatementContextActivityJoin 
                               WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
-                                AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo)
+                                AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo
+                                AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
                    )
                
                ) AS numCompleted,

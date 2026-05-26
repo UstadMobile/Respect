@@ -160,14 +160,17 @@ class XapiStatementsResourceRepository(
                 }
             }
 
-            remote.get(
-                listParams = GetStatementParams(
-                    verb = XapiVerb.ID_ASSIGN,
-                )
-            ).also {
-                val remoteData = it.dataOrNull()
-                if(remoteData != null) {
-                    local.updateLocal(remoteData.statements)
+            /**
+             * To get from remote: all assigned statements, and all completed statements.
+             */
+            listOf(XapiVerb.ID_ASSIGN, XapiVerb.ID_COMPLETED).forEach { verbId ->
+                launch {
+                    this@XapiStatementsResourceRepository.get(
+                        listParams = GetStatementParams(
+                            verb = verbId,
+                            agent = studentAgent,
+                        )
+                    )
                 }
             }
 

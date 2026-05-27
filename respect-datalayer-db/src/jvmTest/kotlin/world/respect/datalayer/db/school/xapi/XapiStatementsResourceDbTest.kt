@@ -8,6 +8,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import world.respect.datalayer.db.school.insertAdmin
 import world.respect.datalayer.db.school.testSchoolDb
 import world.respect.datalayer.db.school.toDataSource
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
@@ -123,7 +124,10 @@ class XapiStatementsResourceDbTest {
                     val dataSource = db.toDataSource(
                         authenticatedUserUid = "1",
                         schoolUrl = Url("http://localhost:8098/"),
-                    )
+                    ).also {
+                        it.insertAdmin()
+                    }
+
 
                     val stmtUuid = Uuid.random()
                     val timeNow = Clock.System.now()
@@ -192,7 +196,9 @@ class XapiStatementsResourceDbTest {
                 val dataSource = db.toDataSource(
                     authenticatedUserUid = "1",
                     schoolUrl = Url("http://localhost:8098/"),
-                )
+                ).also {
+                    it.insertAdmin()
+                }
 
                 val getStmtParams = XapiStatementsResource.GetStatementParams(
                     statementId = stmtUuid
@@ -263,7 +269,9 @@ class XapiStatementsResourceDbTest {
                 val dataSource = db.toDataSource(
                     authenticatedUserUid = "1",
                     schoolUrl = Url("http://localhost:8098/"),
-                )
+                ).also {
+                    it.insertAdmin()
+                }
 
                 val teacherAgent = XapiAgent(
                     name = "Teacher",
@@ -464,7 +472,9 @@ class XapiStatementsResourceDbTest {
                 val dataSource = db.toDataSource(
                     authenticatedUserUid = "1",
                     schoolUrl = Url("http://localhost:8098/"),
-                )
+                ).also {
+                    it.insertAdmin()
+                }
 
                 dataSource.xapiStatementsResource.post(listOf(sampleStmt))
 

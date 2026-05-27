@@ -165,6 +165,7 @@ class SchoolDataSourceDb(
         XapiStatementsResourceDb(
             schoolDb = schoolDb,
             authenticatedUser = authenticatedUser,
+            getAuthenticatedPersonUseCase = getAuthenticatedPersonUseCase,
             schoolUrl = schoolUrl,
             uidNumberMapper = uidNumberMapper,
             xapiActivityDataSourceLocal = xapiActivityDataSource,

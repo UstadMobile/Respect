@@ -13,6 +13,8 @@ import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.toLongPair
 import world.respect.datalayer.db.school.xapi.adapters.ActorEntities
 import world.respect.datalayer.db.school.xapi.adapters.StatementEntities
@@ -77,6 +79,7 @@ import kotlin.time.Instant
 class XapiStatementsResourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
+    private val getAuthenticatedPersonUseCase: GetAuthenticatedPersonUseCase,
     private val schoolUrl: Url,
     private val uidNumberMapper: UidNumberMapper,
     private val json: Json,
@@ -286,6 +289,20 @@ class XapiStatementsResourceDb(
             }.forEach { stmtOrSubStmt ->
                 stmtOrSubStmt.context?.extensions?.keys?.forEach { extensionKey ->
                     xapiRequireValidIRI(extensionKey, "Extension key must be a valid IRI")
+                }
+            }
+        }
+
+        val authenticatedPerson = getAuthenticatedPersonUseCase()
+            ?: throw XapiForbiddenException("Not authenticated")
+
+        if(!authenticatedPerson.isAdminOrTeacher()) {
+            statementsWithIdsSet.forEach {
+                //Check all statements are for the authenticated user's actor only
+                if(it.actor.account?.homePage != schoolUrl.toString()
+                    || it.actor.account?.name != authenticatedUser.guid
+                ) {
+                    throw XapiForbiddenException("User does not have permission to post statement as any other actor")
                 }
             }
         }

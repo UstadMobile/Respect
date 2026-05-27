@@ -21,6 +21,10 @@ data class XapiVerb(
         // As per https://github.com/AICC/CMI-5_Spec_Current/blob/quartz/cmi5_spec.md#933-completed
         const val ID_COMPLETED = "http://adlnet.gov/expapi/verbs/completed"
 
+        const val ID_PASSED = "http://adlnet.gov/expapi/verbs/passed"
+
+        const val ID_FAILED = "http://adlnet.gov/expapi/verbs/failed"
+
         const val ID_SAVED = "http://activitystrea.ms/schema/1.0/saved"
 
         /**

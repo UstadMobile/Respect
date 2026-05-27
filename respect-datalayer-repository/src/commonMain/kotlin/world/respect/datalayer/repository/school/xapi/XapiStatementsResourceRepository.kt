@@ -160,7 +160,9 @@ class XapiStatementsResourceRepository(
             /**
              * To get from remote: all assigned statements, and all completed statements.
              */
-            listOf(XapiVerb.ID_ASSIGN, XapiVerb.ID_COMPLETED).forEach { verbId ->
+            listOf(
+                XapiVerb.ID_ASSIGN, XapiVerb.ID_COMPLETED, XapiVerb.ID_PASSED, XapiVerb.ID_FAILED
+            ).forEach { verbId ->
                 launch {
                     val remoteState = remote.get(
                         listParams = GetStatementParams(

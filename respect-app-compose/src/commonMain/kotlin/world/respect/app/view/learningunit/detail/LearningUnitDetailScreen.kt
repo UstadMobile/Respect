@@ -177,12 +177,14 @@ fun LearningUnitDetailScreen(
                     enabled = uiState.buttonsEnabled,
                 )
 
-                RespectQuickActionButton(
-                    imageVector = if (uiState.isStudent) Icons.Filled.BookmarkBorder else Icons.Filled.NearMe,
-                    labelText = if (uiState.isStudent) stringResource(Res.string.bookmark) else stringResource(Res.string.assign),
-                    onClick = onClickAssign,
-                    enabled = uiState.buttonsEnabled,
-                )
+                if(uiState.showAssignButton) {
+                    RespectQuickActionButton(
+                        imageVector =Icons.Filled.NearMe,
+                        labelText = stringResource(Res.string.assign),
+                        onClick = onClickAssign,
+                        enabled = uiState.buttonsEnabled,
+                    )
+                }
             }
         }
     }

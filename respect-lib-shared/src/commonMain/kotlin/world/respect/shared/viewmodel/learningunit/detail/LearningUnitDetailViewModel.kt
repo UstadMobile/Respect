@@ -14,6 +14,7 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.opds.model.OpdsPublication
@@ -38,7 +39,7 @@ data class LearningUnitDetailUiState(
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
-    val isStudent: Boolean = false,
+    val showAssignButton: Boolean = false,
 ) {
     val buttonsEnabled: Boolean
         get() = lessonDetail != null
@@ -102,8 +103,9 @@ class LearningUnitDetailViewModel(
 
         viewModelScope.launch {
             accountMananger.selectedAccountAndPersonFlow.collect { selectedAccount ->
-                val isStudent = selectedAccount?.person?.isStudent() == true
-                _uiState.update { it.copy(isStudent = isStudent) }
+                _uiState.update {
+                    it.copy(showAssignButton = selectedAccount?.person?.isAdminOrTeacher() == true)
+                }
             }
         }
 

@@ -151,7 +151,7 @@ fun AssignmentListItem(
         },
         trailingContent = summary.averageScore?.let {
             {
-                Text((it * 100).roundToInt().toString())
+                Text((it * 100).roundToInt().toString() + "%")
             }
         }
     )

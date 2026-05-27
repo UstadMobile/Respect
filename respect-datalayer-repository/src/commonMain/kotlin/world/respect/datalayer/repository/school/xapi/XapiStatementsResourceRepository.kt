@@ -135,13 +135,6 @@ class XapiStatementsResourceRepository(
                     dataLoadParams, studentAgent
                 ).collectLatest { loadState ->
                     send(loadState)
-
-                    val actors = loadState.dataOrNull()?.map { it.assignedActor }
-                        ?.distinctBy { it.idStr }
-
-                    if(!actors.isNullOrEmpty()) {
-                        actorsToLoadFlow.emit(actors)
-                    }
                 }
             }
 
@@ -149,12 +142,16 @@ class XapiStatementsResourceRepository(
                 actorsToLoadFlow.distinctUntilChanged().collectLatest { actors ->
                     actors.forEach { actor ->
                         launch {
+                            Napier.d("Xapi load actor: ${actor.idStr}")
                             this@XapiStatementsResourceRepository.get(
                                 listParams = GetStatementParams(
                                     agent = actor,
                                     verb = XapiVerb.ID_SAVED,
                                 )
-                            )
+                            ).also {
+                                val actorData = it.dataOrNull()
+                                Napier.d("Xapi load actor: got ${actorData?.statements?.size} statements")
+                            }
                         }
                     }
                 }
@@ -165,12 +162,28 @@ class XapiStatementsResourceRepository(
              */
             listOf(XapiVerb.ID_ASSIGN, XapiVerb.ID_COMPLETED).forEach { verbId ->
                 launch {
-                    this@XapiStatementsResourceRepository.get(
+                    val remoteState = remote.get(
                         listParams = GetStatementParams(
                             verb = verbId,
                             agent = studentAgent,
                         )
                     )
+
+                    val remoteData = remoteState.dataOrNull()
+
+                    if(remoteData != null) {
+                        local.updateLocal(remoteData.statements)
+                    }
+
+                    if(verbId == XapiVerb.ID_ASSIGN) {
+                        val actors = remoteData?.statements
+                            ?.map { it.actor }
+                            ?.distinctBy { it.idStr }
+
+                        if(!actors.isNullOrEmpty()) {
+                            actorsToLoadFlow.emit(actors)
+                        }
+                    }
                 }
             }
 

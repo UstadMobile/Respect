@@ -90,6 +90,7 @@ class XapiStatementRepositoryIntegrationTest {
                 server.start()
 
                 val client = clients.first()
+                client.insertServerAdminAndDefaultGrants()
                 val statement: XapiStatement = xapiSampleStatements().first().let {
                     json.decodeFromJsonElement(it.jsonObject)
                 }

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
 import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityDao.Companion.SINCE_UNSET
 import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityDao.Companion.UNTIL_UNSET
+import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityDao.Companion.XAPI_STATEMENT_PERMISSION_CLAUSE
 import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntityJson
 
@@ -31,7 +32,9 @@ interface XapiStatementEntityJsonDao {
         since: Long,
         until: Long,
         ascending: Boolean,
-        limit: Int
+        limit: Int,
+        authenticatedPersonUidNum: Long,
+        authenticatedActorUid: Long,
     ): List<XapiStatementEntityJson>
 
 
@@ -49,7 +52,9 @@ interface XapiStatementEntityJsonDao {
         since: Long,
         until: Long,
         ascending: Boolean,
-        limit: Int
+        limit: Int,
+        authenticatedPersonUidNum: Long,
+        authenticatedActorUid: Long,
     ): Flow<List<XapiStatementEntityJson>>
 
     @Query(
@@ -163,6 +168,7 @@ interface XapiStatementEntityJsonDao {
            AND NOT XapiStatementEntity.isSubStatement
            AND (    NOT XapiStatementEntity.stmtVoid
                  OR (:voidedStatementIdHi != 0 AND :voidedStatementIdLo != 0))
+           AND $XAPI_STATEMENT_PERMISSION_CLAUSE      
       ORDER BY CASE(:ascending) WHEN 1 THEN XapiStatementEntity.stored END ASC,
                CASE(:ascending) WHEN 0 THEN XapiStatementEntity.stored END DESC
          LIMIT :limit

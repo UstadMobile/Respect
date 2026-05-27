@@ -16,6 +16,7 @@ import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntryP
 import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementContextActivityJoinTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.StatementReportRow
 import world.respect.lib.xapi.OpenEelXapiConstants.ACTIVITY_EXTENSION_DEADLINE
 
@@ -40,6 +41,8 @@ interface XapiStatementEntityDao {
         until: Long,
         ascending: Boolean,
         limit: Int,
+        authenticatedPersonUidNum: Long,
+        authenticatedActorUid: Long,
     ): List<XapiStatementAndJsonEntities>
 
     @Query(LIST_SQL)
@@ -57,6 +60,8 @@ interface XapiStatementEntityDao {
         until: Long,
         ascending: Boolean,
         limit: Int,
+        authenticatedPersonUidNum: Long,
+        authenticatedActorUid: Long,
     ): Flow<List<XapiStatementAndJsonEntities>>
 
 
@@ -230,6 +235,11 @@ interface XapiStatementEntityDao {
           FROM XapiStatementEntity
                $SQL_JOIN_ASSIGNMENT_SUMMARY
          WHERE XapiStatementEntity.statementVerbUid = :assignVerbUid
+           AND (      :studentAgentActorUid = XapiStatementEntity.statementActorUid
+                 OR (:studentAgentActorUid IN 
+                     (SELECT XapiGroupMemberActorJoin.gmajMemberActorUid
+                       FROM XapiGroupMemberActorJoin
+                      WHERE XapiGroupMemberActorJoin.gmajGroupActorUid = XapiStatementEntity.statementActorUid)))   
            AND $SQL_STATEMENT_ENTITY_IS_MOST_RECENT_FOR_OBJECT_CLAUSE
     """)
     fun getAssignmentListForStudentAsFlow(
@@ -351,6 +361,27 @@ interface XapiStatementEntityDao {
                  LIMIT 1)
         """
 
+        const val XAPI_STATEMENT_PERMISSION_CLAUSE = """
+            (   (SELECT EXISTS(
+                        SELECT 1
+                          FROM PersonRoleEntity
+                         WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum
+                           AND (     PersonRoleEntity.prRoleEnum = ${PersonRoleEnum.TEACHER_INT}
+                                  OR PersonRoleEntity.prRoleEnum = ${PersonRoleEnum.SYSTEM_ADMINISTRATOR_INT}
+                                  OR PersonRoleEntity.prRoleEnum = ${PersonRoleEnum.SITE_ADMINISTRATOR_INT})))
+                 OR (:authenticatedActorUid = XapiStatementEntity.statementActorUid)
+                 OR (     :authenticatedActorUid = XapiStatementEntity.statementObjectUid1
+                      AND XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.AGENT})
+                 OR (:authenticatedActorUid IN 
+                     (SELECT XapiGroupMemberActorJoin.gmajMemberActorUid
+                        FROM XapiGroupMemberActorJoin
+                       WHERE XapiGroupMemberActorJoin.gmajGroupActorUid = XapiStatementEntity.statementActorUid
+                          OR (     XapiGroupMemberActorJoin.gmajGroupActorUid = XapiStatementEntity.statementObjectUid1
+                               AND XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.GROUP}))
+                    )          
+               )
+        """
+
         /*
          Begin statement query : This query is the same for both XapiStatementEntity
          based return results (used for canonical and id results) and exact (which uses
@@ -443,6 +474,7 @@ interface XapiStatementEntityDao {
            AND NOT XapiStatementEntity.isSubStatement
            AND (    NOT XapiStatementEntity.stmtVoid
                  OR (:voidedStatementIdHi != 0 AND :voidedStatementIdLo != 0))
+           AND $XAPI_STATEMENT_PERMISSION_CLAUSE
       ORDER BY CASE(:ascending) WHEN 1 THEN XapiStatementEntity.stored END ASC,
                CASE(:ascending) WHEN 0 THEN XapiStatementEntity.stored END DESC
          LIMIT :limit      

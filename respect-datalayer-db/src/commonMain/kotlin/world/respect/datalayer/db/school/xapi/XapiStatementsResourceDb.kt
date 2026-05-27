@@ -61,7 +61,6 @@ import world.respect.lib.xapi.exceptions.XapiConflictException
 import world.respect.lib.xapi.exceptions.XapiForbiddenException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
-import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.ext.objectSubstatementOrNull
 import world.respect.lib.xapi.ext.xapiRequireValidIRI
 import world.respect.lib.xapi.model.AssignmentSummary
@@ -406,6 +405,8 @@ class XapiStatementsResourceDb(
                         until = listParams.until?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                         ascending = ascendingOrder,
                         limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
+                        authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                        authenticatedActorUid = authenticatedAgent.identifierHash(uidNumberMapper),
                     ).map { entity ->
                         json.decodeFromString(
                             XapiStatementTransformingSerializer, entity.fullStatement
@@ -426,6 +427,8 @@ class XapiStatementsResourceDb(
                         until = listParams.until?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                         ascending = ascendingOrder,
                         limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
+                        authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                        authenticatedActorUid = authenticatedAgent.identifierHash(uidNumberMapper),
                     ).mapToCanonicalStatements(
                         idOnly = format == XapiStatementsResource.GetStatementFormatEnum.IDS
                     )
@@ -469,6 +472,8 @@ class XapiStatementsResourceDb(
                 until = listParams.until?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                 ascending = listParams.ascending,
                 limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                authenticatedActorUid = authenticatedAgent.identifierHash(uidNumberMapper),
             ).map { list ->
                 DataReadyState(
                     data = XapiStatementResult(
@@ -496,6 +501,8 @@ class XapiStatementsResourceDb(
                 until = listParams.until?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                 ascending = listParams.ascending,
                 limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                authenticatedActorUid = authenticatedAgent.identifierHash(uidNumberMapper),
             ).map { list ->
                 val consistentThrough = Clock.System.now()
 

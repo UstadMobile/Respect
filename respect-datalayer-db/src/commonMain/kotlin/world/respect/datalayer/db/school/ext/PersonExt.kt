@@ -26,6 +26,12 @@ fun Person.isStudent() : Boolean {
     }
 }
 
+fun Person.isParent() : Boolean {
+    return roles.any {
+        it.roleEnum == PersonRoleEnum.PARENT
+    }
+}
+
 fun Person.isTeacher(): Boolean {
     return roles.any {
         it.roleEnum == PersonRoleEnum.TEACHER

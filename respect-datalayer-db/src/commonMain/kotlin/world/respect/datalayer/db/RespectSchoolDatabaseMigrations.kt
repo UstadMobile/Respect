@@ -57,9 +57,16 @@ val MIGRATION_13_14 = object: Migration(13, 14) {
     }
 }
 
+val MIGRATION_14_15 = object: Migration(14, 15) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("DROP TABLE IF EXISTS `XapiActivityExtensionEntity`")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `XapiActivityExtensionEntity` (`aeeActivityUid` INTEGER NOT NULL, `aeeKeyHash` INTEGER NOT NULL, `aeeKey` TEXT NOT NULL, `aeeJson` TEXT NOT NULL, `aeeLastMod` INTEGER NOT NULL, PRIMARY KEY(`aeeActivityUid`, `aeeKeyHash`))")
+    }
+}
+
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectSchoolDatabase> {
-    return this.addMigrations(MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14)
+    return this.addMigrations(MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15)
 }
 

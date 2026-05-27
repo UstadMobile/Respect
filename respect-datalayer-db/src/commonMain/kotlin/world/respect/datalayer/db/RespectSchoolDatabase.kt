@@ -137,7 +137,7 @@ import world.respect.datalayer.school.model.Report
         XapiVerbLangMapEntry::class,
         XapiSessionEntity::class,
     ],
-    version = 14,
+    version = 15,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)

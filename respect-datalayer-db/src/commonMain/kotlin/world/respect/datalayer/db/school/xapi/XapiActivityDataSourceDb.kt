@@ -79,14 +79,6 @@ class XapiActivityDataSourceDb(
                         schoolDb.getActivityInteractionDao().insertOrIgnoreAsync(
                             entities.activityInteractionEntities
                         )
-
-                        schoolDb.getActivityExtensionDao().takeIf {
-                            activityInDb != null
-                        }?.deleteByActivityUid(uid)
-
-                        schoolDb.getActivityExtensionDao().upsertListAsync(
-                            entities.activityExtensionEntities
-                        )
                     }
 
                     //For each langmap property: If it already exists, and we have newer data for that entry
@@ -104,6 +96,19 @@ class XapiActivityDataSourceDb(
                             changeTime = timestampMillis,
                         )
                     }
+
+                    entities.activityExtensionEntities.forEach {
+                        schoolDb.getActivityExtensionDao().updateIfNewer(
+                            activityUid = uid,
+                            keyHash = it.aeeKeyHash,
+                            json = it.aeeJson,
+                            changeTime = timestampMillis,
+                        )
+                    }
+
+                    schoolDb.getActivityExtensionDao().insertOrIgnore(
+                        entities.activityExtensionEntities
+                    )
 
                     //Insert any lang map entries that don't exist.
                     schoolDb.getActivityLangMapEntryDao().insertOrIgnore(entities.activityLangMapEntries)

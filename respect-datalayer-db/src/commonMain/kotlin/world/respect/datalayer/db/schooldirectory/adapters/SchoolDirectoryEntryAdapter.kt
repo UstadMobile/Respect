@@ -34,6 +34,7 @@ fun SchoolDirectoryEntry.toEntities(
             reRpId = rpId,
             reLastModified = lastModified,
             reStored = stored,
+            reInDirectoryUrl = inDirectoryUrl,
         ),
         langMapEntities = name.asEntities { lang, region, value ->
             SchoolDirectoryEntryLangMapEntity(
@@ -56,5 +57,6 @@ fun SchoolDirectoryEntryEntities.toModel() : SchoolDirectoryEntry {
         rpId = school.reRpId,
         lastModified = school.reLastModified,
         stored = school.reStored,
+        inDirectoryUrl = school.reInDirectoryUrl,
     )
 }

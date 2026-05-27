@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,7 +66,13 @@ fun <T> RespectExposedDropDownMenuField(
         ) {
             options.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(if(item != null) itemText(item) else "") },
+                    text = {
+                        Text(
+                            text = if(item != null) itemText(item) else "",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
                     onClick = {
                         expanded = false
                         onOptionSelected(item)

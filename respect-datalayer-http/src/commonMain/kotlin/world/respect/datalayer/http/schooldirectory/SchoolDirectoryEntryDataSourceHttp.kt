@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
@@ -19,6 +20,7 @@ import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.respect.model.RESPECT_SCHOOL_JSON_PATH
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.lib.dataloadstate.ext.map
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.resolve
 import kotlin.collections.map
@@ -39,12 +41,18 @@ class SchoolDirectoryEntryDataSourceHttp(
     ): Flow<DataLoadState<List<SchoolDirectoryEntry>>> {
         return flow {
             val directories = local.schoolDirectoryDataSource.allDirectories()
-            val flows = directories.map { dir ->
+            val flows = directories.filter {
+                listParams.directory == null || it.baseUrl == listParams.directory?.baseUrl
+            }.map { dir ->
                 httpClient.getDataLoadResultAsFlow<List<SchoolDirectoryEntry>>(
                     url = dir.baseUrl.appendEndpointSegments("api/directory/school"),
                     dataLoadParams = loadParams,
                 ) {
                     headers[HttpHeaders.CacheControl] = "no-store"
+                }.map { dataLoadState ->
+                    dataLoadState.map { list ->
+                        list.map { it.copy(inDirectoryUrl = dir.baseUrl) }
+                    }
                 }
             }
 
@@ -87,11 +95,15 @@ class SchoolDirectoryEntryDataSourceHttp(
         listParams: SchoolDirectoryEntryDataSource.GetListParams
     ): DataLoadState<List<SchoolDirectoryEntry>> {
         val directories = local.schoolDirectoryDataSource.allDirectories()
-        val listEntries = directories.map { dir ->
+        val listEntries = directories.filter {
+            listParams.directory == null || it.baseUrl == listParams.directory?.baseUrl
+        }.map { dir ->
             httpClient.getAsDataLoadState<List<SchoolDirectoryEntry>>(
                 dir.baseUrl.appendEndpointSegments("api/directory/school")
             ) {
                 headers[HttpHeaders.CacheControl] = "no-store"
+            }.map { list ->
+                list.map { it.copy(inDirectoryUrl = dir.baseUrl) }
             }
         }
 

@@ -43,7 +43,9 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import world.respect.app.config.RespectBuildConfig
+import world.respect.callback.AddDirectoriesFromPropertiesUseCase
 import world.respect.callback.AddSchoolDirectoryCallback
+import world.respect.callback.migrate6to8AddDirectories
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CheckPasskeySupportUseCaseAndroidImpl
 import world.respect.credentials.passkey.CreatePasskeyUseCase
@@ -512,13 +514,20 @@ val appKoinModule = module {
         )
     }
 
+    single<AddDirectoriesFromPropertiesUseCase>{
+        AddDirectoriesFromPropertiesUseCase(
+            xxStringHasher = get()
+        )
+    }
+
     single<RespectAppDatabase> {
         val appContext = androidContext().applicationContext
         Room.databaseBuilder<RespectAppDatabase>(
             appContext, appContext.getDatabasePath("respect_3_app.db").absolutePath
         ).setDriver(BundledSQLiteDriver())
-            .addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
+            .addCallback(AddSchoolDirectoryCallback(addDirectoriesFromPropertiesUseCase = get()))
             .addCommonMigrations()
+            .addMigrations(migrate6to8AddDirectories(addDirectoriesFromPropertiesUseCase = get()))
             .build()
     }
 

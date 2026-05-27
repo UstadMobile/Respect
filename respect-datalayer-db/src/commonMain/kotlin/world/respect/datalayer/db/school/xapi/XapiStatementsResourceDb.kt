@@ -54,6 +54,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.xapi.OpenEelXapiConstants
+import world.respect.lib.xapi.OpenEelXapiConstants.ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_CONSISTENT_THROUGH
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_VERSION
 import world.respect.lib.xapi.composites.AssignmentAndProgress
@@ -655,6 +656,21 @@ class XapiStatementsResourceDb(
         return flowIn.map { list ->
             DataReadyState(
                 data = list.map { summaryRow ->
+                    val manifestUrls = schoolDb.getActivityExtensionDao().findAllByActivityContextUids(
+                        activityUid = uidNumberMapper(summaryRow.activityId),
+                        filterByKeyHash = uidNumberMapper(ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK)
+                    ).mapNotNull {
+                        try {
+                            json.decodeFromString(
+                                JsonPrimitive.serializer(), it.aeeJson
+                            ).contentOrNull?.let { contentStr ->
+                                Url(contentStr)
+                            }
+                        }catch(_: Throwable) {
+                            null
+                        }
+                    }
+
                     val deadline = try {
                         val jsonPrimitive = summaryRow.deadlineStr?.let {
                             json.decodeFromString(JsonPrimitive.serializer(), it)
@@ -676,6 +692,7 @@ class XapiStatementsResourceDb(
                         completedCount = summaryRow.numCompleted,
                         totalCount = summaryRow.numTotal,
                         averageScore = summaryRow.averageScoreScaled,
+                        learningUnitManifestUrls = manifestUrls,
                     )
                 }
             )

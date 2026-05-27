@@ -44,6 +44,7 @@ fun AssignmentListScreen(
                 AssignmentListItem(
                     summary = summary,
                     onClick = onClickAssignment,
+                    learningUnitInfoFlow = uiState.learningUnitInfoFlow,
                 )
             }
 

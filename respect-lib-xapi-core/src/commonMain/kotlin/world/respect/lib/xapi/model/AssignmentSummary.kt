@@ -1,5 +1,6 @@
 package world.respect.lib.xapi.model
 
+import io.ktor.http.Url
 import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 
@@ -15,7 +16,7 @@ data class AssignmentSummary(
     val deadline: Instant?,
     val completedCount: Int,
     val totalCount: Int,
-    val learningUnitManifestUrls: List<String> = emptyList(),
+    val learningUnitManifestUrls: List<Url> = emptyList(),
     val averageScore: Float? = null,
 ) {
     val isCompleted: Boolean get() = totalCount > 0 && completedCount == totalCount

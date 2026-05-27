@@ -157,5 +157,7 @@ fun XapiStatement.objectActivityOrNull(): XapiActivity? {
     return `object` as? XapiActivity
 }
 
-
+fun XapiStatement.objectSubstatementOrNull(): XapiStatement? {
+    return `object` as? XapiStatement
+}
 

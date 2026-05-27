@@ -37,8 +37,10 @@ import world.respect.datalayer.db.school.xapi.ext.allActorUids
 import world.respect.datalayer.ext.appendIfNotNull
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
+import world.respect.datalayer.school.xapi.ext.allActivities
 import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
+import world.respect.datalayer.school.xapi.ext.allVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
 import world.respect.datalayer.school.xapi.ext.copyWithIdIfNotSet
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
@@ -57,6 +59,9 @@ import world.respect.lib.xapi.exceptions.XapiConflictException
 import world.respect.lib.xapi.exceptions.XapiForbiddenException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.ext.objectActivityOrNull
+import world.respect.lib.xapi.ext.objectSubstatementOrNull
+import world.respect.lib.xapi.ext.xapiRequireValidIRI
 import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
@@ -258,9 +263,30 @@ class XapiStatementsResourceDb(
             it.copyWithIdIfNotSet()
         }
 
-        statementsWithIdsSet.forEach {
-            if(it.`object` !is XapiActivity && it.`object`.objectType == null) {
+        //Run basic validations
+        statementsWithIdsSet.forEach { stmt ->
+            if(stmt.`object` !is XapiActivity && stmt.`object`.objectType == null) {
                 throw XapiBadRequestException("When StatementObject is not Activity, objectType MUST be set")
+            }
+
+            stmt.allVerbs().forEach {
+                xapiRequireValidIRI(it.id, "Verb id must be a valid IRI")
+            }
+
+            stmt.allActivities().forEach { activity ->
+                xapiRequireValidIRI(activity.id, "Activity id must be a valid IRI")
+                activity.definition?.extensions?.keys?.forEach { extensionKey ->
+                    xapiRequireValidIRI(extensionKey, "Extension key must be a valid IRI")
+                }
+            }
+
+            buildList {
+                add(stmt)
+                stmt.objectSubstatementOrNull()?.also { add(it) }
+            }.forEach { stmtOrSubStmt ->
+                stmtOrSubStmt.context?.extensions?.keys?.forEach { extensionKey ->
+                    xapiRequireValidIRI(extensionKey, "Extension key must be a valid IRI")
+                }
             }
         }
 

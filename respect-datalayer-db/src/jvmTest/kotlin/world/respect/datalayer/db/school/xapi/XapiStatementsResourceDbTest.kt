@@ -28,6 +28,8 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.test.res.forXapiSampleStatements
 import world.respect.lib.test.res.xapiSampleStatements
 import world.respect.lib.xapi.OpenEelXapiConstants
+import world.respect.lib.xapi.exceptions.XapiConflictException
+import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XAPI_RESULT_EXTENSION_PROGRESS
 import world.respect.lib.xapi.model.XapiAccount
@@ -48,6 +50,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
@@ -445,4 +448,38 @@ class XapiStatementsResourceDbTest {
             }
         }
     }
+
+    @Test
+    fun givenStatementPosted_whenAnotherStatementPostedWithSameId_thenShouldThrowConflictError() {
+        runBlocking {
+            testSchoolDb(temporaryFolder.newFolder()) { db ->
+                val stmtUuid = Uuid.random()
+
+                val sampleStmt = json.decodeFromJsonElement(
+                    XapiStatement.serializer(), xapiSampleStatements().first().jsonObject
+                ).copy(
+                    id = stmtUuid
+                )
+
+                val dataSource = db.toDataSource(
+                    authenticatedUserUid = "1",
+                    schoolUrl = Url("http://localhost:8098/"),
+                )
+
+                dataSource.xapiStatementsResource.post(listOf(sampleStmt))
+
+                try {
+                    dataSource.xapiStatementsResource.post(listOf(sampleStmt))
+
+                    throw IllegalStateException("Should have thrown exception by now")
+                }catch(e: XapiException) {
+                    assertTrue(
+                        e is XapiConflictException,
+                        "Expected XapiConflictException, got $e"
+                    )
+                }
+            }
+        }
+    }
+
 }

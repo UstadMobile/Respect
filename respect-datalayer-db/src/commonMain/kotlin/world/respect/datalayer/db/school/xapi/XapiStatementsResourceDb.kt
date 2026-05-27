@@ -53,6 +53,7 @@ import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
 import world.respect.lib.xapi.composites.XapiAssignmentTaskProgress
 import world.respect.lib.xapi.exceptions.XapiBadRequestException
+import world.respect.lib.xapi.exceptions.XapiConflictException
 import world.respect.lib.xapi.exceptions.XapiForbiddenException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
@@ -266,6 +267,18 @@ class XapiStatementsResourceDb(
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 statementsWithIdsSet.forEach { statement ->
+                    val stmtId = statement.id
+                        ?: throw IllegalStateException("Could not happen as per line 257")
+                    val (stmtIdHi, stmtIdLo) = stmtId.toLongPair()
+                    if(
+                        schoolDb.getStatementDao().getTimestampsByUuid(
+                            statementIdHi = stmtIdHi,
+                            statementIdLo = stmtIdLo,
+                        ) != null
+                    ) {
+                        throw XapiConflictException(message = "Statement $stmtId already exists")
+                    }
+
                     //check if this is a voiding statement
                     if(statement.verb.id == XapiVerb.ID_VOIDED) {
                         //find the statement we are going to void

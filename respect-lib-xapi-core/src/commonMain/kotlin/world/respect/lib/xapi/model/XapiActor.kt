@@ -7,6 +7,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import world.respect.lib.xapi.exceptions.XapiBadRequestException
 
 /**
  * An XapiActor can be an Agent or Group as per the spec
@@ -31,7 +32,7 @@ object XapiActorSerializer: JsonContentPolymorphicSerializer<XapiActor>(XapiActo
         return when (objectType) {
             XapiObjectType.Agent -> XapiAgent.serializer()
             XapiObjectType.Group -> XapiGroup.serializer()
-            else -> throw XapiException(400, "Invalid object type for actor: must be Agent or Group")
+            else -> throw XapiBadRequestException("Invalid object type for actor: must be Agent or Group")
         }
     }
 }

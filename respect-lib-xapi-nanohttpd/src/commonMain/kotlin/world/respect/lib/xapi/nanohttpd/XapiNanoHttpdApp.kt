@@ -13,9 +13,9 @@ import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.OpenEelXapiConstants.ASSIGNMENT_XAPI_SEGMENT
+import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.asAssignmentRecipeStmtIfIdNotNull
 import world.respect.lib.xapi.ext.put
-import world.respect.lib.xapi.model.XapiException
 import world.respect.lib.xapi.model.XapiSingleItemToListSerializer
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
@@ -199,7 +199,7 @@ class XapiNanoHttpdApp(
                 }
             }catch(e: Throwable) {
                 val responseStatus = Response.Status.lookup(
-                    (e as? XapiException)?.responseCode ?: 500
+                    (e as? XapiException)?.httpStatusCode ?: 500
                 )
 
                 newFixedLengthResponse(

@@ -16,12 +16,12 @@ import world.respect.datalayer.db.school.xapi.xapiExtensionsSerializer
 import world.respect.datalayer.db.shared.ext.takeIfNotEmpty
 import world.respect.datalayer.school.xapi.ext.isCompletionOrProgress
 import world.respect.datalayer.school.xapi.ext.resultProgressExtension
+import world.respect.lib.xapi.exceptions.XapiBadRequestException
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiContext
 import world.respect.lib.xapi.model.XapiContextActivities
-import world.respect.lib.xapi.model.XapiException
 import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.xapi.model.XapiObjectType
 import world.respect.lib.xapi.model.XapiResult
@@ -120,8 +120,7 @@ fun XapiStatement.toEntities(
     }
 
     if(isSubStatement && `object` is XapiStatement)
-        throw XapiException(
-            400,
+        throw XapiBadRequestException(
             "SubStatement cannot have another nested subs== XapiObjectType.SubStatementtatement"
         )
 

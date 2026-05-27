@@ -606,6 +606,8 @@
 
     <string name="no_matching_data_available_yet">No matching data available, yet</string>
 
+    <string name="nothing_here_at_the_moment">Nothing here at the moment</string>
+
     <string name="xapi_verb_assigned">assigned</string>
 
 </resources>

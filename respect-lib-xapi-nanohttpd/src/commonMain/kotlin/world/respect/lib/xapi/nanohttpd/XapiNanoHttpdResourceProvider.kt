@@ -9,9 +9,9 @@ import world.respect.lib.xapi.resources.XapiStatementsResource
  */
 fun interface XapiNanoHttpdResourceProvider {
 
-    operator fun invoke(
+    suspend operator fun invoke(
         endpoint: Url,
-        authentication: String,
+        authentication: String?,
     ): XapiStatementsResource
 
 }

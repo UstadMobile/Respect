@@ -1055,6 +1055,8 @@ val appKoinModule = module {
                 json = get(),
                 accountManager = get(),
                 getXapiActivityForPublicationUseCase = get(),
+                schoolDb = get(),
+                uidNumberMapper = get(),
             )
         }
 

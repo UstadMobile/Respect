@@ -9,7 +9,7 @@ import world.respect.datalayer.db.school.xapi.entities.XapiSessionEntity
 interface XapiSessionEntityDao {
 
     @Insert
-    suspend fun insertAsync(xapiSessionEntity: XapiSessionEntity)
+    suspend fun insertAsync(xapiSessionEntity: XapiSessionEntity): Long
 
     @Query(
         """
@@ -20,41 +20,4 @@ interface XapiSessionEntityDao {
     )
     suspend fun findByUidAsync(uid: Long): XapiSessionEntity?
 
-    @Query(
-        """
-        UPDATE XapiSessionEntity
-           SET xseCompleted = :completed,
-               xseLastMod = :time
-         WHERE xseUid = :xseUid
-
-    """
-    )
-    suspend fun updateLatestAsComplete(
-        completed: Boolean,
-        time: Long,
-        xseUid: Long,
-    )
-
-    @Query(
-        """
-        SELECT XapiSessionEntity.*
-          FROM XapiSessionEntity
-         WHERE XapiSessionEntity.xseRootActivityUid = :xseRootActivityUid
-           AND XapiSessionEntity.xseActorUid = :actorUid
-           AND XapiSessionEntity.xseContentEntryVersionUid = :contentEntryVersionUid
-           AND XapiSessionEntity.xseClazzUid = :clazzUid
-           AND EXISTS(
-               SELECT 1
-                 FROM XapiActorEntity
-                WHERE XapiActorEntity.actorUid = :actorUid
-                  AND XapiActorEntity.actorPersonUid = :accountPersonUid)     
-    """
-    )
-    suspend fun findMostRecentSessionByActorAndActivity(
-        accountPersonUid: Long,
-        actorUid: Long,
-        xseRootActivityUid: Long,
-        contentEntryVersionUid: Long,
-        clazzUid: Long,
-    ): XapiSessionEntity?
 }

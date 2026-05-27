@@ -7,6 +7,10 @@ import io.ktor.util.encodeBase64
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
+import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.school.xapi.adapters.identifierHash
+import world.respect.datalayer.db.school.xapi.entities.XapiSessionEntity
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findLearningUnitAcquisitionLinks
 import world.respect.lib.xapi.model.XapiAgent
@@ -24,6 +28,8 @@ class GetXapiLaunchUrlUseCaseAndroid(
     private val json: Json,
     private val accountManager: RespectAccountManager,
     private val getXapiActivityForPublicationUseCase: GetXapiActivityForPublicationUseCase,
+    private val schoolDb: RespectSchoolDatabase,
+    private val uidNumberMapper: UidNumberMapper,
 ): GetXapiLaunchUrlUseCase {
 
     override suspend fun invoke(
@@ -38,6 +44,15 @@ class GetXapiLaunchUrlUseCaseAndroid(
             ?.href ?: throw IllegalArgumentException("Publication has no suitable acquisition link to launch")
         val learningUnitUrl = publicationUrl.resolve(learningUnitHref)
 
+        val xapiSessionEntity = XapiSessionEntity(
+            xseActorUid = activeSession.xapiAgent.identifierHash(uidNumberMapper),
+            xseAccountPersonUid = authenticatedUser.guid,
+            xseStartTime = System.currentTimeMillis(),
+            xseAuth = randomString(10),
+        )
+
+        val xseUid = schoolDb.getXapiSessionEntityDao().insertAsync(xapiSessionEntity)
+
         return URLBuilder(learningUnitUrl).apply {
             parameters.apply {
                 set(name = "endpoint",
@@ -50,7 +65,7 @@ class GetXapiLaunchUrlUseCaseAndroid(
                     }.toString()
                 )
 
-                val basicAuth = "${authenticatedUser.guid}:${randomString(8)}".encodeBase64()
+                val basicAuth = "${xseUid}:${xapiSessionEntity.xseAuth}".encodeBase64()
                 set(
                     "auth",
                     "Basic $basicAuth"

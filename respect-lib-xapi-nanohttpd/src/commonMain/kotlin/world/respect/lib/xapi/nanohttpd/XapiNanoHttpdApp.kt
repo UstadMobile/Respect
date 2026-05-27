@@ -86,16 +86,6 @@ class XapiNanoHttpdApp(
         )
         val authentication = session.headers["authorization"]
 
-        fun basicAuth(): Pair<String, String> {
-            if(authentication == null)
-                throw IllegalStateException("no authentication provided")
-
-            return authentication.substringAfter("Basic").trim().decodeBase64String()
-                .split(":", limit = 2).let {
-                    Pair(it.first(), it.last())
-                }
-        }
-
         val nextSegment = pathSegments[ENDPOINT_SEGMENT_INDEX + 1]
 
         val assignmentXform = nextSegment == ASSIGNMENT_XAPI_SEGMENT
@@ -124,8 +114,7 @@ class XapiNanoHttpdApp(
                     }
 
                     Method.GET -> {
-                        val (authUser, _) = basicAuth()
-                        val dataLoadState = xapiResourceProvider(endpointUrl, authUser).get(
+                        val dataLoadState = xapiResourceProvider(endpointUrl, authentication).get(
                             listParams = XapiStatementsResource.GetStatementParams.fromParams(
                                 params = StringValuesImpl(
                                     caseInsensitiveName = false,
@@ -141,7 +130,6 @@ class XapiNanoHttpdApp(
                     }
 
                     Method.POST -> {
-                        val (authUser, _) = basicAuth()
                         val postBody = session.bodyAsBytes()?.let {
                             json.decodeFromString(
                                 deserializer = XapiSingleItemToListSerializer,
@@ -151,7 +139,7 @@ class XapiNanoHttpdApp(
                             }
                         } ?: throw IllegalArgumentException("No Post Body")
 
-                        val uuidsCreated = xapiResourceProvider(endpointUrl, authUser).post(
+                        val uuidsCreated = xapiResourceProvider(endpointUrl, authentication).post(
                             list = postBody
                         )
 
@@ -165,8 +153,7 @@ class XapiNanoHttpdApp(
                     }
 
                     Method.PUT -> {
-                        val (authUser, _) = basicAuth()
-                        xapiResourceProvider(endpointUrl, authUser).put(
+                        xapiResourceProvider(endpointUrl, authentication).put(
                             statementId = session.parameters["statementId"]?.first()?.let {
                                 Uuid.parse(it)
                             } ?: throw IllegalArgumentException("Statements PUT requires statementId"),

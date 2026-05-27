@@ -289,6 +289,11 @@ class XapiStatementsResourceDb(
                 stmtOrSubStmt.context?.extensions?.keys?.forEach { extensionKey ->
                     xapiRequireValidIRI(extensionKey, "Extension key must be a valid IRI")
                 }
+
+                stmtOrSubStmt.result?.score?.scaled?.also {
+                    if(it < -1 || it > 1)
+                        throw XapiBadRequestException("Score scaled must be between -1 and 1")
+                }
             }
         }
 

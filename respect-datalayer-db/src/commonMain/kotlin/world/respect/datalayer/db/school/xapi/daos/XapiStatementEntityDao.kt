@@ -246,6 +246,7 @@ interface XapiStatementEntityDao {
         assignVerbUid: Long,
         studentAgentActorUid: Long,
         completeVerbUid: Long,
+        deadlineExtensionHash: Long,
     ): Flow<List<XapiSummaryResultRow>>
 
     @Query("""
@@ -312,6 +313,7 @@ interface XapiStatementEntityDao {
         assignmentRecipeActivityUid: Long,
         assignVerbUid: Long,
         completedVerbUid: Long,
+        deadlineExtensionHash: Long,
     ): Flow<List<XapiSummaryResultRow>>
 
     @Query("""
@@ -347,7 +349,7 @@ interface XapiStatementEntityDao {
                     ON XapiStatementEntity.statementActorUid = XapiActorEntity.actorUid
                LEFT JOIN XapiActivityExtensionEntity DeadlineExtensionEntity
                          ON (DeadlineExtensionEntity.aeeActivityUid = XapiStatementEntity.statementObjectUid1
-                             AND DeadlineExtensionEntity.aeeKey = '${ACTIVITY_EXTENSION_DEADLINE}')
+                             AND DeadlineExtensionEntity.aeeKeyHash = :deadlineExtensionHash)
         """
 
         const val SQL_STATEMENT_ENTITY_IS_MOST_RECENT_FOR_OBJECT_CLAUSE = """

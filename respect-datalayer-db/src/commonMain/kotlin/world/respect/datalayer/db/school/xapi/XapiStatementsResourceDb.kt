@@ -3,6 +3,7 @@ package world.respect.datalayer.db.school.xapi
 import androidx.room.Transactor
 import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
+import io.github.aakira.napier.Napier
 import io.ktor.client.utils.buildHeaders
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
@@ -10,6 +11,8 @@ import io.ktor.util.date.GMTDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -636,6 +639,7 @@ class XapiStatementsResourceDb(
                 assignVerbUid = uidNumberMapper(XapiVerb.ID_ASSIGN),
                 studentAgentActorUid = studentAgent.identifierHash(uidNumberMapper),
                 completeVerbUid = uidNumberMapper(XapiVerb.ID_COMPLETED),
+                deadlineExtensionHash = uidNumberMapper(OpenEelXapiConstants.ACTIVITY_EXTENSION_DEADLINE),
             )
         }else {
             schoolDb.getStatementDao().getAssignmentListAsFlow(
@@ -644,23 +648,34 @@ class XapiStatementsResourceDb(
                 ),
                 assignVerbUid = uidNumberMapper(XapiVerb.ID_ASSIGN),
                 completedVerbUid = uidNumberMapper(XapiVerb.ID_COMPLETED),
+                deadlineExtensionHash = uidNumberMapper(OpenEelXapiConstants.ACTIVITY_EXTENSION_DEADLINE),
             )
         }
 
         return flowIn.map { list ->
             DataReadyState(
-                data = list.map {
+                data = list.map { summaryRow ->
+                    val deadline = try {
+                        val jsonPrimitive = summaryRow.deadlineStr?.let {
+                            json.decodeFromString(JsonPrimitive.serializer(), it)
+                        }
+
+                        jsonPrimitive?.contentOrNull?.let { Instant.parse(it) }
+                    }catch (e: Throwable) {
+                        Napier.w("Exception decoding deadline string", e)
+                        null
+                    }
                     AssignmentSummary(
-                        activityId = it.activityId,
-                        title = it.title ?: "",
+                        activityId = summaryRow.activityId,
+                        title = summaryRow.title ?: "",
                         assignedActor = ActorEntities(
-                            actor = it.actorEntity,
+                            actor = summaryRow.actorEntity,
                         ).toModel(idOnlyFormat = true),
                         lastModified = Clock.System.now(),
-                        deadline = null,
-                        completedCount = it.numCompleted,
-                        totalCount = it.numTotal,
-                        averageScore = it.averageScoreScaled,
+                        deadline = deadline,
+                        completedCount = summaryRow.numCompleted,
+                        totalCount = summaryRow.numTotal,
+                        averageScore = summaryRow.averageScoreScaled,
                     )
                 }
             )

@@ -158,7 +158,8 @@ fun XapiActivity.toEntities(
                 aeeActivityUid = activityUid,
                 aeeKeyHash = uidNumberMapper(key),
                 aeeKey = key, //must be valid IRI,
-                aeeJson = json.encodeToString(JsonElement.serializer(), value)
+                aeeJson = json.encodeToString(JsonElement.serializer(), value),
+                aeeLastMod = lastModified.toEpochMilliseconds(),
             )
         } ?: emptyList()
     )

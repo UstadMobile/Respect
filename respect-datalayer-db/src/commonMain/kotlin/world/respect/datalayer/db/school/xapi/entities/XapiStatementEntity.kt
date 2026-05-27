@@ -53,6 +53,9 @@ import kotlin.time.Instant
     indices = [
         Index("stored", name = "idx_stmt_stored"),
         Index("statementActorUid", name = "idx_stmt_actor"),
+        Index("statementVerbUid", name = "idx_stmt_verb"),
+        Index("statementObjectUid1", name = "idx_stmt_obj1"),
+        Index("stored", name = "idx_stmt_since"),
     ]
 )
 @Serializable

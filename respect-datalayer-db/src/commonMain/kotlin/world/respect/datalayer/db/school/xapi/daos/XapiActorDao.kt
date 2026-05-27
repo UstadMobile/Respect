@@ -41,19 +41,6 @@ interface XapiActorDao {
 
     @Query(
         """
-        SELECT XapiActorEntity.*
-          FROM XapiActorEntity
-         WHERE XapiActorEntity.actorUid = :actorUid
-           AND XapiActorEntity.actorPersonUid = :accountPersonUid  
-    """
-    )
-    suspend fun findByUidAndPersonUidAsync(
-        actorUid: Long,
-        accountPersonUid: Long,
-    ): XapiActorEntity?
-
-    @Query(
-        """
         UPDATE XapiActorEntity
            SET actorGroupMembersLastUpdated = :updateTime
          WHERE actorUid = :actorUid

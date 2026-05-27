@@ -19,9 +19,41 @@ val MIGRATION_11_12 = object: Migration(11, 12) {
     }
 }
 
+/**
+ * Adds support for Xapi
+ */
+val MIGRATION_12_13 = object: Migration(12, 13) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `XapiActivityEntity` (`actUid` INTEGER NOT NULL, `actIdIri` TEXT NOT NULL, `actType` TEXT, `actMoreInfo` TEXT, `actInteractionType` INTEGER, `actCorrectResponsePatterns` TEXT, `actNonSignificantLastModified` INTEGER NOT NULL, `actSignificantLastModified` INTEGER NOT NULL, `actStored` INTEGER NOT NULL, `actFlags` INTEGER NOT NULL, `actObjectTypeSet` INTEGER NOT NULL, PRIMARY KEY(`actUid`))")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `XapiActivityExtensionEntity` (`aeeActivityUid` INTEGER NOT NULL, `aeeKeyHash` INTEGER NOT NULL, `aeeKey` TEXT NOT NULL, `aeeJson` TEXT NOT NULL, `aeeLastMod` INTEGER NOT NULL, `aeeIsDeleted` INTEGER NOT NULL, PRIMARY KEY(`aeeActivityUid`, `aeeKeyHash`))")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `XapiActivityInteractionEntity` (`aieUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `aieActivityUid` INTEGER NOT NULL, `aieProp` INTEGER NOT NULL, `aieId` TEXT NOT NULL)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `index_XapiActivityInteractionEntity_aieActivityUid` ON `XapiActivityInteractionEntity` (`aieActivityUid`)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `XapiActivityLangMapEntry` (`almeActivityUid` INTEGER NOT NULL, `almeKeyHash` INTEGER NOT NULL, `almeProperty` INTEGER NOT NULL, `almeInteractionId` TEXT, `almeLangCode` TEXT NOT NULL, `almeValue` TEXT NOT NULL, `almeLastModified` INTEGER NOT NULL, PRIMARY KEY(`almeActivityUid`, `almeKeyHash`))")
+        connection.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_XapiActivityLangMapEntry_almeActivityUid_almeProperty_almeInteractionId_almeLangCode` ON `XapiActivityLangMapEntry` (`almeActivityUid`, `almeProperty`, `almeInteractionId`, `almeLangCode`)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `XapiActorEntity` (`actorUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `actorPersonUid` INTEGER NOT NULL, `actorName` TEXT, `actorMbox` TEXT, `actorMbox_sha1sum` TEXT, `actorOpenid` TEXT, `actorAccountName` TEXT, `actorAccountHomePage` TEXT, `actorStored` INTEGER NOT NULL, `actorLastModified` INTEGER NOT NULL, `actorGroupMembersLastUpdated` INTEGER NOT NULL, `actorIsAnonGroup` INTEGER NOT NULL, `actorObjectType` INTEGER NOT NULL)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_actorentity_uid_personuid` ON `XapiActorEntity` (`actorPersonUid`)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_actorentity_actorobjecttype` ON `XapiActorEntity` (`actorObjectType`)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_actorentity_actorIsAnonGroup` ON `XapiActorEntity` (`actorIsAnonGroup`)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `XapiGroupMemberActorJoin` (`gmajGroupActorUid` INTEGER NOT NULL, `gmajMemberActorUid` INTEGER NOT NULL, PRIMARY KEY(`gmajGroupActorUid`, `gmajMemberActorUid`))")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_groupmemberactorjoin_gmajgroupactoruid` ON `XapiGroupMemberActorJoin` (`gmajGroupActorUid`)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_groupmemberactorjoin_gmajmemberactoruid` ON `XapiGroupMemberActorJoin` (`gmajMemberActorUid`)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `XapiStatementContextActivityJoin` (`scajUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `scajFromStatementIdHi` INTEGER NOT NULL, `scajFromStatementIdLo` INTEGER NOT NULL, `scajContextType` INTEGER NOT NULL, `scajToActivityUid` INTEGER NOT NULL, `scajToActivityId` TEXT NOT NULL)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_statementctx_stmt_id` ON `XapiStatementContextActivityJoin` (`scajFromStatementIdHi`, `scajFromStatementIdLo`)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `XapiStatementEntity` (`statementIdHi` INTEGER NOT NULL, `statementIdLo` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `statementVerbId` TEXT NOT NULL, `statementObjectType` INTEGER NOT NULL, `statementObjectActivityId` TEXT, `statementObjectUid1` INTEGER NOT NULL, `statementObjectUid2` INTEGER NOT NULL, `statementActorUid` INTEGER NOT NULL, `authorityActorUid` INTEGER NOT NULL, `resultCompletion` INTEGER, `resultSuccess` INTEGER, `resultScoreScaled` REAL, `resultScoreRaw` REAL, `resultScoreMin` REAL, `resultScoreMax` REAL, `resultDuration` INTEGER, `resultResponse` TEXT, `resultExtensions` TEXT, `timestamp` INTEGER, `stored` INTEGER, `contextRegistrationHi` INTEGER NOT NULL, `contextRegistrationLo` INTEGER NOT NULL, `contextRegistrationHash` INTEGER NOT NULL, `contextLanguage` TEXT, `contextPlatform` TEXT, `contextRevision` TEXT, `contextStatementRefIdHi` INTEGER NOT NULL, `contextStatementRefIdLo` INTEGER NOT NULL, `contextInstructorActorUid` INTEGER NOT NULL, `contextTeamActorUid` INTEGER NOT NULL, `extensionProgress` INTEGER, `completionOrProgress` INTEGER NOT NULL, `isSubStatement` INTEGER NOT NULL, `statementVersion` TEXT, `stmtVoid` INTEGER NOT NULL, PRIMARY KEY(`statementIdHi`, `statementIdLo`))")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_stmt_stored` ON `XapiStatementEntity` (`stored`)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_stmt_actor` ON `XapiStatementEntity` (`statementActorUid`)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_stmt_verb` ON `XapiStatementEntity` (`statementVerbUid`)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_stmt_obj1` ON `XapiStatementEntity` (`statementObjectUid1`)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_stmt_since` ON `XapiStatementEntity` (`stored`)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `XapiStatementEntityJson` (`stmtJsonIdHi` INTEGER NOT NULL, `stmtJsonIdLo` INTEGER NOT NULL, `fullStatement` TEXT NOT NULL, PRIMARY KEY(`stmtJsonIdHi`, `stmtJsonIdLo`))")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `XapiVerbEntity` (`verbUid` INTEGER NOT NULL, `verbUrlId` TEXT NOT NULL, `verbStatus` INTEGER NOT NULL, `verbLct` INTEGER NOT NULL, PRIMARY KEY(`verbUid`))")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `XapiVerbLangMapEntry` (`vlmeVerbUid` INTEGER NOT NULL, `vlmeLangCode` TEXT NOT NULL, `vlmeEntryString` TEXT NOT NULL, PRIMARY KEY(`vlmeVerbUid`, `vlmeLangCode`))")
+    }
+}
+
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectSchoolDatabase> {
-    return this.addMigrations(MIGRATION_11_12)
+    return this.addMigrations(MIGRATION_11_12, MIGRATION_12_13)
 }
 

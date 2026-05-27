@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "59dce6bcfcfb76cb367c3290f3171620",
+    "identityHash": "1c2ceacc541e2a7018f64d77720eb8e3",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -2317,6 +2317,33 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `idx_stmt_actor` ON `${TABLE_NAME}` (`statementActorUid`)"
+          },
+          {
+            "name": "idx_stmt_verb",
+            "unique": false,
+            "columnNames": [
+              "statementVerbUid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_stmt_verb` ON `${TABLE_NAME}` (`statementVerbUid`)"
+          },
+          {
+            "name": "idx_stmt_obj1",
+            "unique": false,
+            "columnNames": [
+              "statementObjectUid1"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_stmt_obj1` ON `${TABLE_NAME}` (`statementObjectUid1`)"
+          },
+          {
+            "name": "idx_stmt_since",
+            "unique": false,
+            "columnNames": [
+              "stored"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_stmt_since` ON `${TABLE_NAME}` (`stored`)"
           }
         ]
       },
@@ -2421,7 +2448,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '59dce6bcfcfb76cb367c3290f3171620')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1c2ceacc541e2a7018f64d77720eb8e3')"
     ]
   }
 }

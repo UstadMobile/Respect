@@ -27,7 +27,7 @@ kotlin {
         commonMain.dependencies {
             api(projects.respectLibSerializers)
             api(projects.respectLibDataloadstate)
-            implementation(libs.kotlinx.serialization.json)
+            api(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)

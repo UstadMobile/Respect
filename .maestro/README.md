@@ -32,15 +32,98 @@ Where:
 
 ## Available test flows
 ---
-### 001_001_invite_users_using_qr_code_or_link_test
+### 001_001a_invite_flow_admin_teacher_approval_on_off_test
 
-1. Admin generates invite link (QR/link) for teacher
-2. Teacher joins using QR/link → creates account
-3. Teacher creates class and generates invite code for student
-4. Student joins using invite code → waits for approval
-5. Teacher approves student → student joins class
-6. Teacher generates parent invite link to join class
-7. Parent joins using link → adds child to class
+1. Admin Generates New Person Invites:
+2. Admin generates invitation codes for:
+   • System Administrator role
+   • Teacher role
+   Both Approval Required ON and Approval Required OFF flows are tested.
+3. Admin Creates Class & Teacher Class Invite:
+4. Admin creates "TestClass" and generates Teacher class invitation codes for:
+   • Approval Required ON
+   • Approval Required OFF
+5. Admin & Teacher Onboarding (Approval Required ON):
+   • AdminA joins using System Administrator invite and enters "Waiting for approval" state.
+   • TeacherA joins using Teacher QR/link invite and enters "Waiting for approval" state.
+   • TeacherC joins "TestClass" using Teacher class invite and enters "Waiting for approval" state.
+6. Admin Approval Flow:
+7. Admin logs into the People section and validates pending join requests for:
+   • AdminA User
+   • TeacherA User
+   • TeacherC User
+8. Admin approves all pending requests.
+9. Admin & Teacher Onboarding (Approval Required OFF):
+   • AdminB joins using System Administrator invite and gains immediate access.
+   • TeacherB joins using Teacher QR/link invite and gains immediate access.
+   • TeacherD joins "TestClass" using Teacher class invite and gains immediate access.
+10. Immediate Access Verification:
+    AdminB and TeacherB successfully reach the Apps dashboard without requiring approval.
+    Final Verification:
+11. Admin logs in and validates:
+   • People section contains AdminA, AdminB, TeacherB, TeacherC, and TeacherD users.
+   • No pending requests remain.
+   • "TestClass" contains TeacherC User and TeacherD User.
+---
+### 001_001b_invite_flow_student_parent_approval_enabled_test
+
+1. Admin Creates Class & Teacher Account:
+   Admin creates "TestClass" and manually adds TeacherA User as a Teacher account with login credentials.
+2. Admin Generates New Person Invites (Approval Required ON):
+   Admin generates invitation codes for:
+   • Student role (New Person invite)
+   • Parent role (New Person invite)
+   Both invites are configured with "Approval Required" ON.
+3. Admin Generates Class Invites (Approval Required ON):
+   Inside "TestClass", Admin generates:
+   • Direct Student class invite
+   • Parent-to-Class invite
+   Both class invites are configured with "Approval Required" ON.
+4. Student & Parent New Person Onboarding:
+   • StudentA joins the school using the Student New Person invite and enters "Waiting for approval" state.
+   • ParentA joins the school using the Parent New Person invite and enters "Waiting for approval" state.
+5. Student Joins Class Directly:
+   • StudentC joins "TestClass" using the direct Student class invite and enters "Waiting for approval" state.
+6. Parent Joins Class with Child:
+   • ParentC joins using the Parent class invite and registers ChildA User during onboarding.
+   • ParentC and ChildA User both enter "Waiting for approval" state.
+7. Teacher Approval Flow:
+   TeacherA logs in and validates that all Approval Required ON users appear as pending requests in the People section.
+   TeacherA approves all pending requests from the People section.
+8. Final Verification:
+   TeacherA opens "TestClass" and validates:
+   • Student User is visible in the class.
+   • Child User is visible in the class.
+   • No pending approval requests remain.
+---
+### 001_001c_invite_flow_student_parent_approval_disabled_test
+
+1. Admin Creates Class & Teacher Account:
+   Admin creates "TestClass" and manually adds TeacherA User as a Teacher account with login credentials.
+2. Admin Generates New Person Invites (Approval Required OFF):
+   Admin generates invitation codes for:
+   • Student role (New Person invite)
+   • Parent role (New Person invite)
+   Both invites are configured with "Approval Required" OFF.
+3. Admin Generates Class Invites (Approval Required OFF):
+   Inside "TestClass", Admin generates:
+   • Direct Student class invite
+   • Parent-to-Class invite
+   Both class invites are configured with "Approval Required" OFF.
+4. Student & Parent New Person Onboarding:
+   • StudentA joins the school using the Student New Person invite and gains immediate access.
+   • ParentA joins the school using the Parent New Person invite and gains immediate access.
+5. Student Joins Class Directly:
+   • StudentB joins "TestClass" using the direct Student class invite and gains immediate access to the class.
+6. Parent Joins Class with Child:
+   • ParentB joins using the Parent class invite, registers ChildA User during onboarding, and gains immediate access.
+   • ChildA User is automatically added to "TestClass".
+7. Teacher Verification:
+   TeacherA logs in and validates:
+   • All onboarded users are visible in the People section.
+   • No pending approval requests are displayed.
+   • "TestClass" contains StudentB User and ChildA User.
+   • ParentB User is not listed inside the class roster.
 ---
 ### 001_002_add_user_direct_test
 
@@ -82,11 +165,29 @@ Where:
 ---
 ### 003_admin_user_assigns_assignment_to_a_class_test
 
-1. Admin setup includes app, class and teacher creation
-2. Teacher logs in and accesses class
-3. Teacher creates a new assignment
-4. Assignment is linked with lesson content
-5. Assignment is saved and verified in class
+### 003_admin_user_assigns_assignment_to_a_class_test
+
+1. Admin Adds Learning App:
+   Admin logs into the school and adds a learning application to the school environment.
+2. Admin Creates Teacher Account:
+   Admin creates TeacherA User with Teacher role credentials and enables account access.
+3. Admin Creates Class:
+   Admin creates a class named "TestClass".
+4. Teacher Login & Navigation:
+   TeacherA logs into the school and navigates to the Assignments section.
+5. Assignment Creation Validation:
+   Teacher attempts to save a new assignment without entering required details and validates the required field error message.
+6. Teacher Creates Assignment:
+   Teacher creates an assignment named "Homework 1" with:
+   • Assigned class: TestClass
+   • Future due date and time
+   • Linked lesson content from the learning app
+7. Assignment Verification:
+   Teacher successfully saves the assignment and verifies:
+   • Assignment detail page displays "Homework 1"
+   • Linked lesson "Lesson 001" is visible
+   • Assignment appears in the Assignments list.
+
 ---
 
 ## Testing using HTTPS

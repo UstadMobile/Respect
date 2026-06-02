@@ -1,11 +1,13 @@
 appId: world.respect.app
 
 ---
+- tapOn: "Classes"
+- tapOn: ${CLASSNAME}
 - tapOn: "Add Student"
 - tapOn: "Add person"
 - assertVisible:
-      id: "app_title"
-      text: "Add person"
+    id: "app_title"
+    text: "Add person"
 - tapOn: "First names*"
 - inputText: ${FIRSTNAME}
 - tapOn: "Last name*"
@@ -14,4 +16,4 @@ appId: world.respect.app
 - tapOn: "Female"
 - tapOn: "Save"
 - assertVisible:
-      text: ${FIRSTNAME} ${LASTNAME}
+    text: ${FIRSTNAME} ${LASTNAME}

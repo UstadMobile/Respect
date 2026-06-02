@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.paging.compose.collectAsLazyPagingItems
+import world.respect.app.components.RespectEmptyListComponent
 import world.respect.app.components.RespectListSortHeader
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.SortListMode
@@ -83,6 +84,12 @@ fun ClazzListScreen(
                     Text(text = clazz?.title ?: "")
                 }
             )
+        }
+
+        if(lazyPagingItems.itemCount == 0) {
+            item("empty_item") {
+                RespectEmptyListComponent(Modifier.fillMaxWidth().defaultItemPadding())
+            }
         }
 
     }

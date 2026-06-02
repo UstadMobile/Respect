@@ -1,11 +1,14 @@
 package world.respect.lib.xapi.model
 
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KeepGeneratedSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonTransformingSerializer
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import world.respect.lib.serializers.InstantAsISO8601
 import world.respect.lib.serializers.SingleItemToListTransformer
@@ -28,7 +31,9 @@ val XAPI_PROGRESSED_EXTENSIONS = listOf(
  *
  * @property objectType ObjectType is only found on a SubStatement, not a statement.
  */
-@Serializable
+@OptIn(ExperimentalSerializationApi::class)
+@Serializable(with = XapiStatementTransformingSerializer::class)
+@KeepGeneratedSerializer
 data class XapiStatement(
     val id: Uuid? = null,
     val actor: XapiActor,
@@ -58,7 +63,7 @@ data class XapiStatement(
  *
  */
 object XapiStatementTransformingSerializer: JsonTransformingSerializer<XapiStatement>(
-    XapiStatement.serializer()
+    XapiStatement.generatedSerializer()
 ) {
 
     private val statementExcludedProperties = listOf("objectType")
@@ -68,10 +73,10 @@ object XapiStatementTransformingSerializer: JsonTransformingSerializer<XapiState
     override fun transformSerialize(element: JsonElement): JsonElement {
         val jsonObject = element as JsonObject
         return buildJsonObject {
-            val objectType = jsonObject["objectType"]?.jsonPrimitive?.content
+            val objectType = jsonObject["objectType"]?.jsonPrimitive?.contentOrNull
             putAllExcept(
                 other = jsonObject,
-                exceptKeys = if(objectType == "SubStatement") {
+                exceptKeys = if(objectType == XapiObjectType.SubStatement.value) {
                     substatementExcludedProperties
                 }else {
                     statementExcludedProperties

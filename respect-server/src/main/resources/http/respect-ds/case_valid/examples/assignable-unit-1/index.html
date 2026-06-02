@@ -1,0 +1,42 @@
+<html lang="en">
+    <head>
+        <title>
+            Assignment Result Statement Demo
+        </title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <script type="module" src="../../js/xapi_assignable_unit.js"> </script>
+    </head>
+
+    <body>
+
+        Actor:
+        <pre id="actor_info"></pre>
+
+        Activity id:
+        <pre id="activity_id"></pre>
+
+        <label for="verb_id">Verb</label>
+        <select id="verb_id">
+            <option value="http://adlnet.gov/expapi/verbs/passed">Passed</option>
+            <option value="http://adlnet.gov/expapi/verbs/completed">Completed</option>
+            <option value="http://adlnet.gov/expapi/verbs/failed">Failed</option>
+        </select><br/>
+
+        <br/>
+
+        <label for="score_text">Score</label>
+        <input type="text" id="score_text"/><br/>
+
+        <br/>
+
+        <button id="statement_button">
+            Send statement
+        </button>
+
+        <div id="result">
+
+        </div>
+    </body>
+</html>

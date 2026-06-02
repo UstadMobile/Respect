@@ -18,3 +18,7 @@ fun LangMap.toStringMap(
         is LangMapObjectValue -> this.map
     }
 }
+
+fun Map<String, String>.asLangMap(): LangMap {
+    return LangMapObjectValue(this)
+}

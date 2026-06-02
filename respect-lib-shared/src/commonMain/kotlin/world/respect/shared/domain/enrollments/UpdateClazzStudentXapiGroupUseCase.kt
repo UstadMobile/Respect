@@ -12,6 +12,7 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.shared.ext.studentsXapiGroup
+import kotlin.uuid.ExperimentalUuidApi
 
 class UpdateClazzStudentXapiGroupUseCase(
     private val schoolDataSource: SchoolDataSource,
@@ -19,6 +20,7 @@ class UpdateClazzStudentXapiGroupUseCase(
     private val schoolUrl: Url,
 ) {
 
+    @OptIn(ExperimentalUuidApi::class)
     suspend operator fun invoke(
         clazzUid: String,
     ) {

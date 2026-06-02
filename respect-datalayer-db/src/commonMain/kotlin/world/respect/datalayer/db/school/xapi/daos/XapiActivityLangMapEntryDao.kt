@@ -18,19 +18,18 @@ interface XapiActivityLangMapEntryDao {
     @Query(
         """
         UPDATE XapiActivityLangMapEntry
-           SET almeValue = :almeValue
+           SET almeValue = :almeValue,
+               almeLastModified = :changeTime
          WHERE almeActivityUid = :almeActivityUid
-           AND almeProperty = :almeProperty
-           AND almeInteractionId = :almeInteractionId
-           AND almeLastModified > :changeTime
+           AND almeKeyHash = :almeKeyHash
+           AND almeLastModified < :changeTime
            AND almeValue != :almeValue
     """
     )
     suspend fun updateIfChanged(
         almeActivityUid: Long,
-        almeProperty: Int,
+        almeKeyHash: Long,
         almeValue: String,
-        almeInteractionId: String?,
         changeTime: Long,
     )
 

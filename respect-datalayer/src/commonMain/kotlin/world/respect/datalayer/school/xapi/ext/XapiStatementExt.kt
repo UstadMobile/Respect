@@ -2,6 +2,7 @@ package world.respect.datalayer.school.xapi.ext
 
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XAPI_PROGRESSED_EXTENSIONS
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActor
@@ -68,11 +69,37 @@ fun XapiStatement.allDefinedActivities(): List<XapiActivity> {
     }
 }
 
+fun XapiStatement.allActivities(): List<XapiActivity> {
+    return buildList {
+        objectActivityOrNull()?.also { add(it) }
+        context?.contextActivities?.also { ctxActivities ->
+            ctxActivities.parent?.also { addAll(it) }
+            ctxActivities.grouping?.also { addAll(it) }
+            ctxActivities.category?.also { addAll(it) }
+            ctxActivities.other?.also { addAll(it) }
+        }
+    }
+}
+
+
+/**
+ * List of all verbs that have any properties defined (e.g. a display name). Exclude those that are
+ * id only
+ */
 fun XapiStatement.allDefinedVerbs(): List<XapiVerb> {
     return buildList {
         verb.display?.also { add(verb) }
         (`object` as? XapiStatement)?.also {
             addAll(it.allDefinedVerbs())
+        }
+    }
+}
+
+fun XapiStatement.allVerbs(): List<XapiVerb> {
+    return buildList {
+        add(verb)
+        (`object` as? XapiStatement)?.also {
+            addAll(it.allVerbs())
         }
     }
 }

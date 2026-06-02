@@ -17,5 +17,4 @@ data class XapiActivityExtensionEntity(
 
     val aeeLastMod: Long = 0,
 
-    val aeeIsDeleted: Boolean = false,
 )

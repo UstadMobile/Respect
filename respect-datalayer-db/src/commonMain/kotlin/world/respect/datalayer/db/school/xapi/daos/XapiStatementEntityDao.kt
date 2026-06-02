@@ -10,10 +10,15 @@ import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.xapi.composites.XapiAssignmentResultRow
 import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
 import world.respect.datalayer.db.school.xapi.composites.XapiSubstatementAndVerbEntity
+import world.respect.datalayer.db.school.xapi.composites.XapiSummaryResultRow
 import world.respect.datalayer.db.school.xapi.composites.XapiTimes
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntryPropEnum
 import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
+import world.respect.datalayer.db.school.xapi.entities.XapiStatementContextActivityJoinTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.StatementReportRow
+import world.respect.lib.xapi.OpenEelXapiConstants.ACTIVITY_EXTENSION_DEADLINE
 
 @Dao
 interface XapiStatementEntityDao {
@@ -36,6 +41,8 @@ interface XapiStatementEntityDao {
         until: Long,
         ascending: Boolean,
         limit: Int,
+        authenticatedPersonUidNum: Long,
+        authenticatedActorUid: Long,
     ): List<XapiStatementAndJsonEntities>
 
     @Query(LIST_SQL)
@@ -53,6 +60,8 @@ interface XapiStatementEntityDao {
         until: Long,
         ascending: Boolean,
         limit: Int,
+        authenticatedPersonUidNum: Long,
+        authenticatedActorUid: Long,
     ): Flow<List<XapiStatementAndJsonEntities>>
 
 
@@ -99,17 +108,6 @@ interface XapiStatementEntityDao {
         statementIdLo: Long,
     ): Long?
 
-    @Query("""
-        UPDATE XapiStatementEntity
-           SET stmtVoid = 1
-         WHERE XapiStatementEntity.statementIdHi = :voidStmtIdHi
-           AND XapiStatementEntity.statementIdLo = :voidStmtIdLo
-    """)
-    suspend fun updateSetStatementVoided(
-        voidStmtIdHi: Long,
-        voidStmtIdLo: Long
-    )
-
     /**
      * Get a result with one row per combination of assigned actor (including group members) and
      * assigned activity id as per the assignment recipe. Each row includes summary stats for the
@@ -120,12 +118,18 @@ interface XapiStatementEntityDao {
      * combination, and then use subqueries. The aggregate functions should be marginally more
      * efficient as it avoids the need to run a separate subquery for each field: the statements can
      * be selected, grouped, and then we can get all the required fields in one go.
+     *
+     * @param filterByStudentActorUid when not zero, filter to receive only statements from the given
+     *        student.
      */
     @Query("""
         WITH LatestAssignmentStatementIds(idHi, idLo, actorUid) AS (
                  SELECT XapiStatementEntity.statementIdHi AS idHi,
                         XapiStatementEntity.statementIdLo AS idLo,
-                        XapiStatementEntity.statementActorUid AS actorUid
+                        CASE(:filterByStudentActorUid)
+                            WHEN 0 THEN XapiStatementEntity.statementActorUid
+                            ELSE :filterByStudentActorUid
+                        END AS actorUid
                    FROM XapiStatementEntity
                   WHERE XapiStatementEntity.statementObjectUid1 = :assignmentActivityIdNum
                     AND XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.ACTIVITY}
@@ -155,23 +159,173 @@ interface XapiStatementEntityDao {
              SELECT XapiStatementEntity.statementActorUid AS actorUid,
                     XapiStatementEntity.statementObjectUid1 AS activityUid,
                     MAX(XapiStatementEntity.extensionProgress) AS progress,
-                    MAX(XapiStatementEntity.resultCompletion) AS completed,
+                    MAX(XapiStatementEntity.resultCompletion) AS resultCompleted,
+                    MAX(
+                        CASE(XapiStatementEntity.statementVerbUid)
+                            WHEN :completeVerbUid THEN 1
+                            ELSE NULL
+                        END
+                    ) AS verbCompleted,
                     MAX(XapiStatementEntity.resultSuccess) AS successful,
-                    MAX(XapiStatementEntity.resultScoreScaled) AS rawScore
+                    MAX(XapiStatementEntity.resultScoreScaled) AS scoreScaled
                FROM XapiStatementEntity
               WHERE XapiStatementEntity.statementObjectUid1 IN(
                     SELECT DISTINCT AssignedActivityUids.assignedActivityUid 
                       FROM AssignedActivityUids)
                 AND XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.ACTIVITY}
-                AND NOT XapiStatementEntity.stmtVoid
                 AND XapiStatementEntity.statementActorUid IN 
                     (SELECT uid FROM AgentActorUids)
+                AND NOT XapiStatementEntity.stmtVoid
+                AND :assignmentActivityIdNum IN 
+                    (SELECT XapiStatementContextActivityJoin.scajToActivityUid
+                       FROM XapiStatementContextActivityJoin
+                      WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
+                        AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo
+                        AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
            GROUP BY XapiStatementEntity.statementActorUid, XapiStatementEntity.statementObjectUid1
     """)
     suspend fun getAssignmentResults(
-        assignmentActivityIdNum: Long
+        assignmentActivityIdNum: Long,
+        completeVerbUid: Long,
+        filterByStudentActorUid: Long,
     ): List<XapiAssignmentResultRow>
 
+    /**
+     *
+     */
+    @Query("""
+        SELECT XapiStatementEntity.statementObjectUid1 AS activityUid,
+               XapiStatementEntity.statementObjectActivityId AS activityId,
+               XapiActorEntity.*,
+               NameLangMapEntry.almeValue AS title,
+               (SELECT COUNT(DISTINCT ProgressStmt.statementObjectUid1)
+                  FROM XapiStatementEntity ProgressStmt
+                 WHERE ProgressStmt.statementActorUid = :studentAgentActorUid
+                   AND XapiStatementEntity.statementObjectUid1 IN (
+                       SELECT XapiStatementContextActivityJoin.scajToActivityUid
+                         FROM XapiStatementContextActivityJoin
+                        WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = ProgressStmt.statementIdHi
+                          AND XapiStatementContextActivityJoin.scajFromStatementIdLo = ProgressStmt.statementIdLo
+                          AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
+                   AND (    ProgressStmt.resultCompletion = 1
+                         OR ProgressStmt.statementVerbUid = :completeVerbUid)
+                   AND NOT ProgressStmt.stmtVoid      
+               ) AS numCompleted,
+               (
+                    SELECT AVG(ScoreByActivity.resultScoreScaled)
+                      -- Get the average of the maximum score per assigned unit activity id
+                      FROM (SELECT MAX(ScoreStmt.resultScoreScaled) AS resultScoreScaled
+                              FROM XapiStatementEntity ScoreStmt
+                             WHERE ScoreStmt.statementActorUid = :studentAgentActorUid
+                               AND XapiStatementEntity.statementObjectUid1 IN (
+                                    SELECT XapiStatementContextActivityJoin.scajToActivityUid
+                                      FROM XapiStatementContextActivityJoin
+                                     WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = ScoreStmt.statementIdHi
+                                       AND XapiStatementContextActivityJoin.scajFromStatementIdLo = ScoreStmt.statementIdLo
+                                       AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
+                               AND ScoreStmt.resultScoreScaled IS NOT NULL
+                          GROUP BY ScoreStmt.statementObjectUid1) AS ScoreByActivity
+               ) AS averageScoreScaled,
+               (SELECT COUNT(*) 
+                  FROM XapiStatementContextActivityJoin
+                 WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
+                   AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo
+                   AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT}) AS numTotal,
+               DeadlineExtensionEntity.aeeJson AS deadlineStr
+          FROM XapiStatementEntity
+               $SQL_JOIN_ASSIGNMENT_SUMMARY
+         WHERE XapiStatementEntity.statementVerbUid = :assignVerbUid
+           AND (      :studentAgentActorUid = XapiStatementEntity.statementActorUid
+                 OR (:studentAgentActorUid IN 
+                     (SELECT XapiGroupMemberActorJoin.gmajMemberActorUid
+                       FROM XapiGroupMemberActorJoin
+                      WHERE XapiGroupMemberActorJoin.gmajGroupActorUid = XapiStatementEntity.statementActorUid)))   
+           AND $SQL_STATEMENT_ENTITY_IS_MOST_RECENT_FOR_OBJECT_CLAUSE
+    """)
+    fun getAssignmentListForStudentAsFlow(
+        assignVerbUid: Long,
+        studentAgentActorUid: Long,
+        completeVerbUid: Long,
+        deadlineExtensionHash: Long,
+    ): Flow<List<XapiSummaryResultRow>>
+
+    @Query("""
+        SELECT XapiStatementEntity.statementObjectUid1 AS activityUid,
+               XapiStatementEntity.statementObjectActivityId AS activityId,
+               XapiActorEntity.*,
+               NameLangMapEntry.almeValue AS title,
+               (SELECT COUNT(DISTINCT XapiActorInner.actorUid)
+                  FROM XapiActorEntity XapiActorInner
+                        -- Select ActorEntities that are assignees
+                 WHERE (    (     XapiActorInner.actorUid = XapiStatementEntity.statementActorUid
+                              AND XapiActorInner.actorObjectType = ${XapiEntityObjectTypeFlags.AGENT})
+                         OR XapiActorInner.actorUid IN 
+                            (SELECT XapiGroupMemberActorJoin.gmajMemberActorUid
+                               FROM XapiGroupMemberActorJoin
+                              WHERE XapiGroupMemberActorJoin.gmajGroupActorUid = XapiStatementEntity.statementActorUid)
+                       )
+                       -- Filter actors by those where the total of distinct completed statements
+                       -- equals the total  
+                       -- units for this assignment Do we need to double check the activity uid here?
+                   AND (
+                        (SELECT COUNT(DISTINCT ProgressStmt.statementObjectUid1)
+                           FROM XapiStatementEntity ProgressStmt
+                          WHERE ProgressStmt.statementActorUid = XapiActorInner.actorUid
+                            AND ProgressStmt.statementVerbUid = :completedVerbUid
+                            AND XapiStatementEntity.statementObjectUid1 IN (
+                                SELECT XapiStatementContextActivityJoin.scajToActivityUid
+                                  FROM XapiStatementContextActivityJoin
+                                 WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = ProgressStmt.statementIdHi
+                                   AND XapiStatementContextActivityJoin.scajFromStatementIdLo = ProgressStmt.statementIdLo
+                                   AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
+                            AND NOT ProgressStmt.stmtVoid       
+                        ) = (SELECT COUNT(*)
+                               FROM XapiStatementContextActivityJoin 
+                              WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
+                                AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo
+                                AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
+                   )
+               
+               ) AS numCompleted,
+               (SELECT COUNT(*)
+                  FROM XapiActorEntity XapiActorInner
+                 WHERE (     XapiActorInner.actorUid = XapiStatementEntity.statementActorUid
+                         AND XapiActorInner.actorObjectType = ${XapiEntityObjectTypeFlags.AGENT})
+                   OR XapiActorInner.actorUid IN 
+                      (SELECT XapiGroupMemberActorJoin.gmajMemberActorUid
+                         FROM XapiGroupMemberActorJoin
+                        WHERE XapiGroupMemberActorJoin.gmajGroupActorUid = XapiStatementEntity.statementActorUid)    
+               ) AS numTotal,
+               DeadlineExtensionEntity.aeeJson AS deadlineStr,
+               NULL AS averageScoreScaled
+          FROM XapiStatementEntity
+               $SQL_JOIN_ASSIGNMENT_SUMMARY
+         WHERE XapiStatementEntity.statementVerbUid = :assignVerbUid   
+           AND :assignmentRecipeActivityUid IN (
+               SELECT XapiStatementContextActivityJoin.scajToActivityUid
+                 FROM XapiStatementContextActivityJoin
+                WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
+                  AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo
+                  AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.CATEGORY_FLAG_INT})
+           AND $SQL_STATEMENT_ENTITY_IS_MOST_RECENT_FOR_OBJECT_CLAUSE
+    """)
+    fun getAssignmentListAsFlow(
+        assignmentRecipeActivityUid: Long,
+        assignVerbUid: Long,
+        completedVerbUid: Long,
+        deadlineExtensionHash: Long,
+    ): Flow<List<XapiSummaryResultRow>>
+
+    @Query("""
+        UPDATE XapiStatementEntity
+           SET stmtVoid = 1
+         WHERE XapiStatementEntity.statementIdHi = :voidStmtIdHi
+           AND XapiStatementEntity.statementIdLo = :voidStmtIdLo
+    """)
+    suspend fun updateSetStatementVoided(
+        voidStmtIdHi: Long,
+        voidStmtIdLo: Long
+    )
 
     @RawQuery
     suspend fun runReportQuery(query: RoomRawQuery): List<StatementReportRow>
@@ -181,6 +335,54 @@ interface XapiStatementEntityDao {
         const val SINCE_UNSET = Long.MIN_VALUE
 
         const val UNTIL_UNSET = Long.MAX_VALUE
+
+        const val SQL_JOIN_ASSIGNMENT_SUMMARY = """
+               LEFT JOIN XapiActivityLangMapEntry NameLangMapEntry 
+                    ON (NameLangMapEntry.almeActivityUid, NameLangMapEntry.almeKeyHash) IN 
+                       (SELECT XapiActivityLangMapEntry.almeActivityUid,
+                               XapiActivityLangMapEntry.almeKeyHash
+                          FROM XapiActivityLangMapEntry
+                         WHERE XapiActivityLangMapEntry.almeActivityUid = XapiStatementEntity.statementObjectUid1
+                           AND XapiActivityLangMapEntry.almeProperty = ${XapiActivityLangMapEntryPropEnum.NAME_FLAG_INT}
+                         LIMIT 1)
+               JOIN XapiActorEntity
+                    ON XapiStatementEntity.statementActorUid = XapiActorEntity.actorUid
+               LEFT JOIN XapiActivityExtensionEntity DeadlineExtensionEntity
+                         ON (DeadlineExtensionEntity.aeeActivityUid = XapiStatementEntity.statementObjectUid1
+                             AND DeadlineExtensionEntity.aeeKeyHash = :deadlineExtensionHash)
+        """
+
+        const val SQL_STATEMENT_ENTITY_IS_MOST_RECENT_FOR_OBJECT_CLAUSE = """
+            (XapiStatementEntity.statementIdHi, XapiStatementEntity.statementIdLo) IN
+               (SELECT XapiStatementInner.statementIdHi, 
+                       XapiStatementInner.statementIdLo
+                  FROM XapiStatementEntity XapiStatementInner
+                 WHERE XapiStatementInner.statementObjectUid1 = XapiStatementEntity.statementObjectUid1
+                   AND XapiStatementInner.statementObjectType = XapiStatementEntity.statementObjectType
+              ORDER BY XapiStatementInner.timestamp DESC
+                 LIMIT 1)
+        """
+
+        const val XAPI_STATEMENT_PERMISSION_CLAUSE = """
+            (   (SELECT EXISTS(
+                        SELECT 1
+                          FROM PersonRoleEntity
+                         WHERE PersonRoleEntity.prPersonGuidHash = :authenticatedPersonUidNum
+                           AND (     PersonRoleEntity.prRoleEnum = ${PersonRoleEnum.TEACHER_INT}
+                                  OR PersonRoleEntity.prRoleEnum = ${PersonRoleEnum.SYSTEM_ADMINISTRATOR_INT}
+                                  OR PersonRoleEntity.prRoleEnum = ${PersonRoleEnum.SITE_ADMINISTRATOR_INT})))
+                 OR (:authenticatedActorUid = XapiStatementEntity.statementActorUid)
+                 OR (     :authenticatedActorUid = XapiStatementEntity.statementObjectUid1
+                      AND XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.AGENT})
+                 OR (:authenticatedActorUid IN 
+                     (SELECT XapiGroupMemberActorJoin.gmajMemberActorUid
+                        FROM XapiGroupMemberActorJoin
+                       WHERE XapiGroupMemberActorJoin.gmajGroupActorUid = XapiStatementEntity.statementActorUid
+                          OR (     XapiGroupMemberActorJoin.gmajGroupActorUid = XapiStatementEntity.statementObjectUid1
+                               AND XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.GROUP}))
+                    )          
+               )
+        """
 
         /*
          Begin statement query : This query is the same for both XapiStatementEntity
@@ -274,6 +476,7 @@ interface XapiStatementEntityDao {
            AND NOT XapiStatementEntity.isSubStatement
            AND (    NOT XapiStatementEntity.stmtVoid
                  OR (:voidedStatementIdHi != 0 AND :voidedStatementIdLo != 0))
+           AND $XAPI_STATEMENT_PERMISSION_CLAUSE
       ORDER BY CASE(:ascending) WHEN 1 THEN XapiStatementEntity.stored END ASC,
                CASE(:ascending) WHEN 0 THEN XapiStatementEntity.stored END DESC
          LIMIT :limit      

@@ -12,10 +12,11 @@ import io.ktor.http.protocolWithAuthority
 fun NanoHTTPD.Response.addXapiCORSHeaders(
     session: NanoHTTPD.IHTTPSession
 ) {
-    val referrer = session.headers["referer"] ?: throw IllegalArgumentException("No referrer")
-    val origin = Url(referrer).protocolWithAuthority
+    val origin = session.headers["origin"] ?: session.headers["referer"]
+        ?: throw IllegalArgumentException("No referrer")
+    val originUrl = Url(origin).protocolWithAuthority
 
-    addHeader("Access-Control-Allow-Origin", origin)
+    addHeader("Access-Control-Allow-Origin", originUrl)
 
     session.headers["access-control-request-method"]?.also { requestMethods ->
         addHeader("Access-Control-Allow-Methods", requestMethods)

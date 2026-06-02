@@ -13,6 +13,7 @@ import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.OpenEelXapiConstants.ASSIGNMENT_XAPI_SEGMENT
+import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.asAssignmentRecipeStmtIfIdNotNull
 import world.respect.lib.xapi.ext.put
 import world.respect.lib.xapi.model.XapiSingleItemToListSerializer
@@ -85,16 +86,6 @@ class XapiNanoHttpdApp(
         )
         val authentication = session.headers["authorization"]
 
-        fun basicAuth(): Pair<String, String> {
-            if(authentication == null)
-                throw IllegalStateException("no authentication provided")
-
-            return authentication.substringAfter("Basic").trim().decodeBase64String()
-                .split(":", limit = 2).let {
-                    Pair(it.first(), it.last())
-                }
-        }
-
         val nextSegment = pathSegments[ENDPOINT_SEGMENT_INDEX + 1]
 
         val assignmentXform = nextSegment == ASSIGNMENT_XAPI_SEGMENT
@@ -105,90 +96,105 @@ class XapiNanoHttpdApp(
         }
 
         return runBlocking {
-            when(session.method) {
-                /**
-                 * Allow cross-origin requests as per
-                 * https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/OPTIONS
-                 */
-                Method.OPTIONS -> {
-                    newFixedLengthResponse(
-                        Response.Status.NO_CONTENT,
-                        "application/json",
-                        ByteArrayInputStream(byteArrayOf()),
-                        0,
-                    ).also {
-                        it.addXapiCORSHeaders(session)
-                    }
-                }
-
-                Method.GET -> {
-                    val (authUser, _) = basicAuth()
-                    val dataLoadState = xapiResourceProvider(endpointUrl, authUser).get(
-                        listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                            params = StringValuesImpl(
-                                caseInsensitiveName = false,
-                                values = session.parameters
-                            ),
-                            json = json,
-                        )
-                    )
-
-                    dataLoadState.toFixedLengthResponse(XapiStatementResult.serializer())
-                }
-
-                Method.POST -> {
-                    val (authUser, _) = basicAuth()
-                    val postBody = session.bodyAsBytes()?.let {
-                        json.decodeFromString(
-                            deserializer = XapiSingleItemToListSerializer,
-                            string = it.decodeToString()
-                        ).map { statement ->
-                            statement.asAssignmentRecipeStmtIfIdNotNull(assignmentActivityId)
+            try {
+                when(session.method) {
+                    /**
+                     * Allow cross-origin requests as per
+                     * https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods/OPTIONS
+                     */
+                    Method.OPTIONS -> {
+                        newFixedLengthResponse(
+                            Response.Status.NO_CONTENT,
+                            "application/json",
+                            ByteArrayInputStream(byteArrayOf()),
+                            0,
+                        ).also {
+                            it.addXapiCORSHeaders(session)
                         }
-                    } ?: throw IllegalArgumentException("No Post Body")
-
-                    val uuidsCreated = xapiResourceProvider(endpointUrl, authUser).post(
-                        list = postBody
-                    )
-
-                    newFixedLengthResponse(
-                        Response.Status.OK,
-                        "application/json",
-                        json.encodeToString(ListSerializer(Uuid.serializer()), uuidsCreated)
-                    ).also {
-                        it.addXapiCORSHeaders(session)
                     }
-                }
 
-                Method.PUT -> {
-                    val (authUser, _) = basicAuth()
-                    xapiResourceProvider(endpointUrl, authUser).put(
-                        statementId = session.parameters["statementId"]?.first()?.let {
+                    Method.GET -> {
+                        val dataLoadState = xapiResourceProvider(endpointUrl, authentication).get(
+                            listParams = XapiStatementsResource.GetStatementParams.fromParams(
+                                params = StringValuesImpl(
+                                    caseInsensitiveName = false,
+                                    values = session.parameters
+                                ),
+                                json = json,
+                            )
+                        )
+
+                        dataLoadState.toFixedLengthResponse(XapiStatementResult.serializer()).also {
+                            it.addXapiCORSHeaders(session)
+                        }
+                    }
+
+                    Method.POST -> {
+                        val postBody = session.bodyAsBytes()?.let {
+                            json.decodeFromString(
+                                deserializer = XapiSingleItemToListSerializer,
+                                string = it.decodeToString()
+                            ).map { statement ->
+                                statement.asAssignmentRecipeStmtIfIdNotNull(assignmentActivityId)
+                            }
+                        } ?: throw IllegalArgumentException("No Post Body")
+
+                        val uuidsCreated = xapiResourceProvider(endpointUrl, authentication).post(
+                            list = postBody
+                        )
+
+                        newFixedLengthResponse(
+                            Response.Status.OK,
+                            "application/json",
+                            json.encodeToString(ListSerializer(Uuid.serializer()), uuidsCreated)
+                        ).also {
+                            it.addXapiCORSHeaders(session)
+                        }
+                    }
+
+                    Method.PUT -> {
+                        xapiResourceProvider(endpointUrl, authentication).put(
+                            statementId = session.parameters["statementId"]?.first()?.let {
                                 Uuid.parse(it)
                             } ?: throw IllegalArgumentException("Statements PUT requires statementId"),
-                        statement = session.bodyAsBytes()?.decodeToString()?.let {
-                            json.decodeFromString(XapiStatement.serializer(), it)
-                        }?.asAssignmentRecipeStmtIfIdNotNull(assignmentActivityId)
-                            ?: throw IllegalArgumentException("No body")
-                    )
+                            statement = session.bodyAsBytes()?.decodeToString()?.let {
+                                json.decodeFromString(XapiStatement.serializer(), it)
+                            }?.asAssignmentRecipeStmtIfIdNotNull(assignmentActivityId)
+                                ?: throw IllegalArgumentException("No body")
+                        )
 
-                    newFixedLengthResponse(
-                        Response.Status.NO_CONTENT,
-                        "application/json",
-                        ByteArrayInputStream(byteArrayOf()),
-                        0,
-                    ).also {
-                        it.addXapiCORSHeaders(session)
+                        newFixedLengthResponse(
+                            Response.Status.NO_CONTENT,
+                            "application/json",
+                            ByteArrayInputStream(byteArrayOf()),
+                            0,
+                        ).also {
+                            it.addXapiCORSHeaders(session)
+                        }
+                    }
+
+                    else -> {
+                        newFixedLengthResponse(
+                            Response.Status.METHOD_NOT_ALLOWED,
+                            "text/plain",
+                            ByteArrayInputStream(byteArrayOf()),
+                            0,
+                        ).also {
+                            it.addXapiCORSHeaders(session)
+                        }
                     }
                 }
+            }catch(e: Throwable) {
+                val responseStatus = Response.Status.lookup(
+                    (e as? XapiException)?.httpStatusCode ?: 500
+                )
 
-                else -> {
-                    newFixedLengthResponse(
-                        Response.Status.METHOD_NOT_ALLOWED,
-                        "text/plain",
-                        ByteArrayInputStream(byteArrayOf()),
-                        0,
-                    )
+                newFixedLengthResponse(
+                    responseStatus,
+                    "text/plain",
+                    e.message ?: "No error message",
+                ).also {
+                    it.addXapiCORSHeaders(session)
                 }
             }
         }

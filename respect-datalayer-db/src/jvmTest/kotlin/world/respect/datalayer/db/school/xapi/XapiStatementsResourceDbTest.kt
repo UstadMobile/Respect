@@ -8,6 +8,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import world.respect.datalayer.db.school.insertAdmin
 import world.respect.datalayer.db.school.testSchoolDb
 import world.respect.datalayer.db.school.toDataSource
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
@@ -24,8 +25,13 @@ import world.respect.datalayer.school.xapi.ext.resultProgressExtension
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
 import world.respect.datalayer.shared.XXHashUidNumberMapper
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.test.res.forXapiSampleStatements
 import world.respect.lib.test.res.xapiSampleStatements
+import world.respect.lib.xapi.OpenEelXapiConstants
+import world.respect.lib.xapi.exceptions.XapiConflictException
+import world.respect.lib.xapi.exceptions.XapiException
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XAPI_RESULT_EXTENSION_PROGRESS
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
@@ -45,6 +51,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
@@ -117,7 +124,10 @@ class XapiStatementsResourceDbTest {
                     val dataSource = db.toDataSource(
                         authenticatedUserUid = "1",
                         schoolUrl = Url("http://localhost:8098/"),
-                    )
+                    ).also {
+                        it.insertAdmin()
+                    }
+
 
                     val stmtUuid = Uuid.random()
                     val timeNow = Clock.System.now()
@@ -186,7 +196,9 @@ class XapiStatementsResourceDbTest {
                 val dataSource = db.toDataSource(
                     authenticatedUserUid = "1",
                     schoolUrl = Url("http://localhost:8098/"),
-                )
+                ).also {
+                    it.insertAdmin()
+                }
 
                 val getStmtParams = XapiStatementsResource.GetStatementParams(
                     statementId = stmtUuid
@@ -257,7 +269,9 @@ class XapiStatementsResourceDbTest {
                 val dataSource = db.toDataSource(
                     authenticatedUserUid = "1",
                     schoolUrl = Url("http://localhost:8098/"),
-                )
+                ).also {
+                    it.insertAdmin()
+                }
 
                 val teacherAgent = XapiAgent(
                     name = "Teacher",
@@ -294,10 +308,13 @@ class XapiStatementsResourceDbTest {
 
                 val setAssignmentStmt = XapiStatement(
                     actor = studentGroup.copy(member = null),
-                    verb = XapiVerb("http://activitystrea.ms/schema/1.0/assign"),
+                    verb = XapiVerb(id = XapiVerb.ID_ASSIGN),
                     `object` = XapiActivity(
                         id = assignmentActivityId,
                         definition = XapiActivityDefinition(
+                            name = mapOf(
+                                "en-US" to "Test Assignment"
+                            ),
                             type = "http://id.tincanapi.com/activitytype/school-assignment"
                         )
                     ),
@@ -308,7 +325,10 @@ class XapiStatementsResourceDbTest {
                                 XapiActivity(
                                     id = it,
                                 )
-                            }
+                            },
+                            category = listOf(
+                                XapiActivity(id = OpenEelXapiConstants.CATEGORY_ASSIGNMENT_RECIPE)
+                            )
                         )
                     )
                 )
@@ -316,11 +336,25 @@ class XapiStatementsResourceDbTest {
                 dataSource.xapiStatementsResource.post(listOf(setAssignmentStmt))
 
                 val progressStatements = studentGroup.member!!.flatMap { studentActor ->
-                    assignmentTasks.map { assignmentActivityId ->
+                    val studentCompletedAll = Random.nextBoolean()
+
+                    assignmentTasks.map { assignmentTaskId ->
+                        val isComplete = if(studentCompletedAll){
+                            true
+                        }else {
+                            randomNullableBoolean()
+                        }
+
                         XapiStatement(
                             actor = studentActor,
-                            verb = XapiVerb(XapiVerb.ID_COMPLETED),
-                            `object` = XapiActivity(id = assignmentActivityId),
+                            verb = XapiVerb(
+                                id = if(isComplete == true) {
+                                    XapiVerb.ID_COMPLETED
+                                }else {
+                                    XapiVerb.ID_EXPERIENCED
+                                }
+                            ),
+                            `object` = XapiActivity(id = assignmentTaskId),
                             result = XapiResult(
                                 score = XapiResult.Score(
                                     scaled = Random.nextDouble(
@@ -328,7 +362,7 @@ class XapiStatementsResourceDbTest {
                                     ).toFloat()
                                 ),
                                 success = randomNullableBoolean(),
-                                completion = randomNullableBoolean(),
+                                completion = isComplete,
                                 extensions = JsonObject(
                                     mapOf(
                                         XAPI_RESULT_EXTENSION_PROGRESS to JsonPrimitive(Random.nextInt(100))
@@ -356,9 +390,9 @@ class XapiStatementsResourceDbTest {
 
                 studentGroup.member!!.forEach { student ->
                     assignmentTasks.forEach { taskActivityId ->
-                        val result = assignmentResults.first {
+                        val result = assignmentResults.progress.first {
                             it.actor.idStr == student.idStr //canoncical comparison
-                        }.progress.first {
+                        }.progressPerTask.first {
                             it.activityId == taskActivityId
                         }
 
@@ -379,7 +413,7 @@ class XapiStatementsResourceDbTest {
 
                         assertEquals(
                             statement.result?.score?.scaled,
-                            result.rawScore,
+                            result.scoreScaled,
                         )
 
                         assertEquals(
@@ -388,9 +422,74 @@ class XapiStatementsResourceDbTest {
                         )
                     }
                 }
+
+                val summaries = dataSource.xapiStatementsResource.getAssignmentListAsFlow(
+                    dataLoadParams = DataLoadParams(),
+                    studentAgent = null,
+                ).first().dataOrNull()
+
+                assertNotNull(summaries)
+
+                val summaryForAssignment = summaries.firstOrNull {
+                    it.activityId == assignmentActivityId
+                }
+
+                assertNotNull(summaryForAssignment)
+
+                assertEquals(
+                    studentGroup.member!!.size,
+                    summaryForAssignment.totalCount
+                )
+
+                assertEquals(
+                    expected = studentGroup.member!!.count { studentAgent ->
+                        assignmentTasks.all { assignedUnitId ->
+                            progressStatements.any {
+                                it.actor == studentAgent &&
+                                        it.objectActivityOrNull()?.id == assignedUnitId &&
+                                        it.verb.id == XapiVerb.ID_COMPLETED
+                            }
+                        }
+                    },
+                    actual = summaryForAssignment.completedCount
+                )
             }
         }
     }
 
+    @Test
+    fun givenStatementPosted_whenAnotherStatementPostedWithSameId_thenShouldThrowConflictError() {
+        runBlocking {
+            testSchoolDb(temporaryFolder.newFolder()) { db ->
+                val stmtUuid = Uuid.random()
+
+                val sampleStmt = json.decodeFromJsonElement(
+                    XapiStatement.serializer(), xapiSampleStatements().first().jsonObject
+                ).copy(
+                    id = stmtUuid
+                )
+
+                val dataSource = db.toDataSource(
+                    authenticatedUserUid = "1",
+                    schoolUrl = Url("http://localhost:8098/"),
+                ).also {
+                    it.insertAdmin()
+                }
+
+                dataSource.xapiStatementsResource.post(listOf(sampleStmt))
+
+                try {
+                    dataSource.xapiStatementsResource.post(listOf(sampleStmt))
+
+                    throw IllegalStateException("Should have thrown exception by now")
+                }catch(e: XapiException) {
+                    assertTrue(
+                        e is XapiConflictException,
+                        "Expected XapiConflictException, got $e"
+                    )
+                }
+            }
+        }
+    }
 
 }

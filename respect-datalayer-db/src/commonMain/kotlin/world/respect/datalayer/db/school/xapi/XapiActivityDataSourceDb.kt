@@ -10,6 +10,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntry
 import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiObjectType
@@ -47,12 +48,12 @@ class XapiActivityDataSourceDb(
         timestamp: Instant,
     ) {
         val timeNow = Clock.System.now()
+        val timestampMillis = timestamp.toEpochMilliseconds()
 
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 activities.forEach { activity ->
                     val uid = uidNumberMapper(activity.id)
-                    val timestampMillis = timestamp.toEpochMilliseconds()
                     val entities = activity.toEntities(
                         uidNumberMapper = uidNumberMapper,
                         json = json,
@@ -78,14 +79,6 @@ class XapiActivityDataSourceDb(
                         schoolDb.getActivityInteractionDao().insertOrIgnoreAsync(
                             entities.activityInteractionEntities
                         )
-
-                        schoolDb.getActivityExtensionDao().takeIf {
-                            activityInDb != null
-                        }?.deleteByActivityUid(uid)
-
-                        schoolDb.getActivityExtensionDao().upsertListAsync(
-                            entities.activityExtensionEntities
-                        )
                     }
 
                     //For each langmap property: If it already exists, and we have newer data for that entry
@@ -93,12 +86,29 @@ class XapiActivityDataSourceDb(
                     entities.activityLangMapEntries.forEach { langMapEntry ->
                         schoolDb.getActivityLangMapEntryDao().updateIfChanged(
                             almeActivityUid = uid,
-                            almeProperty = langMapEntry.almeProperty.flag,
+                            almeKeyHash = XapiActivityLangMapEntry.keyHashFor(
+                                uidNumberMapper = uidNumberMapper,
+                                property = langMapEntry.almeProperty,
+                                almeInteractionId = langMapEntry.almeInteractionId,
+                                almeLangCode = langMapEntry.almeLangCode,
+                            ),
                             almeValue = langMapEntry.almeValue,
-                            almeInteractionId = langMapEntry.almeInteractionId,
                             changeTime = timestampMillis,
                         )
                     }
+
+                    entities.activityExtensionEntities.forEach {
+                        schoolDb.getActivityExtensionDao().updateIfNewer(
+                            activityUid = uid,
+                            keyHash = it.aeeKeyHash,
+                            json = it.aeeJson,
+                            changeTime = timestampMillis,
+                        )
+                    }
+
+                    schoolDb.getActivityExtensionDao().insertOrIgnore(
+                        entities.activityExtensionEntities
+                    )
 
                     //Insert any lang map entries that don't exist.
                     schoolDb.getActivityLangMapEntryDao().insertOrIgnore(entities.activityLangMapEntries)

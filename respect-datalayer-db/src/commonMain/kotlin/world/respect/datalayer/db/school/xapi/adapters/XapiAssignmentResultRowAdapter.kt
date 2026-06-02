@@ -1,16 +1,16 @@
 package world.respect.datalayer.db.school.xapi.adapters
 
 import world.respect.datalayer.db.school.xapi.composites.XapiAssignmentResultRow
-import world.respect.lib.xapi.composites.XapiAssignmentProgress
+import world.respect.lib.xapi.composites.XapiAssignmentTaskProgress
 
 fun XapiAssignmentResultRow.toXapiAssignmentResult(
     activityId: String,
-): XapiAssignmentProgress {
-    return XapiAssignmentProgress(
+): XapiAssignmentTaskProgress {
+    return XapiAssignmentTaskProgress(
         activityId = activityId,
-        completed = completed,
+        completed = verbCompleted ?: resultCompleted,
         successful = successful,
-        rawScore = rawScore,
+        scoreScaled = scoreScaled,
         progress = progress,
     )
 }

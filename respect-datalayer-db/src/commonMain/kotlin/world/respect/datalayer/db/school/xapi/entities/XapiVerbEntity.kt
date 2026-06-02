@@ -26,9 +26,6 @@ data class XapiVerbEntity(
 ) {
     companion object {
         const val TABLE_ID = 62
-        const val VERB_COMPLETED_URL = "http://adlnet.gov/expapi/verbs/completed"
-        const val VERB_PASSED_URL = "http://adlnet.gov/expapi/verbs/passed"
-        const val VERB_FAILED_URL = "http://adlnet.gov/expapi/verbs/failed"
-        const val VERB_EXPERIENCED_URL = "http://adlnet.gov/expapi/verbs/experienced"
+
     }
 }

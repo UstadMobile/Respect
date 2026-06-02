@@ -7,7 +7,6 @@ import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
 import world.respect.datalayer.db.school.opds.OpdsFeedDataSourceDb
-import world.respect.datalayer.db.school.AssignmentDatasourceDb
 import world.respect.datalayer.db.school.ClassDatasourceDb
 import world.respect.datalayer.db.school.EnrollmentDataSourceDb
 import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
@@ -23,7 +22,6 @@ import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
 import world.respect.datalayer.db.school.xapi.XapiActivityDataSourceDb
 import world.respect.datalayer.db.school.xapi.XapiActorDataSourceDb
 import world.respect.datalayer.db.school.xapi.XapiStatementsResourceDb
-import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.DummySchoolConfigSettingsDataSource
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
@@ -122,10 +120,6 @@ class SchoolDataSourceDb(
         EnrollmentDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
 
-    override val assignmentDataSource: AssignmentDataSourceLocal by lazy {
-        AssignmentDatasourceDb(schoolDb, uidNumberMapper, authenticatedUser)
-    }
-
     override val opdsPublicationDataSource: OpdsPublicationDataSourceLocal by lazy {
         OpdsPublicationDataSourceDb(
             respectSchoolDatabase = schoolDb,
@@ -171,6 +165,7 @@ class SchoolDataSourceDb(
         XapiStatementsResourceDb(
             schoolDb = schoolDb,
             authenticatedUser = authenticatedUser,
+            getAuthenticatedPersonUseCase = getAuthenticatedPersonUseCase,
             schoolUrl = schoolUrl,
             uidNumberMapper = uidNumberMapper,
             xapiActivityDataSourceLocal = xapiActivityDataSource,

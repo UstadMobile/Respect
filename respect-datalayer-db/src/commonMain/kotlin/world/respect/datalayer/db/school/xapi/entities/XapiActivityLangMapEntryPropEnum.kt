@@ -24,6 +24,8 @@ enum class XapiActivityLangMapEntryPropEnum(
 
     companion object {
 
+        const val NAME_FLAG_INT = 1
+
         fun fromFlag(flag: Int): XapiActivityLangMapEntryPropEnum {
             return entries.firstOrNull { it.flag == flag } ?: NAME
         }

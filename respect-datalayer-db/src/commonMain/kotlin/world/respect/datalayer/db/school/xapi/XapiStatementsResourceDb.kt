@@ -3,6 +3,7 @@ package world.respect.datalayer.db.school.xapi
 import androidx.room.Transactor
 import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
+import io.github.aakira.napier.Napier
 import io.ktor.client.utils.buildHeaders
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
@@ -10,9 +11,13 @@ import io.ktor.util.date.GMTDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.toLongPair
 import world.respect.datalayer.db.school.xapi.adapters.ActorEntities
 import world.respect.datalayer.db.school.xapi.adapters.StatementEntities
@@ -37,8 +42,10 @@ import world.respect.datalayer.db.school.xapi.ext.allActorUids
 import world.respect.datalayer.ext.appendIfNotNull
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
+import world.respect.datalayer.school.xapi.ext.allActivities
 import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
+import world.respect.datalayer.school.xapi.ext.allVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
 import world.respect.datalayer.school.xapi.ext.copyWithIdIfNotSet
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
@@ -46,14 +53,23 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.xapi.OpenEelXapiConstants
+import world.respect.lib.xapi.OpenEelXapiConstants.ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_CONSISTENT_THROUGH
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_VERSION
+import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
-import world.respect.lib.xapi.composites.XapiAssignmentProgress
+import world.respect.lib.xapi.composites.XapiAssignmentTaskProgress
 import world.respect.lib.xapi.exceptions.XapiBadRequestException
+import world.respect.lib.xapi.exceptions.XapiConflictException
 import world.respect.lib.xapi.exceptions.XapiForbiddenException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.ext.objectSubstatementOrNull
+import world.respect.lib.xapi.ext.xapiRequireValidIRI
+import world.respect.lib.xapi.model.AssignmentSummary
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.xapi.model.XapiStatementRef
@@ -66,6 +82,7 @@ import kotlin.time.Instant
 class XapiStatementsResourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
+    private val getAuthenticatedPersonUseCase: GetAuthenticatedPersonUseCase,
     private val schoolUrl: Url,
     private val uidNumberMapper: UidNumberMapper,
     private val json: Json,
@@ -73,6 +90,14 @@ class XapiStatementsResourceDb(
     private val xapiActorDataSourceLocal: XapiActorDataSourceLocal,
     private val xapiVersion: String = XAPI_VERSION,
 ) : XapiStatementsResourceLocal {
+
+    private val authenticatedAgent = XapiAgent(
+        account = XapiAccount(
+            homePage = schoolUrl.toString(),
+            name = authenticatedUser.guid,
+        )
+    )
+
 
     suspend fun doUpsertStatement(
         stmt: XapiStatement
@@ -244,9 +269,67 @@ class XapiStatementsResourceDb(
             it.copyWithIdIfNotSet()
         }
 
+        //Run basic validations
+        statementsWithIdsSet.forEach { stmt ->
+            if(stmt.`object` !is XapiActivity && stmt.`object`.objectType == null) {
+                throw XapiBadRequestException("When StatementObject is not Activity, objectType MUST be set")
+            }
+
+            stmt.allVerbs().forEach {
+                xapiRequireValidIRI(it.id, "Verb id must be a valid IRI")
+            }
+
+            stmt.allActivities().forEach { activity ->
+                xapiRequireValidIRI(activity.id, "Activity id must be a valid IRI")
+                activity.definition?.extensions?.keys?.forEach { extensionKey ->
+                    xapiRequireValidIRI(extensionKey, "Extension key must be a valid IRI")
+                }
+            }
+
+            buildList {
+                add(stmt)
+                stmt.objectSubstatementOrNull()?.also { add(it) }
+            }.forEach { stmtOrSubStmt ->
+                stmtOrSubStmt.context?.extensions?.keys?.forEach { extensionKey ->
+                    xapiRequireValidIRI(extensionKey, "Extension key must be a valid IRI")
+                }
+
+                stmtOrSubStmt.result?.score?.scaled?.also {
+                    if(it < -1 || it > 1)
+                        throw XapiBadRequestException("Score scaled must be between -1 and 1")
+                }
+            }
+        }
+
+        val authenticatedPerson = getAuthenticatedPersonUseCase()
+            ?: throw XapiForbiddenException("Not authenticated")
+
+        if(!authenticatedPerson.isAdminOrTeacher()) {
+            statementsWithIdsSet.forEach {
+                //Check all statements are for the authenticated user's actor only
+                if(it.actor.account?.homePage != schoolUrl.toString()
+                    || it.actor.account?.name != authenticatedUser.guid
+                ) {
+                    throw XapiForbiddenException("User does not have permission to post statement as any other actor")
+                }
+            }
+        }
+
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
                 statementsWithIdsSet.forEach { statement ->
+                    val stmtId = statement.id
+                        ?: throw IllegalStateException("Could not happen as per line 257")
+                    val (stmtIdHi, stmtIdLo) = stmtId.toLongPair()
+                    if(
+                        schoolDb.getStatementDao().getTimestampsByUuid(
+                            statementIdHi = stmtIdHi,
+                            statementIdLo = stmtIdLo,
+                        ) != null
+                    ) {
+                        throw XapiConflictException(message = "Statement $stmtId already exists")
+                    }
+
                     //check if this is a voiding statement
                     if(statement.verb.id == XapiVerb.ID_VOIDED) {
                         //find the statement we are going to void
@@ -331,6 +414,8 @@ class XapiStatementsResourceDb(
                         until = listParams.until?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                         ascending = ascendingOrder,
                         limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
+                        authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                        authenticatedActorUid = authenticatedAgent.identifierHash(uidNumberMapper),
                     ).map { entity ->
                         json.decodeFromString(
                             XapiStatementTransformingSerializer, entity.fullStatement
@@ -351,6 +436,8 @@ class XapiStatementsResourceDb(
                         until = listParams.until?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                         ascending = ascendingOrder,
                         limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
+                        authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                        authenticatedActorUid = authenticatedAgent.identifierHash(uidNumberMapper),
                     ).mapToCanonicalStatements(
                         idOnly = format == XapiStatementsResource.GetStatementFormatEnum.IDS
                     )
@@ -394,6 +481,8 @@ class XapiStatementsResourceDb(
                 until = listParams.until?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                 ascending = listParams.ascending,
                 limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                authenticatedActorUid = authenticatedAgent.identifierHash(uidNumberMapper),
             ).map { list ->
                 DataReadyState(
                     data = XapiStatementResult(
@@ -421,6 +510,8 @@ class XapiStatementsResourceDb(
                 until = listParams.until?.toEpochMilliseconds() ?: XapiStatementEntityDao.UNTIL_UNSET,
                 ascending = listParams.ascending,
                 limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
+                authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
+                authenticatedActorUid = authenticatedAgent.identifierHash(uidNumberMapper),
             ).map { list ->
                 val consistentThrough = Clock.System.now()
 
@@ -453,8 +544,9 @@ class XapiStatementsResourceDb(
     }
 
     override fun getAssignmentProgress(
-        activityId: String
-    ): Flow<DataLoadState<List<XapiActorAndAssignmentProgress>>> {
+        activityId: String,
+        filterByAssigneeAgent: XapiAgent?,
+    ): Flow<DataLoadState<AssignmentAndProgress>> {
         //Get the statement itself to get the actor and list of assigned activities.
         return getAsFlow(
             listParams = GetStatementParams(
@@ -464,41 +556,146 @@ class XapiStatementsResourceDb(
             ),
             dataLoadParams = DataLoadParams(),
         ).map { statementResult ->
-            val assignmentStatement = statementResult.dataOrNull()?.statements
-                ?.mostRecentByTimestampOrNull()
+            schoolDb.useReaderConnection { con ->
+                con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
+                    val exactAssignmentStmt = statementResult.dataOrNull()?.statements
+                        ?.mostRecentByTimestampOrNull()
 
-            if(assignmentStatement == null) {
-                NoDataLoadedState(reason = NoDataLoadedState.Reason.NOT_FOUND)
-            }else {
-                val assignedActivities = assignmentStatement.context?.contextActivities?.grouping
-                    ?: emptyList()
+                    val canonicalAssignmentStmt = exactAssignmentStmt?.let {
+                        get(
+                            listParams = GetStatementParams(
+                                statementId = exactAssignmentStmt.id,
+                                limit = 1,
+                                format = XapiStatementsResource.GetStatementFormatEnum.CANONICAL,
+                            )
+                        )
+                    }?.dataOrNull()?.statements?.firstOrNull()
 
-                val actorsToShow = when(val statementActor = assignmentStatement.actor){
-                    is XapiAgent -> listOf(statementActor)
-                    is XapiGroup -> statementActor.member ?: throw IllegalStateException(
-                        "getAssignmentResults: XapiGroup should include members when retrieved using canonical format"
-                    )
-                }
+                    if(exactAssignmentStmt == null || canonicalAssignmentStmt == null) {
+                        NoDataLoadedState(reason = NoDataLoadedState.Reason.NOT_FOUND)
+                    }else {
+                        /*
+                         * The canonical statement will include the latest definition of the assignee (actor).
+                         * However we need the exact statement to
+                         *  a) Get the task activities in the correct order
+                         *  b) Be sure that the definition of each task activity includes the web pub manifest
+                         *     url extension (the canonical definition of the activity might change, e.g. if
+                         *     statements from the content itself don't include the web pub manifest).
+                         */
+                        val assignmentStmt = exactAssignmentStmt.copy(actor = canonicalAssignmentStmt.actor)
 
-                val dbAssignmentResults = schoolDb.getStatementDao().getAssignmentResults(
-                    uidNumberMapper(activityId)
-                ).groupBy { it.actorUid }
+                        val assignedActivities = exactAssignmentStmt.context?.contextActivities?.grouping
+                            ?: emptyList()
 
-                DataReadyState(
-                    data = actorsToShow.map { actor ->
-                        val actorUidNum = actor.identifierHash(uidNumberMapper)
-                        XapiActorAndAssignmentProgress(
-                            actor = actor,
-                            progress = assignedActivities.map { activity ->
-                                dbAssignmentResults[actorUidNum]?.firstOrNull {
-                                    it.activityUid == uidNumberMapper(activity.id)
-                                }?.toXapiAssignmentResult(activity.id)
-                                    ?: XapiAssignmentProgress.emptyResult(activityId)
+                        val statementActor = assignmentStmt.actor
+                        val actorsToShow : List<XapiAgent> = when {
+                            filterByAssigneeAgent != null -> listOfNotNull(filterByAssigneeAgent)
+
+                            statementActor is XapiAgent -> listOf(statementActor)
+
+                            //Might not have loaded yet.
+                            statementActor is XapiGroup -> statementActor.member ?: emptyList()
+
+                            else -> {
+                                throw IllegalStateException("statement actor must be agent or group")
                             }
+                        }
+
+                        val dbAssignmentResults = schoolDb.getStatementDao().getAssignmentResults(
+                            assignmentActivityIdNum = uidNumberMapper(activityId),
+                            filterByStudentActorUid = filterByAssigneeAgent
+                                ?.identifierHash(uidNumberMapper) ?: 0L,
+                            completeVerbUid = uidNumberMapper(XapiVerb.ID_COMPLETED),
+                        ).groupBy { it.actorUid }
+
+                        DataReadyState(
+                            data = AssignmentAndProgress(
+                                assignmentStatement = assignmentStmt,
+                                progress = actorsToShow.map { actor ->
+                                    val actorUidNum = actor.identifierHash(uidNumberMapper)
+                                    XapiActorAndAssignmentProgress(
+                                        actor = actor,
+                                        progressPerTask = assignedActivities.map { taskActivity ->
+                                            dbAssignmentResults[actorUidNum]?.firstOrNull {
+                                                it.activityUid == uidNumberMapper(taskActivity.id)
+                                            }?.toXapiAssignmentResult(taskActivity.id)
+                                                ?: XapiAssignmentTaskProgress.emptyResult(taskActivity.id)
+                                        }
+                                    )
+                                }
+                            )
                         )
                     }
-                )
+                }
             }
+        }
+    }
+
+    override fun getAssignmentListAsFlow(
+        dataLoadParams: DataLoadParams,
+        studentAgent: XapiAgent?
+    ): Flow<DataLoadState<List<AssignmentSummary>>> {
+        val flowIn = if(studentAgent != null) {
+            schoolDb.getStatementDao().getAssignmentListForStudentAsFlow(
+                assignVerbUid = uidNumberMapper(XapiVerb.ID_ASSIGN),
+                studentAgentActorUid = studentAgent.identifierHash(uidNumberMapper),
+                completeVerbUid = uidNumberMapper(XapiVerb.ID_COMPLETED),
+                deadlineExtensionHash = uidNumberMapper(OpenEelXapiConstants.ACTIVITY_EXTENSION_DEADLINE),
+            )
+        }else {
+            schoolDb.getStatementDao().getAssignmentListAsFlow(
+                assignmentRecipeActivityUid = uidNumberMapper(
+                    OpenEelXapiConstants.CATEGORY_ASSIGNMENT_RECIPE
+                ),
+                assignVerbUid = uidNumberMapper(XapiVerb.ID_ASSIGN),
+                completedVerbUid = uidNumberMapper(XapiVerb.ID_COMPLETED),
+                deadlineExtensionHash = uidNumberMapper(OpenEelXapiConstants.ACTIVITY_EXTENSION_DEADLINE),
+            )
+        }
+
+        return flowIn.map { list ->
+            DataReadyState(
+                data = list.map { summaryRow ->
+                    val manifestUrls = schoolDb.getActivityExtensionDao().findAllByActivityContextUids(
+                        activityUid = uidNumberMapper(summaryRow.activityId),
+                        filterByKeyHash = uidNumberMapper(ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK)
+                    ).mapNotNull {
+                        try {
+                            json.decodeFromString(
+                                JsonPrimitive.serializer(), it.aeeJson
+                            ).contentOrNull?.let { contentStr ->
+                                Url(contentStr)
+                            }
+                        }catch(_: Throwable) {
+                            null
+                        }
+                    }
+
+                    val deadline = try {
+                        val jsonPrimitive = summaryRow.deadlineStr?.let {
+                            json.decodeFromString(JsonPrimitive.serializer(), it)
+                        }
+
+                        jsonPrimitive?.contentOrNull?.let { Instant.parse(it) }
+                    }catch (e: Throwable) {
+                        Napier.w("Exception decoding deadline string", e)
+                        null
+                    }
+                    AssignmentSummary(
+                        activityId = summaryRow.activityId,
+                        title = summaryRow.title ?: "",
+                        assignedActor = ActorEntities(
+                            actor = summaryRow.actorEntity,
+                        ).toModel(idOnlyFormat = true),
+                        lastModified = Clock.System.now(),
+                        deadline = deadline,
+                        completedCount = summaryRow.numCompleted,
+                        totalCount = summaryRow.numTotal,
+                        averageScore = summaryRow.averageScoreScaled,
+                        learningUnitManifestUrls = manifestUrls,
+                    )
+                }
+            )
         }
     }
 

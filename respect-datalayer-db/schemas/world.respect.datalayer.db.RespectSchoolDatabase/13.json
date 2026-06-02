@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 13,
-    "identityHash": "7774426547b11ce4f913c89bcd783942",
+    "identityHash": "e8ecca2ba4850ba0ca7123e9a25373cb",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -794,108 +794,6 @@
           "autoGenerate": false,
           "columnNames": [
             "eUidNum"
-          ]
-        }
-      },
-      {
-        "tableName": "AssignmentEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aeUid` TEXT NOT NULL, `aeUidNum` INTEGER NOT NULL, `aeTitle` TEXT NOT NULL, `aeDescription` TEXT NOT NULL, `aeClassUid` TEXT NOT NULL, `aeClassUidNum` INTEGER NOT NULL, `aeDeadline` INTEGER, `aeLastModified` INTEGER NOT NULL, `aeStored` INTEGER NOT NULL, PRIMARY KEY(`aeUidNum`))",
-        "fields": [
-          {
-            "fieldPath": "aeUid",
-            "columnName": "aeUid",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeUidNum",
-            "columnName": "aeUidNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeTitle",
-            "columnName": "aeTitle",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeDescription",
-            "columnName": "aeDescription",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeClassUid",
-            "columnName": "aeClassUid",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeClassUidNum",
-            "columnName": "aeClassUidNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeDeadline",
-            "columnName": "aeDeadline",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "aeLastModified",
-            "columnName": "aeLastModified",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "aeStored",
-            "columnName": "aeStored",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "aeUidNum"
-          ]
-        }
-      },
-      {
-        "tableName": "AssignmentLearningResourceRefEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`alrrAeUidNum` INTEGER NOT NULL, `alrrLearningUnitManifestUrlHash` INTEGER NOT NULL, `alrrLearningUnitManifestUrl` TEXT NOT NULL, `alrrAppManifestUrl` TEXT NOT NULL, PRIMARY KEY(`alrrAeUidNum`, `alrrLearningUnitManifestUrlHash`))",
-        "fields": [
-          {
-            "fieldPath": "alrrAeUidNum",
-            "columnName": "alrrAeUidNum",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "alrrLearningUnitManifestUrlHash",
-            "columnName": "alrrLearningUnitManifestUrlHash",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "alrrLearningUnitManifestUrl",
-            "columnName": "alrrLearningUnitManifestUrl",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "alrrAppManifestUrl",
-            "columnName": "alrrAppManifestUrl",
-            "affinity": "TEXT",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "alrrAeUidNum",
-            "alrrLearningUnitManifestUrlHash"
           ]
         }
       },
@@ -1906,17 +1804,17 @@
       },
       {
         "tableName": "XapiActivityLangMapEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `almeActivityUid` INTEGER NOT NULL, `almeProperty` INTEGER NOT NULL, `almeInteractionId` TEXT, `almeLangCode` TEXT NOT NULL, `almeValue` TEXT NOT NULL, `almeLastModified` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`almeActivityUid` INTEGER NOT NULL, `almeKeyHash` INTEGER NOT NULL, `almeProperty` INTEGER NOT NULL, `almeInteractionId` TEXT, `almeLangCode` TEXT NOT NULL, `almeValue` TEXT NOT NULL, `almeLastModified` INTEGER NOT NULL, PRIMARY KEY(`almeActivityUid`, `almeKeyHash`))",
         "fields": [
           {
-            "fieldPath": "almeUid",
-            "columnName": "almeUid",
+            "fieldPath": "almeActivityUid",
+            "columnName": "almeActivityUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "almeActivityUid",
-            "columnName": "almeActivityUid",
+            "fieldPath": "almeKeyHash",
+            "columnName": "almeKeyHash",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -1951,9 +1849,10 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": true,
+          "autoGenerate": false,
           "columnNames": [
-            "almeUid"
+            "almeActivityUid",
+            "almeKeyHash"
           ]
         },
         "indices": [
@@ -2175,7 +2074,19 @@
           "columnNames": [
             "scajUid"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "idx_statementctx_stmt_id",
+            "unique": false,
+            "columnNames": [
+              "scajFromStatementIdHi",
+              "scajFromStatementIdLo"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_statementctx_stmt_id` ON `${TABLE_NAME}` (`scajFromStatementIdHi`, `scajFromStatementIdLo`)"
+          }
+        ]
       },
       {
         "tableName": "XapiStatementEntity",
@@ -2406,6 +2317,33 @@
             ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `idx_stmt_actor` ON `${TABLE_NAME}` (`statementActorUid`)"
+          },
+          {
+            "name": "idx_stmt_verb",
+            "unique": false,
+            "columnNames": [
+              "statementVerbUid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_stmt_verb` ON `${TABLE_NAME}` (`statementVerbUid`)"
+          },
+          {
+            "name": "idx_stmt_obj1",
+            "unique": false,
+            "columnNames": [
+              "statementObjectUid1"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_stmt_obj1` ON `${TABLE_NAME}` (`statementObjectUid1`)"
+          },
+          {
+            "name": "idx_stmt_since",
+            "unique": false,
+            "columnNames": [
+              "stored"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_stmt_since` ON `${TABLE_NAME}` (`stored`)"
           }
         ]
       },
@@ -2506,11 +2444,71 @@
             "vlmeLangCode"
           ]
         }
+      },
+      {
+        "tableName": "XapiSessionEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xseUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `xseRegistrationHi` INTEGER NOT NULL, `xseRegistrationLo` INTEGER NOT NULL, `xseAccountPersonUid` TEXT NOT NULL, `xseActorUid` INTEGER NOT NULL, `xseStartTime` INTEGER NOT NULL, `xseExpireTime` INTEGER NOT NULL, `xseAuth` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "xseUid",
+            "columnName": "xseUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xseRegistrationHi",
+            "columnName": "xseRegistrationHi",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xseRegistrationLo",
+            "columnName": "xseRegistrationLo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xseAccountPersonUid",
+            "columnName": "xseAccountPersonUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xseActorUid",
+            "columnName": "xseActorUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xseStartTime",
+            "columnName": "xseStartTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xseExpireTime",
+            "columnName": "xseExpireTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xseAuth",
+            "columnName": "xseAuth",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "xseUid"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7774426547b11ce4f913c89bcd783942')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e8ecca2ba4850ba0ca7123e9a25373cb')"
     ]
   }
 }

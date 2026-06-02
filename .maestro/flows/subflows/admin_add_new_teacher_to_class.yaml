@@ -1,6 +1,8 @@
 appId: world.respect.app
 
 ---
+- tapOn: "Classes"
+- tapOn: ${CLASSNAME}
 - tapOn: "Add Teacher"
 - tapOn: "Add person"
 - assertVisible:

@@ -4,7 +4,8 @@ class XapiAssignmentResultRow(
     val actorUid: Long,
     val activityUid: Long,
     val progress: Int?,
-    val completed: Boolean?,
+    val resultCompleted: Boolean?,
+    val verbCompleted: Boolean?,
     val successful: Boolean?,
-    val rawScore: Float?,
+    val scoreScaled: Float?,
 )

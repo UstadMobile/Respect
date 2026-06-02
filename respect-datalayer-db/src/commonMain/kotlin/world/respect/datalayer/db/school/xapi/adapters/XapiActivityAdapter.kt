@@ -68,6 +68,12 @@ fun XapiActivity.toEntities(
     ) = entries.map { (lang, text) ->
         XapiActivityLangMapEntry(
             almeActivityUid = activityUid,
+            almeKeyHash = XapiActivityLangMapEntry.keyHashFor(
+                uidNumberMapper = uidNumberMapper,
+                property = property,
+                almeInteractionId = interactionId,
+                almeLangCode = lang
+            ),
             almeLangCode = lang,
             almeProperty = property,
             almeValue = text,
@@ -152,7 +158,8 @@ fun XapiActivity.toEntities(
                 aeeActivityUid = activityUid,
                 aeeKeyHash = uidNumberMapper(key),
                 aeeKey = key, //must be valid IRI,
-                aeeJson = json.encodeToString(JsonElement.serializer(), value)
+                aeeJson = json.encodeToString(JsonElement.serializer(), value),
+                aeeLastMod = lastModified.toEpochMilliseconds(),
             )
         } ?: emptyList()
     )

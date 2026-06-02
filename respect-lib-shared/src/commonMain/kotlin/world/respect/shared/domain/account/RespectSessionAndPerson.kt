@@ -1,9 +1,8 @@
 package world.respect.shared.domain.account
 
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.db.school.ext.fullName
+import world.respect.datalayer.school.ext.asXapiAgent
 import world.respect.datalayer.school.model.Person
-import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiAgent
 
 /**
@@ -31,12 +30,6 @@ data class RespectSessionAndPerson(
         get() = session.account.userGuid != person.guid
 
     val xapiAgent: XapiAgent
-        get() = XapiAgent(
-            name = person.fullName(),
-            account = XapiAccount(
-                homePage = session.account.school.xapi.toString(),
-                name = person.username ?: person.guid
-            )
-        )
+        get() = person.asXapiAgent(session.account.school.self)
 
 }

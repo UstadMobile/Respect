@@ -11,8 +11,6 @@ import android.util.Log
 import androidx.core.net.toUri
 import io.github.aakira.napier.Napier
 import io.ktor.http.URLBuilder
-import world.respect.lib.opds.model.findLearningUnitAcquisitionLinks
-import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.Companion.RESPECT_LAUNCH_VERSION_PARAM_NAME
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.Companion.RESPECT_LAUNCH_VERSION_VALUE
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.LaunchRequest
@@ -42,12 +40,9 @@ class LaunchAppUseCaseAndroid(
     override suspend fun invoke(
         request: LaunchRequest
     ) {
-        val launchHref = request.publication.findLearningUnitAcquisitionLinks().firstOrNull()
-            ?.href ?: throw IllegalArgumentException("Publication has no suitable acquisition link to launch")
-
-
         val launchUrlBase = getXapiLaunchUrlUseCase(
-            learningUnitUrl = request.publicationUrl.resolve(launchHref),
+            publication = request.publication,
+            publicationUrl = request.publicationUrl,
             assignmentActivityId = request.assignmentActivityId,
         )
 

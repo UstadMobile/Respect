@@ -1,5 +1,7 @@
 package world.respect.server
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -99,6 +101,13 @@ fun serverKoinModule(
             .setDriver(BundledSQLiteDriver())
             .addCallback(AddServerManagedDirectoryCallback(xxStringHasher = get()))
             .addCommonMigrations()
+            .addMigrations(
+                object: Migration(6, 8) {
+                    override fun migrate(connection: SQLiteConnection) {
+                        //do nothing on server.
+                    }
+                }
+            )
             .build()
     }
 

@@ -27,6 +27,7 @@ data class SchoolDirectoryEntry(
     val oneRoster: Url,
     val respectExt: Url?,
     val rpId : String?,
+    val inDirectoryUrl: Url? = null,
     override val lastModified: InstantAsISO8601,
     override val stored: InstantAsISO8601,
 ): ModelWithTimes

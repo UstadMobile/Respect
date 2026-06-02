@@ -7,11 +7,14 @@ import kotlinx.serialization.json.Json
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.serializers.InstantAsISO8601
-import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
+import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.ext.getUuidOrNull
+import world.respect.lib.xapi.model.AssignmentSummary
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 /**
@@ -37,7 +40,7 @@ interface XapiStatementsResource {
     data class GetStatementParams(
         val statementId: Uuid? = null,
         val voidedStatementId: Uuid? = null,
-        val agent: XapiAgent? = null,
+        val agent: XapiActor? = null,
         val verb: String? = null,
         val activity: String? = null,
         val registration: Uuid? = null,
@@ -66,6 +69,8 @@ interface XapiStatementsResource {
                     registration = params.getUuidOrNull("registration"),
                     relatedActivities = params["related_activities"]?.toBoolean() ?: false,
                     relatedAgents = params["related_agents"]?.toBoolean() ?: false,
+                    since = params["since"]?.let { Instant.parse(it) },
+                    until = params["until"]?.let { Instant.parse(it) },
                     limit = params["limit"]?.toInt(),
                     format = params["format"]?.let { GetStatementFormatEnum.fromValue(it) },
                     attachments = params["attachments"]?.toBoolean() ?: false,
@@ -100,10 +105,18 @@ interface XapiStatementsResource {
      * as per the ASSIGNMENT_RECIPE
      *
      * @param activityId the xAPI activity id for the assignment itself
+     * @param filterByAssigneeAgent when not null, filter results to include only the given agent (eg one student)
      */
     fun getAssignmentProgress(
         activityId: String,
-    ): Flow<DataLoadState<List<XapiActorAndAssignmentProgress>>>
+        filterByAssigneeAgent: XapiAgent? = null,
+    ): Flow<DataLoadState<AssignmentAndProgress>>
+
+    fun getAssignmentListAsFlow(
+        dataLoadParams: DataLoadParams = DataLoadParams(),
+        studentAgent: XapiAgent? = null,
+    ): Flow<DataLoadState<List<AssignmentSummary>>>
+
 
     companion object {
 

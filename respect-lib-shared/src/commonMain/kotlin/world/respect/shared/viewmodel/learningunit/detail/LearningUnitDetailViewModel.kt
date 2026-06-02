@@ -14,6 +14,7 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.opds.model.OpdsPublication
@@ -31,12 +32,14 @@ import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import world.respect.datalayer.db.school.ext.isStudent
 
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
+    val showAssignButton: Boolean = false,
 ) {
     val buttonsEnabled: Boolean
         get() = lessonDetail != null
@@ -98,6 +101,14 @@ class LearningUnitDetailViewModel(
             }
         }
 
+        viewModelScope.launch {
+            accountMananger.selectedAccountAndPersonFlow.collect { selectedAccount ->
+                _uiState.update {
+                    it.copy(showAssignButton = selectedAccount?.person?.isAdminOrTeacher() == true)
+                }
+            }
+        }
+
     }
 
 
@@ -145,7 +156,7 @@ class LearningUnitDetailViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 destination = AssignmentEdit.create(
-                    uid = null,
+                    assignmentActivityId = null,
                     learningUnitSelected = LearningUnitSelection(
                         learningUnitManifestUrl = route.learningUnitManifestUrl,
                         selectedPublication = publicationVal,

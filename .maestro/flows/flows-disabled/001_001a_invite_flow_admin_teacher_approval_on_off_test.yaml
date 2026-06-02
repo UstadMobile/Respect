@@ -263,6 +263,7 @@ onFlowComplete:
 - tapOn: "People"
 - assertVisible: "Pending request to join.*"
 - repeat:
+    times: 3
     while:
       visible: "Accept Invite"
     commands:
@@ -270,8 +271,6 @@ onFlowComplete:
 - assertVisible: "AdminA User"
 - assertVisible: "TeacherA User"
 - assertVisible: "TeacherC User"
-- assertVisible: "AdminA User"
-- assertVisible: "TeacherA User"
 - assertNotVisible: "Pending request to join.*"
 
 # Invite Admin as new person - Approve Required Off

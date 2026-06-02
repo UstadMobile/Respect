@@ -58,18 +58,14 @@ onFlowComplete:
       USERNAME: "studentbuser"
       PASSWORD: "test123"
 
-- runFlow:
-    file: "subflows/add_person_to_app.yaml"
-    env:
-      FIRSTNAME: "TeacherA"
-      LASTNAME: "User"
-      GENDER: "Female"
-      ROLE: "Teacher"
-      USERNAME: "teacherauser"
-      PASSWORD: "test123"
-
-# Admin send Family member invite to StudentA user to join ParentA User
+- tapOn: "Classes"
+- tapOn: "TestClass"
+- assertVisible:
+    id: "app_title"
+    text: "TestClass"
 - tapOn: "People"
+
+# Teacher send Family member invite to StudentA user to join ParentA User
 - tapOn: "ParentA User"
 - tapOn:
     id: "floating_action_button"
@@ -79,17 +75,17 @@ onFlowComplete:
 - tapOn: "Family member"
 - tapOn: "Invite person"
 - assertVisible: "ParentA User / Family member"
-# Approval OFF
+# Approval ON
 - runFlow:
     when:
       notVisible: "Approval not required until:.*"
     commands:
-      - tapOn: "Approval required"
+      - tapOn: "Approval required" # turn the switch ON
       - assertVisible: "Approval not required until:.*"
 - assertVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
-- evalScript: ${output.studentApproveOff = maestro.copiedText}
+- evalScript: ${output.studentApproveOn = maestro.copiedText}
 - back
 - back
 - back
@@ -105,24 +101,24 @@ onFlowComplete:
 - tapOn: "Family member"
 - tapOn: "Invite person"
 - assertVisible: "StudentB User / Family member"
-# Approval OFF
+# Approval ON
 - runFlow:
     when:
-      notVisible: "Approval not required until:.*"
+      visible: "Approval not required until:.*"
     commands:
-      - tapOn: "Approval required"
-      - assertVisible: "Approval not required until:.*"
-- assertVisible: "Approval not required until:.*"
+      - tapOn: "Approval required" # turn the switch ON
+      - assertNotVisible: "Approval not required until:.*"
+- assertNotVisible: "Approval not required until:.*"
 - copyTextFrom:
     id: "invite_code"
-- evalScript: ${output.parentApproveOff = maestro.copiedText}
+- evalScript: ${output.parentApproveOn = maestro.copiedText}
 
 
 #StudentA user using link to join the family member (ParentA user)
 - runFlow:
     file: "subflows/openlink_flow.yaml"
     env:
-      URL: ${output.SCHOOL_URL + "respect_school_link/AcceptInvite?inviteCode=" + output.studentApproveOff}
+      URL: ${output.SCHOOL_URL + "respect_school_link/AcceptInvite?inviteCode=" + output.studentApproveOn}
 - assertVisible:
     id: "app_title"
     text: "Login"
@@ -144,16 +140,18 @@ onFlowComplete:
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Accept Invite"
 - assertVisible:
-     id: "app_title"
-     text: "ParentA User"
-- assertVisible: "Family members"
+    id: "app_title"
+    text: "Accounts"
 - assertVisible: "StudentA User"
+- assertVisible: "Pending requests"
+- assertVisible: "StudentA User: Family member (Student)"
+- assertVisible: ".*Pending approval"
 
 #ParentA user using link to join the family member (StudentB user)
 - runFlow:
     file: "subflows/openlink_flow.yaml"
     env:
-      URL: ${output.SCHOOL_URL + "respect_school_link/AcceptInvite?inviteCode=" + output.parentApproveOff}
+      URL: ${output.SCHOOL_URL + "respect_school_link/AcceptInvite?inviteCode=" + output.parentApproveOn}
 - assertVisible:
     id: "app_title"
     text: "Login"
@@ -176,38 +174,29 @@ onFlowComplete:
 - tapOn: "Accept Invite"
 - assertVisible:
     id: "app_title"
-    text: "StudentB User"
+    text: "Accounts"
+- assertVisible: "ParentA User"
+- assertVisible: "Pending requests"
+- assertVisible: "ParentA User: Family member (parent)"
+- assertVisible: ".*Pending approval"
+
+#admin approve user's requests to join the family member
+- clearState: world.respect.app
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- tapOn: "People"
+- tapOn: "StudentB User"
+- assertVisible: "Pending requests.*"
+- tapOn: "Accept Invite"
+- assertVisible: "Family members"
+- assertVisible: "ParentA User"
+- tapOn: "ParentA User"
+- assertVisible: "Pending requests.*"
+- assertVisible: "StudentA User.*"
+- tapOn: "Accept Invite"
+- assertNotVisible: "Pending requests.*"
 - assertVisible: "Family members"
 - assertVisible: "ParentA User"
 - tapOn: "ParentA User"
 - assertVisible: "Family members"
-- assertVisible: "StudentB User"
 - assertVisible: "StudentA User"
-
-# Teacher tries to join as a family member using student's invite code
-- clearState: world.respect.app
-- runFlow:
-    file: "subflows/school_user_login_flow.yaml"
-    env:
-      USERNAME: "teacherauser"
-      PASSWORD: "test123"
-- assertVisible:
-    id: "app_title"
-    text: "Apps"
-- tapOn:
-    id: "user_account_icon"
-- assertVisible:
-    id: "app_title"
-    text: "Accounts"
-- tapOn: "Enter invite code"
-- assertVisible:
-    id: "app_title"
-    text: "Enter invite code"
-- tapOn: "Invite code"
-- inputText: ${output.studentApproveOff}
-- tapOn: "Next"
-- assertVisible:
-    id: "app_title"
-    text: "Invitation"
-- tapOn: "Accept Invite"
-- assertVisible: "Sorry. Invalid invitation: not available for your user type."
+- assertVisible: "StudentB User"

@@ -237,7 +237,12 @@ fun Application.module() {
             }
             route("directory") {
                 val respectAppDataSource: RespectAppDataSource by inject()
-                RespectSchoolDirectoryRoute(respectAppDataSource)
+                RespectSchoolDirectoryRoute(
+                    respectAppDataSource = respectAppDataSource,
+                    filterByHost = environment.config.propertyOrNull(
+                        "ktor.school.directories.virtualhost"
+                    )?.getString()?.toBoolean() ?: false
+                )
             }
 
             route("school") {

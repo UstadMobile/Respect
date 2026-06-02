@@ -42,7 +42,7 @@ class SchoolDirectoryEntryDataSourceHttp(
         return flow {
             val directories = local.schoolDirectoryDataSource.allDirectories()
             val flows = directories.filter {
-                listParams.directory == null || it.baseUrl == listParams.directory?.baseUrl
+                listParams.directoryUrl == null || it.baseUrl == listParams.directoryUrl
             }.map { dir ->
                 httpClient.getDataLoadResultAsFlow<List<SchoolDirectoryEntry>>(
                     url = dir.baseUrl.appendEndpointSegments("api/directory/school"),
@@ -96,7 +96,7 @@ class SchoolDirectoryEntryDataSourceHttp(
     ): DataLoadState<List<SchoolDirectoryEntry>> {
         val directories = local.schoolDirectoryDataSource.allDirectories()
         val listEntries = directories.filter {
-            listParams.directory == null || it.baseUrl == listParams.directory?.baseUrl
+            listParams.directoryUrl == null || it.baseUrl == listParams.directoryUrl
         }.map { dir ->
             httpClient.getAsDataLoadState<List<SchoolDirectoryEntry>>(
                 dir.baseUrl.appendEndpointSegments("api/directory/school")

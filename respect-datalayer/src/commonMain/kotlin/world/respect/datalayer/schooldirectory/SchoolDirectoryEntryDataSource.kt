@@ -19,7 +19,7 @@ interface SchoolDirectoryEntryDataSource {
         val name: String? = null,
         val code: String? = null,
         val limit: Int = 200,
-        val directory: RespectSchoolDirectory? = null,
+        val directoryUrl: Url? = null,
     ) {
 
         companion object {

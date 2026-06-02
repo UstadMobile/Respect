@@ -52,8 +52,9 @@ class AddSchoolUseCase(
             )
 
             // Check if school with this URL already exists
-            val existingSchools =
-                schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(schoolToAdd.self)
+            val existingSchools = schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
+                url = schoolToAdd.self
+            )
 
             if (existingSchools.dataOrNull() != null) {
                 throw HttpStatusException(

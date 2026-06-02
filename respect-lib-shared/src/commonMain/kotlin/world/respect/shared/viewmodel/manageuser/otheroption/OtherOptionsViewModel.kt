@@ -49,6 +49,10 @@ class OtherOptionsViewModel(
                     userAccountIconVisible = false,
                 )
             }
+
+            getDevModeEnabledUseCase().also { devModeEnabled ->
+                _uiState.update { it.copy(manageDirectoriesVisible = devModeEnabled) }
+            }
         }
     }
 
@@ -57,7 +61,6 @@ class OtherOptionsViewModel(
             it.copy(
                 link = link,
                 errorMessage = null,
-                manageDirectoriesVisible= getDevModeEnabledUseCase(),
             )
         }
     }

@@ -64,6 +64,7 @@ fun managerServerMain(ns: Namespace) {
             CMD_ADD_SCHOOL -> {
                 val schoolBaseUrl = Url(ns.getString("url"))
                 val rpId = ns.getString("rpId") ?: schoolBaseUrl.host
+                val nsDirUrl: String? = ns.getString("inDirectoryUrl")
 
                 val response = httpClient.post(
                     serverUrl.appendEndpointSegments("api/directory/school")
@@ -83,6 +84,7 @@ fun managerServerMain(ns: Namespace) {
                                     rpId = rpId,
                                     lastModified = Clock.System.now(),
                                     stored = Clock.System.now(),
+                                    inDirectoryUrl = nsDirUrl?.let { Url(it) },
                                 ),
                                 dbUrl = ns.getString("dburl") ?: schoolBaseUrl.sanitizedForFilename(),
                                 adminUsername = ns.getString("adminusername") ?: DEFAULT_ADMIN_USERNAME,

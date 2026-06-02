@@ -15,11 +15,17 @@ import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.InvalidSchoolRegistrationRequestException
 import world.respect.server.domain.school.add.SchoolRegistrationDisabledException
 import world.respect.server.util.ext.respondDataLoadState
+import world.respect.server.util.ext.virtualHost
 
 const val AUTH_CONFIG_DIRECTORY_ADMIN_BASIC = "auth-directory-admin-basic"
 
+/**
+ * @param filterByHost if true, then filter the school directory entries to entries where the
+ *        SchoolDirectoryEntry.inDirectoryUrl matches the virtual host for the request.
+ */
 fun Route.RespectSchoolDirectoryRoute(
     respectAppDataSource: RespectAppDataSource,
+    filterByHost: Boolean = false,
 ) {
     get("school") {
         call.respondDataLoadState(
@@ -27,6 +33,12 @@ fun Route.RespectSchoolDirectoryRoute(
                 loadParams = DataLoadParams(),
                 listParams = SchoolDirectoryEntryDataSource.GetListParams.fromParams(
                     call.request.queryParameters
+                ).copy(
+                    directoryUrl = if(filterByHost) {
+                        call.request.virtualHost
+                    }else {
+                        null
+                    }
                 )
             )
         )

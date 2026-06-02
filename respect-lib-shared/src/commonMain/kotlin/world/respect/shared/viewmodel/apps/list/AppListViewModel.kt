@@ -17,12 +17,12 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.select_app
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.EnterLink
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataReadyState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.ext.map
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.map
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findSelfLinks

@@ -35,15 +35,18 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.RespectShortVersionInfoText
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
+import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_my_school
 import world.respect.shared.generated.resources.school_name
 import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.scan_qr_code_badge
+import world.respect.shared.generated.resources.school_directory
 import world.respect.shared.generated.resources.school_name_placeholder
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedUiState
@@ -61,7 +64,8 @@ fun GetStartedScreen(
         onClickOtherOptions = viewModel::onClickOtherOptions,
         onClickScanQRBadge = viewModel::onClickScanQRBadge,
         onSchoolSelected = viewModel::onSchoolSelected,
-        onAddMySchool = viewModel::onClickAddMySchool
+        onAddMySchool = viewModel::onClickAddMySchool,
+        onDirectorySelected = viewModel::onDirectorySelected,
     )
 }
 
@@ -72,7 +76,8 @@ fun GetStartedScreen(
     onSchoolSelected: (SchoolDirectoryEntry) -> Unit,
     onClickOtherOptions: () -> Unit,
     onClickScanQRBadge: () -> Unit,
-    onAddMySchool: () -> Unit
+    onAddMySchool: () -> Unit,
+    onDirectorySelected: (RespectSchoolDirectory) -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
 
@@ -95,6 +100,27 @@ fun GetStartedScreen(
                     modifier = Modifier.weight(1f)
                 )
             }
+        }
+
+        uiState.selectedDirectory?.also { selectedDirectory ->
+            RespectExposedDropDownMenuField(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                value = selectedDirectory,
+                options = uiState.directoryOptions,
+                onOptionSelected = onDirectorySelected,
+                label = {
+                    Text(text = stringResource(Res.string.school_directory))
+                },
+                itemText = { item ->
+                    buildString {
+                        item.name?.also {
+                            append(it)
+                            append(" - ")
+                        }
+                        append(item.baseUrl.toString())
+                    }
+                }
+            )
         }
 
         OutlinedTextField(

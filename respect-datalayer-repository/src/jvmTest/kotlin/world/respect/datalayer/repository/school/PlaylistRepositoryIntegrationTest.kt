@@ -7,8 +7,8 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.lib.opds.model.OpdsFeed

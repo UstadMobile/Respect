@@ -1,8 +1,8 @@
 package world.respect.shared.domain.permissions
 
-import world.respect.datalayer.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
 import world.respect.datalayer.school.ext.filterPermissions

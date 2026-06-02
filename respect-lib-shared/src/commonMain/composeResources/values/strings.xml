@@ -25,6 +25,8 @@
     <string name="edit_assignment">Edit assignment</string>
     <string name="classes">Classes</string>
     <string name="clazz">Class</string>
+    <string name="assigned_to">Assigned to</string>
+    <string name="assign_to">Assign to</string>
     <string name="remove_from_class">Remove from class</string>
     <string name="manage_enrollments">Manage enrollments</string>
     <string name="report">Report</string>
@@ -43,6 +45,7 @@
     <string name="downloaded">Downloaded</string>
     <string name="share">Share</string>
     <string name="assign">Assign</string>
+    <string name="bookmark">Bookmark</string>
     <string name="related_lessons">Related Lessons</string>
     <string name="duration">Duration</string>
     <string name="more_info">More Info</string>
@@ -83,7 +86,9 @@
     <string name="creating_account_for">Creating account for %s</string>
     <string name="password_cannot_be_empty">Password cannot be empty</string>
     <string name="learn_more">Learn More</string>
-
+    <string name="percentage_format">%1$d%</string>
+    <string name="no_data">--</string>
+    <string name="task_image">Task Image</string>
     <string name="password_placeholder">Enter your password</string>
     <string name="invitation">Invitation</string>
     <string name="invitation_for">Invitation for:</string>
@@ -313,6 +318,7 @@
     <string name="top_5_schools">Top 5 Schools</string>
     <string name="top_5_students">Top 5 Students</string>
     <string name="percentage">Percentage</string>
+    <string name="percent_format">%1$d%%</string>
     <string name="indicators">Indicators</string>
     <string name="manage_indicators">Manage Indicators</string>
     <string name="indicator">Indicator</string>
@@ -504,8 +510,17 @@
     <string name="date">Date</string>
     <string name="time">Time</string>
     <string name="assignment_tasks">Assignment tasks</string>
+    <string name="tasks">Tasks</string>
     <string name="assignment_name">Assignment name</string>
+    <string name="assignment_title">Assignment title</string>
     <string name="lesson_assessment">Lesson/assessment</string>
+    <string name="deadline">Deadline</string>
+
+    <string name="all_students">All</string>
+    <string name="completed_status">Completed</string>
+    <string name="in_progress_status">In-progress</string>
+    <string name="not_started_status">Not Started</string>
+    <string name="failed">Failed</string>
 
     <string name="due_date">Due date</string>
     <string name="family_members">Family members</string>
@@ -521,6 +536,7 @@
 
     <string name="pending_student">Pending student</string>
     <string name="pending_teacher">Pending teacher</string>
+    <string name="pending">Pending</string>
 
     <string name="edit_enrollment">Edit enrollment</string>
 
@@ -578,8 +594,28 @@
     <string name="select_account">Select account to continue</string>
     <string name="use_another_account">Use another account</string>
 
+    <string name="no_tasks_selected_yet">No task selected yet.</string>
+    <string name="please_click_plus_button_to_add_one">Please click the + button to add one</string>
+
     <string name="username_already_taken">Username already taken</string>
 
     <string name="invalid_link">Invalid link</string>
+    <string name="average">Average</string>
+    <string name="no_student_data_available">No student data available</string>
+    <string name="unknown_class">Unknown Class</string>
+    <string name="task_completed">task completed</string>
+    <string name="task">Task</string>
+    <string name="student_completed">student completed</string>
+    <string name="menu">Menu</string>
+    <string name="fingerprint">Fingerprint</string>
+    <string name="track_changes">TrackChanges</string>>
+    <string name="calendar_month">CalendarMonth</string>>
+    <string name="toggle_fullscreen">Toggle Fullscreen</string>>
+
+    <string name="no_matching_data_available_yet">No matching data available, yet</string>
+
+    <string name="nothing_here_at_the_moment">Nothing here at the moment</string>
+
+    <string name="xapi_verb_assigned">assigned</string>
 
 </resources>

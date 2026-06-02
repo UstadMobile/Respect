@@ -1,13 +1,13 @@
 {
   "name": {
-    "en-US": "My app"
+    "en-US": "Example Web App"
   },
   "description": {
     "en-US": "Short learning app description < 80 chars"
   },
   "license": "AGPL-3.0",
   "website": "http://localhost/opds/case_valid/app.html",
-  "icon": "icon.webp",
+  "icon": "icon.png",
   "learningUnits": "index.json",
   "defaultLaunchUri": "http://localhost/opds/case_valid/",
 

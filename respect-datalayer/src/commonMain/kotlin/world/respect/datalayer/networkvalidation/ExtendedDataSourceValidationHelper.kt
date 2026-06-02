@@ -1,7 +1,7 @@
 package world.respect.datalayer.networkvalidation
 
 import com.ustadmobile.ihttp.headers.IHttpHeaders
-import world.respect.datalayer.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
 
 interface ExtendedDataSourceValidationHelper: BaseDataSourceValidationHelper {
 

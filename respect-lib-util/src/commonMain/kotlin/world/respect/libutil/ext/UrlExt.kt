@@ -5,6 +5,7 @@ import io.ktor.http.Url
 import io.ktor.http.appendPathSegments
 import io.ktor.http.encodedPath
 import io.ktor.http.toURI
+import net.thauvin.erik.urlencoder.UrlEncoderUtil
 
 
 /**
@@ -154,3 +155,16 @@ fun Url.normalizeForEndpoint(): Url {
     }.build()
 }
 
+/**
+ * Append an assignment id to the embedded xAPI endpoint.
+ */
+fun Url.appendAssignmentXapiSegment(
+    activityId: String,
+) : Url {
+    return appendEndpointSegments(
+        //As per OpenEeelXapiConstants.ASSIGNMENT_XAPI_SEGMENT
+        "openeel_assignment",
+        //Required to be double encoded as per comments on XapiNanoHttpdApp
+        UrlEncoderUtil.encode(activityId),
+    )
+}

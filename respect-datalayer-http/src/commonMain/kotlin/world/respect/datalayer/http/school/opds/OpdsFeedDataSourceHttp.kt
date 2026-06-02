@@ -9,11 +9,11 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthTokenProvider
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
-import world.respect.datalayer.ext.map
+import world.respect.lib.dataloadstate.ext.map
 import world.respect.datalayer.ext.useTokenProvider
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.school.opds.OpdsFeedDataSource

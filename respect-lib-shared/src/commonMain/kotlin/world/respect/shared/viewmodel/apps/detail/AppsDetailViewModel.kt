@@ -20,20 +20,21 @@ import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataReadyState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.SchoolApp
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.respectAppDefaultLessonList
 import world.respect.shared.generated.resources.invalid_link
 import world.respect.shared.util.exception.getUiTextOrGeneric
@@ -83,7 +84,9 @@ class AppsDetailViewModel(
                 expectedPublicationId = null,
             ).collectLatest { result ->
                 _uiState.update { prev ->
-                    prev.copy(appDetail = result)
+                    prev.copy(
+                        appDetail = result.map { it.resolve(route.manifestUrl) }
+                    )
                 }
 
                 val defaultLessonLink = result.dataOrNull()?.respectAppDefaultLessonList()
@@ -157,7 +160,6 @@ class AppsDetailViewModel(
                 NavCommand.Navigate(
                     LearningUnitDetail.create(
                         learningUnitManifestUrl = route.manifestUrl.resolve(publicationHref),
-                        appManifestUrl = route.manifestUrl,
                         refererUrl = refererUrl?.let { Url(it) },
                         expectedIdentifier = publication.metadata.identifier?.toString()
                     )

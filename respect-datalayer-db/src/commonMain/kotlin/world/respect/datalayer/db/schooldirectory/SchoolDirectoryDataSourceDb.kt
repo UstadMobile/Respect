@@ -28,10 +28,6 @@ class SchoolDirectoryDataSourceDb(
         }
     }
 
-    override suspend fun getServerManagedDirectory(): RespectSchoolDirectory? {
-        return respectAppDb.getSchoolDirectoryEntityDao().getServerManagerSchoolDirectory()?.toModel()
-    }
-
     override suspend fun setServerManagedSchoolConfig(
         school: SchoolDirectoryEntry,
         dbUrl: String,

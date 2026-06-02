@@ -129,12 +129,12 @@ object AssignmentList : RespectAppRoute
 
 @Serializable
 data class AssignmentDetail(
-    val uid: String,
+    val assignmentActivityId: String,
 ) : RespectAppRoute
 
 @Serializable
 data class AssignmentEdit(
-    val guid: String?,
+    val assignmentActivityId: String?,
     private val learningUnitStr: String? = null,
 ): RespectAppRoute {
 
@@ -146,10 +146,10 @@ data class AssignmentEdit(
     companion object {
 
         fun create(
-            uid: String?,
+            assignmentActivityId: String?,
             learningUnitSelected: LearningUnitSelection? = null,
         ) = AssignmentEdit(
-            guid = uid,
+            assignmentActivityId = assignmentActivityId,
             learningUnitStr = learningUnitSelected?.let {
                 Json.encodeToString(LearningUnitSelection.serializer(), it)
             },
@@ -546,9 +546,9 @@ class CreateAccount(
 @Serializable
 class LearningUnitDetail(
     private val learningUnitManifestUrlStr: String,
-    private val appManifestUrlStr: String,
     private val refererUrlStr: String? = null,
-    val expectedIdentifier: String? = null
+    val expectedIdentifier: String? = null,
+    val assignmentActivityId: String? = null,
 ) : RespectAppRoute {
 
     @Transient
@@ -557,21 +557,18 @@ class LearningUnitDetail(
     @Transient
     val refererUrl = refererUrlStr?.let { Url(it) }
 
-    @Transient
-    val appManifestUrl = Url(appManifestUrlStr)
-
     companion object {
 
         fun create(
             learningUnitManifestUrl: Url,
-            appManifestUrl: Url,
             refererUrl: Url? = null,
-            expectedIdentifier: String? = null
+            expectedIdentifier: String? = null,
+            assignmentActivityId: String? = null,
         ) = LearningUnitDetail(
             learningUnitManifestUrlStr = learningUnitManifestUrl.toString(),
-            appManifestUrlStr = appManifestUrl.toString(),
             refererUrlStr = refererUrl?.toString(),
             expectedIdentifier = expectedIdentifier,
+            assignmentActivityId = assignmentActivityId,
         )
 
     }

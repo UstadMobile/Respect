@@ -1,0 +1,914 @@
+2026-05-12 16:20:21.374 [Test worker] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:20:21.528 [Test worker] INFO  io.ktor.server.Application - Application started in 0.357 seconds.
+2026-05-12 16:20:21.652 [DefaultDispatcher-worker-1 @coroutine#2] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:35135
+2026-05-12 16:20:22.962 [DefaultDispatcher-worker-2 @coroutine#8] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:35135/resources/index.json
+2026-05-12 16:20:22.963 [DefaultDispatcher-worker-2 @coroutine#8] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:35135/resources/index.json.
+2026-05-12 16:20:22.964 [DefaultDispatcher-worker-2 @coroutine#8] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:35135/resources/index.json
+2026-05-12 16:20:23.161 [eventLoopGroupProxy-4-1 @call-handler#12] TRACE io.ktor.server.routing.Routing - Trace for [resources, index.json]
+/, segment:0 -> SUCCESS @ /
+  /(staticContent), segment:0 -> SUCCESS @ /(staticContent)
+    /(staticContent)/resources, segment:1 -> SUCCESS @ /(staticContent)/resources
+      /(staticContent)/resources/{...}, segment:2 -> SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}
+        /(staticContent)/resources/{...}/(method:GET), segment:2 -> SUCCESS @ /(staticContent)/resources/{...}/(method:GET)
+Matched routes:
+  "" -> "(staticContent)" -> "resources" -> "{...}" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}/(method:GET)
+2026-05-12 16:20:23.243 [eventLoopGroupProxy-4-1 @call-handler#12] INFO  io.ktor.server.Application - [32m200 OK[m: [36mGET[m - /resources/index.json in 90ms
+2026-05-12 16:20:23.248 [DefaultDispatcher-worker-2 @coroutine#8] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:35135/resources/index.json
+2026-05-12 16:20:23.251 [DefaultDispatcher-worker-2 @coroutine#8] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:35135/resources/index.json
+2026-05-12 16:20:23.251 [DefaultDispatcher-worker-2 @coroutine#8] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:35135/resources/index.json
+2026-05-12 16:20:23.283 [DefaultDispatcher-worker-2 @coroutine#8] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class world.respect.lib.opds.model.OpdsFeed for http://localhost:35135/resources/index.json.
+2026-05-12 16:20:23.342 [DefaultDispatcher-worker-2 @coroutine#20] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:35135/resources/index.json
+2026-05-12 16:20:23.342 [DefaultDispatcher-worker-2 @coroutine#20] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:35135/resources/index.json.
+2026-05-12 16:20:23.342 [DefaultDispatcher-worker-2 @coroutine#20] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:35135/resources/index.json
+2026-05-12 16:20:23.347 [eventLoopGroupProxy-4-1 @call-handler#22] TRACE io.ktor.server.routing.Routing - Trace for [resources, index.json]
+/, segment:0 -> SUCCESS @ /
+  /(staticContent), segment:0 -> SUCCESS @ /(staticContent)
+    /(staticContent)/resources, segment:1 -> SUCCESS @ /(staticContent)/resources
+      /(staticContent)/resources/{...}, segment:2 -> SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}
+        /(staticContent)/resources/{...}/(method:GET), segment:2 -> SUCCESS @ /(staticContent)/resources/{...}/(method:GET)
+Matched routes:
+  "" -> "(staticContent)" -> "resources" -> "{...}" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}/(method:GET)
+2026-05-12 16:20:23.349 [eventLoopGroupProxy-4-1 @call-handler#22] INFO  io.ktor.server.Application - [33m304 Not Modified[m: [36mGET[m - /resources/index.json in 3ms
+2026-05-12 16:20:23.350 [DefaultDispatcher-worker-2 @coroutine#20] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:35135/resources/index.json
+2026-05-12 16:20:23.351 [DefaultDispatcher-worker-2 @coroutine#20] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:35135/resources/index.json
+2026-05-12 16:20:23.351 [DefaultDispatcher-worker-2 @coroutine#20] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:35135/resources/index.json
+2026-05-12 16:20:25.374 [Test worker] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:20:25.375 [Test worker] INFO  io.ktor.server.Application - Application started in 0.001 seconds.
+2026-05-12 16:20:25.378 [DefaultDispatcher-worker-2 @coroutine#26] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:43233
+2026-05-12 16:20:25.394 [Test worker @coroutine#30] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:43233/resources/index.json
+2026-05-12 16:20:25.394 [Test worker @coroutine#30] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:43233/resources/index.json.
+2026-05-12 16:20:25.395 [Test worker @coroutine#30] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:43233/resources/index.json
+2026-05-12 16:20:25.400 [eventLoopGroupProxy-7-1 @call-handler#35] TRACE io.ktor.server.routing.Routing - Trace for [resources, index.json]
+/, segment:0 -> SUCCESS @ /
+  /(staticContent), segment:0 -> SUCCESS @ /(staticContent)
+    /(staticContent)/resources, segment:1 -> SUCCESS @ /(staticContent)/resources
+      /(staticContent)/resources/{...}, segment:2 -> SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}
+        /(staticContent)/resources/{...}/(method:GET), segment:2 -> SUCCESS @ /(staticContent)/resources/{...}/(method:GET)
+Matched routes:
+  "" -> "(staticContent)" -> "resources" -> "{...}" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}/(method:GET)
+2026-05-12 16:20:25.402 [DefaultDispatcher-worker-3 @call-handler#35] INFO  io.ktor.server.Application - [32m200 OK[m: [36mGET[m - /resources/index.json in 2ms
+2026-05-12 16:20:25.403 [Test worker @coroutine#30] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:43233/resources/index.json
+2026-05-12 16:20:25.404 [Test worker @coroutine#30] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:43233/resources/index.json
+2026-05-12 16:20:25.404 [Test worker @coroutine#30] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:43233/resources/index.json
+2026-05-12 16:20:25.405 [Test worker @coroutine#30] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class world.respect.lib.opds.model.OpdsFeed for http://localhost:43233/resources/index.json.
+2026-05-12 16:20:25.414 [DefaultDispatcher-worker-2 @coroutine#43] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:43233/resources/index.json
+2026-05-12 16:20:25.414 [DefaultDispatcher-worker-2 @coroutine#43] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:43233/resources/index.json.
+2026-05-12 16:20:25.414 [DefaultDispatcher-worker-2 @coroutine#43] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:43233/resources/index.json
+2026-05-12 16:20:25.417 [eventLoopGroupProxy-7-1 @call-handler#45] TRACE io.ktor.server.routing.Routing - Trace for [resources, index.json]
+/, segment:0 -> SUCCESS @ /
+  /(staticContent), segment:0 -> SUCCESS @ /(staticContent)
+    /(staticContent)/resources, segment:1 -> SUCCESS @ /(staticContent)/resources
+      /(staticContent)/resources/{...}, segment:2 -> SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}
+        /(staticContent)/resources/{...}/(method:GET), segment:2 -> SUCCESS @ /(staticContent)/resources/{...}/(method:GET)
+Matched routes:
+  "" -> "(staticContent)" -> "resources" -> "{...}" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}/(method:GET)
+2026-05-12 16:20:25.418 [eventLoopGroupProxy-7-1 @call-handler#45] INFO  io.ktor.server.Application - [33m304 Not Modified[m: [36mGET[m - /resources/index.json in 2ms
+2026-05-12 16:20:25.419 [DefaultDispatcher-worker-1 @coroutine#43] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:43233/resources/index.json
+2026-05-12 16:20:25.419 [DefaultDispatcher-worker-1 @coroutine#43] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:43233/resources/index.json
+2026-05-12 16:20:25.419 [DefaultDispatcher-worker-1 @coroutine#43] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:43233/resources/index.json
+2026-05-12 16:20:27.467 [Test worker] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:20:27.470 [Test worker] INFO  io.ktor.server.Application - Application started in 0.003 seconds.
+2026-05-12 16:20:27.481 [DefaultDispatcher-worker-1 @coroutine#49] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:45091
+2026-05-12 16:20:27.504 [Test worker @coroutine#55] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:45091/resources/lesson001.json
+2026-05-12 16:20:27.505 [Test worker @coroutine#55] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:45091/resources/lesson001.json.
+2026-05-12 16:20:27.505 [Test worker @coroutine#55] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:45091/resources/lesson001.json
+2026-05-12 16:20:27.524 [eventLoopGroupProxy-10-1 @call-handler#59] TRACE io.ktor.server.routing.Routing - Trace for [resources, lesson001.json]
+/, segment:0 -> SUCCESS @ /
+  /(staticContent), segment:0 -> SUCCESS @ /(staticContent)
+    /(staticContent)/resources, segment:1 -> SUCCESS @ /(staticContent)/resources
+      /(staticContent)/resources/{...}, segment:2 -> SUCCESS; Parameters [static-content-path-parameter=[lesson001.json]] @ /(staticContent)/resources/{...}
+        /(staticContent)/resources/{...}/(method:GET), segment:2 -> SUCCESS @ /(staticContent)/resources/{...}/(method:GET)
+Matched routes:
+  "" -> "(staticContent)" -> "resources" -> "{...}" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS; Parameters [static-content-path-parameter=[lesson001.json]] @ /(staticContent)/resources/{...}/(method:GET)
+2026-05-12 16:20:27.530 [DefaultDispatcher-worker-1 @call-handler#59] INFO  io.ktor.server.Application - [32m200 OK[m: [36mGET[m - /resources/lesson001.json in 7ms
+2026-05-12 16:20:27.535 [DefaultDispatcher-worker-3 @coroutine#55] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:45091/resources/lesson001.json
+2026-05-12 16:20:27.536 [DefaultDispatcher-worker-3 @coroutine#55] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:45091/resources/lesson001.json
+2026-05-12 16:20:27.536 [DefaultDispatcher-worker-3 @coroutine#55] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:45091/resources/lesson001.json
+2026-05-12 16:20:27.547 [DefaultDispatcher-worker-3 @coroutine#55] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class kotlinx.serialization.json.JsonObject for http://localhost:45091/resources/lesson001.json.
+2026-05-12 16:20:29.898 [Test worker @coroutine#65] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:20:29.912 [Test worker @coroutine#65] INFO  io.ktor.server.Application - Application started in 0.132 seconds.
+2026-05-12 16:20:29.917 [DefaultDispatcher-worker-4 @coroutine#74] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:42445
+2026-05-12 16:20:29.941 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:42445/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:29.942 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:42445/api/school/respect/schoolpermissiongrant.
+2026-05-12 16:20:29.943 [Test worker @coroutine#65] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:42445/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:29.975 [eventLoopGroupProxy-13-1 @call-handler#78] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, schoolpermissiongrant]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/person
+        /api/school/respect/schoolpermissiongrant, segment:4 -> SUCCESS @ /api/school/respect/schoolpermissiongrant
+          /api/school/respect/schoolpermissiongrant/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/schoolpermissiongrant/(method:GET)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "schoolpermissiongrant" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/schoolpermissiongrant/(method:GET)
+2026-05-12 16:20:30.057 [Test worker @coroutine#65] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:42445/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:30.058 [Test worker @coroutine#65] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:42445/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:30.059 [Test worker @coroutine#65] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:42445/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:30.071 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:42445/api/school/respect/schoolpermissiongrant.
+2026-05-12 16:20:30.227 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:42445/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:30.227 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:42445/api/school/respect/person?includeRelated=false.
+2026-05-12 16:20:30.228 [Test worker @coroutine#65] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:42445/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:30.233 [eventLoopGroupProxy-13-1 @call-handler#84] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+        /api/school/respect/schoolpermissiongrant, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/schoolpermissiongrant
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:20:30.314 [Test worker @coroutine#65] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:42445/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:30.315 [Test worker @coroutine#65] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:42445/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:30.316 [Test worker @coroutine#65] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:42445/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:30.320 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:42445/api/school/respect/person?includeRelated=false.
+2026-05-12 16:20:30.339 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:42445/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:30.340 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:42445/api/school/respect/person?includeRelated=false.
+2026-05-12 16:20:30.341 [Test worker @coroutine#65] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:42445/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:30.352 [eventLoopGroupProxy-13-1 @call-handler#90] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+        /api/school/respect/schoolpermissiongrant, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/schoolpermissiongrant
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:20:30.362 [DefaultDispatcher-worker-1 @call-handler#90] TRACE i.k.s.p.c.ContentNegotiation - Skipping response body transformation from HttpStatusCode to OutgoingContent for the GET /api/school/respect/person?includeRelated=false request because the HttpStatusCode type is ignored. See [ContentNegotiationConfig::ignoreType].
+2026-05-12 16:20:30.365 [Test worker @coroutine#65] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:42445/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:30.366 [Test worker @coroutine#65] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:42445/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:30.366 [Test worker @coroutine#65] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:42445/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:32.486 [Test worker @coroutine#94] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:20:32.490 [Test worker @coroutine#94] INFO  io.ktor.server.Application - Application started in 0.025 seconds.
+2026-05-12 16:20:32.497 [DefaultDispatcher-worker-4 @coroutine#103] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:41331
+2026-05-12 16:20:32.501 [Test worker @coroutine#94] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:41331/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:32.502 [Test worker @coroutine#94] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:41331/api/school/respect/schoolpermissiongrant.
+2026-05-12 16:20:32.502 [Test worker @coroutine#94] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:41331/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:32.525 [eventLoopGroupProxy-16-1 @call-handler#107] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, schoolpermissiongrant]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/person
+        /api/school/respect/schoolpermissiongrant, segment:4 -> SUCCESS @ /api/school/respect/schoolpermissiongrant
+          /api/school/respect/schoolpermissiongrant/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/schoolpermissiongrant/(method:GET)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "schoolpermissiongrant" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/schoolpermissiongrant/(method:GET)
+2026-05-12 16:20:32.537 [Test worker @coroutine#94] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:41331/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:32.538 [Test worker @coroutine#94] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:41331/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:32.538 [Test worker @coroutine#94] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:41331/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:32.540 [Test worker @coroutine#94] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:41331/api/school/respect/schoolpermissiongrant.
+2026-05-12 16:20:32.602 [DefaultDispatcher-worker-3 @coroutine#113] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:41331/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100
+2026-05-12 16:20:32.602 [DefaultDispatcher-worker-3 @coroutine#113] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:41331/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100.
+2026-05-12 16:20:32.602 [DefaultDispatcher-worker-3 @coroutine#113] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:41331/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100
+2026-05-12 16:20:32.606 [eventLoopGroupProxy-16-1 @call-handler#117] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+        /api/school/respect/schoolpermissiongrant, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/schoolpermissiongrant
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:20:32.616 [DefaultDispatcher-worker-2 @coroutine#113] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:41331/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100
+2026-05-12 16:20:32.616 [DefaultDispatcher-worker-2 @coroutine#113] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:41331/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100
+2026-05-12 16:20:32.616 [DefaultDispatcher-worker-2 @coroutine#113] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:41331/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100
+2026-05-12 16:20:32.618 [DefaultDispatcher-worker-2 @coroutine#113] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:41331/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100.
+2026-05-12 16:20:34.694 [Test worker @coroutine#122] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:20:34.695 [Test worker @coroutine#122] INFO  io.ktor.server.Application - Application started in 0.01 seconds.
+2026-05-12 16:20:34.698 [DefaultDispatcher-worker-4 @coroutine#131] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:35473
+2026-05-12 16:20:34.706 [Test worker @coroutine#122] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:35473/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:34.706 [Test worker @coroutine#122] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:35473/api/school/respect/person?includeRelated=false.
+2026-05-12 16:20:34.706 [Test worker @coroutine#122] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:35473/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:34.711 [eventLoopGroupProxy-19-1 @call-handler#136] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:20:34.724 [Test worker @coroutine#122] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:35473/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:34.724 [Test worker @coroutine#122] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:35473/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:34.724 [Test worker @coroutine#122] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:35473/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:34.726 [Test worker @coroutine#122] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:35473/api/school/respect/person?includeRelated=false.
+2026-05-12 16:20:34.762 [Test worker @coroutine#122] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:35473/api/school/respect/person?since=2026-05-12T12%3A20%3A34.712633119Z&includeRelated=false
+2026-05-12 16:20:34.763 [Test worker @coroutine#122] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:35473/api/school/respect/person?since=2026-05-12T12%3A20%3A34.712633119Z&includeRelated=false.
+2026-05-12 16:20:34.764 [Test worker @coroutine#122] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:35473/api/school/respect/person?since=2026-05-12T12%3A20%3A34.712633119Z&includeRelated=false
+2026-05-12 16:20:34.768 [eventLoopGroupProxy-19-1 @call-handler#142] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:20:34.774 [Test worker @coroutine#122] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:35473/api/school/respect/person?since=2026-05-12T12%3A20%3A34.712633119Z&includeRelated=false
+2026-05-12 16:20:34.775 [Test worker @coroutine#122] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:35473/api/school/respect/person?since=2026-05-12T12%3A20%3A34.712633119Z&includeRelated=false
+2026-05-12 16:20:34.775 [Test worker @coroutine#122] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:35473/api/school/respect/person?since=2026-05-12T12%3A20%3A34.712633119Z&includeRelated=false
+2026-05-12 16:20:34.778 [Test worker @coroutine#122] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:35473/api/school/respect/person?since=2026-05-12T12%3A20%3A34.712633119Z&includeRelated=false.
+2026-05-12 16:20:36.890 [Test worker @coroutine#148] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:20:36.898 [Test worker @coroutine#148] INFO  io.ktor.server.Application - Application started in 0.042 seconds.
+2026-05-12 16:20:36.904 [DefaultDispatcher-worker-5 @coroutine#156] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:43479
+2026-05-12 16:20:36.953 [DefaultDispatcher-worker-2 @coroutine#154] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:43479/api/school/respect/person
+2026-05-12 16:20:36.954 [DefaultDispatcher-worker-2 @coroutine#154] TRACE i.k.c.p.c.ContentNegotiation - Converted request body using io.ktor.serialization.kotlinx.KotlinxSerializationConverter@519a13af for http://localhost:43479/api/school/respect/person
+2026-05-12 16:20:36.954 [DefaultDispatcher-worker-2 @coroutine#154] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:43479/api/school/respect/person
+2026-05-12 16:20:36.954 [DefaultDispatcher-worker-2 @coroutine#154] TRACE i.k.c.plugins.defaultTransformers - Transformed with default transformers request body for http://localhost:43479/api/school/respect/person from class io.ktor.http.content.TextContent
+2026-05-12 16:20:36.977 [eventLoopGroupProxy-22-1 @call-handler#166] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> SUCCESS @ /api/school/respect/person/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:POST)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:POST)
+2026-05-12 16:20:37.010 [eventLoopGroupProxy-22-1 @call-handler#166] TRACE i.k.server.engine.DefaultTransform - No Default Transformations found for class io.ktor.utils.io.ByteChannel and expected type TypeInfo(kotlin.collections.List<world.respect.datalayer.school.model.Person>) for call /api/school/respect/person
+2026-05-12 16:20:37.020 [DefaultDispatcher-worker-3 @call-handler#166] TRACE i.k.s.p.c.ContentNegotiation - Skipping response body transformation from HttpStatusCode to OutgoingContent for the POST /api/school/respect/person request because the HttpStatusCode type is ignored. See [ContentNegotiationConfig::ignoreType].
+2026-05-12 16:20:37.029 [DefaultDispatcher-worker-5 @coroutine#154] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:43479/api/school/respect/person
+2026-05-12 16:20:37.030 [DefaultDispatcher-worker-5 @coroutine#154] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:43479/api/school/respect/person
+2026-05-12 16:20:37.030 [DefaultDispatcher-worker-5 @coroutine#154] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:43479/api/school/respect/person
+2026-05-12 16:20:39.109 [Test worker @coroutine#171] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:20:39.113 [Test worker @coroutine#171] INFO  io.ktor.server.Application - Application started in 0.021 seconds.
+2026-05-12 16:20:39.118 [DefaultDispatcher-worker-4 @coroutine#180] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:45211
+2026-05-12 16:20:39.120 [Test worker @coroutine#171] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:45211/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:39.120 [Test worker @coroutine#171] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:45211/api/school/respect/schoolpermissiongrant.
+2026-05-12 16:20:39.120 [Test worker @coroutine#171] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:45211/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:39.126 [eventLoopGroupProxy-25-1 @call-handler#184] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, schoolpermissiongrant]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/person
+        /api/school/respect/schoolpermissiongrant, segment:4 -> SUCCESS @ /api/school/respect/schoolpermissiongrant
+          /api/school/respect/schoolpermissiongrant/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/schoolpermissiongrant/(method:GET)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "schoolpermissiongrant" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/schoolpermissiongrant/(method:GET)
+2026-05-12 16:20:39.133 [Test worker @coroutine#171] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:45211/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:39.134 [Test worker @coroutine#171] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:45211/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:39.134 [Test worker @coroutine#171] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:45211/api/school/respect/schoolpermissiongrant
+2026-05-12 16:20:39.135 [Test worker @coroutine#171] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:45211/api/school/respect/schoolpermissiongrant.
+2026-05-12 16:20:39.173 [Test worker @coroutine#171] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:45211/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:39.174 [Test worker @coroutine#171] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:45211/api/school/respect/person?includeRelated=false.
+2026-05-12 16:20:39.174 [Test worker @coroutine#171] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:45211/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:39.192 [eventLoopGroupProxy-25-1 @call-handler#190] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+        /api/school/respect/schoolpermissiongrant, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/schoolpermissiongrant
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:20:39.221 [Test worker @coroutine#171] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:45211/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:39.222 [Test worker @coroutine#171] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:45211/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:39.222 [Test worker @coroutine#171] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:45211/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:39.228 [Test worker @coroutine#171] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:45211/api/school/respect/person?includeRelated=false.
+2026-05-12 16:20:41.258 [Test worker @coroutine#171] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:45211/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:41.258 [Test worker @coroutine#171] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:45211/api/school/respect/person?includeRelated=false.
+2026-05-12 16:20:41.258 [Test worker @coroutine#171] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:45211/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:41.263 [eventLoopGroupProxy-25-1 @call-handler#197] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+        /api/school/respect/schoolpermissiongrant, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/schoolpermissiongrant
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:20:41.282 [Test worker @coroutine#171] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:45211/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:41.283 [Test worker @coroutine#171] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:45211/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:41.283 [Test worker @coroutine#171] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:45211/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:41.285 [Test worker @coroutine#171] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:45211/api/school/respect/person?includeRelated=false.
+2026-05-12 16:20:43.472 [Test worker @coroutine#203] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:20:43.480 [Test worker @coroutine#203] INFO  io.ktor.server.Application - Application started in 0.027 seconds.
+2026-05-12 16:20:43.491 [DefaultDispatcher-worker-3 @coroutine#212] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:40575
+2026-05-12 16:20:43.516 [Test worker @coroutine#203] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:40575/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:43.518 [Test worker @coroutine#203] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:40575/api/school/respect/person?includeRelated=false.
+2026-05-12 16:20:43.519 [Test worker @coroutine#203] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:40575/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:43.540 [eventLoopGroupProxy-28-1 @call-handler#217] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:20:43.554 [Test worker @coroutine#203] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:40575/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:43.555 [Test worker @coroutine#203] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:40575/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:43.555 [Test worker @coroutine#203] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:40575/api/school/respect/person?includeRelated=false
+2026-05-12 16:20:43.559 [Test worker @coroutine#203] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:40575/api/school/respect/person?includeRelated=false.
+2026-05-12 16:20:43.617 [Test worker @coroutine#203] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:40575/api/school/respect/person?since=2026-05-12T12%3A20%3A43.541523430Z&includeRelated=false
+2026-05-12 16:20:43.620 [Test worker @coroutine#203] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:40575/api/school/respect/person?since=2026-05-12T12%3A20%3A43.541523430Z&includeRelated=false.
+2026-05-12 16:20:43.620 [Test worker @coroutine#203] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:40575/api/school/respect/person?since=2026-05-12T12%3A20%3A43.541523430Z&includeRelated=false
+2026-05-12 16:20:43.633 [eventLoopGroupProxy-28-1 @call-handler#224] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:20:43.648 [Test worker @coroutine#203] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:40575/api/school/respect/person?since=2026-05-12T12%3A20%3A43.541523430Z&includeRelated=false
+2026-05-12 16:20:43.648 [Test worker @coroutine#203] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:40575/api/school/respect/person?since=2026-05-12T12%3A20%3A43.541523430Z&includeRelated=false
+2026-05-12 16:20:43.648 [Test worker @coroutine#203] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:40575/api/school/respect/person?since=2026-05-12T12%3A20%3A43.541523430Z&includeRelated=false
+2026-05-12 16:20:43.650 [Test worker @coroutine#203] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:40575/api/school/respect/person?since=2026-05-12T12%3A20%3A43.541523430Z&includeRelated=false.
+2026-05-12 16:20:45.791 [Test worker @coroutine#230] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:20:45.798 [Test worker @coroutine#230] INFO  io.ktor.server.Application - Application started in 0.029 seconds.
+2026-05-12 16:20:45.803 [DefaultDispatcher-worker-4 @coroutine#240] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:41245
+2026-05-12 16:20:45.811 [Test worker @coroutine#230] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:41245/playlist/dfd43a50-57f1-4b83-aa6a-77a4ada5cec6
+2026-05-12 16:20:45.812 [Test worker @coroutine#230] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:41245/playlist/dfd43a50-57f1-4b83-aa6a-77a4ada5cec6.
+2026-05-12 16:20:45.812 [Test worker @coroutine#230] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:41245/playlist/dfd43a50-57f1-4b83-aa6a-77a4ada5cec6
+2026-05-12 16:20:45.823 [eventLoopGroupProxy-31-1 @call-handler#244] TRACE io.ktor.server.routing.Routing - Trace for [playlist, dfd43a50-57f1-4b83-aa6a-77a4ada5cec6]
+/, segment:0 -> SUCCESS @ /
+  /playlist, segment:1 -> SUCCESS @ /playlist
+    /playlist/{uuid}, segment:2 -> SUCCESS; Parameters [uuid=[dfd43a50-57f1-4b83-aa6a-77a4ada5cec6]] @ /playlist/{uuid}
+      /playlist/{uuid}/(method:GET), segment:2 -> SUCCESS @ /playlist/{uuid}/(method:GET)
+      /playlist/{uuid}/(method:POST), segment:2 -> FAILURE "Selector didn't match" @ /playlist/{uuid}/(method:POST)
+Matched routes:
+  "" -> "playlist" -> "{uuid}" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS; Parameters [uuid=[dfd43a50-57f1-4b83-aa6a-77a4ada5cec6]] @ /playlist/{uuid}/(method:GET)
+2026-05-12 16:20:45.838 [Test worker @coroutine#230] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:41245/playlist/dfd43a50-57f1-4b83-aa6a-77a4ada5cec6
+2026-05-12 16:20:45.841 [Test worker @coroutine#230] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:41245/playlist/dfd43a50-57f1-4b83-aa6a-77a4ada5cec6
+2026-05-12 16:20:45.841 [Test worker @coroutine#230] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:41245/playlist/dfd43a50-57f1-4b83-aa6a-77a4ada5cec6
+2026-05-12 16:20:45.842 [Test worker @coroutine#230] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class world.respect.lib.opds.model.OpdsFeed for http://localhost:41245/playlist/dfd43a50-57f1-4b83-aa6a-77a4ada5cec6.
+2026-05-12 16:20:47.933 [Test worker @coroutine#248] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:20:47.935 [Test worker @coroutine#248] INFO  io.ktor.server.Application - Application started in 0.011 seconds.
+2026-05-12 16:20:47.937 [DefaultDispatcher-worker-9 @coroutine#257] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:44435
+2026-05-12 16:20:47.951 [DefaultDispatcher-worker-6 @coroutine#255] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:44435/playlist/2d8c66fa-356e-4ca2-9ff1-74143b621ef0
+2026-05-12 16:20:47.952 [DefaultDispatcher-worker-6 @coroutine#255] TRACE i.k.c.p.c.ContentNegotiation - Converted request body using io.ktor.serialization.kotlinx.KotlinxSerializationConverter@1b6f5f07 for http://localhost:44435/playlist/2d8c66fa-356e-4ca2-9ff1-74143b621ef0
+2026-05-12 16:20:47.952 [DefaultDispatcher-worker-6 @coroutine#255] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:44435/playlist/2d8c66fa-356e-4ca2-9ff1-74143b621ef0
+2026-05-12 16:20:47.952 [DefaultDispatcher-worker-6 @coroutine#255] TRACE i.k.c.plugins.defaultTransformers - Transformed with default transformers request body for http://localhost:44435/playlist/2d8c66fa-356e-4ca2-9ff1-74143b621ef0 from class io.ktor.http.content.TextContent
+2026-05-12 16:20:47.958 [eventLoopGroupProxy-34-1 @call-handler#265] TRACE io.ktor.server.routing.Routing - Trace for [playlist, 2d8c66fa-356e-4ca2-9ff1-74143b621ef0]
+/, segment:0 -> SUCCESS @ /
+  /playlist, segment:1 -> SUCCESS @ /playlist
+    /playlist/{uuid}, segment:2 -> SUCCESS; Parameters [uuid=[2d8c66fa-356e-4ca2-9ff1-74143b621ef0]] @ /playlist/{uuid}
+      /playlist/{uuid}/(method:GET), segment:2 -> FAILURE "Selector didn't match" @ /playlist/{uuid}/(method:GET)
+      /playlist/{uuid}/(method:POST), segment:2 -> SUCCESS @ /playlist/{uuid}/(method:POST)
+Matched routes:
+  "" -> "playlist" -> "{uuid}" -> "(method:POST)"
+Routing resolve result:
+  SUCCESS; Parameters [uuid=[2d8c66fa-356e-4ca2-9ff1-74143b621ef0]] @ /playlist/{uuid}/(method:POST)
+2026-05-12 16:20:47.958 [eventLoopGroupProxy-34-1 @call-handler#265] TRACE i.k.server.engine.DefaultTransform - No Default Transformations found for class io.ktor.utils.io.ByteChannel and expected type TypeInfo(world.respect.lib.opds.model.OpdsFeed) for call /playlist/2d8c66fa-356e-4ca2-9ff1-74143b621ef0
+2026-05-12 16:20:47.964 [DefaultDispatcher-worker-2 @call-handler#265] TRACE i.k.s.p.c.ContentNegotiation - Skipping response body transformation from HttpStatusCode to OutgoingContent for the POST /playlist/2d8c66fa-356e-4ca2-9ff1-74143b621ef0 request because the HttpStatusCode type is ignored. See [ContentNegotiationConfig::ignoreType].
+2026-05-12 16:20:47.966 [DefaultDispatcher-worker-10 @coroutine#255] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:44435/playlist/2d8c66fa-356e-4ca2-9ff1-74143b621ef0
+2026-05-12 16:20:47.967 [DefaultDispatcher-worker-10 @coroutine#255] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:44435/playlist/2d8c66fa-356e-4ca2-9ff1-74143b621ef0
+2026-05-12 16:20:47.968 [DefaultDispatcher-worker-10 @coroutine#255] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:44435/playlist/2d8c66fa-356e-4ca2-9ff1-74143b621ef0
+2026-05-12 16:20:50.042 [Test worker @coroutine#270] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:20:50.050 [Test worker @coroutine#270] INFO  io.ktor.server.Application - Application started in 0.022 seconds.
+2026-05-12 16:20:50.057 [DefaultDispatcher-worker-6 @coroutine#279] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:44381
+2026-05-12 16:20:50.222 [DefaultDispatcher-worker-2 @coroutine#277] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:44381/api/school/xapi/statements
+2026-05-12 16:20:50.223 [DefaultDispatcher-worker-2 @coroutine#277] TRACE i.k.c.p.c.ContentNegotiation - Converted request body using io.ktor.serialization.kotlinx.KotlinxSerializationConverter@7acc951d for http://localhost:44381/api/school/xapi/statements
+2026-05-12 16:20:50.224 [DefaultDispatcher-worker-2 @coroutine#277] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:44381/api/school/xapi/statements
+2026-05-12 16:20:50.224 [DefaultDispatcher-worker-2 @coroutine#277] TRACE i.k.c.plugins.defaultTransformers - Transformed with default transformers request body for http://localhost:44381/api/school/xapi/statements from class io.ktor.http.content.TextContent
+2026-05-12 16:20:50.230 [eventLoopGroupProxy-37-1 @call-handler#287] TRACE io.ktor.server.routing.Routing - Trace for [api, school, xapi, statements]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/xapi, segment:3 -> SUCCESS @ /api/school/xapi
+        /api/school/xapi/statements, segment:4 -> SUCCESS @ /api/school/xapi/statements
+          /api/school/xapi/statements/(method:GET), segment:4 -> FAILURE "Selector didn't match" @ /api/school/xapi/statements/(method:GET)
+          /api/school/xapi/statements/(method:POST), segment:4 -> SUCCESS @ /api/school/xapi/statements/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "xapi" -> "statements" -> "(method:POST)"
+Routing resolve result:
+  SUCCESS @ /api/school/xapi/statements/(method:POST)
+2026-05-12 16:20:50.230 [eventLoopGroupProxy-37-1 @call-handler#287] TRACE i.k.server.engine.DefaultTransform - No Default Transformations found for class io.ktor.utils.io.ByteChannel and expected type TypeInfo(kotlinx.serialization.json.JsonElement) for call /api/school/xapi/statements
+2026-05-12 16:20:50.251 [DefaultDispatcher-worker-2 @coroutine#277] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:44381/api/school/xapi/statements
+2026-05-12 16:20:50.252 [DefaultDispatcher-worker-2 @coroutine#277] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:44381/api/school/xapi/statements
+2026-05-12 16:20:50.252 [DefaultDispatcher-worker-2 @coroutine#277] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:44381/api/school/xapi/statements
+2026-05-12 16:20:50.254 [DefaultDispatcher-worker-2 @coroutine#277] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:44381/api/school/xapi/statements.
+2026-05-12 16:20:52.284 [Test worker @coroutine#293] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:20:52.285 [Test worker @coroutine#293] INFO  io.ktor.server.Application - Application started in 0.012 seconds.
+2026-05-12 16:20:52.287 [DefaultDispatcher-worker-2 @coroutine#302] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:35139
+2026-05-12 16:20:52.299 [Test worker @coroutine#293] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:35139/api/school/xapi/statements
+2026-05-12 16:20:52.300 [Test worker @coroutine#293] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:35139/api/school/xapi/statements.
+2026-05-12 16:20:52.300 [Test worker @coroutine#293] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:35139/api/school/xapi/statements
+2026-05-12 16:20:52.304 [eventLoopGroupProxy-40-1 @call-handler#308] TRACE io.ktor.server.routing.Routing - Trace for [api, school, xapi, statements]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/xapi, segment:3 -> SUCCESS @ /api/school/xapi
+        /api/school/xapi/statements, segment:4 -> SUCCESS @ /api/school/xapi/statements
+          /api/school/xapi/statements/(method:GET), segment:4 -> SUCCESS @ /api/school/xapi/statements/(method:GET)
+          /api/school/xapi/statements/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/xapi/statements/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "xapi" -> "statements" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/xapi/statements/(method:GET)
+2026-05-12 16:20:52.311 [Test worker @coroutine#293] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:35139/api/school/xapi/statements
+2026-05-12 16:20:52.312 [Test worker @coroutine#293] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:35139/api/school/xapi/statements
+2026-05-12 16:20:52.312 [Test worker @coroutine#293] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:35139/api/school/xapi/statements
+2026-05-12 16:20:52.314 [Test worker @coroutine#293] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class world.respect.lib.xapi.model.XapiStatementResult for http://localhost:35139/api/school/xapi/statements.
+2026-05-12 16:45:09.830 [Test worker] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:45:10.024 [Test worker] INFO  io.ktor.server.Application - Application started in 0.637 seconds.
+2026-05-12 16:45:10.235 [DefaultDispatcher-worker-1 @coroutine#2] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:35881
+2026-05-12 16:45:12.035 [DefaultDispatcher-worker-2 @coroutine#8] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:35881/resources/index.json
+2026-05-12 16:45:12.038 [DefaultDispatcher-worker-2 @coroutine#8] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:35881/resources/index.json.
+2026-05-12 16:45:12.039 [DefaultDispatcher-worker-2 @coroutine#8] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:35881/resources/index.json
+2026-05-12 16:45:12.457 [eventLoopGroupProxy-4-1 @call-handler#12] TRACE io.ktor.server.routing.Routing - Trace for [resources, index.json]
+/, segment:0 -> SUCCESS @ /
+  /(staticContent), segment:0 -> SUCCESS @ /(staticContent)
+    /(staticContent)/resources, segment:1 -> SUCCESS @ /(staticContent)/resources
+      /(staticContent)/resources/{...}, segment:2 -> SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}
+        /(staticContent)/resources/{...}/(method:GET), segment:2 -> SUCCESS @ /(staticContent)/resources/{...}/(method:GET)
+Matched routes:
+  "" -> "(staticContent)" -> "resources" -> "{...}" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}/(method:GET)
+2026-05-12 16:45:12.609 [eventLoopGroupProxy-4-1 @call-handler#12] INFO  io.ktor.server.Application - [32m200 OK[m: [36mGET[m - /resources/index.json in 163ms
+2026-05-12 16:45:12.622 [DefaultDispatcher-worker-1 @coroutine#8] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:35881/resources/index.json
+2026-05-12 16:45:12.626 [DefaultDispatcher-worker-1 @coroutine#8] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:35881/resources/index.json
+2026-05-12 16:45:12.626 [DefaultDispatcher-worker-1 @coroutine#8] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:35881/resources/index.json
+2026-05-12 16:45:12.697 [DefaultDispatcher-worker-1 @coroutine#8] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class world.respect.lib.opds.model.OpdsFeed for http://localhost:35881/resources/index.json.
+2026-05-12 16:45:12.815 [DefaultDispatcher-worker-1 @coroutine#20] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:35881/resources/index.json
+2026-05-12 16:45:12.816 [DefaultDispatcher-worker-1 @coroutine#20] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:35881/resources/index.json.
+2026-05-12 16:45:12.817 [DefaultDispatcher-worker-1 @coroutine#20] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:35881/resources/index.json
+2026-05-12 16:45:12.830 [eventLoopGroupProxy-4-1 @call-handler#22] TRACE io.ktor.server.routing.Routing - Trace for [resources, index.json]
+/, segment:0 -> SUCCESS @ /
+  /(staticContent), segment:0 -> SUCCESS @ /(staticContent)
+    /(staticContent)/resources, segment:1 -> SUCCESS @ /(staticContent)/resources
+      /(staticContent)/resources/{...}, segment:2 -> SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}
+        /(staticContent)/resources/{...}/(method:GET), segment:2 -> SUCCESS @ /(staticContent)/resources/{...}/(method:GET)
+Matched routes:
+  "" -> "(staticContent)" -> "resources" -> "{...}" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}/(method:GET)
+2026-05-12 16:45:12.845 [eventLoopGroupProxy-4-1 @call-handler#22] INFO  io.ktor.server.Application - [33m304 Not Modified[m: [36mGET[m - /resources/index.json in 16ms
+2026-05-12 16:45:12.867 [DefaultDispatcher-worker-2 @coroutine#20] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:35881/resources/index.json
+2026-05-12 16:45:12.868 [DefaultDispatcher-worker-2 @coroutine#20] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:35881/resources/index.json
+2026-05-12 16:45:12.869 [DefaultDispatcher-worker-2 @coroutine#20] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:35881/resources/index.json
+2026-05-12 16:45:14.922 [Test worker] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:45:14.923 [Test worker] INFO  io.ktor.server.Application - Application started in 0.001 seconds.
+2026-05-12 16:45:14.926 [DefaultDispatcher-worker-2 @coroutine#26] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:45629
+2026-05-12 16:45:14.948 [Test worker @coroutine#30] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:45629/resources/index.json
+2026-05-12 16:45:14.949 [Test worker @coroutine#30] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:45629/resources/index.json.
+2026-05-12 16:45:14.949 [Test worker @coroutine#30] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:45629/resources/index.json
+2026-05-12 16:45:14.955 [eventLoopGroupProxy-7-1 @call-handler#35] TRACE io.ktor.server.routing.Routing - Trace for [resources, index.json]
+/, segment:0 -> SUCCESS @ /
+  /(staticContent), segment:0 -> SUCCESS @ /(staticContent)
+    /(staticContent)/resources, segment:1 -> SUCCESS @ /(staticContent)/resources
+      /(staticContent)/resources/{...}, segment:2 -> SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}
+        /(staticContent)/resources/{...}/(method:GET), segment:2 -> SUCCESS @ /(staticContent)/resources/{...}/(method:GET)
+Matched routes:
+  "" -> "(staticContent)" -> "resources" -> "{...}" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}/(method:GET)
+2026-05-12 16:45:14.957 [DefaultDispatcher-worker-2 @call-handler#35] INFO  io.ktor.server.Application - [32m200 OK[m: [36mGET[m - /resources/index.json in 3ms
+2026-05-12 16:45:14.959 [Test worker @coroutine#30] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:45629/resources/index.json
+2026-05-12 16:45:14.959 [Test worker @coroutine#30] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:45629/resources/index.json
+2026-05-12 16:45:14.959 [Test worker @coroutine#30] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:45629/resources/index.json
+2026-05-12 16:45:14.960 [Test worker @coroutine#30] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class world.respect.lib.opds.model.OpdsFeed for http://localhost:45629/resources/index.json.
+2026-05-12 16:45:14.970 [DefaultDispatcher-worker-5 @coroutine#43] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:45629/resources/index.json
+2026-05-12 16:45:14.970 [DefaultDispatcher-worker-5 @coroutine#43] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:45629/resources/index.json.
+2026-05-12 16:45:14.970 [DefaultDispatcher-worker-5 @coroutine#43] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:45629/resources/index.json
+2026-05-12 16:45:14.973 [eventLoopGroupProxy-7-1 @call-handler#45] TRACE io.ktor.server.routing.Routing - Trace for [resources, index.json]
+/, segment:0 -> SUCCESS @ /
+  /(staticContent), segment:0 -> SUCCESS @ /(staticContent)
+    /(staticContent)/resources, segment:1 -> SUCCESS @ /(staticContent)/resources
+      /(staticContent)/resources/{...}, segment:2 -> SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}
+        /(staticContent)/resources/{...}/(method:GET), segment:2 -> SUCCESS @ /(staticContent)/resources/{...}/(method:GET)
+Matched routes:
+  "" -> "(staticContent)" -> "resources" -> "{...}" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS; Parameters [static-content-path-parameter=[index.json]] @ /(staticContent)/resources/{...}/(method:GET)
+2026-05-12 16:45:14.974 [eventLoopGroupProxy-7-1 @call-handler#45] INFO  io.ktor.server.Application - [33m304 Not Modified[m: [36mGET[m - /resources/index.json in 1ms
+2026-05-12 16:45:14.975 [DefaultDispatcher-worker-5 @coroutine#43] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:45629/resources/index.json
+2026-05-12 16:45:14.976 [DefaultDispatcher-worker-5 @coroutine#43] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:45629/resources/index.json
+2026-05-12 16:45:14.976 [DefaultDispatcher-worker-5 @coroutine#43] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:45629/resources/index.json
+2026-05-12 16:45:17.001 [Test worker] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:45:17.006 [Test worker] INFO  io.ktor.server.Application - Application started in 0.005 seconds.
+2026-05-12 16:45:17.017 [DefaultDispatcher-worker-5 @coroutine#49] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:37793
+2026-05-12 16:45:17.039 [Test worker @coroutine#55] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:37793/resources/lesson001.json
+2026-05-12 16:45:17.039 [Test worker @coroutine#55] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:37793/resources/lesson001.json.
+2026-05-12 16:45:17.039 [Test worker @coroutine#55] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:37793/resources/lesson001.json
+2026-05-12 16:45:17.054 [eventLoopGroupProxy-10-1 @call-handler#59] TRACE io.ktor.server.routing.Routing - Trace for [resources, lesson001.json]
+/, segment:0 -> SUCCESS @ /
+  /(staticContent), segment:0 -> SUCCESS @ /(staticContent)
+    /(staticContent)/resources, segment:1 -> SUCCESS @ /(staticContent)/resources
+      /(staticContent)/resources/{...}, segment:2 -> SUCCESS; Parameters [static-content-path-parameter=[lesson001.json]] @ /(staticContent)/resources/{...}
+        /(staticContent)/resources/{...}/(method:GET), segment:2 -> SUCCESS @ /(staticContent)/resources/{...}/(method:GET)
+Matched routes:
+  "" -> "(staticContent)" -> "resources" -> "{...}" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS; Parameters [static-content-path-parameter=[lesson001.json]] @ /(staticContent)/resources/{...}/(method:GET)
+2026-05-12 16:45:17.057 [DefaultDispatcher-worker-2 @call-handler#59] INFO  io.ktor.server.Application - [32m200 OK[m: [36mGET[m - /resources/lesson001.json in 3ms
+2026-05-12 16:45:17.060 [DefaultDispatcher-worker-1 @coroutine#55] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:37793/resources/lesson001.json
+2026-05-12 16:45:17.060 [DefaultDispatcher-worker-1 @coroutine#55] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:37793/resources/lesson001.json
+2026-05-12 16:45:17.060 [DefaultDispatcher-worker-1 @coroutine#55] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:37793/resources/lesson001.json
+2026-05-12 16:45:17.065 [DefaultDispatcher-worker-1 @coroutine#55] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class kotlinx.serialization.json.JsonObject for http://localhost:37793/resources/lesson001.json.
+2026-05-12 16:45:19.297 [Test worker @coroutine#65] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:45:19.306 [Test worker @coroutine#65] INFO  io.ktor.server.Application - Application started in 0.098 seconds.
+2026-05-12 16:45:19.309 [DefaultDispatcher-worker-4 @coroutine#74] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:33261
+2026-05-12 16:45:19.319 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:33261/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:19.319 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:33261/api/school/respect/schoolpermissiongrant.
+2026-05-12 16:45:19.319 [Test worker @coroutine#65] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:33261/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:19.325 [eventLoopGroupProxy-13-1 @call-handler#78] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, schoolpermissiongrant]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/person
+        /api/school/respect/schoolpermissiongrant, segment:4 -> SUCCESS @ /api/school/respect/schoolpermissiongrant
+          /api/school/respect/schoolpermissiongrant/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/schoolpermissiongrant/(method:GET)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "schoolpermissiongrant" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/schoolpermissiongrant/(method:GET)
+2026-05-12 16:45:19.347 [Test worker @coroutine#65] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:33261/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:19.347 [Test worker @coroutine#65] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:33261/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:19.347 [Test worker @coroutine#65] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:33261/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:19.350 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:33261/api/school/respect/schoolpermissiongrant.
+2026-05-12 16:45:19.401 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:33261/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:19.401 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:33261/api/school/respect/person?includeRelated=false.
+2026-05-12 16:45:19.401 [Test worker @coroutine#65] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:33261/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:19.404 [eventLoopGroupProxy-13-1 @call-handler#84] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+        /api/school/respect/schoolpermissiongrant, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/schoolpermissiongrant
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:45:19.434 [Test worker @coroutine#65] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:33261/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:19.434 [Test worker @coroutine#65] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:33261/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:19.434 [Test worker @coroutine#65] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:33261/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:19.436 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:33261/api/school/respect/person?includeRelated=false.
+2026-05-12 16:45:19.446 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:33261/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:19.446 [Test worker @coroutine#65] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:33261/api/school/respect/person?includeRelated=false.
+2026-05-12 16:45:19.446 [Test worker @coroutine#65] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:33261/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:19.449 [eventLoopGroupProxy-13-1 @call-handler#90] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+        /api/school/respect/schoolpermissiongrant, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/schoolpermissiongrant
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:45:19.453 [DefaultDispatcher-worker-4 @call-handler#90] TRACE i.k.s.p.c.ContentNegotiation - Skipping response body transformation from HttpStatusCode to OutgoingContent for the GET /api/school/respect/person?includeRelated=false request because the HttpStatusCode type is ignored. See [ContentNegotiationConfig::ignoreType].
+2026-05-12 16:45:19.455 [Test worker @coroutine#65] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:33261/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:19.455 [Test worker @coroutine#65] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:33261/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:19.455 [Test worker @coroutine#65] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:33261/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:21.518 [Test worker @coroutine#94] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:45:21.520 [Test worker @coroutine#94] INFO  io.ktor.server.Application - Application started in 0.016 seconds.
+2026-05-12 16:45:21.523 [DefaultDispatcher-worker-1 @coroutine#103] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:34217
+2026-05-12 16:45:21.524 [Test worker @coroutine#94] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:34217/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:21.524 [Test worker @coroutine#94] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:34217/api/school/respect/schoolpermissiongrant.
+2026-05-12 16:45:21.524 [Test worker @coroutine#94] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:34217/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:21.529 [eventLoopGroupProxy-16-1 @call-handler#107] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, schoolpermissiongrant]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/person
+        /api/school/respect/schoolpermissiongrant, segment:4 -> SUCCESS @ /api/school/respect/schoolpermissiongrant
+          /api/school/respect/schoolpermissiongrant/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/schoolpermissiongrant/(method:GET)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "schoolpermissiongrant" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/schoolpermissiongrant/(method:GET)
+2026-05-12 16:45:21.533 [Test worker @coroutine#94] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:34217/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:21.534 [Test worker @coroutine#94] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:34217/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:21.534 [Test worker @coroutine#94] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:34217/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:21.535 [Test worker @coroutine#94] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:34217/api/school/respect/schoolpermissiongrant.
+2026-05-12 16:45:21.560 [DefaultDispatcher-worker-6 @coroutine#113] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:34217/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100
+2026-05-12 16:45:21.560 [DefaultDispatcher-worker-6 @coroutine#113] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:34217/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100.
+2026-05-12 16:45:21.561 [DefaultDispatcher-worker-6 @coroutine#113] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:34217/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100
+2026-05-12 16:45:21.563 [eventLoopGroupProxy-16-1 @call-handler#117] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+        /api/school/respect/schoolpermissiongrant, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/schoolpermissiongrant
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:45:21.569 [DefaultDispatcher-worker-1 @coroutine#113] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:34217/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100
+2026-05-12 16:45:21.569 [DefaultDispatcher-worker-1 @coroutine#113] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:34217/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100
+2026-05-12 16:45:21.569 [DefaultDispatcher-worker-1 @coroutine#113] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:34217/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100
+2026-05-12 16:45:21.571 [DefaultDispatcher-worker-1 @coroutine#113] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:34217/api/school/respect/person?includeDeleted=true&includeRelated=false&offset=0&limit=100.
+2026-05-12 16:45:23.611 [Test worker @coroutine#122] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:45:23.613 [Test worker @coroutine#122] INFO  io.ktor.server.Application - Application started in 0.01 seconds.
+2026-05-12 16:45:23.615 [DefaultDispatcher-worker-3 @coroutine#131] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:34955
+2026-05-12 16:45:23.620 [Test worker @coroutine#122] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:34955/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:23.620 [Test worker @coroutine#122] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:34955/api/school/respect/person?includeRelated=false.
+2026-05-12 16:45:23.620 [Test worker @coroutine#122] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:34955/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:23.625 [eventLoopGroupProxy-19-1 @call-handler#136] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:45:23.630 [Test worker @coroutine#122] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:34955/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:23.630 [Test worker @coroutine#122] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:34955/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:23.631 [Test worker @coroutine#122] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:34955/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:23.632 [Test worker @coroutine#122] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:34955/api/school/respect/person?includeRelated=false.
+2026-05-12 16:45:23.673 [Test worker @coroutine#122] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:34955/api/school/respect/person?since=2026-05-12T12%3A45%3A23.625659145Z&includeRelated=false
+2026-05-12 16:45:23.673 [Test worker @coroutine#122] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:34955/api/school/respect/person?since=2026-05-12T12%3A45%3A23.625659145Z&includeRelated=false.
+2026-05-12 16:45:23.673 [Test worker @coroutine#122] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:34955/api/school/respect/person?since=2026-05-12T12%3A45%3A23.625659145Z&includeRelated=false
+2026-05-12 16:45:23.676 [eventLoopGroupProxy-19-1 @call-handler#142] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:45:23.684 [Test worker @coroutine#122] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:34955/api/school/respect/person?since=2026-05-12T12%3A45%3A23.625659145Z&includeRelated=false
+2026-05-12 16:45:23.685 [Test worker @coroutine#122] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:34955/api/school/respect/person?since=2026-05-12T12%3A45%3A23.625659145Z&includeRelated=false
+2026-05-12 16:45:23.685 [Test worker @coroutine#122] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:34955/api/school/respect/person?since=2026-05-12T12%3A45%3A23.625659145Z&includeRelated=false
+2026-05-12 16:45:23.686 [Test worker @coroutine#122] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:34955/api/school/respect/person?since=2026-05-12T12%3A45%3A23.625659145Z&includeRelated=false.
+2026-05-12 16:45:25.744 [Test worker @coroutine#148] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:45:25.748 [Test worker @coroutine#148] INFO  io.ktor.server.Application - Application started in 0.017 seconds.
+2026-05-12 16:45:25.753 [DefaultDispatcher-worker-1 @coroutine#157] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:41979
+2026-05-12 16:45:25.778 [DefaultDispatcher-worker-6 @coroutine#155] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:41979/api/school/respect/person
+2026-05-12 16:45:25.779 [DefaultDispatcher-worker-6 @coroutine#155] TRACE i.k.c.p.c.ContentNegotiation - Converted request body using io.ktor.serialization.kotlinx.KotlinxSerializationConverter@4c9537a0 for http://localhost:41979/api/school/respect/person
+2026-05-12 16:45:25.779 [DefaultDispatcher-worker-6 @coroutine#155] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:41979/api/school/respect/person
+2026-05-12 16:45:25.779 [DefaultDispatcher-worker-6 @coroutine#155] TRACE i.k.c.plugins.defaultTransformers - Transformed with default transformers request body for http://localhost:41979/api/school/respect/person from class io.ktor.http.content.TextContent
+2026-05-12 16:45:25.786 [eventLoopGroupProxy-22-1 @call-handler#167] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> SUCCESS @ /api/school/respect/person/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:POST)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:POST)
+2026-05-12 16:45:25.796 [eventLoopGroupProxy-22-1 @call-handler#167] TRACE i.k.server.engine.DefaultTransform - No Default Transformations found for class io.ktor.utils.io.ByteChannel and expected type TypeInfo(kotlin.collections.List<world.respect.datalayer.school.model.Person>) for call /api/school/respect/person
+2026-05-12 16:45:25.799 [DefaultDispatcher-worker-6 @call-handler#167] TRACE i.k.s.p.c.ContentNegotiation - Skipping response body transformation from HttpStatusCode to OutgoingContent for the POST /api/school/respect/person request because the HttpStatusCode type is ignored. See [ContentNegotiationConfig::ignoreType].
+2026-05-12 16:45:25.801 [DefaultDispatcher-worker-5 @coroutine#155] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:41979/api/school/respect/person
+2026-05-12 16:45:25.802 [DefaultDispatcher-worker-5 @coroutine#155] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:41979/api/school/respect/person
+2026-05-12 16:45:25.803 [DefaultDispatcher-worker-5 @coroutine#155] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:41979/api/school/respect/person
+2026-05-12 16:45:27.869 [Test worker @coroutine#172] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:45:27.872 [Test worker @coroutine#172] INFO  io.ktor.server.Application - Application started in 0.017 seconds.
+2026-05-12 16:45:27.877 [DefaultDispatcher-worker-7 @coroutine#181] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:43567
+2026-05-12 16:45:27.879 [Test worker @coroutine#172] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:43567/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:27.880 [Test worker @coroutine#172] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:43567/api/school/respect/schoolpermissiongrant.
+2026-05-12 16:45:27.880 [Test worker @coroutine#172] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:43567/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:27.885 [eventLoopGroupProxy-25-1 @call-handler#185] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, schoolpermissiongrant]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/person
+        /api/school/respect/schoolpermissiongrant, segment:4 -> SUCCESS @ /api/school/respect/schoolpermissiongrant
+          /api/school/respect/schoolpermissiongrant/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/schoolpermissiongrant/(method:GET)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "schoolpermissiongrant" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/schoolpermissiongrant/(method:GET)
+2026-05-12 16:45:27.888 [Test worker @coroutine#172] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:43567/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:27.889 [Test worker @coroutine#172] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:43567/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:27.889 [Test worker @coroutine#172] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:43567/api/school/respect/schoolpermissiongrant
+2026-05-12 16:45:27.891 [Test worker @coroutine#172] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:43567/api/school/respect/schoolpermissiongrant.
+2026-05-12 16:45:27.913 [Test worker @coroutine#172] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:43567/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:27.913 [Test worker @coroutine#172] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:43567/api/school/respect/person?includeRelated=false.
+2026-05-12 16:45:27.913 [Test worker @coroutine#172] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:43567/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:27.916 [eventLoopGroupProxy-25-1 @call-handler#191] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+        /api/school/respect/schoolpermissiongrant, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/schoolpermissiongrant
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:45:27.926 [Test worker @coroutine#172] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:43567/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:27.927 [Test worker @coroutine#172] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:43567/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:27.927 [Test worker @coroutine#172] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:43567/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:27.930 [Test worker @coroutine#172] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:43567/api/school/respect/person?includeRelated=false.
+2026-05-12 16:45:29.955 [Test worker @coroutine#172] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:43567/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:29.956 [Test worker @coroutine#172] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:43567/api/school/respect/person?includeRelated=false.
+2026-05-12 16:45:29.957 [Test worker @coroutine#172] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:43567/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:29.965 [eventLoopGroupProxy-25-1 @call-handler#198] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+        /api/school/respect/schoolpermissiongrant, segment:3 -> FAILURE "Selector didn't match" @ /api/school/respect/schoolpermissiongrant
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:45:29.978 [Test worker @coroutine#172] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:43567/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:29.978 [Test worker @coroutine#172] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:43567/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:29.978 [Test worker @coroutine#172] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:43567/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:29.980 [Test worker @coroutine#172] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:43567/api/school/respect/person?includeRelated=false.
+2026-05-12 16:45:32.108 [Test worker @coroutine#204] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:45:32.110 [Test worker @coroutine#204] INFO  io.ktor.server.Application - Application started in 0.01 seconds.
+2026-05-12 16:45:32.111 [DefaultDispatcher-worker-7 @coroutine#213] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:41087
+2026-05-12 16:45:32.116 [Test worker @coroutine#204] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:41087/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:32.116 [Test worker @coroutine#204] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:41087/api/school/respect/person?includeRelated=false.
+2026-05-12 16:45:32.116 [Test worker @coroutine#204] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:41087/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:32.130 [eventLoopGroupProxy-28-1 @call-handler#218] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:45:32.150 [Test worker @coroutine#204] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:41087/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:32.151 [Test worker @coroutine#204] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:41087/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:32.151 [Test worker @coroutine#204] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:41087/api/school/respect/person?includeRelated=false
+2026-05-12 16:45:32.153 [Test worker @coroutine#204] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:41087/api/school/respect/person?includeRelated=false.
+2026-05-12 16:45:32.194 [Test worker @coroutine#204] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:41087/api/school/respect/person?since=2026-05-12T12%3A45%3A32.132164079Z&includeRelated=false
+2026-05-12 16:45:32.194 [Test worker @coroutine#204] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:41087/api/school/respect/person?since=2026-05-12T12%3A45%3A32.132164079Z&includeRelated=false.
+2026-05-12 16:45:32.195 [Test worker @coroutine#204] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:41087/api/school/respect/person?since=2026-05-12T12%3A45%3A32.132164079Z&includeRelated=false
+2026-05-12 16:45:32.202 [eventLoopGroupProxy-28-1 @call-handler#225] TRACE io.ktor.server.routing.Routing - Trace for [api, school, respect, person]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/respect, segment:3 -> SUCCESS @ /api/school/respect
+        /api/school/respect/person, segment:4 -> SUCCESS @ /api/school/respect/person
+          /api/school/respect/person/(method:GET), segment:4 -> SUCCESS @ /api/school/respect/person/(method:GET)
+          /api/school/respect/person/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/respect/person/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "respect" -> "person" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/respect/person/(method:GET)
+2026-05-12 16:45:32.220 [Test worker @coroutine#204] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:41087/api/school/respect/person?since=2026-05-12T12%3A45%3A32.132164079Z&includeRelated=false
+2026-05-12 16:45:32.221 [Test worker @coroutine#204] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:41087/api/school/respect/person?since=2026-05-12T12%3A45%3A32.132164079Z&includeRelated=false
+2026-05-12 16:45:32.222 [Test worker @coroutine#204] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:41087/api/school/respect/person?since=2026-05-12T12%3A45%3A32.132164079Z&includeRelated=false
+2026-05-12 16:45:32.226 [Test worker @coroutine#204] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:41087/api/school/respect/person?since=2026-05-12T12%3A45%3A32.132164079Z&includeRelated=false.
+2026-05-12 16:45:34.328 [Test worker @coroutine#231] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:45:34.334 [Test worker @coroutine#231] INFO  io.ktor.server.Application - Application started in 0.031 seconds.
+2026-05-12 16:45:34.338 [DefaultDispatcher-worker-3 @coroutine#241] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:39663
+2026-05-12 16:45:34.350 [Test worker @coroutine#231] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:39663/playlist/cfcd41b8-02f3-41cd-83ee-22f04054177c
+2026-05-12 16:45:34.351 [Test worker @coroutine#231] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:39663/playlist/cfcd41b8-02f3-41cd-83ee-22f04054177c.
+2026-05-12 16:45:34.351 [Test worker @coroutine#231] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:39663/playlist/cfcd41b8-02f3-41cd-83ee-22f04054177c
+2026-05-12 16:45:34.360 [eventLoopGroupProxy-31-1 @call-handler#245] TRACE io.ktor.server.routing.Routing - Trace for [playlist, cfcd41b8-02f3-41cd-83ee-22f04054177c]
+/, segment:0 -> SUCCESS @ /
+  /playlist, segment:1 -> SUCCESS @ /playlist
+    /playlist/{uuid}, segment:2 -> SUCCESS; Parameters [uuid=[cfcd41b8-02f3-41cd-83ee-22f04054177c]] @ /playlist/{uuid}
+      /playlist/{uuid}/(method:GET), segment:2 -> SUCCESS @ /playlist/{uuid}/(method:GET)
+      /playlist/{uuid}/(method:POST), segment:2 -> FAILURE "Selector didn't match" @ /playlist/{uuid}/(method:POST)
+Matched routes:
+  "" -> "playlist" -> "{uuid}" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS; Parameters [uuid=[cfcd41b8-02f3-41cd-83ee-22f04054177c]] @ /playlist/{uuid}/(method:GET)
+2026-05-12 16:45:34.371 [Test worker @coroutine#231] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:39663/playlist/cfcd41b8-02f3-41cd-83ee-22f04054177c
+2026-05-12 16:45:34.372 [Test worker @coroutine#231] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:39663/playlist/cfcd41b8-02f3-41cd-83ee-22f04054177c
+2026-05-12 16:45:34.372 [Test worker @coroutine#231] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:39663/playlist/cfcd41b8-02f3-41cd-83ee-22f04054177c
+2026-05-12 16:45:34.374 [Test worker @coroutine#231] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class world.respect.lib.opds.model.OpdsFeed for http://localhost:39663/playlist/cfcd41b8-02f3-41cd-83ee-22f04054177c.
+2026-05-12 16:45:36.443 [Test worker @coroutine#249] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:45:36.446 [Test worker @coroutine#249] INFO  io.ktor.server.Application - Application started in 0.014 seconds.
+2026-05-12 16:45:36.449 [DefaultDispatcher-worker-7 @coroutine#258] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:43201
+2026-05-12 16:45:36.468 [DefaultDispatcher-worker-2 @coroutine#256] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:43201/playlist/3f83cf34-4688-4f36-aba8-88eabead42fc
+2026-05-12 16:45:36.468 [DefaultDispatcher-worker-2 @coroutine#256] TRACE i.k.c.p.c.ContentNegotiation - Converted request body using io.ktor.serialization.kotlinx.KotlinxSerializationConverter@6083b2f0 for http://localhost:43201/playlist/3f83cf34-4688-4f36-aba8-88eabead42fc
+2026-05-12 16:45:36.468 [DefaultDispatcher-worker-2 @coroutine#256] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:43201/playlist/3f83cf34-4688-4f36-aba8-88eabead42fc
+2026-05-12 16:45:36.468 [DefaultDispatcher-worker-2 @coroutine#256] TRACE i.k.c.plugins.defaultTransformers - Transformed with default transformers request body for http://localhost:43201/playlist/3f83cf34-4688-4f36-aba8-88eabead42fc from class io.ktor.http.content.TextContent
+2026-05-12 16:45:36.473 [eventLoopGroupProxy-34-1 @call-handler#266] TRACE io.ktor.server.routing.Routing - Trace for [playlist, 3f83cf34-4688-4f36-aba8-88eabead42fc]
+/, segment:0 -> SUCCESS @ /
+  /playlist, segment:1 -> SUCCESS @ /playlist
+    /playlist/{uuid}, segment:2 -> SUCCESS; Parameters [uuid=[3f83cf34-4688-4f36-aba8-88eabead42fc]] @ /playlist/{uuid}
+      /playlist/{uuid}/(method:GET), segment:2 -> FAILURE "Selector didn't match" @ /playlist/{uuid}/(method:GET)
+      /playlist/{uuid}/(method:POST), segment:2 -> SUCCESS @ /playlist/{uuid}/(method:POST)
+Matched routes:
+  "" -> "playlist" -> "{uuid}" -> "(method:POST)"
+Routing resolve result:
+  SUCCESS; Parameters [uuid=[3f83cf34-4688-4f36-aba8-88eabead42fc]] @ /playlist/{uuid}/(method:POST)
+2026-05-12 16:45:36.474 [eventLoopGroupProxy-34-1 @call-handler#266] TRACE i.k.server.engine.DefaultTransform - No Default Transformations found for class io.ktor.utils.io.ByteChannel and expected type TypeInfo(world.respect.lib.opds.model.OpdsFeed) for call /playlist/3f83cf34-4688-4f36-aba8-88eabead42fc
+2026-05-12 16:45:36.477 [DefaultDispatcher-worker-2 @call-handler#266] TRACE i.k.s.p.c.ContentNegotiation - Skipping response body transformation from HttpStatusCode to OutgoingContent for the POST /playlist/3f83cf34-4688-4f36-aba8-88eabead42fc request because the HttpStatusCode type is ignored. See [ContentNegotiationConfig::ignoreType].
+2026-05-12 16:45:36.480 [DefaultDispatcher-worker-5 @coroutine#256] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:43201/playlist/3f83cf34-4688-4f36-aba8-88eabead42fc
+2026-05-12 16:45:36.480 [DefaultDispatcher-worker-5 @coroutine#256] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:43201/playlist/3f83cf34-4688-4f36-aba8-88eabead42fc
+2026-05-12 16:45:36.480 [DefaultDispatcher-worker-5 @coroutine#256] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:43201/playlist/3f83cf34-4688-4f36-aba8-88eabead42fc
+2026-05-12 16:45:38.517 [Test worker @coroutine#271] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:45:38.519 [Test worker @coroutine#271] INFO  io.ktor.server.Application - Application started in 0.008 seconds.
+2026-05-12 16:45:38.520 [DefaultDispatcher-worker-3 @coroutine#280] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:44389
+2026-05-12 16:45:38.580 [DefaultDispatcher-worker-3 @coroutine#278] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:44389/api/school/xapi/statements
+2026-05-12 16:45:38.581 [DefaultDispatcher-worker-3 @coroutine#278] TRACE i.k.c.p.c.ContentNegotiation - Converted request body using io.ktor.serialization.kotlinx.KotlinxSerializationConverter@36006bbd for http://localhost:44389/api/school/xapi/statements
+2026-05-12 16:45:38.581 [DefaultDispatcher-worker-3 @coroutine#278] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:44389/api/school/xapi/statements
+2026-05-12 16:45:38.581 [DefaultDispatcher-worker-3 @coroutine#278] TRACE i.k.c.plugins.defaultTransformers - Transformed with default transformers request body for http://localhost:44389/api/school/xapi/statements from class io.ktor.http.content.TextContent
+2026-05-12 16:45:38.586 [eventLoopGroupProxy-37-1 @call-handler#288] TRACE io.ktor.server.routing.Routing - Trace for [api, school, xapi, statements]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/xapi, segment:3 -> SUCCESS @ /api/school/xapi
+        /api/school/xapi/statements, segment:4 -> SUCCESS @ /api/school/xapi/statements
+          /api/school/xapi/statements/(method:GET), segment:4 -> FAILURE "Selector didn't match" @ /api/school/xapi/statements/(method:GET)
+          /api/school/xapi/statements/(method:POST), segment:4 -> SUCCESS @ /api/school/xapi/statements/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "xapi" -> "statements" -> "(method:POST)"
+Routing resolve result:
+  SUCCESS @ /api/school/xapi/statements/(method:POST)
+2026-05-12 16:45:38.587 [eventLoopGroupProxy-37-1 @call-handler#288] TRACE i.k.server.engine.DefaultTransform - No Default Transformations found for class io.ktor.utils.io.ByteChannel and expected type TypeInfo(kotlinx.serialization.json.JsonElement) for call /api/school/xapi/statements
+2026-05-12 16:45:38.600 [DefaultDispatcher-worker-3 @coroutine#278] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:44389/api/school/xapi/statements
+2026-05-12 16:45:38.600 [DefaultDispatcher-worker-3 @coroutine#278] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:44389/api/school/xapi/statements
+2026-05-12 16:45:38.600 [DefaultDispatcher-worker-3 @coroutine#278] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:44389/api/school/xapi/statements
+2026-05-12 16:45:38.601 [DefaultDispatcher-worker-3 @coroutine#278] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class java.util.ArrayList for http://localhost:44389/api/school/xapi/statements.
+2026-05-12 16:45:40.633 [Test worker @coroutine#294] INFO  io.ktor.server.Application - Autoreload is disabled because the development mode is off.
+2026-05-12 16:45:40.635 [Test worker @coroutine#294] INFO  io.ktor.server.Application - Application started in 0.013 seconds.
+2026-05-12 16:45:40.636 [DefaultDispatcher-worker-8 @coroutine#303] INFO  io.ktor.server.Application - Responding at http://0.0.0.0:40377
+2026-05-12 16:45:40.648 [Test worker @coroutine#294] TRACE i.k.c.p.c.ContentNegotiation - Adding Accept=application/json header for http://localhost:40377/api/school/xapi/statements
+2026-05-12 16:45:40.648 [Test worker @coroutine#294] TRACE i.k.c.p.c.ContentNegotiation - Body type class io.ktor.client.utils.EmptyContent is in ignored types. Skipping ContentNegotiation for http://localhost:40377/api/school/xapi/statements.
+2026-05-12 16:45:40.648 [Test worker @coroutine#294] TRACE i.ktor.client.plugins.HttpPlainText - Adding Accept-Charset=UTF-8 to http://localhost:40377/api/school/xapi/statements
+2026-05-12 16:45:40.652 [eventLoopGroupProxy-40-1 @call-handler#309] TRACE io.ktor.server.routing.Routing - Trace for [api, school, xapi, statements]
+/, segment:0 -> SUCCESS @ /
+  /api, segment:1 -> SUCCESS @ /api
+    /api/school, segment:2 -> SUCCESS @ /api/school
+      /api/school/xapi, segment:3 -> SUCCESS @ /api/school/xapi
+        /api/school/xapi/statements, segment:4 -> SUCCESS @ /api/school/xapi/statements
+          /api/school/xapi/statements/(method:GET), segment:4 -> SUCCESS @ /api/school/xapi/statements/(method:GET)
+          /api/school/xapi/statements/(method:POST), segment:4 -> FAILURE "Selector didn't match" @ /api/school/xapi/statements/(method:POST)
+Matched routes:
+  "" -> "api" -> "school" -> "xapi" -> "statements" -> "(method:GET)"
+Routing resolve result:
+  SUCCESS @ /api/school/xapi/statements/(method:GET)
+2026-05-12 16:45:40.661 [Test worker @coroutine#294] TRACE io.ktor.client.plugins.SaveBody - Saving body for http://localhost:40377/api/school/xapi/statements
+2026-05-12 16:45:40.661 [Test worker @coroutine#294] TRACE i.k.client.plugins.HttpCallValidator - Validating response for request http://localhost:40377/api/school/xapi/statements
+2026-05-12 16:45:40.661 [Test worker @coroutine#294] TRACE i.k.c.p.DefaultResponseValidation - Skipping default response validation for http://localhost:40377/api/school/xapi/statements
+2026-05-12 16:45:40.665 [Test worker @coroutine#294] TRACE i.k.c.p.c.ContentNegotiation - Response body was converted to class world.respect.lib.xapi.model.XapiStatementResult for http://localhost:40377/api/school/xapi/statements.

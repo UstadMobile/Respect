@@ -15,13 +15,13 @@ import io.ktor.util.reflect.TypeInfo
 import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import world.respect.datalayer.DataErrorResult
-import world.respect.datalayer.DataLoadMetaInfo
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
-import world.respect.datalayer.NoDataLoadedState
+import world.respect.lib.dataloadstate.DataErrorResult
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 
@@ -54,7 +54,7 @@ suspend fun <T: Any> HttpClient.getAsDataLoadState(
             validationInfoKey = validationInfoKey ?: 0,
             varyHeader = varyHeader,
             permissionsLastModified = response.permissionsLastModified(),
-            headers = response.headers.asIHttpHeaders(),
+            headers = response.headers,
         )
 
         return if(response.status == HttpStatusCode.NotModified) {

@@ -44,7 +44,6 @@ import world.respect.server.routes.passkey.RevokePasskeyRoute
 import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
 import world.respect.server.routes.qrcode.PersonQrBadgeRoute
 import world.respect.server.routes.school.respect.AddChildAccountRoute
-import world.respect.server.routes.school.respect.AssignmentRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
@@ -60,6 +59,7 @@ import world.respect.server.routes.school.respect.SchoolRegistrationRoute
 import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.school.respect.SchoolValidationRoute
+import world.respect.server.routes.school.xapi.XapiStatementsResourceRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.routes.username.checkusernameunique.CheckUsernameUniqueRoute
 import world.respect.server.util.ext.getSchoolKoinScope
@@ -238,10 +238,21 @@ fun Application.module() {
             }
             route("directory") {
                 val respectAppDataSource: RespectAppDataSource by inject()
-                RespectSchoolDirectoryRoute(respectAppDataSource)
+                RespectSchoolDirectoryRoute(
+                    respectAppDataSource = respectAppDataSource,
+                    filterByHost = environment.config.propertyOrNull(
+                        "ktor.school.directories.virtualhost"
+                    )?.getString()?.toBoolean() ?: false
+                )
             }
 
             route("school") {
+                route("xapi") {
+                    authenticate(AUTH_CONFIG_SCHOOL) {
+                        XapiStatementsResourceRoute(json = json)
+                    }
+                }
+
                 route("respect") {
                     route("auth") {
                         AuthRoute()
@@ -265,6 +276,8 @@ fun Application.module() {
                         )
                     }
 
+
+
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         SchoolAppRoute()
                         SchoolPermissionGrantRoute()
@@ -274,7 +287,6 @@ fun Application.module() {
                         PersonPasswordRoute()
                         ClassRoute()
                         EnrollmentRoute()
-                        AssignmentRoute()
                         PersonQrBadgeRoute()
                         RedeemInviteExistingUserRoute(
                             redeemInviteExistingUserUseCase = { it.requireAccountScope().get() }

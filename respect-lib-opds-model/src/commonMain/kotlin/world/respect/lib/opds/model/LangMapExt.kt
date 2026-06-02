@@ -10,9 +10,15 @@ package world.respect.lib.opds.model
  *
  * @return A [Map<String, String>] representation of the [LangMap].
  */
-fun LangMap.toStringMap(): Map<String, String> {
+fun LangMap.toStringMap(
+    noLangKey: String = ""
+): Map<String, String> {
     return when(this) {
-        is LangMapStringValue -> mapOf("" to this.value)
+        is LangMapStringValue -> mapOf(noLangKey to this.value)
         is LangMapObjectValue -> this.map
     }
+}
+
+fun Map<String, String>.asLangMap(): LangMap {
+    return LangMapObjectValue(this)
 }

@@ -27,9 +27,9 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.drag

@@ -1,18 +1,21 @@
 package world.respect.shared.domain.account.invite
 
-import world.respect.datalayer.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.datalayer.db.school.ext.isTeacher
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.ext.copyAsApproved
 import world.respect.datalayer.school.ext.inviteCodeOrNull
+import world.respect.datalayer.school.ext.relatedPersonRoleEnum
 import world.respect.datalayer.school.model.ClassInvite
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.datalayer.shared.params.GetListCommonParams
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import kotlin.time.Clock
 
 
@@ -22,6 +25,7 @@ import kotlin.time.Clock
  */
 class ApproveOrDeclineInviteRequestUseCase(
     private val schoolDataSource: SchoolDataSource,
+    private val updateClazzStudentXapiGroupUseCase: UpdateClazzStudentXapiGroupUseCase,
 ) {
 
     /**
@@ -79,6 +83,14 @@ class ApproveOrDeclineInviteRequestUseCase(
                         }
                     }
                 )
+
+                val hasStudents = enrollmentsToUpdate.any {
+                    it.role.relatedPersonRoleEnum == PersonRoleEnum.STUDENT
+                }
+
+                if(approved && hasStudents) {
+                    updateClazzStudentXapiGroupUseCase(invite.classUid)
+                }
             }
 
             else -> {

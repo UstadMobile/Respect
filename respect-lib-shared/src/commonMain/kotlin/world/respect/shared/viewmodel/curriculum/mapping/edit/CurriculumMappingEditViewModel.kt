@@ -16,10 +16,10 @@ import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.map
+import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.findIcons
 import world.respect.libutil.ext.moveItem
 import world.respect.libutil.ext.updateAtIndex

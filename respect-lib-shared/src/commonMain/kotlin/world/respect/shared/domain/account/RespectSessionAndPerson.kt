@@ -1,7 +1,9 @@
 package world.respect.shared.domain.account
 
 import kotlinx.serialization.Serializable
+import world.respect.datalayer.school.ext.asXapiAgent
 import world.respect.datalayer.school.model.Person
+import world.respect.lib.xapi.model.XapiAgent
 
 /**
  *
@@ -15,6 +17,8 @@ import world.respect.datalayer.school.model.Person
  *           If the (active) person is not the account holder themselves, then the account holder
  *           themselves will be in the relatedPersons list.
  *
+ * @property xapiAgent the XapiAgent for the currently active person.
+ *
  */
 @Serializable
 data class RespectSessionAndPerson(
@@ -24,4 +28,8 @@ data class RespectSessionAndPerson(
 ){
     val isChild: Boolean
         get() = session.account.userGuid != person.guid
+
+    val xapiAgent: XapiAgent
+        get() = person.asXapiAgent(session.account.school.self)
+
 }

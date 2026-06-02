@@ -24,6 +24,7 @@ interface SchoolDirectoryEntityDao {
     @Query(
         """
             SELECT * FROM SchoolDirectoryEntity
+          ORDER BY SchoolDirectoryEntity.rdName  
         """
     )
     fun getSchoolDirectoriesAsFlow(): Flow<List<SchoolDirectoryEntity>>

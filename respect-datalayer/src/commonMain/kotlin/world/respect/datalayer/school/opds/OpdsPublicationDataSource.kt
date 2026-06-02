@@ -2,8 +2,8 @@ package world.respect.datalayer.school.opds
 
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.opds.model.OpdsPublication
 
 interface OpdsPublicationDataSource {

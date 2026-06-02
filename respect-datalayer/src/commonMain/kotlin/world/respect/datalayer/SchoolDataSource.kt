@@ -1,7 +1,6 @@
 package world.respect.datalayer
 
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
-import world.respect.datalayer.school.AssignmentDataSource
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.ReportDataSource
@@ -15,6 +14,9 @@ import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
+import world.respect.datalayer.school.xapi.XapiActivityDataSource
+import world.respect.lib.xapi.resources.XapiAgentsResource
+import world.respect.lib.xapi.resources.XapiStatementsResource
 
 /**
  * DataSource for data which is specific to a given School and authenticated user (see
@@ -44,8 +46,6 @@ interface SchoolDataSource {
 
     val enrollmentDataSource: EnrollmentDataSource
 
-    val assignmentDataSource: AssignmentDataSource
-
     val inviteDataSource: InviteDataSource
 
     val opdsPublicationDataSource: OpdsPublicationDataSource
@@ -54,4 +54,9 @@ interface SchoolDataSource {
 
     val schoolConfigSettingDataSource: SchoolConfigSettingDataSource
 
+    val xapiAgentsResource: XapiAgentsResource
+
+    val xapiActivityDataSource: XapiActivityDataSource
+
+    val xapiStatementsResource: XapiStatementsResource
 }

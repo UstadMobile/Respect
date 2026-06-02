@@ -17,6 +17,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.ext.getClassName
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
@@ -119,11 +120,8 @@ class AccountListViewModel(
             val pending = enrollments.mapNotNull { e ->
                 val person = childMap[e.personUid] ?: return@mapNotNull null
 
-                val clazz = schoolDataSource.classDataSource.findByGuid(
-                    params = DataLoadParams(),e.classUid
-                ).dataOrNull() ?: return@mapNotNull null
 
-                PersonWithEnrollment(person, clazz, e)
+                PersonWithEnrollment(person, e.getClassName()?:"", e)
             }
 
             respectAccountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->

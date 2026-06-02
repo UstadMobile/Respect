@@ -28,13 +28,13 @@ fun PendingPersonEnrollmentItem(
         leadingContent = {
 
             RespectPersonAvatar(
-                name = personWithEnrollment?.person?.fullName() + " : "
+                name = personWithEnrollment?.person?.fullName().toString()
             )
         },
         headlineContent = {
             Text(
-                text = personWithEnrollment?.person?.fullName() + " : "
-                        +personWithEnrollment?.clazz?.title +
+                text = personWithEnrollment?.person?.fullName() + ": "
+                        +personWithEnrollment?.clazz +
                         "(${personWithEnrollment?.person?.roles?.firstOrNull()?.roleEnum?.name})"
             )
         },

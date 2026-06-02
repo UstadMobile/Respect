@@ -127,6 +127,8 @@ import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseC
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCaseClient
+import world.respect.shared.domain.account.username.checkusernameunique.CheckUsernameUniqueUseCase
+import world.respect.shared.domain.account.username.checkusernameunique.CheckUsernameUniqueUseCaseClient
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseCase
@@ -754,7 +756,6 @@ val appKoinModule = module {
         }
 
 
-
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
@@ -769,6 +770,15 @@ val appKoinModule = module {
         }
         scoped<UsernameSuggestionUseCase> {
             UsernameSuggestionUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
+                httpClient = get(),
+            )
+        }
+
+
+        scoped<CheckUsernameUniqueUseCase> {
+            CheckUsernameUniqueUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
                 schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
                 httpClient = get(),

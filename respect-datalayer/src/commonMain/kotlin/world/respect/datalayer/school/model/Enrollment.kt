@@ -30,6 +30,8 @@ data class Enrollment(
 ): ModelWithTimes {
 
     companion object {
+        const val METADATA_KEY_CLASS_NAME = "className"
+
 
         const val TABLE_ID = 6
 

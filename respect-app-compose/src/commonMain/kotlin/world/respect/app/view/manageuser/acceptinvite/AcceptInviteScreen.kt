@@ -71,6 +71,7 @@ fun AcceptInviteScreen(
 ) {
     val invite = uiState.inviteInfo?.invite
     val errorText = uiState.errorText
+    val isParentInvite = uiState.inviteInfo?.familyPersonRole == PARENT
 
     Column(modifier = Modifier.fillMaxSize()) {
         when {
@@ -108,6 +109,20 @@ fun AcceptInviteScreen(
             }
 
             invite != null -> {
+                if (uiState.showSelectChildDropDown) {
+                    RespectChildrenExposedDropDownMenuField(
+                        value = uiState.selectedChild,
+                        options = uiState.children,
+                        onValueChanged = { child ->
+                            onChildSelected(child)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultItemPadding(),
+                        isError = uiState.childError != null,
+                        errorText = uiState.childError
+                    )
+                }
                 when(invite) {
                     is NewUserInvite -> {
                         RespectDetailField(
@@ -132,7 +147,6 @@ fun AcceptInviteScreen(
                     }
 
                     else -> {
-                        val isParentInvite = uiState.inviteInfo?.familyPersonRole == PARENT
 
                         RespectDetailField(
                             modifier = Modifier.defaultItemPadding(),
@@ -175,20 +189,7 @@ fun AcceptInviteScreen(
                     label = { Text(stringResource(Res.string.school_server_url)) },
                     value = { Text(uiState.schoolUrl?.toString() ?: "") }
                 )
-                if (uiState.showSelectChildDropDown) {
-                    RespectChildrenExposedDropDownMenuField(
-                        value = uiState.selectedChild,
-                        options = uiState.children,
-                        onValueChanged = { child ->
-                            onChildSelected(child)
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .defaultItemPadding(),
-                        isError = uiState.childError != null,
-                        errorText = uiState.childError
-                    )
-                }
+
                 Button(
                     onClick = onClickNext,
                     modifier = Modifier.fillMaxWidth().defaultItemPadding(),

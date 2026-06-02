@@ -1,5 +1,6 @@
 package world.respect.server.routes.school.respect
 
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -14,8 +15,13 @@ fun Route.RedeemInviteExistingUserRoute(
 
     post("existingUserRedeem") {
         val selectedChildGuid = call.request.queryParameters["selectedChildGuid"]
+        try {
+            val redeemRequest: RespectRedeemInviteRequest = call.receive()
 
-        val redeemRequest: RespectRedeemInviteRequest = call.receive()
-        call.respond(redeemInviteExistingUserUseCase(call).invoke(redeemRequest,selectedChildGuid))
+            redeemInviteExistingUserUseCase(call).invoke(redeemRequest, selectedChildGuid)
+            call.respond(HttpStatusCode.OK)
+        } catch (e: Throwable) {
+            call.respond(HttpStatusCode.BadRequest, e.message ?: "Unknown error")
+        }
     }
 }

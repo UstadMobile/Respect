@@ -200,8 +200,16 @@ interface PersonEntityDao {
         SELECT PersonEntity.pGuid AS guid, 
                PersonEntity.pGivenName AS givenName, 
                PersonEntity.pFamilyName AS familyName, 
-               PersonEntity.pUsername AS username
+               PersonEntity.pUsername AS username,
+               PersonRoleEntity.prRoleEnum AS role
           FROM PersonEntity
+               JOIN PersonRoleEntity
+                    ON PersonRoleEntity.prUid = 
+                       (SELECT PersonRoleEntity.prUid
+                          FROM PersonRoleEntity
+                         WHERE PersonRoleEntity.prPersonGuidHash = PersonEntity.pGuidHash
+                           AND PersonRoleEntity.prIsPrimaryRole
+                         LIMIT 1)
          WHERE PersonEntity.pGuidHash IN (
                 SELECT DISTINCT uidNum
                   FROM AllPersons)
@@ -261,6 +269,14 @@ interface PersonEntityDao {
     suspend fun getMostRecentPermissionChangeTime(
         authenticatedPersonUidNum: Long
     ): Long
+
+    @Query("""
+        SELECT EXISTS(
+                SELECT 1 
+                  FROM PersonEntity
+                 WHERE PersonEntity.pUsername = :username)
+    """)
+    suspend fun getUsernameAlreadyExists(username: String): Boolean
 
 
     companion object {

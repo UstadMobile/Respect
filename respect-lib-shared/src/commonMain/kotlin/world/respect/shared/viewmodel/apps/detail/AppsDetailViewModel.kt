@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel.apps.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,7 +35,13 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.lib.opds.model.respectAppDefaultLessonList
+import world.respect.shared.generated.resources.invalid_link
+import world.respect.shared.util.exception.getUiTextOrGeneric
+import world.respect.shared.util.exception.withUiText
 import world.respect.shared.util.ext.resolve
+import world.respect.shared.util.ext.selfPublicationLinkOrNull
+import world.respect.shared.viewmodel.app.appstate.Snack
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 
 data class AppsDetailUiState(
     val appDetail: DataLoadState<OpdsPublication>? = null,
@@ -48,6 +55,7 @@ data class AppsDetailUiState(
 class AppsDetailViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
+    private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -138,24 +146,27 @@ class AppsDetailViewModel(
     }
 
     fun onClickPublication(publication: OpdsPublication) {
+        try {
+            val publicationHref = publication.links.selfPublicationLinkOrNull()?.href
+                ?: throw IllegalArgumentException().withUiText(Res.string.invalid_link.asUiText())
 
-        val publicationHref = publication.links.find {
-            it.rel?.equals(SELF) == true
-        }?.href.toString()
+            val refererUrl = uiState.value.appDetail?.dataOrNull()
+                ?.respectAppDefaultLessonList()?.href
 
-        val refererUrl = uiState.value.appDetail?.dataOrNull()
-            ?.respectAppDefaultLessonList()?.href
-
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                LearningUnitDetail.create(
-                    learningUnitManifestUrl = route.manifestUrl.resolve(publicationHref),
-                    appManifestUrl = route.manifestUrl,
-                    refererUrl = refererUrl?.let { Url(it) },
-                    expectedIdentifier = publication.metadata.identifier?.toString()
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    LearningUnitDetail.create(
+                        learningUnitManifestUrl = route.manifestUrl.resolve(publicationHref),
+                        appManifestUrl = route.manifestUrl,
+                        refererUrl = refererUrl?.let { Url(it) },
+                        expectedIdentifier = publication.metadata.identifier?.toString()
+                    )
                 )
             )
-        )
+        }catch(e: Throwable) {
+            Napier.w("Something wrong opening publication", e)
+            snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
+        }
     }
 
     fun onClickNavigation(navigation: ReadiumLink) {

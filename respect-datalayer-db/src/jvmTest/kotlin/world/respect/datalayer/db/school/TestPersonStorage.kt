@@ -1,18 +1,18 @@
 package world.respect.datalayer.db.school
 
+import io.ktor.http.Url
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import world.respect.datalayer.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -32,7 +32,10 @@ class TestPersonStorage {
 
         runBlocking {
             testSchoolDb(temporaryFolder.newFolder()) { db ->
-                val schoolDs = db.toDataSource(adminUid)
+                val schoolDs = db.toDataSource(
+                    authenticatedUserUid = adminUid,
+                    schoolUrl = Url("http://localhost:8098/"),
+                )
 
                 val parentPerson = Person(
                     guid = parentGuid,

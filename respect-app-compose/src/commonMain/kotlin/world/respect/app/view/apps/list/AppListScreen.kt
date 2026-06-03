@@ -26,7 +26,7 @@ import world.respect.app.app.RespectAsyncImage
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.apps.list.AppListUiState
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findIcons
 

@@ -1,0 +1,213 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "003_admin_user_assigns_assignment_to_a_class_test"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+---
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- runFlow: "subflows/admin_add_app.yaml"
+- runFlow:
+    file:  "subflows/admin_add_class_with_members.yaml"
+    env:
+      CLASSNAME: "TestClass"
+
+# Teacher Add Assignment
+- clearState: world.respect.app
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USERNAME: "teacherauser"
+      PASSWORD: "test123"
+- assertVisible: "Apps"
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- assertVisible: "TestClass"
+- tapOn: "Assignments"
+- tapOn:
+    id: "floating_action_button"   #  +Assignment button
+- assertVisible:
+    id: "app_title"
+    text: "Add assignment"
+- tapOn: "Save"
+- assertVisible: "Required field"
+- tapOn: "Assignment title*"
+- inputText: "Homework 1"
+- tapOn: "Assign to"
+- tapOn: "TestClass"
+- tapOn: "Description"
+- inputText: "Please complete this Homework on time."
+- runFlow:
+    when:
+      notVisible: "Due date"
+    commands:
+      - hideKeyboard
+- tapOn: "Due date"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.futureDate}
+- tapOn: "Time"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.currentTime}
+- runFlow:
+    when:
+      notVisible: "Task"
+    commands:
+      - hideKeyboard
+- tapOn: "Task"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "Example Web App"
+- assertVisible:
+    id: "app_title"
+    text: "Main Menu"
+- tapOn: "Examples"
+- tapOn: "Statement Maker"
+- tapOn: "Task"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "Example Web App"
+- assertVisible:
+    id: "app_title"
+    text: "Main Menu"
+- tapOn: "Examples"
+- tapOn: "Assignment Result Statement Demo"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 1"
+- assertVisible: "All (3)"
+- assertVisible: "Completed (0)"
+- assertVisible: "In-progress (0)"
+- assertVisible: "Please complete this Homework on time."
+- assertVisible: "Assigned to"
+- assertVisible: "TestClass.*"
+- assertVisible: "StudentA User"
+- assertVisible: "StudentB User"
+- assertVisible: "StudentC User"
+- assertVisible: "Statement Maker"
+- assertVisible: "Assignment Result Statement Demo"
+- assertVisible: "Average"
+- tapOn: "Assignments"
+- assertVisible:
+    id: "app_title"
+    text: "Assignments"
+- assertVisible: "Homework 1"
+
+- clearState: world.respect.app
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USERNAME: "studentauser"
+      PASSWORD: "test123"
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 1"
+- tapOn: "Statement Maker"
+- assertVisible:
+    text: "Statement Maker"
+- tapOn: "Open"
+- assertVisible: "Statement Maker"
+- tapOn: "Send statement"
+- assertVisible: "Statement sent.*"
+- tapOn: "Close"
+- back
+- tapOn: "Assignment Result Statement Demo"
+- tapOn: "Open"
+- assertVisible: "Assignment Result.*"
+- tapOn: "Score"
+- inputText: 1
+- tapOn: "Send statement"
+- assertVisible: "Statement sent.*"
+- tapOn: "Close"
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
+- assertVisible: "All (2)"
+- assertVisible: "Completed (2)"
+- assertVisible: "In-progress (0)"
+
+# Student B user complete 1 task
+- clearState: world.respect.app
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USERNAME: "studentbuser"
+      PASSWORD: "test123"
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 1"
+- assertVisible: "Statement Maker"
+- tapOn: "Assignment Result Statement Demo"
+- tapOn: "Open"
+- assertVisible: "Assignment Result.*"
+- tapOn: "Score"
+- inputText: 0.9
+- tapOn: "Send statement"
+- assertVisible: "Statement sent.*"
+- tapOn: "Close"
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
+- assertVisible: "All (2)"
+- assertVisible: "Completed (1)"
+
+# Teacher Validate students results
+- clearState: world.respect.app
+- runFlow:
+    file: "subflows/school_user_login_flow.yaml"
+    env:
+      USERNAME: "teacherauser"
+      PASSWORD: "test123"
+- tapOn: "Assignments"
+- assertVisible: "Homework 1"
+- assertVisible: "TestClass.*"
+- tapOn: "Homework 1"
+- assertVisible: "All (3)"
+- assertVisible: "Completed (1)"
+- assertVisible: "In-progress (1)"
+# 22/May: Disabled: needs horizontal scroll MD
+#- assertVisible: "Not started (1)"
+- assertVisible: "Please complete this Homework on time."
+- assertVisible: "Assigned to"
+- assertVisible: "TestClass.*"
+- assertVisible: "StudentA User"
+- assertVisible: "StudentB User"
+- assertVisible: "StudentC User"
+- assertVisible: "Statement Maker"
+- assertVisible: "Average"
+- assertVisible: "95%"
+- assertVisible: "90%"
+
+# Verify edit assignment is working
+- tapOn:
+    id: "floating_action_button"   #  Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit assignment"
+- tapOn: "Assignment title*"
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Homework 1"
+- inputText: "HW - Week 1"
+- tapOn: "Save"
+- assertVisible: "HW - Week 1"

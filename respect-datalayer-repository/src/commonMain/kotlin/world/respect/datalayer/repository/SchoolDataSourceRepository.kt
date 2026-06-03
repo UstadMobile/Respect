@@ -5,7 +5,6 @@ import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.opds.OpdsPublicationDataSourceRepository
 import world.respect.datalayer.repository.opds.OpdsFeedDataSourceRepository
-import world.respect.datalayer.repository.school.AssignmentDataSourceRepository
 import world.respect.datalayer.repository.school.ClassDataSourceRepository
 import world.respect.datalayer.repository.school.EnrollmentDataSourceRepository
 import world.respect.datalayer.repository.school.PersonDataSourceRepository
@@ -15,12 +14,16 @@ import world.respect.datalayer.repository.school.PersonPasswordDataSourceReposit
 import world.respect.datalayer.repository.school.PersonQrCodeBadgeDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolAppDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolPermissionGrantDataSourceRepository
+import world.respect.datalayer.repository.school.xapi.XapiStatementsResourceRepository
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
+import world.respect.datalayer.school.xapi.XapiActivityDataSource
+import world.respect.lib.xapi.resources.XapiAgentsResource
+import world.respect.lib.xapi.resources.XapiStatementsResource
 
 class SchoolDataSourceRepository(
     internal val local: SchoolDataSourceLocal,
@@ -106,15 +109,6 @@ class SchoolDataSourceRepository(
         )
     }
 
-    override val assignmentDataSource: AssignmentDataSourceRepository by lazy {
-        AssignmentDataSourceRepository(
-            local = local.assignmentDataSource,
-            remote = remote.assignmentDataSource,
-            validationHelper = validationHelper,
-            remoteWriteQueue = remoteWriteQueue,
-        )
-    }
-
     override val inviteDataSource: InviteDataSourceRepository by lazy {
         InviteDataSourceRepository(
             local = local.inviteDataSource,
@@ -138,6 +132,20 @@ class SchoolDataSourceRepository(
             remoteWriteQueue = remoteWriteQueue,
         )
     }
+
+    override val xapiStatementsResource: XapiStatementsResource by lazy {
+        XapiStatementsResourceRepository(
+            local = local.xapiStatementsResource,
+            remote = remote.xapiStatementsResource,
+            remoteWriteQueue = remoteWriteQueue,
+        )
+    }
+
+    override val xapiAgentsResource: XapiAgentsResource
+        get() = local.xapiAgentsResource
+
+    override val xapiActivityDataSource: XapiActivityDataSource
+        get() = local.xapiActivityDataSource
 
     override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {
         local.schoolConfigSettingDataSource

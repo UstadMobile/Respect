@@ -61,6 +61,7 @@ buildConfig {
 kotlin {
     compilerOptions {
         optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
     androidTarget {
@@ -181,8 +182,8 @@ android {
         applicationId = "world.respect.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 125
-        versionName = "1.0.25"
+        versionCode = 128
+        versionName = "1.0.28"
 
         for(propName in ACRA_PROP_NAMES) {
             buildConfigField(

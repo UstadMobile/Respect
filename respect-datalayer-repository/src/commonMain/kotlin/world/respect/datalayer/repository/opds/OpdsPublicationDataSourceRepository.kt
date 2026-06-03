@@ -3,10 +3,10 @@ package world.respect.datalayer.repository.opds
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.ext.combineWithRemote
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.ext.combineWithRemote
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.lib.opds.model.OpdsPublication

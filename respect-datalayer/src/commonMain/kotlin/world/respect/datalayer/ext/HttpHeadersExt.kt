@@ -2,7 +2,7 @@ package world.respect.datalayer.ext
 
 import io.ktor.http.HttpMessage
 import io.ktor.http.lastModified
-import world.respect.datalayer.DataLayerHeaders
+import world.respect.lib.dataloadstate.DataLayerHeaders
 import kotlin.time.Instant
 
 fun HttpMessage.lastModifiedAsLong(): Long {

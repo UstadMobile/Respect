@@ -1,14 +1,23 @@
 package world.respect.datalayer.http.ext
 
 import io.ktor.http.ParametersBuilder
-import world.respect.datalayer.DataLayerParams
+import world.respect.lib.dataloadstate.DataLayerParams
 import world.respect.datalayer.shared.params.GetListCommonParams
+import kotlin.uuid.Uuid
 
 fun ParametersBuilder.appendIfNotNull(
     name: String,
     value: String?
 ) {
     value?.also { append(name, it) }
+}
+
+
+fun ParametersBuilder.appendIfNotNull(
+    name: String,
+    value: Uuid?
+) {
+    value?.also { append(name, it.toString()) }
 }
 
 fun ParametersBuilder.appendCommonListParams(

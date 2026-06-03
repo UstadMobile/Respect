@@ -13,6 +13,12 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.DataReadyState
+import world.respect.shared.navigation.LearningUnitDetail
+import world.respect.shared.navigation.LearningUnitList
+import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
+import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
@@ -114,11 +120,6 @@ class LearningUnitListViewModel(
 
 
     init {
-        _uiState.update {
-            it.copy(
-                showSelectPlaylistButton = route.resultDest?.resultKey == PlaylistEditViewModel.KEY_PLAYLIST
-            )
-        }
         viewModelScope.launch {
             _appUiState.update {
                 it.copy(searchState = AppBarSearchUiState(visible = true))
@@ -214,7 +215,6 @@ class LearningUnitListViewModel(
                 result = LearningUnitSelection(
                     learningUnitManifestUrl = learningUnitManifestUrl,
                     selectedPublication = publication,
-                    appManifestUrl = route.appManifestUrl,
                 )
             )
         ) {
@@ -222,6 +222,9 @@ class LearningUnitListViewModel(
                 value = NavCommand.Navigate(
                     LearningUnitDetail.create(
                         learningUnitManifestUrl = learningUnitManifestUrl,
+                        refererUrl = Url(
+                            refererUrl
+                        ),
                         appManifestUrl = route.appManifestUrl,
                         refererUrl = Url(learningUnitManifestUrl.toString()),
                         expectedIdentifier = publication.metadata.identifier.toString()
@@ -278,6 +281,7 @@ class LearningUnitListViewModel(
     }
 
     fun onClickNavigation(navigation: ReadiumLink) {
+
         val navigationHref = navigation.href
         val resolvedUrl = route.opdsFeedUrl.resolve(navigationHref)
 
@@ -433,7 +437,7 @@ class PlaylistDetailViewModel(
         viewModelScope.launch {
             val activeAccount = accountManager.activeAccount
                 ?: throw IllegalStateException("No active account when copying playlist")
-            
+
             val username = getActiveUsernameUseCase()
             @OptIn(ExperimentalUuidApi::class)
             val copiedFeed = MakePlaylistOpdsFeedUseCase(

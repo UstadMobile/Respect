@@ -43,6 +43,7 @@ import org.koin.compose.getKoin
 import org.koin.compose.koinInject
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.effects.NavControllerLogEffect
+import world.respect.datalayer.db.school.ext.isParent
 import world.respect.navigation.NavCommandEffect
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
@@ -231,21 +232,26 @@ fun App(
                     if (appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
                         NavigationBar {
                             topLevelNavItems.forEachIndexed { index, item ->
-                                NavigationBarItem(
-                                    icon = {
-                                        Icon(item.icon, contentDescription = null)
-                                    },
-                                    label = {
-                                        Text(stringResource(item.label), maxLines = 1)
-                                    },
-                                    selected = selectedTopLevelItemIndex == index,
-                                    onClick = {
-                                        navController.navigate(item.destRoute)  {
-                                            popUpTo(0) { inclusive = true }
+                                val skipIt = item.routeName == "$routeNamePrefix.Assignment" &&
+                                        activeAccount?.person?.isParent() == true
+
+                                if(!skipIt) {
+                                    NavigationBarItem(
+                                        icon = {
+                                            Icon(item.icon, contentDescription = null)
+                                        },
+                                        label = {
+                                            Text(stringResource(item.label), maxLines = 1)
+                                        },
+                                        selected = selectedTopLevelItemIndex == index,
+                                        onClick = {
+                                            navController.navigate(item.destRoute)  {
+                                                popUpTo(0) { inclusive = true }
+                                            }
+                                            selectedTopLevelItemIndex = index
                                         }
-                                        selectedTopLevelItemIndex = index
-                                    }
-                                )
+                                    )
+                                }
                             }
                         }
                     }

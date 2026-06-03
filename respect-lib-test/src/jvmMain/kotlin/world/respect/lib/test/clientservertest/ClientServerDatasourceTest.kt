@@ -75,6 +75,10 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
     private val serverDir = File(baseDir, "server").also { it.mkdirs() }
 
+    val port = findFreePort()
+
+    val schoolUrl = Url("http://localhost:$port/")
+
     val serverSchoolSourceAndDb = newLocalSchoolDatabase(
         serverDir, stringHasher, adminUserId
     )
@@ -142,13 +146,13 @@ class ClientServerDataSourceTestBuilder internal constructor(
             ),
             defaultAppCatalogUrl = null,
             json = Json { ignoreUnknownKeys = true },
+            schoolUrl = schoolUrl,
         )
 
         return Pair(schoolDb, schoolDataSource)
     }
 
 
-    val port = findFreePort()
 
     val serverSchoolDataSource = serverSchoolSourceAndDb.also { (database, datasource) ->
         runBlocking {
@@ -164,7 +168,6 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
     val serverSchoolPrimaryKeyGenerator = SchoolPrimaryKeyGenerator()
 
-    val schoolUrl = Url("http://localhost:$port/")
 
     val schoolDirectoryEntry = SchoolDirectoryEntry(
         name = LangMapStringValue("test school"),

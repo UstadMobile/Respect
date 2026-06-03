@@ -1,3 +1,4 @@
+
 package world.respect
 
 import android.content.Context
@@ -22,11 +23,16 @@ import com.ustadmobile.libcache.downloader.RunDownloadJobUseCaseImpl
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import okhttp3.Dispatcher
@@ -37,7 +43,9 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import world.respect.app.config.RespectBuildConfig
+import world.respect.callback.AddDirectoriesFromPropertiesUseCase
 import world.respect.callback.AddSchoolDirectoryCallback
+import world.respect.callback.migrate6to8AddDirectories
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CheckPasskeySupportUseCaseAndroidImpl
 import world.respect.credentials.passkey.CreatePasskeyUseCase
@@ -90,6 +98,8 @@ import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
+import world.respect.lib.xapi.nanohttpd.XapiNanoHttpdApp
+import world.respect.lib.xapi.nanohttpd.XapiNanoHttpdResourceProvider
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXHasher64Factory
 import world.respect.libxxhash.XXStringHasher
@@ -347,6 +357,7 @@ val appKoinModule = module {
             json = get()
         )
     }
+
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)
     viewModelOf(::AppLauncherViewModel)
@@ -396,7 +407,6 @@ val appKoinModule = module {
     viewModelOf(::AssignmentListViewModel)
     viewModelOf(::AssignmentEditViewModel)
     viewModelOf(::AssignmentDetailViewModel)
-    viewModelOf(::AssignmentDetailViewModel)
     viewModelOf(::EnrollmentListViewModel)
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::InviteQrViewModel)
@@ -406,6 +416,7 @@ val appKoinModule = module {
     viewModelOf(::PlaylistEditViewModel)
     viewModelOf(::ExternalLinkViewModel)
     viewModelOf(::PlaylistShareViewModel)
+
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -524,13 +535,20 @@ val appKoinModule = module {
         )
     }
 
+    single<AddDirectoriesFromPropertiesUseCase>{
+        AddDirectoriesFromPropertiesUseCase(
+            xxStringHasher = get()
+        )
+    }
+
     single<RespectAppDatabase> {
         val appContext = androidContext().applicationContext
         Room.databaseBuilder<RespectAppDatabase>(
             appContext, appContext.getDatabasePath("respect_3_app.db").absolutePath
         ).setDriver(BundledSQLiteDriver())
-            .addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
+            .addCallback(AddSchoolDirectoryCallback(addDirectoriesFromPropertiesUseCase = get()))
             .addCommonMigrations()
+            .addMigrations(migrate6to8AddDirectories(addDirectoriesFromPropertiesUseCase = get()))
             .build()
     }
 
@@ -715,6 +733,29 @@ val appKoinModule = module {
             settings = get(),
         )
     }
+
+    single<XapiNanoHttpdApp>(createdAtStart = true) {
+        XapiNanoHttpdApp(
+            port = 0,
+            json = get(),
+            xapiResourceProvider = get(),
+        ).also { nanoHttpdApp ->
+            GlobalScope.launch(Dispatchers.IO) {
+                nanoHttpdApp.start()
+                Napier.i("NanoHttpdXapi started")
+            }
+        }
+    }
+
+    single<XapiNanoHttpdResourceProvider> {
+        XapiNanoHttpdResourceProviderAndroid()
+    }
+
+    single<GetXapiActivityForPublicationUseCase> {
+        GetXapiActivityForPublicationUseCase()
+    }
+
+
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -914,6 +955,7 @@ val appKoinModule = module {
                 checkPersonPermissionUseCase = get(),
                 json = get(),
                 defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
+                schoolUrl = accountScopeId.schoolUrl,
             )
         }
 
@@ -943,6 +985,7 @@ val appKoinModule = module {
         scoped<ApproveOrDeclineInviteRequestUseCase> {
             ApproveOrDeclineInviteRequestUseCase(
                 schoolDataSource = get(),
+                updateClazzStudentXapiGroupUseCase = get(),
             )
         }
 
@@ -1021,6 +1064,37 @@ val appKoinModule = module {
             CreateClassUseCase(dataSource = get())
         }
 
+        scoped<GetXapiLaunchUrlUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            GetXapiLaunchUrlUseCaseAndroid(
+                nanoHttpdApp = get(),
+                schoolUrl = accountScopeId.schoolUrl,
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                json = get(),
+                accountManager = get(),
+                getXapiActivityForPublicationUseCase = get(),
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<LaunchAppUseCase> {
+            LaunchAppUseCaseAndroid(
+                appContext = androidContext().applicationContext,
+                getXapiLaunchUrlUseCase = get(),
+            )
+        }
+
+        scoped<UpdateClazzStudentXapiGroupUseCase>() {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            UpdateClazzStudentXapiGroupUseCase(
+                schoolDataSource = get(),
+                authenticatedUserPrincipalId = accountScopeId.accountPrincipalId,
+                schoolUrl = accountScopeId.schoolUrl,
+            )
+        }
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()

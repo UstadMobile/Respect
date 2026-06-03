@@ -1,7 +1,6 @@
 package world.respect.datalayer
 
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
-import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.InviteDataSourceLocal
@@ -13,6 +12,9 @@ import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.SchoolAppDataSourceLocal
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 
 /**
  * Local DataSource implementation (eg based on a database). Local DataSources include putLocal
@@ -39,12 +41,16 @@ interface SchoolDataSourceLocal: SchoolDataSource {
 
     override val enrollmentDataSource: EnrollmentDataSourceLocal
 
-    override val assignmentDataSource: AssignmentDataSourceLocal
-
     override val inviteDataSource: InviteDataSourceLocal
 
     override val opdsPublicationDataSource: OpdsPublicationDataSourceLocal
 
     override val opdsFeedDataSource: OpdsFeedDataSourceLocal
+
+    override val xapiActivityDataSource: XapiActivityDataSourceLocal
+
+    override val xapiAgentsResource: XapiActorDataSourceLocal
+
+    override val xapiStatementsResource: XapiStatementsResourceLocal
 
 }

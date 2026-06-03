@@ -1,7 +1,6 @@
 package world.respect.datalayer.schooldirectory
 
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
-import world.respect.datalayer.respect.model.RespectSchoolDirectory
 
 interface SchoolDirectoryDataSourceLocal: SchoolDirectoryDataSource {
 
@@ -9,7 +8,5 @@ interface SchoolDirectoryDataSourceLocal: SchoolDirectoryDataSource {
         school: SchoolDirectoryEntry,
         dbUrl: String,
     )
-
-    suspend fun getServerManagedDirectory(): RespectSchoolDirectory?
 
 }

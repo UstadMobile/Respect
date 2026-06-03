@@ -24,7 +24,7 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.db.school.ext.fullName
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.shared.generated.resources.Res

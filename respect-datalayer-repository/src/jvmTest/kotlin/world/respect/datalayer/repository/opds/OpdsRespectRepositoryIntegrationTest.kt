@@ -25,13 +25,13 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.mockito.kotlin.mock
 import world.respect.datalayer.AuthenticatedUserPrincipalId
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.NoDataLoadedState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.opds.OpdsFeedDataSourceDb
 import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttp
 import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttp
 import world.respect.datalayer.school.model.AuthToken

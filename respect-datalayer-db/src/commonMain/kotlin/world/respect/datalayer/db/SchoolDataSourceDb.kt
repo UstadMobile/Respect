@@ -1,12 +1,12 @@
 package world.respect.datalayer.db
 
+import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
 import world.respect.datalayer.db.school.opds.OpdsFeedDataSourceDb
-import world.respect.datalayer.db.school.AssignmentDatasourceDb
 import world.respect.datalayer.db.school.ClassDatasourceDb
 import world.respect.datalayer.db.school.EnrollmentDataSourceDb
 import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
@@ -19,7 +19,9 @@ import world.respect.datalayer.db.school.PersonQrBadgeDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
 import world.respect.datalayer.db.school.SchoolAppDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
-import world.respect.datalayer.school.AssignmentDataSourceLocal
+import world.respect.datalayer.db.school.xapi.XapiActivityDataSourceDb
+import world.respect.datalayer.db.school.xapi.XapiActorDataSourceDb
+import world.respect.datalayer.db.school.xapi.XapiStatementsResourceDb
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.DummySchoolConfigSettingsDataSource
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
@@ -36,6 +38,9 @@ import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
 /**
@@ -46,6 +51,7 @@ import world.respect.lib.primarykeygen.PrimaryKeyGenerator
  * @property authenticatedUser the authenticated user. The DataSource will use this to carry out
  *           permission checks as required, except when using putLocal functions (which are used by
  *           the repository to cache data from upstream).
+ * @property schoolUrl the schoolUrl used by the Xapi datasource when creating actor objects.
  */
 class SchoolDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -55,6 +61,7 @@ class SchoolDataSourceDb(
     private val json: Json,
     private val defaultAppCatalogUrl: String?,
     private val primaryKeyGenerator: PrimaryKeyGenerator = PrimaryKeyGenerator(RespectSchoolDatabase.TABLE_IDS),
+    private val schoolUrl: Url,
 ) : SchoolDataSourceLocal {
 
     private val getAuthenticatedPersonUseCase by lazy {
@@ -113,10 +120,6 @@ class SchoolDataSourceDb(
         EnrollmentDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
 
-    override val assignmentDataSource: AssignmentDataSourceLocal by lazy {
-        AssignmentDatasourceDb(schoolDb, uidNumberMapper, authenticatedUser)
-    }
-
     override val opdsPublicationDataSource: OpdsPublicationDataSourceLocal by lazy {
         OpdsPublicationDataSourceDb(
             respectSchoolDatabase = schoolDb,
@@ -139,6 +142,35 @@ class SchoolDataSourceDb(
     override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {
         DummySchoolConfigSettingsDataSource(
             defaultAppCatalogUrl = defaultAppCatalogUrl,
+        )
+    }
+
+    override val xapiActivityDataSource: XapiActivityDataSourceLocal by lazy {
+        XapiActivityDataSourceDb(
+            schoolDb = schoolDb,
+            authenticatedUser = authenticatedUser,
+            uidNumberMapper = uidNumberMapper,
+            json = json,
+        )
+    }
+
+    override val xapiAgentsResource: XapiActorDataSourceLocal by lazy {
+        XapiActorDataSourceDb(
+            schoolDb = schoolDb,
+            authenticatedUser = authenticatedUser,
+            uidNumberMapper = uidNumberMapper,
+        )
+    }
+    override val xapiStatementsResource: XapiStatementsResourceLocal by lazy {
+        XapiStatementsResourceDb(
+            schoolDb = schoolDb,
+            authenticatedUser = authenticatedUser,
+            getAuthenticatedPersonUseCase = getAuthenticatedPersonUseCase,
+            schoolUrl = schoolUrl,
+            uidNumberMapper = uidNumberMapper,
+            xapiActivityDataSourceLocal = xapiActivityDataSource,
+            xapiActorDataSourceLocal = xapiAgentsResource,
+            json = json,
         )
     }
 }

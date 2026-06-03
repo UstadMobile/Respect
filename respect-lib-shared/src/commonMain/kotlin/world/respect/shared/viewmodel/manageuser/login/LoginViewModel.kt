@@ -15,7 +15,7 @@ import world.respect.credentials.passkey.GetCredentialUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.credentials.passkey.password.SavePasswordUseCase
-import world.respect.datalayer.DataReadyState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.model.PersonStatusEnum

@@ -1,5 +1,7 @@
 package world.respect.server
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
@@ -74,6 +76,7 @@ import world.respect.shared.domain.account.username.filterusername.FilterUsernam
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
+import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
@@ -98,6 +101,13 @@ fun serverKoinModule(
             .setDriver(BundledSQLiteDriver())
             .addCallback(AddServerManagedDirectoryCallback(xxStringHasher = get()))
             .addCommonMigrations()
+            .addMigrations(
+                object: Migration(6, 8) {
+                    override fun migrate(connection: SQLiteConnection) {
+                        //do nothing on server.
+                    }
+                }
+            )
             .build()
     }
 
@@ -151,7 +161,11 @@ fun serverKoinModule(
         )
     }
     single<RegisterSchoolUseCase> {
-        RegisterSchoolUseCaseImpl()
+        RegisterSchoolUseCaseImpl(
+            registerSchoolPin = config.propertyOrNull(
+                SERVER_CONFIG_KEY_REGISTRATION_PIN
+            )?.getString()
+        )
     }
     single<SchoolUrlVerificationManager> {
         SchoolUrlVerificationManager()
@@ -385,6 +399,7 @@ fun serverKoinModule(
                 json = get(),
                 primaryKeyGenerator = get<SchoolPrimaryKeyGenerator>().primaryKeyGenerator,
                 defaultAppCatalogUrl = RespectServerBuildConfig.RESPECT_DEFAULT_APPLIST,
+                schoolUrl = accountScopeId.schoolUrl,
             )
         }
 
@@ -409,6 +424,16 @@ fun serverKoinModule(
                 schoolPrimaryKeyGenerator = get(),
                 authenticatedUser = accountScopeId.accountPrincipalId,
                 schoolDataSource = get(),
+            )
+        }
+
+        factory<UpdateClazzStudentXapiGroupUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            UpdateClazzStudentXapiGroupUseCase(
+                schoolDataSource = get(),
+                authenticatedUserPrincipalId = accountScopeId.accountPrincipalId,
+                schoolUrl = accountScopeId.schoolUrl,
             )
         }
 

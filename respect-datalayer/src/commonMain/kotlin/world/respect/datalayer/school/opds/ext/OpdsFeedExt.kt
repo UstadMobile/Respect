@@ -1,7 +1,7 @@
 package world.respect.datalayer.school.opds.ext
 
 import io.ktor.http.Url
-import world.respect.datalayer.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.libutil.util.time.systemTimeInMillis
@@ -25,23 +25,7 @@ fun OpdsFeed.requireSelfUrl(): Url {
  * See also: dataLoadMetaInfoForPlaylist
  */
 fun OpdsFeed.withAbsoluteSelfUrl(urlLoaded: Url): OpdsFeed {
-    return copy(
-        links = if(links.any { it.hasRel("self") }) {
-            links.map { link ->
-                if(link.hasRel("self")) {
-                    link.copy(href = urlLoaded.toString())
-                }else {
-                    link
-                }
-            }
-        }else {
-            links + ReadiumLink(
-                href = urlLoaded.toString(),
-                rel = listOf("self"),
-                type = "application/opds+json",
-            )
-        }
-    )
+    return copy(links = links.withAbsoluteSelfLink(urlLoaded))
 }
 
 

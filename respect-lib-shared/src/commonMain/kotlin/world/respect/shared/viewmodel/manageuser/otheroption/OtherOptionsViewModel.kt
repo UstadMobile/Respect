@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
@@ -49,6 +49,10 @@ class OtherOptionsViewModel(
                     userAccountIconVisible = false,
                 )
             }
+
+            getDevModeEnabledUseCase().also { devModeEnabled ->
+                _uiState.update { it.copy(manageDirectoriesVisible = devModeEnabled) }
+            }
         }
     }
 
@@ -57,7 +61,6 @@ class OtherOptionsViewModel(
             it.copy(
                 link = link,
                 errorMessage = null,
-                manageDirectoriesVisible= getDevModeEnabledUseCase(),
             )
         }
     }

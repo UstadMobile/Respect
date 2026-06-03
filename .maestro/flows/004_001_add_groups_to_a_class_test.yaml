@@ -36,7 +36,7 @@ onFlowComplete:
 - inputText: "teacherauser"
 - tapOn:
     id : "password"
-- inputText: "test1234"
+- inputText: "test123"
 - tapOn: "Login"
 - runFlow:
     when:

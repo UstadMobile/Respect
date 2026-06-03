@@ -15,12 +15,11 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.RespectPasswordCredential
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
 import world.respect.datalayer.school.PersonDataSource

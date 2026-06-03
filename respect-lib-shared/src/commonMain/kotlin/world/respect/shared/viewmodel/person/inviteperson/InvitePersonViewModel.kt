@@ -24,7 +24,6 @@ import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.db.school.ext.fullName
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
 import world.respect.datalayer.school.ext.copyInvite
 import world.respect.datalayer.school.ext.isApprovalRequiredNow

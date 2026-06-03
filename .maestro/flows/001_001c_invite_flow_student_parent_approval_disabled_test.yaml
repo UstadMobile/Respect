@@ -309,7 +309,7 @@ onFlowComplete:
     id: "app_title"
     text: "Invitation"
 - assertVisible: "Role"
-- assertVisible: "Parent"
+- assertVisible: "Student"
 - assertVisible: "School name"
 - assertVisible: ${output.SCHOOL_NAME}
 - assertVisible: "Class name"

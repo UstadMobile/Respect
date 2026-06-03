@@ -90,7 +90,7 @@ echo "ci-run-maestro: TestServerController now running on port $TESTCONTROLLER_P
 
 # Can now run maestro - the TESTSERVERCONTROLLER url is known and we also know the admin auth to create a new school etc.
 
-echo "Run Maestro using $TESTSERVERCONTROLLER_URL and $DIR_ADMIN_AUTH_PASS"
+echo "Run Maestro using $TESTSERVERCONTROLLER_URL"
 
 if [ ! -e build/results ]; then
     mkdir -p build/results

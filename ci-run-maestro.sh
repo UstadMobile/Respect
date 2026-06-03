@@ -100,8 +100,6 @@ if [ ! -e build/maestro/results ]; then
     mkdir -p build/maestro/output
 fi
 
-echo"Mode=$1"
-
 if [ "$1" == "cloud" ]; then
     if [ "$MAESTRO_CLOUD_PROJECTID" == "" ]; then
       echo "Must set Maestro cloud project id as MAESTRO_CLOUD_PROJECTID environment var"
@@ -192,7 +190,7 @@ if [ "$1" == "cloud" ]; then
          echo "ci-run-maestro: Log file not found. Skipping download."
     fi
 elif [ "$1" == "wait-for-upload" ]; then
-    MAESTRO_CMD_FILE="~/run-local-$GIT_BRANCH.sh"
+    MAESTRO_CMD_FILE="$HOME/tmp/run-local-$BUILD_TAG.sh"
     echo maestro test \
                --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
                --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \

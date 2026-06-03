@@ -1,8 +1,8 @@
 # App listings
 Recipe id: https://id.openeel.org/recipes/applisting
 
-Used to provide a list of apps that are intended to be made available to users (e.g. teachers, 
-students, etc). 
+Used to provide a list of launchable apps that are intended to be made available to users (e.g. 
+teachers, students, etc). 
 
 ```
 {
@@ -13,7 +13,7 @@ students, etc).
         }
     },
     verb: {
-        "id": "http://activitystrea.ms/schema/1.0/saved"
+        "id": "https://id.openeel.org/verb/listed-app"
     },
     object: {
         "id": "https://example.app/ns/app-id",
@@ -46,3 +46,8 @@ students, etc).
 [launchable app OPDS publication](../respect-lib-opds-model/README_LAUNCHABLE_APP.md).
 * An app is removed by [voiding](https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#232-voiding) 
   the statement that added it.
+* A listing of available apps can be retrieved using a get statements query with the following 
+  parameters:
+  * verb=```https://id.openeel.org/verb/listed-app```
+  * activity=```https://id.openeel.org/recipes/applisting```
+  * related_activities=```true```

@@ -44,8 +44,9 @@ Steps:
 * Run ```adb tcpip 5555``` on the laptop (5555 is a default, can be changed) to switch the Android
   device into TCP/IP mode.
 * Connect to the continuous integration server using SSH with port forwarding
-  ```ssh -R 7777:192.168.1.2:5555``` (where 192.168.1.2 is the WiFi IP address of the Android device,
-  7777 is any available random port).
+  ```ssh -R 7777:192.168.1.2:5555 user@server``` (where 192.168.1.2 is the WiFi IP address of the Android device,
+  7777 is any available random port, user is the ssh username, and server is the hostname of the CI 
+  server).
 * On the CI server run ```adb connect localhost:7777```. Device should connect
 * On the CI server verify the device is connected by running ```adb devices```.
 

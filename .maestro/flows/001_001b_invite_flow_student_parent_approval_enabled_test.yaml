@@ -284,7 +284,10 @@ onFlowComplete:
     file: "subflows/openlink_flow.yaml"
     env:
       URL: ${output.SCHOOL_URL + "respect_school_link/AcceptInvite?inviteCode=" + output.parentClassApproveOn}
-- tapOn: "Get Started"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- tapOn: "Create new account"
 - assertVisible:
     id: "app_title"
     text: "Invitation"

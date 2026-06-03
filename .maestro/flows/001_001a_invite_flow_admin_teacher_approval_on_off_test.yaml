@@ -153,6 +153,10 @@ onFlowComplete:
 - tapOn: "OK"
 - assertVisible:
     id: "app_title"
+    text: "Login"
+- tapOn: "Create new account"
+- assertVisible:
+    id: "app_title"
     text: "Invitation"
 - assertVisible: "Role"
 - assertVisible: "Teacher"
@@ -419,6 +423,10 @@ onFlowComplete:
 - tapOn: "Url"
 - inputText: ${output.SCHOOL_URL + "respect_school_link/AcceptInvite?inviteCode=" + output.teacherApproveOff}
 - tapOn: "OK"
+- assertVisible:
+    id: "app_title"
+    text: "Login"
+- tapOn: "Create new account"
 - assertVisible:
     id: "app_title"
     text: "Invitation"

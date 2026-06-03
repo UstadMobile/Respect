@@ -191,6 +191,12 @@ if [ "$1" == "cloud" ]; then
     fi
 elif [ "$1" == "wait-for-upload" ]; then
     MAESTRO_CMD_FILE="$HOME/tmp/run-local-$BUILD_TAG.sh"
+    DONE_FLAG_FILE=$WORKSPACE/build/maestro-uploaded
+
+    if [ -e $DONE_FLAG_FILE ]; then
+      rm $DONE_FLAG_FILE
+    fi
+
     echo maestro test \
                --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
                --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
@@ -198,10 +204,16 @@ elif [ "$1" == "wait-for-upload" ]; then
                --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
                --env SCHOOL_NAME=TestSchool \
                --format=junit \
-               --test-output-dir=build/maestro/output \
                --output=build/maestro/report.xml > $MAESTRO_CMD_FILE
-    echo "Saved Maestro command to $MAESTRO_CMD_FILE - download it and run locally"
-    sleep 120
+    echo "Saved Maestro command to $MAESTRO_CMD_FILE - download it and run locally, then upload" \
+      " results to $WORKSPACE and create a file $DONE_FLAG_FILE"
+
+    # This script should be run by Jenkins using a timeout control.
+    while [ ! -f $DONE_FLAG_FILE ]; do
+      sleep 5
+    done
+
+    echo "$DONE_FLAG_FILE appeared - proceeding"
 else
     maestro test \
       --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \

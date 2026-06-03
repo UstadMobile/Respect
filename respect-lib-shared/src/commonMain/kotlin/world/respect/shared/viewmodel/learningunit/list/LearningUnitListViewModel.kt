@@ -11,8 +11,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataReadyState
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
@@ -36,8 +34,6 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.generated.resources.language
 import world.respect.shared.navigation.AssignmentEdit
-import world.respect.shared.navigation.LearningUnitDetail
-import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PlaylistDetail
@@ -48,8 +44,6 @@ import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
-import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
@@ -175,7 +169,6 @@ class LearningUnitListViewModel(
                     result = LearningUnitSelection(
                         learningUnitManifestUrl = learningUnitManifestUrl,
                         selectedPublication = publication,
-                        appManifestUrl = route.appManifestUrl,
                     )
                 )
                 return
@@ -192,7 +185,6 @@ class LearningUnitListViewModel(
                 value = NavCommand.Navigate(
                     LearningUnitDetail.create(
                         learningUnitManifestUrl = learningUnitManifestUrl,
-                        appManifestUrl = route.appManifestUrl,
                         refererUrl = Url(learningUnitManifestUrl.toString()),
                         expectedIdentifier = publication.metadata.identifier.toString()
                     )
@@ -222,11 +214,7 @@ class LearningUnitListViewModel(
                 value = NavCommand.Navigate(
                     LearningUnitDetail.create(
                         learningUnitManifestUrl = learningUnitManifestUrl,
-                        refererUrl = Url(
-                            refererUrl
-                        ),
-                        appManifestUrl = route.appManifestUrl,
-                        refererUrl = Url(learningUnitManifestUrl.toString()),
+                        refererUrl = route.opdsFeedUrl,
                         expectedIdentifier = publication.metadata.identifier.toString()
                     )
                 )
@@ -269,7 +257,6 @@ class LearningUnitListViewModel(
                 LearningUnitSelection(
                     learningUnitManifestUrl = resolvePublicationManifestUrl(publication),
                     selectedPublication = publication,
-                    appManifestUrl = route.appManifestUrl,
                 )
             }
 
@@ -513,10 +500,6 @@ class PlaylistDetailViewModel(
             )
             return
         }
-        val appManifestUrl = _uiState.value.feed?.selfUrl()
-            ?: throw IllegalStateException(
-                "Cannot navigate to publication: playlist feed has no self URL"
-            )
 
         if (!resultReturner.sendResultIfResultExpected(
                 route = route,
@@ -524,7 +507,6 @@ class PlaylistDetailViewModel(
                 result = LearningUnitSelection(
                     learningUnitManifestUrl = Url(selfLink.href),
                     selectedPublication = publication,
-                    appManifestUrl = appManifestUrl,
                 )
             )
         ) {
@@ -532,7 +514,6 @@ class PlaylistDetailViewModel(
                 NavCommand.Navigate(
                     LearningUnitDetail.create(
                         learningUnitManifestUrl = Url(selfLink.href),
-                        appManifestUrl = appManifestUrl,
                         expectedIdentifier = publication.metadata.identifier?.toString(),
                     )
                 )
@@ -570,11 +551,10 @@ class PlaylistDetailViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 destination = AssignmentEdit.create(
-                    uid = null,
+                    assignmentActivityId = null,
                     learningUnitSelected = LearningUnitSelection(
                         learningUnitManifestUrl = learningUnitManifestUrl,
                         selectedPublication = firstPublication,
-                        appManifestUrl = playlistUrl,
                     )
                 )
             )

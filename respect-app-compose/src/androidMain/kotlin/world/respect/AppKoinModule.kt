@@ -224,6 +224,7 @@ import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
+import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
@@ -263,6 +264,10 @@ import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
+import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
+import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
+import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCaseAndroid
+import world.respect.shared.domain.xapi.xapinanohttpd.XapiNanoHttpdResourceProviderAndroid
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -339,12 +344,6 @@ val appKoinModule = module {
                 preconfigured = get()
             }
         }
-    }
-
-    single<LaunchAppUseCase> {
-        LaunchAppUseCaseAndroid(
-            appContext = androidContext().applicationContext
-        )
     }
     single<OpenExternalLinkUseCase> {
         OpenExternalLinkUseCaseAndroid(

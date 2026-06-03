@@ -206,7 +206,6 @@ fun AssignmentEditScreen(
         Text(
             modifier = Modifier.defaultItemPadding(),
             text = stringResource(Res.string.task),
-            text = stringResource(Res.string.tasks),
             style = MaterialTheme.typography.titleMedium
         )
 

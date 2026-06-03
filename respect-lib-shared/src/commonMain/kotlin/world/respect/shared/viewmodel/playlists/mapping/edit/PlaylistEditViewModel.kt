@@ -12,11 +12,11 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.datalayer.school.opds.ext.selfUrl
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsFeedMetadata
 import world.respect.lib.opds.model.OpdsGroup

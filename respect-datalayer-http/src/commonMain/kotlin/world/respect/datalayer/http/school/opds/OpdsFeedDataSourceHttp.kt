@@ -10,9 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthTokenProvider
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.NoDataLoadedState
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.datalayer.ext.getAsDataLoadState
@@ -23,6 +20,7 @@ import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.datalayer.school.opds.ext.withAbsoluteSelfUrl
+import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.opds.model.OpdsFeed
 
 class OpdsFeedDataSourceHttp(

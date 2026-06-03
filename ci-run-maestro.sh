@@ -100,6 +100,8 @@ if [ ! -e build/maestro/results ]; then
     mkdir -p build/maestro/output
 fi
 
+echo"Mode=$1"
+
 if [ "$1" == "cloud" ]; then
     if [ "$MAESTRO_CLOUD_PROJECTID" == "" ]; then
       echo "Must set Maestro cloud project id as MAESTRO_CLOUD_PROJECTID environment var"

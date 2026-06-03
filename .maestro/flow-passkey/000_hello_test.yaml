@@ -1,0 +1,21 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        USERNAME: ${USERNAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "006_user_signup_using_passkey_test.yaml"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+
+---
+- launchApp

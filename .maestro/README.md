@@ -49,6 +49,10 @@ Steps:
 * On the CI server run ```adb connect localhost:7777```. Device should connect
 * On the CI server verify the device is connected by running ```adb devices```.
 
+Tips:
+* To reset adb on a laptop or server: run ```adb kill-server```
+* When finished with a remote session, run ```adb disconnect``` before exiting the ssh
+  session (because the device will not be reachable without the ssh tunnel).
 
 ## Available test flows
 ---

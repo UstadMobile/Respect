@@ -10,7 +10,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "001_002b_invite_existing_teacher_and_students_to_class_approval_enabled_test"
+        NAME: "001_002a_invite_existing_teacher_and_students_to_class_approval_enabled_test"
 
 onFlowComplete:
   - runScript:
@@ -179,9 +179,9 @@ onFlowComplete:
     id: "app_title"
     text: "Accounts"
 - assertVisible: "TeacherA User"
-#- assertVisible: "Pending requests"
-#- assertVisible: "TeacherA User: TestClass (Teacher)"
-#- assertVisible: ".*Pending approval"
+- assertVisible: "Pending requests"
+- assertVisible: "TeacherA User: TestClass (Teacher)"
+- assertVisible: ".*Pending approval"
 
 # StudentA User joining class using link to join the class
 - runFlow:
@@ -216,9 +216,9 @@ onFlowComplete:
     id: "app_title"
     text: "Accounts"
 - assertVisible: "StudentA User"
-#- assertVisible: "Pending requests"
-#- assertVisible: "StudentA User: TestClass (Student)"
-#- assertVisible: ".*Pending approval"
+- assertVisible: "Pending requests"
+- assertVisible: "StudentA User: TestClass (Student)"
+- assertVisible: ".*Pending approval"
 
 # Parent user use the link to add StudentA User to class
 - runFlow:
@@ -251,11 +251,11 @@ onFlowComplete:
     id: "app_title"
     text: "Accounts"
 - assertVisible: "ParentA User"
-#- assertVisible: "Pending requests"
-#- assertVisible: "StudentB User: TestClass (Student)"
-#- assertVisible: ".*Pending approval"
-#- assertVisible: "Family members"
-#- assertVisible: "StudentB User"
+- assertVisible: "Pending requests"
+- assertVisible: "StudentB User: TestClass (Student)"
+- assertVisible: ".*Pending approval"
+- assertVisible: "Family members"
+- assertVisible: "StudentB User"
 
 # Admin approve user's request to join the class
 - clearState: world.respect.app

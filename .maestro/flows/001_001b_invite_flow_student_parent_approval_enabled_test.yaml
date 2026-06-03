@@ -366,6 +366,7 @@ onFlowComplete:
 - assertVisible: "ParentC User"
 - assertVisible: "ChildA User"  #When ParentC added, childA automatically gets added to class people
 - repeat:
+    times: 5
     while:
       visible: "Accept Invite"
     commands:

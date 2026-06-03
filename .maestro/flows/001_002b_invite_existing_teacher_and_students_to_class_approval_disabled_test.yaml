@@ -10,7 +10,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "001_002a_invite_existing_teacher_and_students_to_class_approval_disabled_test"
+        NAME: "001_002b_invite_existing_teacher_and_students_to_class_approval_disabled_test"
 
 onFlowComplete:
   - runScript:

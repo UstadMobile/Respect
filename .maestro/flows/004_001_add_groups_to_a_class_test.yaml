@@ -17,7 +17,10 @@ onFlowComplete:
       file: "scripts/teardown.js"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
-- runFlow: "subflows/admin_add_class_with_members.yaml"
+- runFlow:
+    file:  "subflows/admin_add_class_with_members.yaml"
+    env:
+      CLASSNAME: "TestClass"
 #
 - clearState: world.respect.app
 - launchApp:

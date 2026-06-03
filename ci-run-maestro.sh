@@ -189,7 +189,19 @@ if [ "$1" == "cloud" ]; then
     else
          echo "ci-run-maestro: Log file not found. Skipping download."
     fi
-
+elif [ "$1" == "wait-for-upload" ]; then
+    MAESTRO_CMD_FILE="~/run-local-$GIT_BRANCH.sh"
+    echo maestro test \
+               --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
+               --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
+               --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
+               --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
+               --env SCHOOL_NAME=TestSchool \
+               --format=junit \
+               --test-output-dir=build/maestro/output \
+               --output=build/maestro/report.xml > $MAESTRO_CMD_FILE
+    echo "Saved Maestro command to $MAESTRO_CMD_FILE - download it and run locally"
+    sleep 120
 else
     maestro test \
       --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \

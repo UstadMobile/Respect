@@ -139,7 +139,7 @@ if [ "$1" == "cloud" ]; then
         --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \
         --flows=.maestro/flows \
         --format=junit \
-        --output=build/maestro/report.xml \
+        --output=build/maestro/output/report.xml \
         --timeout=300 \
         $NAME_ARG \
         --repo-name=Respect \
@@ -204,8 +204,7 @@ elif [ "$1" == "wait-for-upload" ]; then
                --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
                --env SCHOOL_NAME=TestSchool \
                --format=junit \
-               --test-output-dir=build/maestro/output \
-               --output=build/maestro/report.xml > $MAESTRO_CMD_FILE
+               --output=build/maestro/output/report.xml > $MAESTRO_CMD_FILE
     echo "Saved Maestro command to $MAESTRO_CMD_FILE - download it and run locally, then upload" \
       " results to $WORKSPACE and create a file $DONE_FLAG_FILE"
 
@@ -224,7 +223,7 @@ else
       --env SCHOOL_NAME=TestSchool \
       --format=junit \
       --test-output-dir=build/maestro/output \
-      --output=build/maestro/report.xml \
+      --output=build/maestro/output/report.xml \
       .maestro/flows/*.yaml
     MAESTRO_STATUS=$?
 fi

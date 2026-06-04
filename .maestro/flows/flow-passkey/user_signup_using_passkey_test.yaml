@@ -1,0 +1,139 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        USERNAME: ${USERNAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "user_signup_using_passkey_test"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+
+---
+#- runFlow: "subflows/school_admin_login_flow.yaml"
+
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- tapOn: "Get Started"
+- tapOn: "Other options"
+# link field verification
+- tapOn: "Paste the link here"
+- inputText: ${output.SCHOOL_URL}
+- tapOn: "Next"
+- tapOn:
+    id: "username"
+- inputText: "admin"
+- tapOn:
+    id : "password"
+- inputText: ${SCHOOL_ADMIN_PASSWORD}
+- tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible: "Apps"
+
+
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "People"
+- tapOn:
+    id: "ExpandableFab"   #  +Person button
+- tapOn:
+    text: "Invite person"
+    index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Invite person"
+- assertVisible: "Share link"
+- tapOn:
+    id: "role"
+- tapOn:
+    text: "Teacher"
+# Approve OFF
+- runFlow:
+    when:
+      notVisible: "Approval not required until:.*"
+    commands:
+      - tapOn: "Approval required" # turn the switch off
+      - assertVisible: "Approval not required until:.*"
+- assertVisible: "Approval not required until:.*"
+- copyTextFrom:
+    id: "invite_url"
+- back
+- tapOn:
+    id: "user_account_icon"
+- assertVisible: "Profile"
+- tapOn: "Logout"
+
+# C) Teacher sign-up via invite link to the class
+- tapOn: "Other options"
+- tapOn: "Paste the link here"
+- inputText: ${maestro.copiedText}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Invitation"
+- assertVisible: "Role"
+- assertVisible: "Teacher"
+- assertVisible: "School name"
+- assertVisible: ${output.SCHOOL_NAME}
+- assertVisible: "School server URL"
+- assertVisible: ${output.SCHOOL_URL}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Terms and conditions"
+- tapOn: "Accept"
+- assertVisible:
+    id: "app_title"
+    text: "Your profile"
+- tapOn: "Your name*"
+- inputText: "Teacher User"
+- tapOn: "Gender*"
+- tapOn: "Female"
+- tapOn: "Your date of birth*"
+- runScript:
+    file: "scripts/setDate.js"
+- inputText: ${output.pastYearDateP}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "Create account"
+- assertVisible: "teacheruser"
+- tapOn: "Sign-up"
+- assertVisible: "Create passkey to sign in to Respect?"
+- assertVisible: "Use your screen lock"
+- extendedWaitUntil:
+    visible: "Apps"
+    timeout: 30000
+- tapOn:
+    id: "user_account_icon"
+- assertVisible: "Profile"
+- tapOn: "Logout"
+
+#Teacher Login again using passkey
+- tapOn: "Other options"
+- tapOn: "Paste the link here"
+- inputText: ${output.SCHOOL_URL}
+- tapOn: "Next"
+- assertVisible: "Choose a saved passkey for Respect"
+- tapOn: "teacheruser"
+- extendedWaitUntil:
+    visible: "Apps"
+    timeout: 30000
+- tapOn: "People"
+- assertVisible: "Teacher User"

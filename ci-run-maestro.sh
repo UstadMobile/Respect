@@ -223,7 +223,7 @@ else
       --env SCHOOL_NAME=TestSchool \
       --format=junit \
       --output=build/maestro/output/report.xml \
-      .maestro/flow-passkey/user_signup_using_passkey_test.yaml
+      .maestro/flows/*.yaml
     MAESTRO_STATUS=$?
 fi
 

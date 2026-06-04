@@ -222,7 +222,6 @@ else
       --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
       --env SCHOOL_NAME=TestSchool \
       --format=junit \
-      --test-output-dir=build/maestro/output \
       --output=build/maestro/output/report.xml \
       .maestro/flows/*.yaml
     MAESTRO_STATUS=$?

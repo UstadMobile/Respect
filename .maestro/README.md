@@ -29,32 +29,6 @@ Where:
 * ```SCHOOL_ADMIN_PASSWORD``` is the password for the admin user for the school (also as per addschool command)
 * ```SCHOOL_NAME``` is the name of the school (also as per addschool command)
 
-
-
-## Running continuous integration (CI) tests controlled from a CI server on local devices
-
-It may be necessary to run an end-to-end test controlled by a continuous integration server
-(CI e.g. Jenkins) where the Maestro flow itself runs on a physical Android device (for example 
-a semi-automated passkey test which requires human intervention to authenticate on fingerprint scanner).
-
-Steps:
-* Make sure the laptop and Android device are connected to the same local network.
-* Connect the Android device to the laptop using USB debugging as normal, make sure it appears in
-  the devices list as per the ```adb devices``` command.
-* Run ```adb tcpip 5555``` on the laptop (5555 is a default, can be changed) to switch the Android
-  device into TCP/IP mode.
-* Connect to the continuous integration server using SSH with port forwarding
-  ```ssh -R 7777:192.168.1.2:5555 user@server``` (where 192.168.1.2 is the WiFi IP address of the Android device,
-  7777 is any available random port, user is the ssh username, and server is the hostname of the CI 
-  server).
-* On the CI server run ```adb connect localhost:7777```. Device should connect
-* On the CI server verify the device is connected by running ```adb devices```.
-
-Tips:
-* To reset adb on a laptop or server: run ```adb kill-server```
-* When finished with a remote session, run ```adb disconnect``` before exiting the ssh
-  session (because the device will not be reachable without the ssh tunnel).
-
 ## Available test flows
 ---
 ### 001_001_invite_users_using_qr_code_or_link_test

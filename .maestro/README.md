@@ -29,6 +29,22 @@ Where:
 * ```SCHOOL_ADMIN_PASSWORD``` is the password for the admin user for the school (also as per addschool command)
 * ```SCHOOL_NAME``` is the name of the school (also as per addschool command)
 
+
+## Run multiple tests (suite)
+
+Running multiple tests with Maestro requires a blank server installation for each test.
+[TestServerController](https://github.com/UstadMobile/TestServerController) is used to start/stop a new blank server instance on a free port as
+required.
+
+```
+export TESTSERVER_CONTROLLER=http://192.168.1.2:8094/
+./ci-run-maestro.sh 
+```
+
+Where:
+* 192.168.1.2 is the local IP of the developer's laptop
+
+
 ## Available test flows
 ---
 ### 001_001_invite_users_using_qr_code_or_link_test
@@ -88,17 +104,3 @@ Where:
 5. Assignment is saved and verified in class
 ---
 
-
-## Run multiple tests (suite)
-
-Running multiple tests with Maestro requires a blank server installation for each test.
-[TestServerController](https://github.com/UstadMobile/TestServerController) is used to start/stop a new blank server instance on a free port as
-required.
-
-```
-export TESTSERVER_CONTROLLER=http://192.168.1.2:8094/
-./ci-run-maestro.sh 
-```
-
-Where:
-* 192.168.1.2 is the local IP of the developer's laptop

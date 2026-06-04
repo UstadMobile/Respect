@@ -81,12 +81,12 @@ onFlowComplete:
     id: "delete_group_btn"
 - tapOn:
    id: "floating_action_button"
-- tapOn: "StudentD USER"
+- tapOn: "StudentB USER"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Test Group"
-- assertVisible: "StudentD USER"
+- assertVisible: "StudentB USER"
 - assertVisible: "3 Students"
 - back
 - assertVisible:

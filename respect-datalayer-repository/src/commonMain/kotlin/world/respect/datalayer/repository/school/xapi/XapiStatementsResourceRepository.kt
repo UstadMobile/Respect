@@ -18,6 +18,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.ext.combineWithRemote
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.lib.xapi.model.XapiActor
@@ -194,5 +195,20 @@ class XapiStatementsResourceRepository(
             }
         }
 
+    }
+
+    override fun getAppListAsFlow(dataLoadParams: DataLoadParams): Flow<DataLoadState<List<XapiStatement>>> {
+        return local.getAppListAsFlow(dataLoadParams).combineWithRemote(
+            remoteFlow = remote.getAsFlow(
+                listParams = GetStatementParams(
+                    verb = XapiVerb.ID_LISTED_APP,
+                    activity = OpenEelXapiConstants.CATEGORY_APP_LISTING_RECIPE,
+                    relatedActivities = true,
+                ),
+                dataLoadParams = dataLoadParams,
+            ).onEach { remoteState ->
+                remoteState.dataOrNull()?.let { local.updateLocal(it.statements) }
+            }
+        )
     }
 }

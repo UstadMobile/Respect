@@ -4,6 +4,8 @@ object OpenEelXapiConstants {
 
     const val ASSIGNMENT_XAPI_SEGMENT = "openeel_assignment"
 
+    const val APP_LISTING_XAPI_SEGMENT = "openeel_applisting"
+
     const val HEADER_XAPI_VERSION = "X-Experience-API-Version"
 
     /**
@@ -22,6 +24,8 @@ object OpenEelXapiConstants {
     const val ACTIVITY_EXTENSION_DEADLINE = "https://id.ustadmobile.com/xapi/extension/deadline"
 
     const val CATEGORY_ASSIGNMENT_RECIPE = "https://id.ustadmobile.com/xapi/activities/assignment-recipe"
+
+    const val CATEGORY_APP_LISTING_RECIPE = "https://id.openeel.org/recipes/applisting"
 
 
 }

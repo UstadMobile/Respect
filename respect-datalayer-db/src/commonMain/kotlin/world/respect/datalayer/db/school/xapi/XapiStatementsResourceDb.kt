@@ -53,6 +53,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.OpenEelXapiConstants.ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_CONSISTENT_THROUGH
@@ -699,6 +700,16 @@ class XapiStatementsResourceDb(
         }
     }
 
+    override fun getAppListAsFlow(dataLoadParams: DataLoadParams): Flow<DataLoadState<List<XapiStatement>>> {
+        return getAsFlow(
+            listParams = GetStatementParams(
+                verb = XapiVerb.ID_LISTED_APP,
+                activity = OpenEelXapiConstants.CATEGORY_APP_LISTING_RECIPE,
+                relatedActivities = true,
+            ),
+            dataLoadParams = dataLoadParams,
+        ).map { state -> state.map { it.statements } }
+    }
     companion object {
         const val DEFAULT_MAX_STATEMENTS = 5_000
 

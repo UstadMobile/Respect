@@ -189,27 +189,3 @@ fun LearningUnitDetailScreen(
         }
     }
 }
-
-@Composable
-private fun IconLabel(icon: ImageVector, labelRes: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(
-            modifier = Modifier
-                .height(4.dp)
-        )
-
-        Text(
-            text = labelRes
-        )
-
-    }
-}

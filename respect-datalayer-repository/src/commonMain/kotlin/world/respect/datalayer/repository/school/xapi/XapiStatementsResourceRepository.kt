@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
-import world.respect.datalayer.school.xapi.ext.idStr
+import world.respect.lib.xapi.ext.idStr
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.ext.combineWithRemote

@@ -46,8 +46,9 @@ import world.respect.datalayer.school.xapi.ext.allActivities
 import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
 import world.respect.datalayer.school.xapi.ext.allVerbs
-import world.respect.datalayer.school.xapi.ext.distinctMerged
+import world.respect.lib.xapi.ext.distinctMerged
 import world.respect.datalayer.school.xapi.ext.copyWithIdIfNotSet
+import world.respect.datalayer.school.xapi.ext.distinctMerged
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState

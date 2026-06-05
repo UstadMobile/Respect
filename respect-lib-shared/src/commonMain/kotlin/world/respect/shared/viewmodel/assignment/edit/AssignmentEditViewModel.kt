@@ -39,7 +39,6 @@ import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
 import world.respect.shared.domain.xapi.activityDefinitionTitle
-import world.respect.shared.domain.xapi.actorName
 import world.respect.shared.domain.xapi.createBlankAssignmentStatement
 import world.respect.shared.ext.studentsXapiGroup
 import world.respect.shared.generated.resources.Res
@@ -291,7 +290,7 @@ class AssignmentEditViewModel(
                     statement?.activityDefinitionTitle.isNullOrBlank()
                 },
                 classError = Res.string.required_field.asUiText().takeIf {
-                    statement?.actorName.isNullOrEmpty()
+                    statement?.actor?.name.isNullOrEmpty()
                 }
             )
         }

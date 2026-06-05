@@ -35,6 +35,8 @@ fun XapiStatement.addObjectTypeIfRequired(): XapiStatement {
 
 /**
  * Add the assignmentActivityId to the statement as per the Assignment Recipe, if not already present.
+ * This is used when a statement is received (from an activity provider e.g. a lesson) to link the
+ * statement with the parent. if not already present.
  *
  * @param assignmentActivityId the activity id of the assignment
  * @return the updated statement
@@ -161,3 +163,20 @@ fun XapiStatement.objectSubstatementOrNull(): XapiStatement? {
     return `object` as? XapiStatement
 }
 
+/**
+ * Given a list of statements, filter to include only the most recent statement per object id
+ * (e.g. per activity id etc).
+ */
+fun List<XapiStatement>.distinctByMostRecentTimestampForActivityId(): List<XapiStatement> {
+    return mapNotNull {
+        it.`object`.idAsStringOrNull()?.let { id -> Pair(id, it) }
+    }.groupBy {
+        it.first
+    }.map { entry ->
+        entry.value.maxBy { it.second.timestamp ?: EPOCH }.second
+    }
+}
+
+fun List<XapiStatement>.sortedByTimestampDescending() : List<XapiStatement> {
+    return sortedByDescending { it.timestamp ?: EPOCH }
+}

@@ -24,16 +24,11 @@ object XapiAssignmentConstants {
     const val ACTIVITY_TYPE_ASSIGNMENT = "http://id.tincanapi.com/activitytype/school-assignment"
 }
 
-@OptIn(ExperimentalUuidApi::class)
 val XapiStatement.activityDefinitionTitle: String
     get() = (this.`object` as? XapiActivity)?.definition?.name?.values?.firstOrNull() ?: ""
 
 val XapiStatement.assignmentDescription: String
     get() = (this.`object` as? XapiActivity)?.definition?.description?.values?.firstOrNull() ?: ""
-
-@OptIn(ExperimentalUuidApi::class)
-val XapiStatement.actorName: String
-    get() = this.actor.account?.name.orEmpty()
 
 @OptIn(ExperimentalUuidApi::class)
 val XapiStatement.assignmentDeadline: Instant?

@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import world.respect.app.components.defaultItemPadding
-import world.respect.datalayer.school.xapi.ext.idStr
+import world.respect.lib.xapi.ext.idStr
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.composites.AssignmentAndProgress
@@ -60,7 +60,7 @@ import world.respect.shared.domain.xapi.assignmentDescription
 import world.respect.shared.domain.xapi.createBlankAssignmentStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assigned_to
-import world.respect.shared.generated.resources.average
+import world.respect.shared.generated.resources.average_str
 import world.respect.shared.generated.resources.deadline
 import world.respect.shared.generated.resources.no_matching_data_available_yet
 import world.respect.shared.generated.resources.toggle_fullscreen
@@ -239,7 +239,7 @@ fun AssignmentDetailScreen(
                                     }
 
                                     AssignmentDetailHeaderCell(
-                                        title = stringResource(Res.string.average),
+                                        title = stringResource(Res.string.average_str),
                                         width = taskColWidth,
                                         height = headerHeight
                                     )

@@ -34,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
+import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
@@ -41,6 +42,7 @@ import world.respect.lib.opds.model.findIcons
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_app
 import world.respect.shared.generated.resources.lessons
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.apps.detail.AppsDetailUiState
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
@@ -98,12 +100,16 @@ fun AppsDetailScreen(
                 },
                 headlineContent = {
                     Text(
-                        text = appDetail?.metadata?.title?.getTitle() ?: ""
+                        text = appDetail?.metadata?.title?.let {
+                            uiTextStringResource(it.asUiText())
+                        } ?: ""
                     )
                 },
                 supportingContent = {
                     Text(
-                        text = appDetail?.metadata?.subtitle?.getTitle() ?: "",
+                        text = appDetail?.metadata?.subtitle?.let {
+                            uiTextStringResource(it.asUiText())
+                        } ?: "",
                         maxLines = 1
                     )
                 },
@@ -283,7 +289,7 @@ fun PublicationList(
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = publication.metadata.title.getTitle(),
+            text = uiTextStringResource(publication.metadata.title.asUiText()),
             maxLines = 1,
         )
     }

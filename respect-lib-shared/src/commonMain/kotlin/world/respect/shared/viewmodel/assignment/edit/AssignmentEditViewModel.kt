@@ -30,6 +30,7 @@ import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.ext.addActivityToContextActivitiesGrouping
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.ext.objectActivityNameOrNull
 import world.respect.lib.xapi.ext.removeActivityFromContextActivitiesGrouping
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
@@ -234,7 +235,7 @@ class AssignmentEditViewModel(
             prev.copy(
                 statementData = DataReadyState(statement),
                 nameError = prev.nameError?.takeIf {
-                    prev.statementData.dataOrNull()?.activityDefinitionTitle == statement.activityDefinitionTitle
+                    prev.statementData.dataOrNull()?.objectActivityNameOrNull() == statement.objectActivityNameOrNull()
                 },
             )
         }

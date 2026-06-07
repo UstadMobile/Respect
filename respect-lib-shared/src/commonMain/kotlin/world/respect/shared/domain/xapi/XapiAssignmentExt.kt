@@ -1,7 +1,7 @@
 package world.respect.shared.domain.xapi
 
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.contentOrNull
+import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActivityDefinition
 import world.respect.lib.xapi.model.XapiActor
@@ -19,22 +19,16 @@ import kotlin.uuid.Uuid
 @OptIn(ExperimentalUuidApi::class)
 object XapiAssignmentConstants {
     const val CATEGORY_ASSIGNMENT_RECIPE = "https://id.ustadmobile.com/xapi/activities/assignment-recipe"
-    const val EXT_DEADLINE = "https://id.ustadmobile.com/xapi/extension/deadline"
     const val EXT_CREATED = "https://id.ustadmobile.com/xapi/extension/created"
     const val ACTIVITY_TYPE_ASSIGNMENT = "http://id.tincanapi.com/activitytype/school-assignment"
 }
 
+@Deprecated("Should use objectActivityNameOrNull")
 val XapiStatement.activityDefinitionTitle: String
     get() = (this.`object` as? XapiActivity)?.definition?.name?.values?.firstOrNull() ?: ""
 
 val XapiStatement.assignmentDescription: String
     get() = (this.`object` as? XapiActivity)?.definition?.description?.values?.firstOrNull() ?: ""
-
-@OptIn(ExperimentalUuidApi::class)
-val XapiStatement.assignmentDeadline: Instant?
-    get() = (this.`object` as? XapiActivity)?.definition?.extensions?.get(XapiAssignmentConstants.EXT_DEADLINE)
-        ?.let { (it as? JsonPrimitive)?.contentOrNull }
-        ?.let { runCatching { Instant.parse(it) }.getOrNull() }
 
 
 @OptIn(ExperimentalUuidApi::class)
@@ -70,9 +64,9 @@ fun XapiStatement.withDeadline(deadline: Instant?): XapiStatement {
     val definition = activity.definition ?: XapiActivityDefinition()
     val newExtensions = (definition.extensions ?: emptyMap()).toMutableMap().apply {
         if (deadline != null) {
-            put(XapiAssignmentConstants.EXT_DEADLINE, JsonPrimitive(deadline.toString()))
+            put(OpenEelXapiConstants.ACTIVITY_EXTENSION_DEADLINE, JsonPrimitive(deadline.toString()))
         } else {
-            remove(XapiAssignmentConstants.EXT_DEADLINE)
+            remove(OpenEelXapiConstants.ACTIVITY_EXTENSION_DEADLINE)
         }
     }
     return copy(

@@ -45,10 +45,11 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.xapi.ext.extensionDeadlineAsInstantOrNull
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.shared.domain.xapi.activityDefinitionTitle
-import world.respect.shared.domain.xapi.assignmentDeadline
 import world.respect.shared.domain.xapi.assignmentDescription
 import world.respect.shared.domain.xapi.withDeadline
 import world.respect.shared.domain.xapi.withDescription
@@ -185,7 +186,8 @@ fun AssignmentEditScreen(
 
         RespectLocalDateTimeField(
             modifier = Modifier.defaultItemPadding().fillMaxWidth(),
-            value = assignment?.assignmentDeadline?.toLocalDateTime(TimeZone.currentSystemDefault()),
+            value = assignment?.objectActivityOrNull()?.definition?.extensionDeadlineAsInstantOrNull()
+                ?.toLocalDateTime(TimeZone.currentSystemDefault()),
             onValueChanged = { newDeadline ->
                 assignment?.also {
                     onEntityChanged(

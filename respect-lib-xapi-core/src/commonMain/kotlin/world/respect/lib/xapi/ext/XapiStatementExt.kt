@@ -159,6 +159,10 @@ fun XapiStatement.objectActivityOrNull(): XapiActivity? {
     return `object` as? XapiActivity
 }
 
+fun XapiStatement.objectActivityNameOrNull(): Map<String, String>? {
+    return objectActivityOrNull()?.definition?.name
+}
+
 fun XapiStatement.objectSubstatementOrNull(): XapiStatement? {
     return `object` as? XapiStatement
 }

@@ -7,6 +7,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.Url
 import io.ktor.http.contentType
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.lib.dataloadstate.DataLoadParams
@@ -19,6 +20,7 @@ import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.datalayer.school.opds.ext.withAbsoluteSelfUrl
+import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.opds.model.OpdsFeed
 
 class OpdsFeedDataSourceHttp(
@@ -66,6 +68,15 @@ class OpdsFeedDataSourceHttp(
                 setBody(feed)
             }
         }
+    }
+
+    override fun getPlaylistsAsFlow(schoolUrl: Url): Flow<DataLoadState<List<OpdsFeed>>> {
+        return flowOf(NoDataLoadedState.notFound())
+    }
+
+    override suspend fun deleteByUrl(url: Url) {
+
+
     }
 
 }

@@ -57,6 +57,9 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign_to
 import world.respect.shared.generated.resources.assignment_title
 import world.respect.shared.generated.resources.description
+import world.respect.shared.generated.resources.task
+import world.respect.shared.generated.resources.assignment_name
+import world.respect.shared.generated.resources.lesson_assessment
 import world.respect.shared.generated.resources.due_date
 import world.respect.shared.generated.resources.fingerprint
 import world.respect.shared.generated.resources.no_tasks_selected_yet
@@ -202,7 +205,7 @@ fun AssignmentEditScreen(
 
         Text(
             modifier = Modifier.defaultItemPadding(),
-            text = stringResource(Res.string.tasks),
+            text = stringResource(Res.string.task),
             style = MaterialTheme.typography.titleMedium
         )
 

@@ -325,12 +325,14 @@ class AssignmentEditViewModel(
             }
         }
     }
-
     companion object {
 
-        const val KEY_LEARNING_UNIT = "result_learning_unit"
+        const val KEY_LEARNING_UNIT = "result_learning_unit_single"
 
         const val ACTIVITY_ID_PATH = "xapi/activities/assignment"
 
     }
 }
+
+
+

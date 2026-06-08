@@ -26,7 +26,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app
-import world.respect.shared.generated.resources.apps
+import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.empty_list_description_admin
 import world.respect.shared.generated.resources.empty_list_description_non_admin
 import world.respect.shared.navigation.AppsDetail
@@ -42,6 +42,7 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.respectAppDefaultLessonList
+import world.respect.lib.opds.model.toStringMap
 import world.respect.libutil.ext.resolve
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
@@ -91,7 +92,7 @@ class AppLauncherViewModel(
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.apps.asUiText(),
+                title = Res.string.home.asUiText(),
                 onClickSettings = ::onClickSettings,
                 fabState = FabUiState(
                     icon = FabUiState.FabIcon.ADD,
@@ -158,6 +159,7 @@ class AppLauncherViewModel(
                         opdsFeedUrl = defaultLessonUrl,
                         appManifestUrl = url,
                         resultDest = route.resultDest,
+                        title = app.dataOrNull()?.metadata?.title?.toStringMap()?.values?.firstOrNull(),
                     )
                 }else {
                     AppsDetail.create(
@@ -202,4 +204,3 @@ class AppLauncherViewModel(
         }
     }
 }
-

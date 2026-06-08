@@ -19,8 +19,12 @@ data class OpdsFeed(
     val navigation: List<ReadiumLink>? = null,
     val facets: List<OpdsFacet>? = null,
     val groups: List<OpdsGroup>? = null,
+    val status: String = DEFAULT_STATUS,
 ) {
     companion object {
         const val MEDIA_TYPE = "application/opds+json"
+        
+        // Default status value. Matches StatusEnum.ACTIVE from respect-datalayer.school.model
+        const val DEFAULT_STATUS = "active"
     }
 }

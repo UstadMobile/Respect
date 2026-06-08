@@ -23,11 +23,14 @@ import world.respect.datalayer.db.school.opds.entities.OpdsFeedEntity
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
+import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
 import world.respect.datalayer.school.opds.ext.dataLoadMetaInfoForPlaylist
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
+import world.respect.libutil.ext.appendEndpointSegments
 import kotlin.time.Clock
 
 class OpdsFeedDataSourceDb(
@@ -145,6 +148,31 @@ class OpdsFeedDataSourceDb(
         }
     }
 
+    override fun getPlaylistsAsFlow(schoolUrl: Url): Flow<DataLoadState<List<OpdsFeed>>> {
+        val playlistPrefix =
+            schoolUrl.appendEndpointSegments(OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME)
+                .toString() + "/"
+        return schoolDb.getOpdsFeedEntityDao().findByUrlPrefixAsFlow(playlistPrefix, includeDeleted = false)
+            .map { feedEntities ->
+                schoolDb.useReaderConnection {
+                    DataReadyState(
+                        data = feedEntities.map { it.loadModel() }
+                    )
+                }
+            }
+    }
+    override suspend fun deleteByUrl(url: Url) {
+        val feedUid = uidNumberMapper(url.toString())
+        schoolDb.useWriterConnection { con ->
+            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                schoolDb.getOpdsFeedEntityDao().updateStatusByFeedUid(
+                    feedUid = feedUid,
+                    status = StatusEnum.TO_BE_DELETED,
+                    lastModified = Clock.System.now()
+                )
+            }
+        }
+    }
     override suspend fun updateLocal(
         url: Url,
         dataLoadResult: DataReadyState<OpdsFeed>,

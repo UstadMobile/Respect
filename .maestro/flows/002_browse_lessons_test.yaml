@@ -26,7 +26,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "App detail"
-- assertVisible: "Example Web App"
+- assertVisible: "My app"
 - assertVisible: "Add App"
 # verify App got added to Apps section
 - tapOn: "Add App"
@@ -34,11 +34,11 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Apps"
-- assertVisible: "Example Web App"
-- tapOn: "Example Web App"
+- assertVisible: "My app"
+- tapOn: "My app"
 - assertVisible: "Lessons"
 - tapOn: "Lessons"
-- tapOn: "Examples"
+- tapOn: "Grade 1"
 - tapOn: "Lesson 001"
 - assertVisible: "Lesson 001"
 - assertVisible: "App name"

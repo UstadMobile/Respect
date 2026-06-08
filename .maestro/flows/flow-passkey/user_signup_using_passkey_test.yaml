@@ -116,7 +116,6 @@ onFlowComplete:
 - assertVisible: "teacheruser"
 - tapOn: "Sign-up"
 - assertVisible: "Create passkey to sign in to Respect?"
-- assertVisible: "Use your screen lock"
 - extendedWaitUntil:
     visible: "Apps"
     timeout: 30000
@@ -130,8 +129,7 @@ onFlowComplete:
 - tapOn: "Paste the link here"
 - inputText: ${output.SCHOOL_URL}
 - tapOn: "Next"
-- assertVisible: "Choose a saved passkey for Respect"
-- tapOn: "teacheruser"
+- assertVisible: "Sign in to Respect with your saved passkey?"
 - extendedWaitUntil:
     visible: "Apps"
     timeout: 30000

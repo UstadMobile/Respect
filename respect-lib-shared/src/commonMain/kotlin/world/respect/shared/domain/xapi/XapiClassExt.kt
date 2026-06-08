@@ -12,6 +12,8 @@ import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+const val XAPI_LANG_KEY = ""
+
 /**
  * Activity type for a class as per README_CLASS_RECIPE.md
  */
@@ -38,36 +40,34 @@ val XapiStatement.classDefinitionTitle: String
 val XapiStatement.classDefinitionDescription: String
     get() = (this.`object` as? XapiActivity)?.definition?.description?.values?.firstOrNull() ?: ""
 
-/**
- * Create a copy of this class statement with an updated title in the activity definition name.
- */
-@OptIn(ExperimentalUuidApi::class)
-fun XapiStatement.withClassTitle(title: String): XapiStatement {
-    val activity = `object` as? XapiActivity ?: return this
+
+private fun XapiStatement.withDefinitionField(
+    update: (XapiActivityDefinition) -> XapiActivityDefinition
+): XapiStatement {
+    val activity = `object` as? XapiActivity
+        ?: throw IllegalStateException("Statement object is not an XapiActivity")
     val definition = activity.definition ?: XapiActivityDefinition()
     return copy(
-        `object` = activity.copy(
-            definition = definition.copy(
-                name = (definition.name ?: emptyMap()) + ("" to title)
-            )
-        )
+        `object` = activity.copy(definition = update(definition))
     )
 }
 
 /**
+ * Create a copy of this class statement with an updated title in the activity definition name.
+ */
+fun XapiStatement.withClassTitle(title: String): XapiStatement =
+    withDefinitionField { def ->
+        def.copy(name = (def.name ?: emptyMap()) + (XAPI_LANG_KEY to title))
+    }
+
+/**
  * Create a copy of this class statement with an updated description in the activity definition.
  */
-fun XapiStatement.withClassDescription(description: String): XapiStatement {
-    val activity = `object` as? XapiActivity ?: return this
-    val definition = activity.definition ?: XapiActivityDefinition()
-    return copy(
-        `object` = activity.copy(
-            definition = definition.copy(
-                description = (definition.description ?: emptyMap()) + ("" to description)
-            )
-        )
-    )
-}
+fun XapiStatement.withClassDescription(description: String): XapiStatement =
+    withDefinitionField { def ->
+        def.copy(description = (def.description ?: emptyMap()) + (XAPI_LANG_KEY to description))
+    }
+
 
 /**
  * Create a blank class statement as per the class-management recipe.

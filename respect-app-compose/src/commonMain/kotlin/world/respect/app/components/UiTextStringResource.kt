@@ -2,6 +2,7 @@ package world.respect.app.components
 
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.stringResource
+import world.respect.libutil.util.selectLang
 import world.respect.shared.resources.LangMapUiText
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.StringUiText
@@ -15,9 +16,10 @@ fun uiTextStringResource(uiText: UiText): String {
         }
 
         is LangMapUiText -> {
-            uiText.langMap.entries.firstOrNull {
-                it.key == LocalAppLocale.current
-            }?.value ?: uiText.langMap.entries.firstOrNull()?.value ?: ""
+            selectLang(
+                preferredLocales = listOf(LocalAppLocale.current),
+                availableLocales = uiText.langMap.keys.toList(),
+            )
         }
 
         is StringUiText -> uiText.text

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
@@ -17,18 +16,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_from_link
-import world.respect.app.app.RespectAsyncImage
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.apps.list.AppListUiState
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.opds.model.findIcons
+import world.respect.lib.xapi.ext.objectActivityOrNull
+import world.respect.lib.xapi.model.XapiStatement
 
 @Composable
 fun AppListScreen(
@@ -47,7 +43,7 @@ fun AppListScreen(
 fun AppListScreen(
     uiState: AppListUiState,
     onClickAddLink: () -> Unit,
-    onClickApp: (OpdsPublication) -> Unit
+    onClickApp: (XapiStatement) -> Unit
 ) {
     val appPublications = uiState.appList.dataOrNull() ?: emptyList()
 
@@ -75,43 +71,12 @@ fun AppListScreen(
 
         itemsIndexed(
             items = appPublications,
-            key = { index, app ->
-                app.metadata.identifier?.toString() ?: index
-            }
-        ) { index, app ->
-
+            key = { index, app -> app.objectActivityOrNull()?.id ?: index.toString() }
+        ) { _, app ->
             ListItem(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        onClickApp(app)
-                    },
-                leadingContent = {
-                    app.findIcons().firstOrNull()?.also { iconLink ->
-                        RespectAsyncImage(
-                            uri = iconLink.href,
-                            contentDescription = "",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(36.dp)
-                        )
-                    }
-                },
-                headlineContent = {
-                    Text(
-                        text = app.metadata.title.getTitle(),
-                    )
-                },
-                supportingContent = {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        //"-" is a placeholder for age range/category
-                        Text("-")
-                        Text("-")
-                    }
-                },
-
+                modifier = Modifier.fillMaxWidth().clickable { onClickApp(app) },
+                headlineContent = { Text(app.objectActivityOrNull()?.definition?.name?.get("en-US") ?: "") },
+                supportingContent = { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { Text("-"); Text("-") } },
             )
         }
     }

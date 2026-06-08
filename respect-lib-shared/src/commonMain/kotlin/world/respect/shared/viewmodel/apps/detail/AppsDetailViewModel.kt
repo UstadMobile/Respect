@@ -8,14 +8,12 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.apps_detail
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
@@ -28,7 +26,6 @@ import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.datalayer.school.model.SchoolApp
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.NavCommand
@@ -36,13 +33,21 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.respectAppDefaultLessonList
-import world.respect.shared.generated.resources.invalid_link
+import world.respect.lib.xapi.OpenEelXapiConstants
+import world.respect.lib.xapi.ext.objectActivityOrNull
+import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.exception.withUiText
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.util.ext.selfPublicationLinkOrNull
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
+import world.respect.shared.domain.xapi.createBlankAppListingStatement
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.apps_detail
+import world.respect.shared.generated.resources.invalid_link
+import world.respect.shared.viewmodel.app.appstate.getTitle
 
 data class AppsDetailUiState(
     val appDetail: DataLoadState<OpdsPublication>? = null,
@@ -55,7 +60,7 @@ data class AppsDetailUiState(
 
 class AppsDetailViewModel(
     savedStateHandle: SavedStateHandle,
-    accountManager: RespectAccountManager,
+    private val accountManager: RespectAccountManager,
     private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
@@ -108,6 +113,7 @@ class AppsDetailViewModel(
                                 )
                             }
                         }
+
                         else -> {}
                     }
                 }
@@ -123,12 +129,18 @@ class AppsDetailViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.schoolAppDataSource.listAsFlow().map { list ->
-                list.dataOrNull()?.any { it.appManifestUrl == route.manifestUrl } == true
-            }.collect { appIsAdded ->
-                _uiState.update {
-                    it.copy(isAdded = appIsAdded)
-                }
+            schoolDataSource.xapiStatementsResource.getAsFlow(
+                listParams = XapiStatementsResource.GetStatementParams(
+                    verb = XapiVerb.ID_LISTED_APP,
+                    activity = OpenEelXapiConstants.CATEGORY_APP_LISTING_RECIPE,
+                    relatedActivities = true,
+                ),
+                dataLoadParams = DataLoadParams(),
+            ).collectLatest { state ->
+                val routeActivityId = route.manifestUrl.toString()
+                val appIsAdded = state.dataOrNull()?.statements
+                    ?.any { it.objectActivityOrNull()?.id == routeActivityId } == true
+                _uiState.update { it.copy(isAdded = appIsAdded) }
             }
         }
     }
@@ -147,7 +159,6 @@ class AppsDetailViewModel(
             )
         }
     }
-
     fun onClickPublication(publication: OpdsPublication) {
         try {
             val publicationHref = publication.links.selfPublicationLinkOrNull()?.href
@@ -191,17 +202,19 @@ class AppsDetailViewModel(
 
     fun onClickAdd() {
         viewModelScope.launch {
-            schoolDataSource.schoolAppDataSource.store(
-                listOf(
-                    SchoolApp(
-                        uid = route.manifestUrl.toString(),
-                        appManifestUrl = route.manifestUrl,
-                    )
-                )
+            val actor = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent ?: run {
+                Napier.w("AppsDetailViewModel: cannot add app, no actor for selected account")
+                return@launch
+            }
+            val statement = createBlankAppListingStatement(
+                appActivityId = route.manifestUrl.toString(),
+                appTitle = uiState.value.appDetail?.dataOrNull()?.metadata?.title?.getTitle() ?: "",
+                actor = actor,
+                manifestUrl = route.manifestUrl.toString()
             )
+            schoolDataSource.xapiStatementsResource.post(listOf(statement))
         }
     }
-
     companion object {
         const val BUTTONS_ROW = "buttons_row"
         const val LESSON_HEADER = "lesson_header"

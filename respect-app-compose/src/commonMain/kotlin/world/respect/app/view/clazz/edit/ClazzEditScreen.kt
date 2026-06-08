@@ -17,7 +17,11 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.datalayer.school.model.Clazz
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.shared.domain.xapi.classDefinitionTitle
+import world.respect.shared.domain.xapi.classDefinitionDescription
+import world.respect.shared.domain.xapi.withClassTitle
+import world.respect.shared.domain.xapi.withClassDescription
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.class_name
 import world.respect.shared.generated.resources.description
@@ -34,18 +38,18 @@ fun ClazzEditScreen(
     ClazzEditScreen(
         uiState = uiState,
         onEntityChanged = viewModel::onEntityChanged,
-        onClearError =  viewModel::onClearError
+        onClearError = viewModel::onClearError
     )
 }
 
 @Composable
 fun ClazzEditScreen(
     uiState: ClazzEditUiState,
-    onEntityChanged: (Clazz) -> Unit = {},
+    onEntityChanged: (XapiStatement) -> Unit = {},
     onClearError: () -> Unit = {},
 ) {
 
-    val clazz = uiState.clazz.dataOrNull()
+    val statement = uiState.statementData.dataOrNull()
     val fieldsEnabled = uiState.fieldsEnabled
 
     Column(
@@ -54,13 +58,13 @@ fun ClazzEditScreen(
     ) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("name"),
-            value = clazz?.title ?: "",
+            value = statement?.classDefinitionTitle ?: "",
             label = {
                 Text(stringResource(Res.string.class_name) + "*")
             },
             onValueChange = { value ->
-                clazz?.also {
-                    onEntityChanged(it.copy(title = value))
+                statement?.also {
+                    onEntityChanged(it.withClassTitle(value))
                 }
                 if (uiState.clazzNameError != null && value.isNotBlank()) {
                     onClearError()
@@ -76,17 +80,18 @@ fun ClazzEditScreen(
 
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag(("description")),
-            value = clazz?.description ?: "",
+            value = statement?.classDefinitionDescription ?: "",
             label = {
                 Text(
                     stringResource(Res.string.description)
                 )
             },
             onValueChange = { newValue ->
-                clazz?.also {
-                    onEntityChanged(it.copy(description = newValue))
+                statement?.also {
+                    onEntityChanged(it.withClassDescription(newValue))
                 }
-            }
+            },
+            enabled = fieldsEnabled
         )
     }
 }

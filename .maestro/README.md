@@ -44,6 +44,17 @@ export TESTSERVER_CONTROLLER=http://192.168.1.2:8094/
 Where:
 * 192.168.1.2 is the local IP of the developer's laptop
 
+# Maestro flow environment variables:
+* ```TESTCONTROLLER_URL```: sets the [TestServerController](https://github.com/UstadMobile/TestServerController) 
+  URL for testserver controller that will create new blank server instance as required. If set, the 
+  school url, admin password, and school name will be received from the test server controller
+  if not otherwise specified. This is **required** to run more than one test.
+* ```SCHOOL_URL```: explicitly set the scohol url to use
+* ```SCHOOL_ADMIN_PASSWORD```: explicitly set the school admin password to use
+* ```SCHOOL_NAME```: explicitly set the school name to use (used in get started screen)
+* ```URL_SUBSTITUTION``` when there is a reverse proxy setup (e.g. to handle HTTPS) then it will 
+  replace _PORT_ with the port number created by the test server e.g. https://_PORT_.ustadtesting.ustadmobile.com/
+* ```TEST_APP_URL```: A launchable app publication URL.
 
 ## Available test flows
 ---

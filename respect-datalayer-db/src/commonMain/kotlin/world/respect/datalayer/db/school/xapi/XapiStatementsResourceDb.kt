@@ -699,17 +699,6 @@ class XapiStatementsResourceDb(
             )
         }
     }
-
-    override fun getAppListAsFlow(dataLoadParams: DataLoadParams): Flow<DataLoadState<List<XapiStatement>>> {
-        return getAsFlow(
-            listParams = GetStatementParams(
-                verb = XapiVerb.ID_LISTED_APP,
-                activity = OpenEelXapiConstants.CATEGORY_APP_LISTING_RECIPE,
-                relatedActivities = true,
-            ),
-            dataLoadParams = dataLoadParams,
-        ).map { state -> state.map { it.statements } }
-    }
     companion object {
         const val DEFAULT_MAX_STATEMENTS = 5_000
 

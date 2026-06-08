@@ -1,8 +1,6 @@
 package world.respect.shared.domain.xapi
 
-import io.ktor.http.Url
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.contentOrNull
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActivityDefinition
@@ -23,21 +21,6 @@ object XapiAppListingConstants {
     const val ACTIVITY_TYPE_APPLICATION = "http://activitystrea.ms/schema/1.0/application"
     const val VERB_LISTED_APP = XapiVerb.ID_LISTED_APP
 }
-@OptIn(ExperimentalUuidApi::class)
-val XapiStatement.appActivityId: String
-    get() = (this.`object` as? XapiActivity)?.id ?: ""
-
-val XapiStatement.appTitle: String
-    get() = (this.`object` as? XapiActivity)?.definition?.name?.values?.firstOrNull() ?: ""
-
-val XapiStatement.appDescription: String
-    get() = (this.`object` as? XapiActivity)?.definition?.description?.values?.firstOrNull() ?: ""
-
-val XapiStatement.appManifestUrl: Url?
-    get() = (this.`object` as? XapiActivity)?.definition?.extensions?.get(XapiAppListingConstants.EXT_WEBPUB_MANIFEST_LINK)
-        ?.let { (it as? JsonPrimitive)?.contentOrNull }
-        ?.let { runCatching { Url(it) }.getOrNull() }
-
 
 @OptIn(ExperimentalUuidApi::class)
 fun createBlankAppListingStatement(

@@ -117,16 +117,6 @@ interface XapiStatementsResource {
         studentAgent: XapiAgent? = null,
     ): Flow<DataLoadState<List<AssignmentSummary>>>
 
-    /**
-     * Get results for apps that are listed as per the APP_LISTING_RECIPE
-     * using the LISTED_APP verb.
-     *
-     * @param dataLoadParams parameters for data loading
-     */
-    fun getAppListAsFlow(
-        dataLoadParams: DataLoadParams = DataLoadParams(),
-    ): Flow<DataLoadState<List<XapiStatement>>>
-
     companion object {
 
         const val ENDPOINT_NAME = "statements"

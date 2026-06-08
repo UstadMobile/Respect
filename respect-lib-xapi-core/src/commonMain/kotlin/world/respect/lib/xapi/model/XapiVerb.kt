@@ -32,9 +32,6 @@ data class XapiVerb(
          */
         const val ID_ASSIGN = "http://activitystrea.ms/schema/1.0/assign"
 
-        private const val ID_TYPE_CLASS = "http://id.openeel.org/xapi/activity-type/class"
-
-        private const val ID_CLASS_MANAGEMENT = "https://id.openeel.org/xapi/recipes/class-management"
 
 
     }

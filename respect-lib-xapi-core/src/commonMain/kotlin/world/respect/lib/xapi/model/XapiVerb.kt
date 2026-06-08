@@ -32,8 +32,6 @@ data class XapiVerb(
          */
         const val ID_ASSIGN = "http://activitystrea.ms/schema/1.0/assign"
 
-
-
     }
 
 }

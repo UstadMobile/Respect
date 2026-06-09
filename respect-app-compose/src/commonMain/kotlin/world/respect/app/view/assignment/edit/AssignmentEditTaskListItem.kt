@@ -57,8 +57,7 @@ fun AssignmentEditTaskListItem(
         headlineContent = {
             Text(
                 text = langMapString(
-                    info.dataOrNull()?.metadata?.title ?: taskActivity.definition?.name?.asLangMap()
-                    ?: LangMap.EMPTY
+                    info.dataOrNull()?.metadata?.title ?: LangMap.EMPTY
                 )
             )
         },

@@ -40,20 +40,18 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.LangMapTextField
 import world.respect.app.components.RespectLocalDateTimeField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.xapi.ext.copyWithObjectActivityName
 import world.respect.lib.xapi.ext.extensionDeadlineAsInstantOrNull
 import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
-import world.respect.shared.domain.xapi.activityDefinitionTitle
-import world.respect.shared.domain.xapi.assignmentDescription
 import world.respect.shared.domain.xapi.withDeadline
-import world.respect.shared.domain.xapi.withDescription
-import world.respect.shared.domain.xapi.withTitle
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign_to
 import world.respect.shared.generated.resources.assignment_title
@@ -102,21 +100,19 @@ fun AssignmentEditScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        OutlinedTextField(
+        LangMapTextField(
             modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("title"),
-            value = assignment?.activityDefinitionTitle ?: "",
+            value = assignment?.objectActivityOrNull()?.definition?.name ?: emptyMap(),
+            onValueChange = { value ->
+                assignment?.copyWithObjectActivityName(value)?.also { onEntityChanged(it) }
+            },
             label = {
                 Text(stringResource(Res.string.assignment_title) + "*")
-            },
-            onValueChange = { newTitle ->
-                assignment?.also {
-                    onEntityChanged(it.withTitle(newTitle))
-                }
             },
             supportingText = {
                 Text(uiTextStringResource(uiState.nameError ?: Res.string.required.asUiText()))
             },
-            isError = uiState.nameError != null,
+            enabled = uiState.fieldsEnabled,
         )
 
         var expanded by remember { mutableStateOf(false) }
@@ -171,17 +167,16 @@ fun AssignmentEditScreen(
             }
         }
 
-        OutlinedTextField(
+        LangMapTextField(
             modifier = Modifier.fillMaxWidth().defaultItemPadding().testTag("description"),
-            value = assignment?.assignmentDescription ?: "",
+            value = assignment?.objectActivityOrNull()?.definition?.description ?: emptyMap(),
             label = {
                 Text(stringResource(Res.string.description))
             },
-            onValueChange = { newDescription ->
-                assignment?.also {
-                    onEntityChanged(it.withDescription(newDescription))
-                }
-            }
+            onValueChange = { value ->
+                assignment?.copyWithObjectActivityName(value)?.also { onEntityChanged(it) }
+            },
+            enabled = uiState.fieldsEnabled,
         )
 
         RespectLocalDateTimeField(

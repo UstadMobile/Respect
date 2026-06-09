@@ -20,13 +20,17 @@ import androidx.compose.ui.Modifier
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import world.respect.libutil.util.selectLang
 
-
+/**
+ * A TextField that supports LangMaps
+ *
+ */
 @Composable
-fun LangMapEditField(
+fun LangMapTextField(
     value: Map<String, String>,
     onValueChange: (Map<String, String>) -> Unit,
     modifier: Modifier = Modifier,
     label: (@Composable () -> Unit)? = null,
+    supportingText: (@Composable () -> Unit)? = null,
     enabled: Boolean = true,
 ) {
     val currentLocale = LocalAppLocale.current
@@ -66,6 +70,7 @@ fun LangMapEditField(
                 }.toMap()
             )
         },
+        supportingText = supportingText,
         trailingIcon = {
             IconButton(
                 onClick = {
@@ -107,7 +112,7 @@ fun LangMapEditFieldPreview() {
             mutableStateOf(emptyMap<String, String>())
         }
 
-        LangMapEditField(
+        LangMapTextField(
             modifier = Modifier.defaultItemPadding().fillMaxWidth(),
             value = langMapValue,
             label = {

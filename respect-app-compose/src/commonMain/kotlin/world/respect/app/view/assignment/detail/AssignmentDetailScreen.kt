@@ -44,6 +44,7 @@ import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.langMapString
 import world.respect.lib.xapi.ext.idStr
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.dataOrNull
@@ -58,7 +59,6 @@ import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActivityDefinition
 import world.respect.lib.xapi.model.XapiAgent
-import world.respect.shared.domain.xapi.assignmentDescription
 import world.respect.shared.domain.xapi.createBlankAssignmentStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assigned_to
@@ -98,7 +98,9 @@ fun AssignmentDetailScreen(
 ) {
     val horizontalScrollState = rememberScrollState()
 
-    val stmtUuid = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.id
+    val assignmentStmt = uiState.assignmentProgress.dataOrNull()?.assignmentStatement
+
+    val stmtUuid = assignmentStmt?.id
     val deadlineInstant = remember(stmtUuid) {
         uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.objectActivityOrNull()
             ?.definition?.extensionDeadlineAsInstantOrNull()
@@ -118,8 +120,9 @@ fun AssignmentDetailScreen(
                         .defaultItemPadding()
                 ) {
                     Text(
-                        text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.assignmentDescription
-                            ?: "",
+                        text = assignmentStmt?.objectActivityOrNull()?.definition?.description?.let {
+                            langMapString(it)
+                        } ?: "",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.fillMaxWidth()
                     )

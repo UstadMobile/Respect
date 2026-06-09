@@ -18,45 +18,9 @@ import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
 object XapiAssignmentConstants {
-    const val CATEGORY_ASSIGNMENT_RECIPE = "https://id.ustadmobile.com/xapi/activities/assignment-recipe"
     const val EXT_CREATED = "https://id.ustadmobile.com/xapi/extension/created"
-    const val ACTIVITY_TYPE_ASSIGNMENT = "http://id.tincanapi.com/activitytype/school-assignment"
 }
 
-@Deprecated("Should use objectActivityNameOrNull")
-val XapiStatement.activityDefinitionTitle: String
-    get() = (this.`object` as? XapiActivity)?.definition?.name?.values?.firstOrNull() ?: ""
-
-val XapiStatement.assignmentDescription: String
-    get() = (this.`object` as? XapiActivity)?.definition?.description?.values?.firstOrNull() ?: ""
-
-
-@OptIn(ExperimentalUuidApi::class)
-fun XapiStatement.withTitle(title: String): XapiStatement {
-    val activity = `object` as? XapiActivity ?: return this
-    val definition = activity.definition ?: XapiActivityDefinition()
-    // For now, we use "en-US" as the default key for setting values, but we read any value
-    return copy(
-        `object` = activity.copy(
-            definition = definition.copy(
-                name = (definition.name ?: emptyMap()) + ("en-US" to title)
-            )
-        )
-    )
-}
-
-@OptIn(ExperimentalUuidApi::class)
-fun XapiStatement.withDescription(description: String): XapiStatement {
-    val activity = `object` as? XapiActivity ?: return this
-    val definition = activity.definition ?: XapiActivityDefinition()
-    return copy(
-        `object` = activity.copy(
-            definition = definition.copy(
-                description = (definition.description ?: emptyMap()) + ("en-US" to description)
-            )
-        )
-    )
-}
 
 @OptIn(ExperimentalUuidApi::class)
 fun XapiStatement.withDeadline(deadline: Instant?): XapiStatement {
@@ -93,14 +57,19 @@ fun createBlankAssignmentStatement(
             objectType = XapiObjectType.Activity,
             id = assignmentActivityId,
             definition = XapiActivityDefinition(
-                type = XapiAssignmentConstants.ACTIVITY_TYPE_ASSIGNMENT,
+                type = XapiActivityDefinition.TYPE_ASSIGNMENT,
                 extensions = mapOf(XapiAssignmentConstants.EXT_CREATED to JsonPrimitive(now.toString()))
             )
         ),
         context = XapiContext(
             instructor = instructor,
             contextActivities = XapiContextActivities(
-                category = listOf(XapiActivity(id = XapiAssignmentConstants.CATEGORY_ASSIGNMENT_RECIPE, objectType = XapiObjectType.Activity)),
+                category = listOf(
+                    XapiActivity(
+                        id = OpenEelXapiConstants.CATEGORY_ASSIGNMENT_RECIPE,
+                        objectType = XapiObjectType.Activity
+                    )
+                ),
                 grouping = emptyList()
             )
         ),

@@ -35,6 +35,7 @@ import world.respect.datalayer.db.school.ext.fullName
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
+import world.respect.shared.domain.xapi.classDefinitionDescription
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_student
 import world.respect.shared.generated.resources.add_teacher
@@ -43,13 +44,11 @@ import world.respect.shared.generated.resources.pending_requests
 import world.respect.shared.generated.resources.collapse_pending_invites
 import world.respect.shared.generated.resources.collapse_students
 import world.respect.shared.generated.resources.collapse_teachers
-import world.respect.shared.generated.resources.description
 import world.respect.shared.generated.resources.expand_pending_invites
 import world.respect.shared.generated.resources.expand_students
 import world.respect.shared.generated.resources.expand_teachers
 import world.respect.shared.generated.resources.manage_enrollments
 import world.respect.shared.generated.resources.more_options
-import world.respect.shared.generated.resources.pending_requests
 import world.respect.shared.generated.resources.remove_from_class
 import world.respect.shared.generated.resources.student
 import world.respect.shared.generated.resources.students
@@ -130,7 +129,7 @@ fun ClazzDetailScreen(
                 },
 
                 supportingContent = {
-                    Text(text = uiState.clazz.dataOrNull()?.description ?: "")
+                    Text(text = uiState.classStatement.dataOrNull()?.classDefinitionDescription ?: "")
                 }
             )
         }

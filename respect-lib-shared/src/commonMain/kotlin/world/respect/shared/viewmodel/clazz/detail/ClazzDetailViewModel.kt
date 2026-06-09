@@ -16,11 +16,11 @@ import org.koin.core.scope.Scope
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
-import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
@@ -32,6 +32,8 @@ import world.respect.libutil.util.time.localDateInCurrentTimeZone
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.xapi.classDefinitionTitle
+import world.respect.shared.domain.xapi.classDefinitionDescription
 import world.respect.shared.ext.whenSubscribed
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.first_name
@@ -58,6 +60,10 @@ import world.respect.datalayer.school.ext.writePermissionFlag
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
+import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
@@ -83,7 +89,7 @@ data class ClazzDetailUiState(
         Res.string.first_name, 1, true
     ),
     val fieldsEnabled: Boolean = true,
-    val clazz: DataLoadState<Clazz> = DataLoadingState(),
+    val classStatement: DataLoadState<XapiStatement> = DataLoadingState(),
     val isPendingExpanded: Boolean = true,
     val isTeachersExpanded: Boolean = true,
     val isStudentsExpanded: Boolean = true,
@@ -129,7 +135,7 @@ class ClazzDetailViewModel(
             schoolDataSource.personDataSource.listAsPagingSource(
                 loadParams = DataLoadParams(),
                 params = PersonDataSource.GetListParams(
-                    filterByClazzUid = route.guid,
+                    filterByClazzUid = route.classActivityId,
                     filterByEnrolmentRole = role,
                     inClassOnDay = localDateInCurrentTimeZone(),
                 )
@@ -192,11 +198,25 @@ class ClazzDetailViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.classDataSource.findByGuidAsFlow(route.guid).collect { clazz ->
+            schoolDataSource.xapiStatementsResource.getAsFlow(
+                listParams = GetStatementParams(
+                    activity = route.classActivityId,
+                ),
+                dataLoadParams = DataLoadParams(),
+            ).collect { dataLoadState ->
+                val statement = dataLoadState.dataOrNull()?.statements
+                    ?.mostRecentByTimestampOrNull()
+
                 _appUiState.update {
-                    it.copy(title = clazz.dataOrNull()?.title?.asUiText())
+                    it.copy(title = statement?.classDefinitionTitle?.asUiText())
                 }
-                _uiState.update { it.copy(clazz = clazz) }
+                _uiState.update {
+                    it.copy(
+                        classStatement = statement?.let { stmt ->
+                            DataReadyState(stmt)
+                        } ?: DataLoadingState()
+                    )
+                }
             }
         }
 
@@ -236,7 +256,7 @@ class ClazzDetailViewModel(
                                     uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
                                         Enrollment.TABLE_ID
                                     ).toString(),
-                                    classUid = route.guid,
+                                    classUid = route.classActivityId,
                                     role = enrolmentRole,
                                     personUid = personToEnrol.guid,
                                     beginDate = Clock.System.now().toLocalDateTime(
@@ -247,7 +267,7 @@ class ClazzDetailViewModel(
                         )
 
                         if(enrolmentRole == EnrollmentRoleEnum.STUDENT) {
-                            updateClazzStudentXapiGroupUseCase(route.guid)
+                            updateClazzStudentXapiGroupUseCase(route.classActivityId)
                         }
                     }
                 }
@@ -258,7 +278,8 @@ class ClazzDetailViewModel(
 
     fun onClickAddPersonToClazz(roleType: EnrollmentRoleEnum) {
         viewModelScope.launch {
-            val clazz = _uiState.value.clazz.dataOrNull() ?: return@launch
+            val statement = _uiState.value.classStatement.dataOrNull() ?: return@launch
+            val classTitle = statement.classDefinitionTitle
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
@@ -269,10 +290,10 @@ class ClazzDetailViewModel(
                             resultPopUpTo = route,
                         ),
                         inviteUid = ClassInvite.uidFor(
-                            route.guid, roleType, ClassInviteModeEnum.DIRECT
+                            route.classActivityId, roleType, ClassInviteModeEnum.DIRECT
                         ),
-                        classUid = clazz.guid,
-                        className = clazz.title,
+                        classUid = route.classActivityId,
+                        className = classTitle,
                         addToClassRole = roleType,
                         filterByRole = roleType.relatedPersonRoleEnum,
                     )
@@ -327,7 +348,7 @@ class ClazzDetailViewModel(
 
     fun onClickEdit() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(ClazzEdit(route.guid))
+            NavCommand.Navigate(ClazzEdit(route.classActivityId))
         )
     }
 
@@ -338,7 +359,7 @@ class ClazzDetailViewModel(
                     loadParams = DataLoadParams(),
                     listParams = EnrollmentDataSource.GetListParams(
                         personUid = person.guid,
-                        classUid = route.guid,
+                        classUid = route.classActivityId,
                     )
                 ).dataOrNull() ?: throw IllegalStateException()
 
@@ -386,7 +407,7 @@ class ClazzDetailViewModel(
                 EnrollmentList.create(
                     filterByPersonUid = person.guid,
                     role = role,
-                    filterByClassUid = route.guid
+                    filterByClassUid = route.classActivityId
                 )
             )
         )

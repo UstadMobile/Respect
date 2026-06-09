@@ -10,13 +10,16 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.school.ClassDataSource
-import world.respect.datalayer.school.model.Clazz
-import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
+import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.xapi.ACTIVITY_TYPE_CLASS
+import world.respect.shared.domain.xapi.CATEGORY_CLASS_MANAGEMENT
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.clazz
@@ -34,7 +37,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
 data class ClazzListUiState(
-    val classes: IPagingSourceFactory<Int, Clazz> = EmptyPagingSourceFactory(),
+    val classStatements: List<XapiStatement> = emptyList(),
     val sortOptions: List<SortOrderOption> = emptyList(),
     val activeSortOrderOption: SortOrderOption = SortOrderOption(
         Res.string.first_name, 1, true
@@ -59,13 +62,6 @@ class ClazzListViewModel(
 
     private val enqueuePullSyncUseCase: EnqueueRunPullSyncUseCase by inject()
 
-    private val pagingSourceHolder = PagingSourceFactoryHolder {
-        schoolDataSource.classDataSource.listAsPagingSource(
-            loadParams = DataLoadParams(),
-            params = ClassDataSource.GetListParams()
-        )
-    }
-
     init {
         _appUiState.update {
             it.copy(
@@ -81,7 +77,6 @@ class ClazzListViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                classes = pagingSourceHolder,
                 sortOptions = listOf(
                     SortOrderOption(
                         Res.string.first_name,
@@ -112,6 +107,30 @@ class ClazzListViewModel(
                 )
             }
         }
+
+        viewModelScope.launch {
+            schoolDataSource.xapiStatementsResource.getAsFlow(
+                listParams = GetStatementParams(
+                    activity = CATEGORY_CLASS_MANAGEMENT,
+                    relatedActivities = true,
+                ),
+                dataLoadParams = DataLoadParams(),
+            ).collect { dataLoadState ->
+                val statements = dataLoadState.dataOrNull()?.statements
+                    ?.filter { stmt ->
+                        stmt.verb.id == XapiVerb.ID_SAVED
+                                && (stmt.`object` as? XapiActivity)?.definition?.type == ACTIVITY_TYPE_CLASS
+                    }
+                    ?.groupBy { (it.`object` as? XapiActivity)?.id }
+                    ?.mapNotNull { (_, stmts) ->
+                        stmts.mostRecentByTimestampOrNull()
+                    } ?: emptyList()
+
+                _uiState.update { prev ->
+                    prev.copy(classStatements = statements)
+                }
+            }
+        }
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
@@ -120,17 +139,20 @@ class ClazzListViewModel(
         }
     }
 
-    fun onClickClazz(clazz: Clazz) {
+    fun onClickClazz(statement: XapiStatement) {
+        val activityId = (statement.`object` as? XapiActivity)?.id ?: return
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                ClazzDetail(clazz.guid)
+                ClazzDetail(
+                    classActivityId = activityId,
+                )
             )
         )
     }
 
     fun onClickAdd() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(ClazzEdit(guid = null))
+            NavCommand.Navigate(ClazzEdit(classActivityId = null))
         )
     }
 }

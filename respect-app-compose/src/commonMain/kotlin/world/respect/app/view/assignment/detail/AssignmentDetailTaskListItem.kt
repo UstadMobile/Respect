@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import world.respect.app.components.langMapString
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.NoDataLoadedState
@@ -29,7 +30,6 @@ import world.respect.lib.xapi.model.XapiActivity
 import world.respect.libutil.ext.resolve
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.task_image
-import world.respect.shared.viewmodel.app.appstate.getTitle
 
 @Composable
 fun AssignmentDetailTaskListItem(
@@ -38,8 +38,7 @@ fun AssignmentDetailTaskListItem(
     taskInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>>,
     onClickTask: (XapiActivity) -> Unit = { },
 ) {
-    val title = activity.definition?.name?.asLangMap()?.getTitle()
-        ?: ""
+    val title = activity.definition?.name?.asLangMap()
 
     val manifestUrl = activity.definition?.webPubManifestAsUrlOrNull()
 
@@ -68,7 +67,7 @@ fun AssignmentDetailTaskListItem(
             onClickTask(activity)
         },
         headlineContent = {
-            Text(title)
+            Text(title?.let { langMapString(it) } ?: "")
         },
         leadingContent = {
             if (iconUrl != null) {

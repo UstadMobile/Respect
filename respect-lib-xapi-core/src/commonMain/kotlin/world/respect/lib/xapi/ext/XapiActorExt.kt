@@ -1,4 +1,4 @@
-package world.respect.datalayer.school.xapi.ext
+package world.respect.lib.xapi.ext
 
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiGroup

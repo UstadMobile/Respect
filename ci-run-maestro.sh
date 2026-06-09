@@ -100,6 +100,13 @@ if [ ! -e build/maestro/results ]; then
     mkdir -p build/maestro/output
 fi
 
+
+TEST_APP_URL_ARG=""
+
+if [ "$TEST_APP_URL" != "" ]; then
+    TEST_APP_URL_ARG=" --env TEST_APP_URL=$TEST_APP_URL "
+fi
+
 if [ "$1" == "cloud" ]; then
     if [ "$MAESTRO_CLOUD_PROJECTID" == "" ]; then
       echo "Must set Maestro cloud project id as MAESTRO_CLOUD_PROJECTID environment var"
@@ -152,6 +159,7 @@ if [ "$1" == "cloud" ]; then
         --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
         --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
         --env SCHOOL_NAME=TestSchool \
+        $TEST_APP_URL_ARG \
        | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
 
     # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
@@ -197,6 +205,7 @@ else
       --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
       --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
       --env SCHOOL_NAME=TestSchool \
+      $TEST_APP_URL_ARG \
       --format=junit \
       --test-output-dir=build/maestro/output \
       --output=build/maestro/report.xml \

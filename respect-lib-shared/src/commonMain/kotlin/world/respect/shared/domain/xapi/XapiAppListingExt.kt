@@ -14,12 +14,8 @@ import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
 object XapiAppListingConstants {
-    const val CATEGORY_APP_LISTING_RECIPE = OpenEelXapiConstants.CATEGORY_APP_LISTING_RECIPE
-    const val EXT_WEBPUB_MANIFEST_LINK = OpenEelXapiConstants.ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK
     const val ACTIVITY_TYPE_APPLICATION = "http://activitystrea.ms/schema/1.0/application"
-    const val VERB_LISTED_APP = XapiVerb.ID_LISTED_APP
 }
 
 @OptIn(ExperimentalUuidApi::class)
@@ -35,7 +31,7 @@ fun createBlankAppListingStatement(
     return XapiStatement(
         id = Uuid.random(),
         actor = actor,
-        verb = XapiVerb(id = XapiAppListingConstants.VERB_LISTED_APP),
+        verb = XapiVerb(id = XapiVerb.ID_LISTED_APP),
         `object` = XapiActivity(
             objectType = XapiObjectType.Activity,
             id = appActivityId,
@@ -45,7 +41,7 @@ fun createBlankAppListingStatement(
                 type = XapiAppListingConstants.ACTIVITY_TYPE_APPLICATION,
                 moreInfo = moreInfo,
                 extensions = mapOf(
-                    XapiAppListingConstants.EXT_WEBPUB_MANIFEST_LINK to JsonPrimitive(manifestUrl)
+                    OpenEelXapiConstants.ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK to JsonPrimitive(manifestUrl)
                 )
             )
         ),
@@ -53,7 +49,7 @@ fun createBlankAppListingStatement(
             contextActivities = XapiContextActivities(
                 category = listOf(
                     XapiActivity(
-                        id = XapiAppListingConstants.CATEGORY_APP_LISTING_RECIPE,
+                        id = OpenEelXapiConstants.CATEGORY_APP_LISTING_RECIPE,
                         objectType = XapiObjectType.Activity
                     )
                 ),

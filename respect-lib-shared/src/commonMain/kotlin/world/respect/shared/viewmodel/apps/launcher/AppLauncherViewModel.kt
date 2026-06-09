@@ -49,7 +49,6 @@ import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.libutil.ext.resolve
-import world.respect.shared.domain.xapi.XapiAppListingConstants
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -190,7 +189,7 @@ class AppLauncherViewModel(
         viewModelScope.launch {
             val existing = schoolDataSource.xapiStatementsResource.get(
                 XapiStatementsResource.GetStatementParams(
-                    verb = XapiAppListingConstants.VERB_LISTED_APP,
+                    verb = XapiVerb.ID_LISTED_APP,
                     activity = manifestUrl.toString(),
                 ),
                 DataLoadParams(),

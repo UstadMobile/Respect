@@ -54,7 +54,6 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
-import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.OpenEelXapiConstants.ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK
 import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_CONSISTENT_THROUGH

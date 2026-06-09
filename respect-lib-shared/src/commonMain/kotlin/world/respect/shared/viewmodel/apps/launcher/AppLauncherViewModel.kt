@@ -82,8 +82,6 @@ class AppLauncherViewModel(
 
     val uiState = _uiState.asStateFlow()
 
-    var errorMessage: String = ""
-
     private val route: RespectAppLauncher = savedStateHandle.toRoute()
 
     private val schoolDataSource: SchoolDataSource by inject()

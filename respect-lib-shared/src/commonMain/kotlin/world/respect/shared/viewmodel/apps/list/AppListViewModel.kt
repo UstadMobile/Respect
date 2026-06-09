@@ -2,6 +2,7 @@ package world.respect.shared.viewmodel.apps.list
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -77,7 +78,18 @@ class AppListViewModel(
     }
 
     fun onClickApp(app: XapiStatement) {
-        val manifest = app.objectActivityOrNull()?.definition?.webPubManifestAsUrlOrNull() ?: return
-        _navCommandFlow.tryEmit(NavCommand.Navigate(AppsDetail.create(manifest)))
+        val manifest = app.objectActivityOrNull()?.definition?.webPubManifestAsUrlOrNull()
+        Napier.d("onClick App manifest from statement=$manifest")
+        if (manifest == null) {
+            Napier.w("onClick App no manifest url on statement")
+            return
+        }
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                AppsDetail.create(
+                    manifest
+                )
+            )
+        )
     }
 }

@@ -25,6 +25,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.something_went_wrong
+import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.EnterInviteCode
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.LoginScreen
@@ -45,6 +46,7 @@ data class LoginUiState(
     val errorText: UiText? = null,
     val usernameError: StringResourceUiText? = null,
     val passwordError: StringResourceUiText? = null,
+    val acceptInviteMode : Boolean = false
 )
 
 class LoginViewModel(
@@ -56,11 +58,11 @@ class LoginViewModel(
     private val savePasswordUseCase: SavePasswordUseCase
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    private val _uiState = MutableStateFlow(LoginUiState())
+    private val route: LoginScreen = savedStateHandle.toRoute()
+
+    private val _uiState = MutableStateFlow(LoginUiState(acceptInviteMode = route.inviteCode!=null))
 
     val uiState = _uiState.asStateFlow()
-
-    private val route: LoginScreen = savedStateHandle.toRoute()
 
     override val scope: Scope
         get() = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
@@ -109,7 +111,14 @@ class LoginViewModel(
                                     destination = if(authResponse.person.status == PersonStatusEnum.PENDING_APPROVAL) {
                                         WaitingForApproval()
                                     }else {
-                                        Home
+                                        if (uiState.value.acceptInviteMode){
+                                            AcceptInvite.create(
+                                                schoolUrl = route.schoolUrl,
+                                                code = route.inviteCode?:"",
+                                                guid = authResponse.person.guid
+                                            )
+                                        }else
+                                            Home
                                     },
                                     clearBackStack = true
                                 )
@@ -218,7 +227,14 @@ class LoginViewModel(
                             destination = if(authResponse.person.status == PersonStatusEnum.PENDING_APPROVAL) {
                                 WaitingForApproval()
                             }else {
-                                Home
+                                if (uiState.value.acceptInviteMode){
+                                    AcceptInvite.create(
+                                        schoolUrl = route.schoolUrl,
+                                        code = route.inviteCode?:"",
+                                        guid = authResponse.person.guid
+                                    )
+                                }else
+                                    Home
                             },
                             clearBackStack = true,
                         )
@@ -235,6 +251,16 @@ class LoginViewModel(
         }
     }
 
+    fun onClickCreateNewAccount() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                AcceptInvite.create(
+                    schoolUrl = route.schoolUrl,
+                    code = route.inviteCode?:"",
+                )
+            )
+        )
+    }
     fun onClickInviteCode() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(EnterInviteCode.create(route.schoolUrl))

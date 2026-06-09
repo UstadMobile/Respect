@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -50,6 +51,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.approval_not_required_until
 import world.respect.shared.generated.resources.approval_required
 import world.respect.shared.generated.resources.copy_link
+import world.respect.shared.generated.resources.family_member
 import world.respect.shared.generated.resources.invite_code_label
 import world.respect.shared.generated.resources.invite_students_directly
 import world.respect.shared.generated.resources.invite_via_email
@@ -135,6 +137,15 @@ fun InvitePersonScreen(
 
         uiState.inviteUrl?.also { link ->
             val linkStr = link.toString()
+            uiState.childName?.let {
+                Text(
+                    text = "$it / "+stringResource(Res.string.family_member),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                        .padding(vertical = 8.dp),
+                )
+            }
+
             Image(
                 painter = rememberQrCodePainter(linkStr),
                 contentDescription = stringResource(Res.string.qr_code),

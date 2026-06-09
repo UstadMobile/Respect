@@ -3,17 +3,18 @@ package world.respect.datalayer.school
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDate
-import world.respect.lib.dataloadstate.DataLayerParams
-import world.respect.lib.dataloadstate.DataLayerParams.ACTIVE_ON_DAY
-import world.respect.lib.dataloadstate.DataLayerParams.ORDER_BY
-import world.respect.lib.dataloadstate.DataLoadParams
-import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.datalayer.shared.params.OrderOption
+import world.respect.lib.dataloadstate.DataLayerParams
+import world.respect.lib.dataloadstate.DataLayerParams.ACTIVE_ON_DAY
+import world.respect.lib.dataloadstate.DataLayerParams.INCLUDE_RELATED
+import world.respect.lib.dataloadstate.DataLayerParams.ORDER_BY
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
 
 interface EnrollmentDataSource: WritableDataSource<Enrollment> {
 
@@ -43,6 +44,7 @@ interface EnrollmentDataSource: WritableDataSource<Enrollment> {
         val personUid: String? = null,
         val activeOnDay: LocalDate? = null,
         val orderBy: OrderBy = OrderBy.STORED_ASC,
+        val includeRelated: Boolean = false,
     ) {
 
         companion object {
@@ -55,6 +57,7 @@ interface EnrollmentDataSource: WritableDataSource<Enrollment> {
                         EnrollmentRoleEnum.fromValue(it)
                     },
                     personUid = params[FILTER_BY_PERSON_UID],
+                    includeRelated = params[INCLUDE_RELATED].toBoolean(),
                     activeOnDay = params[ACTIVE_ON_DAY]?.let { LocalDate.parse(it) },
                     orderBy = params[ORDER_BY]?.let {
                         OrderBy.fromValue(it)

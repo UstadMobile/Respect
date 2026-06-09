@@ -34,6 +34,7 @@ import world.respect.app.view.manageuser.enterinvitecode.EnterInviteCodeScreen
 import world.respect.app.view.manageuser.login.LoginScreen
 import world.respect.app.view.manageuser.otheroption.OtherOptionsScreen
 import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScreen
+import world.respect.app.view.manageuser.selectAccount.SelectAccountScreen
 import world.respect.app.view.manageuser.signup.SignupScreen
 import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScreen
 import world.respect.app.view.manageuser.waitingforapproval.WaitingForApprovalScreen
@@ -114,6 +115,7 @@ import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
+import world.respect.shared.navigation.SelectAccount
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.TermsAndCondition
@@ -465,6 +467,7 @@ fun AppNavHost(
             )
         }
 
+
         composable<TermsAndCondition> {
             val viewModel: TermsAndConditionViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
@@ -497,6 +500,15 @@ fun AppNavHost(
 
         composable<AccountList> {
             AccountListScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController
+                )
+            )
+        }
+
+        composable<SelectAccount> {
+            SelectAccountScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController

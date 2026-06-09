@@ -120,10 +120,15 @@ data class ClassInvite(
 data class FamilyMemberInvite(
     override val uid: String,
     override val code: String,
-    override val approvalRequiredAfter: InstantAsISO8601,
+    override val approvalRequiredAfter: InstantAsISO8601= Instant.fromEpochMilliseconds(0),
     override val lastModified: InstantAsISO8601 = Clock.System.now(),
     override val stored: InstantAsISO8601 = Clock.System.now(),
     override val status: StatusEnum = StatusEnum.ACTIVE,
     val personUid: String,
-): Invite2
+): Invite2 {
+    companion object {
+        fun uidFor(personUid: String?): String = "$TYPE_FAMILY_MEMBER:$personUid"
+    }
+}
+
 

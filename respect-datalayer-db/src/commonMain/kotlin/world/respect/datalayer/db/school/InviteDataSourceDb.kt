@@ -16,6 +16,7 @@ import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.exceptions.ForbiddenException
 import world.respect.datalayer.school.InviteDataSource
 import world.respect.datalayer.school.InviteDataSourceLocal
+import world.respect.datalayer.school.PersonDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
@@ -114,7 +115,23 @@ class InviteDataSourceDb(
 
                         else -> {
                             //Family member invite
-                            val knownPersonUid = (inviteToStore as? FamilyMemberInvite)?.personUid ?: "0"
+                            val knownPersonUid =
+                                (inviteToStore as? FamilyMemberInvite)?.personUid ?: "0"
+                            val authGuid = authenticatedUser.guid
+
+                            if (authGuid != knownPersonUid) {
+                                val hasWrite = checkPersonPermissionUseCase(
+                                    otherPersonUid = knownPersonUid,
+                                    otherPersonKnownRole = null,
+                                    permissionsRequiredByRole = CheckPersonPermissionUseCase.PermissionsRequiredByRole.WRITE_PERMISSIONS
+                                )
+
+                                if (!hasWrite) {
+                                    throw Exception(
+                                        "user does not have permission to create family invite for $knownPersonUid"
+                                    )
+                                }
+                            }
                         }
                     }
                 }

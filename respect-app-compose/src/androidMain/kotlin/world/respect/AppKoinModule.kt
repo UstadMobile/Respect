@@ -118,7 +118,10 @@ import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestU
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCaseClient
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
+import world.respect.shared.domain.account.invite.RedeemInviteExistingUserUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseClient
+import world.respect.shared.domain.account.invite.RedeemInviteExistingUserUseCaseClient
+import world.respect.shared.domain.navigation.inviteforexistingusernavigation.NavigateOnExistingUserInviteAcceptedUseCase
 import world.respect.shared.domain.navigation.onaccountcreated.NavigateOnAccountCreatedUseCase
 import world.respect.shared.domain.account.passkey.EncodeUserHandleUseCaseImpl
 import world.respect.shared.domain.account.passkey.GetPasskeyProviderInfoUseCaseImpl
@@ -200,6 +203,7 @@ import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
+import world.respect.shared.viewmodel.manageuser.selectaccount.SelectAccountViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
@@ -367,6 +371,7 @@ val appKoinModule = module {
     viewModelOf(::OtherOptionsSignupViewModel)
     viewModelOf(::EnterPasswordSignupViewModel)
     viewModelOf(::AccountListViewModel)
+    viewModelOf(::SelectAccountViewModel)
     viewModelOf(::ManageAccountViewModel)
     viewModelOf(::PersonListViewModel)
     viewModelOf(::InvitePersonViewModel)
@@ -638,7 +643,9 @@ val appKoinModule = module {
     }
 
     single<ResolveUrlToNavCommandUseCase> {
-        ResolveUrlToNavCommandUseCase()
+        ResolveUrlToNavCommandUseCase(
+            respectAccountManager = get()
+        )
     }
 
     single<InitDeepLinkUriProviderUseCaseAndroid> {
@@ -807,6 +814,7 @@ val appKoinModule = module {
             )
         }
 
+
         scoped<CheckUsernameUniqueUseCase> {
             CheckUsernameUniqueUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
@@ -853,6 +861,9 @@ val appKoinModule = module {
             ValidateQrCodeUseCase(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
             )
+        }
+        scoped<NavigateOnExistingUserInviteAcceptedUseCase> {
+            NavigateOnExistingUserInviteAcceptedUseCase()
         }
 
         scoped<NavigateOnAccountCreatedUseCase> {
@@ -976,6 +987,14 @@ val appKoinModule = module {
             ApproveOrDeclineInviteRequestUseCase(
                 schoolDataSource = get(),
                 updateClazzStudentXapiGroupUseCase = get(),
+            )
+        }
+
+        scoped<RedeemInviteExistingUserUseCase> {
+            RedeemInviteExistingUserUseCaseClient(
+                schoolUrl = RespectAccountScopeId.parse(id).schoolUrl,
+                httpClient = get(),
+                authTokenProvider= get()
             )
         }
 

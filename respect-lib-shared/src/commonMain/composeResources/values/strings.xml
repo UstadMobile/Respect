@@ -115,6 +115,7 @@
     <string name="email">Email</string>
     <string name="phone_number">Phone number</string>
     <string name="create_account">Create account</string>
+    <string name="create_new_account">Create new account</string>
     <string name="username_label">Username</string>
     <string name="qr_code_badge">QR Code Badge</string>
     <string name="manage_account">Manage account</string>
@@ -504,6 +505,7 @@
     <string name="system_administrator">System administrator</string>
     <string name="site_administrator">Site administrator</string>
     <string name="role">Role</string>
+    <string name="child">Child</string>
 
     <string name="date">Date</string>
     <string name="time">Time</string>
@@ -585,6 +587,12 @@
     <string name="supported_by_spix_foundation">Supported by Spix Foundation.</string>
 
     <string name="select_host">Select Host</string>
+    <string name="select_child">Select child</string>
+    <string name="pending_approval">Pending approval</string>
+    <string name="message">Message</string>
+    <string name="link_is">Link is</string>
+    <string name="select_account">Select account to continue</string>
+    <string name="use_another_account">Use another account</string>
 
     <string name="no_tasks_selected_yet">No task selected yet.</string>
     <string name="please_click_plus_button_to_add_one">Please click the + button to add one</string>

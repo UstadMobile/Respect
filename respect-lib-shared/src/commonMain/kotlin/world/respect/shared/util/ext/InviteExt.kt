@@ -13,7 +13,7 @@ val Invite2.roleLabel: StringResource
         is NewUserInvite -> this.role.label
 
         is ClassInvite -> if(this.inviteMode == ClassInviteModeEnum.VIA_PARENT) {
-            PersonRoleEnum.PARENT.label
+            PersonRoleEnum.STUDENT.label
         }else {
             this.role.label
         }

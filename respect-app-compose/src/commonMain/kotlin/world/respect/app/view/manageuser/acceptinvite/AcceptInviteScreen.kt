@@ -19,18 +19,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectChildrenExposedDropDownMenuField
 import world.respect.app.components.RespectDetailField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.NewUserInvite
+import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonRoleEnum.PARENT
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.accept_invite
+import world.respect.shared.generated.resources.child
 import world.respect.shared.generated.resources.class_name
+import world.respect.shared.generated.resources.family_member
 import world.respect.shared.generated.resources.loading
 import world.respect.shared.generated.resources.next
+import world.respect.shared.generated.resources.parent
 import world.respect.shared.generated.resources.role
 import world.respect.shared.generated.resources.school_name
 import world.respect.shared.generated.resources.school_server_url
+import world.respect.shared.generated.resources.student
 import world.respect.shared.util.ext.isLoading
 import world.respect.shared.util.ext.label
 import world.respect.shared.util.ext.roleLabel
@@ -49,7 +57,8 @@ fun AcceptInviteScreen(
     AcceptInviteScreen(
         uiState = uiState,
         appUiState = appUiState,
-        onClickNext = viewModel::onClickNext
+        onClickNext = viewModel::onClickNext,
+        onChildSelected = viewModel::onChildSelected
     )
 }
 
@@ -57,10 +66,12 @@ fun AcceptInviteScreen(
 fun AcceptInviteScreen(
     uiState: AcceptInviteUiState,
     appUiState: AppUiState,
-    onClickNext: () -> Unit
+    onClickNext: () -> Unit,
+    onChildSelected: (Person) -> Unit
 ) {
     val invite = uiState.inviteInfo?.invite
     val errorText = uiState.errorText
+    val isParentInvite = uiState.inviteInfo?.familyPersonRole == PARENT
 
     Column(modifier = Modifier.fillMaxSize()) {
         when {
@@ -98,6 +109,20 @@ fun AcceptInviteScreen(
             }
 
             invite != null -> {
+                if (uiState.showSelectChildDropDown) {
+                    RespectChildrenExposedDropDownMenuField(
+                        value = uiState.selectedChild,
+                        options = uiState.children,
+                        onValueChanged = { child ->
+                            onChildSelected(child)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .defaultItemPadding(),
+                        isError = uiState.childError != null,
+                        errorText = uiState.childError
+                    )
+                }
                 when(invite) {
                     is NewUserInvite -> {
                         RespectDetailField(
@@ -122,7 +147,34 @@ fun AcceptInviteScreen(
                     }
 
                     else -> {
-                        //Do nothing else
+
+                        RespectDetailField(
+                            modifier = Modifier.defaultItemPadding(),
+                            label = { Text(stringResource(Res.string.role)) },
+                            value = {
+                                Text(
+                                    stringResource(
+                                        if (isParentInvite) Res.string.student
+                                        else Res.string.parent
+                                    )
+                                )
+                            }
+                        )
+
+                        RespectDetailField(
+                            modifier = Modifier.defaultItemPadding(),
+                            label = {
+                                Text(
+                                    stringResource(
+                                        if (isParentInvite) Res.string.family_member
+                                        else Res.string.child
+                                    )
+                                )
+                            },
+                            value = {
+                                Text(uiState.inviteInfo?.familyPersonName.orEmpty())
+                            }
+                        )
                     }
                 }
 
@@ -143,7 +195,7 @@ fun AcceptInviteScreen(
                     modifier = Modifier.fillMaxWidth().defaultItemPadding(),
                     enabled = uiState.nextButtonEnabled,
                 ) {
-                    Text(stringResource(Res.string.next))
+                    Text(stringResource(if (uiState.uid!=null) Res.string.accept_invite else Res.string.next))
                 }
             }
         }

@@ -83,7 +83,8 @@ class EnterInviteCodeViewModel(
                     NavCommand.Navigate(
                         AcceptInvite.create(
                             schoolUrl = route.schoolUrl,
-                            code = inviteCode
+                            code = inviteCode,
+                            guid = route.personGuid
                         )
                     )
                 )

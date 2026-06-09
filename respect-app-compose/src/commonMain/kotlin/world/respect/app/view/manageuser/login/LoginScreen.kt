@@ -27,6 +27,7 @@ import world.respect.app.components.defaultScreenPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.create_new_account
 import world.respect.shared.generated.resources.i_have_an_invite_code
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.password_label
@@ -50,6 +51,7 @@ fun LoginScreen(
         onPasswordChanged = viewModel::onPasswordChanged,
         onClickLogin = viewModel::onClickLogin,
         onClickInviteCode = viewModel::onClickInviteCode,
+        onClickCreateNewAccount = viewModel::onClickCreateNewAccount,
     )
 }
 
@@ -60,7 +62,8 @@ fun LoginScreen(
     onUsernameChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onClickLogin: () -> Unit,
-    onClickInviteCode: () -> Unit = {}
+    onClickInviteCode: () -> Unit = {},
+    onClickCreateNewAccount: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -110,14 +113,22 @@ fun LoginScreen(
         ) {
             Text(text = stringResource(Res.string.login))
         }
-
-        OutlinedButton(
-            onClick = onClickInviteCode,
-            modifier = Modifier.fillMaxWidth().defaultItemPadding()
-        ) {
-            Text(text = stringResource(Res.string.i_have_an_invite_code))
+       if (!uiState.acceptInviteMode) {
+           OutlinedButton(
+               onClick = onClickInviteCode,
+               modifier = Modifier.fillMaxWidth().defaultItemPadding()
+           ) {
+               Text(text = stringResource(Res.string.i_have_an_invite_code))
+           }
+       }
+        if (uiState.acceptInviteMode) {
+            OutlinedButton(
+                onClick = onClickCreateNewAccount,
+                modifier = Modifier.fillMaxWidth().defaultItemPadding()
+            ) {
+                Text(text = stringResource(Res.string.create_new_account))
+            }
         }
-
         uiState.errorText?.also {
             Text(
                 uiTextStringResource(it),

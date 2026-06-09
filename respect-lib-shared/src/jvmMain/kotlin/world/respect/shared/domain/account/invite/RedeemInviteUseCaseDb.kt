@@ -28,9 +28,13 @@ import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.Enrollment
+import world.respect.datalayer.school.model.FamilyMemberInvite
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.model.StatusEnum
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.throwable.withHttpStatus
 import world.respect.shared.domain.account.AuthResponse
@@ -135,7 +139,42 @@ class RedeemInviteUseCaseDb(
                 updateXapiGroupUseCase(inviteFromDb.classUid)
             }
         }
+        val timeNow = Clock.System.now()
 
+        if (inviteFromDb is FamilyMemberInvite) {
+            val parentUid = inviteFromDb.personUid
+
+            val inviterPerson = schoolDataSourceVal.personDataSource.findByGuid(
+                loadParams = DataLoadParams(),
+                guid = parentUid
+            ).dataOrNull() ?: throw IllegalStateException("person not found: $parentUid")
+
+
+            val updatedInviter = inviterPerson.copy(
+                relatedPersonUids = inviterPerson.relatedPersonUids + accountPerson.guid,
+                lastModified = timeNow
+            )
+
+            val updatedAccountPerson = accountPerson.copy(
+                relatedPersonUids = accountPerson.relatedPersonUids + parentUid,
+                lastModified = timeNow
+            )
+            schoolDataSourceVal.personDataSource.updateLocal(listOf(updatedInviter, updatedAccountPerson))
+        }
+        if (inviteFromDb !is FamilyMemberInvite){
+            if ( accountPerson.roles.any { it.roleEnum == PersonRoleEnum.STUDENT }) {
+                val invite = FamilyMemberInvite(
+                    uid = FamilyMemberInvite.uidFor(accountPerson.guid),
+                    code = Invite2.newRandomCode(),
+                    approvalRequiredAfter = timeNow,
+                    lastModified = timeNow,
+                    stored = timeNow,
+                    status = StatusEnum.ACTIVE,
+                    personUid = accountPerson.guid
+                )
+                schoolDataSourceVal.inviteDataSource.store(listOf(invite))
+            }
+        }
         val credential = redeemRequest.account.credential
 
         val authResponse = when (credential) {

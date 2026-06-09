@@ -2,16 +2,21 @@ package world.respect.shared.domain.urltonavcommand
 
 import io.ktor.http.Url
 import world.respect.libutil.ext.schoolUrlOrNull
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.navigation.AcceptInvite
+import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.SelectAccount
 
 /**
  * Given a Url (that may have come from a deep link, scanned as a qr code, etc) that
  * follows the respect school link format (See UrlExt.schoolUrlOrNull) resolve this into a
  * NavCommand.
  */
-class ResolveUrlToNavCommandUseCase {
+class ResolveUrlToNavCommandUseCase(
+    private val respectAccountManager: RespectAccountManager
+) {
 
     operator fun invoke(
         url: Url,
@@ -21,15 +26,25 @@ class ResolveUrlToNavCommandUseCase {
 
         val lastSegment = url.segments.lastOrNull() ?: return null
 
-        return when(lastSegment) {
+        return when (lastSegment) {
             CreateInviteLinkUseCase.PATH -> {
                 url.parameters[CreateInviteLinkUseCase.QUERY_PARAM]?.let { inviteCode ->
-                    NavCommand.Navigate(
-                        destination = AcceptInvite.create(
+                    val destination = if (respectAccountManager.activeAccount != null) {
+
+                        SelectAccount(
+                            inviteCode = inviteCode
+                        )
+                    } else {
+
+                        LoginScreen.create(
                             schoolUrl = schoolUrl,
-                            code = inviteCode,
-                            canGoBack = canGoBack,
-                        ), clearBackStack = false
+                            inviteCode = inviteCode,
+                        )
+                    }
+
+                    NavCommand.Navigate(
+                        destination = destination,
+                        clearBackStack = false
                     )
                 }
             }

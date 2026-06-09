@@ -24,7 +24,9 @@ import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 
-class RegisterSchoolUseCaseImpl : RegisterSchoolUseCase, KoinComponent {
+class RegisterSchoolUseCaseImpl(
+    private val registerSchoolPin: String?,
+) : RegisterSchoolUseCase, KoinComponent {
 
     private val addSchoolUseCase: AddSchoolUseCase by inject()
     private val schoolConfig: SchoolConfig by inject()
@@ -56,6 +58,15 @@ class RegisterSchoolUseCaseImpl : RegisterSchoolUseCase, KoinComponent {
         // Verify school URL - will throw SchoolUrlVerificationException if verification fails
         verifySchoolUrlUseCase(parsedUrl)
 
+        val adminUsername = request.adminUsername
+        val adminPassword = request.adminPassword
+
+        if(adminUsername != null && adminPassword != null &&
+            (request.schoolCreationPin == null || request.schoolCreationPin != registerSchoolPin)
+        ) {
+            throw HttpStatusException("Invalid school creation PIN", HttpStatusCode.Forbidden)
+        }
+
         // Create school using AddSchoolUseCase
         addSchoolUseCase(
             listOf(
@@ -69,10 +80,11 @@ class RegisterSchoolUseCaseImpl : RegisterSchoolUseCase, KoinComponent {
                         rpId = parsedUrl.host,
                         lastModified = Clock.System.now(),
                         stored = Clock.System.now(),
+                        inDirectoryUrl = request.inDirectoryUrl,
                     ),
                     dbUrl = parsedUrl.sanitizedForFilename(),
-                    adminUsername = null,
-                    adminPassword = null
+                    adminUsername = adminUsername,
+                    adminPassword = adminPassword,
                 )
             )
         )
@@ -80,38 +92,49 @@ class RegisterSchoolUseCaseImpl : RegisterSchoolUseCase, KoinComponent {
         val schoolScopeId = SchoolDirectoryEntryScopeId(parsedUrl, null)
         val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(schoolScopeId.scopeId)
 
-        val createInviteUseCase: CreateInviteUseCase = schoolScope.get()
-        val createInviteLinkUseCase: CreateInviteLinkUseCase = schoolScope.get()
+        return if(adminUsername != null && adminPassword != null) {
+            RegisterSchoolUseCase.RegisterSchoolResponse(
+                schoolName = request.schoolName,
+                schoolUrl = Url(request.schoolUrl),
+                adminUsername = adminUsername,
+                inDirectoryUrl = request.inDirectoryUrl,
+            )
+        }else {
+            val createInviteUseCase: CreateInviteUseCase = schoolScope.get()
+            val createInviteLinkUseCase: CreateInviteLinkUseCase = schoolScope.get()
 
 
-        val inviteCode = Invite2.newRandomCode()
+            val inviteCode = Invite2.newRandomCode()
 
-        val tenYearsFromNow = Clock.System.now() + (10 * 365).days
-        val firstUserInviteUid = "${PersonRoleEnum.SYSTEM_ADMINISTRATOR.newUserInviteUid}:first"
+            val tenYearsFromNow = Clock.System.now() + (10 * 365).days
+            val firstUserInviteUid = "${PersonRoleEnum.SYSTEM_ADMINISTRATOR.newUserInviteUid}:first"
 
-        val invite = NewUserInvite(
-            uid = firstUserInviteUid,
-            code = inviteCode,
-            role = PersonRoleEnum.SYSTEM_ADMINISTRATOR,
-            firstUser = true,
-            status = StatusEnum.ACTIVE,
-            lastModified = Clock.System.now(),
-            stored = Clock.System.now(),
-            approvalRequiredAfter = tenYearsFromNow
-        )
+            val invite = NewUserInvite(
+                uid = firstUserInviteUid,
+                code = inviteCode,
+                role = PersonRoleEnum.SYSTEM_ADMINISTRATOR,
+                firstUser = true,
+                status = StatusEnum.ACTIVE,
+                lastModified = Clock.System.now(),
+                stored = Clock.System.now(),
+                approvalRequiredAfter = tenYearsFromNow
+            )
 
-        createInviteUseCase(invite)
+            createInviteUseCase(invite)
 
-        // Create the regular invite URL first
-        val regularInviteUrl = createInviteLinkUseCase(inviteCode)
+            // Create the regular invite URL first
+            val regularInviteUrl = createInviteLinkUseCase(inviteCode)
 
-        // Convert to custom deep link so it opens directly in the app
-        val customDeepLinkUrl = urlToCustomDeepLinkUseCase(regularInviteUrl)
+            // Convert to custom deep link so it opens directly in the app
+            val customDeepLinkUrl = urlToCustomDeepLinkUseCase(regularInviteUrl)
 
-        return RegisterSchoolUseCase.RegisterSchoolResponse(
-            schoolUrl = Url(request.schoolUrl),
-            redirectUrl = customDeepLinkUrl,
-        )
+            RegisterSchoolUseCase.RegisterSchoolResponse(
+                schoolName = request.schoolName,
+                schoolUrl = Url(request.schoolUrl),
+                redirectUrl = customDeepLinkUrl,
+                inDirectoryUrl = request.inDirectoryUrl,
+            )
+        }
     }
 
 }

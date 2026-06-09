@@ -1,6 +1,6 @@
 package world.respect.datalayer.db.school.xapi
 
-import world.respect.datalayer.school.xapi.ext.idStr
+import world.respect.lib.xapi.ext.idStr
 import world.respect.lib.xapi.model.XapiActivityDefinition
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActor

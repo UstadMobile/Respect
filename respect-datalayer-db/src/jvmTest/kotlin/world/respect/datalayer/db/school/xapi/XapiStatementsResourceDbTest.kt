@@ -20,7 +20,8 @@ import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedActivities
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
-import world.respect.datalayer.school.xapi.ext.idStr
+import world.respect.lib.xapi.ext.distinctMerged
+import world.respect.lib.xapi.ext.idStr
 import world.respect.datalayer.school.xapi.ext.resultProgressExtension
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer

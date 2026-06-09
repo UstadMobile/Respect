@@ -163,7 +163,11 @@ fun serverKoinModule(
         )
     }
     single<RegisterSchoolUseCase> {
-        RegisterSchoolUseCaseImpl()
+        RegisterSchoolUseCaseImpl(
+            registerSchoolPin = config.propertyOrNull(
+                SERVER_CONFIG_KEY_REGISTRATION_PIN
+            )?.getString()
+        )
     }
     single<SchoolUrlVerificationManager> {
         SchoolUrlVerificationManager()

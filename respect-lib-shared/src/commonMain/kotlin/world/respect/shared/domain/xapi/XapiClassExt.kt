@@ -12,7 +12,7 @@ import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-const val XAPI_LANG_KEY = ""
+const val XAPI_LANG_KEY = "en-US"
 
 /**
  * Activity type for a class as per README_CLASS_RECIPE.md

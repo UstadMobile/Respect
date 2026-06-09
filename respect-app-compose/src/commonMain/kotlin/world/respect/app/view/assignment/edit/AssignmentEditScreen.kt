@@ -46,6 +46,7 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.xapi.ext.copyWithObjectActivityDescription
 import world.respect.lib.xapi.ext.copyWithObjectActivityName
 import world.respect.lib.xapi.ext.extensionDeadlineAsInstantOrNull
 import world.respect.lib.xapi.ext.objectActivityOrNull
@@ -174,7 +175,7 @@ fun AssignmentEditScreen(
                 Text(stringResource(Res.string.description))
             },
             onValueChange = { value ->
-                assignment?.copyWithObjectActivityName(value)?.also { onEntityChanged(it) }
+                assignment?.copyWithObjectActivityDescription(value)?.also { onEntityChanged(it) }
             },
             enabled = uiState.fieldsEnabled,
         )

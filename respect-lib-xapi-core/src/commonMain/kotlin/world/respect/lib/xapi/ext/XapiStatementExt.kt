@@ -197,4 +197,10 @@ fun XapiStatement.copyWithObjectActivityName(
     )
 }
 
-
+fun XapiStatement.copyWithObjectActivityDescription(
+    description: Map<String, String>
+): XapiStatement {
+    return copy(
+        `object` = objectActivityOrNull()?.copyWithDefinitionDescription(description) ?: this.`object`
+    )
+}

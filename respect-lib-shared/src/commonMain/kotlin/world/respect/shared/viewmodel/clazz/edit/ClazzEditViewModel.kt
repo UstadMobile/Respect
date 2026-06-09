@@ -21,12 +21,13 @@ import world.respect.lib.dataloadstate.ext.isReadyAndSettled
 import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.ext.objectActivityNameOrNull
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.libutil.ext.appendEndpointSegments
+import world.respect.libutil.ext.isNullOrAllBlank
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.xapi.ACTIVITY_ID_PATH
-import world.respect.shared.domain.xapi.classDefinitionTitle
 import world.respect.shared.domain.xapi.createBlankClassStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_clazz
@@ -149,7 +150,7 @@ class ClazzEditViewModel(
             prev.copy(
                 statementData = DataReadyState(statement),
                 clazzNameError = prev.clazzNameError?.takeIf {
-                    prev.statementData.dataOrNull()?.classDefinitionTitle == statement.classDefinitionTitle
+                    prev.statementData.dataOrNull()?.objectActivityNameOrNull() == statement.objectActivityNameOrNull()
                 },
             )
         }
@@ -166,7 +167,7 @@ class ClazzEditViewModel(
 
             prev.copy(
                 clazzNameError = Res.string.required_field.asUiText().takeIf {
-                    statement?.classDefinitionTitle.isNullOrBlank()
+                    statement?.objectActivityOrNull()?.definition?.name.isNullOrAllBlank()
                 },
             )
         }
@@ -204,5 +205,9 @@ class ClazzEditViewModel(
 
     fun onClearError() {
         _uiState.update { prev -> prev.copy(clazzNameError = null) }
+    }
+
+    companion object{
+        const val ACTIVITY_ID_PATH = "xapi/activities/classes"
     }
 }

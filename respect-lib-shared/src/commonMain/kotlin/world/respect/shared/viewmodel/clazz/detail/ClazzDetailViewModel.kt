@@ -32,9 +32,9 @@ import world.respect.libutil.util.time.localDateInCurrentTimeZone
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
-import world.respect.shared.domain.xapi.classDefinitionTitle
-import world.respect.shared.domain.xapi.classDefinitionDescription
+import world.respect.lib.xapi.ext.objectActivityNameOrNull
 import world.respect.shared.ext.whenSubscribed
+import world.respect.shared.util.ext.asLangMapUiText
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.first_name
 import world.respect.shared.generated.resources.last_name
@@ -61,7 +61,6 @@ import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
-import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
@@ -208,7 +207,8 @@ class ClazzDetailViewModel(
                     ?.mostRecentByTimestampOrNull()
 
                 _appUiState.update {
-                    it.copy(title = statement?.classDefinitionTitle?.asUiText())
+                    it.copy(title = statement?.objectActivityNameOrNull()
+                        ?.takeIf { map -> map.isNotEmpty() }?.asLangMapUiText())
                 }
                 _uiState.update {
                     it.copy(
@@ -279,7 +279,7 @@ class ClazzDetailViewModel(
     fun onClickAddPersonToClazz(roleType: EnrollmentRoleEnum) {
         viewModelScope.launch {
             val statement = _uiState.value.classStatement.dataOrNull() ?: return@launch
-            val classTitle = statement.classDefinitionTitle
+            val classTitle = statement.objectActivityNameOrNull()?.values?.firstOrNull() ?: ""
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(

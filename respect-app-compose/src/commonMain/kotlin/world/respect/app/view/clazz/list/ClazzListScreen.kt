@@ -17,9 +17,10 @@ import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.SortListMode
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultSortListMode
+import world.respect.app.components.langMapString
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
-import world.respect.shared.domain.xapi.classDefinitionTitle
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.viewmodel.clazz.list.ClazzListUiState
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
@@ -65,7 +66,8 @@ fun ClazzListScreen(
                 (statement.`object` as? XapiActivity)?.id ?: statement.id.toString()
             },
         ) { statement ->
-            val title = statement.classDefinitionTitle
+            val title = statement.objectActivityOrNull()?.definition?.name
+                ?.takeIf { it.isNotEmpty() }?.let { langMapString(it) } ?:""
             ListItem(
                 modifier = Modifier
                     .fillMaxWidth()

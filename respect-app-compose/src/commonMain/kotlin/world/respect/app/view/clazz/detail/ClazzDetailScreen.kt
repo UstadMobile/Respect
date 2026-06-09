@@ -32,10 +32,11 @@ import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.db.school.ext.fullName
+import world.respect.app.components.langMapString
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
-import world.respect.shared.domain.xapi.classDefinitionDescription
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_student
 import world.respect.shared.generated.resources.add_teacher
@@ -129,7 +130,12 @@ fun ClazzDetailScreen(
                 },
 
                 supportingContent = {
-                    Text(text = uiState.classStatement.dataOrNull()?.classDefinitionDescription ?: "")
+                    Text(
+                        text = uiState.classStatement.dataOrNull()?.objectActivityOrNull()
+                            ?.definition?.description?.takeIf { it.isNotEmpty() }?.let {
+                                langMapString(it)
+                            } ?: "",
+                    )
                 }
             )
         }

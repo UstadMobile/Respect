@@ -12,8 +12,6 @@ import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-const val XAPI_LANG_KEY = "en-US"
-
 /**
  * Activity type for a class as per README_CLASS_RECIPE.md
  */
@@ -23,50 +21,6 @@ const val ACTIVITY_TYPE_CLASS = "http://id.openeel.org/xapi/activity-type/class"
  * Category activity id for the class-management recipe as per README_CLASS_RECIPE.md
  */
 const val CATEGORY_CLASS_MANAGEMENT = "https://id.openeel.org/xapi/recipes/class-management"
-
-const val ACTIVITY_ID_PATH = "xapi/activities/classes"
-
-
-/**
- * The activity definition name for a class statement.
- */
-@OptIn(ExperimentalUuidApi::class)
-val XapiStatement.classDefinitionTitle: String
-    get() = (this.`object` as? XapiActivity)?.definition?.name?.values?.firstOrNull() ?: ""
-
-/**
- * The activity definition description for a class statement.
- */
-val XapiStatement.classDefinitionDescription: String
-    get() = (this.`object` as? XapiActivity)?.definition?.description?.values?.firstOrNull() ?: ""
-
-
-private fun XapiStatement.withDefinitionField(
-    update: (XapiActivityDefinition) -> XapiActivityDefinition
-): XapiStatement {
-    val activity = `object` as? XapiActivity
-        ?: throw IllegalStateException("Statement object is not an XapiActivity")
-    val definition = activity.definition ?: XapiActivityDefinition()
-    return copy(
-        `object` = activity.copy(definition = update(definition))
-    )
-}
-
-/**
- * Create a copy of this class statement with an updated title in the activity definition name.
- */
-fun XapiStatement.withClassTitle(title: String): XapiStatement =
-    withDefinitionField { def ->
-        def.copy(name = (def.name ?: emptyMap()) + (XAPI_LANG_KEY to title))
-    }
-
-/**
- * Create a copy of this class statement with an updated description in the activity definition.
- */
-fun XapiStatement.withClassDescription(description: String): XapiStatement =
-    withDefinitionField { def ->
-        def.copy(description = (def.description ?: emptyMap()) + (XAPI_LANG_KEY to description))
-    }
 
 
 /**
@@ -88,8 +42,6 @@ fun createBlankClassStatement(
             objectType = XapiObjectType.Activity,
             id = classActivityId,
             definition = XapiActivityDefinition(
-                name = emptyMap(),
-                description = emptyMap(),
                 type = ACTIVITY_TYPE_CLASS,
             )
         ),

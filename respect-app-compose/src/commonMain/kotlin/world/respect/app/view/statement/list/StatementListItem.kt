@@ -37,6 +37,7 @@ fun StatementListItem(
     // Placeholder for now
     val iconUrl: String? = null
 
+    // Todo : need to change the time format
     val formattedTime = statement.timestamp?.let {
         rememberFormattedDateTime(
             timeInMillis = it.toEpochMilliseconds(),

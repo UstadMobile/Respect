@@ -130,7 +130,7 @@ class ClazzEditViewModel(
                 )
             } else {
                 val actor = accountManager.selectedAccountAndPersonFlow.firstOrNull()?.xapiAgent
-                    ?: return@launchWithLoadingIndicator
+                    ?: throw IllegalStateException("ClazzEditViewModel: no active account/agent available to create a class")
                 val baseStmt = createBlankClassStatement(
                     classActivityId = classActivityId,
                     actor = actor
@@ -175,7 +175,8 @@ class ClazzEditViewModel(
         if (stateToSave.hasErrors)
             return
 
-        val classStatement = _uiState.value.statementData.dataOrNull() ?: return
+        val classStatement = _uiState.value.statementData.dataOrNull()
+            ?: throw IllegalStateException("onClickSave: statement data cannot be null after validation")
 
         launchWithLoadingIndicator {
             schoolDataSource.xapiStatementsResource.post(

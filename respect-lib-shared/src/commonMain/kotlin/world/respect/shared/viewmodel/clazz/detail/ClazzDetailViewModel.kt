@@ -204,8 +204,7 @@ class ClazzDetailViewModel(
                     ?.mostRecentByTimestampOrNull()
 
                 _appUiState.update {
-                    it.copy(title = statement?.objectActivityNameOrNull()
-                        ?.takeIf { map -> map.isNotEmpty() }?.asLangMapUiText())
+                    it.copy(title = statement?.objectActivityNameOrNull()?.asLangMapUiText())
                 }
                 _uiState.update {
                     it.copy(

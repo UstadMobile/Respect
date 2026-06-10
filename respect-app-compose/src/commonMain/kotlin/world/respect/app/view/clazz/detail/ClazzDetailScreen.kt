@@ -108,6 +108,9 @@ fun ClazzDetailScreen(
     val pendingTeacherLazyPagingItems = pendingTeacherPager.flow.collectAsLazyPagingItems()
     val pendingStudentLazyPagingItems = pendingStudentPager.flow.collectAsLazyPagingItems()
 
+    val classStatement = uiState.classStatement.dataOrNull()
+
+
     fun Person?.key(role: EnrollmentRoleEnum, index: Int): Any {
         return this?.guid?.let {
             Pair(it, role)
@@ -131,8 +134,7 @@ fun ClazzDetailScreen(
 
                 supportingContent = {
                     Text(
-                        text = uiState.classStatement.dataOrNull()?.objectActivityOrNull()
-                            ?.definition?.description?.takeIf { it.isNotEmpty() }?.let {
+                        text =classStatement?.objectActivityOrNull()?.definition?.description?.let {
                                 langMapString(it)
                             } ?: "",
                     )

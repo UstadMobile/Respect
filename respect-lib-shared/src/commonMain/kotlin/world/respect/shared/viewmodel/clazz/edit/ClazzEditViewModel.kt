@@ -77,10 +77,7 @@ class ClazzEditViewModel(
     private val schoolUrl = accountManager.requireActiveSchoolUrl()
 
     private val classActivityId = route.classActivityId ?: run {
-        schoolUrl.appendEndpointSegments(
-            ACTIVITY_ID_PATH,
-            Uuid.random().toString()
-        ).toString()
+        schoolUrl.appendEndpointSegments(ACTIVITY_ID_PATH, Uuid.random().toString()).toString()
     }
 
     private val debouncer = LaunchDebouncer(viewModelScope)

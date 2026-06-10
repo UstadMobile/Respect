@@ -23,7 +23,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_from_link
 import world.respect.app.app.RespectAsyncImage
-import world.respect.shared.viewmodel.app.appstate.getTitle
+import world.respect.app.components.langMapString
 import world.respect.shared.viewmodel.apps.list.AppListUiState
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.lib.dataloadstate.ext.dataOrNull
@@ -99,7 +99,7 @@ fun AppListScreen(
                 },
                 headlineContent = {
                     Text(
-                        text = app.metadata.title.getTitle(),
+                        text = langMapString(app.metadata.title),
                     )
                 },
                 supportingContent = {

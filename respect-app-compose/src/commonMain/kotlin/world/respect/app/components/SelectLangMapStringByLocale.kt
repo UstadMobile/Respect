@@ -10,10 +10,11 @@ import world.respect.libutil.util.selectLang
 fun langMapString(
     langMap: Map<String, String>
 ): String {
-    return selectLang(
+    val langCodeToDisplay = selectLang(
         preferredLocales = listOf(LocalAppLocale.current),
         availableLocales = langMap.keys.toList(),
     )
+    return langMap[langCodeToDisplay] ?: "ERR: $langCodeToDisplay"
 }
 
 @Composable

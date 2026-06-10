@@ -33,6 +33,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.respectAppDefaultLessonList
+import world.respect.lib.opds.model.toStringMap
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiVerb
@@ -47,7 +48,6 @@ import world.respect.shared.domain.xapi.createBlankAppListingStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps_detail
 import world.respect.shared.generated.resources.invalid_link
-import world.respect.shared.viewmodel.app.appstate.getTitle
 
 data class AppsDetailUiState(
     val appDetail: DataLoadState<OpdsPublication>? = null,
@@ -208,7 +208,7 @@ class AppsDetailViewModel(
             }
             val statement = createBlankAppListingStatement(
                 appActivityId = route.manifestUrl.toString(),
-                appTitle = uiState.value.appDetail?.dataOrNull()?.metadata?.title?.getTitle() ?: "",
+                appTitle = uiState.value.appDetail?.dataOrNull()?.metadata?.title?.toStringMap() ?: emptyMap(),
                 actor = actor,
                 manifestUrl = route.manifestUrl.toString()
             )

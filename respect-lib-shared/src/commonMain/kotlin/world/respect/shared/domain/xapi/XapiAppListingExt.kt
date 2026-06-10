@@ -21,9 +21,9 @@ object XapiAppListingConstants {
 @OptIn(ExperimentalUuidApi::class)
 fun createBlankAppListingStatement(
     appActivityId: String,
-    appTitle: String,
+    appTitle: Map<String, String>,
     actor: XapiActor,
-    description: String? = null,
+    description: Map<String, String>?= null,
     moreInfo: String? = null,
     manifestUrl: String = appActivityId
 ): XapiStatement {
@@ -36,8 +36,8 @@ fun createBlankAppListingStatement(
             objectType = XapiObjectType.Activity,
             id = appActivityId,
             definition = XapiActivityDefinition(
-                name = mapOf("en-US" to appTitle),
-                description = description?.let { mapOf("en-US" to it) },
+                name = appTitle,
+                description = description,
                 type = XapiAppListingConstants.ACTIVITY_TYPE_APPLICATION,
                 moreInfo = moreInfo,
                 extensions = mapOf(

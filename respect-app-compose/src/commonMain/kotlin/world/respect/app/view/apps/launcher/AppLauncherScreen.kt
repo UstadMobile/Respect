@@ -54,7 +54,6 @@ import world.respect.shared.generated.resources.empty
 import world.respect.shared.generated.resources.empty_list
 import world.respect.shared.generated.resources.more_info
 import world.respect.shared.generated.resources.remove
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherUiState
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 

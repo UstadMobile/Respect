@@ -47,6 +47,7 @@ import world.respect.shared.navigation.AssignmentDetail
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.StatementList
 import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.util.ext.asLangMapUiText
 import world.respect.shared.util.ext.asUiText
@@ -318,5 +319,12 @@ class AssignmentDetailViewModel(
 
     fun onToggleFullscreen() {
         _uiState.update { it.copy(isFullscreen = !it.isFullscreen) }
+    }
+    fun onClickScoreCell(activityId: String) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                StatementList
+            )
+        )
     }
 }

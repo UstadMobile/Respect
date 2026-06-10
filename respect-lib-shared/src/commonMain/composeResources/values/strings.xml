@@ -611,4 +611,6 @@
 
     <string name="xapi_verb_assigned">assigned</string>
 
+    <string name="list">list</string>
+
 </resources>

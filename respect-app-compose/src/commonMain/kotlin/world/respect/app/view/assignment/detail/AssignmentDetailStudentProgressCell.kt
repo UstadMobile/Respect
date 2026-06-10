@@ -1,6 +1,7 @@
 package world.respect.app.view.assignment.detail
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +39,7 @@ import kotlin.math.roundToInt
 fun AssignmentDetailStudentProgressCell(
     progress: XapiAssignmentTaskProgress,
     modifier: Modifier = Modifier,
+    onClickScoreCell: () -> Unit = {},
 ) {
     val score = progress.scoreScaled
     val progressPercentVal = progress.progress
@@ -49,6 +51,9 @@ fun AssignmentDetailStudentProgressCell(
                     Modifier
                         .fillMaxSize()
                         .padding(8.dp)
+                        .clickable {
+                            onClickScoreCell()
+                        }
                         .background(
                             color = when (progress.successful) {
                                 true -> Color.Green

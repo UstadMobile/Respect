@@ -84,7 +84,8 @@ fun AssignmentDetailScreen(
         uiState = uiState,
         onStatusFilterChanged = viewModel::onStatusFilterChanged,
         onClickTask = viewModel::onClickTask,
-        onToggleFullscreen = viewModel::onToggleFullscreen
+        onToggleFullscreen = viewModel::onToggleFullscreen,
+        onClickScoreCell = viewModel::onClickScoreCell
     )
 }
 
@@ -95,6 +96,7 @@ fun AssignmentDetailScreen(
     onStatusFilterChanged: (AssignmentStatusFilter) -> Unit = { },
     onClickTask: (XapiActivity) -> Unit = { },
     onToggleFullscreen: () -> Unit = { },
+    onClickScoreCell: (activityId: String) -> Unit = { },
 ) {
     val horizontalScrollState = rememberScrollState()
 
@@ -285,7 +287,10 @@ fun AssignmentDetailScreen(
                                     studentAndProgress.progressPerTask.forEach { progressItem ->
                                         AssignmentDetailStudentProgressCell(
                                             progress = progressItem,
-                                            modifier = Modifier.size(taskColWidth)
+                                            modifier = Modifier.size(taskColWidth),
+                                            onClickScoreCell = {
+                                                onClickScoreCell(progressItem.activityId)
+                                            }
                                         )
                                     }
 

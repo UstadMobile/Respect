@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_from_link
+import world.respect.app.app.RespectAsyncImage
+import world.respect.app.components.langMapString
 import world.respect.shared.viewmodel.apps.list.AppListUiState
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.lib.dataloadstate.ext.dataOrNull
@@ -74,9 +76,37 @@ fun AppListScreen(
             key = { index, app -> app.objectActivityOrNull()?.id ?: index.toString() }
         ) { _, app ->
             ListItem(
-                modifier = Modifier.fillMaxWidth().clickable { onClickApp(app) },
-                headlineContent = { Text(app.objectActivityOrNull()?.definition?.name?.get("en-US") ?: "") },
-                supportingContent = { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { Text("-"); Text("-") } },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onClickApp(app)
+                    },
+                leadingContent = {
+                    app.findIcons().firstOrNull()?.also { iconLink ->
+                        RespectAsyncImage(
+                            uri = iconLink.href,
+                            contentDescription = "",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(36.dp)
+                        )
+                    }
+                },
+                headlineContent = {
+                    Text(
+                        text = app.metadata.title.getTitle(),
+                    )
+                },
+                supportingContent = {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        //"-" is a placeholder for age range/category
+                        Text("-")
+                        Text("-")
+                    }
+                },
+
             )
         }
     }

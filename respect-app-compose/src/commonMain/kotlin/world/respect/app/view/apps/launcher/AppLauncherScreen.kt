@@ -40,6 +40,8 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
+import world.respect.app.components.langMapString
+import world.respect.app.components.respectRememberPager
 import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.NoDataLoadedState
@@ -233,7 +235,7 @@ fun AppGridItem(
         )
 
         Text(
-            text = appData?.metadata?.title?.getTitle() ?: "",
+            text = appData?.metadata?.title?.let { langMapString(it) } ?:"",
             modifier = Modifier.align(Alignment.Start)
         )
 

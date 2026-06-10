@@ -159,6 +159,10 @@ fun XapiStatement.objectActivityOrNull(): XapiActivity? {
     return `object` as? XapiActivity
 }
 
+fun XapiStatement.objectActivityNameOrNull(): Map<String, String>? {
+    return objectActivityOrNull()?.definition?.name
+}
+
 fun XapiStatement.objectSubstatementOrNull(): XapiStatement? {
     return `object` as? XapiStatement
 }
@@ -179,4 +183,24 @@ fun List<XapiStatement>.distinctByMostRecentTimestampForActivityId(): List<XapiS
 
 fun List<XapiStatement>.sortedByTimestampDescending() : List<XapiStatement> {
     return sortedByDescending { it.timestamp ?: EPOCH }
+}
+
+/**
+ * Returns a copy of the statement with the activity name updated. If the object is not an activity,
+ * it has no effect
+ */
+fun XapiStatement.copyWithObjectActivityName(
+    name: Map<String, String>
+) : XapiStatement {
+    return copy(
+        `object` = objectActivityOrNull()?.copyWithDefinitionName(name) ?: this.`object`
+    )
+}
+
+fun XapiStatement.copyWithObjectActivityDescription(
+    description: Map<String, String>
+): XapiStatement {
+    return copy(
+        `object` = objectActivityOrNull()?.copyWithDefinitionDescription(description) ?: this.`object`
+    )
 }

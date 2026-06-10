@@ -38,6 +38,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.RespectShortVersionInfoText
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.langMapString
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
@@ -48,7 +49,6 @@ import world.respect.shared.generated.resources.other_options
 import world.respect.shared.generated.resources.scan_qr_code_badge
 import world.respect.shared.generated.resources.school_directory
 import world.respect.shared.generated.resources.school_name_placeholder
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedUiState
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
 
@@ -164,7 +164,7 @@ fun GetStartedScreen(
                     headlineContent = {
                         Text(
                             modifier = Modifier.testTag("school_name_text"),
-                            text = school.name.getTitle()
+                            text = langMapString(school.name),
                         )
                     },
                     supportingContent = {

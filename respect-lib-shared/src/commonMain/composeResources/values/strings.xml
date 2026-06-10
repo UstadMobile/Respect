@@ -305,6 +305,7 @@
     <!-- Score Metrics -->
     <string name="average_score">Average Score</string>
     <string name="total_score">Total Score</string>
+    <string name="score">Score</string>
 
     <!-- Count Metrics -->
     <string name="number_of_activities">Number of Activities</string>

@@ -323,7 +323,7 @@ class AssignmentDetailViewModel(
     fun onClickScoreCell(activityId: String) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                StatementList
+                StatementList(activityId = activityId)
             )
         )
     }

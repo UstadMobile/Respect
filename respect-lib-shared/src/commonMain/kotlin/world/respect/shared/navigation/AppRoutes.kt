@@ -152,7 +152,9 @@ data class AssignmentEdit(
 }
 
 @Serializable
-object StatementList : RespectAppRoute
+data class StatementList(
+    val activityId: String? = null
+) : RespectAppRoute
 
 @Serializable
 object ClazzList : RespectAppRoute

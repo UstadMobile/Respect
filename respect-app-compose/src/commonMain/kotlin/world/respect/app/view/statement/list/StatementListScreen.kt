@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.shared.viewmodel.statement.list.StatementListUiState
 import world.respect.shared.viewmodel.statement.list.StatementListViewModel
 
@@ -25,8 +26,10 @@ fun StatementListScreen(
 fun StatementListScreen(
     uiState: StatementListUiState
 ) {
+    val statements = uiState.statements.dataOrNull() ?: emptyList()
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(uiState.statements) { statement ->
+        items(statements) { statement ->
+            StatementListItem(statement = statement)
         }
     }
 }

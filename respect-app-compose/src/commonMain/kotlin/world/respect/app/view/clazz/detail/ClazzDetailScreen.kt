@@ -110,7 +110,6 @@ fun ClazzDetailScreen(
 
     val classStatement = uiState.classStatement.dataOrNull()
 
-
     fun Person?.key(role: EnrollmentRoleEnum, index: Int): Any {
         return this?.guid?.let {
             Pair(it, role)

@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel.clazz.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -50,6 +51,7 @@ import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.util.FilterChipsOption
 import world.respect.shared.util.SortOrderOption
+import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
@@ -66,6 +68,7 @@ import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companion.ALL
 import kotlin.getValue
@@ -351,6 +354,7 @@ class ClazzDetailViewModel(
 
     fun onClickRemovePersonFromClass(person: Person, role: EnrollmentRoleEnum) {
         viewModelScope.launch {
+            try {
                 val personEnrollments = schoolDataSource.enrollmentDataSource.list(
                     loadParams = DataLoadParams(),
                     listParams = EnrollmentDataSource.GetListParams(
@@ -381,6 +385,12 @@ class ClazzDetailViewModel(
                 }
 
                 schoolDataSource.enrollmentDataSource.store(enrollmentsToStore)
+
+            }catch(e: Throwable) {
+                //do something
+                Napier.e("onClickRemovePersonFromClass ERROR", throwable = e)
+                snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
+            }
         }
     }
 

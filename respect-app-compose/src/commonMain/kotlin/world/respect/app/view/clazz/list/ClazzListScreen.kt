@@ -19,7 +19,6 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultSortListMode
 import world.respect.app.components.langMapString
 import world.respect.lib.xapi.ext.objectActivityOrNull
-import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.viewmodel.clazz.list.ClazzListUiState
@@ -63,7 +62,7 @@ fun ClazzListScreen(
         items(
             items = uiState.classStatements,
             key = { statement ->
-                (statement.`object` as? XapiActivity)?.id ?: statement.id.toString()
+                statement.objectActivityOrNull()?.id ?: statement.id.toString()
             },
         ) { statement ->
             val title = statement.objectActivityOrNull()?.definition?.name

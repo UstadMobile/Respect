@@ -12,8 +12,8 @@ import org.koin.core.scope.Scope
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.SchoolDataSource
-import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
-import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.ext.distinctByMostRecentTimestampForActivityId
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
@@ -119,12 +119,10 @@ class ClazzListViewModel(
                 val statements = dataLoadState.dataOrNull()?.statements
                     ?.filter { stmt ->
                         stmt.verb.id == XapiVerb.ID_SAVED
-                                && (stmt.`object` as? XapiActivity)?.definition?.type == ACTIVITY_TYPE_CLASS
+                                && stmt.objectActivityOrNull()?.definition?.type == ACTIVITY_TYPE_CLASS
                     }
-                    ?.groupBy { (it.`object` as? XapiActivity)?.id }
-                    ?.mapNotNull { (_, stmts) ->
-                        stmts.mostRecentByTimestampOrNull()
-                    } ?: emptyList()
+                    ?.distinctByMostRecentTimestampForActivityId()
+                    ?: emptyList()
 
                 _uiState.update { prev ->
                     prev.copy(classStatements = statements)
@@ -140,7 +138,8 @@ class ClazzListViewModel(
     }
 
     fun onClickClazz(statement: XapiStatement) {
-        val activityId = (statement.`object` as? XapiActivity)?.id ?: return
+        val activityId = statement.objectActivityOrNull()?.id
+            ?: throw IllegalStateException("onClickClazz: statement object is not an Activity or has no id")
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 ClazzDetail(

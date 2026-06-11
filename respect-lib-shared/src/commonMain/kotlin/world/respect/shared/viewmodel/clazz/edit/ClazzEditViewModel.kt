@@ -28,6 +28,7 @@ import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParam
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.isNullOrAllBlank
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.xapi.createBlankClassStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_clazz
@@ -68,6 +69,7 @@ class ClazzEditViewModel(
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
+    private val createClassUseCase: CreateClassUseCase by inject()
     private val route: ClazzEdit = savedStateHandle.toRoute()
 
     private val _uiState = MutableStateFlow(ClazzEditUiState())
@@ -186,6 +188,9 @@ class ClazzEditViewModel(
             )
 
             if (route.classActivityId == null) {
+                // Create invites for the new class
+                createClassUseCase(classActivityId)
+
                 _navCommandFlow.tryEmit(
                     NavCommand.Navigate(
                         destination = ClazzDetail(

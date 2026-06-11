@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import world.respect.shared.generated.resources.Res
@@ -54,6 +55,7 @@ fun AssignmentDetailStudentProgressCell(
                         .clickable {
                             onClickScoreCell()
                         }
+                        .testTag("score_cell")
                         .background(
                             color = when (progress.successful) {
                                 true -> Color.Green

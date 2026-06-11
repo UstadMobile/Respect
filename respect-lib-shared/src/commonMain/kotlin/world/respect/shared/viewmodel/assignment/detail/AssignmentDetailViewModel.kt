@@ -37,6 +37,7 @@ import world.respect.lib.xapi.ext.isStarted
 import world.respect.lib.xapi.ext.objectActivityNameOrNull
 import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
 import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
@@ -320,10 +321,13 @@ class AssignmentDetailViewModel(
     fun onToggleFullscreen() {
         _uiState.update { it.copy(isFullscreen = !it.isFullscreen) }
     }
-    fun onClickScoreCell(activityId: String) {
+    fun onClickScoreCell(activityId: String, xapiActor: XapiActor) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                StatementList(activityId = activityId)
+                StatementList.create(
+                    activityId = activityId,
+                    xapiActor = xapiActor
+                )
             )
         )
     }

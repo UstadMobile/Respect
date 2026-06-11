@@ -14,6 +14,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.langMapString
 import world.respect.lib.xapi.ext.objectActivityNameOrNull
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.score
@@ -25,8 +26,8 @@ fun StatementListItem(
     statement: XapiStatement,
     modifier: Modifier = Modifier,
 ) {
-
-    val objectName = statement.objectActivityNameOrNull()?.let { langMapString(it) } ?: ""
+    val objectName = statement.objectActivityNameOrNull()?.let { langMapString(it) }
+        ?: statement.objectActivityOrNull()?.id?.substringAfterLast("/") ?: ""
 
     val verbName = statement.verb.display?.let { langMapString(it) } ?: ""
 

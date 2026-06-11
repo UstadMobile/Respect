@@ -16,14 +16,16 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.map
+import world.respect.lib.xapi.ext.objectActivityNameOrNull
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.ext.sortedByTimestampDescending
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.list
 import world.respect.shared.navigation.StatementList
+import world.respect.shared.util.ext.asLangMapUiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
@@ -51,7 +53,6 @@ class StatementListViewModel(
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.list.asUiText(),
                 showBackButton = true,
                 hideBottomNavigation = true
             )
@@ -61,10 +62,25 @@ class StatementListViewModel(
             schoolDataSource.xapiStatementsResource.getAsFlow(
                 listParams = XapiStatementsResource.GetStatementParams(
                     activity = route.activityId,
-                    relatedActivities = true
+                    relatedActivities = true,
+                    agent = route.xapiActor,
                 ),
                 dataLoadParams = DataLoadParams()
             ).collectLatest { loadState ->
+
+                val statements = loadState.dataOrNull()?.statements ?: emptyList()
+
+                val unitNameMap = statements.find {
+                    it.objectActivityOrNull()?.id == route.activityId
+                }?.objectActivityNameOrNull()
+
+                val actorName = route.xapiActor.name ?: ""
+
+                val title = unitNameMap?.mapValues { "${it.value}: $actorName" }?.asLangMapUiText()
+                    ?: "${route.activityId.substringAfterLast("/")}: $actorName".asUiText()
+
+                _appUiState.update { it.copy(title = title) }
+
                 _uiState.update {
                     it.copy(
                         statements = loadState.map { result ->

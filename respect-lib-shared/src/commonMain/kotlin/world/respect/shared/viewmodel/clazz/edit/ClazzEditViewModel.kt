@@ -188,7 +188,7 @@ class ClazzEditViewModel(
             )
 
             if (route.classActivityId == null) {
-                // Create invites for the new class
+
                 createClassUseCase(classActivityId)
 
                 _navCommandFlow.tryEmit(

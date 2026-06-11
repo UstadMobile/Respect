@@ -16,12 +16,6 @@ import world.respect.datalayer.school.model.Invite2
 class CreateClassUseCase(
     private val dataSource: SchoolDataSource
 ) {
-
-    /**
-     * Create invites for a class identified by its activity ID.
-     *
-     * @param classActivityId the xAPI activity ID of the class
-     */
     suspend operator fun invoke(
         classActivityId: String
     ) {

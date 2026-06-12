@@ -44,11 +44,14 @@ class XapiMessengerService: Service() {
 
             //val xapiResource = xapiResourceProvider(endpoint, auth)
             when(msg.what) {
-                XapiIpcWhatFlags.WHAT_GET_STATEMENTS -> {
+                XapiIpcWhatFlags.WHAT_REQUEST -> {
                     //get the params and make the request
                     val reply = Message.obtain(
-                        this@IncomingHandler, XapiIpcWhatFlags.WHAT_GET_STATEMENTS_RESPONSE
+                        this@IncomingHandler, XapiIpcWhatFlags.WHAT_RESPONSE
                     )
+
+                    //Mark it as a response to the request id received.
+                    msg.arg1 = msg.arg1
                     msg.replyTo.send(reply)
                 }
 

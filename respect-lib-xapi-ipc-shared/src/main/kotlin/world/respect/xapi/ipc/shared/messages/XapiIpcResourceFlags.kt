@@ -1,0 +1,9 @@
+package world.respect.xapi.ipc.shared.messages
+
+object XapiIpcResourceFlags {
+
+    const val GET_STATEMENTS = 1
+
+    const val POST_STATEMENTS = 3
+
+}

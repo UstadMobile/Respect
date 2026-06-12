@@ -10,12 +10,11 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.rule.ServiceTestRule
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 import org.junit.Rule
 import org.junit.Test
-import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
+import world.respect.xapi.ipc.client.MessageRequestSenderBinderImpl
+import world.respect.xapi.ipc.client.XapiResourceIpcClient
 import kotlin.test.assertNotNull
-import kotlin.time.Duration.Companion.milliseconds
 
 class XapiServiceIntegrationTest {
 
@@ -30,6 +29,10 @@ class XapiServiceIntegrationTest {
             XapiMessengerService::class.java,
         )
 
+        runBlocking {
+            ipcTestApplication.insertAdminAndDefaultGrants()
+        }
+
         class IncomingHandler(
             looper: Looper,
             val completeable: CompletableDeferred<Message>,
@@ -40,26 +43,16 @@ class XapiServiceIntegrationTest {
         }
 
         val binder: IBinder = serviceRule.bindService(serviceIntent)
-
         assertNotNull(binder)
-
         val serviceMessenger = Messenger(binder)
-        val completeable = CompletableDeferred<Message>()
-        val incomingHandler = IncomingHandler(Looper.getMainLooper(), completeable)
-        val incomingMessenger = Messenger(incomingHandler)
+        val client = XapiResourceIpcClient(
+            MessageRequestSenderBinderImpl(serviceMessenger)
+        )
 
-
-        val msg: Message = Message.obtain(null, XapiIpcWhatFlags.WHAT_GET_STATEMENTS, 0, 0)
-        msg.replyTo = incomingMessenger
-        serviceMessenger.send(msg)
-
-        val reply = runBlocking {
-            withTimeout(10_000.milliseconds) {
-                completeable.await()
-            }
+        runBlocking {
+            val response = client.statements.post(emptyList())
+            println(response)
         }
-
-        assertNotNull(reply)
     }
 
 

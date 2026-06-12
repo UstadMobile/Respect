@@ -8,8 +8,10 @@ import android.os.Message
 import android.os.Messenger
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.rule.ServiceTestRule
+import io.ktor.http.Url
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.junit.Rule
 import org.junit.Test
 import world.respect.xapi.ipc.client.MessageRequestSenderBinderImpl
@@ -20,6 +22,10 @@ class XapiServiceIntegrationTest {
 
     @get:Rule
     val serviceRule = ServiceTestRule()
+
+    val json = Json {
+        encodeDefaults = false
+    }
 
     @Test
     fun givenValidService_whenRequestSent_thenResponseReceived() {
@@ -46,7 +52,10 @@ class XapiServiceIntegrationTest {
         assertNotNull(binder)
         val serviceMessenger = Messenger(binder)
         val client = XapiResourceIpcClient(
-            MessageRequestSenderBinderImpl(serviceMessenger)
+            MessageRequestSenderBinderImpl(serviceMessenger),
+            json,
+            Url("http://localhost/"),
+            "secret",
         )
 
         runBlocking {

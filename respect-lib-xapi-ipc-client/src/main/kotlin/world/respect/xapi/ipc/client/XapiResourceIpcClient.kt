@@ -1,5 +1,8 @@
 package world.respect.xapi.ipc.client
 
+import io.ktor.http.Url
+import kotlinx.serialization.json.Json
+import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.resources.XapiActivitiesResource
 import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiResource
@@ -16,9 +19,12 @@ import world.respect.lib.xapi.resources.XapiStatementsResource
  */
 class XapiResourceIpcClient(
     private val requestSender: MessageRequestSender,
+    private val json: Json,
+    private val endpoint: Url,
+    private val auth: String,
 ): XapiResource {
     override val statements: XapiStatementsResource by lazy {
-        XapiStatementsResourceIpcClient(requestSender)
+        XapiStatementsResourceIpcClient(requestSender, json, endpoint, auth)
     }
 
     override val agents: XapiAgentsResource

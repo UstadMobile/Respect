@@ -9,9 +9,6 @@ object XapiIpcWhatFlags {
     const val WHAT_BROADCAST = 3
 
 
-    const val KEY_ENDPOINT = "endpoint"
-
-    const val KEY_AUTH = "auth"
 
 
 }

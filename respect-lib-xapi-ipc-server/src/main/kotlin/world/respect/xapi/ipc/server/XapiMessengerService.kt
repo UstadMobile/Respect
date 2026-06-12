@@ -8,8 +8,16 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import world.respect.lib.xapi.XapiResourceProvider
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
+import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
+import kotlin.uuid.Uuid
 
 /**
  * Messenger service (server) that will receive xAPI requests, send them to a given xAPI resource,
@@ -27,32 +35,55 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
  */
 class XapiMessengerService: Service() {
 
+    private val json = Json {
+        encodeDefaults = false
+    }
+
     internal class IncomingHandler(
         context: Context,
-        private val applicationContext: Context = context.applicationContext
+        private val applicationContext: Context = context.applicationContext,
+        private val json: Json,
     ):  Handler(Looper.getMainLooper()) {
 
 
         override fun handleMessage(msg: Message) {
+            if(msg.what != XapiIpcWhatFlags.WHAT_REQUEST) {
+                super.handleMessage(msg)
+                return
+            }
+
             val xapiResourceProvider = applicationContext as? XapiResourceProvider
                 ?: throw IllegalStateException("No xapi resource provider")
 
-//            val endpoint = msg.data.getString(XapiIpcWhatFlags.KEY_ENDPOINT)
-//                ?: throw IllegalArgumentException("Message has no endpoint")
-//            val auth = msg.data.getString(XapiIpcWhatFlags.KEY_AUTH)
-//                ?: throw IllegalArgumentException("Message has no auth")
+            val endpoint = msg.data.getString(XapiIpcKeys.KEY_ENDPOINT)
+                ?: throw IllegalArgumentException("Message has no endpoint")
+            val auth = msg.data.getString(XapiIpcKeys.KEY_AUTH)
+                ?: throw IllegalArgumentException("Message has no auth")
 
-            //val xapiResource = xapiResourceProvider(endpoint, auth)
-            when(msg.what) {
-                XapiIpcWhatFlags.WHAT_REQUEST -> {
+            val xapiResource = xapiResourceProvider.provideXapiResource(endpoint, auth)
+
+            when(msg.arg2) {
+                XapiIpcResourceFlags.POST_STATEMENTS -> {
                     //get the params and make the request
-                    val reply = Message.obtain(
+                    val replyMessage = Message.obtain(
                         this@IncomingHandler, XapiIpcWhatFlags.WHAT_RESPONSE
                     )
+                    val statements: List<XapiStatement> = msg.data.getString(XapiIpcKeys.KEY_BODY)?.let {
+                        json.decodeFromString(ListSerializer(XapiStatement.serializer()), it)
+                    } ?: throw IllegalArgumentException()
+
+                    val uuids = runBlocking {
+                        xapiResource.statements.post(statements)
+                    }
 
                     //Mark it as a response to the request id received.
-                    msg.arg1 = msg.arg1
-                    msg.replyTo.send(reply)
+                    replyMessage.arg1 = msg.arg1
+                    replyMessage.data.putString(
+                        XapiIpcKeys.KEY_BODY,
+                        json.encodeToString(ListSerializer(Uuid.serializer()), uuids)
+                    )
+
+                    msg.replyTo.send(replyMessage)
                 }
 
                 else -> {
@@ -64,7 +95,7 @@ class XapiMessengerService: Service() {
 
     private val messenger: Messenger by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         Messenger(
-            IncomingHandler(this, this.applicationContext)
+            IncomingHandler(this, this.applicationContext, json)
         )
     }
 

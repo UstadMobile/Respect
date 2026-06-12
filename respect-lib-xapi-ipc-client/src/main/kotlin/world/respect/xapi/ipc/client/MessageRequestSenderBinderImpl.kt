@@ -1,10 +1,12 @@
 package world.respect.xapi.ipc.client
 
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import kotlinx.coroutines.CompletableDeferred
+import world.respect.xapi.ipc.shared.messages.MessageReply
 import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -16,9 +18,9 @@ class MessageRequestSenderBinderImpl(
     private val outgoingMessenger: Messenger,
 ): MessageRequestSender {
 
-    private val requestIdAtomic = AtomicInteger()
+    private val requestIdAtomic = AtomicInteger(1)
 
-    private val pendingMessages = ConcurrentHashMap<Int, CompletableDeferred<Message>>()
+    private val pendingMessages = ConcurrentHashMap<Int, CompletableDeferred<MessageReply>>()
 
     val incomingHandler: Handler = object: Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
@@ -28,27 +30,34 @@ class MessageRequestSenderBinderImpl(
                     val completeable = pendingMessages[replyToRequestId]
                     if(completeable != null) {
                         pendingMessages.remove(replyToRequestId)
-                        completeable.complete(msg)
+                        val messageReply = MessageReply(
+                            data = Bundle(msg.data),
+                            what = msg.what,
+                            arg1 = msg.arg1,
+                            arg2 = msg.arg2,
+                        )
+                        completeable.complete(messageReply)
                     }else {
                         println("WARN: No pending message for id $replyToRequestId")
                     }
                 }
+
+                else -> {
+                    super.handleMessage(msg)
+                }
             }
-
-
-            super.handleMessage(msg)
         }
     }
 
     private val incomingMessenger: Messenger = Messenger(incomingHandler)
 
-    override suspend fun sendRequest(message: Message): Message {
+    override suspend fun sendRequest(message: Message): MessageReply {
         message.replyTo = incomingMessenger
         message.what = XapiIpcWhatFlags.WHAT_REQUEST
         val messageId = requestIdAtomic.getAndIncrement()
 
         message.arg1 = messageId
-        val completeable = CompletableDeferred<Message>().also {
+        val completeable = CompletableDeferred<MessageReply>().also {
             pendingMessages[messageId] = it
         }
 

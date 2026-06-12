@@ -12,8 +12,8 @@ import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
 
 /**
- * Messenger service that will receive xAPI requests, send them to a given xAPI resource, and then
- * send a reply message with the response.
+ * Messenger service (server) that will receive xAPI requests, send them to a given xAPI resource,
+ * and then send a reply message with the response.
  *
  * The replyTo field of the incoming message MUST be a Messenger of the client where responses
  * should be sent.
@@ -66,7 +66,6 @@ class XapiMessengerService: Service() {
     }
 
     override fun onBind(intent: Intent): IBinder? {
-        //mMessenger = Messenger(IncomingHandler(this))
         return messenger.binder
     }
 

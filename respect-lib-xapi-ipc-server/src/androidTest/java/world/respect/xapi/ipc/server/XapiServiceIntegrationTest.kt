@@ -15,6 +15,7 @@ import org.junit.Rule
 import org.junit.Test
 import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
 import kotlin.test.assertNotNull
+import kotlin.time.Duration.Companion.milliseconds
 
 class XapiServiceIntegrationTest {
 
@@ -53,7 +54,7 @@ class XapiServiceIntegrationTest {
         serviceMessenger.send(msg)
 
         val reply = runBlocking {
-            withTimeout(10_000) {
+            withTimeout(10_000.milliseconds) {
                 completeable.await()
             }
         }

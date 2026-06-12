@@ -8,7 +8,7 @@ import world.respect.lib.xapi.resources.XapiResource
  */
 fun interface XapiResourceProvider {
 
-    operator fun invoke(
+    fun provideXapiResource(
         endpoint: String,
         authentication: String?,
     ): XapiResource

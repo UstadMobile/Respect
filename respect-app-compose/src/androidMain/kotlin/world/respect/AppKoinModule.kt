@@ -261,6 +261,8 @@ import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPubl
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCaseAndroid
 import world.respect.shared.domain.xapi.xapinanohttpd.XapiNanoHttpdResourceProviderAndroid
+import world.respect.shared.viewmodel.statement.detail.RawStatementViewModel
+import world.respect.shared.viewmodel.statement.detail.StatementDetailViewModel
 import world.respect.shared.viewmodel.statement.list.StatementListViewModel
 
 
@@ -398,6 +400,8 @@ val appKoinModule = module {
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
     viewModelOf(::StatementListViewModel)
+    viewModelOf(::StatementDetailViewModel)
+    viewModelOf(::RawStatementViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(

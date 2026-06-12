@@ -612,6 +612,29 @@
 
     <string name="xapi_verb_assigned">assigned</string>
 
-    <string name="list">list</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <string name="sunday">Sunday</string>
+
+    <string name="timestamp">Timestamp</string>
+    <string name="verb">Verb</string>
+    <string name="_object">Object</string>
+    <string name="actor">Actor</string>
+    <string name="result">Result</string>
+    <string name="interaction_type">Interaction type</string>
+    <string name="account_homepage">Account homepage</string>
+    <string name="account_name">Account name</string>
+    <string name="score_scaled">Score (scaled)</string>
+
+    <string name="show_raw_xapi">Show raw xAPI(Advanced)</string>
+    <string name="raw_statement">Raw Statement</string>
+
 
 </resources>

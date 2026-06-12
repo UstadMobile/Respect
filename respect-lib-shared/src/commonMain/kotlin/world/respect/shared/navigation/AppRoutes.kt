@@ -170,6 +170,16 @@ data class StatementList(
 }
 
 @Serializable
+data class StatementDetail(
+    val statementId: String,
+) : RespectAppRoute
+
+@Serializable
+data class RawStatement(
+    val statementId: String,
+): RespectAppRoute
+
+@Serializable
 object ClazzList : RespectAppRoute
 
 @Serializable

@@ -19,17 +19,19 @@ fun StatementListScreen(
 
     StatementListScreen(
         uiState = uiState,
+        onClickListItem = viewModel::onClickListItem
     )
 }
 
 @Composable
 fun StatementListScreen(
-    uiState: StatementListUiState
+    uiState: StatementListUiState,
+    onClickListItem: (statementId: String) -> Unit = {},
 ) {
     val statements = uiState.statements.dataOrNull() ?: emptyList()
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(statements) { statement ->
-            StatementListItem(statement = statement)
+            StatementListItem(statement = statement, onClickListItem = onClickListItem)
         }
     }
 }

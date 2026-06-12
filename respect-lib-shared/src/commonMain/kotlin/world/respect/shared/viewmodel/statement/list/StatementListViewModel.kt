@@ -24,6 +24,8 @@ import world.respect.lib.xapi.ext.sortedByTimestampDescending
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.StatementDetail
 import world.respect.shared.navigation.StatementList
 import world.respect.shared.util.ext.asLangMapUiText
 import world.respect.shared.util.ext.asUiText
@@ -90,5 +92,11 @@ class StatementListViewModel(
                 }
             }
         }
+    }
+
+    fun onClickListItem(statementId: String) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(StatementDetail(statementId))
+        )
     }
 }

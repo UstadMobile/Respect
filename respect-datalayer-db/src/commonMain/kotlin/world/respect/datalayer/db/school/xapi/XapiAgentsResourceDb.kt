@@ -5,17 +5,17 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.ext.EPOCH
-import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiAgentsResourceLocal
 import world.respect.lib.xapi.XapiRequestHeaders
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiGroup
 import kotlin.time.Instant
 
-class XapiActorDataSourceDb(
+class XapiAgentsResourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
     private val uidNumberMapper: UidNumberMapper,
-) : XapiActorDataSourceLocal{
+) : XapiAgentsResourceLocal{
 
     override suspend fun updateLocal(
         actors: List<XapiActor>,

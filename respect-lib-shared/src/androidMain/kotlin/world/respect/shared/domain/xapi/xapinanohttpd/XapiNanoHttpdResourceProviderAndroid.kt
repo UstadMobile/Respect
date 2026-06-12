@@ -43,6 +43,7 @@ class XapiNanoHttpdResourceProviderAndroid(): XapiNanoHttpdResourceProvider, Koi
         )
 
         val schoolDataSource: SchoolDataSource = getKoin().getScope(accountScope.scopeId).get()
-        return schoolDataSource.xapiStatementsResource
+        return schoolDataSource.xapiResource.statements
     }
+
 }

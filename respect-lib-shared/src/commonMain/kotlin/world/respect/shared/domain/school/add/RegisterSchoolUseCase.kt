@@ -13,6 +13,10 @@ interface RegisterSchoolUseCase {
     data class RegisterSchoolRequest(
         val schoolName: String,
         val schoolUrl: String,
+        val inDirectoryUrl: Url? = null,
+        val adminUsername: String? = null,
+        val adminPassword: String? = null,
+        val schoolCreationPin: String? = null,
     ) {
 
         companion object {
@@ -26,7 +30,7 @@ interface RegisterSchoolUseCase {
                 val schoolName = params[PARAM_SCHOOL_NAME] ?: ""
                 val fullUrlParam = params[PARAM_SCHOOL_FULL_URL]
 
-                return if(fullUrlParam != null) {
+                val baseRequest = if(fullUrlParam != null) {
                     RegisterSchoolRequest(
                         schoolName = schoolName,
                         schoolUrl = fullUrlParam
@@ -46,6 +50,12 @@ interface RegisterSchoolUseCase {
                         ).build().toString()
                     )
                 }
+
+                return baseRequest.copy(
+                    adminUsername = params[PARAM_ADMIN_USERNAME],
+                    adminPassword = params[PARAM_ADMIN_PASSWORD],
+                    schoolCreationPin = params[PARAM_SCHOOL_CREATION_PIN],
+                )
             }
 
         }
@@ -54,7 +64,10 @@ interface RegisterSchoolUseCase {
     @Serializable
     data class RegisterSchoolResponse(
         val schoolUrl: Url,
-        val redirectUrl: Url
+        val schoolName: String? = null,
+        val redirectUrl: Url? = null,
+        val adminUsername: String? = null,
+        val inDirectoryUrl: Url? = null,
     )
 
     suspend operator fun invoke(
@@ -82,6 +95,14 @@ interface RegisterSchoolUseCase {
         const val PARAM_PACKAGE_NAME = "packageName"
 
         const val PARAM_NAME_REDIRECT = "redirect"
+
+        const val PARAM_ADMIN_USERNAME = "adminUsername"
+
+        const val PARAM_ADMIN_PASSWORD = "adminPassword"
+
+        const val PARAM_SCHOOL_CREATION_PIN = "schoolCreationPin"
+
+        const val PARAM_NAME_SET_USERNAME_AND_PASS = "setDirect"
 
     }
 }

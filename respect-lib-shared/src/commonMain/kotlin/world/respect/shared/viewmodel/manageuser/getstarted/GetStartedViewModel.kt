@@ -97,7 +97,7 @@ class GetStartedViewModel(
                     loadParams = DataLoadParams(),
                     listParams = SchoolDirectoryEntryDataSource.GetListParams(
                         name = name,
-                        directory = _uiState.value.selectedDirectory,
+                        directoryUrl = _uiState.value.selectedDirectory?.baseUrl,
                     )
                 )
             }else {

@@ -12,6 +12,10 @@ const val SERVER_PROPERTIES_KEY_PORT = "port"
  */
 const val SERVER_CONFIG_KEY_STATICFILES = "ktor.extrastaticfiles.dir"
 
+const val SERVER_CONFIG_KEY_DIRS_USE_VIRTUALHOST = "ktor.school.directories.virtualhost"
+
+const val SERVER_CONFIG_KEY_REGISTRATION_PIN = "ktor.school.registration.pin"
+
 /**
  * File that contains the password for directory management.
  */
@@ -132,3 +136,6 @@ fun ApplicationConfig.absoluteDataDir() = fileProperty(
     propertyName = "ktor.respect.datadir", defaultPath = DEFAULT_DATA_DIR_NAME
 )
 
+fun ApplicationConfig.schoolDirsUseVirtualHost(): Boolean {
+    return propertyOrNull(SERVER_CONFIG_KEY_DIRS_USE_VIRTUALHOST)?.getString()?.toBoolean() ?: false
+}

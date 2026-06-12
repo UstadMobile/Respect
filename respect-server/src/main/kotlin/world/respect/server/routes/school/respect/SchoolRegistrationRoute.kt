@@ -1,9 +1,11 @@
 package world.respect.server.routes.school.respect
 
 import io.github.aakira.napier.Napier
+import io.ktor.http.CacheControl
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.html.respondHtml
 import io.ktor.server.request.receiveParameters
+import io.ktor.server.response.cacheControl
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
@@ -13,6 +15,7 @@ import kotlinx.html.ButtonType
 import kotlinx.html.FormMethod
 import kotlinx.html.InputType
 import kotlinx.html.body
+import kotlinx.html.br
 import kotlinx.html.button
 import kotlinx.html.div
 import kotlinx.html.form
@@ -27,6 +30,7 @@ import kotlinx.html.style
 import kotlinx.html.title
 import org.koin.ktor.ext.inject
 import world.respect.server.SchoolConfig
+import world.respect.server.schoolDirsUseVirtualHost
 import world.respect.server.util.ext.getStatusCode
 import world.respect.server.util.ext.virtualHost
 import world.respect.shared.domain.school.add.RegisterSchoolUseCase
@@ -47,6 +51,7 @@ fun Route.SchoolRegistrationRoute() {
 
         val packageName = call.request.queryParameters[RegisterSchoolUseCase.PARAM_PACKAGE_NAME]
         val virtualHost = call.request.virtualHost
+        val showUserInForm = call.request.queryParameters[RegisterSchoolUseCase.PARAM_NAME_SET_USERNAME_AND_PASS]?.toBoolean() ?: false
 
         call.respondHtml {
             head {
@@ -59,15 +64,68 @@ fun Route.SchoolRegistrationRoute() {
 
                     form(method = FormMethod.post, action = "/school-directory/register-school") {
                         div("form-group") {
+                            if(showUserInForm) {
+                                if(environment.config.schoolDirsUseVirtualHost()){
+                                    +"School in directory: ${call.virtualHost}"
+                                    br()
+                                }
+
+                                label {
+                                    htmlFor = RegisterSchoolUseCase.PARAM_SCHOOL_CREATION_PIN
+                                    +"School Creation PIN:"
+                                }
+
+                                input(
+                                    type = InputType.password,
+                                    name = RegisterSchoolUseCase.PARAM_SCHOOL_CREATION_PIN,
+                                ) {
+                                    id = RegisterSchoolUseCase.PARAM_SCHOOL_CREATION_PIN
+                                }
+                                br()
+                            }
+
                             label {
                                 htmlFor = RegisterSchoolUseCase.PARAM_SCHOOL_NAME
-                                +"School Name"
+                                +"School Name:"
                             }
 
                             input(type = InputType.text, name = "schoolName") {
                                 id = RegisterSchoolUseCase.PARAM_SCHOOL_NAME
                                 required = true
                                 placeholder = "Enter school name"
+                            }
+
+                            br()
+
+                            if(showUserInForm) {
+                                label {
+                                    htmlFor = RegisterSchoolUseCase.PARAM_ADMIN_USERNAME
+                                    +"Admin username:"
+                                }
+
+                                input(
+                                    type = InputType.text,
+                                    name = RegisterSchoolUseCase.PARAM_ADMIN_USERNAME,
+                                ) {
+                                    id = RegisterSchoolUseCase.PARAM_ADMIN_USERNAME
+                                    required = true
+                                    value = "admin"
+                                }
+
+                                br()
+
+                                label {
+                                    htmlFor = RegisterSchoolUseCase.PARAM_ADMIN_PASSWORD
+                                    +"Admin password:"
+                                }
+
+                                input(
+                                    type = InputType.password,
+                                    name = RegisterSchoolUseCase.PARAM_ADMIN_PASSWORD,
+                                ) {
+                                    id = RegisterSchoolUseCase.PARAM_ADMIN_PASSWORD
+                                    required = true
+                                }
                             }
                         }
 
@@ -76,7 +134,7 @@ fun Route.SchoolRegistrationRoute() {
                                 div("form-group") {
                                     label {
                                         htmlFor = RegisterSchoolUseCase.PARAM_SUBDOMAIN
-                                        +"School Link"
+                                        +"School Link:"
                                     }
                                     div {
                                         input(type = InputType.text, name = "schoolSubdomain") {
@@ -94,7 +152,7 @@ fun Route.SchoolRegistrationRoute() {
                                 div("form-group") {
                                     label {
                                         htmlFor = RegisterSchoolUseCase.PARAM_SCHOOL_FULL_URL
-                                        +"School URL"
+                                        +"School URL:"
                                     }
 
                                     input(type = InputType.text, name = "schoolUrl") {
@@ -164,9 +222,41 @@ fun Route.SchoolRegistrationRoute() {
     post("/school-directory/register-school") {
         try {
             val parameters = call.receiveParameters()
-            val registerRequest = RegisterSchoolUseCase.RegisterSchoolRequest.fromParameters(parameters)
+            val registerRequest = RegisterSchoolUseCase.RegisterSchoolRequest.fromParameters(
+                parameters
+            ).let {
+                if(environment.config.schoolDirsUseVirtualHost()) {
+                    it.copy(inDirectoryUrl = call.virtualHost)
+                }else {
+                    it
+                }
+            }
+
             val response = registerSchoolUseCase(request = registerRequest)
-            call.respondRedirect(response.redirectUrl)
+            val redirectUrl = response.redirectUrl
+            if(redirectUrl != null) {
+                call.respondRedirect(redirectUrl)
+            }else {
+                call.respondHtml {
+                    body {
+                        h1 {
+                            +"Registration successful"
+                        }
+                        response.schoolName?.also { name ->
+                            +"School name: $name"
+                            br()
+                        }
+                        +"School URL: ${response.schoolUrl}"
+                        br()
+                        "Admin username: ${response.adminUsername}"
+                        br()
+                        response.inDirectoryUrl?.also { dirUrl ->
+                            + "In directory :$dirUrl"
+                        }
+                    }
+                }
+            }
+
             return@post
         }catch(e: Throwable) {
             Napier.e("Error registering school", e)

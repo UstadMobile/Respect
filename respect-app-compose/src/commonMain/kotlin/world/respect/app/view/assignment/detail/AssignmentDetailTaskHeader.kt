@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.Dp
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import world.respect.app.components.langMapString
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
@@ -17,7 +18,6 @@ import world.respect.lib.opds.model.findIcons
 import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.libutil.ext.resolve
-import world.respect.shared.viewmodel.app.appstate.getTitle
 
 @Composable
 fun AssignmentDetailTaskHeader(
@@ -41,7 +41,7 @@ fun AssignmentDetailTaskHeader(
     }
 
     AssignmentDetailHeaderCell(
-        title = title?.getTitle() ?: "",
+        title = title?.let { langMapString(it) } ?: "",
         iconUrl = iconUrl,
         width = taskColWidth,
         height = headerHeight

@@ -237,7 +237,10 @@ fun Application.module() {
             }
             route("directory") {
                 val respectAppDataSource: RespectAppDataSource by inject()
-                RespectSchoolDirectoryRoute(respectAppDataSource)
+                RespectSchoolDirectoryRoute(
+                    respectAppDataSource = respectAppDataSource,
+                    filterByHost = environment.config.schoolDirsUseVirtualHost()
+                )
             }
 
             route("school") {

@@ -4,7 +4,7 @@ import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.resources.XapiAgentsResource
 import kotlin.time.Instant
 
-interface XapiActorDataSourceLocal : XapiAgentsResource {
+interface XapiAgentsResourceLocal : XapiAgentsResource {
 
     suspend fun updateLocal(
         actors: List<XapiActor>,

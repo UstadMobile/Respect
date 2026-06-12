@@ -11,18 +11,18 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.db.school.xapi.adapters.toModel
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntry
-import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiActivitiesResourceLocal
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiObjectType
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-class XapiActivityDataSourceDb(
+class XapiActivitiesResourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
     private val uidNumberMapper: UidNumberMapper,
     private val json: Json,
-) : XapiActivityDataSourceLocal{
+) : XapiActivitiesResourceLocal{
 
     /**
      * As per the xAPI spec :

@@ -6,8 +6,9 @@ import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import kotlinx.coroutines.CompletableDeferred
-import world.respect.xapi.ipc.shared.messages.MessageReply
+import world.respect.xapi.ipc.shared.messages.MessageData
 import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
+import world.respect.xapi.ipc.shared.messages.ext.setFromMessageData
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -20,7 +21,7 @@ class MessageRequestSenderBinderImpl(
 
     private val requestIdAtomic = AtomicInteger(1)
 
-    private val pendingMessages = ConcurrentHashMap<Int, CompletableDeferred<MessageReply>>()
+    private val pendingMessages = ConcurrentHashMap<Int, CompletableDeferred<MessageData>>()
 
     val incomingHandler: Handler = object: Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
@@ -30,7 +31,7 @@ class MessageRequestSenderBinderImpl(
                     val completeable = pendingMessages[replyToRequestId]
                     if(completeable != null) {
                         pendingMessages.remove(replyToRequestId)
-                        val messageReply = MessageReply(
+                        val messageReply = MessageData(
                             data = Bundle(msg.data),
                             what = msg.what,
                             arg1 = msg.arg1,
@@ -51,13 +52,14 @@ class MessageRequestSenderBinderImpl(
 
     private val incomingMessenger: Messenger = Messenger(incomingHandler)
 
-    override suspend fun sendRequest(message: Message): MessageReply {
+    override suspend fun sendRequest(messageData: MessageData): MessageData {
+        val message = Message.obtain()
+        message.setFromMessageData(messageData)
         message.replyTo = incomingMessenger
-        message.what = XapiIpcWhatFlags.WHAT_REQUEST
         val messageId = requestIdAtomic.getAndIncrement()
-
         message.arg1 = messageId
-        val completeable = CompletableDeferred<MessageReply>().also {
+
+        val completeable = CompletableDeferred<MessageData>().also {
             pendingMessages[messageId] = it
         }
 

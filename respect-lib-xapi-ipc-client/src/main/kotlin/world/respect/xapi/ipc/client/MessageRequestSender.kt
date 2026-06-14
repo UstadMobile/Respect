@@ -1,14 +1,13 @@
 package world.respect.xapi.ipc.client
 
-import android.os.Message
-import world.respect.xapi.ipc.shared.messages.MessageReply
+import world.respect.xapi.ipc.shared.messages.MessageData
 
 interface MessageRequestSender {
 
     /**
      * Send a Message as a request and receive a response
      */
-    suspend fun sendRequest(message: Message): MessageReply
+    suspend fun sendRequest(messageData: MessageData): MessageData
 
 
 }

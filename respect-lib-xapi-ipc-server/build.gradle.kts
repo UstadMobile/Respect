@@ -46,7 +46,7 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(projects.respectLibXapiIpcClient)
     androidTestImplementation(projects.respectDatalayerDb)
-    androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(projects.respectLibTestResources)
     androidTestImplementation(kotlin("test"))
 }

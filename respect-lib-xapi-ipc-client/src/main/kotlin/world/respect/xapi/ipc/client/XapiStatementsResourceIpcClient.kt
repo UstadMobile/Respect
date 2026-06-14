@@ -20,8 +20,8 @@ import world.respect.xapi.ipc.shared.messages.MessageData
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
-import world.respect.xapi.ipc.shared.messages.ext.getDeserialized
 import world.respect.xapi.ipc.shared.messages.ext.putStringValues
+import world.respect.xapi.ipc.shared.messages.ext.toDataLoadState
 import kotlin.uuid.Uuid
 
 class XapiStatementsResourceIpcClient(
@@ -76,13 +76,7 @@ class XapiStatementsResourceIpcClient(
             )
         )
 
-        val stmtResult = response.data.getDeserialized(
-            key = XapiIpcKeys.KEY_BODY,
-            json = json,
-            deserializer = XapiStatementResult.serializer(),
-        ) ?: return DataErrorResult(IllegalStateException())
-
-        return DataReadyState(stmtResult)
+        return response.data.toDataLoadState(json, XapiStatementResult.serializer())
     }
 
     override fun getAsFlow(
@@ -96,13 +90,13 @@ class XapiStatementsResourceIpcClient(
         activityId: String,
         filterByAssigneeAgent: XapiAgent?
     ): Flow<DataLoadState<AssignmentAndProgress>> {
-        TODO("Not yet implemented")
+        throw IllegalStateException("GetAssignmentResults over IPC is not supported")
     }
 
     override fun getAssignmentListAsFlow(
         dataLoadParams: DataLoadParams,
         studentAgent: XapiAgent?
     ): Flow<DataLoadState<List<AssignmentSummary>>> {
-        TODO("Not yet implemented")
+        throw IllegalStateException("GetAssignmentResults over IPC is not supported")
     }
 }

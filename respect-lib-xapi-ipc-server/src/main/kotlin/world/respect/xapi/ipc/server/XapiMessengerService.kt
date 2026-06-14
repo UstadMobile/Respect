@@ -8,11 +8,11 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
+import io.ktor.http.Parameters
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
@@ -23,6 +23,7 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
 import world.respect.xapi.ipc.shared.messages.ext.getDeserialized
 import world.respect.xapi.ipc.shared.messages.ext.getStringValues
 import world.respect.xapi.ipc.shared.messages.ext.putSerialized
+import world.respect.xapi.ipc.shared.messages.ext.toBundle
 import kotlin.uuid.Uuid
 
 /**
@@ -99,19 +100,14 @@ class XapiMessengerService: Service() {
                     }
 
                     XapiIpcResourceFlags.GET_STATEMENTS -> {
-                        val result = xapiResource.statements.get(
+                        replyMessage.data = xapiResource.statements.get(
                             listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                                params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS)!!,
+                                params = msg.data.getStringValues(
+                                    XapiIpcKeys.KEY_QUERY_PARAMS
+                                ) ?: Parameters.Empty,
                                 json = json
                             )
-                        ).dataOrNull() ?: return@runBlocking null
-
-                        replyMessage.data.putSerialized(
-                            key = XapiIpcKeys.KEY_BODY,
-                            json = json,
-                            serializer = XapiStatementResult.serializer(),
-                            value = result
-                        )
+                        ).toBundle(XapiStatementResult.serializer(), json)
 
                         msg.replyTo.send(replyMessage)
                     }

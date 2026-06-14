@@ -1,5 +1,6 @@
 package world.respect.lib.xapi.resources
 
+import io.ktor.http.ParametersBuilder
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
@@ -14,6 +15,7 @@ import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
+import world.respect.libutil.ext.appendIfNotNull
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
@@ -53,6 +55,31 @@ interface XapiStatementsResource {
         val attachments: Boolean = false,
         val ascending: Boolean = false,
     ) {
+
+        fun toParameters(json: Json): StringValues {
+            return ParametersBuilder().also { parameters ->
+                parameters.appendIfNotNull("statementId", statementId)
+                parameters.appendIfNotNull("voidedStatementId", voidedStatementId)
+                agent?.also {
+                    parameters.append(
+                        "agent", json.encodeToString(XapiActor.serializer(),
+                            it
+                        )
+                    )
+                }
+                parameters.appendIfNotNull("verb", verb)
+                parameters.appendIfNotNull("activity", activity)
+                parameters.appendIfNotNull("registration", registration)
+                parameters.append("related_activities", relatedActivities.toString())
+                parameters.append("related_agents", relatedAgents.toString())
+                parameters.appendIfNotNull("since", since?.toString())
+                parameters.appendIfNotNull("until", until?.toString())
+                parameters.appendIfNotNull("limit", limit?.toString())
+                parameters.append("format", format?.value ?: GetStatementFormatEnum.EXACT.value)
+                parameters.append("attachments", attachments.toString())
+                parameters.append("ascending", ascending.toString())
+            }.build()
+        }
 
         companion object {
 

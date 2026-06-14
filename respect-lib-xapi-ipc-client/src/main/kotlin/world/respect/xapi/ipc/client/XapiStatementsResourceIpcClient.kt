@@ -1,14 +1,15 @@
 package world.respect.xapi.ipc.client
 
 import android.os.Bundle
-import android.os.Message
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.lib.xapi.model.XapiAgent
@@ -19,6 +20,8 @@ import world.respect.xapi.ipc.shared.messages.MessageData
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
+import world.respect.xapi.ipc.shared.messages.ext.getDeserialized
+import world.respect.xapi.ipc.shared.messages.ext.putStringValues
 import kotlin.uuid.Uuid
 
 class XapiStatementsResourceIpcClient(
@@ -28,26 +31,22 @@ class XapiStatementsResourceIpcClient(
     private val auth: String,
 ): XapiStatementsResource {
 
+    private fun Bundle.putEndpoint() {
+        putString(XapiIpcKeys.KEY_ENDPOINT, endpoint.toString())
+        putString(XapiIpcKeys.KEY_AUTH, auth)
+    }
+
     override suspend fun post(list: List<XapiStatement>): List<Uuid> {
-        val message = Message.obtain(
-            null, XapiIpcWhatFlags.WHAT_REQUEST, 0, XapiIpcResourceFlags.POST_STATEMENTS
-        )
-
-        message.data.putString(XapiIpcKeys.KEY_ENDPOINT, endpoint.toString())
-        message.data.putString(XapiIpcKeys.KEY_AUTH, auth)
-
         val response = requestSender.sendRequest(
             MessageData(
                 data = Bundle().apply {
-                    putString(XapiIpcKeys.KEY_ENDPOINT, endpoint.toString())
-                    putString(XapiIpcKeys.KEY_AUTH, auth)
+                    putEndpoint()
                     putString(
                         XapiIpcKeys.KEY_BODY,
                         json.encodeToString(ListSerializer(XapiStatement.serializer()), list)
                     )
                 },
                 what = XapiIpcWhatFlags.WHAT_REQUEST,
-                arg1 = 0,//message id will be set by sender
                 arg2 = XapiIpcResourceFlags.POST_STATEMENTS,
             )
         )
@@ -63,12 +62,27 @@ class XapiStatementsResourceIpcClient(
         listParams: XapiStatementsResource.GetStatementParams,
         dataLoadParams: DataLoadParams
     ): DataLoadState<XapiStatementResult> {
-        //messenger.send()
+        val response = requestSender.sendRequest(
+            MessageData(
+                data = Bundle().apply {
+                    putEndpoint()
+                    putStringValues(
+                        key = XapiIpcKeys.KEY_QUERY_PARAMS,
+                        value = listParams.toParameters(json)
+                    )
+                },
+                what = XapiIpcWhatFlags.WHAT_REQUEST,
+                arg2 = XapiIpcResourceFlags.GET_STATEMENTS,
+            )
+        )
 
+        val stmtResult = response.data.getDeserialized(
+            key = XapiIpcKeys.KEY_BODY,
+            json = json,
+            deserializer = XapiStatementResult.serializer(),
+        ) ?: return DataErrorResult(IllegalStateException())
 
-
-
-        TODO("Not yet implemented")
+        return DataReadyState(stmtResult)
     }
 
     override fun getAsFlow(

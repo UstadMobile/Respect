@@ -12,11 +12,17 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatementResult
+import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
+import world.respect.xapi.ipc.shared.messages.ext.getDeserialized
+import world.respect.xapi.ipc.shared.messages.ext.getStringValues
+import world.respect.xapi.ipc.shared.messages.ext.putSerialized
 import kotlin.uuid.Uuid
 
 /**
@@ -62,32 +68,58 @@ class XapiMessengerService: Service() {
 
             val xapiResource = xapiResourceProvider.provideXapiResource(endpoint, auth)
 
-            when(msg.arg2) {
-                XapiIpcResourceFlags.POST_STATEMENTS -> {
-                    //get the params and make the request
-                    val replyMessage = Message.obtain(
-                        this@IncomingHandler, XapiIpcWhatFlags.WHAT_RESPONSE
-                    )
-                    val statements: List<XapiStatement> = msg.data.getString(XapiIpcKeys.KEY_BODY)?.let {
-                        json.decodeFromString(ListSerializer(XapiStatement.serializer()), it)
-                    } ?: throw IllegalArgumentException()
+            runBlocking {
+                val replyMessage = Message.obtain(
+                    this@IncomingHandler, XapiIpcWhatFlags.WHAT_RESPONSE
+                )
 
-                    val uuids = runBlocking {
-                        xapiResource.statements.post(statements)
+                //Mark it as a response to the request id received.
+                replyMessage.arg1 = msg.arg1
+
+                when (msg.arg2) {
+                    XapiIpcResourceFlags.POST_STATEMENTS -> {
+                        //get the params and make the request
+
+                        val uuids = xapiResource.statements.post(
+                            list = msg.data.getDeserialized(
+                                key = XapiIpcKeys.KEY_BODY,
+                                json = json,
+                                deserializer = ListSerializer(XapiStatement.serializer()),
+                            ) ?: throw IllegalArgumentException()
+                        )
+
+                        replyMessage.data.putSerialized(
+                            key = XapiIpcKeys.KEY_BODY,
+                            json = json,
+                            serializer = ListSerializer(Uuid.serializer()),
+                            value = uuids
+                        )
+
+                        msg.replyTo.send(replyMessage)
                     }
 
-                    //Mark it as a response to the request id received.
-                    replyMessage.arg1 = msg.arg1
-                    replyMessage.data.putString(
-                        XapiIpcKeys.KEY_BODY,
-                        json.encodeToString(ListSerializer(Uuid.serializer()), uuids)
-                    )
+                    XapiIpcResourceFlags.GET_STATEMENTS -> {
+                        val result = xapiResource.statements.get(
+                            listParams = XapiStatementsResource.GetStatementParams.fromParams(
+                                params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS)!!,
+                                json = json
+                            )
+                        ).dataOrNull() ?: return@runBlocking null
 
-                    msg.replyTo.send(replyMessage)
-                }
+                        replyMessage.data.putSerialized(
+                            key = XapiIpcKeys.KEY_BODY,
+                            json = json,
+                            serializer = XapiStatementResult.serializer(),
+                            value = result
+                        )
 
-                else -> {
-                    super.handleMessage(msg)
+                        msg.replyTo.send(replyMessage)
+                    }
+
+                    else -> {
+                        super.handleMessage(msg)
+                        null
+                    }
                 }
             }
         }

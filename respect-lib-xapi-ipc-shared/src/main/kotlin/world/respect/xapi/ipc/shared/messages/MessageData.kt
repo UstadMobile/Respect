@@ -11,6 +11,6 @@ import android.os.Bundle
 data class MessageData(
     val data: Bundle,
     val what: Int,
-    val arg1: Int,
-    val arg2: Int,
+    val arg1: Int = 0,
+    val arg2: Int = 0,
 )

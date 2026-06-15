@@ -1,0 +1,98 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "004_001_add_groups_to_a_class_test"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+---
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- runFlow:
+    file:  "subflows/admin_add_class_with_members.yaml"
+    env:
+      CLASSNAME: "TestClass"
+#
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- tapOn: "Get Started"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn:
+    id: "username"
+- inputText: "teacherauser"
+- tapOn:
+    id : "password"
+- inputText: "test123"
+- tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
+- assertVisible: "Apps"
+- tapOn: "Classes"
+- assertVisible:
+    id: "app_title"
+    text: "Classes"
+- assertVisible: "TestClass"
+- tapOn: "TestClass"
+- assertVisible:
+    id: "app_title"
+    text: "TestClass"
+- scrollUntilVisible:
+    element: "Groups"
+    direction: DOWN
+- tapOn: "Create group"
+- assertVisible:
+    id: "app_title"
+    text: "Create group"
+- tapOn: "Name*"
+- inputText: "Test Group"
+- tapOn: "StudentA USER"
+- tapOn: "StudentC USER"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Test Group"
+- assertVisible: "StudentA USER"
+- assertVisible: "StudentC USER"
+- assertVisible: "2 Students"
+- tapOn:
+    id: "delete_group_btn"
+- assertVisible: "Permanently delete?"
+- assertVisible: "Permanently delete this group"
+- assertVisible: "Cancel"
+- assertVisible: "Delete"
+- tapOn: "Cancel"
+- assertVisible:
+    id: "delete_group_btn"
+- tapOn:
+   id: "floating_action_button"
+- tapOn: "StudentB USER"
+- tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Test Group"
+- assertVisible: "StudentB USER"
+- assertVisible: "3 Students"
+- back
+- assertVisible:
+    id: "app_title"
+    text: "TestClass"
+- scrollUntilVisible:
+      element: "Test Group (3)"
+- assertVisible: "Groups (1)"
+- assertVisible: "Test Group (3)"

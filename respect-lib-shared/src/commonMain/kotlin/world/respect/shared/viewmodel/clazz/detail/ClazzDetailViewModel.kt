@@ -63,6 +63,8 @@ import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
+import world.respect.shared.navigation.StudentGroupingDetail
+import world.respect.shared.navigation.StudentGroupingEdit
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
@@ -71,8 +73,12 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companion.ALL
-import kotlin.getValue
 import kotlin.time.Clock
+import world.respect.lib.xapi.model.VERB_SAVED
+import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
+import kotlin.time.Instant
 
 data class ClazzDetailUiState(
     val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
@@ -93,9 +99,10 @@ data class ClazzDetailUiState(
     val isTeachersExpanded: Boolean = true,
     val isStudentsExpanded: Boolean = true,
     val inviteCodePrefix: String? = null,
-    val showAddStudent: Boolean = false,
-    val showAddTeacher: Boolean = false,
-    val addPersonPermissions: List<Long> = emptyList(),
+    val isAdminOrTeacher: Boolean = false,
+    val isStudentGroupingExpanded: Boolean = true,
+    val groups: List<XapiGroup> = emptyList(),
+    val addPersonPermissions: List<Long> = emptyList()
 ) {
 
     fun showApproveOption(person: Person): Boolean {
@@ -128,6 +135,11 @@ class ClazzDetailViewModel(
     private val route: ClazzDetail = savedStateHandle.toRoute()
 
     private val updateClazzStudentXapiGroupUseCase: UpdateClazzStudentXapiGroupUseCase by inject()
+
+    private val schoolSelfUrl = accountManager.activeAccount?.school?.self
+        ?: throw IllegalStateException("schoolSelfUrl is required but activeAccount or school is null")
+
+    private val classActivityId = "${schoolSelfUrl}${CLASS}${route.guid}"
 
     private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
         return PagingSourceFactoryHolder {
@@ -220,12 +232,15 @@ class ClazzDetailViewModel(
         }
 
         viewModelScope.launch {
+            observeGroupsFromXapi()
+        }
+
+        viewModelScope.launch {
             _uiState.whenSubscribed {
                 accountManager.selectedAccountAndPersonFlow.collect { selectedAccountAndPerson ->
                     _uiState.update { prev ->
                         prev.copy(
-                            showAddStudent = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
-                            showAddTeacher = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
+                            isAdminOrTeacher = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true
                         )
                     }
 
@@ -346,9 +361,21 @@ class ClazzDetailViewModel(
         _uiState.update { it.copy(isStudentsExpanded = !it.isStudentsExpanded) }
     }
 
+    fun onToggleStudentGroupingSection() {
+        _uiState.update { it.copy(isStudentGroupingExpanded = !it.isStudentGroupingExpanded) }
+    }
+
     fun onClickEdit() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(ClazzEdit(route.classActivityId))
+        )
+    }
+
+    fun onClickGroup(groupId: String) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                StudentGroupingDetail(groupId = groupId)
+            )
         )
     }
 
@@ -402,6 +429,16 @@ class ClazzDetailViewModel(
         )
     }
 
+    fun onClickCreateGroup() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                StudentGroupingEdit(
+                    classUid = route.guid, groupId = null
+                )
+            )
+        )
+    }
+
     fun onClickManageEnrollments(person: Person, role: EnrollmentRoleEnum) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
@@ -414,10 +451,69 @@ class ClazzDetailViewModel(
         )
     }
 
+    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+    private suspend fun observeGroupsFromXapi() {
+
+        schoolDataSource.xapiStatementsResource.getAsFlow(
+            listParams = XapiStatementsResource.GetStatementParams(
+                verb = VERB_SAVED,
+                activity = classActivityId,
+                relatedActivities = true,
+            ),
+            dataLoadParams = DataLoadParams()
+        ).collect { dataLoadState ->
+
+            val statementResult = dataLoadState.dataOrNull()
+                ?: return@collect
+
+            val latestGroups = statementResult.statements
+                .filter { statement ->
+                    statement.verb.id == VERB_SAVED
+                }
+                .sortedByDescending { statement ->
+                    statement.timestamp
+                        ?: statement.stored
+                        ?: Instant.DISTANT_PAST
+                }
+                .mapNotNull { statement ->
+                    val group = statement.`object` as? XapiGroup
+                    if (group == null) {
+                        Napier.w("observeGroupsFromXapi: Expected XapiGroup in statement ${statement.id}")
+                    }
+                    group
+                }
+                .filter { group ->
+                    val name = group.account?.name
+                    if (name == null) {
+                        Napier.w("observeGroupsFromXapi: Group account name missing")
+                    }
+                    name != null
+                }
+                .distinctBy { group ->
+                    group.account?.name
+                }
+                .map { group ->
+                    val filteredMembers = group.member?.filter { agent ->
+                        if (agent.name == null) {
+                            Napier.w("observeGroupsFromXapi: member agent has no name in group ${group.account?.name}")
+                        }
+                        agent.name != null
+                    }
+                    group.copy(member = filteredMembers)
+                }
+
+            _uiState.update { prev ->
+                prev.copy(groups = latestGroups)
+            }
+        }
+    }
+
     companion object {
         const val ALL = "All"
 
         const val RESULT_KEY_PREFIX = "result_"
+
+        const val STACK_COUNT=3
 
     }
 }

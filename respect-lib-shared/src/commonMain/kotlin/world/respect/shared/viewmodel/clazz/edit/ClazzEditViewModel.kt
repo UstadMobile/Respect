@@ -178,7 +178,7 @@ class ClazzEditViewModel(
             ?: throw IllegalStateException("onClickSave: statement data cannot be null after validation")
 
         launchWithLoadingIndicator {
-            schoolDataSource.xapiStatementsResource.post(
+            schoolDataSource.xapiResource.statements.post(
                 listOf(
                     classStatement.copy(
                         id = Uuid.random(),

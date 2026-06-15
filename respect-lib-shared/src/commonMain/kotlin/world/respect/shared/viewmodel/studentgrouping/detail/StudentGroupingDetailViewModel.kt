@@ -158,7 +158,7 @@ class StudentGroupingDetailViewModel(
                 )
             )
 
-            schoolDataSource.xapiStatementsResource.getAsFlow(
+            schoolDataSource.xapiResource.statements.getAsFlow(
                 listParams = XapiStatementsResource.GetStatementParams(
                     verb = VERB_SAVED,
                     agent = groupAgent,

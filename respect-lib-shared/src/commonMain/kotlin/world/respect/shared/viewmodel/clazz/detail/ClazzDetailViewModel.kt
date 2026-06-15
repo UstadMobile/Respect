@@ -209,7 +209,7 @@ class ClazzDetailViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.xapiStatementsResource.getAsFlow(
+            schoolDataSource.xapiResource.statements.getAsFlow(
                 listParams = GetStatementParams(
                     activity = route.classActivityId,
                 ),

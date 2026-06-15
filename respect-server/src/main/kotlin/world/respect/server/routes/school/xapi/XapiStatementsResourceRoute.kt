@@ -21,7 +21,7 @@ import world.respect.server.util.ext.respondDataLoadState
 
 fun Route.XapiStatementsResourceRoute(
     statementResource: (ApplicationCall) -> XapiStatementsResource = { call ->
-        call.requireAccountScope().get<SchoolDataSource>().xapiStatementsResource
+        call.requireAccountScope().get<SchoolDataSource>().xapiResource.statements
     },
     json: Json,
 ) {

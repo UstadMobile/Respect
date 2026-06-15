@@ -217,7 +217,7 @@ class AssignmentDetailViewModel(
                     )
                 }
 
-                val assignmentProgressFlow = schoolDataSource.xapiStatementsResource.getAssignmentProgress(
+                val assignmentProgressFlow = schoolDataSource.xapiResource.statements.getAssignmentProgress(
                     activityId = route.assignmentActivityId,
                     filterByAssigneeAgent = if(sessionAndPerson.person.isStudent()) {
                         sessionAndPerson.xapiAgent
@@ -246,7 +246,7 @@ class AssignmentDetailViewModel(
                     assignmentProgressFlow.mapNotNull {
                         it.dataOrNull()?.assignmentStatement?.actor
                     }.distinctUntilChanged().collect { assignedActor ->
-                        schoolDataSource.xapiStatementsResource.get(
+                        schoolDataSource.xapiResource.statements.get(
                             listParams = XapiStatementsResource.GetStatementParams(
                                 agent = assignedActor,
                                 verb = XapiVerb.ID_SAVED,

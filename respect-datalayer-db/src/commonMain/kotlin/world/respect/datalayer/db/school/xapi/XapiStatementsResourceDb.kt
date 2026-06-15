@@ -29,7 +29,7 @@ import world.respect.datalayer.db.school.xapi.adapters.toVerbEntities
 import world.respect.datalayer.db.school.xapi.adapters.toXapiAssignmentResult
 import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
 import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityDao
-import world.respect.datalayer.school.xapi.XapiActivityDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiActivitiesResourceLocal
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
 import world.respect.datalayer.school.xapi.ext.allDefinedActivities
@@ -41,7 +41,7 @@ import world.respect.datalayer.db.school.xapi.ext.allActivityUids
 import world.respect.datalayer.db.school.xapi.ext.allActorUids
 import world.respect.datalayer.ext.appendIfNotNull
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.datalayer.school.xapi.XapiActorDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiAgentsResourceLocal
 import world.respect.datalayer.school.xapi.ext.allActivities
 import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
@@ -87,8 +87,8 @@ class XapiStatementsResourceDb(
     private val schoolUrl: Url,
     private val uidNumberMapper: UidNumberMapper,
     private val json: Json,
-    private val xapiActivityDataSourceLocal: XapiActivityDataSourceLocal,
-    private val xapiActorDataSourceLocal: XapiActorDataSourceLocal,
+    private val xapiActivitiesResourceLocal: XapiActivitiesResourceLocal,
+    private val xapiAgentsResourceLocal: XapiAgentsResourceLocal,
     private val xapiVersion: String = XAPI_VERSION,
 ) : XapiStatementsResourceLocal {
 
@@ -143,8 +143,8 @@ class XapiStatementsResourceDb(
         )
 
         val activities = stmt.allDefinedActivities().distinctMerged()
-        xapiActivityDataSourceLocal.updateLocal(activities, stmtTimestamp)
-        xapiActorDataSourceLocal.updateLocal(
+        xapiActivitiesResourceLocal.updateLocal(activities, stmtTimestamp)
+        xapiAgentsResourceLocal.updateLocal(
             actors = stmt.allActors().distinctMerged(),
             timestamp = stmtTimestamp,
         )

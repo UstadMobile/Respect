@@ -4,5 +4,8 @@ interface XapiResource {
 
     val statements: XapiStatementsResource
 
+    val agents: XapiAgentsResource
+
+    val activities: XapiActivitiesResource
 
 }

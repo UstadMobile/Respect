@@ -1,6 +1,7 @@
 package world.respect.datalayer.school.xapi
 
 import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.resources.XapiActivitiesResource
 import kotlin.time.Instant
 
 /**
@@ -8,7 +9,7 @@ import kotlin.time.Instant
  * be updated. The XapiActivityDataSourceLocal will be used and required by the StatementDataSource
  * to handle updating canonical definitions
  */
-interface XapiActivityDataSourceLocal: XapiActivityDataSource {
+interface XapiActivitiesResourceLocal: XapiActivitiesResource {
 
     /**
      * Update the canonical definition of activities as per xAPI spec rules

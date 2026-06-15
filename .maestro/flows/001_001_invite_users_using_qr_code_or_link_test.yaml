@@ -105,10 +105,10 @@ onFlowComplete:
 - runFlow:
     file: "subflows/admin_add_class.yaml"
     env:
-      CLASSNAME: "TestClass"
+      CLASSNAME: "New Class"
 - assertVisible:
     id: "app_title"
-    text: "TestClass"
+    text: "New Class"
 - tapOn: "Add Student"
 - tapOn: "Invite person"
 - assertVisible:
@@ -140,7 +140,7 @@ onFlowComplete:
 - assertVisible: "School name"
 - assertVisible: ${output.SCHOOL_NAME}
 - assertVisible: "Class name"
-- assertVisible: "TestClass"
+- assertVisible: "New Class"
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Next"
@@ -195,7 +195,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Classes"
-- tapOn: "TestClass"
+- tapOn: "New Class"
 - assertVisible: "Pending requests.*"
 - assertVisible: "Student User.*"
 - tapOn: "Accept Invite"
@@ -223,7 +223,7 @@ onFlowComplete:
 - assertVisible: "School name"
 - assertVisible: ${output.SCHOOL_NAME}
 - assertVisible: "Class name"
-- assertVisible: "TestClass"
+- assertVisible: "New Class"
 - assertVisible: "School server URL"
 - assertVisible: ${output.SCHOOL_URL}
 - tapOn: "Next"

@@ -108,7 +108,7 @@ class ClazzEditViewModel(
                     json = json,
                     serializer = XapiStatement.serializer(),
                     loadFn = { params ->
-                        schoolDataSource.xapiStatementsResource.get(
+                        schoolDataSource.xapiResource.statements.get(
                             listParams = GetStatementParams(
                                 activity = classActivityId,
                             ),

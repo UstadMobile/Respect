@@ -454,7 +454,7 @@ class ClazzDetailViewModel(
     @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
     private suspend fun observeGroupsFromXapi() {
 
-        schoolDataSource.xapiStatementsResource.getAsFlow(
+        schoolDataSource.xapiResource.statements.getAsFlow(
             listParams = XapiStatementsResource.GetStatementParams(
                 verb = VERB_SAVED,
                 activity = classActivityId,

@@ -109,7 +109,7 @@ class ClazzListViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.xapiStatementsResource.getAsFlow(
+            schoolDataSource.xapiResource.statements.getAsFlow(
                 listParams = GetStatementParams(
                     activity = CATEGORY_CLASS_MANAGEMENT,
                     relatedActivities = true,

@@ -135,7 +135,7 @@ class AssignmentEditViewModel(
         launchWithLoadingIndicator(
             onShowError = { snackBarDispatcher.showSnackBar(Snack(it)) }
         ) {
-            val statementResult = schoolDataSource.xapiStatementsResource.get(
+            val statementResult = schoolDataSource.xapiResource.statements.get(
                 listParams = GetStatementParams(
                     verb = VERB_SAVED,
                 ),

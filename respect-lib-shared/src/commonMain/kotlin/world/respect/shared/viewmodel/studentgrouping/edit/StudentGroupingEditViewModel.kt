@@ -129,7 +129,7 @@ class StudentGroupingEditViewModel(
             @OptIn(ExperimentalUuidApi::class)
             viewModelScope.launch {
                 try {
-                    val statementResult = schoolDataSource.xapiStatementsResource.get(
+                    val statementResult = schoolDataSource.xapiResource.statements.get(
                         listParams = XapiStatementsResource.GetStatementParams(
                             verb = VERB_SAVED,
                             activity = classActivityId,
@@ -228,7 +228,7 @@ class StudentGroupingEditViewModel(
                     ),
                     timestamp = Clock.System.now()
                 )
-                schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
+                schoolDataSource.xapiResource.statements.post(listOf(voidingStatement))
             }
 
             val members = _uiState.value.selectedStudents.map { student ->
@@ -275,7 +275,7 @@ class StudentGroupingEditViewModel(
                 )
             )
 
-            schoolDataSource.xapiStatementsResource.post(listOf(statement))
+            schoolDataSource.xapiResource.statements.post(listOf(statement))
 
             if (route.groupId == null) {
                 _navCommandFlow.tryEmit(

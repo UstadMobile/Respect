@@ -140,7 +140,7 @@ class StudentGroupingDetailViewModel(
                 ),
                 timestamp = Clock.System.now()
             )
-            schoolDataSource.xapiStatementsResource.post(listOf(voidingStatement))
+            schoolDataSource.xapiResource.statements.post(listOf(voidingStatement))
             _navCommandFlow.tryEmit(NavCommand.PopUp())
 
         }

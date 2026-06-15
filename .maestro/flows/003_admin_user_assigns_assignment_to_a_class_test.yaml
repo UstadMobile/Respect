@@ -23,6 +23,24 @@ onFlowComplete:
     env:
       CLASSNAME: "TestClass"
 
+- tapOn: "Classes"
+- tapOn: "TestClass"
+- scrollUntilVisible:
+    element: "Create group"
+    direction: DOWN
+- tapOn: "Create group"
+- assertVisible:
+    id: "app_title"
+    text: "Create group"
+- tapOn:
+    id: "name"
+- inputText: "TestGroup"
+- hideKeyboard
+- tapOn: "StudentA User"
+- tapOn: "StudentB User"
+- tapOn: "StudentC User"
+- tapOn: "Save"
+
 # Teacher Add Assignment
 - clearState: world.respect.app
 - runFlow:
@@ -47,7 +65,7 @@ onFlowComplete:
 - tapOn: "Assignment title*"
 - inputText: "Homework 1"
 - tapOn: "Assign to"
-- tapOn: "TestClass"
+- tapOn: "TestGroup"
 - tapOn: "Description"
 - inputText: "Please complete this Homework on time."
 - runFlow:
@@ -97,7 +115,7 @@ onFlowComplete:
 - assertVisible: "In-progress (0)"
 - assertVisible: "Please complete this Homework on time."
 - assertVisible: "Assigned to"
-- assertVisible: "TestClass.*"
+- assertVisible: "TestGroup.*"
 - assertVisible: "StudentA User"
 - assertVisible: "StudentB User"
 - assertVisible: "StudentC User"
@@ -179,7 +197,7 @@ onFlowComplete:
       PASSWORD: "test123"
 - tapOn: "Assignments"
 - assertVisible: "Homework 1"
-- assertVisible: "TestClass.*"
+- assertVisible: "TestGroup.*"
 - tapOn: "Homework 1"
 - assertVisible: "All (3)"
 - assertVisible: "Completed (1)"
@@ -188,7 +206,7 @@ onFlowComplete:
 #- assertVisible: "Not started (1)"
 - assertVisible: "Please complete this Homework on time."
 - assertVisible: "Assigned to"
-- assertVisible: "TestClass.*"
+- assertVisible: "TestGroup.*"
 - assertVisible: "StudentA User"
 - assertVisible: "StudentB User"
 - assertVisible: "StudentC User"

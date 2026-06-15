@@ -44,7 +44,7 @@ import world.respect.app.components.LangMapTextField
 import world.respect.app.components.RespectLocalDateTimeField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.datalayer.school.model.Clazz
+import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.ext.copyWithObjectActivityDescription
 import world.respect.lib.xapi.ext.copyWithObjectActivityName
@@ -80,7 +80,7 @@ fun AssignmentEditScreen(
         onEntityChanged = viewModel::onEntityChanged,
         onAssigneeTextChanged = viewModel::onAssigneeTextChanged,
         onClickAddLearningUnit = viewModel::onClickAddLearningUnit,
-        onAssigneeClassSelected = viewModel::onAssigneeClassSelected,
+        onAssigneeGroupSelected = viewModel::onAssigneeGroupSelected,
         onClickRemoveLearningUnit = viewModel::onClickRemoveLearningUnit,
     )
 }
@@ -91,7 +91,7 @@ fun AssignmentEditScreen(
     uiState: AssignmentEditUiState,
     onEntityChanged: (XapiStatement) -> Unit,
     onAssigneeTextChanged: (String) -> Unit,
-    onAssigneeClassSelected: (Clazz) -> Unit,
+    onAssigneeGroupSelected: (XapiGroup) -> Unit,
     onClickAddLearningUnit: () -> Unit,
     onClickRemoveLearningUnit: (XapiActivity) -> Unit,
 ) {
@@ -143,9 +143,9 @@ fun AssignmentEditScreen(
                 },
                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                 supportingText = {
-                    Text(uiTextStringResource(uiState.classError ?: Res.string.required.asUiText()))
+                    Text(uiTextStringResource(uiState.groupError ?: Res.string.required.asUiText()))
                 },
-                isError = uiState.classError != null,
+                isError = uiState.groupError != null,
             )
 
             ExposedDropdownMenu(
@@ -153,14 +153,14 @@ fun AssignmentEditScreen(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
-                uiState.classOptions.forEach { clazz ->
+                uiState.groupOptions.forEach { group ->
                     DropdownMenuItem(
                         text = {
-                            Text(clazz.title)
+                            Text(group.name ?: "")
                         },
                         onClick = {
                             expanded = false
-                            onAssigneeClassSelected(clazz)
+                            onAssigneeGroupSelected(group)
                         },
                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                     )

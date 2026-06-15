@@ -17,10 +17,8 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.school.PersonDataSource
-import world.respect.datalayer.school.ext.asXapiAgent
-import world.respect.datalayer.school.model.PersonRoleEnum
-import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.ClassDataSource
+import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
@@ -44,6 +42,7 @@ import world.respect.libutil.ext.isNullOrAllBlank
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
 import world.respect.shared.domain.xapi.createBlankAssignmentStatement
+import world.respect.shared.ext.studentsXapiGroup
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_assignment
 import world.respect.shared.generated.resources.edit_assignment
@@ -71,7 +70,7 @@ data class AssignmentEditUiState(
     val statementData: DataLoadState<XapiStatement> = DataLoadingState(),
     val assignee: String = "",
     val nameError: UiText? = null,
-    val studentOptions: List<Person> = emptyList(),
+    val classOptions: List<Clazz> = emptyList(),
     val classError: UiText? = null,
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { flowOf(DataLoadingState()) },
 ) {
@@ -136,16 +135,14 @@ class AssignmentEditViewModel(
         launchWithLoadingIndicator(
             onShowError = { snackBarDispatcher.showSnackBar(Snack(it)) }
         ) {
-            val students = schoolDataSource.personDataSource.list(
-                loadParams = DataLoadParams(),
-                params = PersonDataSource.GetListParams(
-                    filterByPersonRole = PersonRoleEnum.STUDENT,
-                )
+            val classes = schoolDataSource.classDataSource.list(
+                DataLoadParams(),
+                ClassDataSource.GetListParams()
             ).dataOrNull() ?: emptyList()
 
             _uiState.update {
                 it.copy(
-                    studentOptions = students,
+                    classOptions = classes,
                 )
             }
 
@@ -221,14 +218,14 @@ class AssignmentEditViewModel(
         )
     }
 
-    fun onAssigneeStudentSelected(person: Person) {
+    fun onAssigneeClassSelected(clazz: Clazz) {
         val statement = _uiState.value.statementData.dataOrNull() ?: return
         _uiState.update {
             it.copy(
                 statementData = DataReadyState(
-                    statement.copy(actor = person.asXapiAgent(schoolUrl))
+                    statement.copy(actor = clazz.studentsXapiGroup(schoolUrl))
                 ),
-                assignee = "${person.givenName} ${person.familyName}",
+                assignee = clazz.title,
                 classError = null,
             )
         }

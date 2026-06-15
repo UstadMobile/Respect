@@ -44,7 +44,7 @@ import world.respect.app.components.LangMapTextField
 import world.respect.app.components.RespectLocalDateTimeField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.ext.copyWithObjectActivityDescription
 import world.respect.lib.xapi.ext.copyWithObjectActivityName
@@ -80,7 +80,7 @@ fun AssignmentEditScreen(
         onEntityChanged = viewModel::onEntityChanged,
         onAssigneeTextChanged = viewModel::onAssigneeTextChanged,
         onClickAddLearningUnit = viewModel::onClickAddLearningUnit,
-        onAssigneeStudentSelected = viewModel::onAssigneeStudentSelected,
+        onAssigneeClassSelected = viewModel::onAssigneeClassSelected,
         onClickRemoveLearningUnit = viewModel::onClickRemoveLearningUnit,
     )
 }
@@ -91,7 +91,7 @@ fun AssignmentEditScreen(
     uiState: AssignmentEditUiState,
     onEntityChanged: (XapiStatement) -> Unit,
     onAssigneeTextChanged: (String) -> Unit,
-    onAssigneeStudentSelected: (Person) -> Unit,
+    onAssigneeClassSelected: (Clazz) -> Unit,
     onClickAddLearningUnit: () -> Unit,
     onClickRemoveLearningUnit: (XapiActivity) -> Unit,
 ) {
@@ -153,14 +153,14 @@ fun AssignmentEditScreen(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
-                uiState.studentOptions.forEach { student ->
+                uiState.classOptions.forEach { clazz ->
                     DropdownMenuItem(
                         text = {
-                            Text("${student.givenName} ${student.familyName}")
+                            Text(clazz.title)
                         },
                         onClick = {
                             expanded = false
-                            onAssigneeStudentSelected(student)
+                            onAssigneeClassSelected(clazz)
                         },
                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                     )

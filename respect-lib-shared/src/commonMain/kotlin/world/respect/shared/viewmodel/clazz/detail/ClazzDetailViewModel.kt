@@ -139,7 +139,7 @@ class ClazzDetailViewModel(
     private val schoolSelfUrl = accountManager.activeAccount?.school?.self
         ?: throw IllegalStateException("schoolSelfUrl is required but activeAccount or school is null")
 
-    private val classActivityId = "${schoolSelfUrl}${CLASS}${route.guid}"
+    private val classActivityId = "${schoolSelfUrl}${CLASS}${route.classActivityId}"
 
     private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
         return PagingSourceFactoryHolder {
@@ -433,7 +433,7 @@ class ClazzDetailViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 StudentGroupingEdit(
-                    classUid = route.guid, groupId = null
+                    classUid = route.classActivityId, groupId = null
                 )
             )
         )

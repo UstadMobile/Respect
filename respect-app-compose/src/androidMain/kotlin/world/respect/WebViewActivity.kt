@@ -11,10 +11,16 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import world.respect.app.R
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
+import world.respect.shared.domain.xapi.SendLearningUnitTerminatedStatementUseCase
 
 /**
  * A separate activity that only shows a WebView (e.g. to view a LearningUnit) .
@@ -45,6 +51,7 @@ class WebViewActivity : AppCompatActivity() {
     }
 
     private val webViewClient: OkHttpWebViewClient by inject()
+    private val sendLearningUnitTerminatedStatementUseCase : SendLearningUnitTerminatedStatementUseCase by inject()
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,6 +89,19 @@ class WebViewActivity : AppCompatActivity() {
         }
     }
 
+    override fun finish() {
+        val activityId =
+            intent.getStringExtra(LaunchAppUseCaseAndroid.EXTRA_ACTIVITY_ID)
+
+        if (activityId != null) {
+            CoroutineScope(Dispatchers.IO).launch {
+                    sendLearningUnitTerminatedStatementUseCase(activityId)
+
+            }
+        }
+
+        super.finish()
+    }
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.menu_webview, menu)

@@ -101,6 +101,7 @@ class LaunchAppUseCaseAndroid(
         intent.flags = FLAG_ACTIVITY_NEW_TASK
         val launchUrlStr = launchUrl.toString()
         intent.putExtra(EXTRA_URL, launchUrlStr)
+        intent.putExtra(EXTRA_ACTIVITY_ID, request.assignmentActivityId)
         Napier.i("LaunchAppUseCaseAndroid: launching $launchUrlStr")
         appContext.startActivity(intent)
     }
@@ -110,6 +111,9 @@ class LaunchAppUseCaseAndroid(
         private const val WEBVIEW_ACTIVITY_NAME = "world.respect.WebViewActivity"
 
         const val EXTRA_URL = "url"
+
+        const val EXTRA_ACTIVITY_ID = "activityId"
+
 
         private val KNOWN_BROWSER_PACKAGES = listOf(
             "org.chromium.webview_shell",//WebView on emulator

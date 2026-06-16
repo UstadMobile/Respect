@@ -258,6 +258,7 @@ import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
 import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
+import world.respect.shared.domain.xapi.SendLearningUnitTerminatedStatementUseCase
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCaseAndroid
 import world.respect.shared.domain.xapi.xapinanohttpd.XapiNanoHttpdResourceProviderAndroid
@@ -713,6 +714,12 @@ val appKoinModule = module {
         )
     }
 
+    single<SendLearningUnitTerminatedStatementUseCase> {
+        SendLearningUnitTerminatedStatementUseCase(
+            accountManager = get()
+        )
+    }
+
     single<XapiNanoHttpdApp>(createdAtStart = true) {
         XapiNanoHttpdApp(
             port = 0,
@@ -1037,6 +1044,8 @@ val appKoinModule = module {
                 scopeClass = RespectAccount::class,
             )
         }
+
+
 
         scoped<RunPullSyncUseCase> {
             RunPullSyncUseCase(

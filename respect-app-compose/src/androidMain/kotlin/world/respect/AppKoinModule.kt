@@ -1045,8 +1045,6 @@ val appKoinModule = module {
             )
         }
 
-
-
         scoped<RunPullSyncUseCase> {
             RunPullSyncUseCase(
                 pullSyncTracker = get(),

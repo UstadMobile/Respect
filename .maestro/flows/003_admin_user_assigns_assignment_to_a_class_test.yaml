@@ -139,13 +139,12 @@ onFlowComplete:
       USERNAME: "studentauser"
       PASSWORD: "test123"
 - assertVisible: "Apps"
+- tapOn: "Classes"
+- assertVisible: "TestClass"
 - tapOn: "Assignments"
 - assertVisible:
     id: "app_title"
     text: "Assignments"
-- extendedWaitUntil:
-    visible: "Homework 1"
-    timeout: 10000
 - tapOn: "Homework 1"
 - assertVisible:
     id: "app_title"
@@ -181,13 +180,12 @@ onFlowComplete:
       USERNAME: "studentbuser"
       PASSWORD: "test123"
 - assertVisible: "Apps"
+- tapOn: "Classes"
+- assertVisible: "TestClass"
 - tapOn: "Assignments"
 - assertVisible:
     id: "app_title"
     text: "Assignments"
-- extendedWaitUntil:
-    visible: "Homework 1"
-    timeout: 10000
 - tapOn: "Homework 1"
 - assertVisible:
     id: "app_title"
@@ -214,13 +212,12 @@ onFlowComplete:
       USERNAME: "teacherauser"
       PASSWORD: "test123"
 - assertVisible: "Apps"
+- tapOn: "Classes"
+- assertVisible: "TestClass"
 - tapOn: "Assignments"
 - assertVisible:
     id: "app_title"
     text: "Assignments"
-- extendedWaitUntil:
-    visible: "Homework 1"
-    timeout: 10000
 - assertVisible: "Homework 1"
 - assertVisible: "TestGroup.*"
 - tapOn: "Homework 1"
@@ -239,6 +236,9 @@ onFlowComplete:
 - assertVisible: "Average"
 - assertVisible: "95%"
 - assertVisible: "90%"
+- tapOn: "90%" #studentB
+- assertVisible: "Assignment Result Statement Demo: StudentB User"
+- assertVisible: "Assignment Result Statement Demo"
 
 # Verify edit assignment is working
 - tapOn:

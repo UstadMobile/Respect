@@ -22,7 +22,11 @@ onFlowComplete:
     file:  "subflows/admin_add_class_with_members.yaml"
     env:
       CLASSNAME: "TestClass"
-
+- runFlow:
+    when:
+      notVisible: "Classes"
+    commands:
+      - back
 - tapOn: "Classes"
 - tapOn: "TestClass"
 - scrollUntilVisible:

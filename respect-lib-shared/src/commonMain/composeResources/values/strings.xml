@@ -636,5 +636,8 @@
     <string name="show_raw_xapi">Show raw xAPI(Advanced)</string>
     <string name="raw_statement">Raw Statement</string>
 
+    <string name="duration_hours_short">h</string>
+    <string name="duration_minutes_short">m</string>
+    <string name="duration_seconds_short">s</string>
 
 </resources>

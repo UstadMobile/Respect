@@ -138,7 +138,14 @@ onFlowComplete:
     env:
       USERNAME: "studentauser"
       PASSWORD: "test123"
+- assertVisible: "Apps"
 - tapOn: "Assignments"
+- assertVisible:
+    id: "app_title"
+    text: "Assignments"
+- extendedWaitUntil:
+    visible: "Homework 1"
+    timeout: 10000
 - tapOn: "Homework 1"
 - assertVisible:
     id: "app_title"
@@ -173,7 +180,14 @@ onFlowComplete:
     env:
       USERNAME: "studentbuser"
       PASSWORD: "test123"
+- assertVisible: "Apps"
 - tapOn: "Assignments"
+- assertVisible:
+    id: "app_title"
+    text: "Assignments"
+- extendedWaitUntil:
+    visible: "Homework 1"
+    timeout: 10000
 - tapOn: "Homework 1"
 - assertVisible:
     id: "app_title"
@@ -199,7 +213,14 @@ onFlowComplete:
     env:
       USERNAME: "teacherauser"
       PASSWORD: "test123"
+- assertVisible: "Apps"
 - tapOn: "Assignments"
+- assertVisible:
+    id: "app_title"
+    text: "Assignments"
+- extendedWaitUntil:
+    visible: "Homework 1"
+    timeout: 10000
 - assertVisible: "Homework 1"
 - assertVisible: "TestGroup.*"
 - tapOn: "Homework 1"

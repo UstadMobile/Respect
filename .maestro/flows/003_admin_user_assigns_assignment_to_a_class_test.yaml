@@ -196,7 +196,42 @@ onFlowComplete:
 - assertVisible: "Average"
 - assertVisible: "95%"
 - assertVisible: "90%"
-
+- tapOn:
+    id: "score_cell"
+    index: 0
+- assertVisible:
+    id: "app_title"
+    text: "aunit1: StudentB User"
+- assertVisible: "Assignment Result Statement Demo"
+- assertVisible: "Score: 90%"
+- assertVisible: ".*ago"
+- tapOn: "Assignment Result Statement Demo"
+- assertVisible:
+    id: "app_title"
+    text: "Assignment Result Statement Demo"
+- assertVisible: "Timestamp:"
+- assertVisible: "Verb:"
+- assertVisible: "Passed"
+- assertVisible: "Object:"
+- assertVisible: "Name: Assignment Result Statement Demo"
+#- assertVisible: "Description: Assignment Result Statement Demo"
+#- assertVisible: "Interaction type: fill-in"
+- assertVisible: "Actor:"
+- assertVisible: "Name: StudentB User"
+- assertVisible: "Account homepage: ${output.SCHOOL_URL}"
+- assertVisible: "Account name:.*"
+- assertVisible: "Result:"
+- assertVisible: "Score (scaled): 90%"
+#- assertVisible: "Duration:.*"
+- tapOn:
+    id: "more_options_xapi"
+- tapOn: "Show raw xAPI (advanced)"
+- assertVisible:
+    id: "app_title"
+    text: "Raw statement"
+- back
+- back
+- back
 # Verify edit assignment is working
 - tapOn:
     id: "floating_action_button"   #  Edit button

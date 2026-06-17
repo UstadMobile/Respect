@@ -633,8 +633,8 @@
     <string name="account_name">Account name</string>
     <string name="score_scaled">Score (scaled)</string>
 
-    <string name="show_raw_xapi">Show raw xAPI(Advanced)</string>
-    <string name="raw_statement">Raw Statement</string>
+    <string name="show_raw_xapi">Show raw xAPI(advanced)</string>
+    <string name="raw_statement">Raw statement</string>
 
     <string name="duration_hours_short">h</string>
     <string name="duration_minutes_short">m</string>

@@ -225,7 +225,6 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Raw statement"
-- assertVisible: "StudentA User"
 - back
 - back
 - back

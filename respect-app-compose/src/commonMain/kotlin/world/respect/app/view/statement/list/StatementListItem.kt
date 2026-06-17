@@ -38,7 +38,8 @@ fun StatementListItem(
     val objectName = statement.objectActivityNameOrNull()?.let { langMapString(it) }
         ?: statement.objectActivityOrNull()?.id?.substringAfterLast("/") ?: ""
 
-    val verbName = statement.verb.display?.let { langMapString(it) } ?: ""
+    val verbName = statement.verb.display?.let { langMapString(it) }
+        ?: statement.verb.id.substringAfterLast("/")
 
     val scoreText = statement.result?.score?.scaled?.let {
         stringResource(Res.string.score) + ":" + "${(it * 100).roundToInt()}%"

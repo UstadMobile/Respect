@@ -30,8 +30,16 @@ fun StatementListScreen(
 ) {
     val statements = uiState.statements.dataOrNull() ?: emptyList()
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(statements) { statement ->
-            StatementListItem(statement = statement, onClickListItem = onClickListItem)
+        items(
+            items = statements,
+            key = { statement ->
+                statement.id.toString()
+            }
+        ) { statement ->
+            StatementListItem(
+                statement = statement,
+                onClickListItem = onClickListItem
+            )
         }
     }
 }

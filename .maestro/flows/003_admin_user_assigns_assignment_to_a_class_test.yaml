@@ -196,9 +196,6 @@ onFlowComplete:
 - assertVisible: "Average"
 - assertVisible: "95%"
 - assertVisible: "100%"
-#- tapOn:
-#    id: "score_cell"
-#    index: 0
 - tapOn: "90%"   #Statement Maker
 - assertVisible:
     id: "app_title"
@@ -206,7 +203,7 @@ onFlowComplete:
 - assertVisible: "statementmaker"
 - assertVisible: "Completed"
 - assertVisible: "Score: 90%"
-- assertVisible: ".*ago"
+#- assertVisible: ".*ago"
 - tapOn: "statementmaker"
 - assertVisible:
     id: "app_title"

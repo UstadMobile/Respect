@@ -220,7 +220,7 @@ onFlowComplete:
 - assertVisible: "Result:"
 - assertVisible: "Score (scaled): 90%"
 - tapOn:
-    id: "more_options_xapi"
+    id: "more_options"
 - tapOn: "Show raw xAPI (advanced)"
 - assertVisible:
     id: "app_title"

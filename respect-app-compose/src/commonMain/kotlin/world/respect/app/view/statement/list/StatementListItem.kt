@@ -42,7 +42,7 @@ fun StatementListItem(
         ?: statement.verb.id.substringAfterLast("/")
 
     val scoreText = statement.result?.score?.scaled?.let {
-        stringResource(Res.string.score) + ":" + "${(it * 100).roundToInt()}%"
+        stringResource(Res.string.score) + ": " + "${(it * 100).roundToInt()}%"
     }
 
     // Placeholder for now

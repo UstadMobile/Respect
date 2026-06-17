@@ -161,7 +161,7 @@ onFlowComplete:
 - tapOn: "Open"
 - assertVisible: "Assignment Result.*"
 - tapOn: "Score"
-- inputText: 0.9
+- inputText: 1
 - tapOn: "Send statement"
 - assertVisible: "Statement sent.*"
 - tapOn: "Close"
@@ -195,40 +195,40 @@ onFlowComplete:
 - assertVisible: "Statement Maker"
 - assertVisible: "Average"
 - assertVisible: "95%"
-- assertVisible: "90%"
-- tapOn:
-    id: "score_cell"
-    index: 0
+- assertVisible: "100%"
+#- tapOn:
+#    id: "score_cell"
+#    index: 0
+- tapOn: "90%"   #Statement Maker
 - assertVisible:
     id: "app_title"
-    text: "aunit1: StudentB User"
-- assertVisible: "Assignment Result Statement Demo"
+    text: "statementmaker: StudentA User"
+- assertVisible: "statementmaker"
+- assertVisible: "Completed"
 - assertVisible: "Score: 90%"
 - assertVisible: ".*ago"
-- tapOn: "Assignment Result Statement Demo"
+- tapOn: "statementmaker"
 - assertVisible:
     id: "app_title"
-    text: "Assignment Result Statement Demo"
+    text: "statementmaker"
 - assertVisible: "Timestamp:"
 - assertVisible: "Verb:"
-- assertVisible: "Passed"
+- assertVisible: "Completed"
 - assertVisible: "Object:"
-- assertVisible: "Name: Assignment Result Statement Demo"
-#- assertVisible: "Description: Assignment Result Statement Demo"
-#- assertVisible: "Interaction type: fill-in"
+- assertVisible: "Name: statementmaker"
 - assertVisible: "Actor:"
-- assertVisible: "Name: StudentB User"
+- assertVisible: "Name: StudentA User"
 - assertVisible: "Account homepage: ${output.SCHOOL_URL}"
 - assertVisible: "Account name:.*"
 - assertVisible: "Result:"
 - assertVisible: "Score (scaled): 90%"
-#- assertVisible: "Duration:.*"
 - tapOn:
     id: "more_options_xapi"
 - tapOn: "Show raw xAPI (advanced)"
 - assertVisible:
     id: "app_title"
     text: "Raw statement"
+- assertVisible: "StudentA User"
 - back
 - back
 - back

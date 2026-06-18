@@ -22,28 +22,6 @@ onFlowComplete:
     file:  "subflows/admin_add_class_with_members.yaml"
     env:
       CLASSNAME: "TestClass"
-- runFlow:
-    when:
-      notVisible: "Classes"
-    commands:
-      - back
-- tapOn: "Classes"
-- tapOn: "TestClass"
-- scrollUntilVisible:
-    element: "Create group"
-    direction: DOWN
-- tapOn: "Create group"
-- assertVisible:
-    id: "app_title"
-    text: "Create group"
-- tapOn:
-    id: "name"
-- inputText: "TestGroup"
-- hideKeyboard
-- tapOn: "StudentA User"
-- tapOn: "StudentB User"
-- tapOn: "StudentC User"
-- tapOn: "Save"
 
 # Teacher Add Assignment
 - clearState: world.respect.app
@@ -69,7 +47,7 @@ onFlowComplete:
 - tapOn: "Assignment title*"
 - inputText: "Homework 1"
 - tapOn: "Assign to"
-- tapOn: "TestClass"
+- tapOn: "TestClass students"
 - tapOn: "Description"
 - inputText: "Please complete this Homework on time."
 - runFlow:

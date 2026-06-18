@@ -19,11 +19,10 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
 import world.respect.xapi.ipc.shared.messages.ext.putStringValues
-import world.respect.xapi.ipc.shared.messages.ext.toDataLoadState
 import kotlin.uuid.Uuid
 
 class XapiStatementsResourceIpcClient(
-    private val requestSender: MessageRequestSender,
+    private val requestSender: XapiMessageBridge,
     private val json: Json,
     private val endpoint: Url,
     private val auth: String,

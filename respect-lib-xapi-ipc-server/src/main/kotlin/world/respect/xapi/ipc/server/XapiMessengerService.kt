@@ -16,7 +16,7 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.xapi.XapiResourceProvider
-import world.respect.lib.xapi.exceptions.XapiBadRequestException
+import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -93,7 +93,7 @@ class XapiMessengerService: Service() {
                                     key = XapiIpcKeys.KEY_BODY,
                                     json = json,
                                     deserializer = ListSerializer(XapiStatement.serializer()),
-                                ) ?: throw XapiBadRequestException("Post statements has no body")
+                                ) ?: throw XapiException(400, "Post statements has no body")
                             )
 
                             replyMessage.data.putSerialized(

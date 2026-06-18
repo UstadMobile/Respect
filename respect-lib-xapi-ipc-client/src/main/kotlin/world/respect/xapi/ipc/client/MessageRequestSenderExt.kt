@@ -7,7 +7,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.xapi.ipc.shared.messages.MessageData
 import world.respect.xapi.ipc.shared.messages.ext.toDataLoadState
 
-suspend fun <T:Any> MessageRequestSender.executeRequestAsDataLoadState(
+suspend fun <T:Any> XapiMessageBridge.executeRequestAsDataLoadState(
     request: MessageData,
     json: Json,
     deserializer: DeserializationStrategy<T>,

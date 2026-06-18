@@ -16,7 +16,7 @@ import world.respect.lib.test.res.xapiSampleStatements
 import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource
-import world.respect.xapi.ipc.client.MessageRequestSenderBinderImpl
+import world.respect.xapi.ipc.client.XapiMessageBridgeBinderImpl
 import world.respect.xapi.ipc.client.XapiResourceIpcClient
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -46,7 +46,7 @@ class XapiServiceIntegrationTest {
         assertNotNull(binder)
         val serviceMessenger = Messenger(binder)
         val client = XapiResourceIpcClient(
-            MessageRequestSenderBinderImpl(serviceMessenger),
+            XapiMessageBridgeBinderImpl(serviceMessenger),
             json,
             Url("http://localhost/"),
             "secret",

@@ -118,11 +118,6 @@ fun AssignmentEditScreen(
 
         var expanded by remember { mutableStateOf(false) }
 
-        println("AssignmentEditScreen: classOptions count=${uiState.classOptions.size}")
-        uiState.classOptions.forEach { group ->
-            println("AssignmentEditScreen: Group name='${group.name}', members=${group.member?.map { it.name }}")
-        }
-
         //As per https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#ExposedDropdownMenuBox(kotlin.Boolean,kotlin.Function1,androidx.compose.ui.Modifier,kotlin.Function1)
         ExposedDropdownMenuBox(
             expanded = expanded,
@@ -165,7 +160,6 @@ fun AssignmentEditScreen(
                         },
                         onClick = {
                             expanded = false
-                            println("AssignmentEditScreen: Selected group='${group.name}', assigning to members=${group.member?.map { it.name }}")
                             onAssigneeClassSelected(group)
                         },
                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,

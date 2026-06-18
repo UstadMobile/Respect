@@ -62,26 +62,15 @@ class UpdateClazzStudentXapiGroupUseCase(
             guid = authenticatedUserPrincipalId.guid,
         ).dataOrNull()
 
-        println("UpdateClazzStudentXapiGroup: clazzUid='$clazzUid'")
-        println("UpdateClazzStudentXapiGroup: studentsInClass=${studentsInClass?.map { "${it.givenName} ${it.familyName}" }}")
-        println("UpdateClazzStudentXapiGroup: classActivity=${classActivity?.id}")
-        println("UpdateClazzStudentXapiGroup: className=$className")
-        println("UpdateClazzStudentXapiGroup: studentsXapiGroup=$studentsXapiGroup")
-        println("UpdateClazzStudentXapiGroup: activePerson=${activePerson?.let { "${it.givenName} ${it.familyName}" }}")
 
         if(studentsInClass == null || studentsXapiGroup == null || activePerson == null) {
             println("UpdateClazzStudentXapiGroup: RETURNING EARLY - studentsInClass=${studentsInClass != null}, studentsXapiGroup=${studentsXapiGroup != null}, activePerson=${activePerson != null}")
             return
         }
 
-        val classDisplayName = className ?: "Unknown Class"
-        val studentNames = studentsInClass.map { "${it.givenName} ${it.familyName}" }
-        println("UpdateClazzStudentXapiGroup: Class='$classDisplayName', Students=$studentNames")
-
         val groupToPost = studentsXapiGroup.copy(
             member = studentsInClass.map { it.asXapiAgent(schoolUrl) }
         )
-        println("UpdateClazzStudentXapiGroup: Posting XapiGroup name='${groupToPost.name}', account=${groupToPost.account}, members=${groupToPost.member?.map { it.name }}")
 
         schoolDataSource.xapiResource.statements.post(
             listOf(

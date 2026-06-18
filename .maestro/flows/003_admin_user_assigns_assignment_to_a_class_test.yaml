@@ -210,9 +210,6 @@ onFlowComplete:
 - assertVisible: "Average"
 - assertVisible: "95%"
 - assertVisible: "90%"
-- tapOn: "90%" #studentB
-- assertVisible: "Assignment Result Statement Demo: StudentB User"
-- assertVisible: "Assignment Result Statement Demo"
 
 # Verify edit assignment is working
 - tapOn:

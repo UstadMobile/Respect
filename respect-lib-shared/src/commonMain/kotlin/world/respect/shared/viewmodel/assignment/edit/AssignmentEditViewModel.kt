@@ -148,8 +148,6 @@ class AssignmentEditViewModel(
                 .sortedByDescending { it.member?.size ?: 0 }
                 .distinctBy { it.account?.homePage }
 
-            println("AssignmentEdit: studentGroups=${studentGroups.map { "${it.name} (members=${it.member?.map { m -> m.name }})" }}")
-
             _uiState.update {
                 it.copy(
                     classOptions = studentGroups,
@@ -230,7 +228,6 @@ class AssignmentEditViewModel(
 
     fun onAssigneeClassSelected(group: XapiGroup) {
         val statement = _uiState.value.statementData.dataOrNull() ?: return
-        println("AssignmentEdit: onAssigneeClassSelected group='${group.name}', members=${group.member?.map { it.name }}")
         _uiState.update {
             it.copy(
                 statementData = DataReadyState(

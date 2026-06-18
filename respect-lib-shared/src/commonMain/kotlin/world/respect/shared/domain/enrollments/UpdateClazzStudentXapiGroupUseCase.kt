@@ -1,5 +1,6 @@
 package world.respect.shared.domain.enrollments
 
+import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSource
@@ -50,7 +51,7 @@ class UpdateClazzStudentXapiGroupUseCase(
 
 
         if (studentsInClass == null || studentsXapiGroup == null || activePerson == null) {
-            println("UpdateClazzStudentXapiGroup: RETURNING EARLY - studentsInClass=${studentsInClass != null}, studentsXapiGroup=${studentsXapiGroup != null}, activePerson=${activePerson != null}")
+            Napier.w("No enrollments: something bad: students=$studentsInClass clazz=$classStatement")
             return
         }
 

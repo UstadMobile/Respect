@@ -6,7 +6,7 @@ object XapiIpcWhatFlags {
 
     const val WHAT_RESPONSE = 2
 
-    const val WHAT_BROADCAST = 3
+    const val WHAT_FLOW_EMISSION = 3
 
 
 

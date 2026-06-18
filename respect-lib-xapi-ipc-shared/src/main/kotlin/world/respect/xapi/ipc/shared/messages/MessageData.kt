@@ -1,6 +1,7 @@
 package world.respect.xapi.ipc.shared.messages
 
 import android.os.Bundle
+import android.os.Message
 
 /**
  * Immutable data class to store a message: Message objects are obtained from an object pool as per
@@ -13,4 +14,10 @@ data class MessageData(
     val what: Int,
     val arg1: Int = 0,
     val arg2: Int = 0,
-)
+) {
+
+    constructor(message: Message) : this(
+        data = message.data, what = message.what, arg1 = message.arg1, arg2 = message.arg2
+    )
+
+}

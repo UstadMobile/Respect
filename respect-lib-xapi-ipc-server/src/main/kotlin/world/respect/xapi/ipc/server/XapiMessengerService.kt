@@ -10,11 +10,17 @@ import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import io.ktor.http.Parameters
+import io.ktor.util.collections.ConcurrentMap
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import world.respect.lib.dataloadstate.DataErrorResult
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.model.XapiStatement
@@ -25,7 +31,6 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
 import world.respect.xapi.ipc.shared.messages.ext.getDeserialized
 import world.respect.xapi.ipc.shared.messages.ext.getStringValues
-import world.respect.xapi.ipc.shared.messages.ext.putSerialized
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
 import kotlin.uuid.Uuid
 
@@ -61,45 +66,58 @@ class XapiMessengerService: Service() {
         private val json: Json,
     ):  Handler(looper) {
 
+        val flowCollectors = ConcurrentMap<Int, Job>()
+
+        private val scope = CoroutineScope(Dispatchers.Default + Job())
+
         override fun handleMessage(msg: Message) {
             if(msg.what != XapiIpcWhatFlags.WHAT_REQUEST) {
                 super.handleMessage(msg)
                 return
             }
 
-            runBlocking {
-                val replyMessage = Message.obtain(
-                    this@IncomingHandler, XapiIpcWhatFlags.WHAT_RESPONSE
-                )
 
-                //Mark it as a response to the request id received.
-                replyMessage.arg1 = msg.arg1
-                try {
-                    val xapiResourceProvider = applicationContext as? XapiResourceProvider
-                        ?: throw IllegalStateException("No xapi resource provider")
+            val replyMessage = Message.obtain(
+                this@IncomingHandler, XapiIpcWhatFlags.WHAT_RESPONSE
+            )
 
-                    val endpoint = msg.data.getString(XapiIpcKeys.KEY_ENDPOINT)
-                        ?: throw IllegalArgumentException("Message has no endpoint")
-                    val auth = msg.data.getString(XapiIpcKeys.KEY_AUTH)
-                        ?: throw IllegalArgumentException("Message has no auth")
+            //Mark it as a response to the request id received.
+            val incomingMessageId = msg.arg1
+            replyMessage.arg1 = incomingMessageId
 
-                    val xapiResource = xapiResourceProvider.provideXapiResource(endpoint, auth)
+            val replyTo = msg.replyTo
 
-                    when (msg.arg2) {
-                        XapiIpcResourceFlags.POST_STATEMENTS -> {
-                            replyMessage.data = xapiResource.statements.post(
+            try {
+                val xapiResourceProvider = applicationContext as? XapiResourceProvider
+                    ?: throw IllegalStateException("No xapi resource provider")
+
+                val endpoint = msg.data.getString(XapiIpcKeys.KEY_ENDPOINT)
+                    ?: throw IllegalArgumentException("Message has no endpoint")
+                val auth = msg.data.getString(XapiIpcKeys.KEY_AUTH)
+                    ?: throw IllegalArgumentException("Message has no auth")
+
+                val xapiResource = xapiResourceProvider.provideXapiResource(endpoint, auth)
+
+                when (msg.arg2) {
+                    XapiIpcResourceFlags.POST_STATEMENTS -> {
+                        replyMessage.data = runBlocking {
+                            xapiResource.statements.post(
                                 list = msg.data.getDeserialized(
                                     key = XapiIpcKeys.KEY_BODY,
                                     json = json,
-                                    deserializer = ListSerializer(XapiStatement.serializer()),
+                                    deserializer = ListSerializer(
+                                        XapiStatement.serializer()
+                                    ),
                                 ) ?: throw XapiException(400, "Post statements has no body")
                             ).toBundle(ListSerializer(Uuid.serializer()), json)
-
-                            msg.replyTo.send(replyMessage)
                         }
 
-                        XapiIpcResourceFlags.GET_STATEMENTS -> {
-                            replyMessage.data = xapiResource.statements.get(
+                        msg.replyTo.send(replyMessage)
+                    }
+
+                    XapiIpcResourceFlags.GET_STATEMENTS -> {
+                        replyMessage.data = runBlocking {
+                            xapiResource.statements.get(
                                 listParams = XapiStatementsResource.GetStatementParams.fromParams(
                                     params = msg.data.getStringValues(
                                         XapiIpcKeys.KEY_QUERY_PARAMS
@@ -107,21 +125,42 @@ class XapiMessengerService: Service() {
                                     json = json
                                 )
                             ).toBundle(XapiStatementResult.serializer(), json)
-
-                            msg.replyTo.send(replyMessage)
                         }
 
-                        else -> {
-                            super.handleMessage(msg)
-                            null
+                        msg.replyTo.send(replyMessage)
+                    }
+
+                    XapiIpcResourceFlags.GET_STATEMENTS_FLOW -> {
+                        scope.launch {
+                            xapiResource.statements.getAsFlow(
+                                listParams = XapiStatementsResource.GetStatementParams.fromParams(
+                                    params = msg.data.getStringValues(
+                                        XapiIpcKeys.KEY_QUERY_PARAMS
+                                    ) ?: Parameters.Empty,
+                                    json = json
+                                ),
+                                dataLoadParams = DataLoadParams()
+                            ).collect {
+                                val message = Message.obtain()
+                                message.arg1 = incomingMessageId
+                                message.what = XapiIpcWhatFlags.WHAT_FLOW_EMISSION
+                                message.data = it.toBundle(XapiStatementResult.serializer(), json)
+                                replyTo.send(message)
+                            }
+                        }.also {
+                            flowCollectors[incomingMessageId] = it
                         }
                     }
-                }catch(e: Throwable) {
-                    replyMessage.data = DataErrorResult<String>(
-                        error = e,
-                    ).toBundle(String.serializer(), json)
-                    msg.replyTo.send(replyMessage)
+
+                    else -> {
+                        super.handleMessage(msg)
+                    }
                 }
+            }catch(e: Throwable) {
+                replyMessage.data = DataErrorResult<String>(
+                    error = e,
+                ).toBundle(String.serializer(), json)
+                msg.replyTo.send(replyMessage)
             }
         }
     }

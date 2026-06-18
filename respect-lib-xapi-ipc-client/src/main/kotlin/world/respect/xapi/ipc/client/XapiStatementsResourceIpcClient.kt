@@ -3,6 +3,7 @@ package world.respect.xapi.ipc.client
 import android.os.Bundle
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -19,6 +20,7 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
 import world.respect.xapi.ipc.shared.messages.ext.putStringValues
+import world.respect.xapi.ipc.shared.messages.ext.toDataLoadState
 import kotlin.uuid.Uuid
 
 class XapiStatementsResourceIpcClient(
@@ -76,7 +78,21 @@ class XapiStatementsResourceIpcClient(
         listParams: XapiStatementsResource.GetStatementParams,
         dataLoadParams: DataLoadParams
     ): Flow<DataLoadState<XapiStatementResult>> {
-        TODO("Not yet implemented")
+        return requestSender.executeForFlow(
+            messageData = MessageData(
+                data = Bundle().apply {
+                    putEndpoint()
+                    putStringValues(
+                        key = XapiIpcKeys.KEY_QUERY_PARAMS,
+                        value = listParams.toParameters(json)
+                    )
+                },
+                what = XapiIpcWhatFlags.WHAT_REQUEST,
+                arg2 = XapiIpcResourceFlags.GET_STATEMENTS_FLOW,
+            )
+        ).map { msg ->
+            msg.data.toDataLoadState(json, XapiStatementResult.serializer())
+        }
     }
 
     override fun getAssignmentProgress(

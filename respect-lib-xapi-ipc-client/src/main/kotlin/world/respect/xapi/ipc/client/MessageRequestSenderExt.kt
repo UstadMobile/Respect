@@ -13,7 +13,7 @@ suspend fun <T:Any> XapiMessageBridge.executeRequestAsDataLoadState(
     deserializer: DeserializationStrategy<T>,
 ): DataLoadState<T> {
     return try {
-        executeRequest(request).data.toDataLoadState(json, deserializer)
+        executeForResponse(request).data.toDataLoadState(json, deserializer)
     }catch(e: Throwable) {
         DataErrorResult(e)
     }

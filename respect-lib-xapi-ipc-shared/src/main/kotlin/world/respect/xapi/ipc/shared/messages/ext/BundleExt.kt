@@ -34,6 +34,13 @@ fun <T: Any> Bundle.getDeserialized(
 
 private const val SUFFIX_STR_VALS_CASE_INSENSITIVE = "_caseInsensitive"
 
+/**
+ * Put a set of StringValues into the given bundle, that can then be retrieved using
+ * Bundle.getStringValues
+ *
+ * @param key Bundle key to use
+ * @parma value StringValues to put into the bundle
+ */
 fun Bundle.putStringValues(
     key: String,
     value: StringValues
@@ -42,6 +49,12 @@ fun Bundle.putStringValues(
     putBoolean(key + SUFFIX_STR_VALS_CASE_INSENSITIVE, value.caseInsensitiveName)
 }
 
+/**
+ * Get a set of StringValues from the given bundle (that was stored using putStringValues).
+ *
+ * @param key Bundle key to use
+ * @return The StringValues, or null if not found
+ */
 fun Bundle.getStringValues(
     key: String
 ): StringValues? {
@@ -55,37 +68,42 @@ fun <T: Any> Bundle.toDataLoadState(
     deserializer: DeserializationStrategy<T>
 ): DataLoadState<T> {
     val status = getInt(XapiIpcKeys.KEY_STATUS_CODE)
-    val metaInfo = DataLoadMetaInfo(
-        headers = Headers.build {
-            this@toDataLoadState.getStringValues(XapiIpcKeys.KEY_HEADERS)?.also { stringVals ->
-                appendAll(stringVals)
+
+    return try {
+        val metaInfo = DataLoadMetaInfo(
+            headers = Headers.build {
+                this@toDataLoadState.getStringValues(XapiIpcKeys.KEY_HEADERS)?.also { stringVals ->
+                    appendAll(stringVals)
+                }
+            }
+        )
+
+        when(status) {
+            200 -> {
+                DataReadyState(
+                    data = getDeserialized(
+                        key = XapiIpcKeys.KEY_BODY,
+                        json = json,
+                        deserializer = deserializer,
+                    ) ?: throw IllegalStateException("200 response has no body"),
+                    metaInfo = metaInfo,
+                )
+            }
+
+            302, 404 -> {
+                NoDataLoadedState(
+                    reason = NoDataLoadedState.Reason.forStatusCode(status),
+                    metaInfo = metaInfo,
+                )
+            }
+
+            else -> {
+                DataErrorResult(
+                    error = IllegalStateException()
+                )
             }
         }
-    )
-
-    return when(status) {
-        200 -> {
-            DataReadyState(
-                data = getDeserialized(
-                    key = XapiIpcKeys.KEY_BODY,
-                    json = json,
-                    deserializer = deserializer,
-                ) ?: throw IllegalStateException("200 response has no body"),
-                metaInfo = metaInfo,
-            )
-        }
-
-        302, 404 -> {
-            NoDataLoadedState(
-                reason = NoDataLoadedState.Reason.forStatusCode(status),
-                metaInfo = metaInfo,
-            )
-        }
-
-        else -> {
-            DataErrorResult(
-                error = IllegalStateException()
-            )
-        }
+    }catch (e: Throwable) {
+        return DataErrorResult(e)
     }
 }

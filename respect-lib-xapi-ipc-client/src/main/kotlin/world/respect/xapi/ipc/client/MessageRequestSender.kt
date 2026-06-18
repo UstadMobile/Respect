@@ -7,7 +7,7 @@ interface MessageRequestSender {
     /**
      * Send a Message as a request and receive a response
      */
-    suspend fun sendRequest(messageData: MessageData): MessageData
+    suspend fun executeRequest(messageData: MessageData): MessageData
 
 
 }

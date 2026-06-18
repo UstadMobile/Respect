@@ -6,10 +6,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.lib.xapi.model.XapiAgent
@@ -37,7 +35,7 @@ class XapiStatementsResourceIpcClient(
     }
 
     override suspend fun post(list: List<XapiStatement>): List<Uuid> {
-        val response = requestSender.sendRequest(
+        val response = requestSender.executeRequest(
             MessageData(
                 data = Bundle().apply {
                     putEndpoint()
@@ -62,8 +60,8 @@ class XapiStatementsResourceIpcClient(
         listParams: XapiStatementsResource.GetStatementParams,
         dataLoadParams: DataLoadParams
     ): DataLoadState<XapiStatementResult> {
-        val response = requestSender.sendRequest(
-            MessageData(
+        return requestSender.executeRequestAsDataLoadState(
+            request = MessageData(
                 data = Bundle().apply {
                     putEndpoint()
                     putStringValues(
@@ -73,10 +71,10 @@ class XapiStatementsResourceIpcClient(
                 },
                 what = XapiIpcWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceFlags.GET_STATEMENTS,
-            )
+            ),
+            json = json,
+            deserializer = XapiStatementResult.serializer()
         )
-
-        return response.data.toDataLoadState(json, XapiStatementResult.serializer())
     }
 
     override fun getAsFlow(

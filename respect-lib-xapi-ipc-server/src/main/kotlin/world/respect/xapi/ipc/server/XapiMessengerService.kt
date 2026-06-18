@@ -13,7 +13,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.xapi.XapiResourceProvider
+import world.respect.lib.xapi.exceptions.XapiBadRequestException
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -52,22 +54,11 @@ class XapiMessengerService: Service() {
         private val json: Json,
     ):  Handler(Looper.getMainLooper()) {
 
-
         override fun handleMessage(msg: Message) {
             if(msg.what != XapiIpcWhatFlags.WHAT_REQUEST) {
                 super.handleMessage(msg)
                 return
             }
-
-            val xapiResourceProvider = applicationContext as? XapiResourceProvider
-                ?: throw IllegalStateException("No xapi resource provider")
-
-            val endpoint = msg.data.getString(XapiIpcKeys.KEY_ENDPOINT)
-                ?: throw IllegalArgumentException("Message has no endpoint")
-            val auth = msg.data.getString(XapiIpcKeys.KEY_AUTH)
-                ?: throw IllegalArgumentException("Message has no auth")
-
-            val xapiResource = xapiResourceProvider.provideXapiResource(endpoint, auth)
 
             runBlocking {
                 val replyMessage = Message.obtain(
@@ -76,46 +67,61 @@ class XapiMessengerService: Service() {
 
                 //Mark it as a response to the request id received.
                 replyMessage.arg1 = msg.arg1
+                try {
+                    val xapiResourceProvider = applicationContext as? XapiResourceProvider
+                        ?: throw IllegalStateException("No xapi resource provider")
 
-                when (msg.arg2) {
-                    XapiIpcResourceFlags.POST_STATEMENTS -> {
-                        //get the params and make the request
+                    val endpoint = msg.data.getString(XapiIpcKeys.KEY_ENDPOINT)
+                        ?: throw IllegalArgumentException("Message has no endpoint")
+                    val auth = msg.data.getString(XapiIpcKeys.KEY_AUTH)
+                        ?: throw IllegalArgumentException("Message has no auth")
 
-                        val uuids = xapiResource.statements.post(
-                            list = msg.data.getDeserialized(
+                    val xapiResource = xapiResourceProvider.provideXapiResource(endpoint, auth)
+
+                    when (msg.arg2) {
+                        XapiIpcResourceFlags.POST_STATEMENTS -> {
+                            //get the params and make the request
+                            val uuids = xapiResource.statements.post(
+                                list = msg.data.getDeserialized(
+                                    key = XapiIpcKeys.KEY_BODY,
+                                    json = json,
+                                    deserializer = ListSerializer(XapiStatement.serializer()),
+                                ) ?: throw XapiBadRequestException("Post statements has no body")
+                            )
+
+                            replyMessage.data.putSerialized(
                                 key = XapiIpcKeys.KEY_BODY,
                                 json = json,
-                                deserializer = ListSerializer(XapiStatement.serializer()),
-                            ) ?: throw IllegalArgumentException()
-                        )
-
-                        replyMessage.data.putSerialized(
-                            key = XapiIpcKeys.KEY_BODY,
-                            json = json,
-                            serializer = ListSerializer(Uuid.serializer()),
-                            value = uuids
-                        )
-
-                        msg.replyTo.send(replyMessage)
-                    }
-
-                    XapiIpcResourceFlags.GET_STATEMENTS -> {
-                        replyMessage.data = xapiResource.statements.get(
-                            listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                                params = msg.data.getStringValues(
-                                    XapiIpcKeys.KEY_QUERY_PARAMS
-                                ) ?: Parameters.Empty,
-                                json = json
+                                serializer = ListSerializer(Uuid.serializer()),
+                                value = uuids
                             )
-                        ).toBundle(XapiStatementResult.serializer(), json)
 
-                        msg.replyTo.send(replyMessage)
-                    }
+                            msg.replyTo.send(replyMessage)
+                        }
 
-                    else -> {
-                        super.handleMessage(msg)
-                        null
+                        XapiIpcResourceFlags.GET_STATEMENTS -> {
+                            replyMessage.data = xapiResource.statements.get(
+                                listParams = XapiStatementsResource.GetStatementParams.fromParams(
+                                    params = msg.data.getStringValues(
+                                        XapiIpcKeys.KEY_QUERY_PARAMS
+                                    ) ?: Parameters.Empty,
+                                    json = json
+                                )
+                            ).toBundle(XapiStatementResult.serializer(), json)
+
+                            msg.replyTo.send(replyMessage)
+                        }
+
+                        else -> {
+                            super.handleMessage(msg)
+                            null
+                        }
                     }
+                }catch(e: Throwable) {
+                    replyMessage.data = DataErrorResult<String>(
+                        error = e,
+                    ).toBundle(String.serializer(), json)
+                    msg.replyTo.send(replyMessage)
                 }
             }
         }
@@ -129,11 +135,6 @@ class XapiMessengerService: Service() {
 
     override fun onBind(intent: Intent): IBinder? {
         return messenger.binder
-    }
-
-    companion object {
-
-
     }
 
 }

@@ -52,7 +52,7 @@ class MessageRequestSenderBinderImpl(
 
     private val incomingMessenger: Messenger = Messenger(incomingHandler)
 
-    override suspend fun sendRequest(messageData: MessageData): MessageData {
+    override suspend fun executeRequest(messageData: MessageData): MessageData {
         val message = Message.obtain()
         message.setFromMessageData(messageData)
         message.replyTo = incomingMessenger

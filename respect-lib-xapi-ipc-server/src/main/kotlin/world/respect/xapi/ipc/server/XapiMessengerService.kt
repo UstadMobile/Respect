@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.IBinder
 import android.os.Looper
 import android.os.Message
@@ -48,11 +49,17 @@ class XapiMessengerService: Service() {
         encodeDefaults = false
     }
 
+    private val handlerThread = HandlerThread("XapiMessengerServiceThread").also {
+        if(!it.isAlive)
+            it.start()
+    }
+
     internal class IncomingHandler(
+        looper: Looper,
         context: Context,
         private val applicationContext: Context = context.applicationContext,
         private val json: Json,
-    ):  Handler(Looper.getMainLooper()) {
+    ):  Handler(looper) {
 
         override fun handleMessage(msg: Message) {
             if(msg.what != XapiIpcWhatFlags.WHAT_REQUEST) {
@@ -129,7 +136,11 @@ class XapiMessengerService: Service() {
 
     private val messenger: Messenger by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         Messenger(
-            IncomingHandler(this, this.applicationContext, json)
+            IncomingHandler(
+                looper = handlerThread.looper,
+                context = this,
+                json = json,
+            )
         )
     }
 
@@ -137,4 +148,9 @@ class XapiMessengerService: Service() {
         return messenger.binder
     }
 
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handlerThread.quit()
+    }
 }

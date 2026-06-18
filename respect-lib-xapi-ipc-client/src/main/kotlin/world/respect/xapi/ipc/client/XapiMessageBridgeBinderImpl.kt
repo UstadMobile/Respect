@@ -94,7 +94,16 @@ class XapiMessageBridgeBinderImpl(
         outgoingMessenger.send(message)
 
         return receiveChannel.receiveAsFlow().onCompletion {
-            //TODO: Cleanup here: tell the other side
+            Log.d(XapiIpcTags.LOGTAG, "XapiMessageBridgeBinderImpl: Flow #$messageId completed")
+
+            outgoingMessenger.send(
+                Message.obtain().also {
+                    it.what = XapiIpcWhatFlags.WHAT_FLOW_COMPLETION
+                    it.arg1 = messageId
+                }
+            )
+
+            receiveChannel.close()
         }
     }
 }

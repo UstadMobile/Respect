@@ -9,6 +9,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
+import android.util.Log
 import io.ktor.http.Parameters
 import io.ktor.util.collections.ConcurrentMap
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +29,7 @@ import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
+import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
 import world.respect.xapi.ipc.shared.messages.ext.getDeserialized
 import world.respect.xapi.ipc.shared.messages.ext.getStringValues
@@ -66,23 +68,32 @@ class XapiMessengerService: Service() {
         private val json: Json,
     ):  Handler(looper) {
 
-        val flowCollectors = ConcurrentMap<Int, Job>()
+        private val flowCollectors = ConcurrentMap<Int, Job>()
 
         private val scope = CoroutineScope(Dispatchers.Default + Job())
 
         override fun handleMessage(msg: Message) {
-            if(msg.what != XapiIpcWhatFlags.WHAT_REQUEST) {
+            if(msg.what != XapiIpcWhatFlags.WHAT_REQUEST && msg.what != XapiIpcWhatFlags.WHAT_FLOW_COMPLETION) {
                 super.handleMessage(msg)
                 return
             }
 
+            val incomingMessageId = msg.arg1
+
+            if(msg.what == XapiIpcWhatFlags.WHAT_FLOW_COMPLETION) {
+                flowCollectors.remove(incomingMessageId)?.also {
+                    it.cancel()
+                    Log.d(XapiIpcTags.LOGTAG, "XapiMessengerService: Flow #$incomingMessageId cancelled")
+                }
+
+                return
+            }
 
             val replyMessage = Message.obtain(
                 this@IncomingHandler, XapiIpcWhatFlags.WHAT_RESPONSE
             )
 
             //Mark it as a response to the request id received.
-            val incomingMessageId = msg.arg1
             replyMessage.arg1 = incomingMessageId
 
             val replyTo = msg.replyTo

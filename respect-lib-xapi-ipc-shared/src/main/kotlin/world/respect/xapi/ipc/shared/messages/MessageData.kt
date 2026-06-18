@@ -7,6 +7,10 @@ import android.os.Message
  * Immutable data class to store a message: Message objects are obtained from an object pool as per
  * the Android documentation.
  *
+ * @param what as per XapiIpcWhatFlags
+ * @param arg1 the message id used to match up requests and responses
+ * @param arg2 endpoint flag as per XapiIpcResourceFlags
+ *
  * https://developer.android.com/reference/android/os/Message
  */
 data class MessageData(

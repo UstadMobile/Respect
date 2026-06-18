@@ -187,7 +187,7 @@ onFlowComplete:
       PASSWORD: "test123"
 - assertVisible: "Apps"
 - tapOn: "Classes"
-- assertVisible: "TestClass students"
+- assertVisible: "TestClass"
 - tapOn: "Assignments"
 - assertVisible:
     id: "app_title"

@@ -11,16 +11,19 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import world.respect.app.R
+import world.respect.datalayer.SchoolDataSource
+import world.respect.lib.xapi.model.XapiVerb
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
-import world.respect.shared.domain.xapi.SendLearningUnitTerminatedStatementUseCase
+import world.respect.shared.domain.xapi.createLearningUnitStatement
 
 /**
  * A separate activity that only shows a WebView (e.g. to view a LearningUnit) .
@@ -51,7 +54,7 @@ class WebViewActivity : AppCompatActivity() {
     }
 
     private val webViewClient: OkHttpWebViewClient by inject()
-    private val sendLearningUnitTerminatedStatementUseCase : SendLearningUnitTerminatedStatementUseCase by inject()
+    private val accountManager: RespectAccountManager by inject()
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,8 +98,30 @@ class WebViewActivity : AppCompatActivity() {
 
         if (activityId != null) {
             CoroutineScope(Dispatchers.IO).launch {
-                    sendLearningUnitTerminatedStatementUseCase(activityId)
+                runCatching {
+                    val account = accountManager.activeAccount ?: return@launch
 
+                    val accountScope = accountManager.getOrCreateAccountScope(account)
+
+                    val schoolDataSource: SchoolDataSource = accountScope.get()
+
+                    val actor = accountManager.selectedAccountAndPersonFlow
+                        .firstOrNull()
+                        ?.xapiAgent
+                        ?: return@launch
+
+                    schoolDataSource.xapiResource.statements.post(
+                        listOf(
+                            createLearningUnitStatement(
+                                activityId = activityId,
+                                actor = actor,
+                                verbId = XapiVerb.ID_TERMINATED,
+                            )
+                        )
+                    )
+                }.onFailure {
+                    Napier.e("Failed to send terminated statement", it)
+                }
             }
         }
 

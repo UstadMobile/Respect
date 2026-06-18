@@ -114,7 +114,7 @@ interface XapiStatementsResource {
      */
     suspend fun post(
         list: List<XapiStatement>
-    ): List<Uuid>
+    ): DataLoadState<List<Uuid>>
 
     suspend fun get(
         listParams: GetStatementParams,

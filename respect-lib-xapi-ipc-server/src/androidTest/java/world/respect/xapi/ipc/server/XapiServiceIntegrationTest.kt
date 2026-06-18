@@ -60,7 +60,7 @@ class XapiServiceIntegrationTest {
             val response = client.statements.post(listOf(statement))
             val ipcResponse = client.statements.get(
                 listParams = XapiStatementsResource.GetStatementParams(
-                    statementId = response.first()
+                    statementId = response.dataOrNull()!!.first()
                 )
             )
 

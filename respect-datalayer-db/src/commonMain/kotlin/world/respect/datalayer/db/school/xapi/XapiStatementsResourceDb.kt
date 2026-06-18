@@ -263,7 +263,7 @@ class XapiStatementsResourceDb(
         )
     }
 
-    override suspend fun post(list: List<XapiStatement>): List<Uuid> {
+    override suspend fun post(list: List<XapiStatement>): DataLoadState<List<Uuid>> {
         val statementsWithIdsSet = list.map {
             it.copyWithIdIfNotSet()
         }
@@ -354,7 +354,9 @@ class XapiStatementsResourceDb(
             }
         }
 
-        return statementsWithIdsSet.mapNotNull { it.id }
+        return DataReadyState(
+            data = statementsWithIdsSet.mapNotNull { it.id }
+        )
     }
 
     override suspend fun updateLocal(

@@ -33,9 +33,9 @@ class XapiStatementsResourceIpcClient(
         putString(XapiIpcKeys.KEY_AUTH, auth)
     }
 
-    override suspend fun post(list: List<XapiStatement>): List<Uuid> {
-        val response = requestSender.executeRequest(
-            MessageData(
+    override suspend fun post(list: List<XapiStatement>): DataLoadState<List<Uuid>> {
+        return requestSender.executeRequestAsDataLoadState(
+            request = MessageData(
                 data = Bundle().apply {
                     putEndpoint()
                     putString(
@@ -45,14 +45,10 @@ class XapiStatementsResourceIpcClient(
                 },
                 what = XapiIpcWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceFlags.POST_STATEMENTS,
-            )
+            ),
+            json = json,
+            deserializer = ListSerializer(Uuid.serializer())
         )
-
-        val uuidsCreated = response.data.getString(XapiIpcKeys.KEY_BODY)?.let {
-            json.decodeFromString(ListSerializer(Uuid.serializer()), it)
-        } ?: throw IllegalStateException("IPC Response has no body")
-
-        return uuidsCreated
     }
 
     override suspend fun get(

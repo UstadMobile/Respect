@@ -87,21 +87,13 @@ class XapiMessengerService: Service() {
 
                     when (msg.arg2) {
                         XapiIpcResourceFlags.POST_STATEMENTS -> {
-                            //get the params and make the request
-                            val uuids = xapiResource.statements.post(
+                            replyMessage.data = xapiResource.statements.post(
                                 list = msg.data.getDeserialized(
                                     key = XapiIpcKeys.KEY_BODY,
                                     json = json,
                                     deserializer = ListSerializer(XapiStatement.serializer()),
                                 ) ?: throw XapiException(400, "Post statements has no body")
-                            )
-
-                            replyMessage.data.putSerialized(
-                                key = XapiIpcKeys.KEY_BODY,
-                                json = json,
-                                serializer = ListSerializer(Uuid.serializer()),
-                                value = uuids
-                            )
+                            ).toBundle(ListSerializer(Uuid.serializer()), json)
 
                             msg.replyTo.send(replyMessage)
                         }

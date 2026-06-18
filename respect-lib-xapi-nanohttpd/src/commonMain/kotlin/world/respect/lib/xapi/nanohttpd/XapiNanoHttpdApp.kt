@@ -3,7 +3,6 @@ package world.respect.lib.xapi.nanohttpd
 import fi.iki.elonen.NanoHTTPD
 import io.ktor.http.Url
 import io.ktor.util.StringValuesImpl
-import io.ktor.util.decodeBase64String
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.builtins.ListSerializer
@@ -139,14 +138,10 @@ class XapiNanoHttpdApp(
                             }
                         } ?: throw IllegalArgumentException("No Post Body")
 
-                        val uuidsCreated = xapiResourceProvider(endpointUrl, authentication).post(
+                        xapiResourceProvider(endpointUrl, authentication).post(
                             list = postBody
-                        )
-
-                        newFixedLengthResponse(
-                            Response.Status.OK,
-                            "application/json",
-                            json.encodeToString(ListSerializer(Uuid.serializer()), uuidsCreated)
+                        ).toFixedLengthResponse(
+                            ListSerializer(Uuid.serializer())
                         ).also {
                             it.addXapiCORSHeaders(session)
                         }

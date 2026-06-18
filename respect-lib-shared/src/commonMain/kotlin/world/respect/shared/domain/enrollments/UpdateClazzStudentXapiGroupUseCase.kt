@@ -9,13 +9,11 @@ import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
-import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
-import world.respect.lib.xapi.model.XapiGroup
-import world.respect.lib.xapi.model.XapiObjectType
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
+import world.respect.shared.ext.studentsXapiGroup
 import kotlin.uuid.ExperimentalUuidApi
 
 class UpdateClazzStudentXapiGroupUseCase(
@@ -42,20 +40,8 @@ class UpdateClazzStudentXapiGroupUseCase(
         ).dataOrNull()?.statements?.mostRecentByTimestampOrNull()
 
         val classActivity = classStatement?.`object` as? XapiActivity
-        val className = classActivity?.definition?.name?.values?.firstOrNull()
 
-        val studentsXapiGroup = if (classActivity != null) {
-            XapiGroup(
-                name = "${className ?: ""} students",
-                account = XapiAccount(
-                    homePage = classActivity.id,
-                    name = "students"
-                ),
-                objectType = XapiObjectType.Group,
-            )
-        } else {
-            null
-        }
+        val studentsXapiGroup = classActivity?.studentsXapiGroup()
 
         val activePerson = schoolDataSource.personDataSource.findByGuid(
             loadParams = DataLoadParams(onlyIfCached = true),
@@ -63,12 +49,12 @@ class UpdateClazzStudentXapiGroupUseCase(
         ).dataOrNull()
 
 
-        if(studentsInClass == null || studentsXapiGroup == null || activePerson == null) {
+        if (studentsInClass == null || studentsXapiGroup == null || activePerson == null) {
             println("UpdateClazzStudentXapiGroup: RETURNING EARLY - studentsInClass=${studentsInClass != null}, studentsXapiGroup=${studentsXapiGroup != null}, activePerson=${activePerson != null}")
             return
         }
 
-        val groupToPost = studentsXapiGroup.copy(
+        val studentsGroup = studentsXapiGroup.copy(
             member = studentsInClass.map { it.asXapiAgent(schoolUrl) }
         )
 
@@ -77,10 +63,9 @@ class UpdateClazzStudentXapiGroupUseCase(
                 XapiStatement(
                     actor = activePerson.asXapiAgent(schoolUrl),
                     verb = XapiVerb(id = XapiVerb.ID_SAVED),
-                    `object` = groupToPost
+                    `object` = studentsGroup
                 )
             )
         )
     }
-
 }

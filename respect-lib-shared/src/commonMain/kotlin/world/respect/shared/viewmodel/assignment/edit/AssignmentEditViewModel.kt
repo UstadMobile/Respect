@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel.assignment.edit
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -145,6 +146,12 @@ class AssignmentEditViewModel(
                     val group = statement.`object` as? XapiGroup
                     group?.takeIf { it.account?.name == "students" }
                 }
+                .filter { group ->
+                    if(group.name == null) {
+                        Napier.w("AssignmentEditViewModel: student group has no name (homePage=${group.account?.homePage})")
+                    }
+                    group.name != null
+                }
                 .sortedByDescending { it.member?.size ?: 0 }
                 .distinctBy { it.account?.homePage }
 
@@ -182,7 +189,7 @@ class AssignmentEditViewModel(
                 )
             } else {
                 val instructor = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent
-                    ?: return@launchWithLoadingIndicator
+                    ?: throw IllegalStateException("Cannot create assignment: no active account xapiAgent found")
                 val baseStmt = createBlankAssignmentStatement(
                     assignmentActivityId = assignmentActivityId,
                     instructor = instructor
@@ -205,7 +212,8 @@ class AssignmentEditViewModel(
                     val activity = getXapiActivityForPublicationUseCase(learningUnit.selectedPublication)
 
                     _uiState.update { prev ->
-                        val preStatementData = prev.statementData.dataOrNull() ?: return@update prev
+                        val preStatementData = prev.statementData.dataOrNull()
+                            ?: throw IllegalStateException("Learning unit result received but statement data is null")
 
                         prev.copy(
                             statementData = DataReadyState(
@@ -227,13 +235,16 @@ class AssignmentEditViewModel(
     }
 
     fun onAssigneeClassSelected(group: XapiGroup) {
-        val statement = _uiState.value.statementData.dataOrNull() ?: return
+        val statement = _uiState.value.statementData.dataOrNull()
+            ?: throw IllegalStateException("onAssigneeClassSelected: statement data cannot be null")
+        val groupName = group.name
+            ?: throw IllegalStateException("onAssigneeClassSelected: group name cannot be null")
         _uiState.update {
             it.copy(
                 statementData = DataReadyState(
                     statement.copy(actor = group)
                 ),
-                assignee = group.name ?: "",
+                assignee = groupName,
                 classError = null,
             )
         }
@@ -278,7 +289,8 @@ class AssignmentEditViewModel(
     fun onClickRemoveLearningUnit(
         activity: XapiActivity
     ) {
-        val assignment = uiState.value.statementData.dataOrNull() ?: return
+        val assignment = uiState.value.statementData.dataOrNull()
+            ?: throw IllegalStateException("onClickRemoveLearningUnit: statement data cannot be null")
 
         _uiState.update { prev ->
             prev.copy(
@@ -308,7 +320,8 @@ class AssignmentEditViewModel(
         if (stateToSave.hasErrors)
             return
 
-        val assignment = uiState.value.statementData.dataOrNull() ?: return
+        val assignment = uiState.value.statementData.dataOrNull()
+            ?: throw IllegalStateException("onClickSave: statement data cannot be null after validation")
 
         launchWithLoadingIndicator {
             schoolDataSource.xapiResource.statements.post(

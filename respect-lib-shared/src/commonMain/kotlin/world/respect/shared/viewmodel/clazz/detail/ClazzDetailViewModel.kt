@@ -502,11 +502,6 @@ class ClazzDetailViewModel(
                     group.copy(member = filteredMembers)
                 }
 
-            println("observeGroupsFromXapi: latestGroups count=${latestGroups.size}")
-            latestGroups.forEach { group ->
-                println("observeGroupsFromXapi: Group name='${group.name}', account=${group.account}, members=${group.member?.map { it.name }}")
-            }
-
             _uiState.update { prev ->
                 prev.copy(groups = latestGroups)
             }

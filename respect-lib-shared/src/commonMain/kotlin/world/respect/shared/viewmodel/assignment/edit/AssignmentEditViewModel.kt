@@ -17,8 +17,6 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.school.ClassDataSource
-import world.respect.datalayer.school.model.Clazz
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
@@ -34,6 +32,7 @@ import world.respect.lib.xapi.ext.objectActivityNameOrNull
 import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.ext.removeActivityFromContextActivitiesGrouping
 import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
@@ -42,7 +41,6 @@ import world.respect.libutil.ext.isNullOrAllBlank
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
 import world.respect.shared.domain.xapi.createBlankAssignmentStatement
-import world.respect.shared.ext.studentsXapiGroup
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_assignment
 import world.respect.shared.generated.resources.edit_assignment
@@ -70,7 +68,7 @@ data class AssignmentEditUiState(
     val statementData: DataLoadState<XapiStatement> = DataLoadingState(),
     val assignee: String = "",
     val nameError: UiText? = null,
-    val classOptions: List<Clazz> = emptyList(),
+    val classOptions: List<XapiGroup> = emptyList(),
     val classError: UiText? = null,
     val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { flowOf(DataLoadingState()) },
 ) {
@@ -135,14 +133,26 @@ class AssignmentEditViewModel(
         launchWithLoadingIndicator(
             onShowError = { snackBarDispatcher.showSnackBar(Snack(it)) }
         ) {
-            val classes = schoolDataSource.classDataSource.list(
-                DataLoadParams(),
-                ClassDataSource.GetListParams()
-            ).dataOrNull() ?: emptyList()
+            val savedStatements = schoolDataSource.xapiResource.statements.get(
+                listParams = GetStatementParams(
+                    verb = XapiVerb.ID_SAVED,
+                ),
+                dataLoadParams = DataLoadParams(),
+            ).dataOrNull()?.statements ?: emptyList()
+
+            val studentGroups = savedStatements
+                .mapNotNull { statement ->
+                    val group = statement.`object` as? XapiGroup
+                    group?.takeIf { it.account?.name == "students" }
+                }
+                .sortedByDescending { it.member?.size ?: 0 }
+                .distinctBy { it.account?.homePage }
+
+            println("AssignmentEdit: studentGroups=${studentGroups.map { "${it.name} (members=${it.member?.map { m -> m.name }})" }}")
 
             _uiState.update {
                 it.copy(
-                    classOptions = classes,
+                    classOptions = studentGroups,
                 )
             }
 
@@ -218,14 +228,15 @@ class AssignmentEditViewModel(
         )
     }
 
-    fun onAssigneeClassSelected(clazz: Clazz) {
+    fun onAssigneeClassSelected(group: XapiGroup) {
         val statement = _uiState.value.statementData.dataOrNull() ?: return
+        println("AssignmentEdit: onAssigneeClassSelected group='${group.name}', members=${group.member?.map { it.name }}")
         _uiState.update {
             it.copy(
                 statementData = DataReadyState(
-                    statement.copy(actor = clazz.studentsXapiGroup(schoolUrl))
+                    statement.copy(actor = group)
                 ),
-                assignee = clazz.title,
+                assignee = group.name ?: "",
                 classError = null,
             )
         }

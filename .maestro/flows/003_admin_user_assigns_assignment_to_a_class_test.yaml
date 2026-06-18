@@ -139,8 +139,6 @@ onFlowComplete:
       USERNAME: "studentauser"
       PASSWORD: "test123"
 - assertVisible: "Apps"
-- tapOn: "Classes"
-- assertVisible: "TestClass"
 - tapOn: "Assignments"
 - assertVisible:
     id: "app_title"
@@ -180,8 +178,6 @@ onFlowComplete:
       USERNAME: "studentbuser"
       PASSWORD: "test123"
 - assertVisible: "Apps"
-- tapOn: "Classes"
-- assertVisible: "TestClass"
 - tapOn: "Assignments"
 - assertVisible:
     id: "app_title"

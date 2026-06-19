@@ -89,6 +89,10 @@ The following environment variables can be set:
 RESPECT_DEFAULT_APPLIST - the default list of RESPECT Compatible app manifest URLs e.g. https://respect.world/respect-ds/manifestlist.json
 ```
 
+## Publishing
+
+As per [Kotlin docs](https://kotlinlang.org/docs/multiplatform/multiplatform-publish-lib-setup.html#publishing-to-a-local-maven-repository)
+
 ## Legal and license
 
 Copyright 2024-2025 UstadMobile FZ-LLC. This code is substantially derived from [UstadMobile](https://www.github.com/UstadMobile/UstadMobile/).

@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * @param outgoingMessenger the outgoing messenger e.g. the one that is connected to the service binder
  */
-class XapiMessageBridgeBinderImpl(
+class XapiMessageBridgeMessengerImpl(
     private val outgoingMessenger: Messenger,
 ): XapiMessageBridge {
 

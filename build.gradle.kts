@@ -14,3 +14,8 @@ plugins {
 tasks.register("clean", Delete::class) {
     this.delete(project.layout.buildDirectory)
 }
+
+subprojects {
+    group = rootProject.group
+    version = rootProject.version
+}

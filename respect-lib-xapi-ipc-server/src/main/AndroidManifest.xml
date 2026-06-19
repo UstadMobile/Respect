@@ -2,9 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
-        <service
-            android:name="world.respect.xapi.ipc.server.XapiMessengerService"
-            android:exported="false"/>
+
 
     </application>
 

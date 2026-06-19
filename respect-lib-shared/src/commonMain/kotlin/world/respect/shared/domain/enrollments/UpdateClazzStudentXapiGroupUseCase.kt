@@ -69,4 +69,8 @@ class UpdateClazzStudentXapiGroupUseCase(
             )
         )
     }
+
+    companion object{
+        const val STUDENTS = "students"
+    }
 }

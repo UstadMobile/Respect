@@ -40,6 +40,7 @@ import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParam
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.isNullOrAllBlank
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase.Companion.STUDENTS
 import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
 import world.respect.shared.domain.xapi.createBlankAssignmentStatement
 import world.respect.shared.generated.resources.Res
@@ -351,8 +352,6 @@ class AssignmentEditViewModel(
         const val KEY_LEARNING_UNIT = "result_learning_unit"
 
         const val ACTIVITY_ID_PATH = "xapi/activities/assignment"
-
-        const val STUDENTS = "students"
 
     }
 }

@@ -4,7 +4,7 @@ import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.xapi.model.XapiObjectType
-import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel.Companion.STUDENTS
+import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase.Companion.STUDENTS
 
 
 /**

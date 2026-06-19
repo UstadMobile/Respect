@@ -4,6 +4,7 @@ import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.xapi.model.XapiObjectType
+import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel.Companion.STUDENTS
 
 
 /**
@@ -13,12 +14,13 @@ import world.respect.lib.xapi.model.XapiObjectType
 fun XapiActivity.studentsXapiGroup(): XapiGroup {
     val className = definition?.name?.values?.firstOrNull()
     return XapiGroup(
-        name = "$className students",
+        name = "$className $STUDENTS",
         account = XapiAccount(
             homePage = id,
-            name = "students"
+            name = STUDENTS
         ),
         objectType = XapiObjectType.Group,
     )
 }
+
 

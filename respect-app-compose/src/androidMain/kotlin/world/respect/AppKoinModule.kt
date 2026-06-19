@@ -261,6 +261,8 @@ import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPubl
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCaseAndroid
 import world.respect.shared.domain.xapi.xapinanohttpd.XapiNanoHttpdResourceProviderAndroid
+import world.respect.shared.viewmodel.studentgrouping.detail.StudentGroupingDetailViewModel
+import world.respect.shared.viewmodel.studentgrouping.edit.StudentGroupingEditViewModel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -396,6 +398,8 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
+    viewModelOf(::StudentGroupingEditViewModel)
+    viewModelOf(::StudentGroupingDetailViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(

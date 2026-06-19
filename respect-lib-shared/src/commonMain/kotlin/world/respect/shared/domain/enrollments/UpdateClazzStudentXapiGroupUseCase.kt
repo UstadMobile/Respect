@@ -9,8 +9,11 @@ import world.respect.datalayer.school.ext.asXapiAgent
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.ext.studentsXapiGroup
 import kotlin.uuid.ExperimentalUuidApi
 
@@ -32,34 +35,42 @@ class UpdateClazzStudentXapiGroupUseCase(
             )
         ).dataOrNull()
 
-        val clazz = schoolDataSource.classDataSource.findByGuid(
-            params = DataLoadParams(),
-            guid = clazzUid,
-        ).dataOrNull()
+        val classStatement = schoolDataSource.xapiResource.statements.get(
+            listParams = GetStatementParams(activity = clazzUid),
+            dataLoadParams = DataLoadParams(),
+        ).dataOrNull()?.statements?.mostRecentByTimestampOrNull()
+
+        val classActivity = classStatement?.`object` as? XapiActivity
+
+        val studentsXapiGroup = classActivity?.studentsXapiGroup()
 
         val activePerson = schoolDataSource.personDataSource.findByGuid(
             loadParams = DataLoadParams(onlyIfCached = true),
             guid = authenticatedUserPrincipalId.guid,
         ).dataOrNull()
 
-        if(studentsInClass == null || clazz == null || activePerson == null) {
-            Napier.w("No enrollments: something bad: students=$studentsInClass clazz=$clazz")
+
+        if (studentsInClass == null || studentsXapiGroup == null || activePerson == null) {
+            Napier.w("No enrollments: something bad: students=$studentsInClass clazz=$classStatement")
             return
         }
+
+        val studentsGroup = studentsXapiGroup.copy(
+            member = studentsInClass.map { it.asXapiAgent(schoolUrl) }
+        )
 
         schoolDataSource.xapiResource.statements.post(
             listOf(
                 XapiStatement(
                     actor = activePerson.asXapiAgent(schoolUrl),
                     verb = XapiVerb(id = XapiVerb.ID_SAVED),
-                    `object` = clazz.studentsXapiGroup(
-                        schoolUrl = schoolUrl
-                    ).copy(
-                        member = studentsInClass.map { it.asXapiAgent(schoolUrl) }
-                    )
+                    `object` = studentsGroup
                 )
             )
         )
     }
 
+    companion object{
+        const val STUDENTS = "students"
+    }
 }

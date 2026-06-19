@@ -1,11 +1,15 @@
 package world.respect.app.view.clazz.detail
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
@@ -25,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.paging.compose.collectAsLazyPagingItems
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectListSortHeader
@@ -32,9 +37,11 @@ import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.respectPagingItems
 import world.respect.app.components.respectRememberPager
 import world.respect.datalayer.db.school.ext.fullName
+import world.respect.app.components.langMapString
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_student
 import world.respect.shared.generated.resources.add_teacher
@@ -43,13 +50,13 @@ import world.respect.shared.generated.resources.pending_requests
 import world.respect.shared.generated.resources.collapse_pending_invites
 import world.respect.shared.generated.resources.collapse_students
 import world.respect.shared.generated.resources.collapse_teachers
-import world.respect.shared.generated.resources.description
+import world.respect.shared.generated.resources.collapse_groups
 import world.respect.shared.generated.resources.expand_pending_invites
 import world.respect.shared.generated.resources.expand_students
 import world.respect.shared.generated.resources.expand_teachers
+import world.respect.shared.generated.resources.expand_groups
 import world.respect.shared.generated.resources.manage_enrollments
 import world.respect.shared.generated.resources.more_options
-import world.respect.shared.generated.resources.pending_requests
 import world.respect.shared.generated.resources.remove_from_class
 import world.respect.shared.generated.resources.student
 import world.respect.shared.generated.resources.students
@@ -58,7 +65,9 @@ import world.respect.shared.generated.resources.teachers
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailUiState
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
-
+import world.respect.shared.generated.resources.create_group
+import world.respect.shared.generated.resources.groups
+import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companion.STACK_COUNT
 
 @Composable
 fun ClazzDetailScreen(
@@ -76,9 +85,12 @@ fun ClazzDetailScreen(
         onTogglePendingSection = viewModel::onTogglePendingSection,
         onToggleTeachersSection = viewModel::onToggleTeachersSection,
         onToggleStudentsSection = viewModel::onToggleStudentsSection,
+        onToggleStudentGroupingSection = viewModel::onToggleStudentGroupingSection,
         onClickRemovePersonFromClass = viewModel::onClickRemovePersonFromClass,
         onClickManageEnrollments = viewModel::onClickManageEnrollments,
         onClickPerson = viewModel::onClickPerson,
+        onClickCreateGroup=viewModel::onClickCreateGroup,
+        onClickGroup = viewModel::onClickGroup
     )
 }
 
@@ -93,9 +105,12 @@ fun ClazzDetailScreen(
     onTogglePendingSection: () -> Unit,
     onToggleTeachersSection: () -> Unit,
     onToggleStudentsSection: () -> Unit,
+    onToggleStudentGroupingSection: () -> Unit,
     onClickRemovePersonFromClass: (Person, EnrollmentRoleEnum) -> Unit,
     onClickManageEnrollments: (Person, EnrollmentRoleEnum) -> Unit,
     onClickPerson: (Person) -> Unit,
+    onClickCreateGroup:()-> Unit,
+    onClickGroup: (String) -> Unit,
 ) {
     val teacherPager = respectRememberPager(uiState.teachers)
     val studentPager = respectRememberPager(uiState.students)
@@ -107,6 +122,8 @@ fun ClazzDetailScreen(
     val studentLazyPagingItems = studentPager.flow.collectAsLazyPagingItems()
     val pendingTeacherLazyPagingItems = pendingTeacherPager.flow.collectAsLazyPagingItems()
     val pendingStudentLazyPagingItems = pendingStudentPager.flow.collectAsLazyPagingItems()
+
+    val classStatement = uiState.classStatement.dataOrNull()
 
     fun Person?.key(role: EnrollmentRoleEnum, index: Int): Any {
         return this?.guid?.let {
@@ -130,7 +147,11 @@ fun ClazzDetailScreen(
                 },
 
                 supportingContent = {
-                    Text(text = uiState.clazz.dataOrNull()?.description ?: "")
+                    Text(
+                        text =classStatement?.objectActivityOrNull()?.definition?.description?.let {
+                                langMapString(it)
+                            } ?: "",
+                    )
                 }
             )
         }
@@ -144,7 +165,7 @@ fun ClazzDetailScreen(
             )
         }
 
-        if ((uiState.showAddTeacher || uiState.showAddStudent) &&
+        if (uiState.isAdminOrTeacher &&
             (pendingTeacherLazyPagingItems.itemCount + pendingStudentLazyPagingItems.itemCount) > 0
         ) {
             item("pending_header") {
@@ -184,7 +205,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isPendingExpanded) {
-            if (uiState.showAddTeacher) {
+            if (uiState.isAdminOrTeacher) {
                 respectPagingItems(
                     items = pendingTeacherLazyPagingItems,
                     key = { person, index ->
@@ -203,7 +224,7 @@ fun ClazzDetailScreen(
                 }
             }
 
-            if (uiState.showAddStudent) {
+            if (uiState.isAdminOrTeacher) {
                 respectPagingItems(
                     items = pendingStudentLazyPagingItems,
                     key = { person, index ->
@@ -231,7 +252,10 @@ fun ClazzDetailScreen(
                 headlineContent = {
                     Text(
                         modifier = Modifier.padding(top = 24.dp),
-                        text = stringResource(Res.string.teachers)
+                        text = if (teacherLazyPagingItems.itemCount > 0)
+                            "${stringResource(Res.string.teachers)} (${teacherLazyPagingItems.itemCount})"
+                        else
+                            stringResource(Res.string.teachers)
                     )
                 },
 
@@ -253,7 +277,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isTeachersExpanded) {
-            if (uiState.showAddTeacher) {
+            if (uiState.isAdminOrTeacher) {
                 item("add_teacher") {
                     ListItem(
                         modifier = Modifier.clickable {
@@ -282,7 +306,7 @@ fun ClazzDetailScreen(
             ) { teacher ->
                 PersonListItemWithMenu(
                     person = teacher,
-                    showMenu = uiState.showAddTeacher,
+                    showMenu = uiState.isAdminOrTeacher,
                     onClickRemove = { onClickRemovePersonFromClass(it, EnrollmentRoleEnum.TEACHER) },
                     onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.TEACHER) },
                     onClick = onClickPerson,
@@ -298,9 +322,10 @@ fun ClazzDetailScreen(
                 headlineContent = {
                     Text(
                         modifier = Modifier.padding(top = 24.dp),
-                        text = stringResource(
-                            resource = Res.string.students
-                        )
+                        text = if (studentLazyPagingItems.itemCount > 0)
+                            "${stringResource(Res.string.students)} (${studentLazyPagingItems.itemCount})"
+                        else
+                            stringResource(Res.string.students)
                     )
                 },
 
@@ -322,7 +347,7 @@ fun ClazzDetailScreen(
         }
 
         if (uiState.isStudentsExpanded) {
-            if(uiState.showAddStudent) {
+            if(uiState.isAdminOrTeacher) {
                 item("add_student") {
                     ListItem(
                         modifier = Modifier.clickable {
@@ -356,11 +381,110 @@ fun ClazzDetailScreen(
                         onClickRemovePersonFromClass(it, EnrollmentRoleEnum.STUDENT)
                     },
                     onClickManage = { onClickManageEnrollments(it, EnrollmentRoleEnum.STUDENT) },
-                    showMenu = uiState.showAddStudent,
+                    showMenu = uiState.isAdminOrTeacher,
                     onClick = onClickPerson,
                 )
             }
         }
+
+        if (uiState.isAdminOrTeacher) {
+
+            item("student_grouping_header") {
+                ListItem(
+                    modifier = Modifier
+                        .clickable { onToggleStudentGroupingSection() },
+                    headlineContent = {
+                        Text(
+                            modifier = Modifier.padding(top = 24.dp),
+                            text = if (uiState.groups.isNotEmpty())
+                                "${stringResource(Res.string.groups)} (${uiState.groups.size})"
+                            else
+                                stringResource(Res.string.groups)
+                        )
+                    },
+
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.Outlined.KeyboardArrowDown,
+                            contentDescription = if (uiState.isStudentGroupingExpanded) {
+                                stringResource(Res.string.collapse_groups)
+                            } else {
+                                stringResource(Res.string.expand_groups)
+                            },
+                            modifier = Modifier.size(24.dp)
+                                .rotate(
+                                    if (uiState.isStudentGroupingExpanded) 0f else -90f
+                                )
+                        )
+                    }
+                )
+            }
+
+            if (uiState.isStudentGroupingExpanded) {
+                item("student_grouping") {
+                    ListItem(
+                        modifier = Modifier.clickable {
+                            onClickCreateGroup()
+                        },
+                        leadingContent = {
+                            Icon(
+                                modifier = Modifier.size(40.dp).padding(8.dp),
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = stringResource(resource = Res.string.create_group)
+                            )
+                        },
+                        headlineContent = {
+                            Text(
+                                text =
+                                    stringResource(resource = Res.string.create_group)
+                            )
+                        }
+                    )
+                }
+
+                items(
+                    items = uiState.groups,
+                    key = { group -> group.account?.name ?: "" }
+                ) { group ->
+                    val groupId = group.account?.name ?: return@items
+
+                    val memberNames = group.member
+                        ?.map { it.name.orEmpty() }
+                        ?: emptyList()
+
+                    ListItem(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onClickGroup(groupId)
+                            },
+                        leadingContent = {
+                            Box(
+                                modifier = Modifier.width(40.dp),
+                            ) {
+                                val displayMembers = memberNames.take(STACK_COUNT)
+                                displayMembers.forEachIndexed { i, name ->
+                                    Box(
+                                        modifier = Modifier
+                                            .offset(x = (i * 12).dp)
+                                            .zIndex((displayMembers.size - i).toFloat())
+                                    ) {
+                                        RespectPersonAvatar(
+                                            name = name,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                        headlineContent = {
+                            Text(text = "${group.name} (${memberNames.size})")
+                        }
+                    )
+                }
+            }
+        }
+
     }
 }
 

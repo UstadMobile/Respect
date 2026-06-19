@@ -147,6 +147,10 @@
     <string name="students">Students</string>
     <string name="add_teacher">Add Teacher</string>">
     <string name="add_student">Add Student</string>">
+    <string name="add_student_to_create_group">Add Student to create a Group</string>">
+    <string name="create_group">Create group</string>">
+    <string name="edit_group">Edit Group</string>">
+    <string name="groups">Groups</string>">
     <string name="accept_invite">Accept Invite</string>">
     <string name="dismiss_invite">Dismiss invite</string>
     <string name="pending_requests">Pending requests</string>">
@@ -427,6 +431,8 @@
     <string name="expand_students">Expand students list</string>
     <string name="collapse_students">Collapse students list</string>
 
+    <string name="expand_groups">Expand groups list</string>
+    <string name="collapse_groups">Collapse groups list</string>
 
     <string name="add_person">Add person</string>
     <string name="select_person">Select person</string>
@@ -463,6 +469,8 @@
     <string name="badge">Badge</string>
     <string name="assigned">assigned</string>
     <string name="delete_this_passkey">Delete this passkey?</string>
+    <string name="permanently_deleted">Permanently delete?</string>
+    <string name="permanently_delete_this_group">Permanently delete this group</string>
     <string name="loss_access_passkey_dialog">You could lose access to the account if you dont have another way to sign in.</string>
 
     <string name="toggle_visibility">toggle visibility</string>

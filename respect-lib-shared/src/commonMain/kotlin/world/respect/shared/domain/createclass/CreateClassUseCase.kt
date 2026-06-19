@@ -3,27 +3,22 @@ package world.respect.shared.domain.createclass
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
-import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Invite2
 
 /**
- * Use case to contain logic for creating a new class.
+ * Use case to contain logic for creating invites for a new class.
  *
- * Currently:
+ * Creates invites for each role (teacher direct, student direct, student via parent).
  *
- * 1) Stores the class itself
- * 2) Stores invites for the class for each role
+ * @property dataSource the SchoolDataSource used to store invites
  */
 class CreateClassUseCase(
     private val dataSource: SchoolDataSource
 ) {
-
     suspend operator fun invoke(
-        clazz: Clazz
+        classActivityId: String
     ) {
-        dataSource.classDataSource.store(listOf(clazz))
-
         dataSource.inviteDataSource.store(
             listOf(
                 Pair(EnrollmentRoleEnum.TEACHER, ClassInviteModeEnum.DIRECT),
@@ -32,10 +27,10 @@ class CreateClassUseCase(
             ).map { (role, inviteMode) ->
                 ClassInvite(
                     uid = ClassInvite.uidFor(
-                        clazz.guid, role, inviteMode = inviteMode
+                        classActivityId, role, inviteMode = inviteMode
                     ),
                     code = Invite2.newRandomCode(),
-                    classUid = clazz.guid,
+                    classUid = classActivityId,
                     role = role,
                     inviteMode = inviteMode,
                 )

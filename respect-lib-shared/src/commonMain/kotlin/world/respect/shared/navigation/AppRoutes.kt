@@ -156,7 +156,7 @@ object ClazzList : RespectAppRoute
 
 @Serializable
 class ClazzDetail(
-    val guid: String,
+    val classActivityId: String,
 ) : RespectAppRoute
 
 @Serializable
@@ -216,8 +216,19 @@ class AddPersonToClazz(
 
 @Serializable
 data class ClazzEdit(
-    val guid: String?
+    val classActivityId: String?,
 ) : RespectAppRoute
+
+@Serializable
+data class StudentGroupingEdit(
+    val classUid: String,
+    val groupId:String?
+) : RespectAppRoute
+
+@Serializable
+data class StudentGroupingDetail(
+    val groupId: String
+): RespectAppRoute
 
 @Serializable
 object Report : RespectAppRoute

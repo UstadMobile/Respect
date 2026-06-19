@@ -16,11 +16,11 @@ import org.koin.core.scope.Scope
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
-import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
@@ -32,7 +32,9 @@ import world.respect.libutil.util.time.localDateInCurrentTimeZone
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.invite.ApproveOrDeclineInviteRequestUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.lib.xapi.ext.objectActivityNameOrNull
 import world.respect.shared.ext.whenSubscribed
+import world.respect.shared.util.ext.asLangMapUiText
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.first_name
 import world.respect.shared.generated.resources.last_name
@@ -58,6 +60,11 @@ import world.respect.datalayer.school.ext.writePermissionFlag
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
+import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
+import world.respect.shared.navigation.StudentGroupingDetail
+import world.respect.shared.navigation.StudentGroupingEdit
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
@@ -66,8 +73,12 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel.Companion.ALL
-import kotlin.getValue
 import kotlin.time.Clock
+import world.respect.lib.xapi.model.VERB_SAVED
+import world.respect.lib.xapi.model.XapiGroup
+import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.lib.xapi.model.XapiGroup.Companion.CLASS
+import kotlin.time.Instant
 
 data class ClazzDetailUiState(
     val teachers: IPagingSourceFactory<Int, Person> = EmptyPagingSourceFactory() ,
@@ -83,14 +94,15 @@ data class ClazzDetailUiState(
         Res.string.first_name, 1, true
     ),
     val fieldsEnabled: Boolean = true,
-    val clazz: DataLoadState<Clazz> = DataLoadingState(),
+    val classStatement: DataLoadState<XapiStatement> = DataLoadingState(),
     val isPendingExpanded: Boolean = true,
     val isTeachersExpanded: Boolean = true,
     val isStudentsExpanded: Boolean = true,
     val inviteCodePrefix: String? = null,
-    val showAddStudent: Boolean = false,
-    val showAddTeacher: Boolean = false,
-    val addPersonPermissions: List<Long> = emptyList(),
+    val isAdminOrTeacher: Boolean = false,
+    val isStudentGroupingExpanded: Boolean = true,
+    val groups: List<XapiGroup> = emptyList(),
+    val addPersonPermissions: List<Long> = emptyList()
 ) {
 
     fun showApproveOption(person: Person): Boolean {
@@ -124,12 +136,17 @@ class ClazzDetailViewModel(
 
     private val updateClazzStudentXapiGroupUseCase: UpdateClazzStudentXapiGroupUseCase by inject()
 
+    private val schoolSelfUrl = accountManager.activeAccount?.school?.self
+        ?: throw IllegalStateException("schoolSelfUrl is required but activeAccount or school is null")
+
+    private val classActivityId = "${schoolSelfUrl}${CLASS}${route.classActivityId}"
+
     private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
         return PagingSourceFactoryHolder {
             schoolDataSource.personDataSource.listAsPagingSource(
                 loadParams = DataLoadParams(),
                 params = PersonDataSource.GetListParams(
-                    filterByClazzUid = route.guid,
+                    filterByClazzUid = route.classActivityId,
                     filterByEnrolmentRole = role,
                     inClassOnDay = localDateInCurrentTimeZone(),
                 )
@@ -192,12 +209,30 @@ class ClazzDetailViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.classDataSource.findByGuidAsFlow(route.guid).collect { clazz ->
+            schoolDataSource.xapiResource.statements.getAsFlow(
+                listParams = GetStatementParams(
+                    activity = route.classActivityId,
+                ),
+                dataLoadParams = DataLoadParams(),
+            ).collect { dataLoadState ->
+                val statement = dataLoadState.dataOrNull()?.statements
+                    ?.mostRecentByTimestampOrNull()
+
                 _appUiState.update {
-                    it.copy(title = clazz.dataOrNull()?.title?.asUiText())
+                    it.copy(title = statement?.objectActivityNameOrNull()?.asLangMapUiText())
                 }
-                _uiState.update { it.copy(clazz = clazz) }
+                _uiState.update {
+                    it.copy(
+                        classStatement = statement?.let { stmt ->
+                            DataReadyState(stmt)
+                        } ?: DataLoadingState()
+                    )
+                }
             }
+        }
+
+        viewModelScope.launch {
+            observeGroupsFromXapi()
         }
 
         viewModelScope.launch {
@@ -205,8 +240,7 @@ class ClazzDetailViewModel(
                 accountManager.selectedAccountAndPersonFlow.collect { selectedAccountAndPerson ->
                     _uiState.update { prev ->
                         prev.copy(
-                            showAddStudent = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
-                            showAddTeacher = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true,
+                            isAdminOrTeacher = selectedAccountAndPerson?.person?.isAdminOrTeacher() == true
                         )
                     }
 
@@ -236,7 +270,7 @@ class ClazzDetailViewModel(
                                     uid = schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
                                         Enrollment.TABLE_ID
                                     ).toString(),
-                                    classUid = route.guid,
+                                    classUid = route.classActivityId,
                                     role = enrolmentRole,
                                     personUid = personToEnrol.guid,
                                     beginDate = Clock.System.now().toLocalDateTime(
@@ -247,7 +281,7 @@ class ClazzDetailViewModel(
                         )
 
                         if(enrolmentRole == EnrollmentRoleEnum.STUDENT) {
-                            updateClazzStudentXapiGroupUseCase(route.guid)
+                            updateClazzStudentXapiGroupUseCase(route.classActivityId)
                         }
                     }
                 }
@@ -258,7 +292,9 @@ class ClazzDetailViewModel(
 
     fun onClickAddPersonToClazz(roleType: EnrollmentRoleEnum) {
         viewModelScope.launch {
-            val clazz = _uiState.value.clazz.dataOrNull() ?: return@launch
+            val statement = _uiState.value.classStatement.dataOrNull()
+                ?: throw IllegalStateException("onClickAddPersonToClazz: class statement must be loaded")
+            val classTitle = statement.objectActivityNameOrNull()?.values?.firstOrNull() ?: ""
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
@@ -269,10 +305,10 @@ class ClazzDetailViewModel(
                             resultPopUpTo = route,
                         ),
                         inviteUid = ClassInvite.uidFor(
-                            route.guid, roleType, ClassInviteModeEnum.DIRECT
+                            route.classActivityId, roleType, ClassInviteModeEnum.DIRECT
                         ),
-                        classUid = clazz.guid,
-                        className = clazz.title,
+                        classUid = route.classActivityId,
+                        className = classTitle,
                         addToClassRole = roleType,
                         filterByRole = roleType.relatedPersonRoleEnum,
                     )
@@ -325,9 +361,21 @@ class ClazzDetailViewModel(
         _uiState.update { it.copy(isStudentsExpanded = !it.isStudentsExpanded) }
     }
 
+    fun onToggleStudentGroupingSection() {
+        _uiState.update { it.copy(isStudentGroupingExpanded = !it.isStudentGroupingExpanded) }
+    }
+
     fun onClickEdit() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(ClazzEdit(route.guid))
+            NavCommand.Navigate(ClazzEdit(route.classActivityId))
+        )
+    }
+
+    fun onClickGroup(groupId: String) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                StudentGroupingDetail(groupId = groupId)
+            )
         )
     }
 
@@ -338,9 +386,10 @@ class ClazzDetailViewModel(
                     loadParams = DataLoadParams(),
                     listParams = EnrollmentDataSource.GetListParams(
                         personUid = person.guid,
-                        classUid = route.guid,
+                        classUid = route.classActivityId,
                     )
-                ).dataOrNull() ?: throw IllegalStateException()
+                ).dataOrNull()
+                    ?: throw IllegalStateException("onClickRemovePersonFromClass: failed to load enrollments")
 
                 val today = localDateInCurrentTimeZone()
                 val modTime = Clock.System.now()
@@ -380,22 +429,91 @@ class ClazzDetailViewModel(
         )
     }
 
+    fun onClickCreateGroup() {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                StudentGroupingEdit(
+                    classUid = route.classActivityId, groupId = null
+                )
+            )
+        )
+    }
+
     fun onClickManageEnrollments(person: Person, role: EnrollmentRoleEnum) {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 EnrollmentList.create(
                     filterByPersonUid = person.guid,
                     role = role,
-                    filterByClassUid = route.guid
+                    filterByClassUid = route.classActivityId
                 )
             )
         )
+    }
+
+    @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+    private suspend fun observeGroupsFromXapi() {
+
+        schoolDataSource.xapiResource.statements.getAsFlow(
+            listParams = XapiStatementsResource.GetStatementParams(
+                verb = VERB_SAVED,
+                activity = classActivityId,
+                relatedActivities = true,
+            ),
+            dataLoadParams = DataLoadParams()
+        ).collect { dataLoadState ->
+
+            val statementResult = dataLoadState.dataOrNull()
+                ?: return@collect
+
+            val latestGroups = statementResult.statements
+                .filter { statement ->
+                    statement.verb.id == VERB_SAVED
+                }
+                .sortedByDescending { statement ->
+                    statement.timestamp
+                        ?: statement.stored
+                        ?: Instant.DISTANT_PAST
+                }
+                .mapNotNull { statement ->
+                    val group = statement.`object` as? XapiGroup
+                    if (group == null) {
+                        Napier.w("observeGroupsFromXapi: Expected XapiGroup in statement ${statement.id}")
+                    }
+                    group
+                }
+                .filter { group ->
+                    val name = group.account?.name
+                    if (name == null) {
+                        Napier.w("observeGroupsFromXapi: Group account name missing")
+                    }
+                    name != null
+                }
+                .distinctBy { group ->
+                    group.account?.name
+                }
+                .map { group ->
+                    val filteredMembers = group.member?.filter { agent ->
+                        if (agent.name == null) {
+                            Napier.w("observeGroupsFromXapi: member agent has no name in group ${group.account?.name}")
+                        }
+                        agent.name != null
+                    }
+                    group.copy(member = filteredMembers)
+                }
+
+            _uiState.update { prev ->
+                prev.copy(groups = latestGroups)
+            }
+        }
     }
 
     companion object {
         const val ALL = "All"
 
         const val RESULT_KEY_PREFIX = "result_"
+
+        const val STACK_COUNT=3
 
     }
 }

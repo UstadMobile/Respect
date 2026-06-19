@@ -44,7 +44,7 @@ import world.respect.app.components.LangMapTextField
 import world.respect.app.components.RespectLocalDateTimeField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.datalayer.school.model.Clazz
+import world.respect.lib.xapi.model.XapiGroup
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.ext.copyWithObjectActivityDescription
 import world.respect.lib.xapi.ext.copyWithObjectActivityName
@@ -91,7 +91,7 @@ fun AssignmentEditScreen(
     uiState: AssignmentEditUiState,
     onEntityChanged: (XapiStatement) -> Unit,
     onAssigneeTextChanged: (String) -> Unit,
-    onAssigneeClassSelected: (Clazz) -> Unit,
+    onAssigneeClassSelected: (XapiGroup) -> Unit,
     onClickAddLearningUnit: () -> Unit,
     onClickRemoveLearningUnit: (XapiActivity) -> Unit,
 ) {
@@ -153,14 +153,14 @@ fun AssignmentEditScreen(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
             ) {
-                uiState.classOptions.forEach { clazz ->
+                uiState.classOptions.forEach { group ->
                     DropdownMenuItem(
                         text = {
-                            Text(clazz.title)
+                            Text(group.name ?: "")
                         },
                         onClick = {
                             expanded = false
-                            onAssigneeClassSelected(clazz)
+                            onAssigneeClassSelected(group)
                         },
                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                     )

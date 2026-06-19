@@ -47,7 +47,7 @@ onFlowComplete:
 - tapOn: "Assignment title*"
 - inputText: "Homework 1"
 - tapOn: "Assign to"
-- tapOn: "TestClass"
+- tapOn: "TestClass students"
 - tapOn: "Description"
 - inputText: "Please complete this Homework on time."
 - runFlow:
@@ -97,7 +97,7 @@ onFlowComplete:
 - assertVisible: "In-progress (0)"
 - assertVisible: "Please complete this Homework on time."
 - assertVisible: "Assigned to"
-- assertVisible: "TestClass.*"
+- assertVisible: "TestClass students"
 - assertVisible: "StudentA User"
 - assertVisible: "StudentB User"
 - assertVisible: "StudentC User"
@@ -116,7 +116,11 @@ onFlowComplete:
     env:
       USERNAME: "studentauser"
       PASSWORD: "test123"
+- assertVisible: "Apps"
 - tapOn: "Assignments"
+- assertVisible:
+    id: "app_title"
+    text: "Assignments"
 - tapOn: "Homework 1"
 - assertVisible:
     id: "app_title"
@@ -151,7 +155,11 @@ onFlowComplete:
     env:
       USERNAME: "studentbuser"
       PASSWORD: "test123"
+- assertVisible: "Apps"
 - tapOn: "Assignments"
+- assertVisible:
+    id: "app_title"
+    text: "Assignments"
 - tapOn: "Homework 1"
 - assertVisible:
     id: "app_title"
@@ -177,9 +185,15 @@ onFlowComplete:
     env:
       USERNAME: "teacherauser"
       PASSWORD: "test123"
+- assertVisible: "Apps"
+- tapOn: "Classes"
+- assertVisible: "TestClass"
 - tapOn: "Assignments"
+- assertVisible:
+    id: "app_title"
+    text: "Assignments"
 - assertVisible: "Homework 1"
-- assertVisible: "TestClass.*"
+- assertVisible: "TestClass students"
 - tapOn: "Homework 1"
 - assertVisible: "All (3)"
 - assertVisible: "Completed (1)"
@@ -188,7 +202,7 @@ onFlowComplete:
 #- assertVisible: "Not started (1)"
 - assertVisible: "Please complete this Homework on time."
 - assertVisible: "Assigned to"
-- assertVisible: "TestClass.*"
+- assertVisible: "TestClass students"
 - assertVisible: "StudentA User"
 - assertVisible: "StudentB User"
 - assertVisible: "StudentC User"

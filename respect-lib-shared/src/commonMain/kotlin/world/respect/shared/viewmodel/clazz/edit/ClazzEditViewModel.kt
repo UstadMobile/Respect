@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.serialization.json.Json
@@ -17,12 +18,18 @@ import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.isReadyAndSettled
-import world.respect.datalayer.school.model.Clazz
-import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_LEN
-import world.respect.datalayer.school.model.Clazz.Companion.DEFAULT_INVITE_CODE_MAX
+import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
+import world.respect.lib.dataloadstate.ext.map
+import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.ext.objectActivityNameOrNull
+import world.respect.lib.xapi.ext.objectActivityOrNull
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
+import world.respect.libutil.ext.appendEndpointSegments
+import world.respect.libutil.ext.isNullOrAllBlank
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.createclass.CreateClassUseCase
-import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.xapi.createBlankClassStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_clazz
 import world.respect.shared.generated.resources.edit_clazz
@@ -36,46 +43,51 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
-import kotlin.random.Random
 import kotlin.time.Clock
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+
 
 data class ClazzEditUiState(
+    val statementData: DataLoadState<XapiStatement> = DataLoadingState(),
     val clazzNameError: UiText? = null,
-    val clazz: DataLoadState<Clazz> = DataLoadingState(),
 ) {
     val fieldsEnabled: Boolean
-        get() = clazz.isReadyAndSettled()
+        get() = statementData.isReadyAndSettled()
+
+    val hasErrors: Boolean
+        get() = clazzNameError != null
 }
 
+@OptIn(ExperimentalUuidApi::class)
 class ClazzEditViewModel(
     savedStateHandle: SavedStateHandle,
-    accountManager: RespectAccountManager,
+    private val accountManager: RespectAccountManager,
     private val json: Json,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
-    private val route: ClazzEdit = savedStateHandle.toRoute()
-
-    private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
-
     private val createClassUseCase: CreateClassUseCase by inject()
-
-    private val guid = route.guid ?: schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-        Clazz.TABLE_ID
-    ).toString()
+    private val route: ClazzEdit = savedStateHandle.toRoute()
 
     private val _uiState = MutableStateFlow(ClazzEditUiState())
 
     val uiState = _uiState.asStateFlow()
+
+    private val schoolUrl = accountManager.requireActiveSchoolUrl()
+
+    private val classActivityId = route.classActivityId ?: run {
+        schoolUrl.appendEndpointSegments(ACTIVITY_ID_PATH, Uuid.random().toString()).toString()
+    }
 
     private val debouncer = LaunchDebouncer(viewModelScope)
 
     init {
         _appUiState.update { prev ->
             prev.copy(
-                title = if (route.guid == null) {
+                title = if (route.classActivityId == null) {
                     Res.string.add_clazz.asUiText()
                 } else {
                     Res.string.edit_clazz.asUiText()
@@ -91,87 +103,114 @@ class ClazzEditViewModel(
         }
 
         launchWithLoadingIndicator {
-            if (route.guid != null) {
+            if (route.classActivityId != null) {
                 loadEntity(
                     json = json,
-                    serializer = Clazz.serializer(),
+                    serializer = XapiStatement.serializer(),
                     loadFn = { params ->
-                        schoolDataSource.classDataSource.findByGuid(params, guid)
+                        schoolDataSource.xapiResource.statements.get(
+                            listParams = GetStatementParams(
+                                activity = classActivityId,
+                            ),
+                            dataLoadParams = params
+                        ).map { result ->
+                            result.statements.mostRecentByTimestampOrNull()?.let {
+                                listOf(it)
+                            } ?: emptyList()
+                        }.firstOrNotLoaded()
                     },
-                    uiUpdateFn = { clazz ->
-                        _uiState.update { prev -> prev.copy(clazz = clazz) }
+                    uiUpdateFn = { entity ->
+                        _uiState.update { prev ->
+                            prev.copy(
+                                statementData = entity
+                            )
+                        }
                     }
                 )
             } else {
+                val actor = accountManager.selectedAccountAndPersonFlow.firstOrNull()?.xapiAgent
+                    ?: throw IllegalStateException("ClazzEditViewModel: no active account/agent available to create a class")
+                val baseStmt = createBlankClassStatement(
+                    classActivityId = classActivityId,
+                    actor = actor
+                )
+
                 _uiState.update { prev ->
                     prev.copy(
-                        clazz = DataReadyState(
-                            Clazz(
-                                guid = guid,
-                                title = "",
-                                description = "",
-                            )
-                        )
+                        statementData = DataReadyState(baseStmt)
                     )
                 }
             }
         }
     }
 
-    fun onEntityChanged(clazz: Clazz) {
-        val classToCommit = _uiState.updateAndGet { prev ->
-            prev.copy(clazz = DataReadyState(clazz))
-        }.clazz.dataOrNull() ?: return
+    fun onEntityChanged(statement: XapiStatement) {
+        _uiState.update { prev ->
+            prev.copy(
+                statementData = DataReadyState(statement),
+                clazzNameError = prev.clazzNameError?.takeIf {
+                    prev.statementData.dataOrNull()?.objectActivityNameOrNull() == statement.objectActivityNameOrNull()
+                },
+            )
+        }
 
         debouncer.launch(DEFAULT_SAVED_STATE_KEY) {
-            savedStateHandle[DEFAULT_SAVED_STATE_KEY] = json.encodeToString(classToCommit)
+            savedStateHandle[DEFAULT_SAVED_STATE_KEY] =
+                json.encodeToString(XapiStatement.serializer(), statement)
         }
     }
 
     fun onClickSave() {
-        val clazz = _uiState.value.clazz.dataOrNull()?.copy(
-            lastModified = Clock.System.now()
-        ) ?: return
+        val stateToSave = _uiState.updateAndGet { prev ->
+            val statement = prev.statementData.dataOrNull()
 
-        if (clazz.title.isBlank()) {
-            _uiState.update { prev ->
-                prev.copy(clazzNameError = Res.string.required_field.asUiText())
-            }
-            return
-        } else {
-            _uiState.update { prev -> prev.copy(clazzNameError = null) }
+            prev.copy(
+                clazzNameError = Res.string.required_field.asUiText().takeIf {
+                    statement?.objectActivityOrNull()?.definition?.name.isNullOrAllBlank()
+                },
+            )
         }
+
+        if (stateToSave.hasErrors)
+            return
+
+        val classStatement = _uiState.value.statementData.dataOrNull()
+            ?: throw IllegalStateException("onClickSave: statement data cannot be null after validation")
 
         launchWithLoadingIndicator {
-            try {
-                if (route.guid == null) {
-                    val newClazz = clazz.copy()
-
-                    createClassUseCase(newClazz)
-
-                    _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(
-                            ClazzDetail(guid), popUpTo = route, popUpToInclusive = true
-                        )
+            schoolDataSource.xapiResource.statements.post(
+                listOf(
+                    classStatement.copy(
+                        id = Uuid.random(),
+                        timestamp = Clock.System.now(),
                     )
-                } else {
-                    schoolDataSource.classDataSource.store(listOf(clazz))
-                    _navCommandFlow.tryEmit(NavCommand.PopUp())
-                }
-            } catch (e: Throwable) {
-                //needs to display snack bar here
-                e.printStackTrace()
+                )
+            )
+
+            if (route.classActivityId == null) {
+
+                createClassUseCase(classActivityId)
+
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        destination = ClazzDetail(
+                            classActivityId = classActivityId,
+                        ),
+                        popUpTo = route,
+                        popUpToInclusive = true,
+                    )
+                )
+            } else {
+                _navCommandFlow.tryEmit(NavCommand.PopUp())
             }
         }
     }
 
-    private fun generateCode(): String {
-        return Random.nextInt(DEFAULT_INVITE_CODE_MAX)
-            .toString()
-            .padStart(DEFAULT_INVITE_CODE_LEN, '0')
-    }
     fun onClearError() {
         _uiState.update { prev -> prev.copy(clazzNameError = null) }
     }
 
+    companion object{
+        const val ACTIVITY_ID_PATH = "xapi/activities/classes"
+    }
 }

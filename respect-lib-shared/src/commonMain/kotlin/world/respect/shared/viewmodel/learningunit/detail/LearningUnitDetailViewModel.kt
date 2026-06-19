@@ -118,17 +118,17 @@ class LearningUnitDetailViewModel(
         viewModelScope.launch {
             try {
                 val lessonPublication = _uiState.value.lessonDetail ?: throw IllegalStateException("Not ready")
-//
-//                val actor = accountMananger.selectedAccountAndPersonFlow.firstOrNull()?.xapiAgent
-//                    ?: throw IllegalStateException("active account not found")
-//
-//                val baseStmt = createLearningUnitStatement(
-//                    activityId = route.assignmentActivityId?:"",
-//                    actor = actor,
-//                    verbId = XapiVerb.ID_INITIALIZED,
-//                )
-//
-//                schoolDataSource.xapiResource.statements.post(listOf(baseStmt))
+
+                val actor = accountMananger.selectedAccountAndPersonFlow.firstOrNull()?.xapiAgent
+                    ?: throw IllegalStateException("active account not found")
+
+                val baseStmt = createLearningUnitStatement(
+                    activityId = route.assignmentActivityId?:"",
+                    actor = actor,
+                    verbId = XapiVerb.ID_INITIALIZED,
+                )
+
+                schoolDataSource.xapiResource.statements.post(listOf(baseStmt))
                 launchAppUseCase(
                     LaunchAppUseCase.LaunchRequest(
                         publicationUrl = route.learningUnitManifestUrl,

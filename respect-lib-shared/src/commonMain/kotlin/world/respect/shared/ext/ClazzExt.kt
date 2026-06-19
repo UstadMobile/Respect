@@ -13,7 +13,7 @@ import world.respect.lib.xapi.model.XapiObjectType
 fun XapiActivity.studentsXapiGroup(): XapiGroup {
     val className = definition?.name?.values?.firstOrNull()
     return XapiGroup(
-        name = "${className ?: ""} students",
+        name = "$className students",
         account = XapiAccount(
             homePage = id,
             name = "students"

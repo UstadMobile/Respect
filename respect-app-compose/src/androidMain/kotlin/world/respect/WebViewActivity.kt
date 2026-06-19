@@ -93,37 +93,37 @@ class WebViewActivity : AppCompatActivity() {
     }
 
     override fun finish() {
-//        val activityId =
-//            intent.getStringExtra(LaunchAppUseCaseAndroid.EXTRA_ACTIVITY_ID)
-//
-//        if (activityId != null) {
-//            CoroutineScope(Dispatchers.IO).launch {
-//                runCatching {
-//                    val account = accountManager.activeAccount ?: return@launch
-//
-//                    val accountScope = accountManager.getOrCreateAccountScope(account)
-//
-//                    val schoolDataSource: SchoolDataSource = accountScope.get()
-//
-//                    val actor = accountManager.selectedAccountAndPersonFlow
-//                        .firstOrNull()
-//                        ?.xapiAgent
-//                        ?: return@launch
-//
-//                    schoolDataSource.xapiResource.statements.post(
-//                        listOf(
-//                            createLearningUnitStatement(
-//                                activityId = activityId,
-//                                actor = actor,
-//                                verbId = XapiVerb.ID_TERMINATED,
-//                            )
-//                        )
-//                    )
-//                }.onFailure {
-//                    Napier.e("Failed to send terminated statement", it)
-//                }
-//            }
-//        }
+        val activityId =
+            intent.getStringExtra(LaunchAppUseCaseAndroid.EXTRA_ACTIVITY_ID)
+
+        if (activityId != null) {
+            CoroutineScope(Dispatchers.IO).launch {
+                runCatching {
+                    val account = accountManager.activeAccount ?: return@launch
+
+                    val accountScope = accountManager.getOrCreateAccountScope(account)
+
+                    val schoolDataSource: SchoolDataSource = accountScope.get()
+
+                    val actor = accountManager.selectedAccountAndPersonFlow
+                        .firstOrNull()
+                        ?.xapiAgent
+                        ?: return@launch
+
+                    schoolDataSource.xapiResource.statements.post(
+                        listOf(
+                            createLearningUnitStatement(
+                                activityId = activityId,
+                                actor = actor,
+                                verbId = XapiVerb.ID_TERMINATED,
+                            )
+                        )
+                    )
+                }.onFailure {
+                    Napier.e("Failed to send terminated statement", it)
+                }
+            }
+        }
 
         super.finish()
     }

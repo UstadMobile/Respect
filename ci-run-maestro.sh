@@ -90,7 +90,7 @@ echo "ci-run-maestro: TestServerController now running on port $TESTCONTROLLER_P
 
 # Can now run maestro - the TESTSERVERCONTROLLER url is known and we also know the admin auth to create a new school etc.
 
-echo "Run Maestro using $TESTSERVERCONTROLLER_URL and $DIR_ADMIN_AUTH_PASS"
+echo "Run Maestro using $TESTSERVERCONTROLLER_URL"
 
 if [ ! -e build/results ]; then
     mkdir -p build/results
@@ -98,6 +98,13 @@ fi
 
 if [ ! -e build/maestro/results ]; then
     mkdir -p build/maestro/output
+fi
+
+
+TEST_APP_URL_ARG=""
+
+if [ "$TEST_APP_URL" != "" ]; then
+    TEST_APP_URL_ARG=" --env TEST_APP_URL=$TEST_APP_URL "
 fi
 
 if [ "$1" == "cloud" ]; then
@@ -152,6 +159,7 @@ if [ "$1" == "cloud" ]; then
         --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
         --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
         --env SCHOOL_NAME=TestSchool \
+        $TEST_APP_URL_ARG \
        | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
 
     # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
@@ -221,6 +229,7 @@ else
       --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
       --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
       --env SCHOOL_NAME=TestSchool \
+      $TEST_APP_URL_ARG \
       --format=junit \
       --output=build/maestro/output/report.xml \
       .maestro/flows/*.yaml

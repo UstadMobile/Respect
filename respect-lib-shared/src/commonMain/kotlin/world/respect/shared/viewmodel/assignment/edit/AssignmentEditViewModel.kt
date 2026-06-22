@@ -30,16 +30,17 @@ import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.ext.addActivityToContextActivitiesGrouping
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.ext.objectActivityNameOrNull
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.ext.removeActivityFromContextActivitiesGrouping
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.libutil.ext.appendEndpointSegments
+import world.respect.libutil.ext.isNullOrAllBlank
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
-import world.respect.shared.domain.xapi.activityDefinitionTitle
-import world.respect.shared.domain.xapi.actorName
 import world.respect.shared.domain.xapi.createBlankAssignmentStatement
 import world.respect.shared.ext.studentsXapiGroup
 import world.respect.shared.generated.resources.Res
@@ -150,7 +151,7 @@ class AssignmentEditViewModel(
                     json = json,
                     serializer = XapiStatement.serializer(),
                     loadFn = { params ->
-                        schoolDataSource.xapiStatementsResource.get(
+                        schoolDataSource.xapiResource.statements.get(
                             listParams = GetStatementParams(
                                 activity = assignmentActivityId,
                                 verb = XapiVerb.ID_ASSIGN,
@@ -235,7 +236,7 @@ class AssignmentEditViewModel(
             prev.copy(
                 statementData = DataReadyState(statement),
                 nameError = prev.nameError?.takeIf {
-                    prev.statementData.dataOrNull()?.activityDefinitionTitle == statement.activityDefinitionTitle
+                    prev.statementData.dataOrNull()?.objectActivityNameOrNull() == statement.objectActivityNameOrNull()
                 },
             )
         }
@@ -288,10 +289,10 @@ class AssignmentEditViewModel(
 
             prev.copy(
                 nameError = Res.string.required_field.asUiText().takeIf {
-                    statement?.activityDefinitionTitle.isNullOrBlank()
+                    statement?.objectActivityOrNull()?.definition?.name.isNullOrAllBlank()
                 },
                 classError = Res.string.required_field.asUiText().takeIf {
-                    statement?.actorName.isNullOrEmpty()
+                    statement?.actor?.name.isNullOrEmpty()
                 }
             )
         }
@@ -302,7 +303,7 @@ class AssignmentEditViewModel(
         val assignment = uiState.value.statementData.dataOrNull() ?: return
 
         launchWithLoadingIndicator {
-            schoolDataSource.xapiStatementsResource.post(
+            schoolDataSource.xapiResource.statements.post(
                 listOf(
                     assignment.copy(
                         id = Uuid.random(),

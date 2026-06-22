@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.emptyFlow
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
+import world.respect.app.components.langMapString
 import world.respect.app.components.respectRememberPager
 import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.DataLoadState
@@ -54,7 +55,6 @@ import world.respect.shared.generated.resources.empty
 import world.respect.shared.generated.resources.empty_list
 import world.respect.shared.generated.resources.more_info
 import world.respect.shared.generated.resources.remove
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherUiState
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 
@@ -238,7 +238,7 @@ fun AppGridItem(
         )
 
         Text(
-            text = appData?.metadata?.title?.getTitle() ?: "",
+            text = appData?.metadata?.title?.let { langMapString(it) } ?:"",
             modifier = Modifier.align(Alignment.Start)
         )
 

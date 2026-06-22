@@ -44,7 +44,6 @@ import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMappingSectionLink
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.navigation.RouteResultDest
-import world.respect.shared.viewmodel.app.appstate.getTitle
 
 data class CurriculumMappingEditUiState(
     val mapping: CurriculumMapping? = null,
@@ -125,7 +124,7 @@ class CurriculumMappingEditViewModel(
                                 it.copy(
                                     items = it.items + CurriculumMappingSectionLink(
                                         href = selectedLearningUnit.learningUnitManifestUrl.toString(),
-                                        title = selectedLearningUnit.selectedPublication.metadata.title.getTitle()
+                                        title = selectedLearningUnit.selectedPublication.metadata.title.toString()
                                     )
                                 )
                             }

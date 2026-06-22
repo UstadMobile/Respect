@@ -20,7 +20,8 @@ import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedActivities
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
 import world.respect.datalayer.school.xapi.ext.distinctMerged
-import world.respect.datalayer.school.xapi.ext.idStr
+import world.respect.lib.xapi.ext.distinctMerged
+import world.respect.lib.xapi.ext.idStr
 import world.respect.datalayer.school.xapi.ext.resultProgressExtension
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementTransformingSerializer
@@ -140,13 +141,13 @@ class XapiStatementsResourceDbTest {
                         stored = Clock.System.now(),
                     )
 
-                    dataSource.xapiStatementsResource.post(listOf(statement))
+                    dataSource.xapiResource.statements.post(listOf(statement))
 
                     //check canonical match
-                    val canonicalStmtFromDb = dataSource.xapiStatementsResource.get(
+                    val canonicalStmtFromDb = dataSource.xapiResource.statements.get(
 
                         listParams = XapiStatementsResource.GetStatementParams(
-                            format = XapiStatementsResource.GetStatementFormatEnum.CANONICAL,
+                            format = GetStatementFormatEnum.CANONICAL,
                             statementId = stmtUuid
                         )
                     ).dataOrNull()?.statements?.first()
@@ -157,18 +158,18 @@ class XapiStatementsResourceDbTest {
                         actual = canonicalStmtFromDb,
                     )
 
-                    val exactStmtFromDb = dataSource.xapiStatementsResource.get(
+                    val exactStmtFromDb = dataSource.xapiResource.statements.get(
 
                         listParams = XapiStatementsResource.GetStatementParams(
-                            format = XapiStatementsResource.GetStatementFormatEnum.EXACT,
+                            format = GetStatementFormatEnum.EXACT,
                             statementId = stmtUuid
                         )
                     ).dataOrNull()?.statements?.first()
                     assertEquals(statement, exactStmtFromDb)
 
-                    val idOnlyStmtFromDb = dataSource.xapiStatementsResource.get(
+                    val idOnlyStmtFromDb = dataSource.xapiResource.statements.get(
                         listParams = XapiStatementsResource.GetStatementParams(
-                            format = XapiStatementsResource.GetStatementFormatEnum.IDS,
+                            format = GetStatementFormatEnum.IDS,
                             statementId = stmtUuid
                         )
                     ).dataOrNull()?.statements?.first()
@@ -204,11 +205,11 @@ class XapiStatementsResourceDbTest {
                     statementId = stmtUuid
                 )
 
-                dataSource.xapiStatementsResource.post(listOf(statement))
+                dataSource.xapiResource.statements.post(listOf(statement))
 
                 assertXapiStatementCanonicallyEqual(
                     expected = statement,
-                    actual = dataSource.xapiStatementsResource.get(
+                    actual = dataSource.xapiResource.statements.get(
                         listParams = getStmtParams
                     ).dataOrNull()?.statements?.firstOrNull()!!
                 )
@@ -218,11 +219,11 @@ class XapiStatementsResourceDbTest {
                     verb = XapiVerb(id = XapiVerb.ID_VOIDED),
                     `object` = XapiStatementRef(id = stmtUuid.toString())
                 )
-                dataSource.xapiStatementsResource.post(listOf(voidingStatement))
+                dataSource.xapiResource.statements.post(listOf(voidingStatement))
 
                 GetStatementFormatEnum.entries.forEach { format ->
                     assertNull(
-                        dataSource.xapiStatementsResource.get(
+                        dataSource.xapiResource.statements.get(
                             listParams = getStmtParams.copy(
                                 format = format
                             )
@@ -235,13 +236,13 @@ class XapiStatementsResourceDbTest {
                 )
                 assertEquals(
                     expected = statement,
-                    actual = dataSource.xapiStatementsResource.get(
+                    actual = dataSource.xapiResource.statements.get(
                         getByVoidedParams.copy(format = GetStatementFormatEnum.EXACT)
                     ).dataOrNull()?.statements?.firstOrNull()
                 )
                 assertXapiStatementCanonicallyEqual(
                     expected = statement,
-                    actual = dataSource.xapiStatementsResource.get(
+                    actual = dataSource.xapiResource.statements.get(
                         getByVoidedParams.copy(format = GetStatementFormatEnum.CANONICAL)
                     ).dataOrNull()?.statements?.firstOrNull()!!
                 )
@@ -304,7 +305,7 @@ class XapiStatementsResourceDbTest {
                     `object` = studentGroup,
                 )
 
-                dataSource.xapiStatementsResource.post(listOf(createGroupStmt))
+                dataSource.xapiResource.statements.post(listOf(createGroupStmt))
 
                 val setAssignmentStmt = XapiStatement(
                     actor = studentGroup.copy(member = null),
@@ -333,7 +334,7 @@ class XapiStatementsResourceDbTest {
                     )
                 )
 
-                dataSource.xapiStatementsResource.post(listOf(setAssignmentStmt))
+                dataSource.xapiResource.statements.post(listOf(setAssignmentStmt))
 
                 val progressStatements = studentGroup.member!!.flatMap { studentActor ->
                     val studentCompletedAll = Random.nextBoolean()
@@ -379,10 +380,10 @@ class XapiStatementsResourceDbTest {
                         )
                     }
                 }.also {
-                    dataSource.xapiStatementsResource.post(it)
+                    dataSource.xapiResource.statements.post(it)
                 }
 
-                val assignmentResults = dataSource.xapiStatementsResource.getAssignmentProgress(
+                val assignmentResults = dataSource.xapiResource.statements.getAssignmentProgress(
                     assignmentActivityId
                 ).first().dataOrNull()
 
@@ -423,7 +424,7 @@ class XapiStatementsResourceDbTest {
                     }
                 }
 
-                val summaries = dataSource.xapiStatementsResource.getAssignmentListAsFlow(
+                val summaries = dataSource.xapiResource.statements.getAssignmentListAsFlow(
                     dataLoadParams = DataLoadParams(),
                     studentAgent = null,
                 ).first().dataOrNull()
@@ -476,10 +477,10 @@ class XapiStatementsResourceDbTest {
                     it.insertAdmin()
                 }
 
-                dataSource.xapiStatementsResource.post(listOf(sampleStmt))
+                dataSource.xapiResource.statements.post(listOf(sampleStmt))
 
                 try {
-                    dataSource.xapiStatementsResource.post(listOf(sampleStmt))
+                    dataSource.xapiResource.statements.post(listOf(sampleStmt))
 
                     throw IllegalStateException("Should have thrown exception by now")
                 }catch(e: XapiException) {

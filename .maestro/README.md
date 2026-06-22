@@ -30,30 +30,31 @@ Where:
 * ```SCHOOL_NAME``` is the name of the school (also as per addschool command)
 
 
+## Run multiple tests (suite)
 
-## Running continuous integration (CI) tests controlled from a CI server on local devices
+Running multiple tests with Maestro requires a blank server installation for each test.
+[TestServerController](https://github.com/UstadMobile/TestServerController) is used to start/stop a new blank server instance on a free port as
+required.
 
-It may be necessary to run an end-to-end test controlled by a continuous integration server
-(CI e.g. Jenkins) where the Maestro flow itself runs on a physical Android device (for example 
-a semi-automated passkey test which requires human intervention to authenticate on fingerprint scanner).
+```
+export TESTSERVER_CONTROLLER=http://192.168.1.2:8094/
+./ci-run-maestro.sh 
+```
 
-Steps:
-* Make sure the laptop and Android device are connected to the same local network.
-* Connect the Android device to the laptop using USB debugging as normal, make sure it appears in
-  the devices list as per the ```adb devices``` command.
-* Run ```adb tcpip 5555``` on the laptop (5555 is a default, can be changed) to switch the Android
-  device into TCP/IP mode.
-* Connect to the continuous integration server using SSH with port forwarding
-  ```ssh -R 7777:192.168.1.2:5555 user@server``` (where 192.168.1.2 is the WiFi IP address of the Android device,
-  7777 is any available random port, user is the ssh username, and server is the hostname of the CI 
-  server).
-* On the CI server run ```adb connect localhost:7777```. Device should connect
-* On the CI server verify the device is connected by running ```adb devices```.
+Where:
+* 192.168.1.2 is the local IP of the developer's laptop
 
-Tips:
-* To reset adb on a laptop or server: run ```adb kill-server```
-* When finished with a remote session, run ```adb disconnect``` before exiting the ssh
-  session (because the device will not be reachable without the ssh tunnel).
+# Maestro flow environment variables:
+* ```TESTCONTROLLER_URL```: sets the [TestServerController](https://github.com/UstadMobile/TestServerController) 
+  URL for testserver controller that will create new blank server instance as required. If set, the 
+  school url, admin password, and school name will be received from the test server controller
+  if not otherwise specified. This is **required** to run more than one test.
+* ```SCHOOL_URL```: explicitly set the scohol url to use
+* ```SCHOOL_ADMIN_PASSWORD```: explicitly set the school admin password to use
+* ```SCHOOL_NAME```: explicitly set the school name to use (used in get started screen)
+* ```URL_SUBSTITUTION``` when there is a reverse proxy setup (e.g. to handle HTTPS) then it will 
+  replace _PORT_ with the port number created by the test server e.g. https://_PORT_.ustadtesting.ustadmobile.com/
+* ```TEST_APP_URL```: A launchable app publication URL.
 
 ## Available test flows
 ---
@@ -114,17 +115,3 @@ Tips:
 5. Assignment is saved and verified in class
 ---
 
-
-## Run multiple tests (suite)
-
-Running multiple tests with Maestro requires a blank server installation for each test.
-[TestServerController](https://github.com/UstadMobile/TestServerController) is used to start/stop a new blank server instance on a free port as
-required.
-
-```
-export TESTSERVER_CONTROLLER=http://192.168.1.2:8094/
-./ci-run-maestro.sh 
-```
-
-Where:
-* 192.168.1.2 is the local IP of the developer's laptop

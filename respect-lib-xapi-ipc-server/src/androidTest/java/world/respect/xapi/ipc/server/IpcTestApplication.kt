@@ -76,8 +76,8 @@ class IpcTestApplication: Application(), XapiResourceProvider{
     }
 
 
-    override fun provideXapiResource(
-        endpoint: String,
+    override suspend fun provideXapiResource(
+        endpoint: Url,
         authentication: String?
     ): XapiResource {
         return schoolDataSource.xapiResource

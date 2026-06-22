@@ -11,6 +11,7 @@ import android.os.Message
 import android.os.Messenger
 import android.util.Log
 import io.ktor.http.Parameters
+import io.ktor.http.Url
 import io.ktor.util.collections.ConcurrentMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -102,12 +103,15 @@ class XapiMessengerService: Service() {
                 val xapiResourceProvider = applicationContext as? XapiResourceProvider
                     ?: throw IllegalStateException("No xapi resource provider")
 
-                val endpoint = msg.data.getString(XapiIpcKeys.KEY_ENDPOINT)
-                    ?: throw IllegalArgumentException("Message has no endpoint")
+                val endpoint = msg.data.getString(XapiIpcKeys.KEY_ENDPOINT)?.let {
+                    Url(it)
+                } ?: throw IllegalArgumentException("Message has no endpoint")
                 val auth = msg.data.getString(XapiIpcKeys.KEY_AUTH)
                     ?: throw IllegalArgumentException("Message has no auth")
 
-                val xapiResource = xapiResourceProvider.provideXapiResource(endpoint, auth)
+                val xapiResource = runBlocking {
+                    xapiResourceProvider.provideXapiResource(endpoint, auth)
+                }
 
                 when (msg.arg2) {
                     XapiIpcResourceFlags.POST_STATEMENTS -> {

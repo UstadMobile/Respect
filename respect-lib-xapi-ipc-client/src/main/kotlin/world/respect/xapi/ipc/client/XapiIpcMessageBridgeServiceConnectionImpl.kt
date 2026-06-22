@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.Messenger
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import world.respect.xapi.ipc.shared.messages.MessageData
+import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 
 /**
  * Binding to a service using a ServiceConnection is asynchronous. The service will normally, but
@@ -22,20 +24,20 @@ import world.respect.xapi.ipc.shared.messages.MessageData
  * if/when required.
  */
 class XapiIpcMessageBridgeServiceConnectionImpl(
-    private val context: Context
+    private val context: Context,
+    private val intent: Intent,
 ) : XapiMessageBridge {
 
     private var mMessenger: Messenger? = null
 
     private val messengerBridgeFlow = MutableStateFlow<XapiMessageBridgeMessengerImpl?>(null)
 
-    private val scope = CoroutineScope(Dispatchers.Default + Job())
-
     private val mConnection = object: ServiceConnection {
         override fun onServiceConnected(
             name: ComponentName,
             service: IBinder
         ) {
+            Log.i(XapiIpcTags.LOGTAG, "XapiIpcMessageBridgeServiceConnectionImpl: service connected")
             mMessenger = Messenger(service).also {
                 messengerBridgeFlow.value = XapiMessageBridgeMessengerImpl(it)
             }
@@ -43,15 +45,14 @@ class XapiIpcMessageBridgeServiceConnectionImpl(
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
+            Log.i(XapiIpcTags.LOGTAG, "XapiIpcMessageBridgeServiceConnectionImpl: service disconnected")
             mMessenger = null
             messengerBridgeFlow.value = null
         }
     }
 
     init {
-        //do the binding here
-
-        val intent = Intent()
+        context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
     }
 
     override suspend fun executeForResponse(messageData: MessageData): MessageData {

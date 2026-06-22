@@ -1,5 +1,6 @@
 package world.respect.lib.xapi
 
+import io.ktor.http.Url
 import world.respect.lib.xapi.resources.XapiResource
 
 /**
@@ -8,8 +9,8 @@ import world.respect.lib.xapi.resources.XapiResource
  */
 fun interface XapiResourceProvider {
 
-    fun provideXapiResource(
-        endpoint: String,
+    suspend fun provideXapiResource(
+        endpoint: Url,
         authentication: String?,
     ): XapiResource
 

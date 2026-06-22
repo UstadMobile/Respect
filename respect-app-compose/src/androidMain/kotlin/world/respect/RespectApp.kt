@@ -9,17 +9,21 @@ import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.crossfade
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
+import io.ktor.http.Url
 import okhttp3.OkHttpClient
 import org.acra.config.httpSender
 import org.acra.data.StringFormat
 import org.acra.ktx.initAcra
 import org.acra.sender.HttpSender
 import org.koin.android.ext.android.get
+import org.koin.android.ext.android.getKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import world.respect.app.BuildConfig
+import world.respect.lib.xapi.XapiResourceProvider
+import world.respect.lib.xapi.resources.XapiResource
 
-class RespectApp : Application(), SingletonImageLoader.Factory {
+class RespectApp : Application(), SingletonImageLoader.Factory, XapiResourceProvider {
 
 
     override fun onCreate() {
@@ -68,4 +72,10 @@ class RespectApp : Application(), SingletonImageLoader.Factory {
             .build()
     }
 
+    override suspend fun provideXapiResource(
+        endpoint: Url,
+        authentication: String?
+    ): XapiResource {
+        return getKoin().get<XapiResourceProvider>().provideXapiResource(endpoint, authentication)
+    }
 }

@@ -6,18 +6,18 @@ import org.koin.core.component.KoinComponent
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.exceptions.XapiException
-import world.respect.lib.xapi.nanohttpd.XapiNanoHttpdResourceProvider
-import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.lib.xapi.resources.XapiResource
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 
-class XapiNanoHttpdResourceProviderAndroid(): XapiNanoHttpdResourceProvider, KoinComponent {
+class XapiResourceProviderAndroid: XapiResourceProvider, KoinComponent {
 
-    override suspend fun invoke(
+    override suspend fun provideXapiResource(
         endpoint: Url,
         authentication: String?,
-    ): XapiStatementsResource {
+    ): XapiResource {
         if(authentication == null)
             throw XapiException(403, "No authorization header provided")
 
@@ -43,7 +43,7 @@ class XapiNanoHttpdResourceProviderAndroid(): XapiNanoHttpdResourceProvider, Koi
         )
 
         val schoolDataSource: SchoolDataSource = getKoin().getScope(accountScope.scopeId).get()
-        return schoolDataSource.xapiResource.statements
+        return schoolDataSource.xapiResource
     }
 
 }

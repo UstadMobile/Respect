@@ -22,6 +22,7 @@ import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.xapi.ipc.client.XapiMessageBridgeMessengerImpl
 import world.respect.xapi.ipc.client.XapiResourceIpcClient
+import world.respect.xapi.ipc.shared.messages.XapiIpcIntent
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.uuid.Uuid
@@ -47,12 +48,10 @@ class XapiServiceIntegrationTest {
             ipcTestApplication.insertAdminAndDefaultGrants()
         }
 
-        val serviceIntent = Intent(
-            ipcTestApplication,
-            XapiMessengerService::class.java,
-        )
+        val intent = Intent(XapiIpcIntent.ACTION_XAPI_OVER_IPC)
+        intent.`package` = ipcTestApplication.packageName
 
-        val binder: IBinder = serviceRule.bindService(serviceIntent)
+        val binder: IBinder = serviceRule.bindService(intent)
         assertNotNull(binder)
         val serviceMessenger = Messenger(binder)
 

@@ -31,4 +31,9 @@ class XapiResourceIpcClient(
 
     override val activities: XapiActivitiesResource
         get() = TODO("Not yet implemented")
+
+    override fun close() {
+        requestSender.close()
+    }
+
 }

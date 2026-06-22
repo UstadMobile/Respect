@@ -60,6 +60,7 @@ kotlin {
             implementation(libs.multiplatformsettings)
             implementation(libs.napier)
             implementation(libs.qrose)
+            implementation(libs.urlencoder)
 
         }
 

@@ -16,6 +16,7 @@ interface GetXapiLaunchUrlUseCase {
         publication: OpdsPublication,
         publicationUrl: Url,
         assignmentActivityId: String?,
+        useEmbeddedHttp: Boolean,
     ): Url
 
 }

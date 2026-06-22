@@ -37,10 +37,6 @@ android {
         singleVariant("release") {
             withSourcesJar()
         }
-
-        singleVariant("debug") {
-            withSourcesJar()
-        }
     }
 }
 
@@ -53,16 +49,6 @@ publishing {
 
             afterEvaluate {
                 from(components["release"])
-            }
-        }
-
-        register<MavenPublication>("debug") {
-            groupId = project.group.toString()
-            artifactId = project.name
-            version = project.version.toString()
-
-            afterEvaluate {
-                from(components["debug"])
             }
         }
     }

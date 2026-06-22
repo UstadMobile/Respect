@@ -106,4 +106,8 @@ class XapiMessageBridgeMessengerImpl(
             receiveChannel.close()
         }
     }
+
+    override fun close() {
+
+    }
 }

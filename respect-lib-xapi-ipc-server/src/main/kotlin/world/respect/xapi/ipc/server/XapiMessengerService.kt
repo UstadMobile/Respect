@@ -191,6 +191,7 @@ class XapiMessengerService: Service() {
     }
 
     override fun onBind(intent: Intent): IBinder? {
+        Log.d(XapiIpcTags.LOGTAG, "XapiMessengerService: onBind: ${intent.action}")
         return messenger.binder
     }
 

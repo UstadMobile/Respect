@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import world.respect.xapi.ipc.shared.messages.MessageData
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * Binding to a service using a ServiceConnection is asynchronous. The service will normally, but
@@ -31,6 +32,8 @@ class XapiIpcMessageBridgeServiceConnectionImpl(
     private var mMessenger: Messenger? = null
 
     private val messengerBridgeFlow = MutableStateFlow<XapiMessageBridgeMessengerImpl?>(null)
+
+    private val closed = AtomicBoolean(false)
 
     private val mConnection = object: ServiceConnection {
         override fun onServiceConnected(
@@ -71,9 +74,12 @@ class XapiIpcMessageBridgeServiceConnectionImpl(
             }
     }
 
-    fun close() {
-
-        //run disconnect here.
-
+    override fun close() {
+        if(!closed.getAndSet(true)) {
+            if(mMessenger != null) {
+                context.unbindService(mConnection)
+                mMessenger = null
+            }
+        }
     }
 }

@@ -8,4 +8,7 @@ interface XapiResource {
 
     val activities: XapiActivitiesResource
 
+    fun close()
+
+
 }

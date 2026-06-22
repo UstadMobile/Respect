@@ -25,5 +25,7 @@ interface XapiMessageBridge {
      */
     fun executeForFlow(messageData: MessageData): Flow<MessageData>
 
+    fun close()
+
 
 }

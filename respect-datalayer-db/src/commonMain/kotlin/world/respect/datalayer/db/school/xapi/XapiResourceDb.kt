@@ -66,4 +66,8 @@ class XapiResourceDb(
             json = json,
         )
     }
+
+    override fun close() {
+        schoolDb.close()
+    }
 }

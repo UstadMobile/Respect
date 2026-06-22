@@ -101,7 +101,7 @@ class LaunchAppUseCaseAndroid(
         intent.flags = FLAG_ACTIVITY_NEW_TASK
         val launchUrlStr = launchUrl.toString()
         intent.putExtra(EXTRA_URL, launchUrlStr)
-        intent.putExtra(EXTRA_ACTIVITY_ID, request.assignmentActivityId)
+        intent.putExtra(EXTRA_ACTIVITY_ID, request.lessonActivityId)
         Napier.i("LaunchAppUseCaseAndroid: launching $launchUrlStr")
         appContext.startActivity(intent)
     }

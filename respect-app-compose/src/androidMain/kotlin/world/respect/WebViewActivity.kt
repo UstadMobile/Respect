@@ -110,15 +110,15 @@ class WebViewActivity : AppCompatActivity() {
                         ?.xapiAgent
                         ?: return@launch
 
-//                    schoolDataSource.xapiResource.statements.post(
-//                        listOf(
-//                            createLearningUnitStatement(
-//                                activityId = activityId,
-//                                actor = actor,
-//                                verbId = XapiVerb.ID_TERMINATED,
-//                            )
-//                        )
-//                    )
+                    schoolDataSource.xapiResource.statements.post(
+                        listOf(
+                            createLearningUnitStatement(
+                                activityId = activityId,
+                                actor = actor,
+                                verbId = XapiVerb.ID_TERMINATED,
+                            )
+                        )
+                    )
                 }.onFailure {
                     Napier.e("Failed to send terminated statement", it)
                 }

@@ -123,17 +123,18 @@ class LearningUnitDetailViewModel(
                     ?: throw IllegalStateException("active account not found")
 
                 val baseStmt = createLearningUnitStatement(
-                    activityId = route.assignmentActivityId?:"",
+                    activityId = lessonPublication.metadata.identifier.toString(),
                     actor = actor,
                     verbId = XapiVerb.ID_INITIALIZED,
                 )
 
-               // schoolDataSource.xapiResource.statements.post(listOf(baseStmt))
+                schoolDataSource.xapiResource.statements.post(listOf(baseStmt))
                 launchAppUseCase(
                     LaunchAppUseCase.LaunchRequest(
                         publicationUrl = route.learningUnitManifestUrl,
                         publication = lessonPublication,
                         assignmentActivityId = route.assignmentActivityId,
+                        lessonActivityId = lessonPublication.metadata.identifier.toString(),
                     )
                 )
             }catch(e: Throwable) {

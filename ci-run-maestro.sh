@@ -157,7 +157,7 @@ if [ "$1" == "cloud" ]; then
         --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
         --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
         --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
-        --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
+        --env DIR_ADMIN_AUTH_HEADER="'$DIR_ADMIN_AUTH_HEADER'" \
         --env SCHOOL_NAME=TestSchool \
         $TEST_APP_URL_ARG \
        | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
@@ -199,6 +199,13 @@ if [ "$1" == "cloud" ]; then
     fi
 elif [ "$1" == "wait-for-upload" ]; then
     MAESTRO_CMD_FILE="$HOME/tmp/run-local-$BUILD_TAG.sh"
+
+    if [ ! -e build/test_variables ]; then
+        mkdir -p build/test_variables
+    fi
+
+    cp -v $MAESTRO_CMD_FILE build/test_variables/test_variables.sh
+
     DONE_FLAG_FILE=$WORKSPACE/build/maestro-uploaded
 
     if [ -e $DONE_FLAG_FILE ]; then
@@ -209,10 +216,11 @@ elif [ "$1" == "wait-for-upload" ]; then
                --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
                --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
                --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
-               --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
+               --env DIR_ADMIN_AUTH_HEADER="'$DIR_ADMIN_AUTH_HEADER'" \
                --env SCHOOL_NAME=TestSchool \
                --format=junit \
                --output=build/maestro/output/report.xml > $MAESTRO_CMD_FILE
+               --output=build/maestro/output/report.xml > test_variables
     echo "Saved Maestro command to $MAESTRO_CMD_FILE - download it and run locally, then upload" \
       " results to $WORKSPACE and create a file $DONE_FLAG_FILE"
 
@@ -227,7 +235,7 @@ else
       --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
       --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
       --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
-      --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
+      --env DIR_ADMIN_AUTH_HEADER="'$DIR_ADMIN_AUTH_HEADER'" \
       --env SCHOOL_NAME=TestSchool \
       $TEST_APP_URL_ARG \
       --format=junit \

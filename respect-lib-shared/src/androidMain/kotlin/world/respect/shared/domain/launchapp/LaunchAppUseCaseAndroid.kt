@@ -37,15 +37,15 @@ class LaunchAppUseCaseAndroid(
     override suspend fun invoke(
         request: LaunchRequest
     ) {
-        suspend fun getXapiLaunchUrl(useEmbeddedHttp: Boolean) = getXapiLaunchUrlUseCase(
+        suspend fun getXapiLaunchUrl(type: GetXapiLaunchUrlUseCase.LaunchType) = getXapiLaunchUrlUseCase(
             publication = request.publication,
             publicationUrl = request.publicationUrl,
             assignmentActivityId = request.assignmentActivityId,
-            useEmbeddedHttp = useEmbeddedHttp
+            type = type,
         )
 
         try {
-            val nativeLaunchUrl = getXapiLaunchUrl(false)
+            val nativeLaunchUrl = getXapiLaunchUrl(GetXapiLaunchUrlUseCase.LaunchType.NATIVE)
 
             val intent = Intent(
                 Intent.ACTION_VIEW, nativeLaunchUrl.toString().toUri()
@@ -81,7 +81,7 @@ class LaunchAppUseCaseAndroid(
             Napier.w("Something wrong opening learning unit through app, fallback", e)
         }
 
-        val webViewLaunchUrl = getXapiLaunchUrl(true)
+        val webViewLaunchUrl = getXapiLaunchUrl(GetXapiLaunchUrlUseCase.LaunchType.WEBVIEW)
 
         Log.i("LaunchUseCase", "Launching URL: $webViewLaunchUrl")
 

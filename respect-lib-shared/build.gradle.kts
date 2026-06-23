@@ -74,6 +74,8 @@ kotlin {
             implementation(libs.installreferrer)
 
             implementation(libs.androidx.browser)
+            implementation(projects.respectLibXapiCore)
+            implementation(projects.respectLibXapiIpcShared)
         }
 
         jvmMain.dependencies {

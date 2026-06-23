@@ -12,11 +12,15 @@ import world.respect.lib.opds.model.OpdsPublication
  */
 interface GetXapiLaunchUrlUseCase {
 
+    enum class LaunchType {
+        NATIVE, WEBVIEW
+    }
+
     suspend operator fun invoke(
         publication: OpdsPublication,
         publicationUrl: Url,
         assignmentActivityId: String?,
-        useEmbeddedHttp: Boolean,
+        type: LaunchType,
     ): Url
 
 }

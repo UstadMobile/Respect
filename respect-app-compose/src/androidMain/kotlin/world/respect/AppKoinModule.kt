@@ -1066,6 +1066,7 @@ val appKoinModule = module {
                 getXapiActivityForPublicationUseCase = get(),
                 schoolDb = get(),
                 uidNumberMapper = get(),
+                applicationContext = androidApplication(),
             )
         }
 

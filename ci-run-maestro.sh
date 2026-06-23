@@ -199,13 +199,19 @@ if [ "$1" == "cloud" ]; then
     fi
 elif [ "$1" == "wait-for-upload" ]; then
     MAESTRO_CMD_FILE="$HOME/tmp/run-local-$BUILD_TAG.sh"
+    TARGET_DIR="build/test_variables"
+    TARGET_FILE="$TARGET_DIR/test_variables.txt"
 
-    if [ ! -e build/test_variables ]; then
-        mkdir -p build/test_variables
-        touch build/test_variables/test_variables.sh
+    if [ ! -d "$TARGET_DIR" ]; then
+        mkdir -p "$TARGET_DIR"
     fi
 
-    cp -v $MAESTRO_CMD_FILE build/test_variables/test_variables.sh
+    if [ -f "$MAESTRO_CMD_FILE" ]; then
+         cat "$MAESTRO_CMD_FILE" > "$TARGET_FILE"
+         echo "Successfully copied maestro command to $TARGET_FILE"
+      else
+         echo "Error: Source file $MAESTRO_CMD_FILE does not exist."
+    fi
 
     DONE_FLAG_FILE=$WORKSPACE/build/maestro-uploaded
 

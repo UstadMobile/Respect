@@ -199,19 +199,6 @@ if [ "$1" == "cloud" ]; then
     fi
 elif [ "$1" == "wait-for-upload" ]; then
     MAESTRO_CMD_FILE="$HOME/tmp/run-local-$BUILD_TAG.sh"
-    TARGET_DIR="build/test_variables"
-    TARGET_FILE="$TARGET_DIR/test_variables.txt"
-
-    if [ ! -d "$TARGET_DIR" ]; then
-        mkdir -p "$TARGET_DIR"
-    fi
-
-    if [ -f "$MAESTRO_CMD_FILE" ]; then
-         cat "$MAESTRO_CMD_FILE" > "$TARGET_FILE"
-         echo "Successfully copied maestro command to $TARGET_FILE"
-      else
-         echo "Error: Source file $MAESTRO_CMD_FILE does not exist."
-    fi
 
     DONE_FLAG_FILE=$WORKSPACE/build/maestro-uploaded
 
@@ -227,9 +214,24 @@ elif [ "$1" == "wait-for-upload" ]; then
                --env SCHOOL_NAME=TestSchool \
                --format=junit \
                --output=build/maestro/output/report.xml > $MAESTRO_CMD_FILE
-               --output=build/maestro/output/report.xml > test_variables
-    echo "Saved Maestro command to $MAESTRO_CMD_FILE - download it and run locally, then upload" \
-      " results to $WORKSPACE and create a file $DONE_FLAG_FILE"
+
+
+       TARGET_DIR="build/test_variables"
+       TARGET_FILE="$TARGET_DIR/test_variables.txt"
+
+       if [ ! -d "$TARGET_DIR" ]; then
+           mkdir -p "$TARGET_DIR"
+       fi
+
+       if [ -f "$MAESTRO_CMD_FILE" ]; then
+            cat "$MAESTRO_CMD_FILE" > "$TARGET_FILE"
+            echo "Successfully copied maestro command to $TARGET_FILE"
+         else
+            echo "Error: Source file $MAESTRO_CMD_FILE does not exist."
+       fi
+
+#    echo "Saved Maestro command to $MAESTRO_CMD_FILE - download it and run locally, then upload" \
+#      " results to $WORKSPACE and create a file $DONE_FLAG_FILE"
 
     # This script should be run by Jenkins using a timeout control.
     while [ ! -f $DONE_FLAG_FILE ]; do

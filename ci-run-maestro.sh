@@ -71,7 +71,7 @@ fi
 # creation of the school, that is encoded here and passed to Maestro to avoid using Maestro's
 # Javascript (which does not have the btoa function)
 DIR_ADMIN_TO_ENCODE="admin:$DIR_ADMIN_AUTH_PASS"
-DIR_ADMIN_AUTH_HEADER="Basic $(printf '%s' $DIR_ADMIN_TO_ENCODE | base64)"
+DIR_ADMIN_AUTH_HEADER="'Basic $(printf '%s' $DIR_ADMIN_TO_ENCODE | base64)'"
 
 export JAVA_OPTS="-Dlogs_dir=$TESTSERVERCONTROLLER_BASEDIR/logs/"
 $TESTCONTROLLER_BIN  \
@@ -157,7 +157,7 @@ if [ "$1" == "cloud" ]; then
         --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
         --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
         --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
-        --env DIR_ADMIN_AUTH_HEADER="'$DIR_ADMIN_AUTH_HEADER'" \
+        --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
         --env SCHOOL_NAME=TestSchool \
         $TEST_APP_URL_ARG \
        | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
@@ -202,6 +202,7 @@ elif [ "$1" == "wait-for-upload" ]; then
 
     if [ ! -e build/test_variables ]; then
         mkdir -p build/test_variables
+        touch build/test_variables/test_variables.sh
     fi
 
     cp -v $MAESTRO_CMD_FILE build/test_variables/test_variables.sh
@@ -216,7 +217,7 @@ elif [ "$1" == "wait-for-upload" ]; then
                --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
                --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
                --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
-               --env DIR_ADMIN_AUTH_HEADER="'$DIR_ADMIN_AUTH_HEADER'" \
+               --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
                --env SCHOOL_NAME=TestSchool \
                --format=junit \
                --output=build/maestro/output/report.xml > $MAESTRO_CMD_FILE
@@ -235,7 +236,7 @@ else
       --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
       --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
       --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
-      --env DIR_ADMIN_AUTH_HEADER="'$DIR_ADMIN_AUTH_HEADER'" \
+      --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
       --env SCHOOL_NAME=TestSchool \
       $TEST_APP_URL_ARG \
       --format=junit \

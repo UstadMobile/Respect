@@ -100,6 +100,7 @@ if [ ! -e build/maestro/results ]; then
     mkdir -p build/maestro/output
 fi
 
+    APP_FILE="$ROOTDIR/respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk"
 
 TEST_APP_URL_ARG=""
 
@@ -206,29 +207,17 @@ elif [ "$1" == "wait-for-upload" ]; then
       rm $DONE_FLAG_FILE
     fi
 
-    echo maestro test \
-               --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
-               --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
-               --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
-               --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
-               --env SCHOOL_NAME=TestSchool \
-               --format=junit \
-               --output=build/maestro/output/report.xml > $MAESTRO_CMD_FILE
+       VARIABLE_FILE="build/test_variables.txt"
+
+    echo DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
+         TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
+         SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
+         DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
+         SCHOOL_NAME=TestSchool \
+         APK_PATH=$APP_FILE > $VARIABLE_FILE
 
 
-       VARIABLE_DIR="build/test_variables"
-       VARIABLE_FILE="$VARIABLE_DIR/test_variables.txt"
-
-       if [ ! -e "$VARIABLE_DIR" ]; then
-           mkdir -p "$VARIABLE_DIR"
-       fi
-
-       if [ -f "$MAESTRO_CMD_FILE" ]; then
-            cat "$MAESTRO_CMD_FILE" > "$VARIABLE_FILE"
-            echo "Successfully copied maestro test variables to $VARIABLE_FILE"
-         else
-            echo "Error: Source file $MAESTRO_CMD_FILE does not exist."
-       fi
+    echo "Variables for test : to copy: $USER@$HOSTNAME:$VARIABLE_FILE"
 
     # This script should be run by Jenkins using a timeout control.
     while [ ! -f $DONE_FLAG_FILE ]; do

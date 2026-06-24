@@ -1,8 +1,7 @@
 appId: world.respect.app
 onFlowStart:
   - clearState: world.respect.app
-  - startRecording:
-      path: "../../../build/maestro/output/passkeyTestRecording.mp4"
+  - startRecording: user_signup_using_passkey_test
   - runScript:
       file: "../scripts/school_init.js"
       env:
@@ -16,12 +15,13 @@ onFlowStart:
         NAME: "user_signup_using_passkey_test"
 
 onFlowComplete:
+ - stopRecording
   - runScript:
       file: "../scripts/teardown.js"
-  - stopRecording
+
 
 ---
-#- runFlow: "subflows/school_admin_login_flow.yaml"
+#- runFlow: "../subflows/school_admin_login_flow.yaml"
 
 - launchApp:
     arguments:
@@ -32,6 +32,9 @@ onFlowComplete:
 - tapOn: "Paste the link here"
 - inputText: ${output.SCHOOL_URL}
 - tapOn: "Next"
+- extendedWaitUntil:
+    visible: "Username"
+    timeout: 120000
 - tapOn:
     id: "username"
 - inputText: "admin"
@@ -132,6 +135,11 @@ onFlowComplete:
 - tapOn: "Paste the link here"
 - inputText: ${output.SCHOOL_URL}
 - tapOn: "Next"
+
+#- runFlow:
+#    file: "../subflows/get_started_select_school_by_name.yaml"
+#    env:
+#      SCHOOL_NAME: ${SCHOOL_NAME}
 - assertVisible: "Sign in to Respect with your saved passkey?"
 - extendedWaitUntil:
     visible: "Apps"

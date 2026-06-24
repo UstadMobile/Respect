@@ -208,6 +208,7 @@ elif [ "$1" == "wait-for-upload" ]; then
     fi
 
        VARIABLE_FILE="build/test_variables.txt"
+       VARIABLE_FILE_PATH=$ROOTDIR/$VARIABLE_FILE"
 
     echo DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
          TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
@@ -217,7 +218,7 @@ elif [ "$1" == "wait-for-upload" ]; then
          APK_PATH=$APP_FILE > $VARIABLE_FILE
 
 
-    echo "Variables for test : to copy: $USER@$HOSTNAME:$VARIABLE_FILE"
+    echo "Variables for test : to copy: $USER@$HOSTNAME:$VARIABLE_FILE_PATH"
 
     # This script should be run by Jenkins using a timeout control.
     while [ ! -f $DONE_FLAG_FILE ]; do

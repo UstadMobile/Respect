@@ -215,7 +215,7 @@ elif [ "$1" == "wait-for-upload" ]; then
          SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
          DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
          SCHOOL_NAME=TestSchool \
-         APK_PATH=$APK_PATH > $VARIABLE_FILE
+         APP_PATH=$USER@$HOSTNAME:$APK_PATH > $VARIABLE_FILE
 
     echo "Variables for test : to copy: $USER@$HOSTNAME:$VARIABLE_FILE_PATH"
 

@@ -216,22 +216,19 @@ elif [ "$1" == "wait-for-upload" ]; then
                --output=build/maestro/output/report.xml > $MAESTRO_CMD_FILE
 
 
-       TARGET_DIR="build/test_variables"
-       TARGET_FILE="$TARGET_DIR/test_variables.txt"
+       VARIABLE_DIR="build/test_variables"
+       VARIABLE_FILE="$VARIABLE_DIR/test_variables.txt"
 
-       if [ ! -d "$TARGET_DIR" ]; then
-           mkdir -p "$TARGET_DIR"
+       if [ ! -e "$VARIABLE_DIR" ]; then
+           mkdir -p "$VARIABLE_DIR"
        fi
 
        if [ -f "$MAESTRO_CMD_FILE" ]; then
-            cat "$MAESTRO_CMD_FILE" > "$TARGET_FILE"
-            echo "Successfully copied maestro command to $TARGET_FILE"
+            cat "$MAESTRO_CMD_FILE" > "$VARIABLE_FILE"
+            echo "Successfully copied maestro test variables to $VARIABLE_FILE"
          else
             echo "Error: Source file $MAESTRO_CMD_FILE does not exist."
        fi
-
-#    echo "Saved Maestro command to $MAESTRO_CMD_FILE - download it and run locally, then upload" \
-#      " results to $WORKSPACE and create a file $DONE_FLAG_FILE"
 
     # This script should be run by Jenkins using a timeout control.
     while [ ! -f $DONE_FLAG_FILE ]; do

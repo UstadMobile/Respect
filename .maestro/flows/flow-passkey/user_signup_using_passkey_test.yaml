@@ -1,8 +1,10 @@
 appId: world.respect.app
 onFlowStart:
   - clearState: world.respect.app
+  - startRecording:
+      path: "../../../build/maestro/output/passkeyTestRecording.mp4"
   - runScript:
-      file: "scripts/school_init.js"
+      file: "../scripts/school_init.js"
       env:
         TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
         SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
@@ -15,7 +17,8 @@ onFlowStart:
 
 onFlowComplete:
   - runScript:
-      file: "scripts/teardown.js"
+      file: "../scripts/teardown.js"
+  - stopRecording
 
 ---
 #- runFlow: "subflows/school_admin_login_flow.yaml"
@@ -39,7 +42,7 @@ onFlowComplete:
 - runFlow:
     when:
       visible: "Save password for Respect?"
-    file: "subflows/save_password_prompt_cancel.yaml"
+    file: "../subflows/save_password_prompt_cancel.yaml"
 - assertVisible: "Apps"
 
 
@@ -107,7 +110,7 @@ onFlowComplete:
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
 - runScript:
-    file: "scripts/setDate.js"
+    file: "../scripts/setDate.js"
 - inputText: ${output.pastYearDateP}
 - tapOn: "Next"
 - assertVisible:

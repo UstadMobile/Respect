@@ -11,6 +11,7 @@ import android.os.Message
 import android.os.Messenger
 import android.util.Log
 import io.ktor.http.Parameters
+import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.util.collections.ConcurrentMap
 import kotlinx.coroutines.CoroutineScope
@@ -23,11 +24,14 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.exceptions.XapiException
+import world.respect.lib.xapi.ext.asAssignmentRecipeStmtIfIdNotNull
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
@@ -106,11 +110,34 @@ class XapiMessengerService: Service() {
                 val endpoint = msg.data.getString(XapiIpcKeys.KEY_ENDPOINT)?.let {
                     Url(it)
                 } ?: throw IllegalArgumentException("Message has no endpoint")
+
+                val assignmentSegmentIndex = endpoint.segments.indexOf(
+                    OpenEelXapiConstants.ASSIGNMENT_XAPI_SEGMENT
+                )
+
+                val assignmentActivityId = if(assignmentSegmentIndex >= 0) {
+                    endpoint.segments[assignmentSegmentIndex + 1]
+                }else {
+                    null
+                }
+
+                val scopeEndpoint = if(assignmentActivityId != null){
+                    URLBuilder(endpoint).apply {
+                        pathSegments = pathSegments.filterIndexed { index, _ ->
+                            index != assignmentSegmentIndex && index != assignmentSegmentIndex + 1
+                        }
+
+                        normalizeForEndpoint()
+                    }.build()
+                }else {
+                    endpoint
+                }
+
                 val auth = msg.data.getString(XapiIpcKeys.KEY_AUTH)
                     ?: throw IllegalArgumentException("Message has no auth")
 
                 val xapiResource = runBlocking {
-                    xapiResourceProvider.provideXapiResource(endpoint, auth)
+                    xapiResourceProvider.provideXapiResource(scopeEndpoint, auth)
                 }
 
                 when (msg.arg2) {
@@ -123,7 +150,9 @@ class XapiMessengerService: Service() {
                                     deserializer = ListSerializer(
                                         XapiStatement.serializer()
                                     ),
-                                ) ?: throw XapiException(400, "Post statements has no body")
+                                )?.map {
+                                    it.asAssignmentRecipeStmtIfIdNotNull(assignmentActivityId)
+                                } ?: throw XapiException(400, "Post statements has no body")
                             ).toBundle(ListSerializer(Uuid.serializer()), json)
                         }
 

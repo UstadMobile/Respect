@@ -20,7 +20,7 @@ if [ ! -e $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; 
         mkdir -p $ROOTDIR/build/testservercontroller
     fi
 
-    wget --no-verbose --output-document=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
+    wget --quiet --output-document=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
     unzip -q -d $ROOTDIR/build/testservercontroller/ \
           $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
 fi

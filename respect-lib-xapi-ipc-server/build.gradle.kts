@@ -37,6 +37,7 @@ android {
 
 dependencies {
     api(projects.respectLibXapiIpcShared)
+    implementation(projects.respectLibUtil)
 
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)

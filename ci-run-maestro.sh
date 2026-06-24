@@ -100,7 +100,7 @@ if [ ! -e build/maestro/results ]; then
     mkdir -p build/maestro/output
 fi
 
-    APP_FILE="$ROOTDIR/respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk"
+    APK_PATH="$ROOTDIR/respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk"
 
 TEST_APP_URL_ARG=""
 
@@ -208,15 +208,14 @@ elif [ "$1" == "wait-for-upload" ]; then
     fi
 
        VARIABLE_FILE="build/test_variables.txt"
-       VARIABLE_FILE_PATH=$ROOTDIR/$VARIABLE_FILE"
+       VARIABLE_FILE_PATH="$ROOTDIR/$VARIABLE_FILE"
 
     echo DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
          TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
          SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
          DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
          SCHOOL_NAME=TestSchool \
-         APK_PATH=$APP_FILE > $VARIABLE_FILE
-
+         APK_PATH=$APK_PATH > $VARIABLE_FILE
 
     echo "Variables for test : to copy: $USER@$HOSTNAME:$VARIABLE_FILE_PATH"
 

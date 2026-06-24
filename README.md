@@ -93,6 +93,9 @@ RESPECT_DEFAULT_APPLIST - the default list of RESPECT Compatible app manifest UR
 
 As per [Kotlin docs](https://kotlinlang.org/docs/multiplatform/multiplatform-publish-lib-setup.html#publishing-to-a-local-maven-repository)
 
+If the environment variable ```GIT_TAG_NAME``` is set (eg by [Jenkins plugin](https://plugins.jenkins.io/git-tag-message/)), 
+this will be used as the version, otherwise the version will be read from the ```gradle.properties``` file.
+
 ## Legal and license
 
 Copyright 2024-2025 UstadMobile FZ-LLC. This code is substantially derived from [UstadMobile](https://www.github.com/UstadMobile/UstadMobile/).

@@ -67,6 +67,15 @@ if [ "$SCHOOL_ADMIN_PASSWORD" == "" ]; then
     SCHOOL_ADMIN_PASSWORD=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13)
 fi
 
+if [ "$GIT_TAG_NAME" != "" ]; then
+    VERSION=$GIT_TAG_NAME
+else
+    GRADLE_PROP_LINE=$(grep version= $ROOTDIR/gradle.properties)
+
+    # Use bash parameter expansion to remove version=prefix
+    VERSION=${GRADLE_PROP_LINE#version=}
+fi
+
 # The Maestro test needs to use basic auth (which is base64 encoded) to authenticate to request the
 # creation of the school, that is encoded here and passed to Maestro to avoid using Maestro's
 # Javascript (which does not have the btoa function)
@@ -80,6 +89,7 @@ $TESTCONTROLLER_BIN  \
     -P:testservercontroller.urlsubstitution=$URL_SUBSTITUTION \
     -P:testservercontroller.basedir=$TESTSERVERCONTROLLER_BASEDIR \
     -P:testservercontroller.env.DIR_ADMIN_AUTH=$DIR_ADMIN_AUTH_PASS \
+    -P:testservercontroller.env.VERSION=$VERSION
     -P:ktor.deployment.shutdown.url=/shutdown \
     -P:testservercontroller.cmd="$ROOTDIR/ci-run-test-server.sh" &
 

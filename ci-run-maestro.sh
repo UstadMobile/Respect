@@ -20,8 +20,8 @@ if [ ! -e $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; 
         mkdir -p $ROOTDIR/build/testservercontroller
     fi
 
-    wget --output-document=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
-    unzip -d $ROOTDIR/build/testservercontroller/ \
+    wget --no-verbose --output-document=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
+    unzip -q -d $ROOTDIR/build/testservercontroller/ \
           $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
 fi
 
@@ -89,7 +89,7 @@ $TESTCONTROLLER_BIN  \
     -P:testservercontroller.urlsubstitution=$URL_SUBSTITUTION \
     -P:testservercontroller.basedir=$TESTSERVERCONTROLLER_BASEDIR \
     -P:testservercontroller.env.DIR_ADMIN_AUTH=$DIR_ADMIN_AUTH_PASS \
-    -P:testservercontroller.env.VERSION=$VERSION
+    -P:testservercontroller.env.VERSION=$VERSION \
     -P:ktor.deployment.shutdown.url=/shutdown \
     -P:testservercontroller.cmd="$ROOTDIR/ci-run-test-server.sh" &
 

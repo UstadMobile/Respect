@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,7 +43,7 @@ import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
 import world.respect.app.components.langMapString
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.findIcons
 import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.cancel
@@ -135,8 +134,7 @@ fun LearningUnitDetailScreen(
                             Spacer(modifier = Modifier.width(12.dp))
 
                             Text(
-                                text = uiState.app.dataOrNull()?.metadata?.title?.getTitle()
-                                    .orEmpty()
+                                text = uiState.app.dataOrNull()?.metadata?.title?.let { langMapString(it) } ?: ""
                             )
                         }
 

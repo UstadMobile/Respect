@@ -16,10 +16,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -31,15 +31,15 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.app.components.langMapString
 import world.respect.datalayer.school.model.Bookmark
 import world.respect.datalayer.school.model.BookmarkDetails
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.findIcons
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.msg_see_bookmark
 import world.respect.shared.generated.resources.no_bookmark
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.bookmark.BookmarkListUiState
 import world.respect.shared.viewmodel.bookmark.BookmarkListViewModel
 
@@ -148,7 +148,7 @@ private fun BookmarkListContent(
 
                 headlineContent = {
                     Text(
-                        text = bookmarkDetails.bookmark.title?.getTitle() ?: ""
+                        text = bookmarkDetails.bookmark.title?.let { langMapString(it) } ?: ""
                     )
                 },
 
@@ -173,8 +173,7 @@ private fun BookmarkListContent(
                             Spacer(modifier = Modifier.width(12.dp))
 
                             Text(
-                                text = bookmarkDetails.app?.dataOrNull()?.metadata?.title?.getTitle()
-                                    .orEmpty()
+                                text = bookmarkDetails.app?.dataOrNull()?.metadata?.title?.let { langMapString(it) } ?: ""
                             )
                         }
                         /**Currently there is no data in subtitle**/

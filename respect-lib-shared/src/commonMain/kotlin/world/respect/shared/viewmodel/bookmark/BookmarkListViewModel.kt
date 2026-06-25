@@ -14,15 +14,15 @@ import world.respect.shared.viewmodel.RespectViewModel
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.ext.map
 import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.model.BookmarkDetails
 import world.respect.datalayer.school.model.StatusEnum
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
@@ -157,7 +157,7 @@ class BookmarkListViewModel(
             value = NavCommand.Navigate(
                 LearningUnitDetail.create(
                     learningUnitManifestUrl = bookmark.learningUnitManifestUrl,
-                    appManifestUrl = bookmark.appManifestUrl,
+                    refererUrl = bookmark.appManifestUrl,
                 )
             )
         )

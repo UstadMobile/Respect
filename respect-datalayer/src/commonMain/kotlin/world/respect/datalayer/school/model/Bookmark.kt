@@ -2,8 +2,8 @@ package world.respect.datalayer.school.model
 
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.shared.ModelWithTimes
+import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.opds.model.LangMap
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.serializers.InstantAsISO8601

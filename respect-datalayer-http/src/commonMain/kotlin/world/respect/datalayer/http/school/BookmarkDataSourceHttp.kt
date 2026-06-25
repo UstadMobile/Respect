@@ -9,8 +9,6 @@ import io.ktor.http.Url
 import io.ktor.http.contentType
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.AuthTokenProvider
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
@@ -23,6 +21,8 @@ import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.BookmarkDataSource.Companion.PERSON_UID
 import world.respect.datalayer.school.model.Bookmark
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
 
 
 class BookmarkDataSourceHttp(

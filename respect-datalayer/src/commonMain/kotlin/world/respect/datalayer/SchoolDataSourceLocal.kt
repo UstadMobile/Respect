@@ -1,7 +1,6 @@
 package world.respect.datalayer
 
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
-import world.respect.datalayer.school.AssignmentDataSourceLocal
 import world.respect.datalayer.school.BookmarkDataSourceLocal
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
@@ -14,11 +13,7 @@ import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.SchoolAppDataSourceLocal
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
-import world.respect.datalayer.school.xapi.XapiActivitiesResourceLocal
-import world.respect.datalayer.school.xapi.XapiAgentsResourceLocal
 import world.respect.datalayer.school.xapi.XapiResourceLocal
-import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
-import world.respect.lib.xapi.resources.XapiResource
 
 /**
  * Local DataSource implementation (eg based on a database). Local DataSources include putLocal

@@ -35,8 +35,6 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.db.school.daos.IndicatorEntityDao
 import world.respect.datalayer.db.school.daos.ReportEntityDao
 import world.respect.datalayer.db.realm.entities.IndicatorEntity
-import world.respect.datalayer.db.school.daos.AssignmentEntityDao
-import world.respect.datalayer.db.school.daos.AssignmentLearningResourceRefEntityDao
 import world.respect.datalayer.db.school.daos.BookmarkDao
 import world.respect.datalayer.db.school.daos.ClassEntityDao
 import world.respect.datalayer.db.school.daos.ClassPermissionEntityDao

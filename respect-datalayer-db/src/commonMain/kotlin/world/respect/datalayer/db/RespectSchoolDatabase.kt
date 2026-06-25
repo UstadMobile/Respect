@@ -35,6 +35,9 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.db.school.daos.IndicatorEntityDao
 import world.respect.datalayer.db.school.daos.ReportEntityDao
 import world.respect.datalayer.db.realm.entities.IndicatorEntity
+import world.respect.datalayer.db.school.daos.AssignmentEntityDao
+import world.respect.datalayer.db.school.daos.AssignmentLearningResourceRefEntityDao
+import world.respect.datalayer.db.school.daos.BookmarkDao
 import world.respect.datalayer.db.school.daos.ClassEntityDao
 import world.respect.datalayer.db.school.daos.ClassPermissionEntityDao
 import world.respect.datalayer.db.school.daos.EnrollmentEntityDao
@@ -54,6 +57,7 @@ import world.respect.datalayer.db.school.entities.ReportEntity
 import world.respect.datalayer.db.school.entities.SchoolAppEntity
 import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 import world.respect.datalayer.db.school.daos.SchoolPermissionGrantDao
+import world.respect.datalayer.db.school.entities.BookmarkEntity
 import world.respect.datalayer.db.school.entities.ClassPermissionEntity
 import world.respect.datalayer.db.school.entities.PullSyncStatusEntity
 import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
@@ -110,6 +114,7 @@ import world.respect.datalayer.school.model.Report
         PullSyncStatusEntity::class,
         PersonQrBadgeEntity::class,
         InviteEntity::class,
+        BookmarkEntity::class,
 
         //Shared (used by OPDS)
         LangMapEntity::class,
@@ -177,6 +182,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getPullSyncStatusEntityDao(): PullSyncStatusEntityDao
 
+    abstract fun getBookmarkDao(): BookmarkDao
+
     abstract fun getLangMapEntityDao(): LangMapEntityDao
 
     abstract fun getOpdsFeedEntityDao(): OpdsFeedEntityDao
@@ -229,6 +236,7 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
             OpdsFacetEntity.TABLE_ID,
             OpdsGroupEntity.TABLE_ID,
             OpdsFeedEntity.TABLE_ID,
+            BookmarkEntity.TABLE_ID
         )
 
     }

@@ -5,6 +5,10 @@ import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttp
+import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttp
+import world.respect.datalayer.http.school.AssignmentDataSourceHttp
+import world.respect.datalayer.http.school.BookmarkDataSourceHttp
 import world.respect.datalayer.http.school.ClassDataSourceHttp
 import world.respect.datalayer.http.school.EnrollmentDataSourceHttp
 import world.respect.datalayer.http.school.InviteDataSourceHttp
@@ -19,6 +23,9 @@ import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttp
 import world.respect.datalayer.http.school.xapi.XapiResourceHttp
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
+import world.respect.datalayer.school.opds.OpdsPublicationDataSource
+import world.respect.datalayer.school.AssignmentDataSource
+import world.respect.datalayer.school.BookmarkDataSource
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.DummySchoolConfigSettingsDataSource
 import world.respect.datalayer.school.EnrollmentDataSource
@@ -137,6 +144,15 @@ class SchoolDataSourceHttp(
 
     override val inviteDataSource: InviteDataSource by lazy {
         InviteDataSourceHttp(
+            schoolUrl = schoolUrl,
+            schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
+            httpClient = httpClient,
+            tokenProvider = tokenProvider,
+            validationHelper = validationHelper,
+        )
+    }
+    override val bookmarkDataSource: BookmarkDataSource by lazy {
+        BookmarkDataSourceHttp(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,

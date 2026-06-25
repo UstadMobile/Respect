@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 12,
-    "identityHash": "3cd745bbc0ddf2c692bd454cbb19fc7f",
+    "identityHash": "f0a2050e7777d6184c88d39f5d6f8d8b",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1214,6 +1214,61 @@
         }
       },
       {
+        "tableName": "BookmarkEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bPersonUid` TEXT NOT NULL, `bPersonUidHash` INTEGER NOT NULL, `bLearningUnitManifestUrl` TEXT NOT NULL, `bLearningUnitUrlHash` INTEGER NOT NULL, `bStatus` INTEGER NOT NULL, `bLastModified` INTEGER NOT NULL, `bStored` INTEGER NOT NULL, PRIMARY KEY(`bPersonUidHash`, `bLearningUnitUrlHash`))",
+        "fields": [
+          {
+            "fieldPath": "bPersonUid",
+            "columnName": "bPersonUid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bPersonUidHash",
+            "columnName": "bPersonUidHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bLearningUnitManifestUrl",
+            "columnName": "bLearningUnitManifestUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bLearningUnitUrlHash",
+            "columnName": "bLearningUnitUrlHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bStatus",
+            "columnName": "bStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bLastModified",
+            "columnName": "bLastModified",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bStored",
+            "columnName": "bStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "bPersonUidHash",
+            "bLearningUnitUrlHash"
+          ]
+        }
+      },
+      {
         "tableName": "LangMapEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lmeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `lmeTopParentType` INTEGER NOT NULL, `lmeTopParentUid1` INTEGER NOT NULL, `lmeTopParentUid2` INTEGER NOT NULL, `lmePropType` INTEGER NOT NULL, `lmePropFk` INTEGER NOT NULL, `lmeLang` TEXT NOT NULL, `lmeRegion` TEXT, `lmeValue` TEXT NOT NULL)",
         "fields": [
@@ -1737,7 +1792,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3cd745bbc0ddf2c692bd454cbb19fc7f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f0a2050e7777d6184c88d39f5d6f8d8b')"
     ]
   }
 }

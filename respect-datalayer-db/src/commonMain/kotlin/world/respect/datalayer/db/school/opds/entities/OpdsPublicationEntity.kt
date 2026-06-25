@@ -10,6 +10,8 @@ import io.ktor.http.Url
  * @property opeOfeUid where this OpdsPublicationEntity is part of a feed, the UID of the feed,
  *           otherwise 0
  * @property opeOgeUid where this OpdsPublicationEntity is part of a group, the UID of the group,
+ *
+ *
  *           otherwise 0
  * @property opeIndex where this OpdsPublicationEntity is part of a feed or group, the index of this
  *           publication within the feed or group respectively.

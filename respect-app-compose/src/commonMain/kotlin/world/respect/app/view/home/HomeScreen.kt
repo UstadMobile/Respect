@@ -15,17 +15,19 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.view.apps.launcher.AppLauncherScreen
-import world.respect.app.view.assignment.list.AssignmentListScreen
+import world.respect.app.view.bookmark.BookmarkListScreen
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
-import world.respect.shared.generated.resources.textbooks
+import world.respect.shared.generated.resources.bookmarks
 import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
+import world.respect.shared.viewmodel.bookmark.BookmarkListViewModel
 
 enum class HomeScreenTabs(val label: StringResource) {
     APPS(Res.string.apps),
+    BOOKMARK(Res.string.bookmarks)
 
     //Temporary example
     //PLAYLISTS(Res.string.textbooks)
@@ -88,6 +90,17 @@ fun HomeScreen(
                         )
                     )
                 }*/
+
+                HomeScreenTabs.BOOKMARK -> {
+                    val viewModel: BookmarkListViewModel = respectViewModel(
+                        onSetAppUiState = onSetAppUiState,
+                        navController = respectNavController,
+                    )
+
+                    BookmarkListScreen(
+                        viewModel = viewModel
+                    )
+                }
             }
         }
     }

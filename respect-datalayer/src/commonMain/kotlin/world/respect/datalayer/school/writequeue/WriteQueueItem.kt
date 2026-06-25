@@ -29,6 +29,7 @@ class WriteQueueItem(
 
         XAPI_STATEMENT(11),
 
+        BOOKMARK(11)
         ;
 
 

@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Android
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -32,10 +32,10 @@ import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.app_name
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.download
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import world.respect.shared.generated.resources.open
 import androidx.compose.material3.ListItem
 import androidx.compose.ui.layout.ContentScale
@@ -44,6 +44,9 @@ import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
 import world.respect.app.components.langMapString
+import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.opds.model.findIcons
+import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.downloaded
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
@@ -59,15 +62,18 @@ fun LearningUnitDetailScreen(
         onClickOpen = viewModel::onClickOpen,
         onClickDownload = viewModel::onClickDownload,
         onClickAssign = viewModel::onClickAssign,
+        onClickBookmark = viewModel::onClickBookmark
     )
 }
 
 @Composable
+
 fun LearningUnitDetailScreen(
     uiState: LearningUnitDetailUiState,
     onClickOpen: () -> Unit,
     onClickDownload: () -> Unit,
     onClickAssign: () -> Unit,
+    onClickBookmark: () -> Unit
 ) {
 
     LazyColumn(
@@ -115,17 +121,22 @@ fun LearningUnitDetailScreen(
                                     .border(1.dp, black, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Android,
-                                    modifier = Modifier.padding(6.dp),
-                                    contentDescription = null
-                                )
+                                uiState.app.dataOrNull()?.findIcons()?.firstOrNull()
+                                    ?.let { icon ->
+                                        RespectAsyncImage(
+                                            uri = icon.href,
+                                            contentDescription = "",
+                                            contentScale = ContentScale.Fit,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                             }
 
                             Spacer(modifier = Modifier.width(12.dp))
 
                             Text(
-                                text = stringResource(Res.string.app_name),
+                                text = uiState.app.dataOrNull()?.metadata?.title?.getTitle()
+                                    .orEmpty()
                             )
                         }
 
@@ -169,6 +180,17 @@ fun LearningUnitDetailScreen(
                         )
                     },
                     onClick = onClickDownload,
+                    enabled = uiState.buttonsEnabled,
+                )
+
+                RespectQuickActionButton(
+                    imageVector = if (uiState.isBookmarked) {
+                        Icons.Filled.Bookmark
+                    } else {
+                        Icons.Outlined.BookmarkBorder
+                    },
+                    labelText = stringResource(Res.string.bookmark),
+                    onClick = onClickBookmark,
                     enabled = uiState.buttonsEnabled,
                 )
 

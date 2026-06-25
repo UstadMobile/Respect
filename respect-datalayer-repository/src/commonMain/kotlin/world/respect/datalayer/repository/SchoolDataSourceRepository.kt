@@ -5,6 +5,8 @@ import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.opds.OpdsFeedDataSourceRepository
 import world.respect.datalayer.repository.opds.OpdsPublicationDataSourceRepository
+import world.respect.datalayer.repository.school.AssignmentDataSourceRepository
+import world.respect.datalayer.repository.school.BookmarkDataSourceRepository
 import world.respect.datalayer.repository.school.ClassDataSourceRepository
 import world.respect.datalayer.repository.school.EnrollmentDataSourceRepository
 import world.respect.datalayer.repository.school.InviteDataSourceRepository
@@ -113,6 +115,15 @@ class SchoolDataSourceRepository(
             remote = remote.inviteDataSource,
             remoteWriteQueue = remoteWriteQueue,
             validationHelper = validationHelper
+        )
+    }
+
+    override val bookmarkDataSource: BookmarkDataSourceRepository by lazy {
+        BookmarkDataSourceRepository(
+            local = local.bookmarkDataSource,
+            remote = remote.bookmarkDataSource,
+            validationHelper = validationHelper,
+            remoteWriteQueue = remoteWriteQueue,
         )
     }
 

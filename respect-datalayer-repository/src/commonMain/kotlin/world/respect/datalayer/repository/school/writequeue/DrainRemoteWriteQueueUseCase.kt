@@ -94,10 +94,6 @@ class DrainRemoteWriteQueueUseCase(
 
                         remoteWriteQueue.markSent(ids = listOf(item.queueItemId))
                     }
-
-                    WriteQueueItem.Model.BOOKMARK -> {
-                        repository.bookmarkDataSource.sendToRemote(listOf(item))
-                    }
                 }
 
             }

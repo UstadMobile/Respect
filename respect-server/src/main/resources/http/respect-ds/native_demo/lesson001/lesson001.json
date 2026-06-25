@@ -3,7 +3,7 @@
     "@type": "http://schema.org/Game",
     "title": "Native Demo 001",
     "author": "Mullah Nasruddin",
-    "identifier": "https://example.app/id/lesson001",
+    "identifier": "https://demo.openeel.org/Lesson",
     "language": "en",
     "modified": "2015-09-29T17:00:00Z"
   },

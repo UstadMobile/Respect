@@ -22,6 +22,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.xapi.OpenEelXapiConstants
@@ -116,15 +117,20 @@ class XapiMessengerService: Service() {
                 )
 
                 val assignmentActivityId = if(assignmentSegmentIndex >= 0) {
-                    endpoint.segments[assignmentSegmentIndex + 1]
+                    UrlEncoderUtil.decode(endpoint.segments[assignmentSegmentIndex + 1])
                 }else {
                     null
                 }
 
                 val scopeEndpoint = if(assignmentActivityId != null){
                     URLBuilder(endpoint).apply {
+                        //Builder adds a blank segment at the beginning, so this needs done again
+                        val segmentIndex = pathSegments.indexOf(
+                            OpenEelXapiConstants.ASSIGNMENT_XAPI_SEGMENT
+                        )
+
                         pathSegments = pathSegments.filterIndexed { index, _ ->
-                            index != assignmentSegmentIndex && index != assignmentSegmentIndex + 1
+                            index != segmentIndex && index != (segmentIndex + 1)
                         }
 
                         normalizeForEndpoint()

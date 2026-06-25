@@ -42,7 +42,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.rules)
-
+    implementation(libs.urlencoder)
 
 
     testImplementation(libs.junit)

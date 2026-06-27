@@ -20,7 +20,7 @@
   scp $JENKINS_VAR_PATH $VAR_FILE_PATH
   source $VAR_FILE_PATH
 
-  echo "Saving APK file from Jenkins to local"
+#  echo "Saving APK file from Jenkins to local"
 #  scp $APP_PATH build
 
 #  adb uninstall world.respect.app
@@ -37,13 +37,14 @@
 #      MAESTRO_STATUS=$?
 
 # Copy the video file and report file to Jenkins
-
+echo "Saving Test files from local to Jenkins"
       scp $TEST_VIDEO_PATH $JENKINS_TEST_PATH
       scp $TEST_REPORT_PATH $DONE_FLAG_TEST_PATH
 
-      MAESTRO_STATUS=1
+      MAESTRO_STATUS=0
       exit $MAESTRO_STATUS
       scp $DONE_FLAG_FILE_PATH $DONE_FLAG_TEST_PATH
+
 
 
 

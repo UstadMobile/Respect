@@ -210,13 +210,18 @@ elif [ "$1" == "wait-for-upload" ]; then
        VARIABLE_FILE="build/test_variables.txt"
        VARIABLE_FILE_PATH="$ROOTDIR/$VARIABLE_FILE"
 
-    echo DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS  $'\n' \
-         TESTCONTROLLER_URL=$TESTCONTROLLER_URL  $'\n' \
-         SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD  $'\n' \
-         DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER"  $'\n' \
-         SCHOOL_NAME=TestSchool  $'\n' \
-         APP_PATH=$USER@$HOSTNAME:$APK_PATH > $VARIABLE_FILE
 
+    echo DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS $'\n' \
+         TESTCONTROLLER_URL=$TESTCONTROLLER_URL $'\n' \
+         SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD $'\n' \
+         DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" $'\n' \
+         SCHOOL_NAME=TestSchool $'\n' \
+         APP_PATH=$USER@$HOSTNAME:$APK_PATH $'\n' \
+         JENKINS_TEST_PATH=$USER@$HOSTNAME:$ROOTDIR $'\n' \
+         DONE_FLAG_TEST_PATH=$USER@$HOSTNAME:DONE_FLAG_FILE > $VARIABLE_FILE
+
+    echo $JENKINS_TEST_PATH
+    echo $DONE_FLAG_TEST_PATH
     echo "Variables for test : to copy: $USER@$HOSTNAME:$VARIABLE_FILE_PATH"
 
     # This script should be run by Jenkins using a timeout control.
@@ -241,5 +246,6 @@ fi
 
 
 echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
+
 
 exit $MAESTRO_STATUS

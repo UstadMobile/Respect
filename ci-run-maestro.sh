@@ -208,6 +208,7 @@ elif [ "$1" == "wait-for-upload" ]; then
     fi
 
        VARIABLE_FILE="build/test_variables.txt"
+       TEST_FILE_PATH="$ROOTDIR/build"
        VARIABLE_FILE_PATH="$ROOTDIR/$VARIABLE_FILE"
 
 
@@ -217,7 +218,7 @@ elif [ "$1" == "wait-for-upload" ]; then
          DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" $'\n' \
          SCHOOL_NAME=TestSchool $'\n' \
          APP_PATH=$USER@$HOSTNAME:$APK_PATH $'\n' \
-         JENKINS_TEST_PATH=$USER@$HOSTNAME:$ROOTDIR $'\n' \
+         JENKINS_TEST_PATH=$USER@$HOSTNAME:$TEST_FILE_PATH $'\n' \
          DONE_FLAG_TEST_PATH=$USER@$HOSTNAME:$DONE_FLAG_FILE > $VARIABLE_FILE
 
     echo "Variables for test : to copy: $USER@$HOSTNAME:$VARIABLE_FILE_PATH"

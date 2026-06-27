@@ -39,10 +39,12 @@
 # Copy the video file and report file to Jenkins
 echo "Saving Test files from local to Jenkins"
       scp $TEST_VIDEO_PATH $JENKINS_TEST_PATH
-      scp $TEST_REPORT_PATH $DONE_FLAG_TEST_PATH
+      scp $TEST_REPORT_PATH $JENKINS_TEST_PATH
 
       MAESTRO_STATUS=0
       exit $MAESTRO_STATUS
+
+      echo "Saving done flag to Jenkins"
       scp $DONE_FLAG_FILE_PATH $DONE_FLAG_TEST_PATH
 
 

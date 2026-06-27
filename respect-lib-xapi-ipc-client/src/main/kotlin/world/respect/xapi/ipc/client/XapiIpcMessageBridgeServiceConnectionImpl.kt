@@ -7,9 +7,6 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.Messenger
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -18,7 +15,6 @@ import kotlinx.coroutines.flow.flow
 import world.respect.xapi.ipc.shared.messages.MessageData
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.log
 
 /**
  * Binding to a service using a ServiceConnection is asynchronous. The service will normally, but

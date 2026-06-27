@@ -106,7 +106,7 @@
 
         <!--
         Xapi over IPC service.
-        Android Manifest permission not required because messages are check for authentication
+        Android Manifest permission not required because messages are checked for authentication
         -->
         <service
             android:name="world.respect.xapi.ipc.server.XapiIpcService"

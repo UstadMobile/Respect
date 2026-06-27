@@ -11,8 +11,7 @@ plugins {
     alias(libs.plugins.buildconfigPlugin)
 }
 
-group = "world.respect.app"
-version = "1.0.0"
+
 
 application {
     mainClass.set("world.respect.server.ServerAppMainKt")

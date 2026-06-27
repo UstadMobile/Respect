@@ -10,9 +10,6 @@ import android.os.Build
 import android.util.Log
 import androidx.core.net.toUri
 import io.github.aakira.napier.Napier
-import io.ktor.http.URLBuilder
-import world.respect.shared.domain.launchapp.LaunchAppUseCase.Companion.RESPECT_LAUNCH_VERSION_PARAM_NAME
-import world.respect.shared.domain.launchapp.LaunchAppUseCase.Companion.RESPECT_LAUNCH_VERSION_VALUE
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.LaunchRequest
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
 
@@ -40,21 +37,18 @@ class LaunchAppUseCaseAndroid(
     override suspend fun invoke(
         request: LaunchRequest
     ) {
-        val launchUrlBase = getXapiLaunchUrlUseCase(
+        suspend fun getXapiLaunchUrl(type: GetXapiLaunchUrlUseCase.LaunchType) = getXapiLaunchUrlUseCase(
             publication = request.publication,
             publicationUrl = request.publicationUrl,
             assignmentActivityId = request.assignmentActivityId,
+            type = type,
         )
 
-        val launchUrl = URLBuilder(launchUrlBase).apply {
-            parameters.append(
-                RESPECT_LAUNCH_VERSION_PARAM_NAME, RESPECT_LAUNCH_VERSION_VALUE
-            )
-        }.build()
-
         try {
+            val nativeLaunchUrl = getXapiLaunchUrl(GetXapiLaunchUrlUseCase.LaunchType.NATIVE)
+
             val intent = Intent(
-                Intent.ACTION_VIEW, launchUrl.toString().toUri()
+                Intent.ACTION_VIEW, nativeLaunchUrl.toString().toUri()
             ).apply {
                 addCategory(CATEGORY_BROWSABLE)
             }
@@ -62,7 +56,7 @@ class LaunchAppUseCaseAndroid(
             if(Build.VERSION.SDK_INT >= 30) {
                 intent.flags = FLAG_ACTIVITY_REQUIRE_NON_BROWSER or FLAG_ACTIVITY_NEW_TASK
                 Napier.d(
-                    "LaunchAppUseCaseAndroid: attempting to launch $launchUrl with RequireNonBrowser"
+                    "LaunchAppUseCaseAndroid: attempting to launch $nativeLaunchUrl with RequireNonBrowser"
                 )
                 appContext.startActivity(intent)
                 return
@@ -87,7 +81,9 @@ class LaunchAppUseCaseAndroid(
             Napier.w("Something wrong opening learning unit through app, fallback", e)
         }
 
-        Log.i("LaunchUseCase", "Launching URL: $launchUrl")
+        val webViewLaunchUrl = getXapiLaunchUrl(GetXapiLaunchUrlUseCase.LaunchType.WEBVIEW)
+
+        Log.i("LaunchUseCase", "Launching URL: $webViewLaunchUrl")
 
         /*
          * The ActivityClass, because it's UI, is contained within the respect-app-compose module,
@@ -99,7 +95,7 @@ class LaunchAppUseCaseAndroid(
             Class.forName(WEBVIEW_ACTIVITY_NAME)
         )
         intent.flags = FLAG_ACTIVITY_NEW_TASK
-        val launchUrlStr = launchUrl.toString()
+        val launchUrlStr = webViewLaunchUrl.toString()
         intent.putExtra(EXTRA_URL, launchUrlStr)
         Napier.i("LaunchAppUseCaseAndroid: launching $launchUrlStr")
         appContext.startActivity(intent)

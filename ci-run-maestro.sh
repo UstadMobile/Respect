@@ -228,6 +228,10 @@ elif [ "$1" == "wait-for-upload" ]; then
       sleep 5
     done
 
+    # Read the status from the file
+    MAESTRO_STATUS=$(cat $DONE_FLAG_FILE)
+    echo "ci-run-maestro: Local test completed with status: $MAESTRO_STATUS"
+
     echo "$DONE_FLAG_FILE appeared - proceeding"
 else
     maestro test \
@@ -242,7 +246,6 @@ else
       .maestro/flows/*.yaml
     MAESTRO_STATUS=$?
 fi
-
 
 echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
 

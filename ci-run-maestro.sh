@@ -230,7 +230,7 @@ elif [ "$1" == "wait-for-upload" ]; then
 
     # Read the status from the file
     MAESTRO_STATUS=$(cat $DONE_FLAG_FILE)
-    echo "ci-run-maestro: Local test completed with status: $MAESTRO_STATUS"
+    echo "ci-run-maestro: Local test completed with status: MAESTRO_STATUS=$MAESTRO_STATUS"
 
     echo "$DONE_FLAG_FILE appeared - proceeding"
 else

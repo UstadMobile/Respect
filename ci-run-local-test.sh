@@ -20,29 +20,28 @@
   scp $JENKINS_VAR_PATH $VAR_FILE_PATH
   source $VAR_FILE_PATH
 
-#  echo "Saving APK file from Jenkins to local"
-#  scp $APP_PATH build
+  echo "Saving APK file from Jenkins to local"
+  scp $APP_PATH build
 
-#  adb uninstall world.respect.app
-#  adb install build/respect-app-compose-release.apk
+  adb uninstall world.respect.app
+  adb install build/respect-app-compose-release.apk
 
 
-#   maestro test \
-#      --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
-#      --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
-#      --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
-#      --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
-#      --env SCHOOL_NAME=TestSchool \
-#      .maestro/flows/flow-passkey/*.yaml
-#      MAESTRO_STATUS=$?
+   maestro test \
+      --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
+      --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
+      --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
+      --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
+      --env SCHOOL_NAME=TestSchool \
+      .maestro/flows/flow-passkey/*.yaml
+      MAESTRO_STATUS=$?
 
 # Copy the video file and report file to Jenkins
-echo "Saving Test files from local to Jenkins"
+      echo "Saving Test files from local to Jenkins"
       scp $TEST_VIDEO_PATH $JENKINS_TEST_PATH
       scp $TEST_REPORT_PATH $JENKINS_TEST_PATH
 
-      MAESTRO_STATUS=1
-      # Write the status to the file
+# Write the status to the file
       echo $MAESTRO_STATUS > $DONE_FLAG_FILE_PATH
 
       echo "Saving done flag to Jenkins"

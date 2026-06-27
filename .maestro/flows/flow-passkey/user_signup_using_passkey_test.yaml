@@ -16,7 +16,7 @@ onFlowStart:
 
 onFlowComplete:
  - stopRecording
-  - runScript:
+ - runScript:
       file: "../scripts/teardown.js"
 
 

@@ -36,6 +36,8 @@
       .maestro/flows/flow-passkey/*.yaml
       MAESTRO_STATUS=$?
 
+      TEST_VIDEO_PATH=build/user_signup_using_passkey_test
+
 # Copy the video file and report file to Jenkins
       echo "Saving Test files from local to Jenkins"
       scp $TEST_VIDEO_PATH $JENKINS_TEST_PATH

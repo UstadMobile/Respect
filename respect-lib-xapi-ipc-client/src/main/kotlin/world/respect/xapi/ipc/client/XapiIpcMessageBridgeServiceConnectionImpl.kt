@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.flow
 import world.respect.xapi.ipc.shared.messages.MessageData
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.math.log
 
 /**
  * Binding to a service using a ServiceConnection is asynchronous. The service will normally, but
@@ -40,7 +41,7 @@ class XapiIpcMessageBridgeServiceConnectionImpl(
             name: ComponentName,
             service: IBinder
         ) {
-            Log.i(XapiIpcTags.LOGTAG, "XapiIpcMessageBridgeServiceConnectionImpl: service connected")
+            Log.i(XapiIpcTags.LOGTAG, "XapiIpcMessageBridgeServiceConnectionImpl: service connected: $name")
             mMessenger = Messenger(service).also {
                 messengerBridgeFlow.value = XapiMessageBridgeMessengerImpl(it)
             }
@@ -48,7 +49,7 @@ class XapiIpcMessageBridgeServiceConnectionImpl(
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            Log.i(XapiIpcTags.LOGTAG, "XapiIpcMessageBridgeServiceConnectionImpl: service disconnected")
+            Log.i(XapiIpcTags.LOGTAG, "XapiIpcMessageBridgeServiceConnectionImpl: service disconnected: $name")
             mMessenger = null
             messengerBridgeFlow.value = null
         }
@@ -60,14 +61,23 @@ class XapiIpcMessageBridgeServiceConnectionImpl(
 
     override suspend fun executeForResponse(messageData: MessageData): MessageData {
         val currentBridgeVal = messengerBridgeFlow.value
-        return currentBridgeVal?.executeForResponse(messageData)
-            ?: messengerBridgeFlow.filterNotNull().first().executeForResponse(messageData)
+        val logPrefix = "XapiIpcMessageBridgeServiceConnectionImpl: executeForResponse server=${intent.`package`} "
+        return currentBridgeVal?.also {
+            Log.d(XapiIpcTags.LOGTAG, "$logPrefix send direct")
+        }?.executeForResponse(messageData)
+            ?: messengerBridgeFlow.also {
+                Log.d(XapiIpcTags.LOGTAG, "$logPrefix queue to send")
+            }.filterNotNull().first().executeForResponse(messageData)
     }
 
     override fun executeForFlow(messageData: MessageData): Flow<MessageData> {
         val currentBridgeVal = messengerBridgeFlow.value
-        return currentBridgeVal?.executeForFlow(messageData)
+        val logPrefix = "XapiIpcMessageBridgeServiceConnectionImpl: executeForFlow server=${intent.`package`} "
+        return currentBridgeVal?.also {
+            Log.d(XapiIpcTags.LOGTAG, "$logPrefix send direct")
+        }?.executeForFlow(messageData)
             ?: flow {
+                Log.d(XapiIpcTags.LOGTAG, "$logPrefix queue to send")
                 messengerBridgeFlow.filterNotNull().first().executeForFlow(messageData).collect {
                     emit(it)
                 }

@@ -75,8 +75,11 @@ class XapiIpcMessageBridgeServiceConnectionImpl(
     }
 
     override fun close() {
+        Log.d(XapiIpcTags.LOGTAG, "XapiMessageBridgeBinderImpl: close")
         if(!closed.getAndSet(true)) {
+            Log.d(XapiIpcTags.LOGTAG, "XapiMessageBridgeBinderImpl: close: cleanup")
             if(mMessenger != null) {
+                Log.d(XapiIpcTags.LOGTAG, "XapiMessageBridgeBinderImpl: close: unbind")
                 context.unbindService(mConnection)
                 mMessenger = null
             }

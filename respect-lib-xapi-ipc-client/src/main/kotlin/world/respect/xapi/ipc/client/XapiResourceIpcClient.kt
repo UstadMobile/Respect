@@ -6,6 +6,7 @@ import world.respect.lib.xapi.resources.XapiActivitiesResource
 import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 
 /**
  * XapiResourceIpcClient must host an interface implementation for messages for which a reply is
@@ -21,9 +22,21 @@ class XapiResourceIpcClient(
     private val json: Json,
     private val endpoint: Url,
     private val auth: String,
+    clientPackageName: String,
 ): XapiResource {
+
+    private val messageExtras = mapOf(
+        XapiIpcKeys.KEY_CLIENT_PACKAGE to clientPackageName,
+    )
+
     override val statements: XapiStatementsResource by lazy {
-        XapiStatementsResourceIpcClient(requestSender, json, endpoint, auth)
+        XapiStatementsResourceIpcClient(
+            requestSender = requestSender,
+            json = json,
+            endpoint = endpoint,
+            auth = auth,
+            messageDataExtras = messageExtras,
+        )
     }
 
     override val agents: XapiAgentsResource

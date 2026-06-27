@@ -63,6 +63,12 @@ fun Bundle.getStringValues(
     return BundleStringValues(bundle, caseInsensitive)
 }
 
+fun Bundle.putAllFromStringMap(map: Map<String, String>) {
+    map.forEach { (key, value) ->
+        putString(key, value)
+    }
+}
+
 fun <T: Any> Bundle.toDataLoadState(
     json: Json,
     deserializer: DeserializationStrategy<T>

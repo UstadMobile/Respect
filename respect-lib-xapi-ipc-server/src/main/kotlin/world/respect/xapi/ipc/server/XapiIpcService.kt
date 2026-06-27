@@ -25,6 +25,7 @@ import kotlinx.serialization.json.Json
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.ext.toPrettyString
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.exceptions.XapiException
@@ -56,20 +57,20 @@ import kotlin.uuid.Uuid
  * Clients will register: then registered clients will receive invalidation messages, which can be
  * easily observed by the datasource on the other side.
  */
-class XapiMessengerService: Service() {
+class XapiIpcService: Service() {
 
     private val json = Json {
         encodeDefaults = false
     }
 
-    private val handlerThread = HandlerThread("XapiMessengerServiceThread").also {
+    private val handlerThread = HandlerThread("XapiIpcServiceThread").also {
         if(!it.isAlive)
             it.start()
     }
 
     internal class IncomingHandler(
         looper: Looper,
-        context: Context,
+        private val context: Context,
         private val applicationContext: Context = context.applicationContext,
         private val json: Json,
     ):  Handler(looper) {
@@ -86,10 +87,14 @@ class XapiMessengerService: Service() {
 
             val incomingMessageId = msg.arg1
 
+            val callingPackage = msg.data.getString(XapiIpcKeys.KEY_CLIENT_PACKAGE)
+
+            val logPrefix = "XapiIpcService (client=$callingPackage) msg #$incomingMessageId"
+
             if(msg.what == XapiIpcWhatFlags.WHAT_FLOW_COMPLETION) {
                 flowCollectors.remove(incomingMessageId)?.also {
                     it.cancel()
-                    Log.d(XapiIpcTags.LOGTAG, "XapiMessengerService: Flow #$incomingMessageId cancelled")
+                    Log.d(XapiIpcTags.LOGTAG, "$logPrefix Flow cancelled")
                 }
 
                 return
@@ -156,16 +161,24 @@ class XapiMessengerService: Service() {
                                     deserializer = ListSerializer(
                                         XapiStatement.serializer()
                                     ),
-                                )?.map {
+                                )?.also {
+                                    Log.d(
+                                        XapiIpcTags.LOGTAG,
+                                        "$logPrefix post send ${it.size} statements"
+                                    )
+                                }?.map {
                                     it.asAssignmentRecipeStmtIfIdNotNull(assignmentActivityId)
                                 } ?: throw XapiException(400, "Post statements has no body")
-                            ).toBundle(ListSerializer(Uuid.serializer()), json)
+                            ).also {
+                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix post: response ${it.toPrettyString()}")
+                            }.toBundle(ListSerializer(Uuid.serializer()), json)
                         }
 
                         msg.replyTo.send(replyMessage)
                     }
 
                     XapiIpcResourceFlags.GET_STATEMENTS -> {
+                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix: get ")
                         replyMessage.data = runBlocking {
                             xapiResource.statements.get(
                                 listParams = XapiStatementsResource.GetStatementParams.fromParams(
@@ -174,7 +187,9 @@ class XapiMessengerService: Service() {
                                     ) ?: Parameters.Empty,
                                     json = json
                                 )
-                            ).toBundle(XapiStatementResult.serializer(), json)
+                            ).also {
+                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix get: response ${it.toPrettyString()}")
+                            }.toBundle(XapiStatementResult.serializer(), json)
                         }
 
                         msg.replyTo.send(replyMessage)
@@ -182,6 +197,7 @@ class XapiMessengerService: Service() {
 
                     XapiIpcResourceFlags.GET_STATEMENTS_FLOW -> {
                         scope.launch {
+                            Log.d(XapiIpcTags.LOGTAG, "$logPrefix #$incomingMessageId getAsFlow")
                             xapiResource.statements.getAsFlow(
                                 listParams = XapiStatementsResource.GetStatementParams.fromParams(
                                     params = msg.data.getStringValues(
@@ -195,6 +211,10 @@ class XapiMessengerService: Service() {
                                 message.arg1 = incomingMessageId
                                 message.what = XapiIpcWhatFlags.WHAT_FLOW_EMISSION
                                 message.data = it.toBundle(XapiStatementResult.serializer(), json)
+                                Log.d(
+                                    XapiIpcTags.LOGTAG,
+                                    "$logPrefix getAsFlow emit ${it.toPrettyString()}"
+                                )
                                 replyTo.send(message)
                             }
                         }.also {
@@ -226,12 +246,14 @@ class XapiMessengerService: Service() {
     }
 
     override fun onBind(intent: Intent): IBinder? {
-        Log.d(XapiIpcTags.LOGTAG, "XapiMessengerService: onBind: ${intent.action}")
+        val clientAppPkg = intent.getStringExtra(XapiIpcKeys.KEY_CLIENT_PACKAGE) ?: ""
+        Log.d(XapiIpcTags.LOGTAG, "XapiIpcService: onBind: ${intent.action} client=$clientAppPkg")
         return messenger.binder
     }
 
 
     override fun onDestroy() {
+        Log.d(XapiIpcTags.LOGTAG, "XapiIpcService: onDestroy")
         super.onDestroy()
         handlerThread.quit()
     }

@@ -6,6 +6,7 @@ import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.xapi.ipc.shared.messages.XapiIpcIntent
+import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 
 class XapiIpcClientBuilder(
     private val context: Context,
@@ -43,11 +44,13 @@ class XapiIpcClientBuilder(
                 intent = Intent(XapiIpcIntent.ACTION_XAPI_OVER_IPC).also {
                     it.`package` = ipcPackageServiceName
                         ?: throw IllegalArgumentException("Ipc service package not set")
+                    it.putExtra(XapiIpcKeys.KEY_CLIENT_PACKAGE, context.packageName)
                 }
             ),
             json = json ?: Json { encodeDefaults = false },
             endpoint = Url(endpointUrl),
-            auth = auth ?: throw IllegalArgumentException("No auth provided")
+            auth = auth ?: throw IllegalArgumentException("No auth provided"),
+            clientPackageName = context.packageName,
         )
     }
 

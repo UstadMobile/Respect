@@ -90,7 +90,7 @@ class GetXapiLaunchUrlUseCaseAndroid(
                 )
             )
             if(type == GetXapiLaunchUrlUseCase.LaunchType.NATIVE) {
-                parameters[XapiIpcIntent.PARAM_NAME_IPC_PACKAGE] = applicationContext.packageName
+                parameters[XapiIpcIntent.PARAM_NAME_IPC_SERVICE_PACKAGE] = applicationContext.packageName
             }
         }.build().also {
             Napier.i("GetXapiLaunchUrlUseCase: $it")

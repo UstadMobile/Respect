@@ -6,7 +6,7 @@
     -->
     <application>
         <service
-            android:name="world.respect.xapi.ipc.server.XapiMessengerService"
+            android:name="world.respect.xapi.ipc.server.XapiIpcService"
             android:exported="true"
             tools:ignore="ExportedService">
 

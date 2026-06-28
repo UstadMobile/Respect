@@ -25,7 +25,7 @@
         ]
       },
       "links": [
-        {"rel": "self", "href": "lesson001/lesson001.json", "type": "application/opds-publication+json"},
+        {"rel": "self", "href": "Lesson-manifest.json", "type": "application/opds-publication+json"},
         {
           "rel": "http://opds-spec.org/acquisition/open-access",
           "href": "https://demo.openeel.org/Lesson",
@@ -33,7 +33,7 @@
         }
       ],
       "images": [
-        {"href": "lesson001/cover.png", "type": "image/png"  }
+        {"href": "Lesson-cover.png", "type": "image/png"  }
       ]
     }
   ]

@@ -6,17 +6,17 @@
     "en-US": "Short learning app description < 80 chars"
   },
   "license": "AGPL-3.0",
-  "website": "http://localhost/opds/case_valid/app.html",
+  "website": "https://openeel.org/",
   "icon": "icon.png",
   "learningUnits": "index.json",
-  "defaultLaunchUri": "http://localhost/opds/case_valid/",
+  "defaultLaunchUri": "https://demo.openeel.org/",
 
   "android": {
-    "packageId": "org.example.app",
-    "stores": ["https://play.google.com/store/apps/details?id=org.example.app"],
-    "sourceCode": "https://www.github.com/Developer/App"
+    "packageId": "org.openeel.demolaunchableapp",
+    "stores": ["https://play.google.com/store/apps/details?id=org.openeel.demolaunchableapp"],
+    "sourceCode": "https://github.com/UstadMobile/DemoLaunchableApp"
   },
   "web" : {
-    "url": "http://localhost/opds/case_valid"
+    "url": "https://demo.openeel.org/"
   }
 }

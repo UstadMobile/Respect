@@ -1,7 +1,7 @@
 <html lang="en">
     <head>
         <title>Lesson 001</title>
-        <link rel="manifest" href="lesson001.json" type="application/webpub+json"/>
+        <link rel="manifest" href="Lesson-manifest" type="application/webpub+json"/>
     </head>
     <body>
         Hello World Lesson

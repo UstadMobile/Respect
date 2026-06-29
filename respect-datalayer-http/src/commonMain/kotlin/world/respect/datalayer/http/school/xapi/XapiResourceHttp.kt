@@ -32,6 +32,11 @@ class XapiResourceHttp(
 
     override val agents: XapiAgentsResource
         get() = TODO("Not yet implemented")
+
     override val activities: XapiActivitiesResource
         get() = TODO("Not yet implemented")
+
+    override fun close() {
+        //Does nothing yet
+    }
 }

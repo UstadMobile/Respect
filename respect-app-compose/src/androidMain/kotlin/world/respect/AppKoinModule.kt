@@ -98,8 +98,8 @@ import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
+import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.nanohttpd.XapiNanoHttpdApp
-import world.respect.lib.xapi.nanohttpd.XapiNanoHttpdResourceProvider
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXHasher64Factory
 import world.respect.libxxhash.XXStringHasher
@@ -260,6 +260,7 @@ import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCa
 import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCaseAndroid
+import world.respect.shared.domain.xapi.xapinanohttpd.XapiResourceProviderAndroid
 import world.respect.shared.domain.xapi.xapinanohttpd.XapiNanoHttpdResourceProviderAndroid
 import world.respect.shared.viewmodel.bookmark.BookmarkListViewModel
 
@@ -729,8 +730,8 @@ val appKoinModule = module {
         }
     }
 
-    single<XapiNanoHttpdResourceProvider> {
-        XapiNanoHttpdResourceProviderAndroid()
+    single<XapiResourceProvider> {
+        XapiResourceProviderAndroid()
     }
 
     single<GetXapiActivityForPublicationUseCase> {
@@ -1069,6 +1070,7 @@ val appKoinModule = module {
                 getXapiActivityForPublicationUseCase = get(),
                 schoolDb = get(),
                 uidNumberMapper = get(),
+                applicationContext = androidApplication(),
             )
         }
 

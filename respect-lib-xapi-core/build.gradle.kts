@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
+    id("maven-publish")
 }
 
 kotlin {
@@ -27,7 +28,8 @@ kotlin {
         commonMain.dependencies {
             api(projects.respectLibSerializers)
             api(projects.respectLibDataloadstate)
-            implementation(libs.kotlinx.serialization.json)
+            implementation(projects.respectLibUtil)
+            api(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)

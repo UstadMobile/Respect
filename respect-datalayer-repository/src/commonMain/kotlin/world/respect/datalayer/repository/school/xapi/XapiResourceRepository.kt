@@ -27,4 +27,8 @@ class XapiResourceRepository(
 
     override val activities: XapiActivitiesResource = local.activities
 
+    override fun close() {
+        remote.close()
+        local.close()
+    }
 }

@@ -60,6 +60,7 @@ kotlin {
             implementation(libs.multiplatformsettings)
             implementation(libs.napier)
             implementation(libs.qrose)
+            implementation(libs.urlencoder)
 
         }
 
@@ -73,6 +74,8 @@ kotlin {
             implementation(libs.installreferrer)
 
             implementation(libs.androidx.browser)
+            implementation(projects.respectLibXapiCore)
+            implementation(projects.respectLibXapiIpcShared)
         }
 
         jvmMain.dependencies {

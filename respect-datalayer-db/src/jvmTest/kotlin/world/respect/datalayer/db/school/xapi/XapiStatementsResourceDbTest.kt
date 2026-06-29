@@ -30,7 +30,6 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.test.res.forXapiSampleStatements
 import world.respect.lib.test.res.xapiSampleStatements
 import world.respect.lib.xapi.OpenEelXapiConstants
-import world.respect.lib.xapi.exceptions.XapiConflictException
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XAPI_RESULT_EXTENSION_PROGRESS
@@ -52,7 +51,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
@@ -484,10 +482,7 @@ class XapiStatementsResourceDbTest {
 
                     throw IllegalStateException("Should have thrown exception by now")
                 }catch(e: XapiException) {
-                    assertTrue(
-                        e is XapiConflictException,
-                        "Expected XapiConflictException, got $e"
-                    )
+                    assertEquals(409, e.httpStatusCode, "Expected status code 409 conflict, got $e")
                 }
             }
         }

@@ -15,14 +15,20 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
-import world.respect.datalayer.school.model.Bookmark
-import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.map
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatementRef
+import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
@@ -71,6 +77,17 @@ class LearningUnitDetailViewModel(
 
     private val launchAppUseCase: LaunchAppUseCase by inject()
 
+    private val schoolUrl = accountMananger.requireActiveSchoolUrl()
+
+    private val agent = XapiAgent(
+        account = XapiAccount(
+            homePage = schoolUrl.toString(),
+            name = requireNotNull(accountMananger.activeAccount?.userGuid) {
+                "LearningUnitDetailViewModel: active account userGuid must not be null"
+            },
+        )
+    )
+
     init {
         viewModelScope.launch {
             schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
@@ -102,15 +119,17 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
-            val personUid = accountMananger.activeAccount?.userGuid ?: return@launch
-
-            schoolDataSource.bookmarkDataSource.getBookmarkStatus(
-                personUid,
-                route.learningUnitManifestUrl
-            )
-                .collect { bookmarked ->
-                    _uiState.update { it.copy(isBookmarked = bookmarked) }
-                }
+            schoolDataSource.xapiResource.statements.getAsFlow(
+                listParams = XapiStatementsResource.GetStatementParams(
+                    agent = agent,
+                    verb = XapiVerb.ID_BOOKMARKED,
+                    activity = route.learningUnitManifestUrl.toString(),
+                ),
+                dataLoadParams = DataLoadParams(),
+            ).collect { result ->
+                val statements = result.dataOrNull()?.statements ?: emptyList()
+                _uiState.update { it.copy(isBookmarked = statements.isNotEmpty()) }
+            }
         }
 
         viewModelScope.launch {
@@ -203,23 +222,44 @@ class LearningUnitDetailViewModel(
 
     fun onClickBookmark() {
         viewModelScope.launch {
-            val personUid = accountMananger.activeAccount?.userGuid ?: return@launch
-            val learningUnitManifestUrl = route.learningUnitManifestUrl
+            val learningUnitId = route.learningUnitManifestUrl.toString()
 
-            val status =
-                if (uiState.value.isBookmarked)
-                    StatusEnum.TO_BE_DELETED
-                else
-                    StatusEnum.ACTIVE
+            if (uiState.value.isBookmarked) {
+                // Void the existing bookmark statement(s)
+                val existingStatements = schoolDataSource.xapiResource.statements.get(
+                    listParams = XapiStatementsResource.GetStatementParams(
+                        agent = agent,
+                        verb = XapiVerb.ID_BOOKMARKED,
+                        activity = learningUnitId,
+                    )
+                ).dataOrNull()?.statements ?: emptyList()
 
-            val bookmark = Bookmark(
-                personUid = personUid,
-                learningUnitManifestUrl = learningUnitManifestUrl,
-                status = status,
-                appManifestUrl = route.learningUnitManifestUrl
-            )
+                existingStatements.forEach { stmt ->
+                    val stmtId = stmt.id
+                    if (stmtId == null) {
+                        Napier.w("Cannot void bookmark: statement has no id")
+                        return@forEach
+                    }
 
-            schoolDataSource.bookmarkDataSource.store(listOf(bookmark))
+                    schoolDataSource.xapiResource.statements.post(
+                        listOf(
+                            XapiStatement(
+                                actor = agent,
+                                verb = XapiVerb(id = XapiVerb.ID_VOIDED),
+                                `object` = XapiStatementRef(id = stmtId.toString()),
+                            )
+                        )
+                    )
+                }
+            } else {
+                // Post a new bookmark statement
+                val bookmarkStatement = XapiStatement(
+                    actor = agent,
+                    verb = XapiVerb(id = XapiVerb.ID_BOOKMARKED),
+                    `object` = XapiActivity(id = learningUnitId),
+                )
+                schoolDataSource.xapiResource.statements.post(listOf(bookmarkStatement))
+            }
         }
     }
 }

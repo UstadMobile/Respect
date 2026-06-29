@@ -31,7 +31,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "App detail"
-- assertVisible: "My app"
+- assertVisible: "Example Web App"
 - assertVisible: "Add App"
 # verify App got added to Apps section
 - tapOn: "Add App"
@@ -43,11 +43,10 @@ onFlowComplete:
 - assertVisible: "No bookmarks yet"
 - assertVisible: "Bookmark a lesson or a playlist to see it here."
 - tapOn: "Apps"
-- tapOn: "My app"
-- tapOn: "Grade 1"
+- tapOn: "Example Web App"
+- tapOn: "Examples"
 - tapOn: "Lesson 001"
 - assertVisible: "Lesson 001"
-- assertVisible: "My App"
 - tapOn: "Open"
 - extendedWaitUntil:
     visible: "Lesson 001"
@@ -58,13 +57,13 @@ onFlowComplete:
 - assertVisible: "Assign"
 - tapOn: "Bookmark"
 - back
-- assertVisible: "Lesson 002"
-- tapOn: "Lesson 002"
+- assertVisible: "Statement Maker"
+- tapOn: "Statement Maker"
 - tapOn: "Bookmark"
 - tapOn: "Home"
 - tapOn: "Bookmarks"
 - assertVisible: "Lesson 001"
-- assertVisible: "Lesson 002"
+- assertVisible: "Statement Maker"
 
 - clearState: world.respect.app
 - runFlow: "subflows/school_admin_login_flow.yaml"
@@ -74,7 +73,7 @@ onFlowComplete:
     text: "Home"
 - tapOn: "Bookmarks"
 - assertVisible: "Lesson 001"
-- assertVisible: "Lesson 002"
+- assertVisible: "Statement Maker"
 - tapOn:                       #Remove bookmark
     text: "Bookmark"
     index: 0

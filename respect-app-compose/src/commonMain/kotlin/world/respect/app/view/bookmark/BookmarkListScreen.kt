@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,10 +31,10 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.langMapString
-import world.respect.datalayer.school.model.Bookmark
-import world.respect.datalayer.school.model.BookmarkDetails
-import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findIcons
+import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.msg_see_bookmark
@@ -59,18 +58,19 @@ fun BookmarkListScreen(
 @Composable
 fun BookmarkListScreen(
     uiState: BookmarkListUiState,
-    onClickRemoveBookmark: (Bookmark) -> Unit,
-    onClickBookmark: (Bookmark) -> Unit
+    onClickRemoveBookmark: (XapiStatement) -> Unit,
+    onClickBookmark: (XapiStatement) -> Unit
 ) {
 
     when {
-        uiState.bookmarkDetails.isEmpty() -> {
+        uiState.statements.isEmpty() -> {
             EmptyBookmarkState()
         }
 
         else -> {
             BookmarkListContent(
-                uiState.bookmarkDetails,
+                uiState.statements,
+                uiState.publications,
                 onClickRemoveBookmark,
                 onClickBookmark
             )
@@ -109,9 +109,10 @@ private fun EmptyBookmarkState() {
 
 @Composable
 private fun BookmarkListContent(
-    bookmarkDetails: List<BookmarkDetails>,
-    onClickRemoveBookmark: (Bookmark) -> Unit,
-    onClickBookmark: (Bookmark) -> Unit
+    statements: List<XapiStatement>,
+    publications: Map<String, OpdsPublication>,
+    onClickRemoveBookmark: (XapiStatement) -> Unit,
+    onClickBookmark: (XapiStatement) -> Unit
 ) {
 
     LazyColumn(
@@ -120,91 +121,63 @@ private fun BookmarkListContent(
             .padding(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        items(bookmarkDetails) { bookmarkDetails ->
+        items(statements) { statement ->
+            val activityId = (statement.`object` as? XapiActivity)?.id
+            val publication = activityId?.let { publications[it] }
+
             ListItem(
                 modifier = Modifier.fillMaxWidth()
                     .clickable {
-                        onClickBookmark(bookmarkDetails.bookmark)
+                        onClickBookmark(statement)
                     },
 
                 leadingContent = {
-
                     Box(
                         modifier = Modifier
                             .fillMaxHeight()
                             .width(48.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        RespectAsyncImage(
-                            uri = bookmarkDetails.bookmark.imageUrl.toString(),
-                            contentDescription = "",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(36.dp)
-                        )
+                        val imageUrl = publication?.findIcons()?.firstOrNull()?.href
+                        if (imageUrl != null) {
+                            RespectAsyncImage(
+                                uri = imageUrl,
+                                contentDescription = "",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
                     }
-
                 },
 
                 headlineContent = {
-                    Text(
-                        text = bookmarkDetails.bookmark.title?.let { langMapString(it) } ?: ""
-                    )
+                    Text(text = publication?.metadata?.title?.let { langMapString(it) }
+                        ?: activityId ?: "")
                 },
 
                 supportingContent = {
                     Column {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            bookmarkDetails.app?.dataOrNull()?.findIcons()?.firstOrNull()
-                                ?.also { icon ->
-                                    RespectAsyncImage(
-                                        uri = icon.href,
-                                        contentDescription = "",
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier
-                                            .size(20.dp)
-
-                                    )
-                                }
-
-
-                            Spacer(modifier = Modifier.width(12.dp))
-
-                            Text(
-                                text = bookmarkDetails.app?.dataOrNull()?.metadata?.title?.let { langMapString(it) } ?: ""
-                            )
-                        }
-                        /**Currently there is no data in subtitle**/
-                        /* Text(
-                             text = bookmark.subTitle?.getTitle() ?: ""
-                         )*/
-
+                        Text(publication?.metadata?.subtitle?.let { langMapString(it) } ?: "")
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            bookmarkDetails.bookmark.language?.let {
-                                Text(text = it)
+                            publication?.metadata?.language?.firstOrNull()?.let { langCode ->
+                                val languageName = java.util.Locale(langCode).displayLanguage
+                                Text(text = languageName)
                             }
-                            /**Currently there is no data in grade**/
-                            /* bookmark.grade?.let {
-                                 Text(text = it)
-                             }*/
 
-                            bookmarkDetails.bookmark.type?.let {
-                                Text(text = it)
-                            }
+                            publication?.metadata?.type?.toString()
+                                ?.substringAfterLast("/")?.let { type ->
+                                    Text(text = type)
+                                }
                         }
-
                     }
                 },
-
 
                 trailingContent = {
                     Icon(
                         modifier = Modifier.clickable {
-                            onClickRemoveBookmark(bookmarkDetails.bookmark)
+                            onClickRemoveBookmark(statement)
                         },
                         imageVector = Icons.Default.Bookmark,
                         contentDescription = stringResource(Res.string.bookmark),

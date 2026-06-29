@@ -12,7 +12,7 @@ private val nameMap = mapOf(
     RespectImage.WORKS_OFFLINE to R.drawable.works_offline,
     RespectImage.DATA_REPORTING to R.drawable.data_reporting,
     RespectImage.ASSIGNMENTS to R.drawable.assignments
-    )
+)
 
 @Composable
 actual fun respectImagePainter(image: RespectImage): Painter {

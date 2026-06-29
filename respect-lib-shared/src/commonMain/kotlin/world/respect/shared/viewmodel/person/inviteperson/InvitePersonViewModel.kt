@@ -4,9 +4,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.ktor.http.Url
 import kotlinx.coroutines.delay
-import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
-import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
-import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -33,12 +30,16 @@ import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.PersonRoleEnum
+import world.respect.lib.opds.model.toStringMap
 import world.respect.libutil.ext.CHAR_POOL_NUMBERS
 import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
+import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
+import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
+import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invitation
 import world.respect.shared.generated.resources.invite_person
@@ -55,9 +56,11 @@ import kotlin.time.Duration.Companion.minutes
  *           the time runs out, even though the invite itself hasn't changed.
  */
 data class InvitePersonUiState(
+    val currentSliderPage: Int = 0,
     val inviteOptions: InvitePerson.NewUserInviteOptions = InvitePerson.NewUserInviteOptions(null),
     val invite: DataLoadState<Invite2> = DataLoadingState(),
     val approvalRequired: Boolean = true,
+    val showSlider: Boolean = false,
     val inviteUrl: Url? = null,
     val selectedRole: PersonRoleEnum? = null,
     val className: String? = null,
@@ -123,11 +126,11 @@ class InvitePersonViewModel(
 
             val writableRoles = getWritableRolesListUseCase(currentPersonRole)
             val selectedRole = writableRoles.firstOrNull() ?: PersonRoleEnum.STUDENT
-
             _uiState.update {
                 it.copy(
                     roleOptions =  writableRoles,
-                    selectedRole = selectedRole
+                    selectedRole = selectedRole,
+                    schoolName =    accountManager.activeAccount?.school?.name?.toStringMap()?.values?.firstOrNull()
                 )
             }
 
@@ -140,13 +143,17 @@ class InvitePersonViewModel(
                         uid = inviteUid,
                         loadParams = DataLoadParams()
                     ).collectLatest { invite ->
+                        val code = invite.dataOrNull()?.code.orEmpty()
+                        val schoolName = accountManager.activeAccount?.school?.name?.
+                        toStringMap()?.values?.firstOrNull()?:""
+
                         _uiState.update { prev ->
                             prev.copy(
                                 invite = invite,
                                 approvalRequired = invite.dataOrNull()?.isApprovalRequiredNow() ?: true,
                                 inviteUrl = invite.dataOrNull()?.let {
                                     createInviteLinkUseCase(it.code)
-                                },
+                                }
                             )
                         }
 
@@ -245,7 +252,17 @@ class InvitePersonViewModel(
             }
         }
     }
+    fun setSliderPage(page: Int) {
+        _uiState.update { it.copy(currentSliderPage = page) }
+    }
 
+    fun showSlider() {
+        _uiState.update { it.copy(showSlider = true) }
+    }
+
+    fun hideSlider() {
+        _uiState.update { it.copy(showSlider = false) }
+    }
     fun onClickResetCode() {
         _uiState.value.invite.dataOrNull()?.also { currentInvite ->
             launchUpdateInvite(

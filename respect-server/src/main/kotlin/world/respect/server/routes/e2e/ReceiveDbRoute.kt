@@ -12,7 +12,7 @@ import java.io.File
 fun Route.ReceiveDbRoute(e2eUploadsDir: File) {
     e2eUploadsDir.mkdirs()
     post("receivedb") {
-        val filename = requireNotNull(call.request.queryParameters["filename"])
+        val filename = File(requireNotNull(call.request.queryParameters["filename"])).name
         val dbBytes = call.receive<ByteArray>()
         File(e2eUploadsDir, filename).writeBytes(dbBytes)
         call.respond(HttpStatusCode.OK)

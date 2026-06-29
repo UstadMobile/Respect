@@ -61,9 +61,7 @@ import world.respect.lib.xapi.OpenEelXapiConstants.HEADER_XAPI_VERSION
 import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
 import world.respect.lib.xapi.composites.XapiAssignmentTaskProgress
-import world.respect.lib.xapi.exceptions.XapiBadRequestException
-import world.respect.lib.xapi.exceptions.XapiConflictException
-import world.respect.lib.xapi.exceptions.XapiForbiddenException
+import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
 import world.respect.lib.xapi.ext.objectSubstatementOrNull
@@ -265,7 +263,7 @@ class XapiStatementsResourceDb(
         )
     }
 
-    override suspend fun post(list: List<XapiStatement>): List<Uuid> {
+    override suspend fun post(list: List<XapiStatement>): DataLoadState<List<Uuid>> {
         val statementsWithIdsSet = list.map {
             it.copyWithIdIfNotSet()
         }
@@ -273,7 +271,7 @@ class XapiStatementsResourceDb(
         //Run basic validations
         statementsWithIdsSet.forEach { stmt ->
             if(stmt.`object` !is XapiActivity && stmt.`object`.objectType == null) {
-                throw XapiBadRequestException("When StatementObject is not Activity, objectType MUST be set")
+                throw XapiException(400, "When StatementObject is not Activity, objectType MUST be set")
             }
 
             stmt.allVerbs().forEach {
@@ -297,13 +295,13 @@ class XapiStatementsResourceDb(
 
                 stmtOrSubStmt.result?.score?.scaled?.also {
                     if(it < -1 || it > 1)
-                        throw XapiBadRequestException("Score scaled must be between -1 and 1")
+                        throw XapiException(400, "Score scaled must be between -1 and 1")
                 }
             }
         }
 
         val authenticatedPerson = getAuthenticatedPersonUseCase()
-            ?: throw XapiForbiddenException("Not authenticated")
+            ?: throw XapiException(403, "Not authenticated")
 
         if(!authenticatedPerson.isAdminOrTeacher()) {
             statementsWithIdsSet.forEach {
@@ -311,7 +309,7 @@ class XapiStatementsResourceDb(
                 if(it.actor.account?.homePage != schoolUrl.toString()
                     || it.actor.account?.name != authenticatedUser.guid
                 ) {
-                    throw XapiForbiddenException("User does not have permission to post statement as any other actor")
+                    throw XapiException(403, "User does not have permission to post statement as any other actor")
                 }
             }
         }
@@ -328,23 +326,23 @@ class XapiStatementsResourceDb(
                             statementIdLo = stmtIdLo,
                         ) != null
                     ) {
-                        throw XapiConflictException(message = "Statement $stmtId already exists")
+                        throw XapiException(409, message = "Statement $stmtId already exists")
                     }
 
                     //check if this is a voiding statement
                     if(statement.verb.id == XapiVerb.ID_VOIDED) {
                         //find the statement we are going to void
                         val statementRef = statement.`object` as? XapiStatementRef
-                            ?: throw XapiBadRequestException("Voiding statement object not statementref")
+                            ?: throw XapiException(400, "Voiding statement object not statementref")
                         val (voidIdHi, voidIdLo) = Uuid.parse(statementRef.id).toLongPair()
 
                         val verbUidToVoid = schoolDb.getStatementDao().getVerbUidNumToBeVoided(
                             statementIdHi = voidIdHi,
                             statementIdLo = voidIdLo,
-                        ) ?: throw XapiForbiddenException("Statement to void not found")
+                        ) ?: throw XapiException(403, "Statement to void not found")
 
                         if(uidNumberMapper(XapiVerb.ID_VOIDED) == verbUidToVoid)
-                            throw XapiForbiddenException("Cannot void a void statement")
+                            throw XapiException(403, "Cannot void a void statement")
 
                         schoolDb.getStatementDao().updateSetStatementVoided(
                             voidIdHi, voidIdLo
@@ -356,7 +354,9 @@ class XapiStatementsResourceDb(
             }
         }
 
-        return statementsWithIdsSet.mapNotNull { it.id }
+        return DataReadyState(
+            data = statementsWithIdsSet.mapNotNull { it.id }
+        )
     }
 
     override suspend fun updateLocal(

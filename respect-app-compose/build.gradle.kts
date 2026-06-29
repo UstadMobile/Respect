@@ -66,7 +66,7 @@ kotlin {
 
     androidTarget {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 
@@ -83,6 +83,7 @@ kotlin {
         androidMain.dependencies {
             api(projects.respectCredentials)
             implementation(projects.respectLibSharedSe)
+            implementation(projects.respectLibXapiIpcServer)
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.play.service.auth)
             implementation(compose.preview)
@@ -103,7 +104,6 @@ kotlin {
             implementation(libs.acra.core)
             implementation(libs.libphonenumber.android)
             implementation(libs.accompanist.permissions)
-
         }
 
         commonMain.dependencies {
@@ -183,7 +183,7 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 128
-        versionName = "1.0.28"
+        versionName = project.version.toString()
 
         for(propName in ACRA_PROP_NAMES) {
             buildConfigField(
@@ -219,8 +219,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 

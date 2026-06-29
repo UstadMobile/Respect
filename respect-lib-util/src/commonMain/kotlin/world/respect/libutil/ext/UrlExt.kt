@@ -149,11 +149,22 @@ fun Url.normalizeForEndpoint(): Url {
     return URLBuilder(this).apply {
         host = host.lowercase()
 
-        if(pathSegments.lastOrNull()?.endsWith("/") != true) {
-            appendPathSegments("/")
-        }
+        normalizeForEndpoint()
     }.build()
 }
+
+/**
+ * When used as part of a URLBuilder, this should be called last, after making any changes to path
+ * segments.
+ */
+fun URLBuilder.normalizeForEndpoint(): URLBuilder {
+    return if(pathSegments.lastOrNull()?.endsWith("/") != true) {
+        appendPathSegments("/")
+    }else {
+        this
+    }
+}
+
 
 /**
  * Append an assignment id to the embedded xAPI endpoint.

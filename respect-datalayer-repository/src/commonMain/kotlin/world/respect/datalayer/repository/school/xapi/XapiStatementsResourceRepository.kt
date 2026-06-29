@@ -38,22 +38,24 @@ class XapiStatementsResourceRepository(
 
     override suspend fun post(
         list: List<XapiStatement>
-    ): List<Uuid> {
-        val uuidsSaved = local.post(list)
+    ): DataLoadState<List<Uuid>> {
+        val localResult = local.post(list)
 
         val timeNow = Clock.System.now().toEpochMilliseconds()
 
-        remoteWriteQueue.add(
-            uuidsSaved.map {
-                WriteQueueItem(
-                    model = WriteQueueItem.Model.XAPI_STATEMENT,
-                    uid = it.toString(),
-                    timeQueued = timeNow,
-                )
-            }
-        )
+        localResult.dataOrNull()?.also { uuidsSaved ->
+            remoteWriteQueue.add(
+                uuidsSaved.map {
+                    WriteQueueItem(
+                        model = WriteQueueItem.Model.XAPI_STATEMENT,
+                        uid = it.toString(),
+                        timeQueued = timeNow,
+                    )
+                }
+            )
+        }
 
-        return uuidsSaved
+        return localResult
     }
 
     override suspend fun get(

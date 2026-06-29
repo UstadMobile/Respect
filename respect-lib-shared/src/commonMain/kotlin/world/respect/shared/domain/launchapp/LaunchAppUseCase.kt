@@ -20,6 +20,7 @@ interface LaunchAppUseCase {
         val publicationUrl: Url,
         val publication: OpdsPublication,
         val assignmentActivityId: String? = null,
+        val lessonActivityId: String? = null,
     )
 
     suspend operator fun invoke(

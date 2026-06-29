@@ -1,0 +1,10 @@
+appId: world.respect.app
+---
+- launchApp:
+    appId: "world.respect.app"
+    arguments:
+      launchUrl: "${output.SCHOOL_URL}respect_school_link/senddbtoserver"
+- extendedWaitUntil:
+    visible:
+      id: "db_completed"
+    timeout: 30000

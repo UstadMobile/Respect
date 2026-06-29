@@ -65,8 +65,6 @@ onFlowComplete:
 - assertVisible: "Lesson 001"
 - assertVisible: "Statement Maker"
 
-- clearState: world.respect.app
-- runFlow: "subflows/school_admin_login_flow.yaml"
 - assertVisible: "Home"
 - assertVisible:
     id: "app_title"

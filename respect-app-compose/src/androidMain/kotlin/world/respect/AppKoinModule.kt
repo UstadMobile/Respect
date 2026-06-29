@@ -261,7 +261,6 @@ import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPubl
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCaseAndroid
 import world.respect.shared.domain.xapi.xapinanohttpd.XapiResourceProviderAndroid
-import world.respect.shared.domain.xapi.xapinanohttpd.XapiNanoHttpdResourceProviderAndroid
 import world.respect.shared.viewmodel.bookmark.BookmarkListViewModel
 
 

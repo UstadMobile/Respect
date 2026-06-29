@@ -45,7 +45,7 @@ data class BookmarkListUiState(
 
 class BookmarkListViewModel(
     savedStateHandle: SavedStateHandle,
-    private val accountManager: RespectAccountManager,
+    accountManager: RespectAccountManager,
     private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     private val _uiState = MutableStateFlow(BookmarkListUiState())
@@ -79,7 +79,9 @@ class BookmarkListViewModel(
                 ),
                 dataLoadParams = DataLoadParams(),
             ).collect { result ->
-                val statements = result.dataOrNull()?.statements ?: emptyList()
+                val statements = result.dataOrNull()?.statements
+                    ?.sortedBy { it.timestamp }
+                    ?: emptyList()
 
                 val publications = loadPublications(statements)
 

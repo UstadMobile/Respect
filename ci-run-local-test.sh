@@ -33,10 +33,12 @@
       --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
       --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
       --env SCHOOL_NAME=TestSchool \
+      --format=junit \
+      --output=build/maestro/output/report.xml \
       .maestro/flows/flow-passkey/*.yaml
       MAESTRO_STATUS=$?
 
-      TEST_VIDEO_PATH=build/user_signup_using_passkey_test
+      TEST_VIDEO_PATH=build/user_signup_using_passkey_test.mp4
 
 # Copy the video file and report file to Jenkins
       echo "Saving Test files from local to Jenkins"

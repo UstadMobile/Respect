@@ -1,8 +1,7 @@
 appId: world.respect.app
 onFlowStart:
   - clearState: world.respect.app
-  - startRecording:
-      path: "../user_signup_using_passkey_test.mp4"
+  - startRecording: user_signup_using_passkey_test
   - runScript:
       file: "../scripts/school_init.js"
       env:

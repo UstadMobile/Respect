@@ -196,9 +196,9 @@ if [ "$1" == "cloud" ]; then
               TEST_NAME=$(basename "$FLOW_FILE" .yaml)
 
               DB_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/data/e2e-uploads"
-              mv "$DB_FILE_PATH/school_3_https___${TEST_PORT}_ustadtesting_ustadmobile_com_" "$DB_FILE_PATH/db_$TEST_NAME"
+              mv "$DB_FILE_PATH/school_3_https___${TEST_PORT}_ustadtesting_ustadmobile_com_" "$DB_FILE_PATH/db_${TEST_NAME}"
 
-              cp -r "$DB_FILE_PATH/db_$TEST_NAME" "$WORKSPACE/build/maestro/db_folder"
+              cp -r "$DB_FILE_PATH/db_${TEST_NAME}" "$WORKSPACE/build/maestro/db_folder"
         done
 
          if [ -n "$MAESTRO_CLOUD_URL" ]; then

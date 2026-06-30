@@ -186,8 +186,8 @@ if [ "$1" == "cloud" ]; then
        for FLOW_FILE in $WORKSPACE/.maestro/flows/*.yaml; do
             TEST_NAME=$(basename "$FLOW_FILE" .yaml)
 
-            LOGO_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/logs/respect-server.log"
-            DB_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/data/e2e-uploads"
+            LOGO_FILE_PATH="$ROOTDIR/build/testservercontroller/workspace/$TEST_NAME/logs/respect-server.log"
+            DB_FILE_PATH="$ROOTDIR/build/testservercontroller/workspace/$TEST_NAME/data/e2e-uploads"
 
           FILE_NAME=$(grep -oP 'filename=\K[^ ]+' ${LOGO_FILE_PATH} | tail -n 1)
            if [ -z "$FILE_NAME" ]; then
@@ -199,7 +199,7 @@ if [ "$1" == "cloud" ]; then
 
           mv "$DB_FILE_PATH/${FILE_NAME}_ustadtesting_ustadmobile_com_" "$DB_FILE_PATH/db_${TEST_NAME}"
 
-          cp -r "$DB_FILE_PATH/db_${TEST_NAME}" "$WORKSPACE/build/maestro/db_folder"
+          cp -r "$DB_FILE_PATH/db_${TEST_NAME}" "$ROOTDIR/build/maestro/db_folder"
        done
 
     if [ -f "$MAESTRO_LOG_FILE" ]; then

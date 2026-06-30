@@ -175,6 +175,18 @@ if [ "$1" == "cloud" ]; then
     # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
     MAESTRO_STATUS=${PIPESTATUS[0]}
 
+    # Creating folder to save db files after running end-to-end tests
+    mkdir -p "$WORKSPACE/build/maestro/db_folder"
+
+    for FLOW_FILE in $WORKSPACE/.maestro/flows/*.yaml; do
+      TEST_NAME=$(basename "$FLOW_FILE" .yaml)
+
+      DB_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/data/e2e-uploads"
+      mv "$DB_FILE_PATH/school_3_https___8063_ustadtesting_ustadmobile_com_" "$DB_FILE_PATH/db_$TEST_NAME"
+
+      cp -r "$DB_FILE_PATH/db_$TEST_NAME" "$WORKSPACE/build/maestro/db_folder"
+    done
+
     echo "ci-run-maestro: Cloud run finished. Extracting URL from log file..."
 
     MAESTRO_LOG_FILE="$TESTSERVERCONTROLLER_BASEDIR/lastMaestroRun.log"

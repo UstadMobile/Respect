@@ -5,8 +5,6 @@ import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttp
-import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttp
 import world.respect.datalayer.http.school.ClassDataSourceHttp
 import world.respect.datalayer.http.school.EnrollmentDataSourceHttp
 import world.respect.datalayer.http.school.InviteDataSourceHttp
@@ -16,6 +14,8 @@ import world.respect.datalayer.http.school.PersonPasswordDataSourceHttp
 import world.respect.datalayer.http.school.PersonQrBadgeDataSourceHttp
 import world.respect.datalayer.http.school.SchoolAppDataSourceHttp
 import world.respect.datalayer.http.school.SchoolPermissionGrantDataSourceHttp
+import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttp
+import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttp
 import world.respect.datalayer.http.school.xapi.XapiResourceHttp
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper

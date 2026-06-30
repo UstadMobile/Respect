@@ -147,8 +147,10 @@ import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCaseAndroid
+import world.respect.app.domain.testing.GetDbFilesForUploadUseCaseAndroid
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
+import world.respect.shared.domain.testing.GetDbFilesForUploadUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
@@ -592,6 +594,12 @@ val appKoinModule = module {
 
     single<GetDeviceInfoUseCase> {
         GetDeviceInfoUseCaseAndroid(androidContext())
+    }
+
+    single<GetDbFilesForUploadUseCase> {
+        GetDbFilesForUploadUseCaseAndroid(
+            context = androidContext(),
+        )
     }
 
     single<CreatePasskeyUseCaseAndroidChannelHost> {

@@ -4,34 +4,38 @@ import android.content.Context
 import io.ktor.http.Url
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.component.KoinComponent
+import world.respect.datalayer.db.RespectSchoolDatabase
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.shared.domain.school.SchoolDbPath
 import world.respect.shared.domain.testing.DbFileForUpload
 import world.respect.shared.domain.testing.GetDbFilesForUploadUseCase
-import java.io.File
+import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 
 class GetDbFilesForUploadUseCaseAndroid(
     private val context: Context,
-) : GetDbFilesForUploadUseCase {
+) : GetDbFilesForUploadUseCase, KoinComponent {
 
     override suspend fun invoke(schoolUrl: Url): DbFileForUpload? {
         val schoolDbName = SchoolDbPath.forSchoolUrl(schoolUrl).filename
         val dbFile = context.getDatabasePath(schoolDbName)
         if (!dbFile.exists()) return null
 
-        val backupFile = withContext(Dispatchers.IO) {
-            File.createTempFile(BACKUP_FILE_PREFIX, BACKUP_FILE_SUFFIX, context.cacheDir)
+        val db = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            SchoolDirectoryEntryScopeId(schoolUrl, null).scopeId
+        ).get<RespectSchoolDatabase>()
+
+        return withContext(Dispatchers.IO) {
+            db.openHelper.writableDatabase.query(PRAGMA_CHECKPOINT).close()
+            db.close()
+
+            DbFileForUpload(filename = schoolDbName, bytes = dbFile.readBytes())
         }
-
-        dbFile.copyTo(backupFile, overwrite = true)
-        return DbFileForUpload(filename = schoolDbName, bytes = backupFile.readBytes())
     }
-
     companion object {
 
-        private const val BACKUP_FILE_PREFIX = "db_backup_"
+        private const val PRAGMA_CHECKPOINT = "PRAGMA wal_checkpoint(FULL)"
 
-        private const val BACKUP_FILE_SUFFIX = ".db"
 
     }
-
 }

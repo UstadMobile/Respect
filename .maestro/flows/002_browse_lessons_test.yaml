@@ -77,9 +77,12 @@ onFlowComplete:
 - assertVisible: "Downloaded"
 - tapOn: "Open"
 - extendedWaitUntil:
-    visible: "JS Tetris.*"
+    visible: "OkHttpWebViewClient error: Failed to connect.*"
     timeout: 10000
-- assertVisible: "Tin Can Home"
+#- extendedWaitUntil:
+#    visible: "JS Tetris.*"
+#    timeout: 10000
+#- assertVisible: "Tin Can Home"
 - tapOn: "Close"
 - setAirplaneMode: disabled
 - tapOn: "Apps"

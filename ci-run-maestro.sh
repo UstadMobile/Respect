@@ -187,7 +187,10 @@ if [ "$1" == "cloud" ]; then
          export MAESTRO_CLOUD_URL=$(grep -o 'https://app\.robintest\.com/[^ ]*' "$MAESTRO_LOG_FILE" | tail -1)
 
          # Extract port from URL
-         TEST_PORT=$(grep "ready" "$MAESTRO_LOG_FILE" | grep -o 'https://[0-9]\+' | sed 's#https://##')
+         TEST_PORT=$(grep "ready" "$MAESTRO_LOG_FILE" \
+           | grep -o 'https://[0-9]\+' \
+           | head -1 \
+           | sed 's#https://##')
 
          export TEST_PORT
          echo "ci-run-maestro: Extracted PORT: ${TEST_PORT}"

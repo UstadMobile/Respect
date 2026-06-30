@@ -84,7 +84,7 @@ onFlowComplete:
 - tapOn: "Sign-up"
 - assertVisible:
     id: "app_title"
-    text: "Home"
+    text: "Apps"
 - tapOn:
     id: "user_account_icon"
 - assertVisible: "Profile"
@@ -106,4 +106,4 @@ onFlowComplete:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Home"
+- assertVisible: "Apps"

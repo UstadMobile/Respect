@@ -54,9 +54,6 @@ onFlowComplete:
 - tapOn: "Example Web App"
 - tapOn: "Lessons"
 - tapOn: "Examples"
-- assertVisible:
-    id: "app_title"
-    text: "Examples"
 - tapOn: "JS Tetris"
 - assertVisible:
     id: "app_title"
@@ -67,13 +64,21 @@ onFlowComplete:
     timeout: 10000
 - setAirplaneMode: enabled
 - assertVisible: "Downloaded"
+- stopApp
+- launchApp
+- assertVisible: "Apps"
+- tapOn: "Example Web App"
+- tapOn: "Lessons"
+- tapOn: "Examples"
+- tapOn: "JS Tetris"
+- assertVisible:
+    id: "app_title"
+    text: "JS Tetris"
+- assertVisible: "Downloaded"
 - tapOn: "Open"
 - extendedWaitUntil:
     visible: "JS Tetris.*"
     timeout: 10000
-- assertVisible:
-    id: "app_title"
-    text: "JS Tetris.*"
 - assertVisible: "Tin Can Home"
 - tapOn: "Close"
 - setAirplaneMode: disabled

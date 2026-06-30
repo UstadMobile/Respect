@@ -188,9 +188,8 @@ if [ "$1" == "cloud" ]; then
 
          # Extract port from URL
          TEST_PORT=$(grep "ready" "$MAESTRO_LOG_FILE" \
-           | grep -o 'https://[0-9]\+' \
            | head -1 \
-           | sed 's#https://##')
+           | sed -n 's#.*https://\([0-9]\+\)\..*#\1#p')
 
          export TEST_PORT
          echo "ci-run-maestro: Extracted PORT: ${TEST_PORT}"

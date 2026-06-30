@@ -5,8 +5,6 @@ import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
-import world.respect.datalayer.db.school.opds.OpdsFeedDataSourceDb
 import world.respect.datalayer.db.school.ClassDatasourceDb
 import world.respect.datalayer.db.school.EnrollmentDataSourceDb
 import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
@@ -19,6 +17,8 @@ import world.respect.datalayer.db.school.PersonQrBadgeDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
 import world.respect.datalayer.db.school.SchoolAppDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
+import world.respect.datalayer.db.school.opds.OpdsFeedDataSourceDb
+import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
 import world.respect.datalayer.db.school.xapi.XapiResourceDb
 import world.respect.datalayer.school.ClassDataSourceLocal
 import world.respect.datalayer.school.DummySchoolConfigSettingsDataSource

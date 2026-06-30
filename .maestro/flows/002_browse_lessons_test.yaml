@@ -75,4 +75,4 @@ onFlowComplete:
     text: "Bookmark"
     index: 0
 - assertNotVisible: "Lesson 001"
-- assertVisible: "Lesson 002"
+- assertVisible: "Statement Maker"

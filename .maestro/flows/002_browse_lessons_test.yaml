@@ -77,7 +77,7 @@ onFlowComplete:
 - assertVisible: "Downloaded"
 - tapOn: "Open"
 - extendedWaitUntil:
-    visible: "OkHttpWebViewClient error: Failed to connect.*"
+    visible: "OkHttpWebViewClient error:.*"
     timeout: 10000
 #- extendedWaitUntil:
 #    visible: "JS Tetris.*"

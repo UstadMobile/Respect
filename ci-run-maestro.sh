@@ -198,9 +198,9 @@ if [ "$1" == "cloud" ]; then
     else
          echo "ci-run-maestro: Log file not found. Skipping download."
     fi
-  fi
 
-  if [ "$1" == "wait-for-upload" ]; then
+
+  elif [ "$1" == "wait-for-upload" ]; then
     MAESTRO_CMD_FILE="$HOME/tmp/run-local-$BUILD_TAG.sh"
 
     DONE_FLAG_FILE=$WORKSPACE/build/maestro-uploaded

@@ -80,7 +80,7 @@ fi
 # creation of the school, that is encoded here and passed to Maestro to avoid using Maestro's
 # Javascript (which does not have the btoa function)
 DIR_ADMIN_TO_ENCODE="admin:$DIR_ADMIN_AUTH_PASS"
-DIR_ADMIN_AUTH_HEADER="Basic $(printf '%s' $DIR_ADMIN_TO_ENCODE | base64)"
+DIR_ADMIN_AUTH_HEADER="'Basic $(printf '%s' $DIR_ADMIN_TO_ENCODE | base64)'"
 
 export JAVA_OPTS="-Dlogs_dir=$TESTSERVERCONTROLLER_BASEDIR/logs/"
 $TESTCONTROLLER_BIN  \
@@ -110,6 +110,7 @@ if [ ! -e build/maestro/results ]; then
     mkdir -p build/maestro/output
 fi
 
+    APK_PATH="$ROOTDIR/respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk"
 
 TEST_APP_URL_ARG=""
 
@@ -156,7 +157,7 @@ if [ "$1" == "cloud" ]; then
         --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \
         --flows=.maestro/flows \
         --format=junit \
-        --output=build/maestro/report.xml \
+        --output=build/maestro/output/report.xml \
         --timeout=300 \
         $NAME_ARG \
         --repo-name=Respect \
@@ -208,6 +209,42 @@ if [ "$1" == "cloud" ]; then
          echo "ci-run-maestro: Log file not found. Skipping download."
     fi
 
+
+  elif [ "$1" == "wait-for-upload" ]; then
+    MAESTRO_CMD_FILE="$HOME/tmp/run-local-$BUILD_TAG.sh"
+
+    DONE_FLAG_FILE=$WORKSPACE/build/maestro-uploaded
+
+    if [ -e $DONE_FLAG_FILE ]; then
+      rm $DONE_FLAG_FILE
+    fi
+
+       VARIABLE_FILE="build/test_variables.txt"
+       TEST_FILE_PATH="$ROOTDIR/build"
+       VARIABLE_FILE_PATH="$ROOTDIR/$VARIABLE_FILE"
+
+
+    echo DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS $'\n' \
+         TESTCONTROLLER_URL=$TESTCONTROLLER_URL $'\n' \
+         SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD $'\n' \
+         DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" $'\n' \
+         SCHOOL_NAME=TestSchool $'\n' \
+         APP_PATH=$USER@$HOSTNAME:$APK_PATH $'\n' \
+         JENKINS_TEST_PATH=$USER@$HOSTNAME:$TEST_FILE_PATH $'\n' \
+         DONE_FLAG_TEST_PATH=$USER@$HOSTNAME:$DONE_FLAG_FILE > $VARIABLE_FILE
+
+    echo "Variables for test : to copy: $USER@$HOSTNAME:$VARIABLE_FILE_PATH"
+
+    # This script should be run by Jenkins using a timeout control.
+    while [ ! -f $DONE_FLAG_FILE ]; do
+      sleep 5
+    done
+
+    # Read the status from the file
+    MAESTRO_STATUS=$(cat $DONE_FLAG_FILE)
+    echo "ci-run-maestro: Local test completed with status: Maestro Status=$MAESTRO_STATUS"
+
+    echo "$DONE_FLAG_FILE appeared - proceeding"
 else
     maestro test \
       --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
@@ -217,12 +254,10 @@ else
       --env SCHOOL_NAME=TestSchool \
       $TEST_APP_URL_ARG \
       --format=junit \
-      --test-output-dir=build/maestro/output \
-      --output=build/maestro/report.xml \
+      --output=build/maestro/output/report.xml \
       .maestro/flows/*.yaml
     MAESTRO_STATUS=$?
 fi
-
 
 echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
 

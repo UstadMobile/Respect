@@ -151,6 +151,9 @@ import world.respect.app.domain.testing.GetDbFilesForUploadUseCaseAndroid
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
 import world.respect.shared.domain.testing.GetDbFilesForUploadUseCase
+import world.respect.shared.domain.testing.SendDbToServerUseCase
+import world.respect.shared.domain.testing.SendDbToServerUseCaseClient
+import world.respect.shared.viewmodel.testing.SendDbToServerViewModel
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
@@ -601,6 +604,15 @@ val appKoinModule = module {
             context = androidContext(),
         )
     }
+
+    single<SendDbToServerUseCase> {
+        SendDbToServerUseCaseClient(
+            httpClient = get(),
+            getDbFilesForUploadUseCase = get(),
+        )
+    }
+
+    viewModelOf(::SendDbToServerViewModel)
 
     single<CreatePasskeyUseCaseAndroidChannelHost> {
         CreatePasskeyUseCaseAndroidChannelHost()

@@ -190,7 +190,7 @@ if [ "$1" == "cloud" ]; then
          TEST_PORT=$(grep "ready" "$MAESTRO_LOG_FILE" | grep -o 'https://[0-9]\+' | sed 's#https://##')
 
          export TEST_PORT
-         echo "ci-run-maestro: Extracted PORT: $TEST_PORT"
+         echo "ci-run-maestro: Extracted PORT: ${TEST_PORT}"
 
         for FLOW_FILE in $WORKSPACE/.maestro/flows/*.yaml; do
               TEST_NAME=$(basename "$FLOW_FILE" .yaml)

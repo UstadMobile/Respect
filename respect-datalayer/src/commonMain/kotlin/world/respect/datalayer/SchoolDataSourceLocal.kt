@@ -12,7 +12,11 @@ import world.respect.datalayer.school.ReportDataSourceLocal
 import world.respect.datalayer.school.SchoolAppDataSourceLocal
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
+import world.respect.datalayer.school.xapi.XapiActivitiesResourceLocal
+import world.respect.datalayer.school.xapi.XapiAgentsResourceLocal
 import world.respect.datalayer.school.xapi.XapiResourceLocal
+import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
+import world.respect.lib.xapi.resources.XapiResource
 
 /**
  * Local DataSource implementation (eg based on a database). Local DataSources include putLocal
@@ -40,7 +44,6 @@ interface SchoolDataSourceLocal: SchoolDataSource {
     override val enrollmentDataSource: EnrollmentDataSourceLocal
 
     override val inviteDataSource: InviteDataSourceLocal
-
 
     override val opdsPublicationDataSource: OpdsPublicationDataSourceLocal
 

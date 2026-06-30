@@ -46,7 +46,6 @@ interface SchoolDataSource {
 
     val inviteDataSource: InviteDataSource
 
-
     val opdsPublicationDataSource: OpdsPublicationDataSource
 
     val opdsFeedDataSource: OpdsFeedDataSource

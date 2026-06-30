@@ -116,7 +116,6 @@ class SchoolDataSourceRepository(
         )
     }
 
-
     override val opdsPublicationDataSource: OpdsPublicationDataSource by lazy {
         OpdsPublicationDataSourceRepository(
             local = local.opdsPublicationDataSource,

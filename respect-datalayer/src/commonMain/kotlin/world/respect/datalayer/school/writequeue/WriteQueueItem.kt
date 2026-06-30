@@ -27,7 +27,8 @@ class WriteQueueItem(
         INVITE(9),
         OPDS_FEED(10),
 
-        XAPI_STATEMENT(11)
+        XAPI_STATEMENT(11),
+
         ;
 
 

@@ -64,7 +64,6 @@ onFlowComplete:
 - tapOn: "Bookmarks"
 - assertVisible: "Lesson 001"
 - assertVisible: "Statement Maker"
-
 - assertVisible: "Home"
 - assertVisible:
     id: "app_title"

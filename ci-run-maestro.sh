@@ -182,26 +182,21 @@ if [ "$1" == "cloud" ]; then
 
     MAESTRO_LOG_FILE="$TESTSERVERCONTROLLER_BASEDIR/lastMaestroRun.log"
 
+    RESPONSE=$(curl -s "$TESTCONTROLLER_URLtestcontroller/start?waitForUrl=api/directory/school")
+    TEST_PORT=$(echo "$RESPONSE" | jq -r '.port')
+
+       for FLOW_FILE in $WORKSPACE/.maestro/flows/*.yaml; do
+            TEST_NAME=$(basename "$FLOW_FILE" .yaml)
+
+            DB_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/data/e2e-uploads"
+            mv "$DB_FILE_PATH/school_3_https___${TEST_PORT}_ustadtesting_ustadmobile_com_" "$DB_FILE_PATH/db_${TEST_NAME}"
+
+            cp -r "$DB_FILE_PATH/db_${TEST_NAME}" "$WORKSPACE/build/maestro/db_folder"
+       done
+
     if [ -f "$MAESTRO_LOG_FILE" ]; then
          # Grep the URL directly from the file
          export MAESTRO_CLOUD_URL=$(grep -o 'https://app\.robintest\.com/[^ ]*' "$MAESTRO_LOG_FILE" | tail -1)
-
-         # Extract port from URL
-         TEST_PORT=$(grep "ready" "$MAESTRO_LOG_FILE" \
-           | head -1 \
-           | sed -n 's#.*https://\([0-9]\+\)\..*#\1#p')
-
-         export TEST_PORT
-         echo "ci-run-maestro: Extracted PORT: ${TEST_PORT}"
-
-        for FLOW_FILE in $WORKSPACE/.maestro/flows/*.yaml; do
-              TEST_NAME=$(basename "$FLOW_FILE" .yaml)
-
-              DB_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/data/e2e-uploads"
-              mv "$DB_FILE_PATH/school_3_https___${TEST_PORT}_ustadtesting_ustadmobile_com_" "$DB_FILE_PATH/db_${TEST_NAME}"
-
-              cp -r "$DB_FILE_PATH/db_${TEST_NAME}" "$WORKSPACE/build/maestro/db_folder"
-        done
 
          if [ -n "$MAESTRO_CLOUD_URL" ]; then
             echo "ci-run-maestro: Found URL: $MAESTRO_CLOUD_URL"

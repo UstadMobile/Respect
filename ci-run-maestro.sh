@@ -182,16 +182,19 @@ if [ "$1" == "cloud" ]; then
 
     MAESTRO_LOG_FILE="$TESTSERVERCONTROLLER_BASEDIR/lastMaestroRun.log"
 
-    RESPONSE=$(curl -s "$TESTCONTROLLER_URLtestcontroller/start?waitForUrl=api/directory/school")
-    TEST_PORT=$(echo "$RESPONSE" | jq -r '.port')
 
        for FLOW_FILE in $WORKSPACE/.maestro/flows/*.yaml; do
             TEST_NAME=$(basename "$FLOW_FILE" .yaml)
 
+            LOGO_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/logs"
             DB_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/data/e2e-uploads"
-            mv "$DB_FILE_PATH/school_3_https___${TEST_PORT}_ustadtesting_ustadmobile_com_" "$DB_FILE_PATH/db_${TEST_NAME}"
 
-            cp -r "$DB_FILE_PATH/db_${TEST_NAME}" "$WORKSPACE/build/maestro/db_folder"
+          FILE_NAME=$(grep -oP 'filename=\K[^ ]+' logfile.txt | tail -1)
+          echo "$FILE_NAME"
+
+          mv "$DB_FILE_PATH/${FILE_NAME}_ustadtesting_ustadmobile_com_" "$DB_FILE_PATH/db_${TEST_NAME}"
+
+          cp -r "$DB_FILE_PATH/db_${TEST_NAME}" "$WORKSPACE/build/maestro/db_folder"
        done
 
     if [ -f "$MAESTRO_LOG_FILE" ]; then

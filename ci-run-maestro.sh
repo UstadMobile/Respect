@@ -189,8 +189,13 @@ if [ "$1" == "cloud" ]; then
             LOGO_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/logs/respect-server.log"
             DB_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/data/e2e-uploads"
 
-          FILE_NAME=$(grep -oP 'filename=\K[^ ]+' logfile.txt | tail -1)
-          echo "$FILE_NAME"
+          FILE_NAME=$(grep -oP 'filename=\K[^ ]+' ${LOGO_FILE_PATH} | tail -n 1)
+           if [ -z "$FILE_NAME" ]; then
+                echo "No filename found for $TEST_NAME"
+                continue
+           fi
+
+           echo "FILE_NAME=$FILE_NAME"
 
           mv "$DB_FILE_PATH/${FILE_NAME}_ustadtesting_ustadmobile_com_" "$DB_FILE_PATH/db_${TEST_NAME}"
 

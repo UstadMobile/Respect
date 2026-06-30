@@ -186,7 +186,7 @@ if [ "$1" == "cloud" ]; then
        for FLOW_FILE in $WORKSPACE/.maestro/flows/*.yaml; do
             TEST_NAME=$(basename "$FLOW_FILE" .yaml)
 
-            LOGO_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/logs"
+            LOGO_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/logs/respect-server.log"
             DB_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/data/e2e-uploads"
 
           FILE_NAME=$(grep -oP 'filename=\K[^ ]+' logfile.txt | tail -1)

@@ -2,12 +2,10 @@ package world.respect.shared.viewmodel.apps.list
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import io.github.aakira.napier.Napier
-import kotlinx.coroutines.flow.Flow
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -20,63 +18,58 @@ import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.EnterLink
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.DataLoadingState
-import world.respect.lib.dataloadstate.ext.map
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.map
+import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.xapi.OpenEelXapiConstants
-import world.respect.lib.xapi.ext.objectActivityOrNull
-import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
-import world.respect.lib.xapi.model.XapiStatement
-import world.respect.lib.xapi.model.XapiVerb
-import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.lib.opds.model.findSelfLinks
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.resolve
 
 data class AppListUiState(
-    val appList: DataLoadState<List<XapiStatement>> = DataLoadingState(),
-    val respectPublicationForXapiStatement: (XapiStatement) -> Flow<DataLoadState<OpdsPublication>> = {
-        emptyFlow()
-    },
+    val appList: DataLoadState<List<OpdsPublication>> = DataReadyState(emptyList())
 )
 
 class AppListViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
-
     override val scope: Scope = accountManager.requireActiveAccountScope()
-
     private val _uiState = MutableStateFlow(AppListUiState())
-
     val uiState = _uiState.asStateFlow()
-
     private val schoolDataSource: SchoolDataSource by inject()
-
-    private val getIconForXapiActivityUseCase: GetPublicationForXapiActivityUseCase by inject()
 
     init {
         _appUiState.update {
-            it.copy(title = Res.string.select_app.asUiText())
+            it.copy(
+                title = Res.string.select_app.asUiText(),
+            )
         }
-
-        _uiState.update {
-            it.copy(respectPublicationForXapiStatement = getIconForXapiActivityUseCase::invoke)
-        }
-
         viewModelScope.launch {
-            schoolDataSource.xapiResource.statements.getAsFlow(
-                listParams = XapiStatementsResource.GetStatementParams(
-                    verb = XapiVerb.ID_LISTED_APP,
-                    activity = OpenEelXapiConstants.CATEGORY_APP_LISTING_RECIPE,
-                    relatedActivities = true,
-                ),
-                dataLoadParams = DataLoadParams(),
-            ).collectLatest { state ->
-                _uiState.update { prev ->
-                    prev.copy(appList = state.map { result -> result.statements })
+            schoolDataSource.schoolConfigSettingDataSource.listAsFlow(
+                loadParams = DataLoadParams(),
+                params = SchoolConfigSettingDataSource.GetListParams(
+                    key = SchoolConfigSettingDataSource.KEY_APP_CATALOGS
+                )
+            ).collectLatest { config ->
+                val feedUrl = config.dataOrNull()?.firstOrNull()?.value?.let {
+                    Url(it)
+                } ?: return@collectLatest
+                schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
+                    url = feedUrl,
+                    params = DataLoadParams()
+                ).collect { dataLoad ->
+                    _uiState.update { prev ->
+                        prev.copy(
+                            appList = dataLoad.map {
+                                it.resolve(feedUrl).publications ?: emptyList()
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -90,19 +83,11 @@ class AppListViewModel(
         )
     }
 
-    fun onClickApp(app: XapiStatement) {
-        val manifest = app.objectActivityOrNull()?.definition?.webPubManifestAsUrlOrNull()
-        Napier.d("onClick App manifest from statement=$manifest")
-        if (manifest == null) {
-            Napier.w("onClick App no manifest url on statement")
-            return
-        }
-
+    fun onClickApp(app: OpdsPublication) {
+        val url = app.findSelfLinks().firstOrNull()?.href ?: return
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                AppsDetail.create(
-                    manifest
-                )
+                AppsDetail.create(Url(url))
             )
         )
     }

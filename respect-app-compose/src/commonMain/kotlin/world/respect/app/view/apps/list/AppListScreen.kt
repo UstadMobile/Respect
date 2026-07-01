@@ -16,29 +16,25 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import world.respect.app.app.RespectAsyncImage
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_from_link
+import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.langMapString
-import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.shared.viewmodel.apps.list.AppListUiState
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findIcons
-import world.respect.lib.xapi.ext.objectActivityOrNull
-import world.respect.lib.xapi.model.XapiStatement
 
 @Composable
 fun AppListScreen(
     viewModel: AppListViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
     AppListScreen(
         uiState = uiState,
         onClickAddLink = { viewModel.onClickAddLink() },
@@ -50,10 +46,9 @@ fun AppListScreen(
 fun AppListScreen(
     uiState: AppListUiState,
     onClickAddLink: () -> Unit,
-    onClickApp: (XapiStatement) -> Unit
+    onClickApp: (OpdsPublication) -> Unit
 ) {
     val appPublications = uiState.appList.dataOrNull() ?: emptyList()
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -75,21 +70,20 @@ fun AppListScreen(
                 }
             )
         }
-
         itemsIndexed(
             items = appPublications,
-            key = { index, app -> app.objectActivityOrNull()?.id ?: index.toString() }
-        ) { _, app ->
-            val publicationFlow = remember(app, uiState.respectPublicationForXapiStatement) {
-                uiState.respectPublicationForXapiStatement(app)
+            key = { index, app ->
+                app.metadata.identifier?.toString() ?: index
             }
-            val publication by publicationFlow.collectAsState(NoDataLoadedState.notFound())
-            val appData = publication.dataOrNull()
-
+        ) { index, app ->
             ListItem(
-                modifier = Modifier.fillMaxWidth().clickable { onClickApp(app) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        onClickApp(app)
+                    },
                 leadingContent = {
-                    appData?.findIcons()?.firstOrNull()?.also { iconLink ->
+                    app.findIcons().firstOrNull()?.also { iconLink ->
                         RespectAsyncImage(
                             uri = iconLink.href,
                             contentDescription = "",
@@ -101,10 +95,18 @@ fun AppListScreen(
                 },
                 headlineContent = {
                     Text(
-                        text = app.objectActivityOrNull()?.definition?.name?.let { langMapString(it) } ?: ""
+                        text = langMapString(app.metadata.title),
                     )
                 },
-                supportingContent = { Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { Text("-"); Text("-") } },
+                supportingContent = {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        //"-" is a placeholder for age range/category
+                        Text("-")
+                        Text("-")
+                    }
+                },
             )
         }
     }

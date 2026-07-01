@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
@@ -15,15 +16,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.app.RespectAsyncImage
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_from_link
 import world.respect.app.components.langMapString
+import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.shared.viewmodel.apps.list.AppListUiState
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.opds.model.findIcons
 import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiStatement
 
@@ -74,8 +80,25 @@ fun AppListScreen(
             items = appPublications,
             key = { index, app -> app.objectActivityOrNull()?.id ?: index.toString() }
         ) { _, app ->
+            val publicationFlow = remember(app, uiState.respectPublicationForXapiStatement) {
+                uiState.respectPublicationForXapiStatement(app)
+            }
+            val publication by publicationFlow.collectAsState(NoDataLoadedState.notFound())
+            val appData = publication.dataOrNull()
+
             ListItem(
                 modifier = Modifier.fillMaxWidth().clickable { onClickApp(app) },
+                leadingContent = {
+                    appData?.findIcons()?.firstOrNull()?.also { iconLink ->
+                        RespectAsyncImage(
+                            uri = iconLink.href,
+                            contentDescription = "",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(36.dp)
+                        )
+                    }
+                },
                 headlineContent = {
                     Text(
                         text = app.objectActivityOrNull()?.definition?.name?.let { langMapString(it) } ?: ""

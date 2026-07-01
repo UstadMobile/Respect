@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -105,44 +104,33 @@ fun LearningUnitDetailScreen(
                     )
                 },
                 supportingContent = {
-                    Column(
-                        verticalArrangement =
-                            Arrangement.spacedBy(4.dp)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
+                        Box(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clip(CircleShape)
+                                .background(white)
+                                .border(1.dp, black, CircleShape),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .clip(CircleShape)
-                                    .background(white)
-                                    .border(1.dp, black, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                uiState.app.dataOrNull()?.findIcons()?.firstOrNull()
-                                    ?.let { icon ->
-                                        RespectAsyncImage(
-                                            uri = icon.href,
-                                            contentDescription = "",
-                                            contentScale = ContentScale.Fit,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                    }
-                            }
-
-                            Spacer(modifier = Modifier.width(12.dp))
-
-                            Text(
-                                text = uiState.app.dataOrNull()?.metadata?.title?.let { langMapString(it) } ?: ""
-                            )
+                            uiState.app.dataOrNull()?.findIcons()?.firstOrNull()
+                                ?.let { icon ->
+                                    RespectAsyncImage(
+                                        uri = icon.href,
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
                         }
 
-                        Text(
-                            text = uiState.lessonDetail?.metadata?.subtitle
-                                ?.let { langMapString(it) } ?: ""
-                        )
+                        Spacer(modifier = Modifier.width(12.dp))
 
+                        Text(
+                            text = uiState.app.dataOrNull()?.metadata?.title?.let { langMapString(it) } ?: ""
+                        )
                     }
                 }
             )

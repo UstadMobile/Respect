@@ -124,7 +124,6 @@ class BookmarkListViewModel(
             pub?.let { id to it }
         }.toMap()
     }
-
     fun onClickRemoveBookmark(statement: XapiStatement) {
         viewModelScope.launch {
             snackBarDispatcher.tryOrShowSnackbarOnError(
@@ -160,10 +159,14 @@ class BookmarkListViewModel(
             return
         }
 
+        val appManifestUrl = statement.context?.contextActivities?.parent
+            ?.firstOrNull()?.id?.let { Url(it) }
+
         _navCommandFlow.tryEmit(
             value = NavCommand.Navigate(
                 LearningUnitDetail.create(
                     learningUnitManifestUrl = Url(activityId),
+                    appManifestUrl = appManifestUrl,
                 )
             )
         )

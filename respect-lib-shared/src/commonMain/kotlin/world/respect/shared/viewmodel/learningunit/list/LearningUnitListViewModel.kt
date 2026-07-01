@@ -146,7 +146,8 @@ class LearningUnitListViewModel(
                         refererUrl = Url(
                             refererUrl
                         ),
-                        expectedIdentifier = publication.metadata.identifier.toString()
+                        expectedIdentifier = publication.metadata.identifier.toString(),
+                        appManifestUrl = route.appManifestUrl,
                     )
                 )
             )

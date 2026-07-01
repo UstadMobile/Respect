@@ -136,8 +136,10 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
+            val appManifestUrl = route.appManifestUrl ?: return@launch
+
             schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
-                url = route.learningUnitManifestUrl,
+                url = appManifestUrl,
                 params = DataLoadParams(),
                 referrerUrl = null,
                 expectedPublicationId = null,
@@ -145,7 +147,7 @@ class LearningUnitDetailViewModel(
                     _uiState.update {
                         it.copy(
                             app = app.map { publication: OpdsPublication ->
-                                publication.resolve(route.learningUnitManifestUrl)
+                                publication.resolve(appManifestUrl)
                             }
                         )
                     }
@@ -239,6 +241,7 @@ class LearningUnitDetailViewModel(
                     addBookmarkUseCase(
                         agent = agent,
                         activityId = learningUnitId,
+                        appManifestUrl = route.appManifestUrl,
                     )
                 }
             }

@@ -35,7 +35,6 @@ fun AppListScreen(
     viewModel: AppListViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
-
     AppListScreen(
         uiState = uiState,
         onClickAddLink = { viewModel.onClickAddLink() },
@@ -50,7 +49,6 @@ fun AppListScreen(
     onClickApp: (OpdsPublication) -> Unit
 ) {
     val appPublications = uiState.appList.dataOrNull() ?: emptyList()
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -72,14 +70,12 @@ fun AppListScreen(
                 }
             )
         }
-
         itemsIndexed(
             items = appPublications,
             key = { index, app ->
                 app.metadata.identifier?.toString() ?: index
             }
         ) { index, app ->
-
             ListItem(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -111,7 +107,6 @@ fun AppListScreen(
                         Text("-")
                     }
                 },
-
             )
         }
     }

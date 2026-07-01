@@ -1,6 +1,5 @@
 package world.respect.shared.viewmodel.apps.list
 
-
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import io.ktor.http.Url
@@ -31,7 +30,6 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
 
-
 data class AppListUiState(
     val appList: DataLoadState<List<OpdsPublication>> = DataReadyState(emptyList())
 )
@@ -40,13 +38,9 @@ class AppListViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
-
     override val scope: Scope = accountManager.requireActiveAccountScope()
-
     private val _uiState = MutableStateFlow(AppListUiState())
-
     val uiState = _uiState.asStateFlow()
-
     private val schoolDataSource: SchoolDataSource by inject()
 
     init {
@@ -55,7 +49,6 @@ class AppListViewModel(
                 title = Res.string.select_app.asUiText(),
             )
         }
-
         viewModelScope.launch {
             schoolDataSource.schoolConfigSettingDataSource.listAsFlow(
                 loadParams = DataLoadParams(),
@@ -66,7 +59,6 @@ class AppListViewModel(
                 val feedUrl = config.dataOrNull()?.firstOrNull()?.value?.let {
                     Url(it)
                 } ?: return@collectLatest
-
                 schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
                     url = feedUrl,
                     params = DataLoadParams()
@@ -93,13 +85,10 @@ class AppListViewModel(
 
     fun onClickApp(app: OpdsPublication) {
         val url = app.findSelfLinks().firstOrNull()?.href ?: return
-
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 AppsDetail.create(Url(url))
             )
         )
     }
-
 }
-

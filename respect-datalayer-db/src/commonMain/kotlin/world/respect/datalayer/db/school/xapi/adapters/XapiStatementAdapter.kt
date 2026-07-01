@@ -16,7 +16,7 @@ import world.respect.datalayer.db.school.xapi.xapiExtensionsSerializer
 import world.respect.datalayer.db.shared.ext.takeIfNotEmpty
 import world.respect.datalayer.school.xapi.ext.isCompletionOrProgress
 import world.respect.datalayer.school.xapi.ext.resultProgressExtension
-import world.respect.lib.xapi.exceptions.XapiBadRequestException
+import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
@@ -120,8 +120,8 @@ fun XapiStatement.toEntities(
     }
 
     if(isSubStatement && `object` is XapiStatement)
-        throw XapiBadRequestException(
-            "SubStatement cannot have another nested subs== XapiObjectType.SubStatementtatement"
+        throw XapiException(
+            400, "SubStatement cannot have another nested subs== XapiObjectType.SubStatementtatement"
         )
 
     val contextRegistration = context?.registration

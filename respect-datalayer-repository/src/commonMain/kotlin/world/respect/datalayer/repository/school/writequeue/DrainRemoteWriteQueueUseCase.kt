@@ -82,12 +82,12 @@ class DrainRemoteWriteQueueUseCase(
                     }
 
                     WriteQueueItem.Model.XAPI_STATEMENT -> {
-                        val statement = repository.local.xapiStatementsResource.getByUuid(
+                        val statement = repository.local.xapiResource.statements.getByUuid(
                             Uuid.parse(item.uid)
                         )
 
                         if(statement != null) {
-                            repository.remote.xapiStatementsResource.post(listOf(statement))
+                            repository.remote.xapiResource.statements.post(listOf(statement))
                         }else {
                             Napier.w("WARN: no local data for statement: ${item.uid}")
                         }

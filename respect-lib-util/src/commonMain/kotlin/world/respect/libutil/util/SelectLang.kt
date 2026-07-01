@@ -28,6 +28,14 @@ fun String.localeCountry(): String? {
  * locale.
  *
  * If nothing suitable is available (availableLocales is empty), returns null
+ *
+ * @param preferredLocales the preferred locales list for the user from the locale settings, normally
+ *        in the form of langcode_region e.g. en_US
+ * @param availableLocales  the locales available for the given resource, normally from a lang map,
+ *        in the form of langcode-region e.g. en-US
+ *
+ * @return the best selection available from the availableLocales list as per the preferredLocales
+ *         arg, or null if no string is available.
  */
 fun selectLangOrNull(
     preferredLocales: List<String>,
@@ -39,13 +47,13 @@ fun selectLangOrNull(
     if(availableLocales.size == 1)
         return availableLocales.first()
 
-    return preferredLocales.firstOrNull { preferredLocale ->
-        availableLocales.any {
+    return preferredLocales.firstNotNullOfOrNull { preferredLocale ->
+        availableLocales.firstOrNull {
             (it.localeLanguage() == preferredLocale.localeLanguage()) &&
                     (it.localeCountry() == preferredLocale.localeCountry())
         }
-    } ?: preferredLocales.firstOrNull { preferredLocale ->
-        availableLocales.any {
+    } ?: preferredLocales.firstNotNullOfOrNull { preferredLocale ->
+        availableLocales.firstOrNull {
             it.localeCountry() == preferredLocale.localeCountry()
         }
     } ?: availableLocales.firstOrNull()

@@ -2,6 +2,18 @@ package world.respect.lib.xapi
 
 object OpenEelXapiConstants {
 
+    /**
+     * When an xAPI activity is to be completed as part of an assignment it needs to include the
+     * assignment activity ID in the contextActivities as per the assignment recipe. Making all
+     * launchable apps change the way they generate statements would be burdensome.
+     *
+     * Therefor the launcher uses a pattern where the local xAPI url is modified to include the
+     * assignment activity id in the path segments and the local server modifies the statement
+     * received to put the assignment activity id in the contextActivities.grouping list.
+     *
+     * eg. https://school.example.org/xAPI/openeel_assignment/assignment-id-encoded/
+     *
+     */
     const val ASSIGNMENT_XAPI_SEGMENT = "openeel_assignment"
 
     const val HEADER_XAPI_VERSION = "X-Experience-API-Version"
@@ -22,6 +34,8 @@ object OpenEelXapiConstants {
     const val ACTIVITY_EXTENSION_DEADLINE = "https://id.ustadmobile.com/xapi/extension/deadline"
 
     const val CATEGORY_ASSIGNMENT_RECIPE = "https://id.ustadmobile.com/xapi/activities/assignment-recipe"
+
+    const val CATEGORY_APP_LISTING_RECIPE = "https://id.openeel.org/recipes/applisting"
 
 
 }

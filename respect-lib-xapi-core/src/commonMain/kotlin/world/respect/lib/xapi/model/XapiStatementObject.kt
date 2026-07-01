@@ -8,7 +8,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import world.respect.lib.serializers.SingleItemToListTransformer
-import world.respect.lib.xapi.exceptions.XapiBadRequestException
+import world.respect.lib.xapi.exceptions.XapiException
 
 /**
  * As per the xAPI spec, can be an Activity, Actor (Agent or Group), or a statement reference.
@@ -65,7 +65,7 @@ object XapiStatementObjectSerializer: JsonContentPolymorphicSerializer<XapiState
             XapiObjectType.Group -> XapiGroup.serializer()
             XapiObjectType.StatementRef -> XapiStatementRef.serializer()
             XapiObjectType.SubStatement -> XapiStatement.serializer()
-            else -> throw XapiBadRequestException("Statement object type invalid")
+            else -> throw XapiException(400, "Statement object type invalid")
         }
     }
 }

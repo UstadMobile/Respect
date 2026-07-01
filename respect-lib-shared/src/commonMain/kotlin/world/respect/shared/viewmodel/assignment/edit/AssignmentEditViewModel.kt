@@ -151,7 +151,7 @@ class AssignmentEditViewModel(
                     json = json,
                     serializer = XapiStatement.serializer(),
                     loadFn = { params ->
-                        schoolDataSource.xapiStatementsResource.get(
+                        schoolDataSource.xapiResource.statements.get(
                             listParams = GetStatementParams(
                                 activity = assignmentActivityId,
                                 verb = XapiVerb.ID_ASSIGN,
@@ -303,7 +303,7 @@ class AssignmentEditViewModel(
         val assignment = uiState.value.statementData.dataOrNull() ?: return
 
         launchWithLoadingIndicator {
-            schoolDataSource.xapiStatementsResource.post(
+            schoolDataSource.xapiResource.statements.post(
                 listOf(
                     assignment.copy(
                         id = Uuid.random(),

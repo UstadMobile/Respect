@@ -98,8 +98,8 @@ import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
+import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.nanohttpd.XapiNanoHttpdApp
-import world.respect.lib.xapi.nanohttpd.XapiNanoHttpdResourceProvider
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXHasher64Factory
 import world.respect.libxxhash.XXStringHasher
@@ -220,6 +220,7 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
+import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
@@ -264,6 +265,7 @@ import world.respect.shared.domain.xapi.xapinanohttpd.XapiNanoHttpdResourceProvi
 import world.respect.shared.viewmodel.statement.detail.RawStatementViewModel
 import world.respect.shared.viewmodel.statement.detail.StatementDetailViewModel
 import world.respect.shared.viewmodel.statement.list.StatementListViewModel
+import world.respect.shared.domain.xapi.xapinanohttpd.XapiResourceProviderAndroid
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -732,8 +734,8 @@ val appKoinModule = module {
         }
     }
 
-    single<XapiNanoHttpdResourceProvider> {
-        XapiNanoHttpdResourceProviderAndroid()
+    single<XapiResourceProvider> {
+        XapiResourceProviderAndroid()
     }
 
     single<GetXapiActivityForPublicationUseCase> {
@@ -1072,6 +1074,7 @@ val appKoinModule = module {
                 getXapiActivityForPublicationUseCase = get(),
                 schoolDb = get(),
                 uidNumberMapper = get(),
+                applicationContext = androidApplication(),
             )
         }
 
@@ -1089,6 +1092,12 @@ val appKoinModule = module {
                 schoolDataSource = get(),
                 authenticatedUserPrincipalId = accountScopeId.accountPrincipalId,
                 schoolUrl = accountScopeId.schoolUrl,
+            )
+        }
+
+        scoped<GetPublicationForXapiActivityUseCase> {
+            GetPublicationForXapiActivityUseCase(
+                opdsPublicationDataSource = get<SchoolDataSource>().opdsPublicationDataSource,
             )
         }
     }

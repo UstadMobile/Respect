@@ -13,6 +13,7 @@ import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
@@ -150,6 +151,33 @@ data class AssignmentEdit(
     }
 
 }
+
+@Serializable
+data class StatementList(
+    val activityId: String,
+    private val xapiActorStr: String,
+) : RespectAppRoute {
+
+    @Transient
+    val xapiActor: XapiActor = Json.decodeFromString(XapiActor.serializer(), xapiActorStr)
+
+    companion object {
+        fun create(activityId: String, xapiActor: XapiActor) = StatementList(
+            activityId = activityId,
+            xapiActorStr = Json.encodeToString(XapiActor.serializer(), xapiActor)
+        )
+    }
+}
+
+@Serializable
+data class StatementDetail(
+    val statementId: String,
+) : RespectAppRoute
+
+@Serializable
+data class RawStatement(
+    val statementId: String,
+): RespectAppRoute
 
 @Serializable
 object ClazzList : RespectAppRoute

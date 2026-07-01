@@ -58,6 +58,7 @@ import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActivityDefinition
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.shared.domain.xapi.createBlankAssignmentStatement
 import world.respect.shared.generated.resources.Res
@@ -84,7 +85,8 @@ fun AssignmentDetailScreen(
         uiState = uiState,
         onStatusFilterChanged = viewModel::onStatusFilterChanged,
         onClickTask = viewModel::onClickTask,
-        onToggleFullscreen = viewModel::onToggleFullscreen
+        onToggleFullscreen = viewModel::onToggleFullscreen,
+        onClickScoreCell = viewModel::onClickScoreCell
     )
 }
 
@@ -95,6 +97,7 @@ fun AssignmentDetailScreen(
     onStatusFilterChanged: (AssignmentStatusFilter) -> Unit = { },
     onClickTask: (XapiActivity) -> Unit = { },
     onToggleFullscreen: () -> Unit = { },
+    onClickScoreCell: (activityId: String, xapiActor: XapiActor) -> Unit = { _, _ -> },
 ) {
     val horizontalScrollState = rememberScrollState()
 
@@ -285,7 +288,13 @@ fun AssignmentDetailScreen(
                                     studentAndProgress.progressPerTask.forEach { progressItem ->
                                         AssignmentDetailStudentProgressCell(
                                             progress = progressItem,
-                                            modifier = Modifier.size(taskColWidth)
+                                            modifier = Modifier.size(taskColWidth),
+                                            onClickScoreCell = {
+                                                onClickScoreCell(
+                                                    progressItem.activityId,
+                                                    studentAndProgress.actor
+                                                )
+                                            }
                                         )
                                     }
 

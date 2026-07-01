@@ -175,32 +175,19 @@ if [ "$1" == "cloud" ]; then
     # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
     MAESTRO_STATUS=${PIPESTATUS[0]}
 
-    # Creating folder to save db files after running end-to-end tests
     mkdir -p "$WORKSPACE/build/maestro/db_folder"
 
-    echo "ci-run-maestro: Cloud run finished. Extracting URL from log file..."
+    for FLOW_FILE in "$WORKSPACE"/.maestro/flows/*.yaml; do
+        TEST_NAME=$(basename "$FLOW_FILE" .yaml)
 
-    MAESTRO_LOG_FILE="$TESTSERVERCONTROLLER_BASEDIR/lastMaestroRun.log"
+        DB_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/data/e2e-uploads"
 
-
-       for FLOW_FILE in $WORKSPACE/.maestro/flows/*.yaml; do
-            TEST_NAME=$(basename "$FLOW_FILE" .yaml)
-
-            LOGO_FILE_PATH="$ROOTDIR/build/testservercontroller/workspace/$TEST_NAME/logs/respect-server.log"
-            DB_FILE_PATH="$ROOTDIR/build/testservercontroller/workspace/$TEST_NAME/data/e2e-uploads"
-
-          FILE_NAME=$(grep -oP 'filename=\K[^ ]+' ${LOGO_FILE_PATH} | tail -n 1)
-           if [ -z "$FILE_NAME" ]; then
-                echo "No filename found for $TEST_NAME"
-                continue
-           fi
-
-           echo "FILE_NAME=$FILE_NAME"
-
-          mv "$DB_FILE_PATH/${FILE_NAME}_ustadtesting_ustadmobile_com_" "$DB_FILE_PATH/db_${TEST_NAME}"
-
-          cp -r "$DB_FILE_PATH/db_${TEST_NAME}" "$ROOTDIR/build/maestro/db_folder"
-       done
+        if [ -d "$DB_FILE_PATH" ]; then
+            cp -r "$DB_FILE_PATH" "$WORKSPACE/build/maestro/db_folder/db_${TEST_NAME}"
+        else
+            echo "DB folder missing: $DB_FILE_PATH"
+        fi
+    done
 
     if [ -f "$MAESTRO_LOG_FILE" ]; then
          # Grep the URL directly from the file

@@ -16,8 +16,6 @@ object OpenEelXapiConstants {
      */
     const val ASSIGNMENT_XAPI_SEGMENT = "openeel_assignment"
 
-    const val APP_LISTING_XAPI_SEGMENT = "openeel_applisting"
-
     const val HEADER_XAPI_VERSION = "X-Experience-API-Version"
 
     /**

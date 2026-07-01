@@ -17,6 +17,11 @@ onFlowComplete:
       file: "scripts/teardown.js"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
+- assertVisible: "Home"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- tapOn: "Apps"
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add from Link"
@@ -30,23 +35,44 @@ onFlowComplete:
 - assertVisible: "Add App"
 # verify App got added to Apps section
 - tapOn: "Add App"
-- tapOn: "Apps"
+- tapOn: "Home"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
-- assertVisible: "Example Web App"
+    text: "Home"
+- tapOn: "Bookmarks"
+- assertVisible: "No bookmarks yet"
+- assertVisible: "Bookmark a lesson or a playlist to see it here."
+- tapOn: "Apps"
 - tapOn: "Example Web App"
-- assertVisible: "Lessons"
-- tapOn: "Lessons"
 - tapOn: "Examples"
 - tapOn: "Lesson 001"
 - assertVisible: "Lesson 001"
-- assertVisible: "App name"
 - tapOn: "Open"
 - extendedWaitUntil:
     visible: "Lesson 001"
     timeout: 1000
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
-
-
+- assertVisible: "Download"
+- assertVisible: "Assign"
+- tapOn: "Bookmark"
+- back
+- assertVisible: "Statement Maker"
+- tapOn: "Statement Maker"
+- tapOn: "Bookmark"
+- tapOn: "Home"
+- tapOn: "Bookmarks"
+- assertVisible: "Lesson 001"
+- assertVisible: "Statement Maker"
+- assertVisible: "Home"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- tapOn: "Bookmarks"
+- assertVisible: "Lesson 001"
+- assertVisible: "Statement Maker"
+- tapOn:                       #Remove bookmark
+    text: "Bookmark"
+    index: 0
+- assertNotVisible: "Lesson 001"
+- assertVisible: "Statement Maker"

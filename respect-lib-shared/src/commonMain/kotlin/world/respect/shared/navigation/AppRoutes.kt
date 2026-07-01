@@ -152,6 +152,9 @@ data class AssignmentEdit(
 }
 
 @Serializable
+object BookmarkList : RespectAppRoute
+
+@Serializable
 object ClazzList : RespectAppRoute
 
 @Serializable
@@ -538,6 +541,7 @@ class LearningUnitDetail(
     private val refererUrlStr: String? = null,
     val expectedIdentifier: String? = null,
     val assignmentActivityId: String? = null,
+    private val appManifestUrlStr: String? = null,
 ) : RespectAppRoute {
 
     @Transient
@@ -546,6 +550,9 @@ class LearningUnitDetail(
     @Transient
     val refererUrl = refererUrlStr?.let { Url(it) }
 
+    @Transient
+    val appManifestUrl = appManifestUrlStr?.let { Url(it) }
+
     companion object {
 
         fun create(
@@ -553,11 +560,13 @@ class LearningUnitDetail(
             refererUrl: Url? = null,
             expectedIdentifier: String? = null,
             assignmentActivityId: String? = null,
+            appManifestUrl: Url? = null,
         ) = LearningUnitDetail(
             learningUnitManifestUrlStr = learningUnitManifestUrl.toString(),
             refererUrlStr = refererUrl?.toString(),
             expectedIdentifier = expectedIdentifier,
             assignmentActivityId = assignmentActivityId,
+            appManifestUrlStr = appManifestUrl?.toString(),
         )
 
     }

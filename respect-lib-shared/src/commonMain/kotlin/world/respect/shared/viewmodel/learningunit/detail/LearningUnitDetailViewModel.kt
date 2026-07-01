@@ -16,9 +16,19 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.ext.map
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.bookmark.AddBookmarkUseCase
+import world.respect.shared.domain.bookmark.RemoveBookmarkUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.navigation.AssignmentEdit
@@ -34,11 +44,14 @@ import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
+    val app: DataLoadState<OpdsPublication> = DataLoadingState(),
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
     val showAssignButton: Boolean = false,
-) {
+    val isBookmarked: Boolean = false,
+
+    ) {
     val buttonsEnabled: Boolean
         get() = lessonDetail != null
 }
@@ -46,12 +59,12 @@ data class LearningUnitDetailUiState(
 class LearningUnitDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val ustadCache: UstadCache,
-    accountMananger: RespectAccountManager,
+    val accountManager: RespectAccountManager,
     private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
 
-    override val scope: Scope = accountMananger.requireActiveAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(LearningUnitDetailUiState())
 
@@ -62,6 +75,21 @@ class LearningUnitDetailViewModel(
     private val schoolDataSource: SchoolDataSource by inject()
 
     private val launchAppUseCase: LaunchAppUseCase by inject()
+
+    private val addBookmarkUseCase: AddBookmarkUseCase by inject()
+
+    private val removeBookmarkUseCase: RemoveBookmarkUseCase by inject()
+
+    private val schoolUrl = accountManager.requireActiveSchoolUrl()
+
+    private val agent = XapiAgent(
+        account = XapiAccount(
+            homePage = schoolUrl.toString(),
+            name = requireNotNull(accountManager.activeAccount?.userGuid) {
+                "LearningUnitDetailViewModel: active account userGuid must not be null"
+            },
+        )
+    )
 
     init {
         viewModelScope.launch {
@@ -94,13 +122,46 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
+            schoolDataSource.xapiResource.statements.getAsFlow(
+                listParams = XapiStatementsResource.GetStatementParams(
+                    agent = agent,
+                    verb = XapiVerb.ID_BOOKMARKED,
+                    activity = route.learningUnitManifestUrl.toString(),
+                ),
+                dataLoadParams = DataLoadParams(),
+            ).collect { result ->
+                val statements = result.dataOrNull()?.statements ?: emptyList()
+                _uiState.update { it.copy(isBookmarked = statements.isNotEmpty()) }
+            }
+        }
+
+        viewModelScope.launch {
+            val appManifestUrl = route.appManifestUrl ?: return@launch
+
+            schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
+                url = appManifestUrl,
+                params = DataLoadParams(),
+                referrerUrl = null,
+                expectedPublicationId = null,
+            ).collect { app ->
+                    _uiState.update {
+                        it.copy(
+                            app = app.map { publication: OpdsPublication ->
+                                publication.resolve(appManifestUrl)
+                            }
+                        )
+                    }
+                }
+        }
+
+        viewModelScope.launch {
             ustadCache.publicationPinState(route.learningUnitManifestUrl).collect { pinState ->
                 _uiState.update { it.copy(pinState = pinState) }
             }
         }
 
         viewModelScope.launch {
-            accountMananger.selectedAccountAndPersonFlow.collect { selectedAccount ->
+            accountManager.selectedAccountAndPersonFlow.collect { selectedAccount ->
                 _uiState.update {
                     it.copy(showAssignButton = selectedAccount?.person?.isAdminOrTeacher() == true)
                 }
@@ -162,5 +223,28 @@ class LearningUnitDetailViewModel(
                 )
             )
         )
+    }
+
+    fun onClickBookmark() {
+        viewModelScope.launch {
+            snackBarDispatcher.tryOrShowSnackbarOnError(
+                logMessage = "LearningUnitDetailViewModel: error toggling bookmark"
+            ) {
+                val learningUnitId = route.learningUnitManifestUrl.toString()
+
+                if (uiState.value.isBookmarked) {
+                    removeBookmarkUseCase(
+                        agent = agent,
+                        activityId = learningUnitId,
+                    )
+                } else {
+                    addBookmarkUseCase(
+                        agent = agent,
+                        activityId = learningUnitId,
+                        appManifestUrl = route.appManifestUrl,
+                    )
+                }
+            }
+        }
     }
 }

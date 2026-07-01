@@ -417,6 +417,7 @@ class XapiStatementsResourceDb(
                         limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
                         authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                         authenticatedActorUid = authenticatedAgent.identifierHash(uidNumberMapper),
+                        appListingVerbUid = uidNumberMapper(XapiVerb.ID_LISTED_APP),
                     ).map { entity ->
                         json.decodeFromString(
                             XapiStatementTransformingSerializer, entity.fullStatement
@@ -439,6 +440,7 @@ class XapiStatementsResourceDb(
                         limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
                         authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                         authenticatedActorUid = authenticatedAgent.identifierHash(uidNumberMapper),
+                        appListingVerbUid = uidNumberMapper(XapiVerb.ID_LISTED_APP),
                     ).mapToCanonicalStatements(
                         idOnly = format == XapiStatementsResource.GetStatementFormatEnum.IDS
                     )
@@ -484,6 +486,7 @@ class XapiStatementsResourceDb(
                 limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
                 authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 authenticatedActorUid = authenticatedAgent.identifierHash(uidNumberMapper),
+                appListingVerbUid = uidNumberMapper(XapiVerb.ID_LISTED_APP),
             ).map { list ->
                 DataReadyState(
                     data = XapiStatementResult(
@@ -513,6 +516,7 @@ class XapiStatementsResourceDb(
                 limit = listParams.limit ?: DEFAULT_MAX_STATEMENTS,
                 authenticatedPersonUidNum = uidNumberMapper(authenticatedUser.guid),
                 authenticatedActorUid = authenticatedAgent.identifierHash(uidNumberMapper),
+                appListingVerbUid = uidNumberMapper(XapiVerb.ID_LISTED_APP),
             ).map { list ->
                 val consistentThrough = Clock.System.now()
 

@@ -179,6 +179,20 @@ if [ "$1" == "cloud" ]; then
 
     MAESTRO_LOG_FILE="$TESTSERVERCONTROLLER_BASEDIR/lastMaestroRun.log"
 
+    # Create a folder for the db files
+        mkdir -p "$WORKSPACE/build/maestro/db_folder"
+
+        for FLOW_FILE in "$WORKSPACE"/.maestro/flows/*.yaml; do
+            TEST_NAME=$(basename "$FLOW_FILE" .yaml)
+
+            DB_FILE_PATH="$WORKSPACE/build/testservercontroller/workspace/$TEST_NAME/data/e2e-uploads"
+
+            if [ -d "$DB_FILE_PATH" ]; then
+                cp -r "$DB_FILE_PATH" "$WORKSPACE/build/maestro/db_folder/db_${TEST_NAME}"
+            else
+                echo "DB folder missing: $DB_FILE_PATH"
+            fi
+        done
 
     if [ -f "$MAESTRO_LOG_FILE" ]; then
          # Grep the URL directly from the file

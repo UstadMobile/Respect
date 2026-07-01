@@ -42,14 +42,12 @@ import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.respectAppDefaultLessonList
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
-import world.respect.lib.xapi.ext.objectActivityOrNull
-import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.libutil.ext.resolve
-import world.respect.shared.util.ext.resolve
+import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
@@ -85,6 +83,8 @@ class AppLauncherViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
 
+    private val getPublicationForXapiActivityUseCase: GetPublicationForXapiActivityUseCase by inject()
+
     init {
         _appUiState.update {
             it.copy(
@@ -108,13 +108,13 @@ class AppLauncherViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                respectPublicationForXapiStatement = ::respectPublicationForXapiStatement,
+                respectPublicationForXapiStatement = getPublicationForXapiActivityUseCase::invoke,
                 appMustLoadToBeClickable = route.resultDest != null,
             )
         }
 
         viewModelScope.launch {
-            schoolDataSource.xapiStatementsResource.getAsFlow(
+            schoolDataSource.xapiResource.statements.getAsFlow(
                 listParams = XapiStatementsResource.GetStatementParams(
                     verb = XapiVerb.ID_LISTED_APP,
                     activity = OpenEelXapiConstants.CATEGORY_APP_LISTING_RECIPE,
@@ -125,6 +125,7 @@ class AppLauncherViewModel(
                 _uiState.update { it.copy(apps = state.map { result -> result.statements }) }
             }
         }
+
         viewModelScope.launch {
             accountManager.selectedAccountAndPersonFlow.collect { selected ->
                 val isAdmin = selected?.person?.isAdmin() == true
@@ -186,8 +187,9 @@ class AppLauncherViewModel(
             Napier.w("app has no manifest url, cannot remove")
             return
         }
+
         viewModelScope.launch {
-            val existing = schoolDataSource.xapiStatementsResource.get(
+            val existing = schoolDataSource.xapiResource.statements.get(
                 XapiStatementsResource.GetStatementParams(
                     verb = XapiVerb.ID_LISTED_APP,
                     activity = manifestUrl.toString(),
@@ -203,26 +205,16 @@ class AppLauncherViewModel(
                 return@launch
             }
 
-            schoolDataSource.xapiStatementsResource.post(listOf(
-                XapiStatement(
-                    actor = actor,
-                    verb = XapiVerb(id = XapiVerb.ID_VOIDED),
-                    `object` = XapiStatementRef(id = existing.id.toString()),
+            schoolDataSource.xapiResource.statements.post(
+                listOf(
+                    XapiStatement(
+                        actor = actor,
+                        verb = XapiVerb(id = XapiVerb.ID_VOIDED),
+                        `object` = XapiStatementRef(id = existing.id.toString()),
+                    )
                 )
-            ))
+            )
         }
     }
 
-    private fun respectPublicationForXapiStatement(statement: XapiStatement): Flow<DataLoadState<OpdsPublication>> {
-        val manifestUrl = statement.objectActivityOrNull()?.definition?.webPubManifestAsUrlOrNull()
-            ?: return emptyFlow()
-        return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
-            url = manifestUrl,
-            params = DataLoadParams(),
-            referrerUrl = null,
-            expectedPublicationId = null,
-        ).map { dataLoad ->
-            dataLoad.map { publication -> publication.resolve(manifestUrl) }
-        }
-    }
 }

@@ -3,9 +3,11 @@ package world.respect.shared.viewmodel.apps.list
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -21,6 +23,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.datalayer.SchoolDataSource
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
@@ -28,11 +31,15 @@ import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 
 data class AppListUiState(
-    val appList: DataLoadState<List<XapiStatement>> = DataLoadingState()
+    val appList: DataLoadState<List<XapiStatement>> = DataLoadingState(),
+    val respectPublicationForXapiStatement: (XapiStatement) -> Flow<DataLoadState<OpdsPublication>> = {
+        emptyFlow()
+    },
 )
 
 class AppListViewModel(
@@ -48,13 +55,19 @@ class AppListViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
 
+    private val getIconForXapiActivityUseCase: GetPublicationForXapiActivityUseCase by inject()
+
     init {
         _appUiState.update {
             it.copy(title = Res.string.select_app.asUiText())
         }
 
+        _uiState.update {
+            it.copy(respectPublicationForXapiStatement = getIconForXapiActivityUseCase::invoke)
+        }
+
         viewModelScope.launch {
-            schoolDataSource.xapiStatementsResource.getAsFlow(
+            schoolDataSource.xapiResource.statements.getAsFlow(
                 listParams = XapiStatementsResource.GetStatementParams(
                     verb = XapiVerb.ID_LISTED_APP,
                     activity = OpenEelXapiConstants.CATEGORY_APP_LISTING_RECIPE,
@@ -84,6 +97,7 @@ class AppListViewModel(
             Napier.w("onClick App no manifest url on statement")
             return
         }
+
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 AppsDetail.create(

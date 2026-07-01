@@ -129,7 +129,7 @@ class AppsDetailViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.xapiStatementsResource.getAsFlow(
+            schoolDataSource.xapiResource.statements.getAsFlow(
                 listParams = XapiStatementsResource.GetStatementParams(
                     verb = XapiVerb.ID_LISTED_APP,
                     activity = OpenEelXapiConstants.CATEGORY_APP_LISTING_RECIPE,
@@ -206,13 +206,14 @@ class AppsDetailViewModel(
                 Napier.w("AppsDetailViewModel: cannot add app, no actor for selected account")
                 return@launch
             }
+
             val statement = createBlankAppListingStatement(
                 appActivityId = route.manifestUrl.toString(),
                 appTitle = uiState.value.appDetail?.dataOrNull()?.metadata?.title?.toStringMap() ?: emptyMap(),
                 actor = actor,
                 manifestUrl = route.manifestUrl.toString()
             )
-            schoolDataSource.xapiStatementsResource.post(listOf(statement))
+            schoolDataSource.xapiResource.statements.post(listOf(statement))
         }
     }
     companion object {

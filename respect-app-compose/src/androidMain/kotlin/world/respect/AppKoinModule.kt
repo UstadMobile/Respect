@@ -220,6 +220,7 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
+import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
@@ -1084,6 +1085,12 @@ val appKoinModule = module {
                 schoolDataSource = get(),
                 authenticatedUserPrincipalId = accountScopeId.accountPrincipalId,
                 schoolUrl = accountScopeId.schoolUrl,
+            )
+        }
+
+        scoped<GetPublicationForXapiActivityUseCase> {
+            GetPublicationForXapiActivityUseCase(
+                opdsPublicationDataSource = get<SchoolDataSource>().opdsPublicationDataSource,
             )
         }
     }

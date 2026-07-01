@@ -151,6 +151,8 @@ import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
+import world.respect.shared.domain.bookmark.AddBookmarkUseCase
+import world.respect.shared.domain.bookmark.RemoveBookmarkUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
@@ -1077,6 +1079,18 @@ val appKoinModule = module {
             LaunchAppUseCaseAndroid(
                 appContext = androidContext().applicationContext,
                 getXapiLaunchUrlUseCase = get(),
+            )
+        }
+
+        scoped<AddBookmarkUseCase> {
+            AddBookmarkUseCase(
+                schoolDataSource = get(),
+            )
+        }
+
+        scoped<RemoveBookmarkUseCase> {
+            RemoveBookmarkUseCase(
+                schoolDataSource = get(),
             )
         }
 

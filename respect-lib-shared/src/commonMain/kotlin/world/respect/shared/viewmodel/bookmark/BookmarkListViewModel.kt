@@ -23,10 +23,11 @@ import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
-import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.bookmark.RemoveBookmarkUseCase
+import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.remove_bookmark
@@ -36,7 +37,6 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
-import kotlin.getValue
 
 data class BookmarkListUiState(
     val statements: List<XapiStatement> = emptyList(),
@@ -54,6 +54,7 @@ class BookmarkListViewModel(
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
     private val schoolDataSource: SchoolDataSource by inject()
+    private val removeBookmarkUseCase: RemoveBookmarkUseCase by inject()
 
     private val schoolUrl = accountManager.requireActiveSchoolUrl()
 
@@ -126,33 +127,29 @@ class BookmarkListViewModel(
 
     fun onClickRemoveBookmark(statement: XapiStatement) {
         viewModelScope.launch {
-            val stmtId = statement.id
-            if (stmtId == null) {
-                Napier.w("Cannot remove bookmark: statement has no id")
-                return@launch
-            }
+            snackBarDispatcher.tryOrShowSnackbarOnError(
+                logMessage = "BookmarkListViewModel: error removing bookmark"
+            ) {
+                val activityId = (statement.`object` as? XapiActivity)?.id
+                    ?: throw IllegalStateException("Cannot remove bookmark: statement object is not an Activity")
 
-            schoolDataSource.xapiResource.statements.post(
-                listOf(
-                    XapiStatement(
-                        actor = agent,
-                        verb = XapiVerb(id = XapiVerb.ID_VOIDED),
-                        `object` = XapiStatementRef(id = stmtId.toString()),
+                removeBookmarkUseCase(
+                    agent = agent,
+                    activityId = activityId,
+                )
+
+                _uiState.update {
+                    it.copy(
+                        statements = it.statements.filterNot { s -> s.id == statement.id }
+                    )
+                }
+
+                snackBarDispatcher.showSnackBar(
+                    Snack(
+                        message = Res.string.remove_bookmark.asUiText(),
                     )
                 )
-            )
-
-            _uiState.update {
-                it.copy(
-                    statements = it.statements.filterNot { s -> s.id == stmtId }
-                )
             }
-
-            snackBarDispatcher.showSnackBar(
-                Snack(
-                    message = Res.string.remove_bookmark.asUiText(),
-                )
-            )
         }
     }
 

@@ -37,6 +37,7 @@ import world.respect.shared.generated.resources.download
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import world.respect.shared.generated.resources.open
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.layout.ContentScale
 import com.ustadmobile.libcache.PublicationPinState
 import world.respect.app.app.RespectAsyncImage
@@ -101,7 +102,7 @@ fun LearningUnitDetailScreen(
                 headlineContent = {
                     Text(
                         text = uiState.lessonDetail?.metadata?.title?.let { langMapString(it) } ?: "",
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.titleMedium
                     )
                 },
                 supportingContent = {

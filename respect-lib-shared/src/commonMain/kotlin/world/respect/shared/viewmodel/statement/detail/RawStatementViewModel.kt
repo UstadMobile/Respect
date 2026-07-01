@@ -59,7 +59,7 @@ class RawStatementViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.xapiStatementsResource.getAsFlow(
+            schoolDataSource.xapiResource.statements.getAsFlow(
                 listParams = XapiStatementsResource.GetStatementParams(
                     statementId = Uuid.parse(route.statementId),
                 ),

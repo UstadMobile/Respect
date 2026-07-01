@@ -61,7 +61,7 @@ class StatementListViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.xapiStatementsResource.getAsFlow(
+            schoolDataSource.xapiResource.statements.getAsFlow(
                 listParams = XapiStatementsResource.GetStatementParams(
                     activity = route.activityId,
                     relatedActivities = true,

@@ -213,7 +213,9 @@ fun NavigationListItem(
 
 @Composable
 fun PublicationListItem(
-    publication: OpdsPublication, onClickPublication: (OpdsPublication) -> Unit
+    publication: OpdsPublication,
+    onClickPublication: (OpdsPublication) -> Unit,
+    trailingContent: (@Composable () -> Unit)? = null,
 ) {
     ListItem(
         modifier = Modifier
@@ -222,6 +224,8 @@ fun PublicationListItem(
             .clickable {
                 onClickPublication(publication)
             },
+
+        trailingContent = trailingContent,
 
         leadingContent = {
             val iconUrl = publication.images?.firstOrNull()?.href

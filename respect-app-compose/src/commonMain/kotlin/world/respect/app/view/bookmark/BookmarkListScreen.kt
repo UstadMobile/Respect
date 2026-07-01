@@ -5,19 +5,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,10 +24,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import world.respect.app.app.RespectAsyncImage
-import world.respect.app.components.langMapString
+import world.respect.app.view.learningunit.list.PublicationListItem
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.opds.model.findIcons
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.shared.generated.resources.Res
@@ -125,65 +118,21 @@ private fun BookmarkListContent(
             val activityId = (statement.`object` as? XapiActivity)?.id
             val publication = activityId?.let { publications[it] }
 
-            ListItem(
-                modifier = Modifier.fillMaxWidth()
-                    .clickable {
-                        onClickBookmark(statement)
-                    },
-
-                leadingContent = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .width(48.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        val imageUrl = publication?.findIcons()?.firstOrNull()?.href
-                        if (imageUrl != null) {
-                            RespectAsyncImage(
-                                uri = imageUrl,
-                                contentDescription = "",
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.size(36.dp)
-                            )
-                        }
+            if (publication != null) {
+                PublicationListItem(
+                    publication = publication,
+                    onClickPublication = { onClickBookmark(statement) },
+                    trailingContent = {
+                        Icon(
+                            modifier = Modifier.clickable {
+                                onClickRemoveBookmark(statement)
+                            },
+                            imageVector = Icons.Default.Bookmark,
+                            contentDescription = stringResource(Res.string.bookmark),
+                        )
                     }
-                },
-
-                headlineContent = {
-                    Text(text = publication?.metadata?.title?.let { langMapString(it) }
-                        ?: activityId ?: "")
-                },
-
-                supportingContent = {
-                    Column {
-                        Text(publication?.metadata?.subtitle?.let { langMapString(it) } ?: "")
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            publication?.metadata?.language?.firstOrNull()?.let { langCode ->
-                                val languageName = java.util.Locale(langCode).displayLanguage
-                                Text(text = languageName)
-                            }
-
-                            publication?.metadata?.type?.toString()
-                                ?.substringAfterLast("/")?.let { type ->
-                                    Text(text = type)
-                                }
-                        }
-                    }
-                },
-
-                trailingContent = {
-                    Icon(
-                        modifier = Modifier.clickable {
-                            onClickRemoveBookmark(statement)
-                        },
-                        imageVector = Icons.Default.Bookmark,
-                        contentDescription = stringResource(Res.string.bookmark),
-                    )
-                }
-            )
+                )
+            }
         }
     }
 }

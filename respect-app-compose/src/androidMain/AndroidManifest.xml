@@ -104,6 +104,20 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <!--
+        Xapi over IPC service.
+        Android Manifest permission not required because messages are checked for authentication
+        -->
+        <service
+            android:name="world.respect.xapi.ipc.server.XapiIpcService"
+            android:exported="true"
+            tools:ignore="ExportedService">
+
+            <intent-filter>
+                <action android:name="org.openeel.action.xapioveripc" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

@@ -3,7 +3,6 @@ package world.respect.lib.xapi.nanohttpd
 import fi.iki.elonen.NanoHTTPD
 import io.ktor.http.Url
 import io.ktor.util.StringValuesImpl
-import io.ktor.util.decodeBase64String
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.builtins.ListSerializer
@@ -13,6 +12,7 @@ import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.OpenEelXapiConstants.ASSIGNMENT_XAPI_SEGMENT
+import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.asAssignmentRecipeStmtIfIdNotNull
 import world.respect.lib.xapi.ext.put
@@ -28,7 +28,7 @@ import kotlin.uuid.Uuid
 class XapiNanoHttpdApp(
     port: Int,
     private val json: Json,
-    private val xapiResourceProvider: XapiNanoHttpdResourceProvider,
+    private val xapiResourceProvider: XapiResourceProvider,
 ) : NanoHTTPD(port){
 
     /**
@@ -114,7 +114,9 @@ class XapiNanoHttpdApp(
                     }
 
                     Method.GET -> {
-                        val dataLoadState = xapiResourceProvider(endpointUrl, authentication).get(
+                        val dataLoadState = xapiResourceProvider.provideXapiResource(
+                            endpointUrl, authentication
+                        ).statements.get(
                             listParams = XapiStatementsResource.GetStatementParams.fromParams(
                                 params = StringValuesImpl(
                                     caseInsensitiveName = false,
@@ -139,21 +141,21 @@ class XapiNanoHttpdApp(
                             }
                         } ?: throw IllegalArgumentException("No Post Body")
 
-                        val uuidsCreated = xapiResourceProvider(endpointUrl, authentication).post(
+                        xapiResourceProvider.provideXapiResource(
+                            endpointUrl, authentication
+                        ).statements.post(
                             list = postBody
-                        )
-
-                        newFixedLengthResponse(
-                            Response.Status.OK,
-                            "application/json",
-                            json.encodeToString(ListSerializer(Uuid.serializer()), uuidsCreated)
+                        ).toFixedLengthResponse(
+                            ListSerializer(Uuid.serializer())
                         ).also {
                             it.addXapiCORSHeaders(session)
                         }
                     }
 
                     Method.PUT -> {
-                        xapiResourceProvider(endpointUrl, authentication).put(
+                        xapiResourceProvider.provideXapiResource(
+                            endpointUrl, authentication
+                        ).statements.put(
                             statementId = session.parameters["statementId"]?.first()?.let {
                                 Uuid.parse(it)
                             } ?: throw IllegalArgumentException("Statements PUT requires statementId"),

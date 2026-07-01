@@ -8,6 +8,7 @@ import com.ustadmobile.libcache.UstadCache
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -18,8 +19,10 @@ import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.xapi.model.XapiVerb
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
+import world.respect.shared.domain.xapi.createLearningUnitStatement
 import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.LearningUnitDetail
@@ -46,7 +49,7 @@ data class LearningUnitDetailUiState(
 class LearningUnitDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val ustadCache: UstadCache,
-    accountMananger: RespectAccountManager,
+    private val accountMananger: RespectAccountManager,
     private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
@@ -116,11 +119,22 @@ class LearningUnitDetailViewModel(
             try {
                 val lessonPublication = _uiState.value.lessonDetail ?: throw IllegalStateException("Not ready")
 
+                val actor = accountMananger.selectedAccountAndPersonFlow.firstOrNull()?.xapiAgent
+                    ?: throw IllegalStateException("active account not found")
+
+                val baseStmt = createLearningUnitStatement(
+                    activityId = lessonPublication.metadata.identifier.toString(),
+                    actor = actor,
+                    verbId = XapiVerb.ID_INITIALIZED,
+                )
+
+                schoolDataSource.xapiResource.statements.post(listOf(baseStmt))
                 launchAppUseCase(
                     LaunchAppUseCase.LaunchRequest(
                         publicationUrl = route.learningUnitManifestUrl,
                         publication = lessonPublication,
                         assignmentActivityId = route.assignmentActivityId,
+                        lessonActivityId = lessonPublication.metadata.identifier.toString(),
                     )
                 )
             }catch(e: Throwable) {

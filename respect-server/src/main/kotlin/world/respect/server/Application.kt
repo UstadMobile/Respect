@@ -58,6 +58,7 @@ import world.respect.server.routes.school.respect.SchoolRegistrationRoute
 import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.school.respect.SchoolValidationRoute
+import world.respect.server.routes.e2e.ReceiveDbRoute
 import world.respect.server.routes.school.xapi.XapiStatementsResourceRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.routes.username.checkusernameunique.CheckUsernameUniqueRoute
@@ -293,6 +294,13 @@ fun Application.module() {
                     authenticate(AUTH_CONFIG_SCHOOL, optional = true) {
                         PlaylistRoute()
                     }
+                }
+            }
+
+            if (environment.config.e2eTestingEnabled()) {
+                val e2eUploadsDir = File(environment.config.absoluteDataDir(), "e2e-uploads")
+                route("e2e") {
+                    ReceiveDbRoute(e2eUploadsDir = e2eUploadsDir)
                 }
             }
         }

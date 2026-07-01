@@ -147,8 +147,13 @@ import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCaseAndroid
+import world.respect.app.domain.testing.GetDbFilesForUploadUseCaseAndroid
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
+import world.respect.shared.domain.testing.GetDbFilesForUploadUseCase
+import world.respect.shared.domain.testing.SendDbToServerUseCase
+import world.respect.shared.domain.testing.SendDbToServerUseCaseClient
+import world.respect.shared.viewmodel.testing.SendDbToServerViewModel
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
@@ -166,6 +171,7 @@ import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
+import world.respect.shared.domain.school.SchoolDbPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.domain.storage.CachePathsProviderAndroid
 import world.respect.shared.domain.storage.GetAndroidSdCardDirUseCase
@@ -593,6 +599,21 @@ val appKoinModule = module {
         GetDeviceInfoUseCaseAndroid(androidContext())
     }
 
+    single<GetDbFilesForUploadUseCase> {
+        GetDbFilesForUploadUseCaseAndroid(
+            context = androidContext(),
+        )
+    }
+
+    single<SendDbToServerUseCase> {
+        SendDbToServerUseCaseClient(
+            httpClient = get(),
+            getDbFilesForUploadUseCase = get(),
+        )
+    }
+
+    viewModelOf(::SendDbToServerViewModel)
+
     single<CreatePasskeyUseCaseAndroidChannelHost> {
         CreatePasskeyUseCaseAndroidChannelHost()
     }
@@ -764,10 +785,14 @@ val appKoinModule = module {
             )
         }
 
+        scoped<SchoolDbPath> {
+            SchoolDbPath.forSchoolUrl(SchoolDirectoryEntryScopeId.parse(id).schoolUrl)
+        }
+
         scoped<RespectSchoolDatabase> {
             Room.databaseBuilder<RespectSchoolDatabase>(
                 androidContext(),
-                "school_3_" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
+                get<SchoolDbPath>().filename
             )
                 .addCommonMigrations()
                 .build()

@@ -35,5 +35,7 @@ object OpenEelXapiConstants {
 
     const val CATEGORY_ASSIGNMENT_RECIPE = "https://id.ustadmobile.com/xapi/activities/assignment-recipe"
 
+    const val CATEGORY_APP_LISTING_RECIPE = "https://id.openeel.org/recipes/applisting"
+
 
 }

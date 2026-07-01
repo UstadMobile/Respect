@@ -144,7 +144,6 @@ interface XapiStatementsResource {
         studentAgent: XapiAgent? = null,
     ): Flow<DataLoadState<List<AssignmentSummary>>>
 
-
     companion object {
 
         const val ENDPOINT_NAME = "statements"

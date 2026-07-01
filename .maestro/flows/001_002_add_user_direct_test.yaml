@@ -13,6 +13,7 @@ onFlowStart:
         NAME: "001_002_add_user_direct_test.yaml"
 
 onFlowComplete:
+  - runFlow: "subflows/send_db_to_server.yaml"
   - runScript:
       file: "scripts/teardown.js"
 ---

@@ -251,4 +251,9 @@ function create_artifact_zip() {
 
 trap create_artifact_zip EXIT
 
+# Clean up old test_db_artifacts_*.zip files in the build directory
+echo "ci-run-maestro: Cleaning up old artifacts..."
+rm -f "$ROOTDIR/build/test_db_artifacts_"*.zip
+rm -f "$ROOTDIR/test_db_artifacts_"*.zip
+
 exit $MAESTRO_STATUS

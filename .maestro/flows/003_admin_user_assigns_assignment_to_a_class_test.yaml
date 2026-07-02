@@ -225,10 +225,12 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Raw statement"
-- back
-- back
-- back
 # Verify edit assignment is working
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 1"
 - tapOn:
     id: "floating_action_button"   #  Edit button
 - assertVisible:

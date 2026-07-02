@@ -5,7 +5,6 @@ import world.respect.libutil.ext.schoolUrlOrNull
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.navigation.AcceptInvite
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.SendDbToServer
 
 /**
  * Given a Url (that may have come from a deep link, scanned as a qr code, etc) that
@@ -33,13 +32,6 @@ class ResolveUrlToNavCommandUseCase {
                         ), clearBackStack = false
                     )
                 }
-            }
-            SendDbToServer.DEEP_LINK_PATH -> {
-                val name = url.parameters[SendDbToServer.QUERY_PARAM_NAME] ?: return null
-                NavCommand.Navigate(
-                    destination = SendDbToServer.create(schoolUrl = schoolUrl, name = name),
-                    clearBackStack = false,
-                )
             }
             else -> null
         }

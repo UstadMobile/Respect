@@ -226,4 +226,28 @@ fi
 
 echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
 
+function create_artifact_zip() {
+    echo "ci-run-maestro: Archiving test artifacts..."
+
+    local OUTPUT_ZIP="$ROOTDIR/test_db_artifacts_$(date +%Y%m%d_%H%M%S).zip"
+
+    if [ -d "$TESTSERVERCONTROLLER_BASEDIR" ]; then
+        cd "$TESTSERVERCONTROLLER_BASEDIR/.."
+
+        # -r: recursive
+        # -x: exclude patterns
+        # We exclude process.pid, empty stderr files
+        zip -r "$OUTPUT_ZIP" "workspace" \
+            -x "*/process.pid" \
+            -x "*/stderr.log"
+
+        cd "$ROOTDIR"
+        echo "ci-run-maestro: Artifacts zipped to $OUTPUT_ZIP"
+    else
+        echo "ci-run-maestro: Workspace directory not found, skipping zip."
+    fi
+}
+
+create_artifact_zip()
+
 exit $MAESTRO_STATUS

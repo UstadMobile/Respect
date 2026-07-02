@@ -229,7 +229,7 @@ echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTR
 function create_artifact_zip() {
     echo "ci-run-maestro: Archiving test artifacts..."
 
-    local OUTPUT_ZIP="$ROOTDIR/test_db_artifacts_$(date +%Y%m%d_%H%M%S).zip"
+    local OUTPUT_ZIP="$ROOTDIR/build/test_db_artifacts_$(date +%Y%m%d_%H%M%S).zip"
 
     if [ -d "$TESTSERVERCONTROLLER_BASEDIR" ]; then
         cd "$TESTSERVERCONTROLLER_BASEDIR/.."

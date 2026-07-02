@@ -51,13 +51,13 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         val launchUrl = intent.getStringExtra(InitDeepLinkUriProviderUseCaseAndroid.BUNDLE_ARG_NAME)
             ?: intent.data?.toString()
         if (launchUrl != null && redirectSendDbIfNeeded(launchUrl)) {
             finish()
             return
         }
-        super.onCreate(savedInstanceState)
 
         checkNotNull(scope)
 

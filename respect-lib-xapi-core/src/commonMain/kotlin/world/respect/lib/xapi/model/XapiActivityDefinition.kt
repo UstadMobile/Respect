@@ -31,4 +31,10 @@ data class XapiActivityDefinition(
         val id: String,
         val description: Map<String, String>? = null
     )
+
+    companion object {
+
+        const val TYPE_ASSIGNMENT = "http://id.tincanapi.com/activitytype/school-assignment"
+
+    }
 }

@@ -57,6 +57,10 @@ All SQL code shoud follow [SQLStyle.guide](https://www.sqlstyle.guide/)
 * Never commit code you can't understand and explain. It's OK to use AI, external sites (e.g. stackoverflow etc),
   it's not OK to use code you don't understand (e.g. AI generated code, complex regexs, etc) because
   one then doesn't know when it _won't_ work.
+* Make sure _all_ commits comply with these coding guidelines. The "I'll tidy it up later" aproach is
+  prohibited because by then it's too late and the mess takes a lot longer to deal with.
+* Commit at least once every working day to ensure that code to ensure that code is tidied as you go
+  and avoid the potential for loss of work.     
 
 #### Avoid terms that could reasonably be considered racist and/or discriminatory
 

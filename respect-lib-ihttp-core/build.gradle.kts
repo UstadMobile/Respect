@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
+    id("maven-publish")
 }
 
 kotlin {

@@ -5,8 +5,6 @@ import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttp
-import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttp
 import world.respect.datalayer.http.school.ClassDataSourceHttp
 import world.respect.datalayer.http.school.EnrollmentDataSourceHttp
 import world.respect.datalayer.http.school.InviteDataSourceHttp
@@ -16,10 +14,11 @@ import world.respect.datalayer.http.school.PersonPasswordDataSourceHttp
 import world.respect.datalayer.http.school.PersonQrBadgeDataSourceHttp
 import world.respect.datalayer.http.school.SchoolAppDataSourceHttp
 import world.respect.datalayer.http.school.SchoolPermissionGrantDataSourceHttp
-import world.respect.datalayer.http.school.xapi.XapiStatementsResourceHttp
+import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttp
+import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttp
+import world.respect.datalayer.http.school.xapi.XapiResourceHttp
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.ClassDataSource
 import world.respect.datalayer.school.DummySchoolConfigSettingsDataSource
 import world.respect.datalayer.school.EnrollmentDataSource
@@ -34,10 +33,9 @@ import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
-import world.respect.datalayer.school.xapi.XapiActivityDataSource
-import world.respect.lib.xapi.resources.XapiAgentsResource
-import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.lib.xapi.resources.XapiResource
 
 class SchoolDataSourceHttp(
     private val schoolUrl: Url,
@@ -169,20 +167,15 @@ class SchoolDataSourceHttp(
         )
     }
 
-    override val xapiActivityDataSource: XapiActivityDataSource by lazy {
-        TODO("No HTTP Activity datasource yet")
-    }
-
-    override val xapiStatementsResource: XapiStatementsResource by lazy {
-        XapiStatementsResourceHttp(
+    override val xapiResource: XapiResource by lazy {
+        XapiResourceHttp(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,
             tokenProvider = tokenProvider,
+            validationHelper = validationHelper,
             json = json,
         )
     }
 
-    override val xapiAgentsResource: XapiAgentsResource
-        get() = TODO("No Xapi Actor DataSource yet")
 }

@@ -69,6 +69,11 @@ androidx-biometric = "1.4.0-alpha02"
 buildconfig-plugin = "6.0.6"
 
 urlencoder = "1.6.0"
+coreKtx = "1.10.1"
+junit = "4.13.2"
+junitVersion = "1.1.5"
+espressoCore = "3.5.1"
+rules = "1.7.0"
 
 [libraries]
 argparse4j = { module = "net.sourceforge.argparse4j:argparse4j", version.ref = "argparse4j" }
@@ -176,6 +181,11 @@ acra-core = { module = "ch.acra:acra-core", version.ref = "acra" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 
 urlencoder = { module = "net.thauvin.erik.urlencoder:urlencoder-lib-jvm", version.ref = "urlencoder"}
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
 
 
 [plugins]

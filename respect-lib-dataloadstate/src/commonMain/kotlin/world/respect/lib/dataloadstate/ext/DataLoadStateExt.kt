@@ -205,3 +205,20 @@ fun DataLoadState<*>.lastModifiedForHttpResponseHeader(): Long? {
     }
 }
 
+fun DataLoadState<*>.toPrettyString(): String {
+    return when(this) {
+        is DataReadyState -> {
+           if(data is List<*>) {
+               "DataReadyState ${data.size} items"
+           }else {
+               "DataReadyState"
+           }
+        }
+        is DataLoadingState -> "DataLoadingState"
+
+        is DataErrorResult -> "DataErrorResult"
+        is NoDataLoadedState -> "NoDataLoadedState($reason)"
+    }
+}
+
+

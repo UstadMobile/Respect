@@ -115,9 +115,3 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
 
     }
 }
-
-@Preview
-@Composable
-fun AppAndroidPreview() {
-    App()
-}

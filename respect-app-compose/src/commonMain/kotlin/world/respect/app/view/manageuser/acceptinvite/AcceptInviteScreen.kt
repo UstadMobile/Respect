@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectDetailField
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.langMapString
 import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.NewUserInvite
@@ -35,7 +36,6 @@ import world.respect.shared.util.ext.isLoading
 import world.respect.shared.util.ext.label
 import world.respect.shared.util.ext.roleLabel
 import world.respect.shared.viewmodel.app.appstate.AppUiState
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteUiState
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 
@@ -129,7 +129,7 @@ fun AcceptInviteScreen(
                 RespectDetailField(
                     modifier = Modifier.defaultItemPadding(),
                     label = { Text(stringResource(Res.string.school_name)) },
-                    value = { Text(uiState.schoolName?.getTitle() ?: "") }
+                    value = { Text(uiState.schoolName?.let { langMapString(it) } ?: "") }
                 )
 
                 RespectDetailField(

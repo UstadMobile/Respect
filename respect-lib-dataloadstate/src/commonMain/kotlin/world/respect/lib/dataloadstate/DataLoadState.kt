@@ -80,7 +80,19 @@ data class NoDataLoadedState<T: Any>(
 ): DataLoadState<T> {
 
     enum class Reason {
-        NOT_MODIFIED, NOT_FOUND
+        NOT_MODIFIED, NOT_FOUND;
+
+        companion object {
+
+            fun forStatusCode(code: Int): Reason {
+                return when(code) {
+                    302 -> NOT_MODIFIED
+                    404 -> NOT_FOUND
+                    else -> throw IllegalStateException("Unknown status code $code")
+                }
+            }
+
+        }
     }
 
     companion object {

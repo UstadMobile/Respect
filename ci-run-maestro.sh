@@ -20,8 +20,8 @@ if [ ! -e $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; 
         mkdir -p $ROOTDIR/build/testservercontroller
     fi
 
-    wget --output-document=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
-    unzip -d $ROOTDIR/build/testservercontroller/ \
+    wget --quiet --output-document=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
+    unzip -q -d $ROOTDIR/build/testservercontroller/ \
           $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
 fi
 
@@ -67,6 +67,15 @@ if [ "$SCHOOL_ADMIN_PASSWORD" == "" ]; then
     SCHOOL_ADMIN_PASSWORD=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13)
 fi
 
+if [ "$GIT_TAG_NAME" != "" ]; then
+    VERSION=$GIT_TAG_NAME
+else
+    GRADLE_PROP_LINE=$(grep version= $ROOTDIR/gradle.properties)
+
+    # Use bash parameter expansion to remove version=prefix
+    VERSION=${GRADLE_PROP_LINE#version=}
+fi
+
 # The Maestro test needs to use basic auth (which is base64 encoded) to authenticate to request the
 # creation of the school, that is encoded here and passed to Maestro to avoid using Maestro's
 # Javascript (which does not have the btoa function)
@@ -80,6 +89,7 @@ $TESTCONTROLLER_BIN  \
     -P:testservercontroller.urlsubstitution=$URL_SUBSTITUTION \
     -P:testservercontroller.basedir=$TESTSERVERCONTROLLER_BASEDIR \
     -P:testservercontroller.env.DIR_ADMIN_AUTH=$DIR_ADMIN_AUTH_PASS \
+    -P:testservercontroller.env.VERSION=$VERSION \
     -P:ktor.deployment.shutdown.url=/shutdown \
     -P:testservercontroller.cmd="$ROOTDIR/ci-run-test-server.sh" &
 
@@ -90,7 +100,7 @@ echo "ci-run-maestro: TestServerController now running on port $TESTCONTROLLER_P
 
 # Can now run maestro - the TESTSERVERCONTROLLER url is known and we also know the admin auth to create a new school etc.
 
-echo "Run Maestro using $TESTSERVERCONTROLLER_URL and $DIR_ADMIN_AUTH_PASS"
+echo "Run Maestro using $TESTSERVERCONTROLLER_URL"
 
 if [ ! -e build/results ]; then
     mkdir -p build/results
@@ -98,6 +108,13 @@ fi
 
 if [ ! -e build/maestro/results ]; then
     mkdir -p build/maestro/output
+fi
+
+
+TEST_APP_URL_ARG=""
+
+if [ "$TEST_APP_URL" != "" ]; then
+    TEST_APP_URL_ARG=" --env TEST_APP_URL=$TEST_APP_URL "
 fi
 
 if [ "$1" == "cloud" ]; then
@@ -152,6 +169,7 @@ if [ "$1" == "cloud" ]; then
         --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
         --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
         --env SCHOOL_NAME=TestSchool \
+        $TEST_APP_URL_ARG \
        | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
 
     # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
@@ -197,6 +215,7 @@ else
       --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
       --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
       --env SCHOOL_NAME=TestSchool \
+      $TEST_APP_URL_ARG \
       --format=junit \
       --test-output-dir=build/maestro/output \
       --output=build/maestro/report.xml \

@@ -30,9 +30,7 @@ import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
-import world.respect.datalayer.db.school.ext.isStudent
 
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
@@ -85,7 +83,7 @@ class LearningUnitDetailViewModel(
 
                         _appUiState.update {
                             it.copy(
-                                title = result.data.metadata.title.getTitle().asUiText()
+                                title = result.data.metadata.title.asUiText()
                             )
                         }
                     }

@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -59,6 +58,8 @@ import world.respect.shared.generated.resources.copy_of_playlist
 import world.respect.shared.generated.resources.copy_playlist
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.duration
+import world.respect.app.app.RespectAsyncImage
+import world.respect.app.components.langMapString
 import world.respect.shared.generated.resources.make_a_copy
 import world.respect.shared.generated.resources.name
 import world.respect.shared.generated.resources.permanently_delete
@@ -561,7 +562,12 @@ private fun FeedListItem(
                 )
             }
         },
-        headlineContent = { Text(text = title) },
+        headlineContent = {
+            Text(
+                text = langMapString(publication.metadata.title)
+            )
+        },
+
         supportingContent = {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 description?.takeIf { it.isNotBlank() }?.let {

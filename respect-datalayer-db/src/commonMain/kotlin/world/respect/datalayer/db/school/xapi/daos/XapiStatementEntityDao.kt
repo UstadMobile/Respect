@@ -151,7 +151,9 @@ interface XapiStatementEntityDao {
                     WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = 
                           (SELECT idHi FROM LatestAssignmentStatementIds)
                       AND XapiStatementContextActivityJoin.scajFromStatementIdLo = 
-                          (SELECT idLo FROM LatestAssignmentStatementIds)  
+                          (SELECT idLo FROM LatestAssignmentStatementIds)
+                      AND XapiStatementContextActivityJoin.scajContextType = 
+                          ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT}    
              )
 
              -- Use aggregate functions with Group by actor, activity to get the required progress
@@ -201,12 +203,8 @@ interface XapiStatementEntityDao {
                (SELECT COUNT(DISTINCT ProgressStmt.statementObjectUid1)
                   FROM XapiStatementEntity ProgressStmt
                  WHERE ProgressStmt.statementActorUid = :studentAgentActorUid
-                   AND XapiStatementEntity.statementObjectUid1 IN (
-                       SELECT XapiStatementContextActivityJoin.scajToActivityUid
-                         FROM XapiStatementContextActivityJoin
-                        WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = ProgressStmt.statementIdHi
-                          AND XapiStatementContextActivityJoin.scajFromStatementIdLo = ProgressStmt.statementIdLo
-                          AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
+                   AND $SQL_PROGRESS_STMT_IS_FOR_ASSIGNED_UNIT_CLAUSE
+                   AND $SQL_PROGRESS_STMT_INCLUDES_ASSIGNMENT_IN_CONTEXT_ACTIVITIES
                    AND (    ProgressStmt.resultCompletion = 1
                          OR ProgressStmt.statementVerbUid = :completeVerbUid)
                    AND NOT ProgressStmt.stmtVoid      
@@ -272,13 +270,11 @@ interface XapiStatementEntityDao {
                            FROM XapiStatementEntity ProgressStmt
                           WHERE ProgressStmt.statementActorUid = XapiActorInner.actorUid
                             AND ProgressStmt.statementVerbUid = :completedVerbUid
-                            AND XapiStatementEntity.statementObjectUid1 IN (
-                                SELECT XapiStatementContextActivityJoin.scajToActivityUid
-                                  FROM XapiStatementContextActivityJoin
-                                 WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = ProgressStmt.statementIdHi
-                                   AND XapiStatementContextActivityJoin.scajFromStatementIdLo = ProgressStmt.statementIdLo
-                                   AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
-                            AND NOT ProgressStmt.stmtVoid       
+                            AND $SQL_PROGRESS_STMT_IS_FOR_ASSIGNED_UNIT_CLAUSE
+                                -- Check that the progress statement includes the assignment activity id 
+                                -- in its context grouping activities    
+                            AND $SQL_PROGRESS_STMT_INCLUDES_ASSIGNMENT_IN_CONTEXT_ACTIVITIES       
+                            AND NOT ProgressStmt.stmtVoid
                         ) = (SELECT COUNT(*)
                                FROM XapiStatementContextActivityJoin 
                               WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
@@ -335,6 +331,30 @@ interface XapiStatementEntityDao {
         const val SINCE_UNSET = Long.MIN_VALUE
 
         const val UNTIL_UNSET = Long.MAX_VALUE
+
+        /**
+         * Check that progress statement is for a unit activity id that is
+         * an assigned activity id as per the xapi statement for the assignment
+         * itself
+         */
+        const val SQL_PROGRESS_STMT_IS_FOR_ASSIGNED_UNIT_CLAUSE = """
+            ProgressStmt.statementObjectUid1 IN (
+                SELECT XapiStatementContextActivityJoin.scajToActivityUid
+                  FROM XapiStatementContextActivityJoin
+                 WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = XapiStatementEntity.statementIdHi
+                   AND XapiStatementContextActivityJoin.scajFromStatementIdLo = XapiStatementEntity.statementIdLo
+                   AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
+        """
+
+        const val SQL_PROGRESS_STMT_INCLUDES_ASSIGNMENT_IN_CONTEXT_ACTIVITIES = """
+            EXISTS(
+                    SELECT 1
+                      FROM XapiStatementContextActivityJoin
+                     WHERE XapiStatementContextActivityJoin.scajFromStatementIdHi = ProgressStmt.statementIdHi
+                       AND XapiStatementContextActivityJoin.scajFromStatementIdLo = ProgressStmt.statementIdLo
+                       AND XapiStatementContextActivityJoin.scajToActivityUid = XapiStatementEntity.statementObjectUid1
+                       AND XapiStatementContextActivityJoin.scajContextType = ${XapiStatementContextActivityJoinTypeEnum.GROUP_FLAG_INT})
+        """
 
         const val SQL_JOIN_ASSIGNMENT_SUMMARY = """
                LEFT JOIN XapiActivityLangMapEntry NameLangMapEntry 

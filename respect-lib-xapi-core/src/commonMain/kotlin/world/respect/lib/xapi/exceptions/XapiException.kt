@@ -1,7 +1,7 @@
 package world.respect.lib.xapi.exceptions
 
-abstract class XapiException(
+class XapiException(
+    val httpStatusCode: Int,
     message: String,
     cause: Throwable? = null,
-    val httpStatusCode: Int,
 ) : Exception(message, cause)

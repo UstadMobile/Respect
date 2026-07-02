@@ -47,7 +47,7 @@ class UpdateClazzStudentXapiGroupUseCase(
             return
         }
 
-        schoolDataSource.xapiStatementsResource.post(
+        schoolDataSource.xapiResource.statements.post(
             listOf(
                 XapiStatement(
                     actor = activePerson.asXapiAgent(schoolUrl),

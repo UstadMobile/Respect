@@ -30,11 +30,15 @@ function onClickSendStatement() {
         }
     };
 
-    console.log("Xapi Send: Assignable unit: sending statement ");
+    console.log("XapiAuJs: Assignable unit: sending statement ");
+
+    document.getElementById("result").innerText = "";
+    document.getElementById("error").innerText = "";
+
     xapi.sendStatement({
         statement: myStatement
     }).then((result) => {
-        console.log("Xapi Send: Assignable unit: got result.");
+        console.log("XapiAuJs: Assignable unit: got result.");
         if(Array.isArray(result.data)) {
             document.getElementById("result").innerText = "Statement sent: " + result.data.join();
         }else {
@@ -42,6 +46,10 @@ function onClickSendStatement() {
         }
 
         console.log(result);
+    }).catch((error) => {
+        const errorStr = JSON.stringify(error.toJSON(), null, 2);
+        console.log(errorStr);
+        document.getElementById("error").innerText = errorStr;
     });
 }
 
@@ -51,3 +59,5 @@ addEventListener("DOMContentLoaded", (event) => {
     document.getElementById("actor_info").innerText = JSON.stringify(queryParamsObject.actor);
     document.getElementById("activity_id").innerText = searchParams.get("activity_id");
 });
+
+console.log("XapiAuJs: loaded");

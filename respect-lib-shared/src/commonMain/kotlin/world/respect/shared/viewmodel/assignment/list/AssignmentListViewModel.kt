@@ -114,7 +114,7 @@ class AssignmentListViewModel(
                 }
 
                 val selectedStudent = selectedAcct?.person?.takeIf { it.isStudent() }
-                schoolDataSource.xapiStatementsResource.getAssignmentListAsFlow(
+                schoolDataSource.xapiResource.statements.getAssignmentListAsFlow(
                     dataLoadParams = DataLoadParams(),
                     studentAgent = selectedStudent?.asXapiAgent(schoolUrl)
                 ).collectLatest { assignmentSummaries ->

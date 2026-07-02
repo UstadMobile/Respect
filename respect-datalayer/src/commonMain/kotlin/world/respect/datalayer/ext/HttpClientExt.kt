@@ -3,27 +3,22 @@ package world.respect.datalayer.ext
 import com.ustadmobile.ihttp.headers.asIHttpHeaders
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.statement.request
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
-import io.ktor.http.etag
 import io.ktor.util.reflect.TypeInfo
 import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
+import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadParams
-import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
-import world.respect.lib.dataloadstate.NoDataLoadedState
-import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
-import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 
 suspend fun <T: Any> HttpClient.getAsDataLoadState(
     url: Url,
@@ -40,33 +35,15 @@ suspend fun <T: Any> HttpClient.getAsDataLoadState(
         }
 
         val extendedValidationHelper = validationHelper as? ExtendedDataSourceValidationHelper
-        val varyHeader = response.headers.getAll(HttpHeaders.Vary)
-            ?.joinToString(separator = ",")
         val validationInfoKey = extendedValidationHelper?.validationInfoKey(
             response.request.headers.asIHttpHeaders(),
             response.headers.getAll(HttpHeaders.Vary)?.joinToString(separator = ",")
         )
-        val metaInfo = DataLoadMetaInfo(
-            url = response.request.url,
-            lastModified = response.lastModifiedAsLong(),
-            etag = response.etag(),
-            consistentThrough = response.consistentThrough(),
-            validationInfoKey = validationInfoKey ?: 0,
-            varyHeader = varyHeader,
-            permissionsLastModified = response.permissionsLastModified(),
-            headers = response.headers,
+
+        response.toDataLoadState(
+            typeInfo = typeInfo,
+            validationInfoKey = validationInfoKey
         )
-
-        return if(response.status == HttpStatusCode.NotModified) {
-            NoDataLoadedState.notModified(metaInfo = metaInfo)
-        }else {
-            val data = response.body<T>(typeInfo)
-
-            DataReadyState(
-                data = data,
-                metaInfo = metaInfo
-            )
-        }
     }catch(t: Throwable) {
         Napier.d("Exception loading $url", t)
         DataErrorResult(

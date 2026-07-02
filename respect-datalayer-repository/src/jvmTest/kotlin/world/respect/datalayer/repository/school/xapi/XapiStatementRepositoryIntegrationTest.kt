@@ -33,7 +33,7 @@ class XapiStatementRepositoryIntegrationTest {
                 serverRouting {
                     route("api/school/xapi") {
                         XapiStatementsResourceRoute(
-                            statementResource = { serverSchoolDataSource.xapiStatementsResource },
+                            statementResource = { serverSchoolDataSource.xapiResource.statements },
                             json = json,
                         )
                     }
@@ -51,14 +51,14 @@ class XapiStatementRepositoryIntegrationTest {
 
                 val stmtUuid = statement.id!!
 
-                client.schoolDataSource.xapiStatementsResource.post(
+                client.schoolDataSource.xapiResource.statements.post(
                     listOf(statement)
                 )
 
                 serverDb.invalidationTracker.createFlow(
                     "XapiStatementEntity"
                 ).map {
-                    serverSchoolDataSource.xapiStatementsResource.get(
+                    serverSchoolDataSource.xapiResource.statements.get(
                         listParams = XapiStatementsResource.GetStatementParams(
                             statementId = stmtUuid,
                         )
@@ -81,7 +81,7 @@ class XapiStatementRepositoryIntegrationTest {
                 serverRouting {
                     route("api/school/xapi") {
                         XapiStatementsResourceRoute(
-                            statementResource = { serverSchoolDataSource.xapiStatementsResource },
+                            statementResource = { serverSchoolDataSource.xapiResource.statements },
                             json = json,
                         )
                     }
@@ -97,11 +97,11 @@ class XapiStatementRepositoryIntegrationTest {
 
                 val stmtUuid = statement.id!!
 
-                serverSchoolDataSource.xapiStatementsResource.post(
+                serverSchoolDataSource.xapiResource.statements.post(
                     listOf(statement)
                 )
 
-                val stmtFromClient = client.schoolDataSource.xapiStatementsResource.get(
+                val stmtFromClient = client.schoolDataSource.xapiResource.statements.get(
                     listParams = XapiStatementsResource.GetStatementParams(
                         statementId = stmtUuid,
                     ),

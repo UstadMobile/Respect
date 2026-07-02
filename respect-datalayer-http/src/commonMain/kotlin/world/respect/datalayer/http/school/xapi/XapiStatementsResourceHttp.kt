@@ -8,13 +8,14 @@ import io.ktor.http.ContentType
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.contentType
+import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
+import world.respect.datalayer.ext.toDataLoadState
 import world.respect.datalayer.ext.useTokenProvider
-import world.respect.datalayer.http.ext.appendIfNotNull
 import world.respect.datalayer.http.ext.xapiEndpointUrl
 import world.respect.datalayer.http.school.SchoolUrlBasedDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
@@ -22,12 +23,10 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.model.AssignmentSummary
-import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
-import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementFormatEnum
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import kotlin.uuid.Uuid
 
@@ -40,41 +39,20 @@ class XapiStatementsResourceHttp(
 ): XapiStatementsResource, SchoolUrlBasedDataSource {
 
     private suspend fun GetStatementParams.urlWithParams(): Url {
-        return URLBuilder(xapiEndpointUrl(XapiStatementsResource.ENDPOINT_NAME)).apply {
-            parameters.appendIfNotNull("statementId", statementId)
-            parameters.appendIfNotNull("voidedStatementId", voidedStatementId)
-            agent?.also {
-                parameters.append(
-                    "agent", json.encodeToString(XapiActor.serializer(),
-                        it
-                    )
-                )
-            }
-            parameters.appendIfNotNull("verb", verb)
-            parameters.appendIfNotNull("activity", activity)
-            parameters.appendIfNotNull("registration", registration)
-            parameters.append("related_activities", relatedActivities.toString())
-            parameters.append("related_agents", relatedAgents.toString())
-            parameters.appendIfNotNull("since", since?.toString())
-            parameters.appendIfNotNull("until", until?.toString())
-            parameters.appendIfNotNull("limit", limit?.toString())
-            parameters.append("format", format?.value ?: GetStatementFormatEnum.EXACT.value)
-            parameters.append("attachments", attachments.toString())
-            parameters.append("ascending", ascending.toString())
+        return URLBuilder(xapiEndpointUrl(XapiStatementsResource.ENDPOINT_NAME)).also {
+            it.parameters.appendAll(this.toParameters(json))
         }.build()
     }
 
-    override suspend fun post(list: List<XapiStatement>): List<Uuid> {
-        val response = httpClient.post(
+    override suspend fun post(list: List<XapiStatement>): DataLoadState<List<Uuid>> {
+        return httpClient.post(
             url = xapiEndpointUrl(XapiStatementsResource.ENDPOINT_NAME)
         ) {
             useTokenProvider(tokenProvider)
 
             contentType(ContentType.Application.Json)
             setBody(list)
-        }
-
-        return response.body()
+        }.toDataLoadState(typeInfo<List<Uuid>>())
     }
 
     override suspend fun get(

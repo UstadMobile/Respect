@@ -34,15 +34,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import world.respect.app.components.defaultItemPadding
-import world.respect.datalayer.school.xapi.ext.idStr
+import world.respect.app.components.langMapString
+import world.respect.lib.xapi.ext.idStr
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.composites.AssignmentAndProgress
@@ -50,21 +53,21 @@ import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
 import world.respect.lib.xapi.composites.XapiAssignmentTaskProgress
 import world.respect.lib.xapi.ext.addActivityToContextActivitiesGrouping
 import world.respect.lib.xapi.ext.averageScore
+import world.respect.lib.xapi.ext.extensionDeadlineAsInstantOrNull
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActivityDefinition
 import world.respect.lib.xapi.model.XapiAgent
-import world.respect.libutil.util.time.toDisplayDateString
-import world.respect.shared.domain.xapi.assignmentDeadline
-import world.respect.shared.domain.xapi.assignmentDescription
 import world.respect.shared.domain.xapi.createBlankAssignmentStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assigned_to
-import world.respect.shared.generated.resources.average
+import world.respect.shared.generated.resources.average_str
 import world.respect.shared.generated.resources.deadline
 import world.respect.shared.generated.resources.no_matching_data_available_yet
 import world.respect.shared.generated.resources.toggle_fullscreen
 import world.respect.shared.util.AssignmentStatusFilter
+import world.respect.shared.util.rememberFormattedDateTime
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailUiState
 import world.respect.shared.viewmodel.assignment.detail.AssignmentDetailViewModel
 
@@ -95,6 +98,19 @@ fun AssignmentDetailScreen(
 ) {
     val horizontalScrollState = rememberScrollState()
 
+    val assignmentStmt = uiState.assignmentProgress.dataOrNull()?.assignmentStatement
+
+    val stmtUuid = assignmentStmt?.id
+    val deadlineInstant = remember(stmtUuid) {
+        uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.objectActivityOrNull()
+            ?.definition?.extensionDeadlineAsInstantOrNull()
+    }
+
+    val deadlineDisplayStr = rememberFormattedDateTime(
+        timeInMillis = deadlineInstant?.toEpochMilliseconds() ?: 0,
+        timeZoneId = TimeZone.currentSystemDefault().id,
+    )
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (!uiState.isFullscreen) {
@@ -104,8 +120,9 @@ fun AssignmentDetailScreen(
                         .defaultItemPadding()
                 ) {
                     Text(
-                        text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.assignmentDescription
-                            ?: "",
+                        text = assignmentStmt?.objectActivityOrNull()?.definition?.description?.let {
+                            langMapString(it)
+                        } ?: "",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -122,8 +139,7 @@ fun AssignmentDetailScreen(
                                 color = Color.Gray
                             )
                             Text(
-                                text = uiState.assignmentProgress.dataOrNull()?.assignmentStatement?.assignmentDeadline?.toDisplayDateString()
-                                    ?: "",
+                                text = deadlineDisplayStr,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray
                             )
@@ -239,7 +255,7 @@ fun AssignmentDetailScreen(
                                     }
 
                                     AssignmentDetailHeaderCell(
-                                        title = stringResource(Res.string.average),
+                                        title = stringResource(Res.string.average_str),
                                         width = taskColWidth,
                                         height = headerHeight
                                     )

@@ -24,6 +24,7 @@ teachers, students, etc).
             "description":{ 
                 "en-US" : "App description" 
             },
+            "type": "http://activitystrea.ms/schema/1.0/application",
             "moreInfo": "https://example.app/about",
             "extensions": {
                 "https://id.openeel.org/extensions/activity/webpub-manifest-link": "https://example.app/app-publication-opds.json"

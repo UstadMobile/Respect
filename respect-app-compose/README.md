@@ -19,6 +19,26 @@ https://digitalassetlinks.googleapis.com/v1/assetlinks:check?source.web.site=htt
   itself must return an HTTP 200 OK response (in addition to https://example.org/.well-known/assetlinks.json ). 
 
 
+### Verified app link notes:
+
+__Getting SHA-256 fingerprint for assetlinks.json__:
+* Build the apk (e.g. ```./gradlew respect-app-compose:assembleRelease```)
+* Get the SHA256
+```
+~/Android/Sdk/build-tools/33.0.1/apksigner verify --print-certs ./build/outputs/apk/debug/app-android-debug.apk
+```
+* Convert the generated SHA-256 into : separated version
+```
+echo (sha256 from apksigner verify) | sed 's/../&:/g; s/:$//' | tr [:lower:] [:upper:]
+```
+* Add the SHA-256 to [assetlinks.json] and publish assetlinks.json in .well-known on https for domain.
+  Note: the SHA-256 in the default assetlinks.json is the Google Play signing key for the 
+  app. The assetlinks.json file can be checked using [Google's statement list tester](https://developers.google.com/digital-asset-links/tools/generator).
+  Google APIs can cache the statements; current status can be checked using the
+  [Digital Asset Links API](https://developers.google.com/digital-asset-links/reference/rest) e.g.
+  ```https://digitalassetlinks.googleapis.com/v1/statements:list?source.web.site=https://ustadmobile.app&relation=delegate_permission/common.handle_all_urls```
+
+
 ### Android link testing and debugging:
 
 Android will only open http or https links in an app by default when they are [https verified app links](https://developer.android.com/training/app-links/about).

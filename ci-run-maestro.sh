@@ -238,6 +238,7 @@ function create_artifact_zip() {
         # -x: exclude patterns
         # We exclude process.pid, empty stderr files
         zip -r "$OUTPUT_ZIP" "workspace" \
+            -x "*/respect-server*/*" \
             -x "*/process.pid" \
             -x "*/stderr.log"
 

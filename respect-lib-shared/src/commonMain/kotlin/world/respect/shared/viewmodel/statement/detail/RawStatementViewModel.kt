@@ -52,7 +52,6 @@ class RawStatementViewModel(
         _appUiState.update {
             it.copy(
                 showBackButton = true,
-                hideBottomNavigation = true,
                 userAccountIconVisible = false,
                 title = Res.string.raw_statement.asUiText(),
             )

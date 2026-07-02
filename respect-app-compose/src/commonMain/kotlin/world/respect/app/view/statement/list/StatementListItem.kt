@@ -33,7 +33,7 @@ import kotlin.time.Clock
 fun StatementListItem(
     statement: XapiStatement,
     modifier: Modifier = Modifier,
-    onClickListItem: (statementId: String) -> Unit = {},
+    onClickListItem: (statement: XapiStatement) -> Unit = {},
 ) {
     val objectName = statement.objectActivityNameOrNull()?.let { langMapString(it) }
         ?: statement.objectActivityOrNull()?.id?.substringAfterLast("/") ?: ""
@@ -74,7 +74,7 @@ fun StatementListItem(
 
     ListItem(
         modifier = modifier.clickable {
-            onClickListItem(statement.id.toString())
+            onClickListItem(statement)
         },
         leadingContent = {
             RespectAsyncImage(

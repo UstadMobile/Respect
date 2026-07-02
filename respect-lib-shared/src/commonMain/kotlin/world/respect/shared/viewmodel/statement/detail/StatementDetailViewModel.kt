@@ -61,7 +61,6 @@ class StatementDetailViewModel(
         _appUiState.update {
             it.copy(
                 showBackButton = true,
-                hideBottomNavigation = true,
                 userAccountIconVisible = false,
                 actions = listOf(
                     AppActionButton(

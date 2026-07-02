@@ -15,14 +15,14 @@ class SendDbToServerUseCaseClient(
     private val getDbFilesForUploadUseCase: GetDbFilesForUploadUseCase,
 ) : SendDbToServerUseCase {
 
-    override suspend fun invoke(schoolUrl: Url) {
+    override suspend fun invoke(schoolUrl: Url, name: String) {
         val file = getDbFilesForUploadUseCase(schoolUrl) ?: return
         httpClient.post {
             url {
                 takeFrom(schoolUrl)
                 appendPathSegments("api/e2e/receivedb")
             }
-            parameter("filename", file.filename)
+            parameter("name", name)
             contentType(ContentType.Application.OctetStream)
             setBody(file.bytes)
         }

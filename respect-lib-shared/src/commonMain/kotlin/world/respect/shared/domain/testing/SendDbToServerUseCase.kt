@@ -4,6 +4,6 @@ import io.ktor.http.Url
 
 interface SendDbToServerUseCase {
 
-    suspend operator fun invoke(schoolUrl: Url)
+    suspend operator fun invoke(schoolUrl: Url, name: String)
 
 }

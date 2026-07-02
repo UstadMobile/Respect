@@ -29,7 +29,7 @@ class SendDbToServerViewModel(
     init {
         viewModelScope.launch {
             try {
-                sendDbToServerUseCase(schoolUrl = route.schoolUrl)
+                sendDbToServerUseCase(schoolUrl = route.schoolUrl, name = route.name)
                 _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
                 _uiState.update {

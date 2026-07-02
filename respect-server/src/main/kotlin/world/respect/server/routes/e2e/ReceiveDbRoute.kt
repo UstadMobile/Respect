@@ -13,10 +13,9 @@ import world.respect.shared.domain.school.SchoolDbPath
 fun Route.ReceiveDbRoute(e2eUploadsDir: File) {
     e2eUploadsDir.mkdirs()
     post("receivedb") {
-        val rawName = File(requireNotNull(call.request.queryParameters["filename"])).name
-        val filename = "$rawName${SchoolDbPath.DB_EXTENSION}"
+        val name = File(requireNotNull(call.request.queryParameters["name"])).name
         val dbBytes = call.receive<ByteArray>()
-        File(e2eUploadsDir, filename).writeBytes(dbBytes)
+        File(e2eUploadsDir, "$name${SchoolDbPath.DB_EXTENSION}").writeBytes(dbBytes)
         call.respond(HttpStatusCode.OK)
     }
 }

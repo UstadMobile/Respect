@@ -13,7 +13,10 @@ onFlowStart:
         NAME: "003_admin_user_assigns_assignment_to_a_class_test"
 
 onFlowComplete:
-  - runFlow: "subflows/send_db_to_server.yaml"
+  - runFlow:
+      file: "subflows/send_db_to_server.yaml"
+      env:
+        NAME: "db-teacher-validated-results"
   - runScript:
       file: "scripts/teardown.js"
 ---
@@ -25,6 +28,10 @@ onFlowComplete:
       CLASSNAME: "TestClass"
 
 # Teacher Add Assignment
+- runFlow:
+    file: "subflows/send_db_to_server.yaml"
+    env:
+      NAME: "db-admin-class-setup"
 - clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
@@ -111,6 +118,10 @@ onFlowComplete:
     text: "Assignments"
 - assertVisible: "Homework 1"
 
+- runFlow:
+    file: "subflows/send_db_to_server.yaml"
+    env:
+      NAME: "db-teacher-assigned"
 - clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
@@ -146,6 +157,10 @@ onFlowComplete:
 - assertVisible: "In-progress (0)"
 
 # Student B user complete 1 task
+- runFlow:
+    file: "subflows/send_db_to_server.yaml"
+    env:
+      NAME: "db-student-a-completed"
 - clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
@@ -172,6 +187,10 @@ onFlowComplete:
 - assertVisible: "Completed (1)"
 
 # Teacher Validate students results
+- runFlow:
+    file: "subflows/send_db_to_server.yaml"
+    env:
+      NAME: "db-student-b-completed"
 - clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"

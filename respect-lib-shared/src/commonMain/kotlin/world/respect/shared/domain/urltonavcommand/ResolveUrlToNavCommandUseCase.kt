@@ -35,8 +35,9 @@ class ResolveUrlToNavCommandUseCase {
                 }
             }
             SendDbToServer.DEEP_LINK_PATH -> {
+                val name = url.parameters[SendDbToServer.QUERY_PARAM_NAME] ?: return null
                 NavCommand.Navigate(
-                    destination = SendDbToServer.create(schoolUrl = schoolUrl),
+                    destination = SendDbToServer.create(schoolUrl = schoolUrl, name = name),
                     clearBackStack = false,
                 )
             }

@@ -1,8 +1,7 @@
 package world.respect
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -12,7 +11,7 @@ import org.koin.android.ext.android.getKoin
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.activityScope
 import org.koin.core.scope.Scope
-import world.respect.app.app.App
+import world.respect.app.domain.testing.SendDbToServerActivity
 import world.respect.credentials.passkey.CreatePasskeyUseCaseAndroidChannelHost
 import world.respect.credentials.passkey.CreatePasskeyUseCaseProcessor
 import world.respect.credentials.passkey.GetCredentialUseCase
@@ -23,14 +22,33 @@ import world.respect.credentials.password.SavePasswordUseCaseAndroidImpl
 import world.respect.credentials.password.SavePasswordUseCaseProcessor
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
+import world.respect.libutil.ext.schoolUrlOrNull
 import world.respect.shared.domain.biometric.BiometricAuthProcessor
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
+import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
+import world.respect.shared.navigation.SendDbToServer
 import world.respect.view.app.AbstractAppActivity
 
 class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
 
     //As per https://insert-koin.io/docs/reference/koin-android/scope/
     override val scope: Scope by activityScope()
+
+    override fun onNewIntent(intent: Intent) {
+        val launchUrl = intent.getStringExtra(InitDeepLinkUriProviderUseCaseAndroid.BUNDLE_ARG_NAME)
+            ?: intent.data?.toString()
+        if (launchUrl != null && redirectSendDbIfNeeded(launchUrl)) return
+        super.onNewIntent(intent)
+    }
+
+    private fun redirectSendDbIfNeeded(launchUrl: String): Boolean {
+        if (!launchUrl.contains(SendDbToServer.DEEP_LINK_PATH)) return false
+        val url = Url(launchUrl)
+        val schoolUrl = url.schoolUrlOrNull() ?: return false
+        val name = url.parameters[SendDbToServer.QUERY_PARAM_NAME] ?: return false
+        startActivity(SendDbToServerActivity.createIntent(this, schoolUrl.toString(), name))
+        return true
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

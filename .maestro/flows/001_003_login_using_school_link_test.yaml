@@ -13,7 +13,10 @@ onFlowStart:
         NAME: "001_003_login_using_school_link_test"
 
 onFlowComplete:
-  - runFlow: "subflows/send_db_to_server.yaml"
+  - runFlow:
+      file: "subflows/send_db_to_server.yaml"
+      env:
+        NAME: "db-final"
   - runScript:
       file: "scripts/teardown.js"
 ---

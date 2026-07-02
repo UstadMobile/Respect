@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -19,13 +17,7 @@ import world.respect.shared.generated.resources.send_db_upload_complete
 import world.respect.shared.generated.resources.send_db_uploading
 import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.viewmodel.testing.SendDbToServerUiState
-import world.respect.shared.viewmodel.testing.SendDbToServerViewModel
 
-@Composable
-fun SendDbToServerScreen(viewModel: SendDbToServerViewModel) {
-    val uiState by viewModel.uiState.collectAsState()
-    SendDbToServerScreen(uiState)
-}
 
 @Composable
 fun SendDbToServerScreen(uiState: SendDbToServerUiState) {

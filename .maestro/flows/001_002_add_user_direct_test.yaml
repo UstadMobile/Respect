@@ -13,7 +13,10 @@ onFlowStart:
         NAME: "001_002_add_user_direct_test"
 
 onFlowComplete:
-  - runFlow: "subflows/send_db_to_server.yaml"
+  - runFlow:
+      file: "subflows/send_db_to_server.yaml"
+      env:
+        NAME: "db-final"
   - runScript:
       file: "scripts/teardown.js"
 ---
@@ -311,6 +314,10 @@ onFlowComplete:
 - assertVisible: "QR code badge"
 
 # Validate Parent User login
+- runFlow:
+    file: "subflows/send_db_to_server.yaml"
+    env:
+      NAME: "db-admin-added-users"
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -369,6 +376,10 @@ onFlowComplete:
 - assertNotVisible: "People"
 
 # Validate Child User QR Login using Scan QR/badge
+- runFlow:
+    file: "subflows/send_db_to_server.yaml"
+    env:
+      NAME: "db-parent-logged-in"
 - clearState: world.respect.app
 - launchApp:
     arguments:

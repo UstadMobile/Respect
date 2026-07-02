@@ -108,6 +108,10 @@
         Xapi over IPC service.
         Android Manifest permission not required because messages are checked for authentication
         -->
+        <activity
+            android:name="world.respect.app.domain.testing.SendDbToServerActivity"
+            android:exported="false" />
+
         <service
             android:name="world.respect.xapi.ipc.server.XapiIpcService"
             android:exported="true"

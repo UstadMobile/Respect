@@ -13,9 +13,7 @@ onFlowStart:
         NAME: "002_browse_lessons_test"
 
 onFlowComplete:
-  - runFlow: "subflows/send_db_to_server.yaml"
-  - runScript:
-      file: "scripts/teardown.js"
+  - runFlow: "subflows/teardown.yaml"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - tapOn:

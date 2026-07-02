@@ -1,0 +1,9 @@
+appId: world.respect.app
+
+---
+- runScript:
+      file: "../scripts/teardown.js"
+- runFlow:
+    file: "send_db_to_server.yaml"
+    env:
+      NAME: ${NAME}

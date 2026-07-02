@@ -8,10 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectEmptyListComponent
 import world.respect.app.components.defaultItemPadding
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.model.XapiStatement
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.no_matching_activity
 import world.respect.shared.viewmodel.statement.list.StatementListUiState
 import world.respect.shared.viewmodel.statement.list.StatementListViewModel
 
@@ -49,7 +52,8 @@ fun StatementListScreen(
         if (statements.isEmpty() ) {
             item("emptyitem") {
                 RespectEmptyListComponent(
-                    modifier = Modifier.fillMaxWidth().defaultItemPadding()
+                    modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+                    text = stringResource(Res.string.no_matching_activity)
                 )
             }
         }

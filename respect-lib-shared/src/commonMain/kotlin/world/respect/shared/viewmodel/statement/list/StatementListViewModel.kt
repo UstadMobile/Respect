@@ -56,7 +56,6 @@ class StatementListViewModel(
         _appUiState.update {
             it.copy(
                 showBackButton = true,
-                hideBottomNavigation = true
             )
         }
 
@@ -94,9 +93,9 @@ class StatementListViewModel(
         }
     }
 
-    fun onClickListItem(statementId: String) {
+    fun onClickListItem(statement: XapiStatement) {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(StatementDetail(statementId))
+            NavCommand.Navigate(StatementDetail(statement.id.toString()))
         )
     }
 }

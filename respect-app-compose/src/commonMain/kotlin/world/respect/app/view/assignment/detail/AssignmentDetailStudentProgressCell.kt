@@ -45,17 +45,16 @@ fun AssignmentDetailStudentProgressCell(
     val score = progress.scoreScaled
     val progressPercentVal = progress.progress
 
-    Box(modifier) {
+    Box(
+        modifier = modifier
+        .clickable { onClickScoreCell() }
+        .testTag("score_cell")) {
         when {
             score != null -> {
                 Box(
                     Modifier
                         .fillMaxSize()
                         .padding(8.dp)
-                        .clickable {
-                            onClickScoreCell()
-                        }
-                        .testTag("score_cell")
                         .background(
                             color = when (progress.successful) {
                                 true -> Color.Green

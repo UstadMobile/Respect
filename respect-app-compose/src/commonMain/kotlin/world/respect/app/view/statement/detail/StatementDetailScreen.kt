@@ -120,15 +120,15 @@ fun StatementDetailScreen(
         )
 
         // Result
-        statement.result?.let { result ->
+        statement.result?.also { result ->
             RespectDetailField(
                 label = { Text("${stringResource(Res.string.result)}:") },
                 value = {
                     Column {
-                        result.score?.scaled?.let {
+                        result.score?.scaled?.also {
                             Text("${stringResource(Res.string.score_scaled)}: ${(it * 100).toInt()}%")
                         }
-                        result.duration?.let { duration ->
+                        result.duration?.also { duration ->
                             Text("${stringResource(Res.string.duration)}: ${duration.formatToShortString()}")
                         }
                     }

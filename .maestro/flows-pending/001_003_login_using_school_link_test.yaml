@@ -14,11 +14,9 @@ onFlowStart:
 
 onFlowComplete:
   - runFlow:
-      file: "subflows/send_db_to_server.yaml"
+      file: "subflows/teardown.yaml"
       env:
         NAME: "db-final"
-  - runScript:
-      file: "scripts/teardown.js"
 ---
 - launchApp:
     arguments:

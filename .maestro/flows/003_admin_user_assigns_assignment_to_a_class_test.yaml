@@ -16,7 +16,7 @@ onFlowComplete:
   - runFlow:
       file: "subflows/teardown.yaml"
       env:
-        NAME: "db-teacher-validated-results"
+        NAME: "db-final"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - runFlow: "subflows/admin_add_app.yaml"

@@ -13,7 +13,10 @@ onFlowStart:
         NAME: "001_002_add_user_direct_test"
 
 onFlowComplete:
-  - runFlow: "subflows/teardown.yaml"
+  - runFlow:
+      file: "subflows/teardown.yaml"
+      env:
+        NAME: "db-teacher-validated-results"
 ---
 - launchApp:
     arguments:

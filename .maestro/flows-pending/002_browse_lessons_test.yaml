@@ -13,7 +13,10 @@ onFlowStart:
         NAME: "002_browse_lessons_test"
 
 onFlowComplete:
-  - runFlow: "subflows/teardown.yaml"
+  - runFlow:
+      file: "subflows/teardown.yaml"
+      env:
+        NAME: "db-teacher-validated-results"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - tapOn:

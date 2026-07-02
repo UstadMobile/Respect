@@ -6,13 +6,15 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import java.io.File
+import world.respect.shared.domain.school.SchoolDbPath
 
 
 @Suppress("FunctionName")
 fun Route.ReceiveDbRoute(e2eUploadsDir: File) {
     e2eUploadsDir.mkdirs()
     post("receivedb") {
-        val filename = File(requireNotNull(call.request.queryParameters["filename"])).name
+        val rawName = File(requireNotNull(call.request.queryParameters["filename"])).name
+        val filename = "$rawName${SchoolDbPath.DB_EXTENSION}"
         val dbBytes = call.receive<ByteArray>()
         File(e2eUploadsDir, filename).writeBytes(dbBytes)
         call.respond(HttpStatusCode.OK)

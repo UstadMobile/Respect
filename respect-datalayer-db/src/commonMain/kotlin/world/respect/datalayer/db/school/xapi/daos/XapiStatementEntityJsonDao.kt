@@ -35,6 +35,7 @@ interface XapiStatementEntityJsonDao {
         limit: Int,
         authenticatedPersonUidNum: Long,
         authenticatedActorUid: Long,
+        appListingVerbUid: Long,
     ): List<XapiStatementEntityJson>
 
 
@@ -55,6 +56,7 @@ interface XapiStatementEntityJsonDao {
         limit: Int,
         authenticatedPersonUidNum: Long,
         authenticatedActorUid: Long,
+        appListingVerbUid: Long,
     ): Flow<List<XapiStatementEntityJson>>
 
     @Query(

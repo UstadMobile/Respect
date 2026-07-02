@@ -248,6 +248,6 @@ function create_artifact_zip() {
     fi
 }
 
-create_artifact_zip()
+trap create_artifact_zip EXIT
 
 exit $MAESTRO_STATUS

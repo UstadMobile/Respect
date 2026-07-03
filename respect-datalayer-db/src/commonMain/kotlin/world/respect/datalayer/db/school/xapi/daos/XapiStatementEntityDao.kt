@@ -43,6 +43,7 @@ interface XapiStatementEntityDao {
         limit: Int,
         authenticatedPersonUidNum: Long,
         authenticatedActorUid: Long,
+        appListingVerbUid: Long,
     ): List<XapiStatementAndJsonEntities>
 
     @Query(LIST_SQL)
@@ -62,6 +63,7 @@ interface XapiStatementEntityDao {
         limit: Int,
         authenticatedPersonUidNum: Long,
         authenticatedActorUid: Long,
+        appListingVerbUid: Long,
     ): Flow<List<XapiStatementAndJsonEntities>>
 
 
@@ -394,6 +396,7 @@ interface XapiStatementEntityDao {
                  OR (:authenticatedActorUid = XapiStatementEntity.statementActorUid)
                  OR (     :authenticatedActorUid = XapiStatementEntity.statementObjectUid1
                       AND XapiStatementEntity.statementObjectType = ${XapiEntityObjectTypeFlags.AGENT})
+                 OR (     XapiStatementEntity.statementVerbUid = :appListingVerbUid)     
                  OR (:authenticatedActorUid IN 
                      (SELECT XapiGroupMemberActorJoin.gmajMemberActorUid
                         FROM XapiGroupMemberActorJoin

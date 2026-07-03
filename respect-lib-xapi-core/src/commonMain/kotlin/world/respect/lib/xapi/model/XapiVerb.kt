@@ -32,6 +32,11 @@ data class XapiVerb(
          */
         const val ID_ASSIGN = "http://activitystrea.ms/schema/1.0/assign"
 
+        /**
+         * As per https://id.openeel.org/verb/listed-app
+         */
+        const val ID_LISTED_APP = "https://id.openeel.org/verb/listed-app"
+
     }
 
 }

@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableColumn
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.langMapString
 import world.respect.app.components.uiTextStringResource
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
@@ -77,7 +78,6 @@ import world.respect.shared.generated.resources.title
 import world.respect.shared.generated.resources.use_link
 import world.respect.shared.generated.resources.use_link_description
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.playlists.mapping.edit.MovingItemState
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditUiState
 import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
@@ -451,7 +451,7 @@ private fun PlaylistPublicationItemRow(
              )
          }
          ListItem(
-             headlineContent = { Text(text = publication.metadata.title.getTitle()) },
+             headlineContent = { Text(text = langMapString(publication.metadata.title)) },
              supportingContent = {
                  publication.metadata.description?.let { Text(text = it) }
              },

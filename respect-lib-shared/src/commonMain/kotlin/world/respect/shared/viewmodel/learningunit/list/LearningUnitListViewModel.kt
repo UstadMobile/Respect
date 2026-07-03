@@ -114,6 +114,12 @@ class LearningUnitListViewModel(
 
 
     init {
+        _uiState.update {
+            it.copy(
+                showSelectPlaylistButton =
+                    route.resultDest?.resultKey == PlaylistEditViewModel.KEY_PLAYLIST
+            )
+        }
         viewModelScope.launch {
             _appUiState.update {
                 it.copy(searchState = AppBarSearchUiState(visible = true))

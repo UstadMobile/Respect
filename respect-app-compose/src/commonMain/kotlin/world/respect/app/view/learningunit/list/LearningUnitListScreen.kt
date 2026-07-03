@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -68,7 +69,6 @@ import world.respect.shared.generated.resources.select_count_items
 import world.respect.shared.generated.resources.select_playlist
 import world.respect.shared.generated.resources.share
 import world.respect.shared.util.SortOrderOption
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListUiState
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel.Companion.ICON
@@ -563,11 +563,8 @@ private fun FeedListItem(
             }
         },
         headlineContent = {
-            Text(
-                text = langMapString(publication.metadata.title)
-            )
+            Text(text = title)
         },
-
         supportingContent = {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 description?.takeIf { it.isNotBlank() }?.let {
@@ -628,7 +625,7 @@ fun PublicationListItem(
     onLongPressPublication: (OpdsPublication) -> Unit,
 ) {
     FeedListItem(
-        title = publication.metadata.title.getTitle(),
+        title = langMapString(publication.metadata.title),
         iconUrl = publication.images?.firstOrNull()?.href,
         language = publication.metadata.language,
         duration = publication.metadata.duration,

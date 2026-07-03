@@ -109,7 +109,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "statementmaker: StudentA User"
-- assertVisible: "No matching activity yet."
+- assertVisible: "No matching activity yet"
 - tapOn: "Assignments"
 - assertVisible:
     id: "app_title"

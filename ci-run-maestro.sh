@@ -226,21 +226,20 @@ fi
 
 echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
 
-function create_artifact_zip() {
+function create_test_artifact_zip() {
     echo "ci-run-maestro: Archiving test artifacts..."
 
-    local OUTPUT_ZIP="$ROOTDIR/build/test_db_artifacts_$(date +%Y%m%d_%H%M%S).zip"
+    local OUTPUT_ZIP="$ROOTDIR/build/EndToEnd_Tests_db_artifacts_$(date +%d%m%Y_%H%M%S).zip"
 
-    if [ -d "$TESTSERVERCONTROLLER_BASEDIR" ]; then
-        cd "$TESTSERVERCONTROLLER_BASEDIR/.."
+    if [ -d "$TESTSERVERCONTROLLER_BASEDIR/workspace" ]; then
+        cd "$TESTSERVERCONTROLLER_BASEDIR/workspace"
 
-        # -r: recursive
-        # -x: exclude patterns
-        # We exclude process.pid, empty stderr files
-        zip -r "$OUTPUT_ZIP" "workspace" \
+        zip -r "$OUTPUT_ZIP" . \
             -x "*/respect-server*/*" \
-            -x "*/process.pid" \
-            -x "*/stderr.log"
+            -x "process.pid" \
+            -x "stderr.log" \
+            -x "dir-admin.txt" \
+            -x "respect-app.db.lck" \
 
         cd "$ROOTDIR"
         echo "ci-run-maestro: Artifacts zipped to $OUTPUT_ZIP"
@@ -249,11 +248,6 @@ function create_artifact_zip() {
     fi
 }
 
-trap create_artifact_zip EXIT
-
-# Clean up old test_db_artifacts_*.zip files in the build directory
-echo "ci-run-maestro: Cleaning up old artifacts..."
-rm -f "$ROOTDIR/build/test_db_artifacts_"*.zip
-rm -f "$ROOTDIR/test_db_artifacts_"*.zip
+trap create_test_artifact_zip EXIT
 
 exit $MAESTRO_STATUS

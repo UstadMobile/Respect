@@ -223,7 +223,6 @@ else
     MAESTRO_STATUS=$?
 fi
 
-
 echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
 
 function create_test_artifact_zip() {
@@ -231,10 +230,11 @@ function create_test_artifact_zip() {
 
     local OUTPUT_ZIP="$ROOTDIR/build/EndToEnd_Tests_db_artifacts_$(date +%d%m%Y_%H%M%S).zip"
 
-    if [ -d "$TESTSERVERCONTROLLER_BASEDIR/workspace" ]; then
-        cd "$TESTSERVERCONTROLLER_BASEDIR/workspace"
+    if [ -d "$TESTSERVERCONTROLLER_BASEDIR" ]; then
+        cd "$TESTSERVERCONTROLLER_BASEDIR"
 
         zip -r "$OUTPUT_ZIP" . \
+            -x "lastMaestroRun.log" \
             -x "*/respect-server*/*" \
             -x "process.pid" \
             -x "stderr.log" \

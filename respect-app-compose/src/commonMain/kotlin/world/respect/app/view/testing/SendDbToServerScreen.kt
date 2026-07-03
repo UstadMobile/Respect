@@ -15,9 +15,11 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.send_db_upload_complete
 import world.respect.shared.generated.resources.send_db_uploading
-import world.respect.shared.generated.resources.something_went_wrong
-import world.respect.shared.viewmodel.testing.SendDbToServerUiState
 
+data class SendDbToServerUiState(
+    val isLoading: Boolean = true,
+    val errorMessage: String? = null,
+)
 
 @Composable
 fun SendDbToServerScreen(uiState: SendDbToServerUiState) {
@@ -37,12 +39,14 @@ fun SendDbToServerScreen(uiState: SendDbToServerUiState) {
                         .testTag("db_progress"),
                 )
             }
+
             uiState.errorMessage != null -> {
                 Text(
-                    text = uiState.errorMessage?:stringResource(Res.string.something_went_wrong),
+                    text = uiState.errorMessage,
                     modifier = Modifier.testTag("db_failed"),
                 )
             }
+
             else -> {
                 Text(
                     text = stringResource(Res.string.send_db_upload_complete),

@@ -15,6 +15,7 @@ import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitorAndroid
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.db.migrations.addCacheDbMigrations
 import com.ustadmobile.libcache.downloader.EnqueueRunDownloadJobUseCase
 import com.ustadmobile.libcache.downloader.EnqueueRunDownloadJobUseCaseAndroid
 import com.ustadmobile.libcache.downloader.PinPublicationPrepareUseCase
@@ -439,6 +440,7 @@ val appKoinModule = module {
             UstadCacheDb::class.java,
             UstadCacheBuilder.DEFAULT_DB_NAME
         ).addCallback(ClearNeighborsCallback())
+            .addCacheDbMigrations()
             .build()
     }
 

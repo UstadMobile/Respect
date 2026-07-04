@@ -4,6 +4,7 @@ import androidx.room.Transactor.SQLiteTransactionType
 import androidx.room.useWriterConnection
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.ihttp.headers.MergedHeaders
+import com.ustadmobile.ihttp.headers.asRawString
 import com.ustadmobile.ihttp.headers.asString
 import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.ihttp.headers.mapHeaders
@@ -12,7 +13,7 @@ import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMES
 import com.ustadmobile.libcache.cachecontrol.ResponseValidityChecker
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
-import com.ustadmobile.libcache.db.entities.CacheEntryAndLocks
+import com.ustadmobile.libcache.db.entities.CacheEntryAndMetadata
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.db.entities.RequestedEntry
 import com.ustadmobile.libcache.integrity.sha256Integrity
@@ -28,6 +29,7 @@ import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.libcache.response.CacheResponse
 import com.ustadmobile.ihttp.response.IHttpResponse
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessChecker
+import com.ustadmobile.libcache.db.entities.CacheEntryExtraHeaders
 import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCase
 import com.ustadmobile.libcache.headers.hasCacheValidators
@@ -35,6 +37,7 @@ import com.ustadmobile.libcache.headers.integrity
 import com.ustadmobile.libcache.response.ByteArrayResponse
 import com.ustadmobile.libcache.util.LruMap
 import com.ustadmobile.libcache.util.concurrentSafeMapOf
+import io.ktor.http.Headers
 import io.ktor.http.Url
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.getAndUpdate
@@ -59,6 +62,7 @@ import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.libxxhash.XXStringHasher
 import kotlin.concurrent.withLock
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -110,9 +114,11 @@ class UstadCacheImpl(
 
     private val pendingLockUpserts = atomic(emptyList<RetentionLock>())
 
-    private val pendingCacheEntryUpdates = atomic(emptyList<CacheEntry>())
+    private val pendingCacheEntryUpserts = atomic(emptyList<CacheEntry>())
 
     private val pendingCacheEntryDeletes = atomic(emptyList<CacheEntry>())
+
+    private val pendingExtraHeaderUpserts = atomic(emptyList<CacheEntryExtraHeaders>())
 
     /**
      * The LruMap is the in-memory cache of entries. It does not include the actual response data.
@@ -124,7 +130,7 @@ class UstadCacheImpl(
      * Database updates are then performed in batches, significantly improving performance. This is
      * especially helpful when many small items are being loaded.
      */
-    private val lruMap = LruMap<String, CacheEntryAndLocks>(concurrentSafeMapOf())
+    private val lruMap = LruMap<String, CacheEntryAndMetadata>(concurrentSafeMapOf())
 
     private val lruMutex = Mutex()
 
@@ -162,14 +168,14 @@ class UstadCacheImpl(
     init {
         scope.launch {
             while(isActive) {
-                delay(databaseCommitInterval.toLong())
+                delay(databaseCommitInterval.milliseconds)
                 commit()
             }
         }
 
         scope.launch {
             while(isActive) {
-                delay(trimInterval.toLong())
+                delay(trimInterval.milliseconds)
                 commit()
                 trimmer.trim()
             }
@@ -195,7 +201,7 @@ class UstadCacheImpl(
      * @param loadedFromDb true if anything was loaded from db, false otherwise.
      */
     private data class LoadEntriesResult(
-        val entries: List<CacheEntryAndLocks>,
+        val entries: List<CacheEntryAndMetadata>,
         val pending: List<RequestedEntry>,
         val loadedFromDb: Boolean,
     )
@@ -234,6 +240,8 @@ class UstadCacheImpl(
 
                 val entriesInDb = db.cacheEntryDao.findByRequestBatchId(batchId)
                     .associateBy { it.key }
+                val extraHeadersInDb = db.cacheEntryExtraHeadersDao.findByRequestBatchId(batchId)
+                    .associateBy { it.ceehKey }
                 val locksInDb = db.retentionLockDao.findByBatchId(batchId)
                     .groupBy { it.lockKey }
 
@@ -243,9 +251,10 @@ class UstadCacheImpl(
                     entries = buildList {
                         addAll(entriesFromLruMap.values)
                         entriesToQueryDb.map {
-                            CacheEntryAndLocks(
+                            CacheEntryAndMetadata(
                                 urlKey = it.requestedKey,
                                 entry = entriesInDb[it.requestedKey],
+                                extraHeaders = extraHeadersInDb[it.requestedKey],
                                 locks = locksInDb[it.requestedKey] ?: emptyList()
                             )
                         }
@@ -259,19 +268,22 @@ class UstadCacheImpl(
 
 
     private suspend fun loadEntry(urlKey: String): CacheEntry? {
-        return loadEntryAndLocks(urlKey).entry
+        return loadEntryAndMetadata(urlKey).entry
     }
 
-    private suspend fun loadEntryAndLocks(urlKey: String): CacheEntryAndLocks {
+    private suspend fun loadEntryAndMetadata(urlKey: String): CacheEntryAndMetadata {
         val entryAndLocks = lruMap[urlKey]
 
         return entryAndLocks ?: lruMutex.withLock {
             val entryInDb =  db.cacheEntryDao.findEntryAndBodyByKey(urlKey)
             val entryLocks = db.retentionLockDao.findByKey(urlKey)
-            CacheEntryAndLocks(
+            val extraHeaders = db.cacheEntryExtraHeadersDao.findByKey(urlKey)
+
+            CacheEntryAndMetadata(
                 urlKey = urlKey,
                 entry = entryInDb,
-                locks = entryLocks
+                extraHeaders = extraHeaders,
+                locks = entryLocks,
             ).also {
                 lruMap[urlKey] = it
             }
@@ -285,15 +297,16 @@ class UstadCacheImpl(
             lruMap.compute(it.key) { key, prev ->
                 prev?.copy(
                     entry = it
-                ) ?: CacheEntryAndLocks(
+                ) ?: CacheEntryAndMetadata(
                     urlKey = key,
                     entry = it,
+                    extraHeaders = null,
                     locks = emptyList()
                 )
             }
         }
 
-        pendingCacheEntryUpdates.update { prev ->
+        pendingCacheEntryUpserts.update { prev ->
             prev + entries
         }
     }
@@ -333,7 +346,7 @@ class UstadCacheImpl(
                 val overrideHeaders = mutableMapOf<String, List<String>>()
 
                 @Suppress("ArrayInDataClass")
-                data class Sha256AndInflateSize(val sha256: ByteArray?, val inflatedSize: Long)
+                data class Sha256AndInflatedSize(val sha256: ByteArray?, val inflatedSize: Long)
 
                 val (sha256IntegrityFromTransfer, uncompressedSize) = if(
                     entryToStore.responseBodyTmpLocalPath != null && storeCompressionType == responseCompression
@@ -350,7 +363,7 @@ class UstadCacheImpl(
                             .uncompress(storeCompressionType).transferTo(NullOutputStream().asSink())
                     }
 
-                    Sha256AndInflateSize(null, inflatedSize)
+                    Sha256AndInflatedSize(null, inflatedSize)
                 }else {
                     val bodySource = response.bodyAsSource()
 
@@ -366,7 +379,7 @@ class UstadCacheImpl(
                     overrideHeaders["content-encoding"] = listOf(storeCompressionType.headerVal)
                     overrideHeaders["content-length"] = listOf(fileSystem.requireMetadata(tmpFile).size.toString())
 
-                    Sha256AndInflateSize(transferResult.sha256, transferResult.transferred)
+                    Sha256AndInflatedSize(transferResult.sha256, transferResult.transferred)
                 }
 
                 val integrityFromHeaders = if(entryToStore.skipChecksumIfProvided)
@@ -602,7 +615,7 @@ class UstadCacheImpl(
         logger?.i(LOG_TAG, "$logPrefix Retrieve ${request.url}")
 
         val key = Md5Digest().urlKey(request.url)
-        val entryAndLocks = loadEntryAndLocks(key)
+        val entryAndLocks = loadEntryAndMetadata(key)
         val entry = entryAndLocks.entry
         if(entry != null) {
             if(fileSystem.exists(Path(entry.storageUri))) {
@@ -610,8 +623,12 @@ class UstadCacheImpl(
                 pendingLastAccessedUpdates.update { prev ->
                     prev + LastAccessedUpdate(key, Clock.System.now().toEpochMilliseconds())
                 }
+
                 val responseHeaders = iHeadersBuilder {
                     takeFrom(IHttpHeaders.fromString(entry.responseHeaders))
+                    entryAndLocks.extraHeaders?.also {
+                        takeFrom(IHttpHeaders.fromString(it.extraHeaders))
+                    }
                     header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
                 }
 
@@ -656,7 +673,7 @@ class UstadCacheImpl(
                         )
                     }
 
-                    pendingCacheEntryUpdates.update { prev ->
+                    pendingCacheEntryUpserts.update { prev ->
                         prev.filter { it.key != key }
                     }
 
@@ -698,7 +715,7 @@ class UstadCacheImpl(
                     lastAccessed = timeNow,
                 )
 
-                pendingCacheEntryUpdates.update { prev ->
+                pendingCacheEntryUpserts.update { prev ->
                     prev + cacheEntryUpdated
                 }
 
@@ -796,7 +813,7 @@ class UstadCacheImpl(
         }
     }
 
-    private fun addLockToLruMap(retentionLock: RetentionLock): CacheEntryAndLocks {
+    private fun addLockToLruMap(retentionLock: RetentionLock): CacheEntryAndMetadata {
         return lruMap.compute(retentionLock.lockKey) { urlKey, entryAndLocks ->
             entryAndLocks?.let { entryVal ->
                 val isNewlyLocked = entryVal.locks.isEmpty()
@@ -810,9 +827,10 @@ class UstadCacheImpl(
                         entryVal.entry?.moveToNewPath(pathsProvider().persistentPath)
                     } ?: entryVal.entry
                 )
-            } ?: CacheEntryAndLocks(
+            } ?: CacheEntryAndMetadata(
                 urlKey = urlKey,
                 entry = null,
+                extraHeaders = null,
                 locks = listOf(retentionLock)
             )
         } ?: throw IllegalStateException("Can't happen")
@@ -827,7 +845,9 @@ class UstadCacheImpl(
         val md5Digest = Md5Digest()
 
         loadEntries(
-            requestEntries = locks.map { RequestedEntry(requestedKey = md5Digest.urlKey(it.url)) },
+            requestEntries = locks.map {
+                RequestedEntry(requestedKey = md5Digest.urlKey(it.url))
+            },
         )
 
 
@@ -849,7 +869,7 @@ class UstadCacheImpl(
             val cacheEntriesToUpsert = requestsAndLocks.mapNotNull {
                 it.third.entry
             }
-            pendingCacheEntryUpdates.update { prev ->
+            pendingCacheEntryUpserts.update { prev ->
                 prev + cacheEntriesToUpsert
             }
         }.map {
@@ -889,7 +909,7 @@ class UstadCacheImpl(
             }
         }
 
-        pendingCacheEntryUpdates.update { prev ->
+        pendingCacheEntryUpserts.update { prev ->
             prev +  entriesWithLostLock
         }
     }
@@ -939,7 +959,7 @@ class UstadCacheImpl(
             emptyList()
         }
 
-        val cacheEntryUpserts = pendingCacheEntryUpdates.getAndUpdate {
+        val cacheEntryUpserts = pendingCacheEntryUpserts.getAndUpdate {
             emptyList()
         }
 
@@ -947,11 +967,16 @@ class UstadCacheImpl(
             emptyList()
         }
 
+        val extraHeaderUpserts = pendingExtraHeaderUpserts.getAndUpdate {
+            emptyList()
+        }
+
         if(lastAccessUpdates.isEmpty() && lockRemovalsPending.isEmpty() &&
             cacheEntryUpserts.isEmpty() && lockUpsertsPending.isEmpty() &&
-            cacheEntryDeletes.isEmpty()
-        )
+            cacheEntryDeletes.isEmpty() && extraHeaderUpserts.isEmpty()
+        ) {
             return
+        }
 
         val updatesMap = mutableMapOf<String, Long>()
         lastAccessUpdates.forEach {
@@ -970,10 +995,46 @@ class UstadCacheImpl(
                 }
 
                 db.retentionLockDao.upsertList(lockUpsertsPending)
-                db.retentionLockDao.delete(lockRemovalsPending.map { RetentionLock(lockId = it) } )
+                db.retentionLockDao.delete(
+                    lockRemovalsPending.map { RetentionLock(lockId = it) }
+                )
+
+                db.cacheEntryExtraHeadersDao.takeIf { extraHeaderUpserts.isNotEmpty() }
+                    ?.upsertList(extraHeaderUpserts)
             }
         }
 
+    }
+
+    override suspend fun setExtraResponseHeaders(
+        url: Url,
+        extraResponseHeaders: Headers,
+    ) {
+        val urlKey = Md5Digest().urlKey(url.toString())
+        loadEntryAndMetadata(urlKey)
+
+        loadEntries(requestEntries = listOf(RequestedEntry()))
+
+        val extraHeaders = CacheEntryExtraHeaders(
+            ceehUrl = url.toString(),
+            ceehKey = urlKey,
+            extraHeaders = extraResponseHeaders.asRawString(),
+        )
+
+        lruMap.compute(urlKey) { urlKey, entryAndMetadata ->
+            entryAndMetadata?.copy(
+                extraHeaders = extraHeaders
+            ) ?: CacheEntryAndMetadata(
+                urlKey = urlKey,
+                entry = null,
+                extraHeaders = extraHeaders,
+                locks = emptyList()
+            )
+        }
+
+        pendingExtraHeaderUpserts.update {
+            it + extraHeaders
+        }
     }
 
     override fun close() {

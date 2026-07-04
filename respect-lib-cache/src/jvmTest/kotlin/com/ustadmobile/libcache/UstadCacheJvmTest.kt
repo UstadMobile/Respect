@@ -190,7 +190,7 @@ class UstadCacheJvmTest {
 
 
         val cacheEntryInDb = runBlocking {
-            cacheDb.cacheEntryDao.findEntryAndBodyByKey(Md5Digest().urlKey(testUrl))
+            cacheDb.cacheEntryDao.findEntryByKey(Md5Digest().urlKey(testUrl))
         }
         assertNotNull(cacheEntryInDb)
         val expectedPath = if(createLock) {
@@ -389,7 +389,7 @@ class UstadCacheJvmTest {
 
             runBlocking {
                 ustadCache.commit()
-                cacheDb.cacheEntryDao.findEntryAndBodyByKey(md5Digest.urlKey(url))
+                cacheDb.cacheEntryDao.findEntryByKey(md5Digest.urlKey(url))
             }
         }
 

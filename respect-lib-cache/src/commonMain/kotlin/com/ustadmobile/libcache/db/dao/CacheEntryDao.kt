@@ -23,7 +23,7 @@ abstract class CacheEntryDao {
           FROM CacheEntry
          WHERE CacheEntry.key = :key
     """)
-    abstract suspend fun findEntryAndBodyByKey(
+    abstract suspend fun findEntryByKey(
         key: String,
     ): CacheEntry?
 

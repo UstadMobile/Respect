@@ -275,7 +275,7 @@ class UstadCacheImpl(
         val entryAndLocks = lruMap[urlKey]
 
         return entryAndLocks ?: lruMutex.withLock {
-            val entryInDb =  db.cacheEntryDao.findEntryAndBodyByKey(urlKey)
+            val entryInDb =  db.cacheEntryDao.findEntryByKey(urlKey)
             val entryLocks = db.retentionLockDao.findByKey(urlKey)
             val extraHeaders = db.cacheEntryExtraHeadersDao.findByKey(urlKey)
 
@@ -320,7 +320,7 @@ class UstadCacheImpl(
         val entryPaths = pathsProvider()
 
         try {
-            logger?.d(LOG_TAG) { "$logPrefix storerequest ${storeRequest.size} entries" }
+            logger?.d(LOG_TAG) { "$logPrefix store request for ${storeRequest.size} entries" }
 
             /**
              * Go through everything that is requested to be stored: create a list of CacheEntryInProgress
@@ -335,7 +335,7 @@ class UstadCacheImpl(
                 val tmpFile = Path(entryPaths.tmpWorkPath,
                     "${tmpCounter.incrementAndGet()}.tmp")
                 val url = entryToStore.request.url
-                val storeCompressionType = storageCompressionFilter.invoke(
+                val storeCompressionType = storageCompressionFilter(
                     url = entryToStore.request.url,
                     requestHeaders = entryToStore.request.headers,
                     responseHeaders = entryToStore.response.headers

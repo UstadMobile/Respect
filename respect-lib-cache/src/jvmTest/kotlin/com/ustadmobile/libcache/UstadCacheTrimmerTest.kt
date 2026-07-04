@@ -65,7 +65,7 @@ class UstadCacheTrimmerTest {
         val expectedIndexes = listOf(0, 1, 5, 6, 7, 8, 9)
         runBlocking {
             (0 until 10).forEach {
-                val entry = cacheDb.cacheEntryDao.findEntryAndBodyByKey(
+                val entry = cacheDb.cacheEntryDao.findEntryByKey(
                     md5Digest.urlKey("$urlPrefix$it")
                 )
 

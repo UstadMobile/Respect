@@ -8,23 +8,37 @@ import androidx.room.PrimaryKey
 /**
  * Represents a cache entry.
  *
- * @param key The url key is the md5 of the URL (base64 encoded). This creates a unique key based on
+ * @param key The url key is the md5 of the url (base64 encoded). This creates a unique key based on
  *        the URL, and improves performance when searching/indexing because it is shorter than the
  *        url itself. URLs by nature often have matching prefixes (which slows down searching through
  *        them as an equality check has to go further through a non-matching string before it can
  *        return false).
+ * @param url the URL. If the response contained the no-vary-search header, the search parameters
+ *        will be normalized as per Url.normalizeForNoVarySearch .
+ * @param urlWithoutSearch the URL without any search parameters, non-null if the NoVarySearch header
+ *        is set.
+ *
+ * @param keyWithoutSearch the MD5 of the URL without any search parameters, non-null if the NoVarySearch header
+ *        is set.
  * @param cacheFlags flags from the cache-control header.
  * @param storageSize the size of the entry as it is stored on the disk. If the entry stored gzipped,
  *        this is the size after compression.
  */
 @Entity(
-    indices = [Index("lastAccessed", name = "idx_lastAccessed")]
+    indices = [
+        Index("lastAccessed", name = "idx_lastAccessed"),
+        Index("keyWithoutSearch", name = "idx_keyWithoutSearch")
+    ],
 )
 data class CacheEntry(
     @PrimaryKey
     val key: String = "",
 
     val url: String = "",
+
+    val keyWithoutSearch: String? = null,
+
+    val urlWithoutSearch: String? = null,
 
     val message: String = "",
 

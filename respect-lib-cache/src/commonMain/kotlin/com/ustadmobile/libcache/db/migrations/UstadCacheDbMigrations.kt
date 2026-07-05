@@ -12,6 +12,13 @@ val MIGRATE_15_16 = object : Migration(15, 16) {
     }
 }
 
+val MIGRATE_16_17 = object: Migration(16, 17) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("ALTER TABLE CacheEntry ADD COLUMN noVaryKey TEXT")
+        connection.execSQL("ALTER TABLE CacheEntry ADD COLUMN urlWithoutParams TEXT")
+    }
+}
+
 fun RoomDatabase.Builder<UstadCacheDb>.addCacheDbMigrations(): RoomDatabase.Builder<UstadCacheDb> {
     return this.addMigrations(
         MIGRATE_15_16,

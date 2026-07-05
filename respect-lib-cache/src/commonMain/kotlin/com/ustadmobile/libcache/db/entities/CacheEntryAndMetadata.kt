@@ -1,5 +1,6 @@
 package com.ustadmobile.libcache.db.entities
 
+import kotlinx.coroutines.sync.Mutex
 import java.util.concurrent.locks.ReentrantLock
 
 /**
@@ -11,5 +12,6 @@ data class CacheEntryAndMetadata(
     val extraHeaders: CacheEntryExtraHeaders?,
     val locks: List<RetentionLock>,
     val moveLock: ReentrantLock = ReentrantLock(false),
+    val mutex: Mutex = Mutex(),
 )
 

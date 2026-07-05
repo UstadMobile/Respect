@@ -2,7 +2,12 @@ package com.ustadmobile.libcache.novarysearch
 
 import io.ktor.http.URLBuilder
 
-fun URLBuilder.applyNoVarySearch(noVarySearch: NoVarySearch): URLBuilder {
+/**
+ * Normalize the URL being built as per the given NoVarySearch header. This will:
+ * a) Remove the search parameters that can be ignored
+ * b) Sort the parameters alphabetically if key-order directive is present
+ */
+fun URLBuilder.normalizeForNoVarySearch(noVarySearch: NoVarySearch): URLBuilder {
     val paramNames = parameters.names()
     paramNames.forEach { name ->
         val isInParams = noVarySearch.params == emptyList<String>() ||

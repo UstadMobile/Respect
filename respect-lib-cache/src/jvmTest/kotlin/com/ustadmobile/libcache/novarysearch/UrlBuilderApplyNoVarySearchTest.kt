@@ -12,35 +12,35 @@ class UrlBuilderApplyNoVarySearchTest {
         assertEquals(
             Url("http://localhost/users"),
             URLBuilder(Url("http://localhost/users?id=123")).apply {
-                applyNoVarySearch(NoVarySearch(params = listOf("id")))
+                normalizeForNoVarySearch(NoVarySearch(params = listOf("id")))
             }.build()
         )
 
         assertEquals(
             Url("http://localhost/users?otherParam=value"),
             URLBuilder(Url("http://localhost/users?id=123&otherParam=value")).apply {
-                applyNoVarySearch(NoVarySearch(params = listOf("id")))
+                normalizeForNoVarySearch(NoVarySearch(params = listOf("id")))
             }.build()
         )
 
         assertEquals(
             Url("http://localhost/users"),
             URLBuilder(Url("http://localhost/users?id=123&order=asc&lang=en")).apply {
-                applyNoVarySearch(NoVarySearch(params = listOf("id", "order", "lang")))
+                normalizeForNoVarySearch(NoVarySearch(params = listOf("id", "order", "lang")))
             }.build()
         )
 
         assertEquals(
             Url("http://localhost/users"),
             URLBuilder(Url("http://localhost/users?id=123&order=asc&lang=en")).apply {
-                applyNoVarySearch(NoVarySearch(params = listOf()))
+                normalizeForNoVarySearch(NoVarySearch(params = listOf()))
             }.build()
         )
 
         assertEquals(
             Url("http://localhost/users?id=123"),
             URLBuilder(Url("http://localhost/users?id=123&order=asc&lang=en")).apply {
-                applyNoVarySearch(NoVarySearch(params = listOf(), except = listOf("id")))
+                normalizeForNoVarySearch(NoVarySearch(params = listOf(), except = listOf("id")))
             }.build()
         )
 
@@ -49,7 +49,7 @@ class UrlBuilderApplyNoVarySearchTest {
         assertEquals(
             Url("http://localhost/users?id=123&lang=en&order=asc"),
             URLBuilder(Url("http://localhost/users?id=123&order=asc&lang=en")).apply {
-                applyNoVarySearch(NoVarySearch(keyOrder = true))
+                normalizeForNoVarySearch(NoVarySearch(keyOrder = true))
             }.build()
         )
     }

@@ -225,6 +225,22 @@ fi
 
 echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
 
+function check_databases() {
+
+    echo "Checking database integrity..."
+
+    find "$TESTSERVERCONTROLLER_BASEDIR" -path "*/e2e-uploads/*.db" | while read -r db; do
+        echo "Checking: $(basename "$db")"
+
+        if [ "$(sqlite3 "$db" ".integrity-check")" = "ok" ]; then
+            echo "PASS: $db"
+        else
+            echo "FAIL: $db"
+            exit 1
+        fi
+    done
+}
+
 function create_test_artifact_zip() {
     echo "ci-run-maestro: Archiving test artifacts..."
 

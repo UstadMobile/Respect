@@ -240,6 +240,7 @@ function create_test_artifact_zip() {
             -x "*/stderr.log" \
             -x "*/data/dir-admin.txt" \
             -x "*/data/respect-app.db.lck" \
+            -x "*/data/server.properties"
 
         cd "$ROOTDIR"
         echo "ci-run-maestro: Artifacts zipped to $OUTPUT_ZIP"

@@ -35,11 +35,13 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
     override val scope: Scope by activityScope()
 
     override fun onNewIntent(intent: Intent) {
-        val launchUrl = intent.getStringExtra(InitDeepLinkUriProviderUseCaseAndroid.BUNDLE_ARG_NAME)
-            ?: intent.data?.toString()
-        if (launchUrl != null && redirectSendDbIfNeeded(launchUrl)) return
+        if (intent.extractLaunchUrl()?.let { redirectSendDbIfNeeded(it) } == true) return
         super.onNewIntent(intent)
     }
+
+    private fun Intent.extractLaunchUrl(): String? =
+        getStringExtra(InitDeepLinkUriProviderUseCaseAndroid.BUNDLE_ARG_NAME)
+            ?: data?.toString()
 
     private fun redirectSendDbIfNeeded(launchUrl: String): Boolean {
         if (!launchUrl.contains(SendDbToServer.DEEP_LINK_PATH)) return false
@@ -52,9 +54,7 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val launchUrl = intent.getStringExtra(InitDeepLinkUriProviderUseCaseAndroid.BUNDLE_ARG_NAME)
-            ?: intent.data?.toString()
-        if (launchUrl != null && redirectSendDbIfNeeded(launchUrl)) {
+        if (intent.extractLaunchUrl()?.let { redirectSendDbIfNeeded(it) } == true) {
             finish()
             return
         }

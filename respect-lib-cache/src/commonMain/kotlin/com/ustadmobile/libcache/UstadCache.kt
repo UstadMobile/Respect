@@ -198,19 +198,6 @@ interface UstadCache {
      */
     suspend fun unpinPublication(manifestUrl: Url)
 
-    /**
-     * Sometimes we might need to add a response header that isn't really there - this is essentially
-     * a way to apply quirks. For example the HTML that is used to launch an xAPI lesson has
-     * parameters that vary each time for which NoVarySearch needs to be applied.
-     *
-     * @param url the URL to which extra response headers will be applied
-     * @param extraResponseHeaders the headers to add to the response
-     */
-    suspend fun setExtraResponseHeaders(
-        url: Url,
-        extraResponseHeaders: Headers,
-    )
-
     fun close()
 
     companion object {

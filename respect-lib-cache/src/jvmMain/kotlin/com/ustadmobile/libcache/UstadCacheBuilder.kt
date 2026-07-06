@@ -37,6 +37,7 @@ class UstadCacheBuilder(
         )
     },
     var db: UstadCacheDb? = null,
+    var extraHeaderProvider: UstadCacheExtraHeaderProvider? = null,
 ){
 
     fun build(): UstadCache {
@@ -58,6 +59,7 @@ class UstadCacheBuilder(
                 dbVal, xxStringHasher
             ),
             freshnessChecker = CacheControlFreshnessCheckerImpl(),
+            extraHeaderProvider = extraHeaderProvider,
         )
     }
 }

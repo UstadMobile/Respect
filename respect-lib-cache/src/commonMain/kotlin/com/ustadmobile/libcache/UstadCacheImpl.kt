@@ -1,19 +1,20 @@
 package com.ustadmobile.libcache
 
 import androidx.room.Transactor.SQLiteTransactionType
+import androidx.room.deferredTransaction
+import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.ihttp.headers.MergedHeaders
-import com.ustadmobile.ihttp.headers.asRawString
+import com.ustadmobile.ihttp.headers.asIHttpHeaders
 import com.ustadmobile.ihttp.headers.asString
-import com.ustadmobile.ihttp.headers.mapHeaders
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.ihttp.iostreams.NullOutputStream
 import com.ustadmobile.libcache.cachecontrol.ResponseValidityChecker
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.CacheEntryAndMetadata
 import com.ustadmobile.libcache.db.entities.RetentionLock
-import com.ustadmobile.libcache.db.entities.RequestedEntry
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.io.moveWithFallback
 import com.ustadmobile.libcache.io.requireMetadata
@@ -26,10 +27,9 @@ import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.libcache.response.CacheResponse
 import com.ustadmobile.ihttp.response.IHttpResponse
+import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessChecker
-import com.ustadmobile.libcache.db.entities.CacheEntryExtraHeaders
 import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
-import com.ustadmobile.libcache.db.ext.makeHttpResponseHeaders
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCase
 import com.ustadmobile.libcache.headers.hasCacheValidators
 import com.ustadmobile.libcache.headers.integrity
@@ -37,11 +37,9 @@ import com.ustadmobile.libcache.novarysearch.NoVarySearch
 import com.ustadmobile.libcache.novarysearch.normalizeForNoVarySearch
 import com.ustadmobile.libcache.novarysearch.removeAllParams
 import com.ustadmobile.libcache.response.ByteArrayResponse
-import com.ustadmobile.libcache.util.LruMap
 import com.ustadmobile.libcache.util.concurrentSafeMapOf
 import io.github.reactivecircus.cache4k.Cache
 import io.github.reactivecircus.cache4k.CacheEvent
-import io.ktor.http.Headers
 import io.ktor.http.Url
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.getAndUpdate
@@ -55,7 +53,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.io.asSink
 import kotlinx.io.buffered
@@ -65,7 +62,6 @@ import kotlinx.io.files.SystemFileSystem
 import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.libxxhash.XXStringHasher
 import kotlin.also
-import kotlin.concurrent.withLock
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.ExperimentalTime
@@ -101,43 +97,18 @@ class UstadCacheImpl(
     private val xxStringHasher: XXStringHasher,
     private val enqueuePinPublicationPrepareUseCase: EnqueuePinPublicationPrepareUseCase,
     private val freshnessChecker: CacheControlFreshnessChecker,
+    private val extraHeaderProvider: UstadCacheExtraHeaderProvider? = null,
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
 
     private val tmpCounter = atomic(0)
 
-    private val batchIdAtomic = atomic(0)
-
     private val lockIdAtomic = atomic(Clock.System.now().toEpochMilliseconds())
 
     private val logPrefix = "UstadCache($cacheName):"
 
     private val pendingLastAccessedUpdates = atomic(emptyList<LastAccessedUpdate>())
-
-    private val pendingLockRemovals = atomic(emptyList<Long>())
-
-    private val pendingLockUpserts = atomic(emptyList<RetentionLock>())
-
-    private val pendingCacheEntryUpserts = atomic(emptyList<CacheEntry>())
-
-    private val pendingCacheEntryDeletes = atomic(emptyList<CacheEntry>())
-
-    private val pendingExtraHeaderUpserts = atomic(emptyList<CacheEntryExtraHeaders>())
-
-    /**
-     * The LruMap is the in-memory cache of entries. It does not include the actual response data.
-     * This can reduce both the number of database queries and significantly reduce the number of
-     * database transactions that need to be performed.
-     *
-     * When modifications happen (when an item is stored, updated, removed, etc) the updates are done
-     * in the LRU map and any pending database changes are added to the relevant pending atomic list.
-     * Database updates are then performed in batches, significantly improving performance. This is
-     * especially helpful when many small items are being loaded.
-     */
-    private val lruMap = LruMap<String, CacheEntryAndMetadata>(concurrentSafeMapOf())
-
-    private val lruMutex = Mutex()
 
     /**
      * Memory cache of URL without any search parameters to a list of URLs keys
@@ -190,7 +161,7 @@ class UstadCacheImpl(
         .eventListener { event ->
             when(event) {
                 is CacheEvent.Updated -> {
-                    pendingCacheUpdates.compute(event.key) { key, prev ->
+                    pendingCacheUpdates.compute(event.key) { _, prev ->
                         if(prev == null) {
                             event
                         }else {
@@ -249,176 +220,14 @@ class UstadCacheImpl(
         scope.launch {
             trimmer.evictedEntriesFlow.collect { evictedEntries ->
                 evictedEntries.forEach { evictedKey ->
-                    lruMap.computeIfPresent(evictedKey) { _, entry ->
-                        entry.copy(
-                            entry = null
-                        )
-                    }
+                    memoryCache.invalidate(evictedKey)
                 }
             }
         }
     }
-
-    /**
-     * @param entries The entries loaded (including CacheEntry entity and any associated locks
-     * @param pending if loadEntries was called with loadFromDb=false, then this is a list of the
-     *        entries that were not loaded because the status is not in the Lru in memory cache
-     * @param loadedFromDb true if anything was loaded from db, false otherwise.
-     */
-    private data class LoadEntriesResult(
-        val entries: List<CacheEntryAndMetadata>,
-        val pending: List<RequestedEntry>,
-        val loadedFromDb: Boolean,
-    )
-
-    /*
-     * Load entries from the LruCache. When loadFromDb is enabled, then any entries not found in the
-     * in memory lru cache will be loaded from the database. When loadFromDb is not enabled, entries
-     * not found in the cache will be returned in the pending list of the LoadEntriesResult
-     */
-    private suspend fun loadEntries(
-        requestEntries: List<RequestedEntry>,
-        loadFromDb: Boolean = true,
-    ): LoadEntriesResult {
-        val (entriesInLru, entriesNotInLru) = requestEntries.partition {
-            lruMap.containsKey(it.requestedKey)
-        }
-
-        val entriesFromLruList = entriesInLru.mapNotNull {
-            lruMap[it.requestedKey]
-        }
-
-        if(!loadFromDb || entriesNotInLru.isEmpty()) {
-            return LoadEntriesResult(entriesFromLruList, entriesNotInLru, loadedFromDb = false)
-        }
-
-        return db.useWriterConnection { con ->
-            con.withTransaction(SQLiteTransactionType.IMMEDIATE) {
-                val batchId = batchIdAtomic.incrementAndGet()
-                val entriesFromLruMap = entriesFromLruList.associateBy { it.urlKey }
-
-                val entriesToQueryDb = requestEntries.filter {
-                    !entriesFromLruMap.containsKey(it.requestedKey)
-                }
-
-                db.requestedEntryDao.insertList(entriesToQueryDb)
-
-                val entriesInDb = db.cacheEntryDao.findByRequestBatchId(batchId)
-                    .associateBy { it.key }
-                val extraHeadersInDb = db.cacheEntryExtraHeadersDao.findByRequestBatchId(batchId)
-                    .associateBy { it.ceehKey }
-                val locksInDb = db.retentionLockDao.findByBatchId(batchId)
-                    .groupBy { it.lockKey }
-
-                db.requestedEntryDao.deleteBatch(batchId)
-
-                LoadEntriesResult(
-                    entries = buildList {
-                        addAll(entriesFromLruMap.values)
-                        entriesToQueryDb.map {
-                            CacheEntryAndMetadata(
-                                urlKey = it.requestedKey,
-                                entry = entriesInDb[it.requestedKey],
-                                extraHeaders = extraHeadersInDb[it.requestedKey],
-                                locks = locksInDb[it.requestedKey] ?: emptyList()
-                            )
-                        }
-                    },
-                    pending = emptyList(),
-                    loadedFromDb = false,
-                )
-            }
-        }
-    }
-
 
     private suspend fun loadEntry(url: String): CacheEntry? {
         return memoryCache.getOrLoadFromDb(Md5Digest().urlKey(url)).entry
-    }
-
-    private suspend fun loadEntryAndMetadata(
-        url: String,
-        md5Digest: Md5Digest = Md5Digest(),
-    ): CacheEntryAndMetadata {
-        val urlKey = md5Digest.urlKey(url)
-        val urlObj = Url(url)
-
-        val entryAndLocks = lruMap[urlKey]
-        if(entryAndLocks != null) {
-            return entryAndLocks
-        }
-
-        val urlWithoutParams = Url(url).removeAllParams()
-
-//        val noVarySearchOptions = urlsWithoutSearchToFullUrlsCache.get(urlWithoutParams)
-//        val noVaryMatch = noVarySearchOptions?.firstNotNullOfOrNull { noVaryOptionUrl ->
-//            val entryInMap = lruMap[md5Digest.urlKey(noVaryOptionUrl.toString())]
-//                ?: return@firstNotNullOfOrNull null
-//
-//            val entryHeaders = entryInMap.entry?.makeHttpResponseHeaders(
-//                entryInMap.extraHeaders?.extraHeaders
-//            ) ?: return@firstNotNullOfOrNull null
-//
-//            val entryNoVarySearch = entryHeaders["No-Vary-Search"]?.let {
-//                NoVarySearch.parse(it)
-//            } ?: return@firstNotNullOfOrNull null
-//
-//            //Is it possible that there could be more than one?
-//            // e.g. request url = http://localhost/user?id=123&lang=en
-//            // matches: http://localhost/user?id=123 No-Vary-Search: params("lang")
-//            // matches: http://localhost/user?lang=en No-Vary-Search: params("id")
-//
-//            //Keep the no vary map as a separate data structure,
-//            //we might need to put an empty list in the options to flag that we've done the lookup
-//
-//            entryInMap.takeIf {
-//                urlObj.normalizeForNoVarySearch(entryNoVarySearch) == noVaryOptionUrl
-//            }
-//        }
-
-        return  lruMutex.withLock {
-            val entryInDb =  db.cacheEntryDao.findEntryByKey(urlKey)
-
-            val entryLocks = db.retentionLockDao.findByKey(urlKey)
-            val extraHeaders = db.cacheEntryExtraHeadersDao.findByKey(urlKey)
-
-            CacheEntryAndMetadata(
-                urlKey = urlKey,
-                entry = entryInDb,
-                extraHeaders = extraHeaders,
-                locks = entryLocks,
-            ).also {
-                lruMap[urlKey] = it
-            }
-        }
-    }
-
-    private fun upsertEntries(
-        entries: List<CacheEntry>
-    ) {
-        entries.forEach { entry ->
-            lruMap.compute(entry.key) { key, prev ->
-                prev?.copy(
-                    entry = entry
-                ) ?: CacheEntryAndMetadata(
-                    urlKey = key,
-                    entry = entry,
-                    extraHeaders = null,
-                    locks = emptyList()
-                )
-            }
-
-//            entry.urlWithoutSearch?.also { urlWithoutSearchStr ->
-//                val urlWithoutSearch = Url(urlWithoutSearchStr)
-//                val existingSet = urlsWithoutSearchToFullUrlsCache.get(urlWithoutSearch)
-//                    ?: emptySet()
-//                urlsWithoutSearchToFullUrlsCache.put(urlWithoutSearch, existingSet + urlWithoutSearch)
-//            }
-        }
-
-        pendingCacheEntryUpserts.update { prev ->
-            prev + entries
-        }
     }
 
     override suspend fun store(
@@ -669,7 +478,13 @@ class UstadCacheImpl(
                     prev + LastAccessedUpdate(entryAndLocks.urlKey, Clock.System.now().toEpochMilliseconds())
                 }
 
-                val responseHeaders = entry.makeHttpResponseHeaders(entryAndLocks.extraHeaders?.extraHeaders)
+                val responseHeaders = iHeadersBuilder {
+                    takeFrom(IHttpHeaders.fromString(entry.responseHeaders))
+                    extraHeaderProvider?.invoke(request)?.also {
+                        takeFrom(it.asIHttpHeaders())
+                    }
+                    header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
+                }
 
                 /*
                  * If the request received had its own explicitly set validation info AND the cache
@@ -735,6 +550,7 @@ class UstadCacheImpl(
         val timeNow = Clock.System.now().toEpochMilliseconds()
         val urlKey = md5.urlKey(validatedEntry.url)
 
+        /*
         loadEntry(validatedEntry.url)
         lruMap.compute(urlKey) { _, prevEntry ->
             val existingEntry = prevEntry?.entry
@@ -765,10 +581,11 @@ class UstadCacheImpl(
                 prevEntry
             }
         }
+         */
     }
 
     override suspend fun getCacheEntry(url: String): CacheEntry? {
-        return loadEntry(url)?.copy()
+        return memoryCache.getOrLoadFromDb(Md5Digest().urlKey(url)).entry?.copy()
     }
 
     override suspend fun getLocks(url: String): List<RetentionLock> {
@@ -776,24 +593,16 @@ class UstadCacheImpl(
     }
 
     override suspend fun getEntries(urls: Set<String>): Map<String, CacheEntry> {
-        val batchId = batchIdAtomic.incrementAndGet()
-        val md5Digest = Md5Digest()
-
-        val entryLoadResult = loadEntries(
-            requestEntries = urls.map {  url ->
-                RequestedEntry(
-                    batchId = batchId,
-                    requestedKey =  md5Digest.urlKey(url)
-                )
-            },
-        )
-
-
-        return entryLoadResult.entries.mapNotNull { entryAndLocks ->
-            entryAndLocks.entry?.let {
-                entryAndLocks.urlKey to it
+        val md5 = Md5Digest()
+        return db.useReaderConnection { con ->
+            con.deferredTransaction {
+                urls.mapNotNull { url ->
+                    memoryCache.getOrLoadFromDb(md5.urlKey(url)).entry?.let { entry ->
+                        url to entry
+                    }
+                }.toMap()
             }
-        }.toMap()
+        }
     }
 
     override suspend fun getEntriesLocallyAvailable(urls: Set<String>): Map<String, Boolean> {
@@ -850,29 +659,6 @@ class UstadCacheImpl(
         }
     }
 
-    private fun addLockToLruMap(retentionLock: RetentionLock): CacheEntryAndMetadata {
-        return lruMap.compute(retentionLock.lockKey) { urlKey, entryAndLocks ->
-            entryAndLocks?.let { entryVal ->
-                val isNewlyLocked = entryVal.locks.isEmpty()
-                val persistentPath = pathsProvider().persistentPath
-
-                entryVal.copy(
-                    locks = entryVal.locks + retentionLock,
-                    entry = entryVal.takeIf {
-                        isNewlyLocked && it.entry?.isStoredIn(persistentPath) == false
-                    }?.moveLock?.withLock {
-                        entryVal.entry?.moveToNewPath(pathsProvider().persistentPath)
-                    } ?: entryVal.entry
-                )
-            } ?: CacheEntryAndMetadata(
-                urlKey = urlKey,
-                entry = null,
-                extraHeaders = null,
-                locks = listOf(retentionLock)
-            )
-        } ?: throw IllegalStateException("Can't happen")
-    }
-
     override suspend fun addRetentionLocks(
         locks: List<EntryLockRequest>
     ): List<Pair<EntryLockRequest, RetentionLock>> {
@@ -907,38 +693,6 @@ class UstadCacheImpl(
             }
             Pair(lockRequest, newLock)
         }
-
-//        loadEntries(
-//            requestEntries = locks.map {
-//                RequestedEntry(requestedKey = md5Digest.urlKey(it.url))
-//            },
-//        )
-//
-//
-//        return locks.map { lockRequest ->
-//            val key = md5Digest.urlKey(lockRequest.url)
-//            val lock = RetentionLock(
-//                lockId = lockIdAtomic.incrementAndGet(),
-//                lockKey = key,
-//                lockRemark = lockRequest.remark,
-//            )
-//
-//            Triple(lockRequest, lock, addLockToLruMap(lock))
-//        }.also { requestsAndLocks ->
-//            val newLockUpserts = requestsAndLocks.map { it.second }
-//            pendingLockUpserts.update { prev ->
-//                prev + newLockUpserts
-//            }
-//
-//            val cacheEntriesToUpsert = requestsAndLocks.mapNotNull {
-//                it.third.entry
-//            }
-//            pendingCacheEntryUpserts.update { prev ->
-//                prev + cacheEntriesToUpsert
-//            }
-//        }.map {
-//            it.first to it.second
-//        }
     }
 
     /**
@@ -949,32 +703,22 @@ class UstadCacheImpl(
         logger?.v(LOG_TAG) {
             "$logPrefix remove retention locks for ${locksToRemove.joinToString { "#${it.lockId}${it.url}" } }"
         }
-        pendingLockRemovals.update { prev ->
-            prev + locksToRemove.map { it.lockId }
-        }
-        val md5Digest = Md5Digest()
-        val entriesWithLostLock = mutableListOf<CacheEntry>()
 
+        val md5 = Md5Digest()
         locksToRemove.forEach { removeRequest ->
-            lruMap.computeIfPresent(md5Digest.urlKey(removeRequest.url)) { _, prev ->
+            memoryCache.update(md5.urlKey(removeRequest.url)) { prev ->
                 val newLockList = prev.locks.filter { it.lockId != removeRequest.lockId }
                 val isNewlyUnlocked = prev.locks.isNotEmpty() && newLockList.isEmpty()
-                val cachePath = pathsProvider().cachePath
 
                 prev.copy(
                     locks = prev.locks.filter { it.lockId != removeRequest.lockId },
-
-                    entry = prev.takeIf {
-                        isNewlyUnlocked && it.entry?.isStoredIn(cachePath) == false
-                    }?.entry?.moveToNewPath(cachePath)?.also {
-                        entriesWithLostLock += it
-                    } ?: prev.entry
+                    entry = if(isNewlyUnlocked) {
+                        prev.entry?.moveToNewPath(pathsProvider().cachePath)
+                    }else {
+                        prev.entry
+                    }
                 )
             }
-        }
-
-        pendingCacheEntryUpserts.update { prev ->
-            prev +  entriesWithLostLock
         }
     }
 
@@ -1033,93 +777,27 @@ class UstadCacheImpl(
                     entry = cacheUpdateEvents.mapNotNull { it.value.newValue.entry }
                 )
 
+                val newLocks = cacheUpdateEvents.flatMap { event ->
+                    event.value.newValue.locks.filter { newLock ->
+                        !event.value.oldValue.locks.any { it.lockId == newLock.lockId }
+                    }
+                }
+
+                val deletedLocks = cacheUpdateEvents.flatMap { event ->
+                    event.value.oldValue.locks.filter { oldLock ->
+                        !event.value.newValue.locks.any { it.lockId == oldLock.lockId }
+                    }
+                }
+                if(newLocks.isNotEmpty())
+                    db.retentionLockDao.upsertList(newLocks)
+
+                if(deletedLocks.isNotEmpty())
+                    db.retentionLockDao.delete(deletedLocks)
+
                 updatesMap.forEach {
                     db.cacheEntryDao.updateLastAccessedTime(it.key, it.value)
                 }
             }
-        }
-
-//
-//        val lockUpsertsPending = pendingLockUpserts.getAndUpdate { emptyList() }
-//
-//        val lockRemovalsPending = pendingLockRemovals.getAndUpdate {
-//            emptyList()
-//        }
-//
-//        val cacheEntryUpserts = pendingCacheEntryUpserts.getAndUpdate {
-//            emptyList()
-//        }
-//
-//        val cacheEntryDeletes = pendingCacheEntryDeletes.getAndUpdate {
-//            emptyList()
-//        }
-//
-//        val extraHeaderUpserts = pendingExtraHeaderUpserts.getAndUpdate {
-//            emptyList()
-//        }
-//
-//        if(lastAccessUpdates.isEmpty() && lockRemovalsPending.isEmpty() &&
-//            cacheEntryUpserts.isEmpty() && lockUpsertsPending.isEmpty() &&
-//            cacheEntryDeletes.isEmpty() && extraHeaderUpserts.isEmpty()
-//        ) {
-//            return
-//        }
-//
-//        val updatesMap = mutableMapOf<String, Long>()
-//        lastAccessUpdates.forEach {
-//            updatesMap[it.key] = it.accessTime
-//        }
-//
-//
-//        db.useWriterConnection { con ->
-//            con.withTransaction(SQLiteTransactionType.IMMEDIATE) {
-//                db.cacheEntryDao.delete(cacheEntryDeletes)
-//                db.cacheEntryDao.takeIf { cacheEntryUpserts.isNotEmpty() }
-//                    ?.upsertList(cacheEntryUpserts)
-//
-//                updatesMap.forEach {
-//                    db.cacheEntryDao.updateLastAccessedTime(it.key, it.value)
-//                }
-//
-//                db.retentionLockDao.upsertList(lockUpsertsPending)
-//                db.retentionLockDao.delete(
-//                    lockRemovalsPending.map { RetentionLock(lockId = it) }
-//                )
-//
-//                db.cacheEntryExtraHeadersDao.takeIf { extraHeaderUpserts.isNotEmpty() }
-//                    ?.upsertList(extraHeaderUpserts)
-//            }
-//        }
-
-    }
-
-    override suspend fun setExtraResponseHeaders(
-        url: Url,
-        extraResponseHeaders: Headers,
-    ) {
-        val md5 = Md5Digest()
-        loadEntryAndMetadata(url.toString(), md5Digest = md5)
-
-        val urlKey = md5.urlKey(url.toString())
-        val extraHeaders = CacheEntryExtraHeaders(
-            ceehUrl = url.toString(),
-            ceehKey = urlKey,
-            extraHeaders = extraResponseHeaders.asRawString(),
-        )
-
-        lruMap.compute(urlKey) { urlKey, entryAndMetadata ->
-            entryAndMetadata?.copy(
-                extraHeaders = extraHeaders
-            ) ?: CacheEntryAndMetadata(
-                urlKey = urlKey,
-                entry = null,
-                extraHeaders = extraHeaders,
-                locks = emptyList()
-            )
-        }
-
-        pendingExtraHeaderUpserts.update {
-            it + extraHeaders
         }
     }
 

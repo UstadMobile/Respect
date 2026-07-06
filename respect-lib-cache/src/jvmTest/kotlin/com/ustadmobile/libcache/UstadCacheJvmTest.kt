@@ -20,8 +20,6 @@ import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncode
 import com.ustadmobile.libcache.util.initNapierLog
 import com.ustadmobile.libcache.util.newFileFromResource
 import com.ustadmobile.libcache.util.storeFileAsUrl
-import io.ktor.http.Headers
-import io.ktor.http.Url
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.asInputStream
@@ -75,7 +73,7 @@ class UstadCacheJvmTest {
         mimeType: String,
         expectedContentEncoding: String? = null,
         requestHeaders: List<IHttpHeader> = emptyList(),
-        extraHeaders: Headers? = null,
+        extraHeadersProvider: UstadCacheExtraHeaderProvider? = null,
     ) {
         val request = runBlocking {
             storeFileAsUrl(
@@ -85,12 +83,7 @@ class UstadCacheJvmTest {
                 requestHeaders = requestHeaders
             ).request
         }
-
-        extraHeaders?.also {
-            runBlocking {
-                setExtraResponseHeaders(Url(testUrl), it)
-            }
-        }
+        val extraHeadersExpected = extraHeadersProvider?.invoke(request)
 
         //Check response body content matches
         val cacheResponse = runBlocking { retrieve(request) }
@@ -127,7 +120,7 @@ class UstadCacheJvmTest {
             }
         }
 
-        extraHeaders?.also { headers ->
+        extraHeadersExpected?.also { headers ->
             headers.forEach { name, values ->
                 val allResponseHeaders = cacheResponse.headers.getAllByName(name)
                 values.forEach { extraHeaderVal ->
@@ -153,7 +146,7 @@ class UstadCacheJvmTest {
         expectContentEncoding: String? = null,
         requestHeaders: List<IHttpHeader> = emptyList(),
         createLock: Boolean = false,
-        extraHeaders: Headers? = null,
+        extraHeadersProvider: UstadCacheExtraHeaderProvider? = null,
         block: FileCanBeCachedAndRetrievedContext.() -> Unit = { },
     ) {
         val tmpFile = tempDir.newFile("cachetest.db")
@@ -169,6 +162,7 @@ class UstadCacheJvmTest {
                 cacheDb, XXStringHasherCommonJvm()
             ),
             freshnessChecker = CacheControlFreshnessCheckerImpl(),
+            extraHeaderProvider = extraHeadersProvider,
         )
 
         val createdLocks = if(createLock) {
@@ -183,7 +177,7 @@ class UstadCacheJvmTest {
             mimeType = mimeType,
             expectedContentEncoding = expectContentEncoding,
             requestHeaders = requestHeaders,
-            extraHeaders = extraHeaders,
+            extraHeadersProvider = extraHeadersProvider,
         )
 
         runBlocking { ustadCache.commit() }
@@ -526,7 +520,9 @@ class UstadCacheJvmTest {
             testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
             testUrl = "http://www.server.com/file.png",
             mimeType = "image/png",
-            extraHeaders = headersOf("No-Vary-Search", "params"),
+            extraHeadersProvider = {
+                headersOf("X-Test-Header" to listOf("Test-Value"))
+            },
         )
     }
 

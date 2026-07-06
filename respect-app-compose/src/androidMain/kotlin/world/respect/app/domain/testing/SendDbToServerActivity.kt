@@ -77,7 +77,9 @@ class SendDbToServerActivity : AppCompatActivity() {
                 withContext(Dispatchers.IO) {
                     SQLiteDatabase.openDatabase(
                         dbFile.absolutePath, null, SQLiteDatabase.OPEN_READWRITE
-                    ).use { it.execSQL(PRAGMA_WAL_CHECKPOINT) }
+                    ).use { db ->
+                        db.rawQuery(PRAGMA_WAL_CHECKPOINT, null).use { it.moveToFirst() }
+                    }
                 }
             }
         }

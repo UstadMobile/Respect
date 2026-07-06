@@ -9,6 +9,7 @@ import com.ustadmobile.ihttp.headers.MergedHeaders
 import com.ustadmobile.ihttp.headers.asIHttpHeaders
 import com.ustadmobile.ihttp.headers.asString
 import com.ustadmobile.ihttp.headers.iHeadersBuilder
+import com.ustadmobile.ihttp.headers.mapHeaders
 import com.ustadmobile.ihttp.iostreams.NullOutputStream
 import com.ustadmobile.libcache.cachecontrol.ResponseValidityChecker
 import com.ustadmobile.libcache.db.UstadCacheDb
@@ -442,6 +443,7 @@ class UstadCacheImpl(
                 "$logPrefix cacheEntries created ${entriesWithTmpFileAndIntegrityInfo.size} entries"
             }
 
+            listener?.onEntriesStored(storeRequest)
             return processedEntries.map {
                 StoreResult(
                     urlKey = it.cacheEntry.key,
@@ -548,12 +550,9 @@ class UstadCacheImpl(
     override suspend fun updateLastValidated(validatedEntry: ValidatedEntry) {
         val md5 = Md5Digest()
         val timeNow = Clock.System.now().toEpochMilliseconds()
-        val urlKey = md5.urlKey(validatedEntry.url)
 
-        /*
-        loadEntry(validatedEntry.url)
-        lruMap.compute(urlKey) { _, prevEntry ->
-            val existingEntry = prevEntry?.entry
+        memoryCache.update(md5.urlKey(validatedEntry.url)) { prevEntry ->
+            val existingEntry = prevEntry.entry
             if(existingEntry != null) {
                 val existingHeaders = IHttpHeaders.fromString(existingEntry.responseHeaders)
 
@@ -564,24 +563,18 @@ class UstadCacheImpl(
                     }
                 }
                 val newHeaders = MergedHeaders(newHeadersCorrected, existingHeaders)
-                val cacheEntryUpdated = existingEntry.copy(
-                    responseHeaders = newHeaders.asString(),
-                    lastValidated = timeNow,
-                    lastAccessed = timeNow,
-                )
-
-                pendingCacheEntryUpserts.update { prev ->
-                    prev + cacheEntryUpdated
-                }
 
                 prevEntry.copy(
-                    entry = cacheEntryUpdated
+                    entry = existingEntry.copy(
+                        responseHeaders = newHeaders.asString(),
+                        lastValidated = timeNow,
+                        lastAccessed = timeNow,
+                    )
                 )
             }else {
                 prevEntry
             }
         }
-         */
     }
 
     override suspend fun getCacheEntry(url: String): CacheEntry? {

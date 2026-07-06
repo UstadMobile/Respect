@@ -185,8 +185,7 @@ class UstadCacheImpl(
             CacheEntryAndMetadata(
                 urlKey = key,
                 entry = db.cacheEntryDao.findEntryByKey(key),
-                extraHeaders = db.cacheEntryExtraHeadersDao.findByKey(key),
-                locks = db.retentionLockDao.findByKey(key)
+                locks = db.retentionLockDao.findByKey(key),
             )
         }
     }
@@ -225,10 +224,6 @@ class UstadCacheImpl(
                 }
             }
         }
-    }
-
-    private suspend fun loadEntry(url: String): CacheEntry? {
-        return memoryCache.getOrLoadFromDb(Md5Digest().urlKey(url)).entry
     }
 
     override suspend fun store(

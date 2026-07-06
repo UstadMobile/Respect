@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 16,
-    "identityHash": "3b9f6d0db6bd409d2c7332c969e78c02",
+    "identityHash": "ac4f6e3b7a5881eaa5ad08aa3f61bb83",
     "entities": [
       {
         "tableName": "CacheEntry",
@@ -520,41 +520,11 @@
             "ppUrlHash"
           ]
         }
-      },
-      {
-        "tableName": "CacheEntryExtraHeaders",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ceehKey` TEXT NOT NULL, `ceehUrl` TEXT NOT NULL, `extraHeaders` TEXT NOT NULL, PRIMARY KEY(`ceehKey`))",
-        "fields": [
-          {
-            "fieldPath": "ceehKey",
-            "columnName": "ceehKey",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "ceehUrl",
-            "columnName": "ceehUrl",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "extraHeaders",
-            "columnName": "extraHeaders",
-            "affinity": "TEXT",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "ceehKey"
-          ]
-        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3b9f6d0db6bd409d2c7332c969e78c02')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ac4f6e3b7a5881eaa5ad08aa3f61bb83')"
     ]
   }
 }

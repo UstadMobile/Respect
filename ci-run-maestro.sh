@@ -236,10 +236,10 @@ function create_test_artifact_zip() {
         zip -r "$OUTPUT_ZIP" . \
             -x "lastMaestroRun.log" \
             -x "*/respect-server*/*" \
-            -x "process.pid" \
-            -x "stderr.log" \
-            -x "dir-admin.txt" \
-            -x "respect-app.db.lck" \
+            -x "*/process.pid" \
+            -x "*/stderr.log" \
+            -x "*/data/dir-admin.txt" \
+            -x "*/data/respect-app.db.lck" \
 
         cd "$ROOTDIR"
         echo "ci-run-maestro: Artifacts zipped to $OUTPUT_ZIP"

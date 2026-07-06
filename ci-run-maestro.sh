@@ -241,6 +241,10 @@ function check_databases() {
     done
 }
 
+check_databases
+
+echo "All databases passed integrity check."
+
 function create_test_artifact_zip() {
     echo "ci-run-maestro: Archiving test artifacts..."
 

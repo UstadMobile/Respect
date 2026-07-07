@@ -237,7 +237,7 @@ function check_databases() {
             echo "FAIL: $db"
             exit 1
         fi
-    done < <(find "$TESTSERVERCONTROLLER_BASEDIR" -path "*/e2e-uploads/*.db")
+    done < <(find "$TESTSERVERCONTROLLER_BASEDIR" -path "*/e2e-client-db-uploads/*.db")
 }
 
 check_databases

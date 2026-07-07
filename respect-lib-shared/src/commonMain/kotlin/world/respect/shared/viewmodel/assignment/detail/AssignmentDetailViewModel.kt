@@ -26,6 +26,7 @@ import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.composites.AssignmentAndProgress
@@ -226,7 +227,15 @@ class AssignmentDetailViewModel(
                     }else {
                         null
                     }
-                ).shareIn(viewModelScope, SharingStarted.Lazily)
+                ).map { state ->
+                    if (state is DataReadyState) {
+                        state.copy(
+                            data = state.data.copy(
+                                progress = state.data.progress.sortedBy { it.actor.name?.lowercase() ?: "" }
+                            )
+                        )
+                    } else state
+                }.shareIn(viewModelScope, SharingStarted.Lazily)
 
                 launch {
                     assignmentProgressFlow.collect { assignmentAndProgress ->

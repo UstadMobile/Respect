@@ -7,7 +7,17 @@ fun Url.normalizeForNoVarySearch(noVarySearch: NoVarySearch): Url {
     return URLBuilder(this).normalizeForNoVarySearch(noVarySearch).build()
 }
 
-fun Url.removeAllParams() : Url {
+fun Url.normalizeForNoVarySearchIfNotNull(
+    noVarySearchHeader: String?
+): Url {
+    return if(noVarySearchHeader != null) {
+        normalizeForNoVarySearch(NoVarySearch.parse(noVarySearchHeader))
+    }else {
+        this
+    }
+}
+
+fun Url.removeAllSearchParams() : Url {
     return URLBuilder(this).apply {
         encodedParameters.clear()
     }.build()

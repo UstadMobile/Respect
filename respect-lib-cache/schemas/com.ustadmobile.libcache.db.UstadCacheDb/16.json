@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 16,
-    "identityHash": "ac4f6e3b7a5881eaa5ad08aa3f61bb83",
+    "identityHash": "9ea68796284afe0269c7c26f7de04228",
     "entities": [
       {
         "tableName": "CacheEntry",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`key` TEXT NOT NULL, `url` TEXT NOT NULL, `keyWithoutSearch` TEXT, `urlWithoutSearch` TEXT, `message` TEXT NOT NULL, `statusCode` INTEGER NOT NULL, `cacheFlags` INTEGER NOT NULL, `method` INTEGER NOT NULL, `lastAccessed` INTEGER NOT NULL, `lastValidated` INTEGER NOT NULL, `integrity` TEXT, `responseHeaders` TEXT NOT NULL, `storageUri` TEXT NOT NULL, `storageSize` INTEGER NOT NULL, `uncompressedSize` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`key`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`key` TEXT NOT NULL, `url` TEXT NOT NULL, `urlWithoutSearch` TEXT, `urlWithoutSearchHash` TEXT, `message` TEXT NOT NULL, `statusCode` INTEGER NOT NULL, `cacheFlags` INTEGER NOT NULL, `method` INTEGER NOT NULL, `lastAccessed` INTEGER NOT NULL, `lastValidated` INTEGER NOT NULL, `integrity` TEXT, `responseHeaders` TEXT NOT NULL, `storageUri` TEXT NOT NULL, `storageSize` INTEGER NOT NULL, `uncompressedSize` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`key`))",
         "fields": [
           {
             "fieldPath": "key",
@@ -21,13 +21,13 @@
             "notNull": true
           },
           {
-            "fieldPath": "keyWithoutSearch",
-            "columnName": "keyWithoutSearch",
+            "fieldPath": "urlWithoutSearch",
+            "columnName": "urlWithoutSearch",
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "urlWithoutSearch",
-            "columnName": "urlWithoutSearch",
+            "fieldPath": "urlWithoutSearchHash",
+            "columnName": "urlWithoutSearchHash",
             "affinity": "TEXT"
           },
           {
@@ -114,13 +114,13 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `idx_lastAccessed` ON `${TABLE_NAME}` (`lastAccessed`)"
           },
           {
-            "name": "idx_keyWithoutSearch",
+            "name": "idx_urlWithoutSearchHash",
             "unique": false,
             "columnNames": [
-              "keyWithoutSearch"
+              "urlWithoutSearchHash"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `idx_keyWithoutSearch` ON `${TABLE_NAME}` (`keyWithoutSearch`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_urlWithoutSearchHash` ON `${TABLE_NAME}` (`urlWithoutSearchHash`)"
           },
           {
             "name": "index_CacheEntry_integrity",
@@ -524,7 +524,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ac4f6e3b7a5881eaa5ad08aa3f61bb83')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9ea68796284afe0269c7c26f7de04228')"
     ]
   }
 }

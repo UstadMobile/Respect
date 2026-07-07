@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import io.ktor.http.Url
 
 /**
  * Represents a cache entry.
@@ -18,7 +19,7 @@ import androidx.room.PrimaryKey
  * @param urlWithoutSearch the URL without any search parameters, non-null if the NoVarySearch header
  *        is set.
  *
- * @param keyWithoutSearch the MD5 of the URL without any search parameters, non-null if the NoVarySearch header
+ * @param urlWithoutSearchHash the MD5 of the URL without any search parameters, non-null if the NoVarySearch header
  *        is set.
  * @param cacheFlags flags from the cache-control header.
  * @param storageSize the size of the entry as it is stored on the disk. If the entry stored gzipped,
@@ -27,18 +28,18 @@ import androidx.room.PrimaryKey
 @Entity(
     indices = [
         Index("lastAccessed", name = "idx_lastAccessed"),
-        Index("keyWithoutSearch", name = "idx_keyWithoutSearch")
+        Index("urlWithoutSearchHash", name = "idx_urlWithoutSearchHash")
     ],
 )
 data class CacheEntry(
     @PrimaryKey
     val key: String = "",
 
-    val url: String = "",
+    val url: Url,
 
-    val keyWithoutSearch: String? = null,
+    val urlWithoutSearch: Url? = null,
 
-    val urlWithoutSearch: String? = null,
+    val urlWithoutSearchHash: String? = null,
 
     val message: String = "",
 

@@ -10,7 +10,7 @@ val MIGRATE_15_16 = object : Migration(15, 16) {
     override fun migrate(connection: SQLiteConnection) {
         connection.execSQL("ALTER TABLE CacheEntry ADD COLUMN keyWithoutSearch TEXT")
         connection.execSQL("ALTER TABLE CacheEntry ADD COLUMN urlWithoutSearch TEXT")
-        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_keyWithoutSearch` ON `CacheEntry` (`keyWithoutSearch`)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_urlWithoutSearchHash` ON `CacheEntry` (`urlWithoutSearchHash`)")
     }
 }
 

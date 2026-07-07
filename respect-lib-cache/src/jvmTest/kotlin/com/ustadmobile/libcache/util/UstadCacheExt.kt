@@ -1,6 +1,7 @@
 package com.ustadmobile.libcache.util
 
 import com.ustadmobile.ihttp.headers.IHttpHeader
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.ihttp.request.requestBuilder
@@ -27,6 +28,7 @@ suspend fun UstadCache.storeFileAsUrl(
     testUrl: String,
     mimeType: String,
     requestHeaders: List<IHttpHeader> = emptyList(),
+    extraHeaders: IHttpHeaders? = null,
 ): FileStoredAsUrl {
     val request = requestBuilder {
         url = testUrl
@@ -45,6 +47,10 @@ suspend fun UstadCache.storeFileAsUrl(
                 name = "Last-Modified",
                 value = GMTDate( testFile.lastModified()).toHttpDate()
             )
+
+            extraHeaders?.also {
+                takeFrom(it)
+            }
         }
     )
 

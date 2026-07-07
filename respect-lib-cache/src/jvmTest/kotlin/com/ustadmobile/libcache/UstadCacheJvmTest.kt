@@ -3,6 +3,8 @@ package com.ustadmobile.libcache
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.ustadmobile.ihttp.headers.IHttpHeader
+import com.ustadmobile.ihttp.headers.IHttpHeaders
+import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.headers.requireIntegrity
@@ -12,14 +14,21 @@ import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.ihttp.request.iRequestBuilder
+import com.ustadmobile.ihttp.request.requestBuilder
+import com.ustadmobile.ihttp.response.IHttpResponse
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseJvm
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
+import com.ustadmobile.libcache.md5.urlHash
+import com.ustadmobile.libcache.novarysearch.NoVarySearch
+import com.ustadmobile.libcache.novarysearch.normalizeForNoVarySearch
+import com.ustadmobile.libcache.novarysearch.normalizeForNoVarySearchIfNotNull
 import com.ustadmobile.libcache.response.StringResponse
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import com.ustadmobile.libcache.util.initNapierLog
 import com.ustadmobile.libcache.util.newFileFromResource
 import com.ustadmobile.libcache.util.storeFileAsUrl
+import io.ktor.http.Url
 import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.asInputStream
@@ -67,21 +76,36 @@ class UstadCacheJvmTest {
         }
     }
 
+    data class AssertStoredResult(
+        val response: IHttpResponse
+    )
+
     private fun UstadCache.assertCanStoreAndRetrieveFileAsCacheHit(
         testFile: File,
         testUrl: String,
+        retrieveUrl: String = testUrl,
         mimeType: String,
         expectedContentEncoding: String? = null,
         requestHeaders: List<IHttpHeader> = emptyList(),
         extraHeadersProvider: UstadCacheExtraHeaderProvider? = null,
-    ) {
-        val request = runBlocking {
+        storeExtraResponseHeaders: IHttpHeaders? = null,
+    ): AssertStoredResult {
+        runBlocking {
             storeFileAsUrl(
                 testFile = testFile,
                 testUrl = testUrl,
                 mimeType = mimeType,
-                requestHeaders = requestHeaders
-            ).request
+                requestHeaders = requestHeaders,
+                extraHeaders = storeExtraResponseHeaders,
+            )
+        }
+
+
+        val request = requestBuilder {
+            url = retrieveUrl
+            requestHeaders.forEach {
+                header(it.name, it.value)
+            }
         }
         val extraHeadersExpected = extraHeadersProvider?.invoke(request)
 
@@ -131,6 +155,8 @@ class UstadCacheJvmTest {
                 }
             }
         }
+
+        return AssertStoredResult(response = cacheResponse)
     }
 
     data class FileCanBeCachedAndRetrievedContext(
@@ -142,14 +168,16 @@ class UstadCacheJvmTest {
     private fun assertFileCanBeCachedAndRetrieved(
         testFile: File,
         testUrl: String,
+        retrieveUrl: String = testUrl,
         mimeType: String,
         expectContentEncoding: String? = null,
         requestHeaders: List<IHttpHeader> = emptyList(),
         createLock: Boolean = false,
         extraHeadersProvider: UstadCacheExtraHeaderProvider? = null,
+        storeExtraResponseHeaders: IHttpHeaders? = null,
         block: FileCanBeCachedAndRetrievedContext.() -> Unit = { },
     ) {
-        val tmpFile = tempDir.newFile("cachetest.db")
+        val tmpFile = tempDir.newFile()
         val cacheDb = Room.databaseBuilder<UstadCacheDb>(tmpFile.absolutePath)
             .setDriver(BundledSQLiteDriver())
             .build()
@@ -171,20 +199,25 @@ class UstadCacheJvmTest {
             emptyList()
         }
 
-        ustadCache.assertCanStoreAndRetrieveFileAsCacheHit(
+        val result = ustadCache.assertCanStoreAndRetrieveFileAsCacheHit(
             testFile =testFile,
             testUrl = testUrl,
+            retrieveUrl = retrieveUrl,
             mimeType = mimeType,
             expectedContentEncoding = expectContentEncoding,
             requestHeaders = requestHeaders,
             extraHeadersProvider = extraHeadersProvider,
+            storeExtraResponseHeaders = storeExtraResponseHeaders,
         )
 
         runBlocking { ustadCache.commit() }
 
+        val urlForKey = Url(retrieveUrl).normalizeForNoVarySearchIfNotNull(
+            result.response.headers["No-Vary-Search"]
+        )
 
         val cacheEntryInDb = runBlocking {
-            cacheDb.cacheEntryDao.findEntryByKey(Md5Digest().urlKey(testUrl))
+            cacheDb.cacheEntryDao.findEntryByKey(Md5Digest().urlHash(urlForKey))
         }
         assertNotNull(cacheEntryInDb)
         val expectedPath = if(createLock) {
@@ -526,6 +559,38 @@ class UstadCacheJvmTest {
         )
     }
 
+    @Test
+    fun givenNoVarySearchHeaderSet_whenRetrievedUsingMatchingUrl_thenIsCacheHit() {
+        data class NoVarySearchCase(
+            val storedAsUrl: String,
+            val retrieveUrl: String,
+            val noVarySearchHeader: String
+        )
+
+        listOf(
+            NoVarySearchCase(
+                "http://www.server.com/file.png",
+                "http://www.server.com/file.png?ts=1",
+                "params"
+            ),
+
+            NoVarySearchCase(
+                "http://www.server.com/file.png?lang=en&lesson=2",
+                "http://www.server.com/file.png?lang=en&lesson=2&actor=janedoe&endpoint=server",
+                "key-order, params=(\"endpoint\" \"actor\")",
+            ),
+        ).forEach { case ->
+            assertFileCanBeCachedAndRetrieved(
+                testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+                testUrl = case.storedAsUrl,
+                retrieveUrl = case.retrieveUrl,
+                mimeType = "image/png",
+                storeExtraResponseHeaders = iHeadersBuilder {
+                    header("No-Vary-Search", case.noVarySearchHeader)
+                },
+            )
+        }
+    }
 
 
 }

@@ -167,7 +167,6 @@ class AppLauncherViewModel(
                         opdsFeedUrl = defaultLessonUrl,
                         appManifestUrl = url,
                         resultDest = route.resultDest,
-                        title = app.dataOrNull()?.metadata?.title?.toStringMap()?.values?.firstOrNull(),
                     )
                 }else {
                     AppsDetail.create(

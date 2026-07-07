@@ -116,23 +116,20 @@ class PlaylistEditViewModel(
         val existingPlaylistUrl = route.playlistUrl
         if (existingPlaylistUrl != null) {
             viewModelScope.launch {
-                schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
+                val result = schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
                     url = existingPlaylistUrl,
                     params = DataLoadParams(),
-                ).collect { result ->
-                    when (result) {
-                        is DataReadyState -> {
-                            val fixedFeed = result.data.copy(
-                                groups = result.data.groups?.map { group ->
-                                    group.copy(
-                                        navigation = group.navigation?.takeIf { it.isNotEmpty() },
-                                    )
-                                }
+                ).first { it is DataReadyState } as DataReadyState
+
+                if (_uiState.value.feed == null) {
+                    val fixedFeed = result.data.copy(
+                        groups = result.data.groups?.map { group ->
+                            group.copy(
+                                navigation = group.navigation?.takeIf { it.isNotEmpty() },
                             )
-                            _uiState.update { it.copy(feed = fixedFeed) }
                         }
-                        else -> {}
-                    }
+                    )
+                    _uiState.update { it.copy(feed = fixedFeed) }
                 }
             }
         } else {

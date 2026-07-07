@@ -298,7 +298,7 @@ fun Application.module() {
             }
 
             if (environment.config.e2eTestingEnabled()) {
-                val e2eUploadsDir = File(environment.config.absoluteDataDir(), "e2e-uploads")
+                val e2eUploadsDir = File(environment.config.absoluteDataDir(), "e2e-client-db-uploads")
                 route("e2e") {
                     ReceiveDbRoute(e2eUploadsDir = e2eUploadsDir)
                 }

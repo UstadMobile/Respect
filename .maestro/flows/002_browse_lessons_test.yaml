@@ -54,14 +54,15 @@ onFlowComplete:
 - tapOn: "Example Web App"
 - tapOn: "Lessons"
 - tapOn: "Examples"
-- tapOn: "JS Tetris"
+- tapOn: "Assignment Result Statement Demo"
 - assertVisible:
     id: "app_title"
-    text: "JS Tetris"
+    text: "Assignment Result Statement Demo"
 - tapOn: "Download"
 - extendedWaitUntil:
     visible: "Downloaded"
     timeout: 10000
+# Set device on Offline mode
 - setAirplaneMode: enabled
 - assertVisible: "Downloaded"
 - stopApp
@@ -70,16 +71,20 @@ onFlowComplete:
 - tapOn: "Example Web App"
 - tapOn: "Lessons"
 - tapOn: "Examples"
-- tapOn: "JS Tetris"
+- tapOn: "Assignment Result Statement Demo"
 - assertVisible:
     id: "app_title"
-    text: "JS Tetris"
+    text: "Assignment Result Statement Demo"
 - assertVisible: "Downloaded"
 - tapOn: "Open"
 - extendedWaitUntil:
-    visible: "JS Tetris.*"
+    visible: "Assignment Result Statement Demo"
     timeout: 10000
-- assertVisible: "Tin Can Home"
+- assertVisible: "Assignment Result.*"
+- tapOn: "Score"
+- inputText: 1
+- tapOn: "Send statement"
+- assertVisible: "Statement sent.*"
 - tapOn: "Close"
 - setAirplaneMode: disabled
 - tapOn: "Apps"

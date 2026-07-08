@@ -247,7 +247,7 @@ echo "All databases passed integrity check."
 function create_test_artifact_zip() {
     echo "ci-run-maestro: Archiving test artifacts..."
 
-    local OUTPUT_ZIP="$ROOTDIR/build/EndToEndTest_Artifacts_$(date +%d%m%Y_%H%M%S).zip"
+    local OUTPUT_ZIP="$ROOTDIR/build/EndToEnd_Test_Artifacts_$(date +%d%m%Y_%H%M%S).zip"
 
     if [ -d "$TESTSERVERCONTROLLER_BASEDIR" ]; then
         cd "$TESTSERVERCONTROLLER_BASEDIR"

@@ -12,5 +12,6 @@ suspend fun UstadCacheDb.getContentEntryAndMetaDataByKey(
         urlKey = key,
         entry = preloadedEntry ?: cacheEntryDao.findEntryByKey(key),
         locks = retentionLockDao.findByKey(key),
+        extraHeaders = cacheEntryExtraHeadersDao.findByKey(key),
     )
 }

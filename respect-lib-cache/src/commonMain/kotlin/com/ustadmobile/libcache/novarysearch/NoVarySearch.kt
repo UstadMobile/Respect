@@ -7,7 +7,7 @@ package com.ustadmobile.libcache.novarysearch
  * This is used to avoid cache misses.
  *
  * @param keyOrder true if present, false otherwise
- * @param params if there are specified names in the params directive eg params("id", "lang") then
+ * @param params if there are specified names in the params directive eg params=("id", "lang") then
  *        those specified names. The params directive is on its own (e.g. covers all parameters),
  *        then an empty list. If the directive is not included, then null
  * @param except a list of specified names in the except directive if present, otherwise null

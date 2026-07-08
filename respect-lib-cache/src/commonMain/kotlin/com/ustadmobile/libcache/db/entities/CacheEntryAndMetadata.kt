@@ -10,6 +10,7 @@ data class CacheEntryAndMetadata(
     val urlKey: String,
     val entry: CacheEntry?,
     val locks: List<RetentionLock>,
+    val extraHeaders: CacheEntryExtraHeaders?,
     val moveLock: ReentrantLock = ReentrantLock(false),
     val mutex: Mutex = Mutex(),
 )

@@ -6,9 +6,8 @@ import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.ihttp.headers.MergedHeaders
-import com.ustadmobile.ihttp.headers.asIHttpHeaders
+import com.ustadmobile.ihttp.headers.asRawString
 import com.ustadmobile.ihttp.headers.asString
-import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.ihttp.headers.mapHeaders
 import com.ustadmobile.ihttp.iostreams.NullOutputStream
 import com.ustadmobile.libcache.cachecontrol.ResponseValidityChecker
@@ -28,10 +27,11 @@ import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.libcache.response.CacheResponse
 import com.ustadmobile.ihttp.response.IHttpResponse
-import com.ustadmobile.libcache.UstadCache.Companion.HEADER_LAST_VALIDATED_TIMESTAMP
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessChecker
+import com.ustadmobile.libcache.db.entities.CacheEntryExtraHeaders
 import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
 import com.ustadmobile.libcache.db.ext.getContentEntryAndMetaDataByKey
+import com.ustadmobile.libcache.db.ext.makeHttpResponseHeaders
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCase
 import com.ustadmobile.libcache.headers.hasCacheValidators
 import com.ustadmobile.libcache.headers.integrity
@@ -43,6 +43,7 @@ import com.ustadmobile.libcache.response.ByteArrayResponse
 import com.ustadmobile.libcache.util.concurrentSafeMapOf
 import io.github.reactivecircus.cache4k.Cache
 import io.github.reactivecircus.cache4k.CacheEvent
+import io.ktor.http.Headers
 import io.ktor.http.Url
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.getAndUpdate
@@ -102,7 +103,6 @@ class UstadCacheImpl(
     private val xxStringHasher: XXStringHasher,
     private val enqueuePinPublicationPrepareUseCase: EnqueuePinPublicationPrepareUseCase,
     private val freshnessChecker: CacheControlFreshnessChecker,
-    private val extraHeaderProvider: UstadCacheExtraHeaderProvider? = null,
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -114,20 +114,6 @@ class UstadCacheImpl(
     private val logPrefix = "UstadCache($cacheName):"
 
     private val pendingLastAccessedUpdates = atomic(emptyList<LastAccessedUpdate>())
-
-    /**
-     * Memory cache of URL without any search parameters to a list of URLs keys
-     *
-     * e.g. Where NoVarySearch covers all search parameters, key and value in list will be the same
-     * http://localhost/user -> [http://localhost/user]
-     *
-     * Where only some search parameters are covered e.g. No-Vary-Search: params("id")
-     * http://localhost/user -> [http://localhost/user?lang=en]
-     *
-     * This allows the retrieve function to find potential matching cache entries even when the URL
-     * itself is not an exact match.
-     */
-    //private val urlsWithoutSearchToFullUrlsCache = Cache.Builder<Url, Set<Url>>().build()
 
     /**
      * Data class that is used to track the status of a CacheEntryToStore as it is processed.
@@ -161,12 +147,6 @@ class UstadCacheImpl(
 
 
     private val pendingCacheUpdates = concurrentSafeMapOf<String, CacheEvent.Updated<String, CacheEntryAndMetadata>>()
-
-    /**
-     *
-     */
-    @Deprecated("Nah")
-    private val memoryCacheUrlWithoutSearchIndex = concurrentSafeMapOf<Url, Set<String>>()
 
     /**
      *
@@ -237,6 +217,7 @@ class UstadCacheImpl(
                     urlKey = urlHash,
                     entry = entryForUrl,
                     locks = db.retentionLockDao.findByKey(urlHash),
+                    extraHeaders = db.cacheEntryExtraHeadersDao.findByKey(urlHash),
                 )
             }
 
@@ -275,6 +256,7 @@ class UstadCacheImpl(
                 urlKey = urlHash,
                 entry = db.cacheEntryDao.findEntryByKey(urlHash),
                 locks = db.retentionLockDao.findByKey(urlHash),
+                extraHeaders = db.cacheEntryExtraHeadersDao.findByKey(urlHash),
             )
         }
     }
@@ -335,6 +317,16 @@ class UstadCacheImpl(
              */
             val entriesWithTmpFileAndIntegrityInfo = storeRequest.map { entryToStore ->
                 val response = entryToStore.response
+                val cacheKey = md5Digest.urlHash(Url(entryToStore.request.url))
+                val extraHeaders = memoryCache.get(cacheKey)?.extraHeaders
+                val responseHeaders = if(extraHeaders != null) {
+                    MergedHeaders(
+                        IHttpHeaders.fromString(extraHeaders.extraHeaders),
+                        response.headers
+                    )
+                }else {
+                    response.headers
+                }
 
                 fileSystem.createDirectories(entryPaths.tmpWorkPath)
                 val tmpFile = Path(entryPaths.tmpWorkPath,
@@ -397,9 +389,9 @@ class UstadCacheImpl(
                     ?: sha256Integrity(fileSystem.source(tmpFile).buffered().useAndReadSha256())
 
                 val effectiveHeaders = if(overrideHeaders.isNotEmpty()) {
-                    MergedHeaders(IHttpHeaders.fromMap(overrideHeaders), response.headers)
+                    MergedHeaders(IHttpHeaders.fromMap(overrideHeaders), responseHeaders)
                 }else {
-                    response.headers
+                    responseHeaders
                 }
 
                 logger?.v(LOG_TAG, "$logPrefix copied request data for $url to $tmpFile (integrity=$integrity)")
@@ -565,13 +557,9 @@ class UstadCacheImpl(
                     prev + LastAccessedUpdate(entryAndLocks.urlKey, Clock.System.now().toEpochMilliseconds())
                 }
 
-                val responseHeaders = iHeadersBuilder {
-                    takeFrom(IHttpHeaders.fromString(entry.responseHeaders))
-                    extraHeaderProvider?.invoke(request)?.also {
-                        takeFrom(it.asIHttpHeaders())
-                    }
-                    header(HEADER_LAST_VALIDATED_TIMESTAMP, entry.lastValidated.toString())
-                }
+                val responseHeaders = entry.makeHttpResponseHeaders(
+                    entryAndLocks.extraHeaders?.extraHeaders
+                )
 
                 /*
                  * If the request received had its own explicitly set validation info AND the cache
@@ -830,6 +818,21 @@ class UstadCacheImpl(
         return db.downloadJobItemDao.publicationPinState(
             pubManifestHash = xxStringHasher.hash(manifestUrl.toString())
         )
+    }
+
+    override suspend fun setExtraResponseHeaders(
+        url: Url,
+        extraResponseHeaders: Headers
+    ) {
+        memoryCache.update(url) { prev ->
+            prev.copy(
+                extraHeaders = CacheEntryExtraHeaders(
+                    ceehKey = Md5Digest().urlHash(url),
+                    ceehUrl = url.toString(),
+                    extraHeaders = extraResponseHeaders.asRawString()
+                )
+            )
+        }
     }
 
     suspend fun commit() {

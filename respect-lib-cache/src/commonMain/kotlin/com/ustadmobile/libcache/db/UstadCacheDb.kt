@@ -6,6 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
 import com.ustadmobile.libcache.db.dao.CacheEntryDao
+import com.ustadmobile.libcache.db.dao.CacheEntryExtraHeadersDao
 import com.ustadmobile.libcache.db.dao.RequestedEntryDao
 import com.ustadmobile.libcache.db.dao.RetentionLockDao
 import com.ustadmobile.libcache.db.dao.NeighborCacheDao
@@ -15,6 +16,7 @@ import com.ustadmobile.libcache.db.dao.DownloadJobDao
 import com.ustadmobile.libcache.db.dao.DownloadJobItemDao
 import com.ustadmobile.libcache.db.dao.PinnedPublicationDao
 import com.ustadmobile.libcache.db.entities.CacheEntry
+import com.ustadmobile.libcache.db.entities.CacheEntryExtraHeaders
 import com.ustadmobile.libcache.db.entities.NeighborCache
 import com.ustadmobile.libcache.db.entities.NeighborCacheEntry
 import com.ustadmobile.libcache.db.entities.NewCacheEntry
@@ -37,7 +39,7 @@ import com.ustadmobile.libcache.db.entities.PinnedPublication
  *
  */
 @Database(
-    version = 16,
+    version = 17,
     entities = [
         CacheEntry::class,
         RequestedEntry::class,
@@ -48,6 +50,7 @@ import com.ustadmobile.libcache.db.entities.PinnedPublication
         DownloadJob::class,
         DownloadJobItem::class,
         PinnedPublication::class,
+        CacheEntryExtraHeaders::class,
     ],
 )
 @TypeConverters(DbTypeConverters::class)
@@ -71,6 +74,8 @@ abstract class UstadCacheDb : RoomDatabase() {
     abstract val downloadJobItemDao: DownloadJobItemDao
 
     abstract val pinnedPublicationDao: PinnedPublicationDao
+
+    abstract val cacheEntryExtraHeadersDao: CacheEntryExtraHeadersDao
 
 }
 

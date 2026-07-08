@@ -28,7 +28,6 @@ class UstadCacheBuilder(
             cachePath = Path(appContext.cacheDir.absolutePath, DEFAULT_SUBPATH_CACHE),
         )
     },
-    var extraHeaderProvider: UstadCacheExtraHeaderProvider? = null,
 ) {
 
     fun build(): UstadCache {
@@ -47,7 +46,6 @@ class UstadCacheBuilder(
             ),
             db = dbVal,
             freshnessChecker = CacheControlFreshnessCheckerImpl(),
-            extraHeaderProvider = extraHeaderProvider,
         )
     }
 

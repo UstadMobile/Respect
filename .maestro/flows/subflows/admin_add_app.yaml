@@ -15,4 +15,6 @@ appId: world.respect.app
     id: "app_title"
     text: "App detail"
 - tapOn: "Add App"
-- tapOn: "Home"
+- tapOn:
+      text: "Home"
+      index: 0

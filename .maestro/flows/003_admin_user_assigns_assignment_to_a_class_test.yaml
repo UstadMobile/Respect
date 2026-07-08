@@ -30,7 +30,8 @@ onFlowComplete:
     env:
       USERNAME: "teacherauser"
       PASSWORD: "test123"
-- assertVisible: "Home"
+- assertVisible:
+    text: "Home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
@@ -65,7 +66,7 @@ onFlowComplete:
 - inputText: ${output.currentTime}
 - runFlow:
     when:
-      notVisible: "Task"
+      notVisible: "No task selected yet."
     commands:
       - hideKeyboard
 - tapOn: "Task"

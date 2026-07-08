@@ -117,7 +117,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Add playlist"
-- assertVisible: "Grade 1"
+- assertVisible: "Examples"
 - tapOn: "+ Section"
 - tapOn:
     text: "Learning item section"
@@ -150,15 +150,19 @@ onFlowComplete:
     id: "app_title"
     text: "Playlist - Grade 1"
 - assertVisible: "Playlist section day 1"
+- tapOn: "Examples"
+- assertVisible: "Lesson 001"
+- assertVisible: "Statement Maker"
+- back
 - tapOn:
     id: "expand_collapse_icon"
     index: 0
-#- assertVisible: "My app"
 - assertVisible: "Learning item section"
 - assertVisible: "Lesson 001"
 - tapOn:
-    id: "expand_collapse_icon"
+    id: "expand_collapse_icon"     #Collapse - Learing item section
     index: 1
+- assertNotVisible: "Lesson 001"
 - tapOn:
     id: "floating_action_button"    # Edit button
 - assertVisible:
@@ -178,26 +182,23 @@ onFlowComplete:
     text: "External link"
 - tapOn:
     id: "external_link_url_field"
-- inputText: ${output.SCHOOL_URL}static-resources/respect-ds/case_valid/examples/lesson001/lesson001.html
+- inputText: ${output.SCHOOL_URL}static-resources/respect-ds/case_valid/examples/statementmaker/index.html
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
     text: "External link"
-- assertVisible: "Lesson 001"
-- assertVisible: "Hello World Lesson - Learn audio and video"
+- assertVisible: "Statement Maker"
 - tapOn: "Done"
-- assertVisible: "Lesson 001"
-- assertVisible: "Hello World Lesson - Learn audio and video"
+- assertVisible: "Statement Maker"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Playlist - Grade 1"
 - assertVisible: "Playlist section day 1"
-- assertVisible: "Grade 1"
+- assertVisible: "Examples"
 - assertVisible: "Learning item section day 2"
 - assertVisible: "Lesson 001"
-- assertVisible: "Lesson 001"
-- assertVisible: "Hello World Lesson - Learn audio and video"
+- assertVisible: "Statement Maker"
 - assertVisible: "Share"
 - assertVisible:
     text: "Copy playlist"
@@ -207,7 +208,12 @@ onFlowComplete:
 - tapOn: "Lesson 001"
 - assertVisible: "Lesson 001"
 - assertVisible: "App name"
-- assertVisible: "Open"
+- tapOn: "Open"
+- extendedWaitUntil:
+    visible: "Lesson 001"
+    timeout: 6000
+- assertVisible: "Hello World Lesson"
+- tapOn: "Close"
 - tapOn: "Home"
 - tapOn: "Playlists"
 - assertVisible: "Playlist - Grade 1"
@@ -240,8 +246,8 @@ onFlowComplete:
 - runScript:
     file: "scripts/setDate.js"
 - inputText: ${output.currentTime}
-- assertVisible: "Task"  # As per prototype
-#- assertVisible: "Lesson 002"
+- assertVisible: "Task"
+- assertVisible: "Lesson 001"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
@@ -341,7 +347,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Playlist - Grade 1"
-- tapOn: "Lesson 001"
+- tapOn: "Statement Maker"
 - assertVisible:
     id: "app_title"
     text: "Add assignment"

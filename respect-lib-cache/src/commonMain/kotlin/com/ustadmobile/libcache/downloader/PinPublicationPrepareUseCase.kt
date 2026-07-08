@@ -14,6 +14,7 @@ import io.ktor.client.request.head
 import io.ktor.client.request.header
 import io.ktor.http.URLBuilder
 import io.ktor.http.contentLength
+import io.ktor.http.headersOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -72,6 +73,15 @@ class PinPublicationPrepareUseCase(
 
         val resourceAndAcquireJobItems = buildList {
             val acquisitionLinks = publication.findLearningUnitAcquisitionLinks()
+
+            acquisitionLinks.forEach { acquisitionLink ->
+                cache.setExtraResponseHeaders(
+                    url = manifestUrl.resolve(acquisitionLink.href),
+                    extraResponseHeaders = headersOf(
+                        "No-Vary-Search" to listOf(LAUNCH_LINK_NO_VARY_HEADER)
+                    )
+                )
+            }
 
             //This isn't ideal - but needed to ensure it will open.
             val acquisitionLinksWithRespectParams = acquisitionLinks.map {
@@ -160,6 +170,8 @@ class PinPublicationPrepareUseCase(
         const val PARALLEL_SIZE_FETCH_LIMIT = 8
 
         const val DEFAULT_MAX_ATTEMPTS = 5
+
+        const val LAUNCH_LINK_NO_VARY_HEADER = "params=(\"endpoint\" \"actor\" \"auth\" \"activity_id\" \"registration\" \"respectLaunchVersion\")"
 
     }
 }

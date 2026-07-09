@@ -22,6 +22,7 @@ import com.ustadmobile.libcache.md5.urlHash
 import com.ustadmobile.libcache.novarysearch.normalizeForNoVarySearchIfNotNull
 import com.ustadmobile.libcache.response.StringResponse
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
+import com.ustadmobile.libcache.util.LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER
 import com.ustadmobile.libcache.util.initNapierLog
 import com.ustadmobile.libcache.util.newFileFromResource
 import com.ustadmobile.libcache.util.storeFileAsUrl
@@ -630,7 +631,7 @@ class UstadCacheJvmTest {
             NoVarySearchCase(
                 "http://www.server.com/file.png?lang=en&lesson=2",
                 "http://www.server.com/file.png?lang=en&lesson=2&actor=janedoe&endpoint=server",
-                PinPublicationPrepareUseCase.LAUNCH_LINK_NO_VARY_HEADER,
+                LAUNCH_LINK_NO_VARY_HEADER,
             )
         ).forEachIndexed { _, case ->
             val testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png")

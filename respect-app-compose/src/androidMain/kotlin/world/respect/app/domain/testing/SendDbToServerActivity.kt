@@ -25,7 +25,6 @@ import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.getKoin
 import world.respect.app.view.testing.SendDbToServerScreen
 import world.respect.app.view.testing.SendDbToServerUiState
-import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.shared.domain.school.SchoolDbPath
 import world.respect.shared.domain.testing.SendDbToServerUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
@@ -67,20 +66,18 @@ class SendDbToServerActivity : AppCompatActivity() {
 
     private suspend fun upload(schoolUrl: Url, name: String) {
         val scopeId = SchoolDirectoryEntryScopeId(schoolUrl, null).scopeId
-        val scope = getKoin().getScopeOrNull(scopeId)
-        if (scope != null) {
-            scope.get<RespectSchoolDatabase>().openHelper.writableDatabase.execSQL(PRAGMA_WAL_CHECKPOINT)
-            scope.close()
-        } else {
-            val dbFile = getDatabasePath(SchoolDbPath.forSchoolUrl(schoolUrl).filename)
-            if (dbFile.exists()) {
-                withContext(Dispatchers.IO) {
-                    SQLiteDatabase.openDatabase(
-                        dbFile.absolutePath, null, SQLiteDatabase.OPEN_READWRITE
-                    ).use { db ->
-                        db.rawQuery(PRAGMA_WAL_CHECKPOINT, null).use { it.moveToFirst() }
-                    }
-                }
+        if (getKoin().getScopeOrNull(scopeId) != null)
+            throw IllegalStateException("school db scope must be close")
+
+        val dbFile = getDatabasePath(SchoolDbPath.forSchoolUrl(schoolUrl).filename)
+        if (!dbFile.exists())
+            throw IllegalStateException("School db file not found - ${dbFile.absolutePath}")
+
+        withContext(Dispatchers.IO) {
+            SQLiteDatabase.openDatabase(
+                dbFile.absolutePath, null, SQLiteDatabase.OPEN_READWRITE
+            ).use { db ->
+                db.rawQuery(PRAGMA_WAL_CHECKPOINT, null).use { it.moveToFirst() }
             }
         }
         getKoin().get<SendDbToServerUseCase>().invoke(schoolUrl, name)

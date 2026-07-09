@@ -128,11 +128,6 @@ if [ "$1" == "cloud" ]; then
       exit 1
     fi
 
-    if [ "$MAESTRO_CLOUD_DEVICEOS" == "" ]; then
-          echo "Must set Maestro cloud DEVICE OS key as MAESTRO_CLOUD_DEVICEOS environment var"
-          exit 1
-        fi
-
     BRANCH_ARG=""
     PULLREQUEST_ARG=""
     NAME_ARG=""

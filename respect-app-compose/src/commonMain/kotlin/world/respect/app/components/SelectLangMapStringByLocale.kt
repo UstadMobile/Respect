@@ -4,13 +4,13 @@ import androidx.compose.runtime.Composable
 import world.respect.lib.opds.model.LangMap
 import world.respect.lib.opds.model.LangMapObjectValue
 import world.respect.lib.opds.model.LangMapStringValue
-import world.respect.libutil.util.selectLang
+import world.respect.libutil.util.selectLangOrNull
 
 @Composable
 fun langMapString(
     langMap: Map<String, String>
 ): String {
-    val langCodeToDisplay = selectLang(
+    val langCodeToDisplay = selectLangOrNull(
         preferredLocales = listOf(LocalAppLocale.current),
         availableLocales = langMap.keys.toList(),
     )

@@ -13,7 +13,7 @@ class ConnectivityMonitorAndroid(
     context: Context
 ) : ConnectivityMonitor {
 
-    private val _status = MutableStateFlow(ConnectivityState(isConnected = true))
+    private val _status = MutableStateFlow(ConnectivityState(isConnected = false))
 
     override val statusFlow: StateFlow<ConnectivityState> = _status.asStateFlow()
 

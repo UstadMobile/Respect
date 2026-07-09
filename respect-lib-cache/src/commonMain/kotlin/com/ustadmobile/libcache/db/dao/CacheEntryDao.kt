@@ -21,11 +21,20 @@ abstract class CacheEntryDao {
     @Query("""
         SELECT CacheEntry.*
           FROM CacheEntry
-         WHERE CacheEntry.key = :key
+         WHERE CacheEntry.`key` = :key
     """)
-    abstract suspend fun findEntryAndBodyByKey(
+    abstract suspend fun findEntryByKey(
         key: String,
     ): CacheEntry?
+
+    @Query("""
+        SELECT CacheEntry.`key`
+          FROM CacheEntry
+         WHERE CacheEntry.urlWithoutSearchHash = :urlHash 
+    """)
+    abstract suspend fun findKeysByUrlWithoutSearchHash(
+        urlHash: String
+    ): List<String>
 
     @Insert
     abstract suspend fun insertAsync(entry: CacheEntry): Long
@@ -38,18 +47,6 @@ abstract class CacheEntryDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun upsertList(entry: List<CacheEntry>)
-
-    @Query(
-        """
-        SELECT CacheEntry.*
-          FROM CacheEntry
-         WHERE CacheEntry.key IN
-               (SELECT RequestedEntry.requestedKey
-                  FROM RequestedEntry
-                 WHERE RequestedEntry.batchId = :batchId)
-    """
-    )
-    abstract suspend fun findByRequestBatchId(batchId: Int): List<CacheEntry>
 
     @Query("""
         SELECT RequestedEntry.requestedKey

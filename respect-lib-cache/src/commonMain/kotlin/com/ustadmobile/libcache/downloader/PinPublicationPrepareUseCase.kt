@@ -83,18 +83,7 @@ class PinPublicationPrepareUseCase(
                 )
             }
 
-            //This isn't ideal - but needed to ensure it will open.
-            val acquisitionLinksWithRespectParams = acquisitionLinks.map {
-                it.copy(
-                    href = URLBuilder(manifestUrl.resolve(it.href.cleanHref()))
-                        .apply {
-                            this.parameters.append("respectLaunchVersion", "1")
-                        }
-                        .build().toString()
-                )
-            }
-            val linksToDownload = (publication.resources ?: emptyList()) +
-                    acquisitionLinks + acquisitionLinksWithRespectParams
+            val linksToDownload = (publication.resources ?: emptyList()) + acquisitionLinks
 
             addAll(
                 linksToDownload.map { resource ->

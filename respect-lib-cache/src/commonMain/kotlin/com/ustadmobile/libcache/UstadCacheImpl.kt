@@ -103,6 +103,7 @@ class UstadCacheImpl(
     private val xxStringHasher: XXStringHasher,
     private val enqueuePinPublicationPrepareUseCase: EnqueuePinPublicationPrepareUseCase,
     private val freshnessChecker: CacheControlFreshnessChecker,
+    memoryCacheMaxEntries: Long = MEMORY_CACHE_DEFAULT_NUM_ENTRIES,
 ) : UstadCache {
 
     private val scope = CoroutineScope(Dispatchers.IO + Job())
@@ -157,6 +158,7 @@ class UstadCacheImpl(
 
 
     private val memoryCache = Cache.Builder<String, CacheEntryAndMetadata>()
+        .maximumCacheSize(memoryCacheMaxEntries)
         .eventListener { event ->
             when(event) {
                 is CacheEvent.Updated -> {
@@ -187,11 +189,13 @@ class UstadCacheImpl(
         }
         .build()
 
-    suspend fun Cache<Url, Set<String>>.getOrLoadKeysFromDbAndPending(urlWithoutSearch: Url) : Set<String> {
+    suspend fun Cache<Url, Set<String>>.getOrLoadKeysFromDbAndPending(
+        urlWithoutSearch: Url
+    ) : Set<String> {
         return get(urlWithoutSearch) {
             //Load from database plus any pending entries.
             db.cacheEntryDao.findKeysByUrlWithoutSearchHash(
-                urlWithoutSearch.toString()
+                Md5Digest().urlHash(urlWithoutSearch)
             ).toSet() + pendingCacheUpdates.mapNotNull { update ->
                 update.key.takeIf {
                     update.value.newValue.entry?.urlWithoutSearch == urlWithoutSearch
@@ -200,65 +204,119 @@ class UstadCacheImpl(
         }
     }
 
-    suspend fun Cache<String, CacheEntryAndMetadata>.getOrLoadFromDb(
+    /**
+     * Goes through a list of cache keys (urlWithoutSearchMatchingKeys) and returns the first
+     * for which the corresponding cache entry url matches after applying the no-vary-search url
+     * normalization (as per the No-Vary-Search header for the CacheEntry with the given key).
+     *
+     * @param requestUrl the url being requested
+     * @param urlWithoutSearchMatchingKeys cache keys to go through e.g. from urlWithoutSearchToKeysCache
+     *
+     * @return A CacheEntryAndMetadata if there is a CacheEntry matching the request url (after
+     *         applying no-vary-search normalization)
+     */
+    private fun Cache<String, CacheEntryAndMetadata>.selectFromUrlWithoutSearchKeys(
+        requestUrl: Url,
+        urlWithoutSearchMatchingKeys: Set<String>
+    ) : CacheEntryAndMetadata? {
+        return urlWithoutSearchMatchingKeys.firstNotNullOfOrNull { candidateKey ->
+            val candidate = get(candidateKey)
+
+            val candidateEntry = candidate?.entry ?: return@firstNotNullOfOrNull null
+
+            val noVaryHeader = IHttpHeaders.fromString(
+                candidateEntry.responseHeaders
+            ).get("No-Vary-Search")?.let {
+                NoVarySearch.parse(it)
+            } ?: return@firstNotNullOfOrNull null
+
+            candidate.takeIf {
+                requestUrl.normalizeForNoVarySearch(noVaryHeader) == candidateEntry.url
+            }
+        }
+    }
+
+    /**
+     * Get the CacheEntryAndMetadata for the given request url
+     *
+     * @param url request url
+     */
+    private suspend fun Cache<String, CacheEntryAndMetadata>.getOrLoadFromDb(
         url: Url,
     ): CacheEntryAndMetadata {
         val md5 = Md5Digest()
         val urlHash = md5.urlHash(url)
 
-        return get(urlHash) {
-            val entryForUrl = db.cacheEntryDao.findEntryByKey(urlHash)
+        val entryInMemory = get(urlHash)
 
-            /**
-             * If there is a direct match for the exact url, take it.
-             */
-            if(entryForUrl != null) {
-                return@get CacheEntryAndMetadata(
-                    urlKey = urlHash,
-                    entry = entryForUrl,
-                    locks = db.retentionLockDao.findByKey(urlHash),
-                    extraHeaders = db.cacheEntryExtraHeadersDao.findByKey(urlHash),
-                )
-            }
+        /* When No-Vary-Search is used the request url and the url used for the real cache key are
+         * different, so we should only return this immediately only if the actual CacheEntry is not null.
+         */
+        if(entryInMemory?.entry != null)
+            return entryInMemory
 
-            //TO THINK ABOUT
-            // If something turns up in the memory cache as an exact match could that "block" getting
-            // to a matching entry
-            val urlWithoutSearch = url.removeAllSearchParams()
+        //Check for loaded NoVarySearch matches
+        val urlWithoutSearch = url.removeAllSearchParams()
+        val urlWithoutSearchMatchKeys = urlWithoutSearchToKeysCache.getOrLoadKeysFromDbAndPending(
+            urlWithoutSearch
+        )
 
-            //Here: can also look at the pending entries if needed.
-            val entriesMatchingWithoutSearch = urlWithoutSearchToKeysCache.getOrLoadKeysFromDbAndPending(
-                urlWithoutSearch
-            )
+        val inMemoryUrlWithoutSearchMatch = selectFromUrlWithoutSearchKeys(
+            url, urlWithoutSearchMatchKeys
+        )
 
-            val noVarySearchMatch = entriesMatchingWithoutSearch.firstNotNullOfOrNull { candidateKey ->
-                val candidate = memoryCache.get(candidateKey) {
-                    db.getContentEntryAndMetaDataByKey(candidateKey, null)
+        if(inMemoryUrlWithoutSearchMatch != null)
+            return inMemoryUrlWithoutSearchMatch
+
+        /*
+         * When an entry matches using NoVarySearch its URL (as per CacheEntry.url) will not match
+         * the request URL. We must not corrupt the memory cache by storing a CacheEntry using the
+         * wrong key.
+         */
+        var noVarySearchMatchFromDb: CacheEntryAndMetadata? = null
+
+        val loadedEntry = get(urlHash) {
+            db.useReaderConnection { con ->
+                con.deferredTransaction {
+                    val entryForUrl = db.cacheEntryDao.findEntryByKey(urlHash)
+
+                    /**
+                     * If there is a direct match for the exact url, take it, we're done.
+                     *
+                     * Future refinement: check for validity to ensure that a more updated no-vary-search
+                     * result would not be hidden by an older direct match if/as applicable after headers
+                     * were changed/updated.
+                     */
+                    if(entryForUrl != null) {
+                        return@deferredTransaction db.getContentEntryAndMetaDataByKey(
+                            urlHash, entryForUrl
+                        )
+                    }
+
+                    //Load any potential urlWithoutSearch matches into the in-memory cache
+                    urlWithoutSearchMatchKeys.forEach { key ->
+                        if(key != urlHash) {
+                            get(key) {
+                                db.getContentEntryAndMetaDataByKey(key, null)
+                            }
+                        }
+                    }
+
+                    noVarySearchMatchFromDb = selectFromUrlWithoutSearchKeys(
+                        url, urlWithoutSearchMatchKeys
+                    )
+
+                    CacheEntryAndMetadata(
+                        urlKey = urlHash,
+                        entry = db.cacheEntryDao.findEntryByKey(urlHash),
+                        locks = db.retentionLockDao.findByKey(urlHash),
+                        extraHeaders = db.cacheEntryExtraHeadersDao.findByKey(urlHash),
+                    )
                 }
-                val candidateEntry = candidate.entry ?: return@firstNotNullOfOrNull null
-
-                val noVaryHeader = IHttpHeaders.fromString(
-                    candidateEntry.responseHeaders
-                ).get("No-Vary-Search")?.let {
-                    NoVarySearch.parse(it)
-                } ?: return@firstNotNullOfOrNull null
-
-                candidate.takeIf {
-                    url.normalizeForNoVarySearch(noVaryHeader) == candidateEntry.url
-                }
             }
-
-            if(noVarySearchMatch != null) {
-                return@get noVarySearchMatch
-            }
-
-            CacheEntryAndMetadata(
-                urlKey = urlHash,
-                entry = db.cacheEntryDao.findEntryByKey(urlHash),
-                locks = db.retentionLockDao.findByKey(urlHash),
-                extraHeaders = db.cacheEntryExtraHeadersDao.findByKey(urlHash),
-            )
         }
+
+        return noVarySearchMatchFromDb ?: loadedEntry
     }
 
     suspend fun Cache<String, CacheEntryAndMetadata>.update(
@@ -562,8 +620,8 @@ class UstadCacheImpl(
                 )
 
                 /*
-                 * If the request received had its own explicitly set validation info AND the cache
-                 * is already fresh THEN we can reply an empty 304 not modified response.
+                 * If the request received had its own explicitly set validation info AND the cached
+                 * entry is fresh THEN we can reply an empty 304 not modified response.
                  */
                 val requestHasValidators = request.headers.hasCacheValidators()
                 val reply304 = requestHasValidators && freshnessChecker(
@@ -799,12 +857,14 @@ class UstadCacheImpl(
             xxStringHasher.hash(manifestUrl.toString())
         )
 
-        removeRetentionLocks(locks.map {
-            RemoveLockRequest(
-                url = it.lockKey,
-                lockId = it.lockId
-            )
-        })
+        removeRetentionLocks(
+            locks.map {
+                RemoveLockRequest(
+                    url = it.lockKey,
+                    lockId = it.lockId
+                )
+            }
+        )
 
         db.downloadJobDao.updateStatusByManifestHash(
             manifestHash = xxStringHasher.hash(manifestUrl.toString()),
@@ -844,6 +904,7 @@ class UstadCacheImpl(
         val lastAccessUpdates = pendingLastAccessedUpdates.getAndUpdate {
             emptyList()
         }
+
         val updatesMap = mutableMapOf<String, Long>()
 
         lastAccessUpdates.forEach {
@@ -867,11 +928,23 @@ class UstadCacheImpl(
                         !event.value.newValue.locks.any { it.lockId == oldLock.lockId }
                     }
                 }
+
                 if(newLocks.isNotEmpty())
                     db.retentionLockDao.upsertList(newLocks)
 
                 if(deletedLocks.isNotEmpty())
                     db.retentionLockDao.delete(deletedLocks)
+
+                val extraHeaderChanges = cacheUpdateEvents.mapNotNull { evt ->
+                    if(evt.value.newValue.extraHeaders == null && evt.value.oldValue.extraHeaders == null) {
+                        null
+                    }else {
+                        evt.value.newValue.extraHeaders
+                    }
+                }
+
+                if(extraHeaderChanges.isNotEmpty())
+                    db.cacheEntryExtraHeadersDao.upsertList(extraHeaderChanges)
 
                 updatesMap.forEach {
                     db.cacheEntryDao.updateLastAccessedTime(it.key, it.value)
@@ -902,6 +975,12 @@ class UstadCacheImpl(
          *     on disk is not changed, so the content-encoding must NEVER change.
          */
         private val NOT_MODIFIED_IGNORE_HEADERS = listOf("content-length", "content-encoding")
+
+        /**
+         * The number of entries to hold in the in-memory cache. Important: this does NOT hold the
+         * body of the response; only the headers and metadata
+         */
+        const val MEMORY_CACHE_DEFAULT_NUM_ENTRIES = 10_000L
 
     }
 }

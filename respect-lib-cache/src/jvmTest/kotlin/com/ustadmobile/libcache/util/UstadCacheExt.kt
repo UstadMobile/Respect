@@ -36,6 +36,13 @@ suspend fun UstadCache.storeFileAsUrl(
 ): FileStoredAsUrl {
     val urlObj = Url(testUrl)
 
+    extraHeaders?.also { extraHeadersVal ->
+        setExtraResponseHeaders(
+            url = urlObj.normalizeForNoVarySearchIfNotNull(extraHeadersVal["No-Vary-Search"]),
+            extraResponseHeaders = extraHeaders,
+        )
+    }
+
     val request = requestBuilder {
         url = testUrl
         requestHeaders.forEach {
@@ -55,13 +62,6 @@ suspend fun UstadCache.storeFileAsUrl(
             )
         }
     )
-
-    extraHeaders?.also { extraHeadersVal ->
-        setExtraResponseHeaders(
-            url = urlObj.normalizeForNoVarySearchIfNotNull(extraHeadersVal["No-Vary-Search"]),
-            extraResponseHeaders = extraHeaders,
-        )
-    }
 
     val storeResult = store(
         listOf(

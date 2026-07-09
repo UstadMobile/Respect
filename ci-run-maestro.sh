@@ -150,12 +150,12 @@ if [ "$1" == "cloud" ]; then
         PULLREQUEST_ARG="--pull-request-id=$PULLREQUEST"
     fi
 
-    if [ "$DEVICE_OS" == "" ]; then
-        DEVICE_OS="android-35"
-    fi
+#    if [ "$DEVICE_OS" == "" ]; then
+#        DEVICE_OS="android-35"
+#    fi
 
     maestro cloud \
-        --device-os "$DEVICE_OS" \
+        --device-os "android-35" \
         --api-key=$MAESTRO_CLOUD_APIKEY \
         --project-id=$MAESTRO_CLOUD_PROJECTID \
         --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \

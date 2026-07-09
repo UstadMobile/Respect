@@ -155,10 +155,19 @@ if [ "$1" == "cloud" ]; then
         PULLREQUEST_ARG="--pull-request-id=$PULLREQUEST"
     fi
 
+    MAESTRO_VERSION=$(maestro --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+    echo "Current Maestro version: $MAESTRO_VERSION"
+
+    if maestro cloud --help 2>&1 | grep -q -- '--device-os'; then
+        DEVICE_OS_ARG="--device-os=android-35"
+    else
+        DEVICE_OS_ARG="--android-api-level=35"
+    fi
+
     maestro cloud \
         --api-key=$MAESTRO_CLOUD_APIKEY \
         --project-id=$MAESTRO_CLOUD_PROJECTID \
-        --device-os=$MAESTRO_CLOUD_DEVICEOS \
+        $DEVICE_OS_ARG
         --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \
         --flows=.maestro/flows \
         --format=junit \

@@ -162,7 +162,7 @@ if [ "$1" == "cloud" ]; then
     maestro cloud \
         --api-key=$MAESTRO_CLOUD_APIKEY \
         --project-id=$MAESTRO_CLOUD_PROJECTID \
-        $DEVICE_OS_ARG
+        $DEVICE_OS_ARG \
         --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \
         --flows=.maestro/flows \
         --format=junit \

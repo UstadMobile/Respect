@@ -65,6 +65,7 @@ onFlowComplete:
 # Set device on Offline mode
 - setAirplaneMode: enabled
 - assertVisible: "Downloaded"
+- tapOn: "Apps"
 - stopApp
 - launchApp
 - assertVisible: "Apps"

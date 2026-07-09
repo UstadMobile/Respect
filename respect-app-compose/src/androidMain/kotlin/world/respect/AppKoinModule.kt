@@ -1077,6 +1077,7 @@ val appKoinModule = module {
             LaunchAppUseCaseAndroid(
                 appContext = androidContext().applicationContext,
                 getXapiLaunchUrlUseCase = get(),
+                ustadCache = get(),
             )
         }
 

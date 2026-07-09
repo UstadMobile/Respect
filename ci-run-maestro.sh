@@ -128,6 +128,11 @@ if [ "$1" == "cloud" ]; then
       exit 1
     fi
 
+    if [ "$MAESTRO_CLOUD_DEVICEOS" == "" ]; then
+          echo "Must set Maestro cloud DEVICE OS key as MAESTRO_CLOUD_DEVICEOS environment var"
+          exit 1
+        fi
+
     BRANCH_ARG=""
     PULLREQUEST_ARG=""
     NAME_ARG=""
@@ -153,9 +158,9 @@ if [ "$1" == "cloud" ]; then
     maestro cloud \
         --api-key=$MAESTRO_CLOUD_APIKEY \
         --project-id=$MAESTRO_CLOUD_PROJECTID \
+        --device-os=$MAESTRO_CLOUD_DEVICEOS \
         --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \
         --flows=.maestro/flows \
-        --device-os="android-35" \
         --format=junit \
         --output=build/maestro/report.xml \
         --timeout=300 \

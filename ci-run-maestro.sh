@@ -155,7 +155,7 @@ if [ "$1" == "cloud" ]; then
 #    fi
 
     maestro cloud \
-        --device-os "android-35" \
+        --device-locale "android-35" \
         --api-key=$MAESTRO_CLOUD_APIKEY \
         --project-id=$MAESTRO_CLOUD_PROJECTID \
         --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \

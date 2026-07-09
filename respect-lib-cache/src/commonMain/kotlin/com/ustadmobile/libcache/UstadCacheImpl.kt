@@ -887,7 +887,7 @@ class UstadCacheImpl(
         memoryCache.update(url) { prev ->
             prev.copy(
                 extraHeaders = CacheEntryExtraHeaders(
-                    ceehKey = Md5Digest().urlHash(url),
+                    ceehKey = prev.urlKey,
                     ceehUrl = url.toString(),
                     extraHeaders = extraResponseHeaders.asRawString()
                 )
@@ -936,10 +936,19 @@ class UstadCacheImpl(
                     db.retentionLockDao.delete(deletedLocks)
 
                 val extraHeaderChanges = cacheUpdateEvents.mapNotNull { evt ->
-                    if(evt.value.newValue.extraHeaders == null && evt.value.oldValue.extraHeaders == null) {
-                        null
-                    }else {
-                        evt.value.newValue.extraHeaders
+                    when {
+                        //There are no extra headers
+                        evt.value.newValue.extraHeaders == null && evt.value.oldValue.extraHeaders == null -> {
+                            null
+                        }
+
+                        evt.value.newValue.extraHeaders == evt.value.oldValue.extraHeaders -> {
+                            null
+                        }
+
+                        else -> {
+                            evt.value.oldValue.extraHeaders
+                        }
                     }
                 }
 

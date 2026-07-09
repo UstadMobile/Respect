@@ -158,12 +158,12 @@ if [ "$1" == "cloud" ]; then
     maestro cloud \
         --api-key=$MAESTRO_CLOUD_APIKEY \
         --project-id=$MAESTRO_CLOUD_PROJECTID \
-        $DEVICE_OS_ARG \
         --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \
         --flows=.maestro/flows \
         --format=junit \
         --output=build/maestro/report.xml \
         --timeout=300 \
+        $DEVICE_OS_ARG \
         $NAME_ARG \
         --repo-name=Respect \
         --repo-owner=UstadMobile \

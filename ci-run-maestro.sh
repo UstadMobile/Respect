@@ -133,6 +133,7 @@ if [ "$1" == "cloud" ]; then
     NAME_ARG=""
     COMMIT_ARG=""
     BRANCH_ARG=""
+    DEVICE_OS_ARG=""
 
     if [ "$BUILD_TAG" != "" ]; then
         NAME_ARG="--name=$BUILD_TAG"
@@ -150,14 +151,9 @@ if [ "$1" == "cloud" ]; then
         PULLREQUEST_ARG="--pull-request-id=$PULLREQUEST"
     fi
 
-    MAESTRO_VERSION=$(maestro --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-    echo "Current Maestro version: $MAESTRO_VERSION"
-
-    if maestro cloud --help 2>&1 | grep -q -- '--device-os'; then
-        DEVICE_OS_ARG="--device-os=android-35"
-    else
-        DEVICE_OS_ARG="--android-api-level=35"
-    fi
+     if [ "$DEVICE_OS_ARG" == "" ]; then
+           DEVICE_OS_ARG="--device-os=android-35"
+     fi
 
     maestro cloud \
         --api-key=$MAESTRO_CLOUD_APIKEY \

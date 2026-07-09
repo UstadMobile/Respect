@@ -1,5 +1,6 @@
 package com.ustadmobile.libcache.novarysearch
 
+import com.ustadmobile.libcache.util.LaunchNoVarySearchConstants
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 
@@ -21,4 +22,19 @@ fun Url.removeAllSearchParams() : Url {
     return URLBuilder(this).apply {
         encodedParameters.clear()
     }.build()
+}
+
+/**
+ * Remove parameters with the given names
+ */
+fun Url.removeSearchParamsByNames(paramNames: List<String>): Url {
+    return URLBuilder(this).apply {
+        paramNames.forEach { name ->
+            encodedParameters.remove(name)
+        }
+    }.build()
+}
+
+fun Url.removeLaunchSearchParams(): Url {
+    return removeSearchParamsByNames(LaunchNoVarySearchConstants.LAUNCH_NO_VARY_PARAM_NAMES)
 }

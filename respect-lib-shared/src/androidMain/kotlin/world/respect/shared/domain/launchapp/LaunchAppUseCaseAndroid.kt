@@ -10,8 +10,8 @@ import android.os.Build
 import android.util.Log
 import androidx.core.net.toUri
 import com.ustadmobile.libcache.UstadCache
-import com.ustadmobile.libcache.downloader.PinPublicationPrepareUseCase
-import com.ustadmobile.libcache.novarysearch.removeAllSearchParams
+import com.ustadmobile.libcache.novarysearch.removeLaunchSearchParams
+import com.ustadmobile.libcache.util.LaunchNoVarySearchConstants
 import io.github.aakira.napier.Napier
 import io.ktor.http.headersOf
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.LaunchRequest
@@ -88,9 +88,9 @@ class LaunchAppUseCaseAndroid(
 
         val webViewLaunchUrl = getXapiLaunchUrl(GetXapiLaunchUrlUseCase.LaunchType.WEBVIEW).also {
             ustadCache.setExtraResponseHeaders(
-                url = it.removeAllSearchParams(),
+                url = it.removeLaunchSearchParams(),
                 extraResponseHeaders = headersOf(
-                    "No-Vary-Search" to listOf(PinPublicationPrepareUseCase.LAUNCH_LINK_NO_VARY_HEADER)
+                    "No-Vary-Search" to listOf(LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER)
                 )
             )
         }

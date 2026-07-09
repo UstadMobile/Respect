@@ -6,13 +6,13 @@ import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.DownloadJobItem
 import com.ustadmobile.libcache.db.entities.PinnedPublication
 import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
+import com.ustadmobile.libcache.util.LaunchNoVarySearchConstants
 import com.ustadmobile.libcache.util.withWriterTransaction
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.head
 import io.ktor.client.request.header
-import io.ktor.http.URLBuilder
 import io.ktor.http.contentLength
 import io.ktor.http.headersOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -78,7 +78,7 @@ class PinPublicationPrepareUseCase(
                 cache.setExtraResponseHeaders(
                     url = manifestUrl.resolve(acquisitionLink.href),
                     extraResponseHeaders = headersOf(
-                        "No-Vary-Search" to listOf(LAUNCH_LINK_NO_VARY_HEADER)
+                        "No-Vary-Search" to listOf(LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER)
                     )
                 )
             }
@@ -159,8 +159,6 @@ class PinPublicationPrepareUseCase(
         const val PARALLEL_SIZE_FETCH_LIMIT = 8
 
         const val DEFAULT_MAX_ATTEMPTS = 5
-
-        const val LAUNCH_LINK_NO_VARY_HEADER = "params=(\"endpoint\" \"actor\" \"auth\" \"activity_id\" \"registration\" \"respectLaunchVersion\")"
 
     }
 }

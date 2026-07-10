@@ -28,7 +28,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import kotlin.uuid.Uuid
 
 data class RawStatementUiState(
-    val statements: DataLoadState<XapiStatement> = DataLoadingState(),
+    val statement: DataLoadState<XapiStatement> = DataLoadingState(),
 )
 
 
@@ -66,7 +66,7 @@ class RawStatementViewModel(
             ).collectLatest { loadState ->
                 _uiState.update { state ->
                     state.copy(
-                        statements = loadState.map { it.statements }.firstOrNotLoaded()
+                        statement = loadState.map { it.statements }.firstOrNotLoaded()
                     )
                 }
             }

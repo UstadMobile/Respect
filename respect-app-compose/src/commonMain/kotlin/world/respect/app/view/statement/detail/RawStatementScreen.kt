@@ -33,7 +33,7 @@ fun RawStatementScreen(
 fun RawStatementScreen(
     uiState: RawStatementUiState,
 ) {
-    val statement = uiState.statements.dataOrNull()
+    val statement = uiState.statement.dataOrNull()
     val prettyJson = remember {
         Json {
             prettyPrint = true

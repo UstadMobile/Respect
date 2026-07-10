@@ -27,6 +27,7 @@ import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
+import world.respect.shared.navigation.ShareFeedback
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.isSameAccount

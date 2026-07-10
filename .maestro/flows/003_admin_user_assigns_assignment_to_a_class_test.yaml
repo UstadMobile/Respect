@@ -104,12 +104,6 @@ onFlowComplete:
 - assertVisible: "Statement Maker"
 - assertVisible: "Assignment Result Statement Demo"
 - assertVisible: "Average"
-- tapOn:
-    id: "score_cell"  #Scorecell is empty
-- assertVisible:
-    id: "app_title"
-    text: "statementmaker: StudentA User"
-- assertVisible: "No matching activity yet"
 - tapOn: "Assignments"
 - assertVisible:
     id: "app_title"

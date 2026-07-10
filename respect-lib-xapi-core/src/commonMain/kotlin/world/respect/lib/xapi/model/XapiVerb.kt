@@ -32,10 +32,6 @@ data class XapiVerb(
          */
         const val ID_ASSIGN = "http://activitystrea.ms/schema/1.0/assign"
 
-        const val ID_INITIALIZED = "http://adlnet.gov/expapi/verbs/initialized"
-
-        const val ID_TERMINATED = "http://adlnet.gov/expapi/verbs/terminated"
-
         /**
          * As per https://id.openeel.org/verb/listed-app
          */

@@ -14,7 +14,11 @@ import world.respect.shared.domain.school.SchoolDbPath
 fun Route.ReceiveDbRoute(e2eUploadsDir: File) {
     e2eUploadsDir.mkdirs()
     post("receivedb") {
-        val name = File(requireNotNull(call.request.queryParameters["name"])).name
+        val name = requireNotNull(call.request.queryParameters["name"])
+        if (!name.all { it.isLetterOrDigit() || it == '_' }) {
+            call.respond(HttpStatusCode.BadRequest, "name must contain only letters, digits, or underscores")
+            return@post
+        }
         val tempFile = File(e2eUploadsDir, "$name.tmp")
         tempFile.writeBytes(call.receive<ByteArray>())
 

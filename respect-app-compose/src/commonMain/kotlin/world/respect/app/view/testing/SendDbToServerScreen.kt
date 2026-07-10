@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.send_db_upload_complete
-import world.respect.shared.generated.resources.send_db_uploading
+import world.respect.shared.generated.resources.uploading
 
 data class SendDbToServerUiState(
     val isLoading: Boolean = true,
@@ -33,7 +33,7 @@ fun SendDbToServerScreen(uiState: SendDbToServerUiState) {
             uiState.isLoading -> {
                 CircularProgressIndicator()
                 Text(
-                    text = stringResource(Res.string.send_db_uploading),
+                    text = stringResource(Res.string.uploading),
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .testTag("db_progress"),

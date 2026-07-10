@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.view.report.graph.CombinedGraph
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.report.ReportOptions
 import world.respect.datalayer.school.model.Report
 import world.respect.shared.domain.report.model.RunReportResultAndFormatters

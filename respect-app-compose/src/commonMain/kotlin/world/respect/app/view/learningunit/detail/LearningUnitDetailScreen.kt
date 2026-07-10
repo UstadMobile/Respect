@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,18 +34,16 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app_name
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
-import androidx.compose.ui.graphics.vector.ImageVector
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.download
 import world.respect.shared.generated.resources.open
-import world.respect.shared.viewmodel.app.appstate.getTitle
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.layout.ContentScale
 import com.ustadmobile.libcache.PublicationPinState
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
+import world.respect.app.components.langMapString
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.downloaded
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
@@ -98,7 +95,7 @@ fun LearningUnitDetailScreen(
                 },
                 headlineContent = {
                     Text(
-                        text = uiState.lessonDetail?.metadata?.title?.getTitle().orEmpty(),
+                        text = uiState.lessonDetail?.metadata?.title?.let { langMapString(it) } ?: "",
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -134,7 +131,7 @@ fun LearningUnitDetailScreen(
 
                         Text(
                             text = uiState.lessonDetail?.metadata?.subtitle
-                                ?.getTitle().orEmpty()
+                                ?.let { langMapString(it) } ?: ""
                         )
 
                     }
@@ -147,6 +144,7 @@ fun LearningUnitDetailScreen(
                 onClick = {
                     onClickOpen()
                 },
+                enabled = uiState.buttonsEnabled,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(Res.string.open))
@@ -174,37 +172,15 @@ fun LearningUnitDetailScreen(
                     enabled = uiState.buttonsEnabled,
                 )
 
-                RespectQuickActionButton(
-                    imageVector = Icons.Filled.NearMe,
-                    labelText = stringResource(Res.string.assign),
-                    onClick = onClickAssign,
-                    enabled = uiState.buttonsEnabled,
-                )
+                if(uiState.showAssignButton) {
+                    RespectQuickActionButton(
+                        imageVector =Icons.Filled.NearMe,
+                        labelText = stringResource(Res.string.assign),
+                        onClick = onClickAssign,
+                        enabled = uiState.buttonsEnabled,
+                    )
+                }
             }
         }
-    }
-}
-
-@Composable
-private fun IconLabel(icon: ImageVector, labelRes: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(
-            modifier = Modifier
-                .height(4.dp)
-        )
-
-        Text(
-            text = labelRes
-        )
-
     }
 }

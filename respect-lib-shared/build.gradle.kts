@@ -42,6 +42,7 @@ kotlin {
 
     compilerOptions {
         optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
     jvm()
@@ -53,6 +54,7 @@ kotlin {
             api(projects.respectLibUtil)
             api(projects.respectDatalayerDb)
             api(projects.respectDatalayerHttp)
+            api(projects.respectLibXapiCore)
 
             implementation(projects.respectLibCache)
             implementation(projects.respectLibXxhash)
@@ -77,10 +79,12 @@ kotlin {
             implementation(libs.multiplatformsettings)
             implementation(libs.napier)
             implementation(libs.qrose)
+            implementation(libs.urlencoder)
 
         }
 
         androidMain.dependencies {
+            api(projects.respectLibXapiNanohttpd)
             implementation(libs.androidx.preference)
             implementation(libs.androidx.preference.ktx)
             implementation(libs.acra.core)
@@ -89,6 +93,8 @@ kotlin {
             implementation(libs.installreferrer)
 
             implementation(libs.androidx.browser)
+            implementation(projects.respectLibXapiCore)
+            implementation(projects.respectLibXapiIpcShared)
         }
 
         jvmMain.dependencies {

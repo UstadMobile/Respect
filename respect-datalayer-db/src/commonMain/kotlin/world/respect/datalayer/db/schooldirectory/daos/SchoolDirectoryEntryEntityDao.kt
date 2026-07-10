@@ -24,21 +24,11 @@ interface SchoolDirectoryEntryEntityDao {
     )
     suspend fun findByUid(uid: Long): SchoolDirectoryEntryEntities?
 
-    @Query(
-        """
-        SELECT SchoolDirectoryEntryEntity.*
-          FROM SchoolDirectoryEntryEntity
-               JOIN LangMapEntity
-                    ON LangMapEntity.lmeTopParentUid1 = SchoolDirectoryEntryEntity.reUid
-         WHERE LangMapEntity.lmeValue LIKE :query
-     """
-    )
-    fun searchSchoolsByName(query: String): Flow<List<SchoolDirectoryEntryEntity>>
-
     @Transaction
     @Query(SELECT_LIST_SQL)
     fun listAsFlow(
         name: String?,
+        directoryUrl: String?,
     ): Flow<List<SchoolDirectoryEntryEntities>>
 
 
@@ -46,6 +36,7 @@ interface SchoolDirectoryEntryEntityDao {
     @Query(SELECT_LIST_SQL)
     suspend fun list(
         name: String?,
+        directoryUrl: String?,
     ): List<SchoolDirectoryEntryEntities>
 
 
@@ -58,6 +49,8 @@ interface SchoolDirectoryEntryEntityDao {
                 (SELECT SchoolDirectoryEntryLangMapEntity.sdelReUid
                    FROM SchoolDirectoryEntryLangMapEntity
                   WHERE SchoolDirectoryEntryLangMapEntity.sdelValue LIKE :name))
+           AND (    :directoryUrl IS NULL
+                 OR SchoolDirectoryEntryEntity.reInDirectoryUrl = :directoryUrl)         
         """
 
     }

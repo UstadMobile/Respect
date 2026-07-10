@@ -55,7 +55,9 @@ class CacheControlFreshnessCheckerImpl: CacheControlFreshnessChecker {
             val timeLastModified = (responseHeaders["last-modified"]?.fromHttpDateToMillis()
                 ?: responseFirstStoredTime)
             val timeSinceModified = (responseLastValidated - timeLastModified)
-            (timeLastModified + (timeSinceModified * HEURISTIC_VALIDITY_FACTOR)) < Clock.System.now().toEpochMilliseconds()
+            val heuristicFreshUntil = (timeLastModified + (timeSinceModified * HEURISTIC_VALIDITY_FACTOR))
+            val timeNow = Clock.System.now().toEpochMilliseconds()
+            heuristicFreshUntil >= timeNow
         }
 
 

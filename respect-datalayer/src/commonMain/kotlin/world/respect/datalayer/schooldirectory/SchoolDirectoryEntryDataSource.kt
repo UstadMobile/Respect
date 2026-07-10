@@ -3,9 +3,10 @@ package world.respect.datalayer.schooldirectory
 import io.ktor.http.Url
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
-import world.respect.datalayer.DataLayerParams
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
+import world.respect.datalayer.respect.model.RespectSchoolDirectory
+import world.respect.lib.dataloadstate.DataLayerParams
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 
 interface SchoolDirectoryEntryDataSource {
@@ -17,7 +18,8 @@ interface SchoolDirectoryEntryDataSource {
     data class GetListParams(
         val name: String? = null,
         val code: String? = null,
-        val limit: Int = 200
+        val limit: Int = 200,
+        val directoryUrl: Url? = null,
     ) {
 
         companion object {

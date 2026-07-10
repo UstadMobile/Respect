@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +34,6 @@ fun <T> RespectExposedDropDownMenuField(
     // https://developer.android.com/reference/kotlin/androidx/compose/material3/package-summary#ExposedDropdownMenuBox(kotlin.Boolean,kotlin.Function1,androidx.compose.ui.Modifier,kotlin.Function1)
 
     var expanded by remember { mutableStateOf(false) }
-
 
     ExposedDropdownMenuBox(
         modifier = modifier,
@@ -66,7 +66,13 @@ fun <T> RespectExposedDropDownMenuField(
         ) {
             options.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(if(item != null) itemText(item) else "") },
+                    text = {
+                        Text(
+                            text = if(item != null) itemText(item) else "",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
                     onClick = {
                         expanded = false
                         onOptionSelected(item)
@@ -75,7 +81,6 @@ fun <T> RespectExposedDropDownMenuField(
                 )
             }
         }
-
     }
 }
 

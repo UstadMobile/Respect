@@ -7,6 +7,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.webkit.WebChromeClient
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
@@ -57,6 +58,10 @@ class WebViewActivity : AppCompatActivity() {
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.mediaPlaybackRequiresUserGesture = false
+
+        //Content will be loaded from HTTPs and will then make requests to 127.0.0.1 for xAPI
+        //statement submission
+        webView.settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
         val url = intent.getStringExtra(LaunchAppUseCaseAndroid.EXTRA_URL) ?:
             throw IllegalStateException("No url specified")
 

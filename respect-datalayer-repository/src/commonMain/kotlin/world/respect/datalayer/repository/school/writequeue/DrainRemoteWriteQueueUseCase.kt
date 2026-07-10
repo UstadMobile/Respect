@@ -1,10 +1,15 @@
 package world.respect.datalayer.repository.school.writequeue
 
+import io.github.aakira.napier.Napier
+import io.ktor.http.Url
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.repository.SchoolDataSourceRepository
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.RepositoryModelDataSource
+import kotlin.uuid.Uuid
 
 
 class DrainRemoteWriteQueueUseCase(
@@ -49,10 +54,6 @@ class DrainRemoteWriteQueueUseCase(
                         repository.personQrBadgeDataSource.sendToRemote(listOf(item))
                     }
 
-                    WriteQueueItem.Model.ASSIGNMENT -> {
-                        repository.assignmentDataSource.sendToRemote(listOf(item))
-                    }
-
                     WriteQueueItem.Model.SCHOOL_APP -> {
                         repository.schoolAppDataSource.sendToRemote(listOf(item))
                     }
@@ -63,6 +64,35 @@ class DrainRemoteWriteQueueUseCase(
 
                     WriteQueueItem.Model.INVITE -> {
                         repository.inviteDataSource.sendToRemote(listOf(item))
+                    }
+
+                    WriteQueueItem.Model.OPDS_FEED -> {
+                        val dataLoad = repository.opdsFeedDataSource.local.getByUrl(
+                            url = Url(item.uid),
+                            params = DataLoadParams()
+                        )
+
+                        if(dataLoad is DataReadyState) {
+                            repository.opdsFeedDataSource.remote.store(listOf(dataLoad.data))
+                        }else {
+                            Napier.w("WARN: No local data for ${item.uid}")
+                        }
+
+                        remoteWriteQueue.markSent(ids = listOf(item.queueItemId))
+                    }
+
+                    WriteQueueItem.Model.XAPI_STATEMENT -> {
+                        val statement = repository.local.xapiResource.statements.getByUuid(
+                            Uuid.parse(item.uid)
+                        )
+
+                        if(statement != null) {
+                            repository.remote.xapiResource.statements.post(listOf(statement))
+                        }else {
+                            Napier.w("WARN: no local data for statement: ${item.uid}")
+                        }
+
+                        remoteWriteQueue.markSent(ids = listOf(item.queueItemId))
                     }
                 }
 

@@ -17,7 +17,17 @@ import world.respect.lib.serializers.StringValueSerializer
  * Can be a simple string or a LangMap (language code to string map)
  */
 @Serializable(with = LangMapSerializer::class)
-sealed class LangMap
+sealed class LangMap {
+
+    companion object {
+
+        val EMPTY = LangMapStringValue("")
+
+        fun fromMap(map: Map<String, String>) = LangMapObjectValue(map)
+
+    }
+
+}
 
 object LangMapSerializer: StringOrObjectSerializer<LangMap>(
     baseClass = LangMap::class,

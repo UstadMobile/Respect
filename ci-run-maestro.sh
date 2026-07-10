@@ -4,35 +4,12 @@
 # .maestro for test flows
 
 ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
+
 # Root directory for TestServerController to use (each server will get its own sub directory)
-
-# Fail if FEEDBACK file is not found
-if [ -z "$FEEDBACK" ] || [ ! -f "$FEEDBACK" ]; then
-    echo "ERROR: Feedback properties file not found at $FEEDBACK"
-    exit 1
-fi
-
-# Function to read property
-get_prop() {
-    grep -E "^$1=" "$FEEDBACK" | cut -d'=' -f2- | tr -d '\r'
-}
-
-# Extract required variables
-zammadUrl=$(get_prop "zammadUrl")
-zammadToken=$(get_prop "zammadToken")
-
-if [ -z "$zammadUrl" ] || [ -z "$zammadToken" ]; then
-    echo "ERROR: zammadUrl or zammadToken missing in feedback.properties"
-    exit 1
-fi
-
-export zammadUrl="$zammadUrl"
-export zammadToken="$zammadToken"
-
-echo "ci-run-maestro: zammadUrl=$zammadUrl"
-
 # TestServerController will create the directory automatically.
 TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
+
+
 TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/9/artifact/build/distributions/testservercontroller-0.0.8.zip"
 TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.8"
 
@@ -43,8 +20,8 @@ if [ ! -e $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; 
         mkdir -p $ROOTDIR/build/testservercontroller
     fi
 
-    wget --output-document=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
-    unzip -d $ROOTDIR/build/testservercontroller/ \
+    wget --quiet --output-document=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
+    unzip -q -d $ROOTDIR/build/testservercontroller/ \
           $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
 fi
 
@@ -56,10 +33,10 @@ fi
 
 if [ "$TESTCONTROLLER_URL" == "" ]; then
     if [ "$URL_SUBSTITUTION" != "" ]; then
-        echo "ci-run-maestro: no TESTCONTROLLER_URL set: using hostname - this might not be correct"
         TESTCONTROLLER_URL=$(echo $URL_SUBSTITUTION | sed s/_PORT_/$TESTCONTROLLER_PORT/g)
     else
-        TESTCONTROLLER_URL="http://$(hostname -I | xargs):$TESTCONTROLLER_PORT/"
+        echo "ci-run-maestro: no TESTCONTROLLER_URL set: using hostname - this might not be correct"
+        TESTCONTROLLER_URL="http://$(hostname -I | awk '{print $1}'):$TESTCONTROLLER_PORT/"
     fi
 fi
 
@@ -90,6 +67,15 @@ if [ "$SCHOOL_ADMIN_PASSWORD" == "" ]; then
     SCHOOL_ADMIN_PASSWORD=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 13)
 fi
 
+if [ "$GIT_TAG_NAME" != "" ]; then
+    VERSION=$GIT_TAG_NAME
+else
+    GRADLE_PROP_LINE=$(grep version= $ROOTDIR/gradle.properties)
+
+    # Use bash parameter expansion to remove version=prefix
+    VERSION=${GRADLE_PROP_LINE#version=}
+fi
+
 # The Maestro test needs to use basic auth (which is base64 encoded) to authenticate to request the
 # creation of the school, that is encoded here and passed to Maestro to avoid using Maestro's
 # Javascript (which does not have the btoa function)
@@ -103,6 +89,7 @@ $TESTCONTROLLER_BIN  \
     -P:testservercontroller.urlsubstitution=$URL_SUBSTITUTION \
     -P:testservercontroller.basedir=$TESTSERVERCONTROLLER_BASEDIR \
     -P:testservercontroller.env.DIR_ADMIN_AUTH=$DIR_ADMIN_AUTH_PASS \
+    -P:testservercontroller.env.VERSION=$VERSION \
     -P:ktor.deployment.shutdown.url=/shutdown \
     -P:testservercontroller.cmd="$ROOTDIR/ci-run-test-server.sh" &
 
@@ -113,7 +100,7 @@ echo "ci-run-maestro: TestServerController now running on port $TESTCONTROLLER_P
 
 # Can now run maestro - the TESTSERVERCONTROLLER url is known and we also know the admin auth to create a new school etc.
 
-echo "Run Maestro using $TESTSERVERCONTROLLER_URL and $DIR_ADMIN_AUTH_PASS"
+echo "Run Maestro using $TESTSERVERCONTROLLER_URL"
 
 if [ ! -e build/results ]; then
     mkdir -p build/results
@@ -121,6 +108,13 @@ fi
 
 if [ ! -e build/maestro/results ]; then
     mkdir -p build/maestro/output
+fi
+
+
+TEST_APP_URL_ARG=""
+
+if [ "$TEST_APP_URL" != "" ]; then
+    TEST_APP_URL_ARG=" --env TEST_APP_URL=$TEST_APP_URL "
 fi
 
 if [ "$1" == "cloud" ]; then
@@ -139,6 +133,7 @@ if [ "$1" == "cloud" ]; then
     NAME_ARG=""
     COMMIT_ARG=""
     BRANCH_ARG=""
+    DEVICE_OS_ARG=""
 
     if [ "$BUILD_TAG" != "" ]; then
         NAME_ARG="--name=$BUILD_TAG"
@@ -156,6 +151,10 @@ if [ "$1" == "cloud" ]; then
         PULLREQUEST_ARG="--pull-request-id=$PULLREQUEST"
     fi
 
+     if [ "$DEVICE_OS_ARG" == "" ]; then
+           DEVICE_OS_ARG="--device-os=android-35"
+     fi
+
     maestro cloud \
         --api-key=$MAESTRO_CLOUD_APIKEY \
         --project-id=$MAESTRO_CLOUD_PROJECTID \
@@ -164,6 +163,7 @@ if [ "$1" == "cloud" ]; then
         --format=junit \
         --output=build/maestro/report.xml \
         --timeout=300 \
+        $DEVICE_OS_ARG \
         $NAME_ARG \
         --repo-name=Respect \
         --repo-owner=UstadMobile \
@@ -175,8 +175,7 @@ if [ "$1" == "cloud" ]; then
         --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
         --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
         --env SCHOOL_NAME=TestSchool \
-        --env zammadUrl="${zammadUrl}" \
-        --env zammadToken="${zammadToken}" \
+        $TEST_APP_URL_ARG \
        | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
 
     # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
@@ -222,8 +221,7 @@ else
       --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
       --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
       --env SCHOOL_NAME=TestSchool \
-      --env zammadUrl="${zammadUrl}" \
-      --env zammadToken="${zammadToken}" \
+      $TEST_APP_URL_ARG \
       --format=junit \
       --test-output-dir=build/maestro/output \
       --output=build/maestro/report.xml \

@@ -13,7 +13,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectLocalDateField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.end_date_label

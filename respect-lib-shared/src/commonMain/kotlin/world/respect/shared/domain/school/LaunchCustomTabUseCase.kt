@@ -1,5 +1,7 @@
 package world.respect.shared.domain.school
 
+import io.ktor.http.Url
+
 interface LaunchCustomTabUseCase {
-    operator fun invoke(url: String)
+    operator fun invoke(url: Url)
 }

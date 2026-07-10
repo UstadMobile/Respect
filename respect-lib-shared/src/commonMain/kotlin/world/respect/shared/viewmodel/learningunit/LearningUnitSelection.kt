@@ -12,5 +12,4 @@ import world.respect.lib.opds.model.OpdsPublication
 data class LearningUnitSelection(
     val learningUnitManifestUrl: Url,
     val selectedPublication: OpdsPublication,
-    val appManifestUrl: Url,
 )

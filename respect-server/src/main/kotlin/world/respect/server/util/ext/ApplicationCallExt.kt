@@ -15,11 +15,11 @@ import io.ktor.util.date.GMTDate
 import org.koin.core.scope.Scope
 import org.koin.ktor.ext.getKoin
 import world.respect.datalayer.AuthenticatedUserPrincipalId
-import world.respect.datalayer.DataLayerHeaders
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.NoDataLoadedState
-import world.respect.datalayer.ext.lastModifiedForHttpResponseHeader
+import world.respect.lib.dataloadstate.DataLayerHeaders
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.dataloadstate.ext.lastModifiedForHttpResponseHeader
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.domain.GetPermissionLastModifiedUseCase
 import world.respect.datalayer.shared.ModelWithTimes

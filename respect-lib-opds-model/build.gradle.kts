@@ -17,6 +17,10 @@ kotlin {
 
     jvm()
 
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+    }
+
     sourceSets {
         commonMain.dependencies {
             api(projects.respectLibSerializers)

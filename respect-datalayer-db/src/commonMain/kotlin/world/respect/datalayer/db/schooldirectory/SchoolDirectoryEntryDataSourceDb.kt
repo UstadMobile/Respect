@@ -6,10 +6,10 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.NoDataLoadedState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.schooldirectory.adapters.toEntities
 import world.respect.datalayer.db.schooldirectory.adapters.toModel
@@ -54,7 +54,8 @@ class SchoolDirectoryEntryDataSourceDb(
         listParams: SchoolDirectoryEntryDataSource.GetListParams
     ): Flow<DataLoadState<List<SchoolDirectoryEntry>>> {
         return respectAppDb.getSchoolDirectoryEntryEntityDao().listAsFlow(
-            name = listParams.name?.let { "%$it%" }
+            name = listParams.name?.let { "%$it%" },
+            directoryUrl = listParams.directoryUrl?.toString(),
         ).map { list ->
             DataReadyState(
                 data = list.map { it.toModel() },
@@ -68,7 +69,8 @@ class SchoolDirectoryEntryDataSourceDb(
     ): DataLoadState<List<SchoolDirectoryEntry>> {
         return DataReadyState(
             respectAppDb.getSchoolDirectoryEntryEntityDao().list(
-                name = listParams.name?.let { "%$it%" }
+                name = listParams.name?.let { "%$it%" },
+                directoryUrl = listParams.directoryUrl?.toString(),
             ).map { it.toModel() }
         )
     }

@@ -40,8 +40,11 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.getKoin
 import org.koin.compose.koinInject
+import world.respect.app.components.LocalAppLocale
+import world.respect.app.components.customAppLocale
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.effects.NavControllerLogEffect
+import world.respect.datalayer.db.school.ext.isParent
 import world.respect.navigation.NavCommandEffect
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
@@ -56,9 +59,9 @@ import world.respect.shared.generated.resources.people
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.ClazzList
+import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonList
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.StringUiText
@@ -82,10 +85,10 @@ private val routeNamePrefix = "world.respect.shared.navigation"
 
 val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
-        destRoute = RespectAppLauncher(),
+        destRoute = Home,
         icon = Icons.Filled.GridView,
         label = Res.string.apps,
-        routeName = "$routeNamePrefix.RespectAppLauncher",
+        routeName = "$routeNamePrefix.Home",
     ),
     TopNavigationItem(
         destRoute = AssignmentList,
@@ -114,10 +117,10 @@ val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
         routeName = "$routeNamePrefix.Assignment"
     ),
     TopNavigationItem(
-        destRoute = RespectAppLauncher(),
+        destRoute = Home,
         icon = Icons.Filled.GridView,
         label = Res.string.apps,
-        routeName = "$routeNamePrefix.RespectAppLauncher",
+        routeName = "$routeNamePrefix.Home",
     ),
 )
 
@@ -192,124 +195,131 @@ fun App(
     }
 
     CompositionLocalProvider(LocalWidthClass provides widthClass) {
-        Scaffold(
-            topBar = {
-                if (!appUiStateVal.hideAppBar) {
-                    RespectAppBar(
-                        compactHeader = (widthClass != SizeClass.EXPANDED),
-                        appUiState = appUiStateVal,
-                        navController = navController,
-                        topLevelItems = topLevelNavItems,
-                        onProfileClick = {
-                            if (activeAccount?.isChild == false) {
-                                navController.navigate(AccountList)
-                            }else {
-                                coroutineScope.launch {
-                                    val result = biometricAuthUseCase(
-                                        BiometricAuthUseCase.BiometricPromptData(
-                                            title = getString(Res.string.parents_only),
-                                            subtitle = getString(Res.string.continue_using_fingerprint_or),
-                                            useDeviceCredential = true,
-                                            negativeButtonText = getString(Res.string.cancel),
+        CompositionLocalProvider(LocalAppLocale provides customAppLocale) {
+            Scaffold(
+                topBar = {
+                    if (!appUiStateVal.hideAppBar) {
+                        RespectAppBar(
+                            compactHeader = (widthClass != SizeClass.EXPANDED),
+                            appUiState = appUiStateVal,
+                            navController = navController,
+                            topLevelItems = topLevelNavItems,
+                            onProfileClick = {
+                                if (activeAccount?.isChild == false) {
+                                    navController.navigate(AccountList)
+                                }else {
+                                    coroutineScope.launch {
+                                        val result = biometricAuthUseCase(
+                                            BiometricAuthUseCase.BiometricPromptData(
+                                                title = getString(Res.string.parents_only),
+                                                subtitle = getString(Res.string.continue_using_fingerprint_or),
+                                                useDeviceCredential = true,
+                                                negativeButtonText = getString(Res.string.cancel),
+                                            )
                                         )
-                                    )
 
-                                    if(result is BiometricAuthUseCase.BiometricResult.Success) {
-                                        navController.navigate(AccountList)
+                                        if(result is BiometricAuthUseCase.BiometricResult.Success) {
+                                            navController.navigate(AccountList)
+                                        }
+                                    }
+                                }
+                            },
+                        )
+                    }
+                },
+                bottomBar = {
+                    var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
+                    if (useBottomBar) {
+                        if (appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
+                            NavigationBar {
+                                topLevelNavItems.forEachIndexed { index, item ->
+                                    val skipIt = item.routeName == "$routeNamePrefix.Assignment" &&
+                                            activeAccount?.person?.isParent() == true
+
+                                    if(!skipIt) {
+                                        NavigationBarItem(
+                                            icon = {
+                                                Icon(item.icon, contentDescription = null)
+                                            },
+                                            label = {
+                                                Text(stringResource(item.label), maxLines = 1)
+                                            },
+                                            selected = selectedTopLevelItemIndex == index,
+                                            onClick = {
+                                                navController.navigate(item.destRoute)  {
+                                                    popUpTo(0) { inclusive = true }
+                                                }
+                                                selectedTopLevelItemIndex = index
+                                            }
+                                        )
                                     }
                                 }
                             }
-                        },
-                    )
-                }
-            },
-            bottomBar = {
-                var selectedTopLevelItemIndex by remember { mutableIntStateOf(0) }
-                if (useBottomBar) {
-                    if (appUiStateVal.navigationVisible && !appUiStateVal.hideBottomNavigation) {
-                        NavigationBar {
-                            topLevelNavItems.forEachIndexed { index, item ->
-                                NavigationBarItem(
-                                    icon = {
-                                        Icon(item.icon, contentDescription = null)
-                                    },
-                                    label = {
-                                        Text(stringResource(item.label), maxLines = 1)
-                                    },
-                                    selected = selectedTopLevelItemIndex == index,
-                                    onClick = {
-                                        navController.navigate(item.destRoute)  {
-                                            popUpTo(0) { inclusive = true }
-                                        }
-                                        selectedTopLevelItemIndex = index
-                                    }
-                                )
-                            }
                         }
                     }
-                }
-            },
-            floatingActionButton = {
-                if (appUiStateVal.expandableFabState.visible) {
-                    ExpandableFab(
-                        state = appUiStateVal.expandableFabState,
-                        onToggle = {
-                            appUiStateVal = appUiStateVal.copy(
-                                expandableFabState = appUiStateVal.expandableFabState.copy(
-                                    expanded = !appUiStateVal.expandableFabState.expanded
-                                )
-                            )
-                        },
-                        onItemClick = { item ->
-                            item.onClick()
-                            appUiStateVal = appUiStateVal.copy(
-                                expandableFabState = appUiStateVal.expandableFabState.copy(
-                                    expanded = false
-                                )
-                            )
-                        }
-                    )
-                }
-                else if (appUiStateVal.fabState.visible) {
-                    ExtendedFloatingActionButton(
-                        modifier = Modifier.testTag("floating_action_button"),
-                        onClick = appUiStateVal.fabState.onClick,
-                        text = {
-                            Text(
-                                modifier = Modifier.testTag("floating_action_button_text"),
-                                text = appUiStateVal.fabState.text?.let {
-                                    uiTextStringResource(it)
-                                } ?: ""
-                            )
-                        },
-                        icon = {
-                            val imageVector = when (appUiStateVal.fabState.icon) {
-                                FabUiState.FabIcon.ADD -> Icons.Default.Add
-                                FabUiState.FabIcon.EDIT -> Icons.Default.Edit
-                                else -> null
-                            }
-                            if (imageVector != null) {
-                                Icon(
-                                    imageVector = imageVector,
-                                    contentDescription = null,
-                                )
-                            }
-                        }
-                    )
-                }
-            },
-            snackbarHost = {
-                SnackbarHost(snackbarHostState)
-            },
-        ) { innerPadding ->
-            AppNavHost(
-                navController = navController,
-                respectNavController = respectNavController,
-                onSetAppUiState = {
-                    appUiStateVal = it
                 },
-                modifier = Modifier.padding(innerPadding)
-            )
+                floatingActionButton = {
+                    if (appUiStateVal.expandableFabState.visible) {
+                        ExpandableFab(
+                            state = appUiStateVal.expandableFabState,
+                            onToggle = {
+                                appUiStateVal = appUiStateVal.copy(
+                                    expandableFabState = appUiStateVal.expandableFabState.copy(
+                                        expanded = !appUiStateVal.expandableFabState.expanded
+                                    )
+                                )
+                            },
+                            onItemClick = { item ->
+                                item.onClick()
+                                appUiStateVal = appUiStateVal.copy(
+                                    expandableFabState = appUiStateVal.expandableFabState.copy(
+                                        expanded = false
+                                    )
+                                )
+                            }
+                        )
+                    }
+                    else if (appUiStateVal.fabState.visible) {
+                        ExtendedFloatingActionButton(
+                            modifier = Modifier.testTag("floating_action_button"),
+                            onClick = appUiStateVal.fabState.onClick,
+                            text = {
+                                Text(
+                                    modifier = Modifier.testTag("floating_action_button_text"),
+                                    text = appUiStateVal.fabState.text?.let {
+                                        uiTextStringResource(it)
+                                    } ?: ""
+                                )
+                            },
+                            icon = {
+                                val imageVector = when (appUiStateVal.fabState.icon) {
+                                    FabUiState.FabIcon.ADD -> Icons.Default.Add
+                                    FabUiState.FabIcon.EDIT -> Icons.Default.Edit
+                                    else -> null
+                                }
+                                if (imageVector != null) {
+                                    Icon(
+                                        imageVector = imageVector,
+                                        contentDescription = null,
+                                    )
+                                }
+                            }
+                        )
+                    }
+                },
+                snackbarHost = {
+                    SnackbarHost(snackbarHostState)
+                },
+            ) { innerPadding ->
+                AppNavHost(
+                    navController = navController,
+                    respectNavController = respectNavController,
+                    onSetAppUiState = {
+                        appUiStateVal = it
+                    },
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
         }
     }
 

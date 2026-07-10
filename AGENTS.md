@@ -1,5 +1,6 @@
 
 * This is a Kotlin Multiplatform Project using Jetpack compose
+* ALWAYS follow the coding guidelines in ```CODING_GUIDELINES.md```
 * The NavHost with composable routes in ```respect-app-compose/src/commonMain/kotlin/world/respect/app/app/AppNavHost.kt```
 * The datalayer is based on the ```respect-datalayer``` module. It is an offline first data layer. The
   local (Room Database) implementation is in the module ```respect-datalayer-db```. The http 

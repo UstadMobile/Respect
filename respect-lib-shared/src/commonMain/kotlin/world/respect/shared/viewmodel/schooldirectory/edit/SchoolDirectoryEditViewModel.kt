@@ -7,10 +7,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.ext.isReadyAndSettled
+import world.respect.lib.dataloadstate.ext.isReadyAndSettled
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_directory

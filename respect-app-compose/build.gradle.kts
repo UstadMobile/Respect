@@ -27,7 +27,7 @@ acraProperties.takeIf { acraPropertiesFile.exists() }
     ?.load(FileInputStream(acraPropertiesFile))
 
 // The applist list - see main README
-val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.world/respect-ds/manifestlist.json"
+val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.directory/respect-ds/base.json"
 
 val ACRA_PROP_NAMES = listOf("uri", "basicAuthLogin", "basicAuthPassword")
 
@@ -61,11 +61,12 @@ buildConfig {
 kotlin {
     compilerOptions {
         optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
     androidTarget {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 
@@ -82,6 +83,7 @@ kotlin {
         androidMain.dependencies {
             api(projects.respectCredentials)
             implementation(projects.respectLibSharedSe)
+            implementation(projects.respectLibXapiIpcServer)
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.play.service.auth)
             implementation(compose.preview)
@@ -102,7 +104,6 @@ kotlin {
             implementation(libs.acra.core)
             implementation(libs.libphonenumber.android)
             implementation(libs.accompanist.permissions)
-
         }
 
         commonMain.dependencies {
@@ -181,8 +182,8 @@ android {
         applicationId = "world.respect.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 121
-        versionName = "1.0.21"
+        versionCode = 128
+        versionName = project.version.toString()
 
         for(propName in ACRA_PROP_NAMES) {
             buildConfigField(
@@ -218,8 +219,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 

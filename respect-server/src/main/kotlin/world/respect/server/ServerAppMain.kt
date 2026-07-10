@@ -23,12 +23,15 @@ fun main(args: Array<String>) {
     subparsers.addParser(CMD_RUN_SERVER).help("Run RESPECT http server")
     subparsers.addParser(CMD_ADD_SCHOOL).help("Add a new school").also {
         it.addArgument("-u", "--url").help("School URL")
-        it.addArgument("-i", "--inviteprefix").help("School invite prefix")
         it.addArgument("-n", "--name").help("School name")
         it.addArgument("-d", "--dburl").help("DB url: path to SQLite file (absolute or relative to school data directory)")
         it.addArgument("-a", "--adminusername").help("Admin username")
         it.addArgument("-p", "--adminpassword")
         it.addArgument("-r", "--rpId").help("Passkey rpId")
+        it.addArgument("-i", "--inDirectoryUrl")
+            .help("Directory URL: if directories.virtualhost=true in server config, return this " +
+                    "entry only if the directory host url matches this"
+            )
             .help("Admin password")
     }
 

@@ -19,10 +19,10 @@ import world.respect.shared.generated.resources.paste_url
 import world.respect.shared.generated.resources.qr_code_invalid_format
 import world.respect.shared.generated.resources.scan_qr_code
 import world.respect.shared.navigation.CreateAccountSetUsername
+import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.resources.UiText
@@ -164,7 +164,7 @@ class ScanQRCodeViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                destination = RespectAppLauncher(),
+                destination = Home,
                 clearBackStack = true,
             )
         )

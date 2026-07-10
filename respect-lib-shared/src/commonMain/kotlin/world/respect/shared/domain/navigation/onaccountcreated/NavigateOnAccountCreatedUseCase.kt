@@ -4,12 +4,11 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableSharedFlow
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
-import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
+import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.viewmodel.manageuser.signup.SignupScreenModeEnum
@@ -45,7 +44,7 @@ class NavigateOnAccountCreatedUseCase(
                     }
 
                     else -> {
-                        RespectAppLauncher()
+                        Home
                     }
                 },
                 clearBackStack = true

@@ -2,6 +2,7 @@ package com.ustadmobile.libcache
 
 import androidx.room.Room
 import com.ustadmobile.libcache.UstadCache.Companion.DEFAULT_SIZE_LIMIT
+import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
 import com.ustadmobile.libcache.db.AddNewEntryTriggerCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseJvm
@@ -53,7 +54,10 @@ class UstadCacheBuilder(
             logger = logger,
             cacheName = cacheName,
             xxStringHasher = xxStringHasher,
-            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(dbVal, xxStringHasher),
+            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                dbVal, xxStringHasher
+            ),
+            freshnessChecker = CacheControlFreshnessCheckerImpl(),
         )
     }
 }

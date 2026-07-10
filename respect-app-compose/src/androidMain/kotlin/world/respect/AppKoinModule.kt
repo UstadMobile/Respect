@@ -15,6 +15,7 @@ import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitorAndroid
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.db.migrations.addCacheDbMigrations
 import com.ustadmobile.libcache.downloader.EnqueueRunDownloadJobUseCase
 import com.ustadmobile.libcache.downloader.EnqueueRunDownloadJobUseCaseAndroid
 import com.ustadmobile.libcache.downloader.PinPublicationPrepareUseCase
@@ -23,11 +24,16 @@ import com.ustadmobile.libcache.downloader.RunDownloadJobUseCaseImpl
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
 import com.ustadmobile.libcache.okhttp.UstadCacheInterceptor
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import okhttp3.Dispatcher
@@ -38,7 +44,9 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import world.respect.app.config.RespectBuildConfig
+import world.respect.callback.AddDirectoriesFromPropertiesUseCase
 import world.respect.callback.AddSchoolDirectoryCallback
+import world.respect.callback.migrate6to8AddDirectories
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CheckPasskeySupportUseCaseAndroidImpl
 import world.respect.credentials.passkey.CreatePasskeyUseCase
@@ -60,7 +68,6 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.MIGRATION_2_3
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -92,6 +99,8 @@ import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
+import world.respect.lib.xapi.XapiResourceProvider
+import world.respect.lib.xapi.nanohttpd.XapiNanoHttpdApp
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.libxxhash.XXHasher64Factory
 import world.respect.libxxhash.XXStringHasher
@@ -125,6 +134,8 @@ import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseC
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCaseClient
+import world.respect.shared.domain.account.username.checkusernameunique.CheckUsernameUniqueUseCase
+import world.respect.shared.domain.account.username.checkusernameunique.CheckUsernameUniqueUseCaseClient
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseCase
@@ -219,6 +230,8 @@ import world.respect.shared.domain.feedback.CreateTicketUseCaseImpl
 import world.respect.shared.domain.feedback.GetFeedbackInfoUseCase
 import world.respect.shared.domain.feedback.GetFeedbackInfoUseCaseImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
+import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
+import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
@@ -256,11 +269,16 @@ import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
+import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
+import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
+import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCaseAndroid
+import world.respect.shared.domain.xapi.xapinanohttpd.XapiResourceProviderAndroid
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
 
+@DelicateCoroutinesApi
 val appKoinModule = module {
     single<Json> {
         Json {
@@ -334,11 +352,7 @@ val appKoinModule = module {
         }
     }
 
-    single<LaunchAppUseCase> {
-        LaunchAppUseCaseAndroid(
-            appContext = androidContext().applicationContext
-        )
-    }
+
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)
     viewModelOf(::AppLauncherViewModel)
@@ -391,7 +405,6 @@ val appKoinModule = module {
     viewModelOf(::SchoolDirectoryEditViewModel)
     viewModelOf(::AssignmentListViewModel)
     viewModelOf(::AssignmentEditViewModel)
-    viewModelOf(::AssignmentDetailViewModel)
     viewModelOf(::AssignmentDetailViewModel)
     viewModelOf(::EnrollmentListViewModel)
     viewModelOf(::EnrollmentEditViewModel)
@@ -447,6 +460,7 @@ val appKoinModule = module {
             UstadCacheDb::class.java,
             UstadCacheBuilder.DEFAULT_DB_NAME
         ).addCallback(ClearNeighborsCallback())
+            .addCacheDbMigrations()
             .build()
     }
 
@@ -522,13 +536,20 @@ val appKoinModule = module {
         )
     }
 
+    single<AddDirectoriesFromPropertiesUseCase>{
+        AddDirectoriesFromPropertiesUseCase(
+            xxStringHasher = get()
+        )
+    }
+
     single<RespectAppDatabase> {
         val appContext = androidContext().applicationContext
         Room.databaseBuilder<RespectAppDatabase>(
             appContext, appContext.getDatabasePath("respect_3_app.db").absolutePath
         ).setDriver(BundledSQLiteDriver())
-            .addCallback(AddSchoolDirectoryCallback(xxStringHasher = get()))
+            .addCallback(AddSchoolDirectoryCallback(addDirectoriesFromPropertiesUseCase = get()))
             .addCommonMigrations()
+            .addMigrations(migrate6to8AddDirectories(addDirectoriesFromPropertiesUseCase = get()))
             .build()
     }
 
@@ -538,17 +559,14 @@ val appKoinModule = module {
                 respectAppDatabase = get(),
                 json = get(),
                 xxStringHasher = get(),
-                primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
             ),
             remote = RespectAppDataSourceHttp(
                 local = RespectAppDataSourceDb(
                     respectAppDatabase = get(),
                     json = get(),
                     xxStringHasher = get(),
-                    primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS),
                 ),
                 httpClient = get(),
-                defaultCompatibleAppListUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
             )
         )
     }
@@ -726,6 +744,28 @@ val appKoinModule = module {
         )
     }
 
+    single<XapiNanoHttpdApp>(createdAtStart = true) {
+        XapiNanoHttpdApp(
+            port = 0,
+            json = get(),
+            xapiResourceProvider = get(),
+        ).also { nanoHttpdApp ->
+            GlobalScope.launch(Dispatchers.IO) {
+                nanoHttpdApp.start()
+                Napier.i("NanoHttpdXapi started")
+            }
+        }
+    }
+
+    single<XapiResourceProvider> {
+        XapiResourceProviderAndroid()
+    }
+
+    single<GetXapiActivityForPublicationUseCase> {
+        GetXapiActivityForPublicationUseCase()
+    }
+
+
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -761,7 +801,6 @@ val appKoinModule = module {
                 "school_3_" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
             )
                 .addCommonMigrations()
-                .addMigrations(MIGRATION_2_3(true))
                 .build()
         }
 
@@ -793,6 +832,14 @@ val appKoinModule = module {
         }
         scoped<UsernameSuggestionUseCase> {
             UsernameSuggestionUseCaseClient(
+                schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
+                schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
+                httpClient = get(),
+            )
+        }
+
+        scoped<CheckUsernameUniqueUseCase> {
+            CheckUsernameUniqueUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
                 schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
                 httpClient = get(),
@@ -927,20 +974,29 @@ val appKoinModule = module {
                     accountScopeId.accountPrincipalId.guid
                 ),
                 checkPersonPermissionUseCase = get(),
+                json = get(),
+                defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
+                schoolUrl = accountScopeId.schoolUrl,
             )
         }
 
         scoped<SchoolDataSource> {
             val schoolUrl = get<RespectAccountSchoolScopeLink>()
+            val localDs = get<SchoolDataSourceLocal>()
 
             SchoolDataSourceRepository(
-                local = get<SchoolDataSourceLocal>(),
+                local = localDs,
                 remote = SchoolDataSourceHttp(
                     schoolUrl = schoolUrl.url,
                     schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
                     httpClient = get(),
                     tokenProvider = get(),
                     validationHelper = get(),
+                    json = get(),
+                    defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
+                    opdsFeedValidationHelper = localDs.opdsFeedDataSource,
+                    opdsPublicationValidationHelper = localDs.opdsPublicationDataSource
+                        .publicationNetworkValidationHelper
                 ),
                 validationHelper = get(),
                 remoteWriteQueue = get(),
@@ -950,6 +1006,7 @@ val appKoinModule = module {
         scoped<ApproveOrDeclineInviteRequestUseCase> {
             ApproveOrDeclineInviteRequestUseCase(
                 schoolDataSource = get(),
+                updateClazzStudentXapiGroupUseCase = get(),
             )
         }
 
@@ -1028,6 +1085,45 @@ val appKoinModule = module {
             CreateClassUseCase(dataSource = get())
         }
 
+        scoped<GetXapiLaunchUrlUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            GetXapiLaunchUrlUseCaseAndroid(
+                nanoHttpdApp = get(),
+                schoolUrl = accountScopeId.schoolUrl,
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                json = get(),
+                accountManager = get(),
+                getXapiActivityForPublicationUseCase = get(),
+                schoolDb = get(),
+                uidNumberMapper = get(),
+                applicationContext = androidApplication(),
+            )
+        }
+
+        scoped<LaunchAppUseCase> {
+            LaunchAppUseCaseAndroid(
+                appContext = androidContext().applicationContext,
+                getXapiLaunchUrlUseCase = get(),
+                ustadCache = get(),
+            )
+        }
+
+        scoped<UpdateClazzStudentXapiGroupUseCase>() {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            UpdateClazzStudentXapiGroupUseCase(
+                schoolDataSource = get(),
+                authenticatedUserPrincipalId = accountScopeId.accountPrincipalId,
+                schoolUrl = accountScopeId.schoolUrl,
+            )
+        }
+
+        scoped<GetPublicationForXapiActivityUseCase> {
+            GetPublicationForXapiActivityUseCase(
+                opdsPublicationDataSource = get<SchoolDataSource>().opdsPublicationDataSource,
+            )
+        }
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()

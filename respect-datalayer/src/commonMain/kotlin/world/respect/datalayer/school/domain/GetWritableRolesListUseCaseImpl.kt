@@ -9,7 +9,6 @@ class GetWritableRolesListUseCaseImpl: GetWritableRolesListUseCase {
             PersonRoleEnum.TEACHER -> listOf(
                 PersonRoleEnum.STUDENT,
                 PersonRoleEnum.PARENT,
-                PersonRoleEnum.TEACHER,
             )
             PersonRoleEnum.SITE_ADMINISTRATOR, PersonRoleEnum.SYSTEM_ADMINISTRATOR -> listOf(
                 PersonRoleEnum.STUDENT,

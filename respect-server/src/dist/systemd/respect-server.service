@@ -1,0 +1,20 @@
+[Unit]
+Description=Respect Server
+After=syslog.target network.target
+
+[Service]
+SuccessExitStatus=143
+
+User=respect
+Group=respect
+
+Type=exec
+
+ExecStart=/home/respect/respect-server/bin/respect-server
+ExecStop=/bin/kill -15 $MAINPID
+
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

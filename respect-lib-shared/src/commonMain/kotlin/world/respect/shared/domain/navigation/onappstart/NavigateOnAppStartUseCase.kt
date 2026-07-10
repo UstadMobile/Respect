@@ -6,15 +6,15 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeoutOrNull
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
+import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.ext.withClearBackstack
 import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.GetStartedScreen
+import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.RespectAppLauncher
 
 /**
  * Decide where to navigate to when the app is starting. The logic is roughly:
@@ -78,7 +78,7 @@ class NavigateOnAppStartUseCase(
 
         return initLinkNavCommand?.withClearBackstack(true) ?: NavCommand.Navigate(
             destination = when {
-                hasAccount -> if (isChild) AssignmentList else RespectAppLauncher()
+                hasAccount -> if (isChild) AssignmentList else Home
                 else -> GetStartedScreen()
             },
             clearBackStack = true,

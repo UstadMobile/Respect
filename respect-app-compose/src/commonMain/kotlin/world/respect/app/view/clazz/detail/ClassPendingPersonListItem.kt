@@ -28,6 +28,7 @@ import world.respect.shared.generated.resources.gender_literal
 fun ClassPendingPersonListItem(
     person: Person?,
     pendingRole: StringResource,
+    showApproveDeclineOptions: Boolean,
     onClickAcceptInvite: (Person) -> Unit,
     onClickDismissInvite: (Person) -> Unit,
 ) {
@@ -55,34 +56,38 @@ fun ClassPendingPersonListItem(
             )
 
         },
-        trailingContent = {
-            Row {
-                IconButton(
-                    onClick = {
-                        person?.also(onClickAcceptInvite)
-                    },
-                    enabled = person != null,
-                ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        imageVector = Icons.Outlined.CheckCircle,
-                        contentDescription = stringResource(resource = Res.string.accept_invite)
-                    )
-                }
+        trailingContent = if(showApproveDeclineOptions) {
+            {
+                Row {
+                    IconButton(
+                        onClick = {
+                            person?.also(onClickAcceptInvite)
+                        },
+                        enabled = person != null,
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            imageVector = Icons.Outlined.CheckCircle,
+                            contentDescription = stringResource(resource = Res.string.accept_invite)
+                        )
+                    }
 
-                IconButton(
-                    onClick = {
-                        person?.also(onClickDismissInvite)
-                    },
-                    enabled = person != null
-                ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        imageVector = Icons.Outlined.Cancel,
-                        contentDescription = stringResource(resource = Res.string.dismiss_invite)
-                    )
+                    IconButton(
+                        onClick = {
+                            person?.also(onClickDismissInvite)
+                        },
+                        enabled = person != null
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            imageVector = Icons.Outlined.Cancel,
+                            contentDescription = stringResource(resource = Res.string.dismiss_invite)
+                        )
+                    }
                 }
             }
+        }else {
+            null
         }
     )
 }

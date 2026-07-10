@@ -12,12 +12,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.ktor.http.Url
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.BasicWebView
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
-import world.respect.datalayer.respect.model.USTADMOBILE_RESPECT_DATA_POLICY_URL
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.accept
 import world.respect.shared.viewmodel.manageuser.termsandcondition.TermsAndConditionUiState
@@ -44,7 +42,7 @@ fun TermsAndConditionScreen(
             .defaultScreenPadding()
     ) {
         BasicWebView(
-            url = Url(USTADMOBILE_RESPECT_DATA_POLICY_URL),
+            url = uiState.termsAndConditionsUrl,
             modifier = Modifier.weight(1f)
         )
 

@@ -21,7 +21,7 @@ import coil3.compose.AsyncImage
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectBasicAlertDialog
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.PersonPasskey
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.at

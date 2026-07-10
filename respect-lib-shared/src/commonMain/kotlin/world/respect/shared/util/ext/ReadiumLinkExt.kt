@@ -2,6 +2,7 @@ package world.respect.shared.util.ext
 
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
+import world.respect.datalayer.school.opds.ext.hasRel
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.libutil.ext.resolve
 
@@ -27,3 +28,8 @@ fun List<ReadiumLink>.resolveAll(
     baseUrl: Url
 ) = this.map { it.resolve(baseUrl) }
 
+fun List<ReadiumLink>.selfPublicationLinkOrNull(): ReadiumLink? {
+    return firstOrNull { link ->
+        link.hasRel("self")
+    }
+}

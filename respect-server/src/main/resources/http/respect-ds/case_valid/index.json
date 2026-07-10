@@ -8,15 +8,15 @@
   ],
   "navigation": [
     {
-      "href": "grade1/grade1.json",
-      "title": "Grade 1",
+      "href": "examples/index.json",
+      "title": "Examples",
       "type": "application/opds+json",
-      "alt": [
+      "alternate": [
         {
-          "href": "grade1/lesson001/cover.png",
+          "href": "examples/icon.png",
           "rel": "icon",
           "type": "image/png",
-          "title": "Book"
+          "title": "Cabinet"
         }
       ]
     }

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,9 +30,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.duration
 import world.respect.app.app.RespectAsyncImage
-import world.respect.app.components.RespectListSortHeader
-import world.respect.app.components.defaultItemPadding
-import world.respect.shared.viewmodel.app.appstate.getTitle
+import world.respect.app.components.langMapString
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListUiState
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.util.SortOrderOption
@@ -249,7 +246,7 @@ fun PublicationListItem(
 
         headlineContent = {
             Text(
-                text = publication.metadata.title.getTitle()
+                text = langMapString(publication.metadata.title)
             )
         },
 

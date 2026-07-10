@@ -1,6 +1,7 @@
 package world.respect.server
 
 import io.github.aakira.napier.Napier
+import io.ktor.http.CacheControl
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -43,7 +44,6 @@ import world.respect.server.routes.passkey.RevokePasskeyRoute
 import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
 import world.respect.server.routes.qrcode.PersonQrBadgeRoute
 import world.respect.server.routes.school.respect.AddChildAccountRoute
-import world.respect.server.routes.school.respect.AssignmentRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
@@ -51,12 +51,16 @@ import world.respect.server.routes.school.respect.InviteRoute
 import world.respect.server.routes.school.respect.PersonPasskeyRoute
 import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
+import world.respect.server.routes.school.respect.PlaylistRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.SchoolAppRoute
 import world.respect.server.routes.school.respect.SchoolRegistrationRoute
 import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
+import world.respect.server.routes.school.respect.SchoolValidationRoute
+import world.respect.server.routes.school.xapi.XapiStatementsResourceRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
+import world.respect.server.routes.username.checkusernameunique.CheckUsernameUniqueRoute
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.virtualHost
@@ -84,6 +88,7 @@ fun Application.module() {
 
     val wellKnownDir = File(ktorAppHomeDir(), "well-known")
     val assetLinksFile = File(wellKnownDir, "assetlinks.json")
+    val termsFile = File(wellKnownDir, "terms.html")
 
     val dirAdminFile = File(environment.config.absoluteDataDir(), DIRECTORY_ADMIN_FILENAME)
     dirAdminFile.takeIf { !it.exists() }?.also {
@@ -181,6 +186,22 @@ fun Application.module() {
             get("assetlinks.json") {
                 call.respondFile(assetLinksFile)
             }
+
+            get("terms.html") {
+                if(termsFile.exists()) {
+                    call.respondFile(termsFile)
+                }else {
+                    call.response.cacheControl(CacheControl.NoStore(null))
+
+                    call.respondText(
+                        contentType = ContentType.Text.Plain,
+                        status = HttpStatusCode.NotFound,
+                        text = "Terms/conditions not found: the server administrator can set this as per the INSTALL.md by saving terms.html into the well-known directory."
+                    )
+                }
+            }
+
+            SchoolValidationRoute()
         }
 
         swaggerUI(
@@ -216,10 +237,19 @@ fun Application.module() {
             }
             route("directory") {
                 val respectAppDataSource: RespectAppDataSource by inject()
-                RespectSchoolDirectoryRoute(respectAppDataSource)
+                RespectSchoolDirectoryRoute(
+                    respectAppDataSource = respectAppDataSource,
+                    filterByHost = environment.config.schoolDirsUseVirtualHost()
+                )
             }
 
             route("school") {
+                route("xapi") {
+                    authenticate(AUTH_CONFIG_SCHOOL) {
+                        XapiStatementsResourceRoute(json = json)
+                    }
+                }
+
                 route("respect") {
                     route("auth") {
                         AuthRoute()
@@ -237,7 +267,13 @@ fun Application.module() {
                         UsernameSuggestionRoute(
                             usernameSuggestionUseCase = { it.getSchoolKoinScope().get() }
                         )
+
+                        CheckUsernameUniqueRoute(
+                            checkUsernameUniqueUseCase = { it.getSchoolKoinScope().get() }
+                        )
                     }
+
+
 
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         SchoolAppRoute()
@@ -248,11 +284,14 @@ fun Application.module() {
                         PersonPasswordRoute()
                         ClassRoute()
                         EnrollmentRoute()
-                        AssignmentRoute()
                         PersonQrBadgeRoute()
                         AddChildAccountRoute(
                             addChildAccountUseCase = { it.requireAccountScope().get() }
                         )
+                    }
+
+                    authenticate(AUTH_CONFIG_SCHOOL, optional = true) {
+                        PlaylistRoute()
                     }
                 }
             }

@@ -23,10 +23,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(projects.respectLibDataloadstate)
             api(projects.respectLibIhttpCore)
             api(projects.respectLibXxhash)
             api(projects.respectCredentials)
             api(projects.respectLibOpdsModel)
+            api(projects.respectLibXapiCore)
             api(projects.respectLibSerializers)
             api(projects.respectLibUtil)
             implementation(libs.kotlinx.serialization.json)
@@ -44,7 +46,7 @@ kotlin {
         }
 
         jvmTest.dependencies {
-
+            implementation(projects.respectLibTestResources)
         }
 
         val commonTest by getting {

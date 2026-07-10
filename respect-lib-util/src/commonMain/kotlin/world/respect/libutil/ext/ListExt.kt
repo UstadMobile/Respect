@@ -55,3 +55,5 @@ fun <T> List<T>.moveItem(
         add(index = to, element = removeAt(from))
     }.toList()
 }
+
+fun <T> List<T>?.toEmptyIfNull(): List<T> = this ?: emptyList()

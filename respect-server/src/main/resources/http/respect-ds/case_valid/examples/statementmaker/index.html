@@ -1,0 +1,42 @@
+<html lang="en">
+    <head>
+        <title>
+            Statement Maker
+        </title>
+
+        <script type="module" src="../../js/xapi_statement_maker.js"> </script>
+    </head>
+
+    <body>
+        <button id="statement_button">
+            Send statement
+        </button>
+
+        <div id="result"> </div>
+
+        <textarea id="statement" cols="112" rows="30" aria-label="statement">
+{
+  "actor": {
+    "account" : {
+      "name": "user",
+      "homePage": "http://localhost/"
+    }
+  },
+  "verb": {
+    "id": "http://adlnet.gov/expapi/verbs/completed",
+    "display": { "en-US": "completed" }
+  },
+  "object": {
+    "id": "https://example.app/id/statementmaker"
+  },
+  "result": {
+     "completion": true,
+     "success": true,
+     "score": {
+     	"scaled": 0.90
+     }
+   }
+}
+        </textarea>
+    </body>
+</html>

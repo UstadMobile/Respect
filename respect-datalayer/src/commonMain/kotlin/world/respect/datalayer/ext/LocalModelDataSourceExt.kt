@@ -1,9 +1,10 @@
 package world.respect.datalayer.ext
 
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataReadyState
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.shared.LocalModelDataSource
+import world.respect.lib.dataloadstate.ext.dataOrNull
 
 @Suppress("unused")
 suspend fun <T: Any> LocalModelDataSource<T>.updateFromRemoteListIfNeeded(

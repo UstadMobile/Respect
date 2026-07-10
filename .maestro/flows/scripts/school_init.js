@@ -1,4 +1,4 @@
-/*
+    /*
  * Sets up and checks the school variables. This can either use the test controller or the school
  * url and name.
  */
@@ -81,6 +81,12 @@ if(isSetUrl(TESTCONTROLLER_URL)) {
 }
 
 if(!isSetString(output.SCHOOL_NAME)) {
-    throw "SCHOOL_NAME not set and not using TESTCONTROLLER_URL. e.g. maestro test -e SCHOOL_NAME=TestSchool . See README"
+    throw "SCHOOL_NAME not set and not using TESTCONTROLLER_URL. e.g. maestro test -e SCHOOL_NAME=TestSchool . See README";
+}
+
+if(isSetString(TEST_APP_URL)) {
+    output.TEST_APP_URL = TEST_APP_URL;
+}else {
+    output.TEST_APP_URL = output.SCHOOL_URL + "static-resources/respect-ds/case_valid/appmanifest.json";
 }
 

@@ -1,7 +1,7 @@
 package world.respect.datalayer.shared.paging
 
 import androidx.paging.PagingSource
-import world.respect.datalayer.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
 
 /**

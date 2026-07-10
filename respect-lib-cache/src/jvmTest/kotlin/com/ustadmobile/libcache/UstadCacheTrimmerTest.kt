@@ -8,6 +8,7 @@ import com.ustadmobile.libcache.db.entities.CacheEntry
 import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
+import io.ktor.http.Url
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.SystemFileSystem
 import org.junit.Rule
@@ -35,7 +36,7 @@ class UstadCacheTrimmerTest {
             val url = "$urlPrefix$index"
             CacheEntry(
                 key = md5Digest.urlKey(url),
-                url = url,
+                url = Url(url),
                 storageSize = 100_000,
                 lastAccessed = index.toLong(),
             )
@@ -65,7 +66,7 @@ class UstadCacheTrimmerTest {
         val expectedIndexes = listOf(0, 1, 5, 6, 7, 8, 9)
         runBlocking {
             (0 until 10).forEach {
-                val entry = cacheDb.cacheEntryDao.findEntryAndBodyByKey(
+                val entry = cacheDb.cacheEntryDao.findEntryByKey(
                     md5Digest.urlKey("$urlPrefix$it")
                 )
 

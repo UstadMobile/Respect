@@ -6,18 +6,17 @@ import android.content.Intent
 import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel.Companion.WEB_URL
 
 class WebLauncherUseCaseAndroid(
     private val context: Context
 ) : WebLauncherUseCase {
 
-    override suspend fun launchWeb() {
+    override suspend fun launchWeb(url: String) {
         withContext(Dispatchers.Main) {
             try {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
-                    WEB_URL.toUri()
+                    url.toUri()
                 ).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }

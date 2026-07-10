@@ -588,11 +588,6 @@ object AccountList : RespectAppRoute
 @Serializable
 object ShareFeedback : RespectAppRoute
 
-@Serializable
-data class FeedbackSubmitted(
-    val ticketId: Int,
-) : RespectAppRoute
-
 /**
  * @property addToClassUid if the PersonList screen has been navigated when the user clicks
  *           add student or add teacher on the ClassDetail screen, then the classUid.

@@ -34,7 +34,6 @@ import world.respect.app.view.manageuser.enterinvitecode.EnterInviteCodeScreen
 import world.respect.app.view.manageuser.login.LoginScreen
 import world.respect.app.view.manageuser.otheroption.OtherOptionsScreen
 import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScreen
-import world.respect.app.view.manageuser.sharefeedback.FeedbackSubmittedScreen
 import world.respect.app.view.manageuser.sharefeedback.ShareFeedbackScreen
 import world.respect.app.view.manageuser.signup.SignupScreen
 import world.respect.app.view.manageuser.termsandcondition.TermsAndConditionScreen
@@ -92,7 +91,6 @@ import world.respect.shared.navigation.IndicatorList
 import world.respect.shared.navigation.IndictorEdit
 import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.EnterInviteCode
-import world.respect.shared.navigation.FeedbackSubmitted
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
@@ -510,15 +508,6 @@ fun AppNavHost(
 
         composable<ShareFeedback> {
             ShareFeedbackScreen(
-                viewModel = respectViewModel(
-                    onSetAppUiState = onSetAppUiState,
-                    navController = respectNavController
-                )
-            )
-        }
-
-        composable<FeedbackSubmitted> {
-            FeedbackSubmittedScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController

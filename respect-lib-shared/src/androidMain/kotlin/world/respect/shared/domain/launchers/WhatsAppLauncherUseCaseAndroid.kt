@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel.Companion.WHATSAPP_URL
 import androidx.core.net.toUri
 
 class WhatsAppLauncherUseCaseAndroid(
@@ -29,4 +28,10 @@ class WhatsAppLauncherUseCaseAndroid(
             }
         }
     }
+
+    companion object{
+        const val WHATSAPP_URL = "https://wa.me/"
+    }
 }
+
+

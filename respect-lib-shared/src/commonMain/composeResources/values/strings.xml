@@ -233,12 +233,12 @@
 
 
     <string name="add_account">Add account</string>
-    <string name="share_feedback">Share feedback</string>
+    <string name="send_feedback">Send feedback</string>
     <string name="feedback_submitted">Feedback submitted</string>
     <string name="feedback_submitted_message">Thank you for your feedback. Respect team will review it internally.</string>
     <string name="quick_contact">Quick Contact</string>
-    <string name="whatsapp_respect">WhatsApp Respect</string>
-    <string name="email_respect">Email Respect</string>
+    <string name="whatsapp_respect">Message the developers on WhatsApp</string>
+    <string name="email_respect">Email the developers</string>
     <string name="public_forum">Public forum</string>
     <string name="category">Category</string>
     <string name="your_feedback">Your feedback</string>

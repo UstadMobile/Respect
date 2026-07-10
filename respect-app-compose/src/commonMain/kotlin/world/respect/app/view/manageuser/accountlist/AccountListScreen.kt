@@ -37,7 +37,7 @@ import world.respect.shared.generated.resources.logout
 import world.respect.shared.generated.resources.profile
 import world.respect.shared.generated.resources.respect_is_open_source
 import world.respect.shared.generated.resources.supported_by_spix_foundation
-import world.respect.shared.generated.resources.share_feedback
+import world.respect.shared.generated.resources.send_feedback
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListUiState
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 
@@ -166,7 +166,7 @@ fun AccountListScreen(
                 headlineContent = {
                     Text(
                         stringResource(
-                            Res.string.share_feedback
+                            Res.string.send_feedback
                         )
                     )
                 },

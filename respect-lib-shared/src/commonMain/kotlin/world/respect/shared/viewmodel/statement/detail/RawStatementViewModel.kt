@@ -25,7 +25,6 @@ import world.respect.shared.generated.resources.raw_statement
 import world.respect.shared.navigation.RawStatement
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import kotlin.uuid.Uuid
 
 data class RawStatementUiState(
     val statement: DataLoadState<XapiStatement> = DataLoadingState(),
@@ -60,7 +59,7 @@ class RawStatementViewModel(
         viewModelScope.launch {
             schoolDataSource.xapiResource.statements.getAsFlow(
                 listParams = XapiStatementsResource.GetStatementParams(
-                    statementId = Uuid.parse(route.statementId),
+                    statementId = route.statementId,
                 ),
                 dataLoadParams = DataLoadParams()
             ).collectLatest { loadState ->

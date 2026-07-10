@@ -19,6 +19,7 @@ import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.signup.SignupScreenModeEnum
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryMode
+import kotlin.uuid.Uuid
 
 /**
  * Mostly TypeSafe navigation for the RESPECT app. All serialized properties must be primitives or
@@ -176,8 +177,16 @@ data class StatementDetail(
 
 @Serializable
 data class RawStatement(
-    val statementId: String,
-): RespectAppRoute
+    val statementIdStr: String,
+): RespectAppRoute {
+
+    @Transient
+    val statementId = Uuid.parse(statementIdStr)
+
+    companion object {
+        fun create(statementId: Uuid) = RawStatement(statementId.toString())
+    }
+}
 
 @Serializable
 object ClazzList : RespectAppRoute

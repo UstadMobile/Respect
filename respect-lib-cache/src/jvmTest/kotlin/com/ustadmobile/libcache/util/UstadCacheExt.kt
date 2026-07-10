@@ -1,6 +1,7 @@
 package com.ustadmobile.libcache.util
 
 import com.ustadmobile.ihttp.headers.IHttpHeader
+import com.ustadmobile.ihttp.headers.IHttpHeaders
 import com.ustadmobile.ihttp.headers.iHeadersBuilder
 import com.ustadmobile.ihttp.request.IHttpRequest
 import com.ustadmobile.ihttp.request.requestBuilder
@@ -8,7 +9,11 @@ import com.ustadmobile.ihttp.response.IHttpResponse
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.StoreResult
 import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.novarysearch.NoVarySearch
+import com.ustadmobile.libcache.novarysearch.normalizeForNoVarySearchIfNotNull
 import com.ustadmobile.libcache.response.HttpPathResponse
+import io.ktor.http.Headers
+import io.ktor.http.Url
 import io.ktor.http.toHttpDate
 import io.ktor.util.date.GMTDate
 import kotlinx.io.files.Path
@@ -27,7 +32,17 @@ suspend fun UstadCache.storeFileAsUrl(
     testUrl: String,
     mimeType: String,
     requestHeaders: List<IHttpHeader> = emptyList(),
+    extraHeaders: Headers? = null,
 ): FileStoredAsUrl {
+    val urlObj = Url(testUrl)
+
+    extraHeaders?.also { extraHeadersVal ->
+        setExtraResponseHeaders(
+            url = urlObj.normalizeForNoVarySearchIfNotNull(extraHeadersVal["No-Vary-Search"]),
+            extraResponseHeaders = extraHeaders,
+        )
+    }
+
     val request = requestBuilder {
         url = testUrl
         requestHeaders.forEach {

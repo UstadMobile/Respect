@@ -133,6 +133,7 @@ if [ "$1" == "cloud" ]; then
     NAME_ARG=""
     COMMIT_ARG=""
     BRANCH_ARG=""
+    DEVICE_OS_ARG=""
 
     if [ "$BUILD_TAG" != "" ]; then
         NAME_ARG="--name=$BUILD_TAG"
@@ -150,6 +151,10 @@ if [ "$1" == "cloud" ]; then
         PULLREQUEST_ARG="--pull-request-id=$PULLREQUEST"
     fi
 
+     if [ "$DEVICE_OS_ARG" == "" ]; then
+           DEVICE_OS_ARG="--device-os=android-35"
+     fi
+
     maestro cloud \
         --api-key=$MAESTRO_CLOUD_APIKEY \
         --project-id=$MAESTRO_CLOUD_PROJECTID \
@@ -158,6 +163,7 @@ if [ "$1" == "cloud" ]; then
         --format=junit \
         --output=build/maestro/report.xml \
         --timeout=300 \
+        $DEVICE_OS_ARG \
         $NAME_ARG \
         --repo-name=Respect \
         --repo-owner=UstadMobile \

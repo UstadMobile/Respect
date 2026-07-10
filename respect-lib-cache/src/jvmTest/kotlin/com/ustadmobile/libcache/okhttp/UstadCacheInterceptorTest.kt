@@ -278,7 +278,7 @@ class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
 
         runBlocking { ustadCache.commit() }
         val storedEntryAfterRequest = runBlocking {
-            cacheDb.cacheEntryDao.findEntryAndBodyByKey(
+            cacheDb.cacheEntryDao.findEntryByKey(
                 Md5Digest().urlKey(requestUrl))
         }
 
@@ -300,7 +300,7 @@ class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
 
         runBlocking { ustadCache.commit() }
         val storedEntryAfterValidation = runBlocking {
-            cacheDb.cacheEntryDao.findEntryAndBodyByKey(Md5Digest().urlKey(requestUrl))
+            cacheDb.cacheEntryDao.findEntryByKey(Md5Digest().urlKey(requestUrl))
         }
 
         assertNotNull(storedEntryAfterValidation)

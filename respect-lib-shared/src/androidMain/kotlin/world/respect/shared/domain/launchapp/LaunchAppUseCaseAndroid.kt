@@ -9,7 +9,11 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import androidx.core.net.toUri
+import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.novarysearch.removeLaunchSearchParams
+import com.ustadmobile.libcache.util.LaunchNoVarySearchConstants
 import io.github.aakira.napier.Napier
+import io.ktor.http.headersOf
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.LaunchRequest
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
 
@@ -19,6 +23,7 @@ import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
 class LaunchAppUseCaseAndroid(
     private val appContext: Context,
     private val getXapiLaunchUrlUseCase: GetXapiLaunchUrlUseCase,
+    private val ustadCache: UstadCache,
 ): LaunchAppUseCase {
 
     /**
@@ -78,10 +83,17 @@ class LaunchAppUseCaseAndroid(
                 }
             }
         }catch(e: Throwable) {
-            Napier.w("Something wrong opening learning unit through app, fallback", e)
+            Napier.w("Something wrong opening learning unit through native app, fallback", e)
         }
 
-        val webViewLaunchUrl = getXapiLaunchUrl(GetXapiLaunchUrlUseCase.LaunchType.WEBVIEW)
+        val webViewLaunchUrl = getXapiLaunchUrl(GetXapiLaunchUrlUseCase.LaunchType.WEBVIEW).also {
+            ustadCache.setExtraResponseHeaders(
+                url = it.removeLaunchSearchParams(),
+                extraResponseHeaders = headersOf(
+                    "No-Vary-Search" to listOf(LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER)
+                )
+            )
+        }
 
         Log.i("LaunchUseCase", "Launching URL: $webViewLaunchUrl")
 

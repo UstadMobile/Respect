@@ -58,7 +58,7 @@ import world.respect.server.routes.school.respect.SchoolRegistrationRoute
 import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.school.respect.SchoolValidationRoute
-import world.respect.server.routes.e2e.ReceiveDbRoute
+import world.respect.server.routes.e2etestartifactsroute.ReceiveE2EArtifactUploadRoute
 import world.respect.server.routes.school.xapi.XapiStatementsResourceRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.routes.username.checkusernameunique.CheckUsernameUniqueRoute
@@ -66,6 +66,7 @@ import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.virtualHost
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
+import world.respect.shared.domain.e2eartifactupload.E2EArtifactUploadUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 
 const val AUTH_CONFIG_SCHOOL = "auth-school-bearer"
@@ -297,10 +298,14 @@ fun Application.module() {
                 }
             }
 
-            if (environment.config.e2eTestingEnabled()) {
-                val e2eUploadsDir = File(environment.config.absoluteDataDir(), "e2e-client-db-uploads")
-                route("e2e") {
-                    ReceiveDbRoute(e2eUploadsDir = e2eUploadsDir)
+            if (environment.config.e2eArtifactUploadEnabled()) {
+                val e2eUploadsDir = File(
+                    environment.config.absoluteDataDir(),
+                    E2EArtifactUploadUseCase.DEFAULT_UPLOAD_DIR_NAME
+                )
+
+                route(E2EArtifactUploadUseCase.ENDPOINT_DIR) {
+                    ReceiveE2EArtifactUploadRoute(e2eUploadsDir = e2eUploadsDir)
                 }
             }
         }

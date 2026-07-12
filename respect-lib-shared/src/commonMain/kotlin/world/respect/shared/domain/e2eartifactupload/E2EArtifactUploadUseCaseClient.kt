@@ -1,4 +1,4 @@
-package world.respect.shared.domain.testing
+package world.respect.shared.domain.e2eartifactupload
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.parameter
@@ -10,17 +10,17 @@ import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
 import io.ktor.http.takeFrom
 
-class SendDbToServerUseCaseClient(
+class E2EArtifactUploadUseCaseClient(
     private val httpClient: HttpClient,
-    private val getDbFilesForUploadUseCase: GetDbFilesForUploadUseCase,
-) : SendDbToServerUseCase {
+    private val getDbFilesForE2EArtifactUploadUseCase: GetDbFilesForE2EArtifactUploadUseCase,
+) : E2EArtifactUploadUseCase {
 
     override suspend fun invoke(schoolUrl: Url, name: String) {
-        val file = getDbFilesForUploadUseCase(schoolUrl) ?: return
+        val file = getDbFilesForE2EArtifactUploadUseCase(schoolUrl) ?: return
         httpClient.post {
             url {
                 takeFrom(schoolUrl)
-                appendPathSegments("api/e2e/receivedb")
+                appendPathSegments("api/${E2EArtifactUploadUseCase.ENDPOINT_API_PATH}")
             }
             parameter("name", name)
             contentType(ContentType.Application.OctetStream)

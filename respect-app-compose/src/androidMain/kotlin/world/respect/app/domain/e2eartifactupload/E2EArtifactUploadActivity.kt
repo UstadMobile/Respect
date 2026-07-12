@@ -1,4 +1,4 @@
-package world.respect.app.domain.testing
+package world.respect.app.domain.e2eartifactupload
 
 import android.content.Context
 import android.content.Intent
@@ -26,10 +26,14 @@ import org.koin.android.ext.android.getKoin
 import world.respect.app.view.testing.SendDbToServerScreen
 import world.respect.app.view.testing.SendDbToServerUiState
 import world.respect.shared.domain.school.SchoolDbPath
-import world.respect.shared.domain.testing.SendDbToServerUseCase
+import world.respect.shared.domain.e2eartifactupload.E2EArtifactUploadUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 
-class SendDbToServerActivity : AppCompatActivity() {
+/**
+ * The end-to-end artifact uploading (see E2EArtifactUploadUseCase) needs to be done when everything
+ * else is closed: e.g. all databases etc. are closed - hence this is a separate activity.
+ */
+class E2EArtifactUploadActivity : AppCompatActivity() {
 
     private var uiState by mutableStateOf(SendDbToServerUiState())
 
@@ -80,7 +84,7 @@ class SendDbToServerActivity : AppCompatActivity() {
                 db.rawQuery(PRAGMA_WAL_CHECKPOINT, null).use { it.moveToFirst() }
             }
         }
-        getKoin().get<SendDbToServerUseCase>().invoke(schoolUrl, name)
+        getKoin().get<E2EArtifactUploadUseCase>().invoke(schoolUrl, name)
     }
 
     companion object {
@@ -89,7 +93,7 @@ class SendDbToServerActivity : AppCompatActivity() {
         private const val PRAGMA_WAL_CHECKPOINT = "PRAGMA wal_checkpoint(FULL)"
 
         fun createIntent(context: Context, schoolUrlStr: String, name: String): Intent =
-            Intent(context, SendDbToServerActivity::class.java)
+            Intent(context, E2EArtifactUploadActivity::class.java)
                 .putExtra(EXTRA_SCHOOL_URL, schoolUrlStr)
                 .putExtra(EXTRA_NAME, name)
     }

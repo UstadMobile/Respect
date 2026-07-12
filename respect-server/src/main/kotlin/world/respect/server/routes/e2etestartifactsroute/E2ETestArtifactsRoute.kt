@@ -1,19 +1,20 @@
-package world.respect.server.routes.e2e
+package world.respect.server.routes.e2etestartifactsroute
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
+import world.respect.shared.domain.e2eartifactupload.E2EArtifactUploadUseCase
 import java.io.File
 import java.sql.DriverManager
 import world.respect.shared.domain.school.SchoolDbPath
 
 
 @Suppress("FunctionName")
-fun Route.ReceiveDbRoute(e2eUploadsDir: File) {
+fun Route.ReceiveE2EArtifactUploadRoute(e2eUploadsDir: File) {
     e2eUploadsDir.mkdirs()
-    post("receivedb") {
+    post(E2EArtifactUploadUseCase.ENDPOINT_RECEIVE) {
         val name = requireNotNull(call.request.queryParameters["name"])
         if (!name.all { it.isLetterOrDigit() || it == '_' }) {
             call.respond(HttpStatusCode.BadRequest, "name must contain only letters, digits, or underscores")

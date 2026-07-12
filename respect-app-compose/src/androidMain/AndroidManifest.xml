@@ -109,7 +109,7 @@
         Android Manifest permission not required because messages are checked for authentication
         -->
         <activity
-            android:name="world.respect.app.domain.testing.SendDbToServerActivity"
+            android:name="world.respect.app.domain.e2eartifactupload.E2EArtifactUploadActivity"
             android:exported="false" />
 
         <service

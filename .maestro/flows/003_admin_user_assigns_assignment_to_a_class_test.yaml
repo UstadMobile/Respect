@@ -13,8 +13,10 @@ onFlowStart:
         NAME: "003_admin_user_assigns_assignment_to_a_class_test"
 
 onFlowComplete:
-  - runScript:
-      file: "scripts/teardown.js"
+  - runFlow:
+      file: "subflows/teardown.yaml"
+      env:
+        NAME: "db-final"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - runFlow: "subflows/admin_add_app.yaml"
@@ -24,6 +26,10 @@ onFlowComplete:
       CLASSNAME: "TestClass"
 
 # Teacher Add Assignment
+- runFlow:
+    file: "subflows/e2e_artifact_upload.yaml"
+    env:
+      NAME: "db-admin-class-setup"
 - clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
@@ -110,6 +116,10 @@ onFlowComplete:
     text: "Assignments"
 - assertVisible: "Homework 1"
 
+- runFlow:
+    file: "subflows/e2e_artifact_upload.yaml"
+    env:
+      NAME: "db-teacher-assigned"
 - clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
@@ -145,6 +155,10 @@ onFlowComplete:
 - assertVisible: "In-progress (0)"
 
 # Student B user complete 1 task
+- runFlow:
+    file: "subflows/e2e_artifact_upload.yaml"
+    env:
+      NAME: "db-student-a-completed"
 - clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"
@@ -171,6 +185,10 @@ onFlowComplete:
 - assertVisible: "Completed (1)"
 
 # Teacher Validate students results
+- runFlow:
+    file: "subflows/e2e_artifact_upload.yaml"
+    env:
+      NAME: "db-student-b-completed"
 - clearState: world.respect.app
 - runFlow:
     file: "subflows/school_user_login_flow.yaml"

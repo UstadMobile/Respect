@@ -613,6 +613,9 @@
 
     <string name="xapi_verb_assigned">assigned</string>
 
+    <string name="uploading">Uploading…</string>
+    <string name="send_db_upload_complete">Upload complete</string>
+
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
 

@@ -13,8 +13,10 @@ onFlowStart:
         NAME: "001_003_login_using_school_link_test"
 
 onFlowComplete:
-  - runScript:
-      file: "scripts/teardown.js"
+  - runFlow:
+      file: "subflows/teardown.yaml"
+      env:
+        NAME: "db-final"
 ---
 - launchApp:
     arguments:

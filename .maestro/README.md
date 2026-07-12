@@ -14,6 +14,12 @@
 adb install ./respect-app-compose/build/outputs/apk/debug/respect-app-compose-debug.apk
 ```
 
+* Run the server with e2e artifact upload enabled
+
+```
+./gradlew respect-server:run --args='runserver -P:ktor.e2eartifactupload.enabled=true'
+```
+
 * Run test using Maestro CLI (specify the school URL and admin password):
 ```
 maestro test \

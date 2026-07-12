@@ -39,10 +39,12 @@ echo $TESTSERVER_WORKSPACE/respect-server-$VERSION/bin/respect-server runserver 
           -P:ktor.deployment.port=$TESTSERVER_PORT \
           -P:ktor.deployment.shutdown.url=/api/shutdown \
           -P:ktor.respect.datadir=$TESTSERVER_WORKSPACE/data \
+          -P:ktor.e2eartifactupload.enabled=true \
 
 # Could set the credentials required to create a new instance here.
 $TESTSERVER_WORKSPACE/respect-server-$VERSION/bin/respect-server runserver \
      -P:ktor.deployment.port=$TESTSERVER_PORT \
      -P:ktor.deployment.shutdown.url=/api/shutdown \
      -P:ktor.respect.datadir=$TESTSERVER_WORKSPACE/data \
+     -P:ktor.e2eartifactupload.enabled=true \
 

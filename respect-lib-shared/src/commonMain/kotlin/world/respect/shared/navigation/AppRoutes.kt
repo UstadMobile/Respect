@@ -900,3 +900,23 @@ data class QrCode(
 data class CopyCode(
     val inviteCode:String?=null
 ): RespectAppRoute
+
+@Serializable
+data class SendDbToServer(
+    val schoolUrlStr: String,
+    val name: String,
+) : RespectAppRoute {
+
+    @Transient
+    val schoolUrl = Url(schoolUrlStr)
+
+    companion object {
+        const val DEEP_LINK_PATH = "senddbtoserver"
+        const val QUERY_PARAM_NAME = "name"
+
+        fun create(schoolUrl: Url, name: String) = SendDbToServer(
+            schoolUrlStr = schoolUrl.toString(),
+            name = name,
+        )
+    }
+}

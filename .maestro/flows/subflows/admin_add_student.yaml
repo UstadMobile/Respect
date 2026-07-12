@@ -11,7 +11,7 @@ appId: world.respect.app
 
 # Student sign-up via invite code to the class
 - runFlow:
-    file: "send_db_to_server.yaml"
+    file: "e2e_artifact_upload.yaml"
     env:
       NAME: "db-admin-invited-student"
 - clearState: world.respect.app
@@ -59,7 +59,7 @@ appId: world.respect.app
 
 # Admin approve student's request to join the class
 - runFlow:
-    file: "send_db_to_server.yaml"
+    file: "e2e_artifact_upload.yaml"
     env:
       NAME: "db-student-signed-up"
 - clearState: world.respect.app

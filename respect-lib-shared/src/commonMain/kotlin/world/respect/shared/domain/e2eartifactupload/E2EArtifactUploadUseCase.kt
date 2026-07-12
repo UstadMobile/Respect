@@ -27,6 +27,12 @@ interface E2EArtifactUploadUseCase {
 
         const val DEFAULT_UPLOAD_DIR_NAME = "e2e-client-artifacts"
 
+        const val PARAM_NAME_SCHOOL_URL = "schoolUrl"
+
+        const val PARAM_NAME_ARTIFACT_NAME = "name"
+
+        const val LOGTAG = "E2EArtifactUpload"
+
     }
 
 }

@@ -80,6 +80,8 @@ if(isSetUrl(TESTCONTROLLER_URL)) {
     throw "SCHOOL_URL not set AND TESTCONTROLLER_URL not set. See README";
 }
 
+output.SCHOOL_URL_ENCODED = encodeURIComponent(output.SCHOOL_URL);
+
 if(!isSetString(output.SCHOOL_NAME)) {
     throw "SCHOOL_NAME not set and not using TESTCONTROLLER_URL. e.g. maestro test -e SCHOOL_NAME=TestSchool . See README";
 }

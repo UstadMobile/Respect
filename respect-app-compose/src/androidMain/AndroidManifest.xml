@@ -104,14 +104,24 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+
+        <activity
+            android:name="world.respect.app.domain.e2eartifactupload.E2EArtifactUploadActivity"
+            android:exported="true" >
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="${applicationId}.e2eartifactupload" />
+            </intent-filter>
+
+        </activity>
+
         <!--
         Xapi over IPC service.
         Android Manifest permission not required because messages are checked for authentication
         -->
-        <activity
-            android:name="world.respect.app.domain.e2eartifactupload.E2EArtifactUploadActivity"
-            android:exported="false" />
-
         <service
             android:name="world.respect.xapi.ipc.server.XapiIpcService"
             android:exported="true"

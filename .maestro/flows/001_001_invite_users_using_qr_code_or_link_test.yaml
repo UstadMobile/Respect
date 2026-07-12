@@ -50,7 +50,7 @@ onFlowComplete:
 
 # Teacher user joining using invite QR code
 - runFlow:
-    file: "subflows/send_db_to_server.yaml"
+    file: "subflows/e2e_artifact_upload.yaml"
     env:
       NAME: "db-admin-teacher-invited"
 - clearState: world.respect.app
@@ -125,7 +125,7 @@ onFlowComplete:
 
 # C) Student sign-up via invite code to the class
 - runFlow:
-    file: "subflows/send_db_to_server.yaml"
+    file: "subflows/e2e_artifact_upload.yaml"
     env:
       NAME: "db-teacher-joined"
 - clearState: world.respect.app
@@ -184,7 +184,7 @@ onFlowComplete:
 
 # H) Teacher approve student's request to join the class
 - runFlow:
-    file: "subflows/send_db_to_server.yaml"
+    file: "subflows/e2e_artifact_upload.yaml"
     env:
       NAME: "db-student-joined-waiting"
 - clearState: world.respect.app

@@ -2,7 +2,7 @@ appId: world.respect.app
 
 ---
 - runFlow:
-    file: "send_db_to_server.yaml"
+    file: "e2e_artifact_upload.yaml"
     env:
       NAME: ${NAME}
 - runScript:

@@ -22,7 +22,8 @@ class E2EArtifactUploadUseCaseClient(
                 takeFrom(schoolUrl)
                 appendPathSegments("api/${E2EArtifactUploadUseCase.ENDPOINT_API_PATH}")
             }
-            parameter("name", name)
+
+            parameter(E2EArtifactUploadUseCase.PARAM_NAME_ARTIFACT_NAME, name)
             contentType(ContentType.Application.OctetStream)
             setBody(file.bytes)
         }

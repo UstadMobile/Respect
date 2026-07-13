@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e  # Exit immediately if any command fails
 
-# Only fall back to re-parsing the log if it wasn't passed in ci-run-maestro.sh.
+# If the URL wasn't already set by ci-run-maestro.sh, try to find it in the log file
 if [ -z "$MAESTRO_CLOUD_URL" ]; then
     LOG_FILE="${TESTSERVERCONTROLLER_BASEDIR:-$WORKSPACE/build/testservercontroller/workspace}/lastMaestroRun.log"
     MAESTRO_CLOUD_URL=$(grep -oE 'https://[^ ]*/upload/[^ ]*' "$LOG_FILE" | tail -1)

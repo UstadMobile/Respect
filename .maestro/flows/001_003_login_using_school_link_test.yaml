@@ -1,6 +1,4 @@
 appId: world.respect.app
-tags:
-  - "e2e"
 onFlowStart:
   - clearState: world.respect.app
   - runScript:
@@ -47,7 +45,7 @@ onFlowComplete:
 - tapOn:
     id : "password"
 - inputText: ${SCHOOL_ADMIN_PASSWORD}
-- tapOn: "Logi"
+- tapOn: "Login"
 - runFlow:
     when:
       visible: "Save password for Respect?"

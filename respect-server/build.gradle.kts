@@ -72,6 +72,7 @@ dependencies {
     implementation(libs.ktor.server.cors)
     implementation(libs.ktor.server.status.pages)
 
+    implementation(libs.sqlite.jdbc)
     implementation(libs.napier)
     implementation(libs.webauthn4j.core)
 

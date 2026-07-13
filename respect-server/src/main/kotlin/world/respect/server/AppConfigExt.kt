@@ -21,6 +21,8 @@ const val SERVER_CONFIG_KEY_REGISTRATION_PIN = "ktor.school.registration.pin"
  */
 const val DIRECTORY_ADMIN_FILENAME = "dir-admin.txt"
 
+const val SERVER_CONFIG_E2E_ARTIFACT_UPLOAD_ENABLED = "ktor.e2eartifactupload.enabled"
+
 const val DEFAULT_DIR_ADMIN_PASS_LENGTH = 16
 
 /**
@@ -138,4 +140,8 @@ fun ApplicationConfig.absoluteDataDir() = fileProperty(
 
 fun ApplicationConfig.schoolDirsUseVirtualHost(): Boolean {
     return propertyOrNull(SERVER_CONFIG_KEY_DIRS_USE_VIRTUALHOST)?.getString()?.toBoolean() ?: false
+}
+
+fun ApplicationConfig.e2eArtifactUploadEnabled(): Boolean {
+    return propertyOrNull(SERVER_CONFIG_E2E_ARTIFACT_UPLOAD_ENABLED)?.getString()?.toBoolean() ?: false
 }

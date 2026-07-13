@@ -1,0 +1,9 @@
+appId: world.respect.app
+
+---
+- runFlow:
+    file: "e2e_artifact_upload.yaml"
+    env:
+      NAME: ${NAME}
+- runScript:
+    file: "../scripts/teardown.js"

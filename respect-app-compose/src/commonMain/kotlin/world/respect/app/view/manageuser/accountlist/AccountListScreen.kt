@@ -173,7 +173,7 @@ fun AccountListScreen(
                 leadingContent = {
                     Icon(
                         imageVector = Icons.Outlined.ChatBubbleOutline,
-                        contentDescription = ""
+                        contentDescription = stringResource(Res.string.send_feedback)
                     )
                 }
             )

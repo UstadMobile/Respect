@@ -86,7 +86,7 @@ private fun QuickContactItem(
         leadingContent = {
             Icon(
                 imageVector = leadingIcon,
-                contentDescription = null
+                contentDescription = title
             )
         },
         modifier = Modifier

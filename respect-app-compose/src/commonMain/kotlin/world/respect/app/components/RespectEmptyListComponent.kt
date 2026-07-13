@@ -17,7 +17,8 @@ import world.respect.shared.generated.resources.nothing_here_at_the_moment
 
 @Composable
 fun RespectEmptyListComponent(
-    modifier : Modifier = Modifier,
+    modifier: Modifier = Modifier,
+    text: String = stringResource(Res.string.nothing_here_at_the_moment)
 ) {
     Column(
         modifier = modifier,
@@ -29,7 +30,7 @@ fun RespectEmptyListComponent(
             contentDescription = null,
         )
 
-        Text(stringResource(Res.string.nothing_here_at_the_moment))
+        Text(text = text)
     }
 }
 

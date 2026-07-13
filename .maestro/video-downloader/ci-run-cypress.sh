@@ -21,7 +21,6 @@ echo "Starting Cypress to extract video URLs..."
 
 # Run Cypress
 npm install
-
 npx cypress run --browser chrome --env \
 maestroEmail="${MAESTRO_EMAIL}",\
 projectUrl="$MAESTRO_CLOUD_URL",\

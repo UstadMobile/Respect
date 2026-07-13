@@ -172,8 +172,7 @@ class AppsDetailViewModel(
                     LearningUnitDetail.create(
                         learningUnitManifestUrl = route.manifestUrl.resolve(publicationHref),
                         refererUrl = refererUrl?.let { Url(it) },
-                        expectedIdentifier = publication.metadata.identifier?.toString(),
-                        appManifestUrl = route.manifestUrl,
+                        expectedIdentifier = publication.metadata.identifier?.toString()
                     )
                 )
             )

@@ -154,6 +154,9 @@ data class AssignmentEdit(
 }
 
 @Serializable
+object BookmarkList : RespectAppRoute
+
+@Serializable
 data class StatementList(
     val activityId: String,
     private val xapiActorStr: String,
@@ -187,9 +190,6 @@ data class RawStatement(
         fun create(statementId: Uuid) = RawStatement(statementId.toString())
     }
 }
-
-@Serializable
-object BookmarkList : RespectAppRoute
 
 @Serializable
 object ClazzList : RespectAppRoute

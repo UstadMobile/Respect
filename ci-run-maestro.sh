@@ -160,10 +160,10 @@ if [ "$1" == "cloud" ]; then
         --project-id=$MAESTRO_CLOUD_PROJECTID \
         --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \
         --flows=.maestro/flows \
+        $DEVICE_OS_ARG \
         --format=junit \
         --output=build/maestro/report.xml \
         --timeout=300 \
-        $DEVICE_OS_ARG \
         $NAME_ARG \
         --repo-name=Respect \
         --repo-owner=UstadMobile \
@@ -178,16 +178,15 @@ if [ "$1" == "cloud" ]; then
         $TEST_APP_URL_ARG \
        | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
 
-    # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
     MAESTRO_STATUS=${PIPESTATUS[0]}
+    echo "ci-run-maestro: Cloud run finished (Status: $MAESTRO_STATUS). Extracting URL.."
 
-    echo "ci-run-maestro: Cloud run finished. Extracting URL from log file..."
 
     MAESTRO_LOG_FILE="$TESTSERVERCONTROLLER_BASEDIR/lastMaestroRun.log"
 
     if [ -f "$MAESTRO_LOG_FILE" ]; then
-         # Grep the URL directly from the file
-         export MAESTRO_CLOUD_URL=$(grep -o 'https://app\.robintest\.com/[^ ]*' "$MAESTRO_LOG_FILE" | tail -1)
+        # This searches for any URL with stable part of the path — /upload/ — regardless of host
+        export MAESTRO_CLOUD_URL=$(grep -oE 'https://[^ ]*/upload/[^ ]*' "$MAESTRO_LOG_FILE" | tail -1)
 
          if [ -n "$MAESTRO_CLOUD_URL" ]; then
             echo "ci-run-maestro: Found URL: $MAESTRO_CLOUD_URL"

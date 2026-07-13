@@ -203,7 +203,8 @@ class LearningUnitDetailViewModel(
                 } else {
                     addBookmarkUseCase(
                         agent = agent,
-                        activityId = opdsUrl
+                        activityId = opdsUrl,
+                        title = uiState.value.lessonDetail?.metadata?.title,
                     )
                 }
             }

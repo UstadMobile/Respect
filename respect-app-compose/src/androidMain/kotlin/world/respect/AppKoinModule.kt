@@ -224,10 +224,6 @@ import world.respect.shared.viewmodel.person.copycode.CopyInviteCodeViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
-import world.respect.shared.domain.feedback.CreateTicketUseCase
-import world.respect.shared.domain.feedback.CreateTicketUseCaseImpl
-import world.respect.shared.domain.feedback.GetFeedbackInfoUseCase
-import world.respect.shared.domain.feedback.GetFeedbackInfoUseCaseImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
@@ -617,15 +613,6 @@ val appKoinModule = module {
         CreatePasskeyUseCaseAndroidChannelHost()
     }
 
-    single<GetFeedbackInfoUseCase> {
-        GetFeedbackInfoUseCaseImpl()
-    }
-
-    single<CreateTicketUseCase>{
-        CreateTicketUseCaseImpl(
-            httpClient = get(),
-        )
-    }
     factory<LoadAaguidJsonUseCase> {
         LoadAaguidJsonUseCaseAndroid(
             appContext = androidContext().applicationContext,

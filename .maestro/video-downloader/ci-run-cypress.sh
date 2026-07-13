@@ -30,8 +30,7 @@ recivoOrgId="${RECIVO_ORG_ID}"
 # Check Cypress Exit Code
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
-    echo "Cypress tests failed with exit code $EXIT_CODE"
-#    exit $EXIT_CODE
+    echo "Maestro tests failed (Code $EXIT_CODE). Checking for captured URLs..."
 fi
 
 #  Download Videos using Wget ---

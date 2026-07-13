@@ -179,10 +179,9 @@ if [ "$1" == "cloud" ]; then
         $TEST_APP_URL_ARG \
        | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
 
-    # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
     MAESTRO_STATUS=${PIPESTATUS[0]}
+    echo "ci-run-maestro: Cloud run finished (Status: $MAESTRO_STATUS). Extracting URL.."
 
-    echo "ci-run-maestro: Cloud run finished. Extracting URL from log file..."
 
     MAESTRO_LOG_FILE="$TESTSERVERCONTROLLER_BASEDIR/lastMaestroRun.log"
 

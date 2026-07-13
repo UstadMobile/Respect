@@ -160,10 +160,10 @@ if [ "$1" == "cloud" ]; then
         --project-id=$MAESTRO_CLOUD_PROJECTID \
         --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \
         --flows=.maestro/flows \
+        $DEVICE_OS_ARG \
         --format=junit \
         --output=build/maestro/report.xml \
         --timeout=300 \
-        $DEVICE_OS_ARG \
         $NAME_ARG \
         --repo-name=Respect \
         --repo-owner=UstadMobile \

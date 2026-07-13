@@ -1,6 +1,4 @@
 appId: world.respect.app
-tags:
-  - wip    #wip = work in progress
 onFlowStart:
   - clearState: world.respect.app
   - runScript:

@@ -1,6 +1,6 @@
 # Open Educational Experience Launcher
 
-The Open Educational Experience Launcher is based on four open standards:
+An Open Educational Experience Launcher is based on four open standards:
 
 * [OPDS](https://opds.io/) __an open standard to describe collections of publications__: any edtech
   app developer can publish an OPDS feed listing the publications (e.g. lessons, assessments, etc)

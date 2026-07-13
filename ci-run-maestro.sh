@@ -135,9 +135,16 @@ if [ "$1" == "cloud" ]; then
     BRANCH_ARG=""
     DEVICE_OS_ARG=""
 
-    if [ "$BUILD_TAG" != "" ]; then
-        NAME_ARG="--name=$BUILD_TAG"
-    fi
+     # Add a unique identifier, such as a timestamp
+     UNIQUE_ID=$(date +%Y%m%d_%H%M%S)
+
+     if [ "$BUILD_TAG" != "" ]; then
+         # Rotate the name by appending the unique identifier
+         NAME_ARG="--name=${BUILD_TAG}_${UNIQUE_ID}"
+     else
+         # Fallback to just the timestamp if no build tag exists
+         NAME_ARG="--name=run_${UNIQUE_ID}"
+     fi
 
     if [ "$GIT_BRANCH" != "" ]; then
         BRANCH_ARG="--branch=$BRANCH"

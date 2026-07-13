@@ -21,12 +21,14 @@ echo "Starting Cypress to extract video URLs..."
 
 # Run Cypress
 npm install
+
+set +e
 npx cypress run --browser chrome --env \
 maestroEmail="${MAESTRO_EMAIL}",\
 projectUrl="$MAESTRO_CLOUD_URL",\
 recivoApiKey="${RECIVO_API_KEY}",\
 recivoOrgId="${RECIVO_ORG_ID}"
-
+set -e
 
 # Check Cypress Exit Code
 EXIT_CODE=$?

@@ -28,7 +28,7 @@ class AddBookmarkUseCase(
                 id = activityId,
                 definition = title?.let {
                     XapiActivityDefinition(
-                        name = it.toStringMap(noLangKey = XAPI_NO_LANG_KEY)
+                        name = it.toStringMap(noLangKey = XAPI_LANG_KEY)
                     )
                 }
             ),
@@ -44,11 +44,7 @@ class AddBookmarkUseCase(
     }
 
     companion object {
-
-        /**
-         * a LangMapStringValue has no language key.
-         */
-        const val XAPI_NO_LANG_KEY = "und"
+        const val XAPI_LANG_KEY = "en-US"
     }
 }
 

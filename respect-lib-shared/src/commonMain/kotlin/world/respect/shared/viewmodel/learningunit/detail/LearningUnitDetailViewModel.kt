@@ -19,13 +19,9 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
-import world.respect.lib.dataloadstate.ext.map
-import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiAgent
-import world.respect.lib.xapi.model.XapiVerb
-import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.bookmark.AddBookmarkUseCase
 import world.respect.shared.domain.bookmark.RemoveBookmarkUseCase
@@ -122,39 +118,6 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.xapiResource.statements.getAsFlow(
-                listParams = XapiStatementsResource.GetStatementParams(
-                    agent = agent,
-                    verb = XapiVerb.ID_BOOKMARKED,
-                    activity = route.learningUnitManifestUrl.toString(),
-                ),
-                dataLoadParams = DataLoadParams(),
-            ).collect { result ->
-                val statements = result.dataOrNull()?.statements ?: emptyList()
-                _uiState.update { it.copy(isBookmarked = statements.isNotEmpty()) }
-            }
-        }
-
-        viewModelScope.launch {
-            val appManifestUrl = route.appManifestUrl ?: return@launch
-
-            schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
-                url = appManifestUrl,
-                params = DataLoadParams(),
-                referrerUrl = null,
-                expectedPublicationId = null,
-            ).collect { app ->
-                    _uiState.update {
-                        it.copy(
-                            app = app.map { publication: OpdsPublication ->
-                                publication.resolve(appManifestUrl)
-                            }
-                        )
-                    }
-                }
-        }
-
-        viewModelScope.launch {
             ustadCache.publicationPinState(route.learningUnitManifestUrl).collect { pinState ->
                 _uiState.update { it.copy(pinState = pinState) }
             }
@@ -235,13 +198,12 @@ class LearningUnitDetailViewModel(
                 if (uiState.value.isBookmarked) {
                     removeBookmarkUseCase(
                         agent = agent,
-                        activityId = opdsUrl,
+                        activityId = opdsUrl
                     )
                 } else {
                     addBookmarkUseCase(
                         agent = agent,
-                        activityId = opdsUrl,
-                        appManifestUrl = route.appManifestUrl,
+                        activityId = opdsUrl
                     )
                 }
             }

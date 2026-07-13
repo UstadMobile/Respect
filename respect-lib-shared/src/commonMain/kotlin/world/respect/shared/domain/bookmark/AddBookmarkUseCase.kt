@@ -22,8 +22,7 @@ class AddBookmarkUseCase(
 
     suspend operator fun invoke(
         agent: XapiAgent,
-        activityId: String,
-        appManifestUrl: Url? = null,
+        activityId: String
     ) {
         val bookmarkStatement = XapiStatement(
             actor = agent,
@@ -33,10 +32,7 @@ class AddBookmarkUseCase(
                 contextActivities = XapiContextActivities(
                     category = listOf(
                         XapiActivity(id = OpenEelXapiConstants.CATEGORY_BOOKMARK_RECIPE)
-                    ),
-                    parent = appManifestUrl?.let { url ->
-                        listOf(XapiActivity(id = url.toString()))
-                    },
+                    )
                 )
             ),
         )

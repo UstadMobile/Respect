@@ -24,6 +24,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectListSortHeader
+import world.respect.app.components.defaultSortListMode
 import world.respect.app.view.learningunit.list.PublicationListItem
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
@@ -31,6 +33,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.msg_see_bookmark
 import world.respect.shared.generated.resources.no_bookmark
+import world.respect.shared.util.SortOrderOption
 import world.respect.shared.viewmodel.bookmark.BookmarkListUiState
 import world.respect.shared.viewmodel.bookmark.BookmarkListViewModel
 
@@ -43,7 +46,8 @@ fun BookmarkListScreen(
     BookmarkListScreen(
         uiState = uiState,
         onClickRemoveBookmark = viewModel::onClickRemoveBookmark,
-        onClickBookmark = viewModel::onClickBookmark
+        onClickBookmark = viewModel::onClickBookmark,
+        onClickSortOption = viewModel::onSortOrderChanged,
     )
 }
 
@@ -51,7 +55,8 @@ fun BookmarkListScreen(
 fun BookmarkListScreen(
     uiState: BookmarkListUiState,
     onClickRemoveBookmark: (XapiStatement) -> Unit,
-    onClickBookmark: (XapiStatement) -> Unit
+    onClickBookmark: (XapiStatement) -> Unit,
+    onClickSortOption: (SortOrderOption) -> Unit = { },
 ) {
 
     when {
@@ -88,6 +93,15 @@ fun BookmarkListScreen(
                     .padding(vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                item("sort_header") {
+                    RespectListSortHeader(
+                        activeSortOrderOption = uiState.activeSortOrderOption,
+                        sortOptions = uiState.sortOptions,
+                        onClickSortOption = onClickSortOption,
+                        mode = defaultSortListMode(),
+                    )
+                }
+
                 items(
                     uiState.statements,
                     key = { it.id ?: error("BookmarkListScreen: statement id is null") }

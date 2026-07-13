@@ -18,6 +18,8 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.opds.model.LangMapObjectValue
+import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.model.XapiAccount
@@ -34,6 +36,7 @@ import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.remove_bookmark
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.app.appstate.Snack
@@ -42,6 +45,8 @@ import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 data class BookmarkListUiState(
     val statements: List<XapiStatement> = emptyList(),
     val publications: Map<String, OpdsPublication> = emptyMap(),
+    val activeSortOrderOption: SortOrderOption = CommonSortOptions.DEFAULT,
+    val sortOptions: List<SortOrderOption> = CommonSortOptions.ALL_OPTIONS,
 )
 
 class BookmarkListViewModel(
@@ -83,15 +88,15 @@ class BookmarkListViewModel(
                 ),
                 dataLoadParams = DataLoadParams(),
             ).collect { result ->
-                val statements = result.dataOrNull()?.statements
-                    ?.sortedBy { it.timestamp }
-                    ?: emptyList()
-
+                val statements = result.dataOrNull()?.statements ?: emptyList()
                 val publications = loadPublications(statements)
+                val sortedStatements = sortStatements(
+                    statements, publications, _uiState.value.activeSortOrderOption
+                )
 
                 _uiState.update {
                     it.copy(
-                        statements = statements,
+                        statements = sortedStatements,
                         publications = publications,
                     )
                 }
@@ -127,6 +132,42 @@ class BookmarkListViewModel(
             pub?.let { id to it }
         }.toMap()
     }
+    fun onSortOrderChanged(sortOrderOption: SortOrderOption) {
+        _uiState.update {
+            it.copy(
+                activeSortOrderOption = sortOrderOption,
+                statements = sortStatements(it.statements, it.publications, sortOrderOption),
+            )
+        }
+    }
+
+    private fun sortStatements(
+        statements: List<XapiStatement>,
+        publications: Map<String, OpdsPublication>,
+        sortOrderOption: SortOrderOption,
+    ): List<XapiStatement> {
+        return when(sortOrderOption.flag) {
+            CommonSortOptions.FLAG_TIME_ASC -> statements.sortedBy { it.timestamp }
+            CommonSortOptions.FLAG_TIME_DESC -> statements.sortedByDescending { it.timestamp }
+            CommonSortOptions.FLAG_TITLE_ASC -> statements.sortedBy { it.publicationTitle(publications) }
+            CommonSortOptions.FLAG_TITLE_DESC -> statements.sortedByDescending { it.publicationTitle(publications) }
+            else -> statements
+        }
+    }
+
+    private fun XapiStatement.publicationTitle(
+        publications: Map<String, OpdsPublication>,
+    ): String {
+        val activityId = (`object` as? XapiActivity)?.id ?: return ""
+        val publication = publications[activityId]
+        return publication?.metadata?.title?.let { langMap ->
+            when(langMap) {
+                is LangMapStringValue -> langMap.value
+                is LangMapObjectValue -> langMap.map.values.firstOrNull() ?: ""
+            }
+        } ?: ""
+    }
+
     fun onClickRemoveBookmark(statement: XapiStatement) {
         viewModelScope.launch {
             snackBarDispatcher.tryOrShowSnackbarOnError(

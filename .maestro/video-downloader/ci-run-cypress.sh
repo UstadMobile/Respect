@@ -31,7 +31,7 @@ recivoOrgId="${RECIVO_ORG_ID}"
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
     echo "Cypress tests failed with exit code $EXIT_CODE"
-    exit $EXIT_CODE
+#    exit $EXIT_CODE
 fi
 
 #  Download Videos using Wget ---

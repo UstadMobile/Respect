@@ -19,9 +19,12 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.bookmark.AddBookmarkUseCase
 import world.respect.shared.domain.bookmark.RemoveBookmarkUseCase
@@ -131,6 +134,21 @@ class LearningUnitDetailViewModel(
             }
         }
 
+        viewModelScope.launch {
+            val existingBookmarks = schoolDataSource.xapiResource.statements.get(
+                listParams = XapiStatementsResource.GetStatementParams(
+                    agent = agent,
+                    verb = XapiVerb.ID_BOOKMARKED,
+                    activity = route.learningUnitManifestUrl.toString(),
+                    relatedActivities = true,
+                )
+            ).dataOrNull()?.statements ?: emptyList()
+
+            _uiState.update {
+                it.copy(isBookmarked = existingBookmarks.isNotEmpty())
+            }
+        }
+
     }
 
 
@@ -200,12 +218,14 @@ class LearningUnitDetailViewModel(
                         agent = agent,
                         activityId = opdsUrl
                     )
+                    _uiState.update { it.copy(isBookmarked = false) }
                 } else {
                     addBookmarkUseCase(
                         agent = agent,
                         activityId = opdsUrl,
                         title = uiState.value.lessonDetail?.metadata?.title,
                     )
+                    _uiState.update { it.copy(isBookmarked = true) }
                 }
             }
         }

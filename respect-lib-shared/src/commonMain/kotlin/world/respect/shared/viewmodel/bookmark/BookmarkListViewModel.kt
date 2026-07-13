@@ -159,14 +159,10 @@ class BookmarkListViewModel(
             return
         }
 
-        val appManifestUrl = statement.context?.contextActivities?.parent
-            ?.firstOrNull()?.id?.let { Url(it) }
-
         _navCommandFlow.tryEmit(
             value = NavCommand.Navigate(
                 LearningUnitDetail.create(
-                    learningUnitManifestUrl = Url(activityId),
-                    appManifestUrl = appManifestUrl,
+                    learningUnitManifestUrl = Url(activityId)
                 )
             )
         )

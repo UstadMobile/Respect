@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.view.learningunit.list.PublicationListItem
-import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.shared.generated.resources.Res
@@ -57,81 +56,61 @@ fun BookmarkListScreen(
 
     when {
         uiState.statements.isEmpty() -> {
-            EmptyBookmarkState()
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.no_bookmark),
+                        contentDescription = stringResource(resource = Res.string.no_bookmark),
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.size(200.dp)
+                    )
+                    Text(
+                        text = stringResource(Res.string.no_bookmark),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = stringResource(Res.string.msg_see_bookmark),
+                        modifier = Modifier.padding(bottom = 64.dp)
+                    )
+                }
+            }
         }
 
         else -> {
-            BookmarkListContent(
-                uiState.statements,
-                uiState.publications,
-                onClickRemoveBookmark,
-                onClickBookmark
-            )
-        }
-    }
-}
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                items(
+                    uiState.statements,
+                    key = { it.id ?: error("BookmarkListScreen: statement id is null") }
+                ) { statement ->
+                    val activityId = (statement.`object` as? XapiActivity)?.id
+                    val publication = activityId?.let { uiState.publications[it] }
 
-
-@Composable
-private fun EmptyBookmarkState() {
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier.align(Alignment.Center),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                painter = painterResource(Res.drawable.no_bookmark),
-                contentDescription = stringResource(resource = Res.string.no_bookmark),
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.size(200.dp)
-            )
-            Text(
-                text = stringResource(Res.string.no_bookmark),
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = stringResource(Res.string.msg_see_bookmark),
-                modifier = Modifier.padding(bottom = 64.dp)
-            )
-        }
-    }
-}
-
-
-@Composable
-private fun BookmarkListContent(
-    statements: List<XapiStatement>,
-    publications: Map<String, OpdsPublication>,
-    onClickRemoveBookmark: (XapiStatement) -> Unit,
-    onClickBookmark: (XapiStatement) -> Unit
-) {
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        items(statements) { statement ->
-            val activityId = (statement.`object` as? XapiActivity)?.id
-            val publication = activityId?.let { publications[it] }
-
-            if (publication != null) {
-                PublicationListItem(
-                    publication = publication,
-                    onClickPublication = { onClickBookmark(statement) },
-                    trailingContent = {
-                        Icon(
-                            modifier = Modifier.clickable {
-                                onClickRemoveBookmark(statement)
-                            },
-                            imageVector = Icons.Default.Bookmark,
-                            contentDescription = stringResource(Res.string.bookmark),
+                    if (publication != null) {
+                        PublicationListItem(
+                            publication = publication,
+                            onClickPublication = { onClickBookmark(statement) },
+                            trailingContent = {
+                                Icon(
+                                    modifier = Modifier.clickable {
+                                        onClickRemoveBookmark(statement)
+                                    },
+                                    imageVector = Icons.Default.Bookmark,
+                                    contentDescription = stringResource(Res.string.bookmark),
+                                )
+                            }
                         )
                     }
-                )
+                }
             }
         }
     }

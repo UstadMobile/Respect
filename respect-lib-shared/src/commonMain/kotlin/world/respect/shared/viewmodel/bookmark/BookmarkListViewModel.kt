@@ -19,6 +19,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiAgent
@@ -77,6 +78,8 @@ class BookmarkListViewModel(
                 listParams = XapiStatementsResource.GetStatementParams(
                     agent = agent,
                     verb = XapiVerb.ID_BOOKMARKED,
+                    activity = OpenEelXapiConstants.CATEGORY_BOOKMARK_RECIPE,
+                    relatedActivities = true,
                 ),
                 dataLoadParams = DataLoadParams(),
             ).collect { result ->
@@ -129,12 +132,9 @@ class BookmarkListViewModel(
             snackBarDispatcher.tryOrShowSnackbarOnError(
                 logMessage = "BookmarkListViewModel: error removing bookmark"
             ) {
-                val activityId = (statement.`object` as? XapiActivity)?.id
-                    ?: throw IllegalStateException("Cannot remove bookmark: statement object is not an Activity")
-
                 removeBookmarkUseCase(
                     agent = agent,
-                    activityId = activityId,
+                    statements = listOf(statement),
                 )
 
                 _uiState.update {

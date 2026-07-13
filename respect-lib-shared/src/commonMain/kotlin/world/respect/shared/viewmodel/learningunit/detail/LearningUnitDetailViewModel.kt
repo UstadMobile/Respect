@@ -230,17 +230,17 @@ class LearningUnitDetailViewModel(
             snackBarDispatcher.tryOrShowSnackbarOnError(
                 logMessage = "LearningUnitDetailViewModel: error toggling bookmark"
             ) {
-                val learningUnitId = route.learningUnitManifestUrl.toString()
+                val opdsUrl = route.learningUnitManifestUrl.toString()
 
                 if (uiState.value.isBookmarked) {
                     removeBookmarkUseCase(
                         agent = agent,
-                        activityId = learningUnitId,
+                        activityId = opdsUrl,
                     )
                 } else {
                     addBookmarkUseCase(
                         agent = agent,
-                        activityId = learningUnitId,
+                        activityId = opdsUrl,
                         appManifestUrl = route.appManifestUrl,
                     )
                 }

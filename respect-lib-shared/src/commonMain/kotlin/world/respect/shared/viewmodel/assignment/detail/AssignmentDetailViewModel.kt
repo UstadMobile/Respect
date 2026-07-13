@@ -26,6 +26,7 @@ import world.respect.datalayer.db.school.ext.isStudent
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.composites.AssignmentAndProgress
@@ -37,6 +38,7 @@ import world.respect.lib.xapi.ext.isStarted
 import world.respect.lib.xapi.ext.objectActivityNameOrNull
 import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
 import world.respect.lib.xapi.model.XapiActivity
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
@@ -47,6 +49,7 @@ import world.respect.shared.navigation.AssignmentDetail
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.StatementList
 import world.respect.shared.util.AssignmentStatusFilter
 import world.respect.shared.util.ext.asLangMapUiText
 import world.respect.shared.util.ext.asUiText
@@ -224,7 +227,15 @@ class AssignmentDetailViewModel(
                     }else {
                         null
                     }
-                ).shareIn(viewModelScope, SharingStarted.Lazily)
+                ).map { state ->
+                    if (state is DataReadyState) {
+                        state.copy(
+                            data = state.data.copy(
+                                progress = state.data.progress.sortedBy { it.actor.name?.lowercase() ?: "" }
+                            )
+                        )
+                    } else state
+                }.shareIn(viewModelScope, SharingStarted.Lazily)
 
                 launch {
                     assignmentProgressFlow.collect { assignmentAndProgress ->
@@ -318,5 +329,15 @@ class AssignmentDetailViewModel(
 
     fun onToggleFullscreen() {
         _uiState.update { it.copy(isFullscreen = !it.isFullscreen) }
+    }
+    fun onClickScoreCell(activityId: String, xapiActor: XapiActor) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                StatementList.create(
+                    activityId = activityId,
+                    xapiActor = xapiActor
+                )
+            )
+        )
     }
 }

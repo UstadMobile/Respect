@@ -229,7 +229,51 @@ else
     MAESTRO_STATUS=$?
 fi
 
-
 echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
+
+function check_databases() {
+    echo "Checking database integrity..."
+
+    while read -r db; do
+        echo "Checking: $(basename "$db")"
+
+        if [ "$(sqlite3 "$db" "PRAGMA integrity_check;")" = "ok" ]; then
+            echo "PASS: $db"
+        else
+            echo "FAIL: $db"
+            exit 1
+        fi
+    done < <(find "$TESTSERVERCONTROLLER_BASEDIR" -path "*/e2e-client-artifacts/*.db")
+}
+
+check_databases
+
+echo "All databases passed integrity check."
+
+function create_test_artifact_zip() {
+    echo "ci-run-maestro: Archiving test artifacts..."
+
+    local OUTPUT_ZIP="$ROOTDIR/build/EndToEnd_Test_Artifacts_$(date +%d%m%Y_%H%M%S).zip"
+
+    if [ -d "$TESTSERVERCONTROLLER_BASEDIR" ]; then
+        cd "$TESTSERVERCONTROLLER_BASEDIR"
+
+        zip -r "$OUTPUT_ZIP" . \
+            -x "lastMaestroRun.log" \
+            -x "*/respect-server*/*" \
+            -x "*/process.pid" \
+            -x "*/stderr.log" \
+            -x "*/data/dir-admin.txt" \
+            -x "*/data/respect-app.db.lck" \
+            -x "*/data/server.properties"
+
+        cd "$ROOTDIR"
+        echo "ci-run-maestro: Artifacts zipped to $OUTPUT_ZIP"
+    else
+        echo "ci-run-maestro: Workspace directory not found, skipping zip."
+    fi
+}
+
+trap create_test_artifact_zip EXIT
 
 exit $MAESTRO_STATUS

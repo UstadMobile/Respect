@@ -13,11 +13,13 @@ import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.shared.ext.NextAfterScan
 import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.signup.SignupScreenModeEnum
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryMode
+import kotlin.uuid.Uuid
 
 /**
  * Mostly TypeSafe navigation for the RESPECT app. All serialized properties must be primitives or
@@ -153,6 +155,41 @@ data class AssignmentEdit(
 
 @Serializable
 object BookmarkList : RespectAppRoute
+
+@Serializable
+data class StatementList(
+    val activityId: String,
+    private val xapiActorStr: String,
+) : RespectAppRoute {
+
+    @Transient
+    val xapiActor: XapiActor = Json.decodeFromString(XapiActor.serializer(), xapiActorStr)
+
+    companion object {
+        fun create(activityId: String, xapiActor: XapiActor) = StatementList(
+            activityId = activityId,
+            xapiActorStr = Json.encodeToString(XapiActor.serializer(), xapiActor)
+        )
+    }
+}
+
+@Serializable
+data class StatementDetail(
+    val statementId: String,
+) : RespectAppRoute
+
+@Serializable
+data class RawStatement(
+    val statementIdStr: String,
+): RespectAppRoute {
+
+    @Transient
+    val statementId = Uuid.parse(statementIdStr)
+
+    companion object {
+        fun create(statementId: Uuid) = RawStatement(statementId.toString())
+    }
+}
 
 @Serializable
 object ClazzList : RespectAppRoute
@@ -872,3 +909,23 @@ data class QrCode(
 data class CopyCode(
     val inviteCode:String?=null
 ): RespectAppRoute
+
+@Serializable
+data class SendDbToServer(
+    val schoolUrlStr: String,
+    val name: String,
+) : RespectAppRoute {
+
+    @Transient
+    val schoolUrl = Url(schoolUrlStr)
+
+    companion object {
+        const val DEEP_LINK_PATH = "senddbtoserver"
+        const val QUERY_PARAM_NAME = "name"
+
+        fun create(schoolUrl: Url, name: String) = SendDbToServer(
+            schoolUrlStr = schoolUrl.toString(),
+            name = name,
+        )
+    }
+}

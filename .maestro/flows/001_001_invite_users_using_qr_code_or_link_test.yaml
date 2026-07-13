@@ -10,12 +10,13 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "001_001_invite_users_using_qr_code_or_link_test.yaml"
+        NAME: "001_001_invite_users_using_qr_code_or_link_test"
 
 onFlowComplete:
-  - runScript:
-      file: "scripts/teardown.js"
-
+  - runFlow:
+      file: "subflows/teardown.yaml"
+      env:
+        NAME: "db-final"
 ---
 # Invite new user:
 - runFlow: "subflows/school_admin_login_flow.yaml"
@@ -48,6 +49,10 @@ onFlowComplete:
       id: "invite_url"
 
 # Teacher user joining using invite QR code
+- runFlow:
+    file: "subflows/e2e_artifact_upload.yaml"
+    env:
+      NAME: "db-admin-teacher-invited"
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -119,6 +124,10 @@ onFlowComplete:
     id: "invite_code"
 
 # C) Student sign-up via invite code to the class
+- runFlow:
+    file: "subflows/e2e_artifact_upload.yaml"
+    env:
+      NAME: "db-teacher-joined"
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -174,6 +183,10 @@ onFlowComplete:
 - assertVisible: "Please wait"
 
 # H) Teacher approve student's request to join the class
+- runFlow:
+    file: "subflows/e2e_artifact_upload.yaml"
+    env:
+      NAME: "db-student-joined-waiting"
 - clearState: world.respect.app
 - launchApp:
     arguments:

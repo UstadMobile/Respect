@@ -84,6 +84,12 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
         cy.log(`Processing ${index + 1}: ${test.name}`);
         cy.visit(test.url);
 
+        cy.get('body', { timeout: 20000 }).then(($body) => {
+            if ($body.find('video').length === 0) {
+              cy.log(`No video found for "${test.name}" — skipping`);
+              return;
+            }
+
           // Extract URL
           cy.get('video', { timeout: 20000 })
             .should('have.prop', 'src')
@@ -95,6 +101,7 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
                 cy.writeFile('cypress/downloads/video_urls.txt', `${test.name}: ${videoUrl}\n`, { flag: 'a+' });
               }
             });
+        });
         });
       });
     });

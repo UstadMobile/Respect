@@ -141,9 +141,6 @@ if [ "$1" == "cloud" ]; then
      if [ "$BUILD_TAG" != "" ]; then
          # Rotate the name by appending the unique identifier
          NAME_ARG="--name=${BUILD_TAG}_${UNIQUE_ID}"
-     else
-         # Fallback to just the timestamp if no build tag exists
-         NAME_ARG="--name=run_${UNIQUE_ID}"
      fi
 
     if [ "$GIT_BRANCH" != "" ]; then

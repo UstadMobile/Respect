@@ -65,8 +65,7 @@ import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.RespectComposeNavController
-import world.respect.shared.resources.StringResourceUiText
-import world.respect.shared.resources.StringUiText
+import world.respect.shared.resources.getUiTextString
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.SnackBarFlowDispatcher
@@ -181,35 +180,13 @@ fun App(
 
     val koin = getKoin()
 
+
     LaunchedEffect(Unit) {
         koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest { snack->
-
-            val message = when (val snackMessage=snack.message) {
-                is StringUiText -> {
-                    snackMessage.text
-                }
-                is StringResourceUiText -> {
-                    getString(snackMessage.resource)
-                }
-                else -> {
-                    ""
-                }
-            }
-            val actionLabel = when (val actionMessage = snack.action) {
-                is StringUiText -> {
-                    actionMessage.text
-                }
-                is StringResourceUiText -> {
-                    getString(actionMessage.resource)
-                }
-                else -> {
-                    ""
-                }
-            }
             val result = snackbarHostState.showSnackbar(
-                message = message,
-                actionLabel = actionLabel,
-                duration = SnackbarDuration.Short
+                message = getUiTextString(snack.message),
+                actionLabel = snack.action?.let { getUiTextString(it) },
+                duration = SnackbarDuration.Short,
             )
             if (result == SnackbarResult.ActionPerformed) {
                 snack.onAction?.invoke()

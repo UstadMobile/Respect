@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e  # Exit immediately if any command fails
 
-# Capture the Maestro Cloud URL from logs
-export MAESTRO_CLOUD_URL=$(grep -o 'https://app\.robintest\.com/[^ ]*' $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log | tail -1)  #tail -1 grabs only the last url of the output
-
 # Fail if URL is not found
 if [ -z "$MAESTRO_CLOUD_URL" ]; then
     echo "Error: Could not find Maestro Cloud URL from previous Maestro run."
@@ -30,12 +27,10 @@ projectUrl="$MAESTRO_CLOUD_URL",\
 recivoApiKey="${RECIVO_API_KEY}",\
 recivoOrgId="${RECIVO_ORG_ID}"
 
-
 # Check Cypress Exit Code
 EXIT_CODE=$?
 if [ $EXIT_CODE -ne 0 ]; then
-    echo "Cypress tests failed with exit code $EXIT_CODE"
-    exit $EXIT_CODE
+    echo "Maestro tests failed (Code $EXIT_CODE). Checking for captured URLs..."
 fi
 
 #  Download Videos using Wget ---

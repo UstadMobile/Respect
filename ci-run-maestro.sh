@@ -186,8 +186,8 @@ if [ "$1" == "cloud" ]; then
     MAESTRO_LOG_FILE="$TESTSERVERCONTROLLER_BASEDIR/lastMaestroRun.log"
 
     if [ -f "$MAESTRO_LOG_FILE" ]; then
-         # Grep the URL directly from the file
-         export MAESTRO_CLOUD_URL=$(grep -o 'https://app\.robintest\.com/[^ ]*' "$MAESTRO_LOG_FILE" | tail -1)
+        # This searches for any URL with stable part of the path — /upload/ — regardless of host
+        export MAESTRO_CLOUD_URL=$(grep -oE 'https://[^ ]*/upload/[^ ]*' "$MAESTRO_LOG_FILE" | tail -1)
 
          if [ -n "$MAESTRO_CLOUD_URL" ]; then
             echo "ci-run-maestro: Found URL: $MAESTRO_CLOUD_URL"

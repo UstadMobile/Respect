@@ -1,13 +1,6 @@
 #!/bin/bash
 set -e  # Exit immediately if any command fails
 
-# If the URL wasn't already set by ci-run-maestro.sh, try to find it in the log file
-if [ -z "$MAESTRO_CLOUD_URL" ]; then
-    LOG_FILE="${TESTSERVERCONTROLLER_BASEDIR:-$WORKSPACE/build/testservercontroller/workspace}/lastMaestroRun.log"
-    MAESTRO_CLOUD_URL=$(grep -oE 'https://[^ ]*/upload/[^ ]*' "$LOG_FILE" | tail -1)
-    export MAESTRO_CLOUD_URL
-fi
-
 # Fail if URL is not found
 if [ -z "$MAESTRO_CLOUD_URL" ]; then
     echo "Error: Could not find Maestro Cloud URL from previous Maestro run."

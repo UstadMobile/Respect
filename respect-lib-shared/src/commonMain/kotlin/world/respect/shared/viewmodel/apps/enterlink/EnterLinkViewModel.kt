@@ -1,7 +1,6 @@
 package world.respect.shared.viewmodel.apps.enterlink
 
 import androidx.lifecycle.SavedStateHandle
-import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -9,25 +8,24 @@ import kotlinx.coroutines.flow.update
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.enter_link
-import world.respect.shared.generated.resources.invalid_url
-import world.respect.shared.resources.UiText
-import world.respect.shared.navigation.AppsDetail
-import world.respect.shared.resources.StringResourceUiText
-import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataReadyState
-import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.school.opds.OpdsFeedDataSource
-import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
+import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.sharelink.CreatePlaylistShareLinkUseCase
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.enter_link
+import world.respect.shared.generated.resources.invalid_url
+import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PlaylistDetail
+import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
-import kotlin.getValue
+import world.respect.shared.viewmodel.RespectViewModel
 
 data class EnterLinkUiState(
     val linkUrl: String = "",
@@ -70,8 +68,8 @@ class EnterLinkViewModel(
             try {
                 val linkUrl = Url(uiState.value.linkUrl)
 
-                if (isPlaylistShareLink(linkUrl)) {
-                    val playlistUrl = resolvePlaylistUrlFromShareLink(linkUrl)
+                val playlistUrl = playlistUrlFromShareLinkOrNull(linkUrl)
+                if (playlistUrl != null) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
                             PlaylistDetail.create(playlistUrl)
@@ -106,27 +104,16 @@ class EnterLinkViewModel(
         }
     }
 
-    private fun isPlaylistShareLink(url: Url): Boolean {
-        val segments = url.pathSegments.filter { it.isNotBlank() }
-        return segments.size >= PLAYLIST_SHARE_LINK_SEGMENTS_TO_DROP &&
-                segments[segments.size - SCHOOL_LINK_SEGMENT_INDEX] == RESPECT_SCHOOL_LINK_SEGMENT &&
-                segments[segments.size - PLAYLIST_SHARE_PATH_INDEX] == CreatePlaylistShareLinkUseCase.PATH
-    }
+    /**
+     * @return the OPDS feed url for the playlist that the given share link refers to, or null if
+     *         the given url is not a playlist share link.
+     */
+    private fun playlistUrlFromShareLinkOrNull(url: Url): Url? {
+        val shareLink = CreatePlaylistShareLinkUseCase.parseOrNull(url) ?: return null
 
-    private fun resolvePlaylistUrlFromShareLink(shareLink: Url): Url {
-        val playlistUuid = shareLink.rawSegments.last { it.isNotBlank() }
-        return URLBuilder(shareLink).apply {
-            pathSegments = shareLink.pathSegments
-                .filter { it.isNotBlank() }
-                .dropLast(PLAYLIST_SHARE_LINK_SEGMENTS_TO_DROP) +
-                    listOf(OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME, playlistUuid)
-        }.build()
-    }
-
-    companion object {
-        private const val PLAYLIST_SHARE_LINK_SEGMENTS_TO_DROP = 3
-        private const val SCHOOL_LINK_SEGMENT_INDEX = 3
-        private const val PLAYLIST_SHARE_PATH_INDEX = 2
+        return shareLink.schoolUrl.appendEndpointSegments(
+            OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME,
+            shareLink.playlistUuid,
+        )
     }
 }
-

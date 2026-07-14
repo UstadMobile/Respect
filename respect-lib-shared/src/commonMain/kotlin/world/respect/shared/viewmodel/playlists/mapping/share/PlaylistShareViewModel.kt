@@ -79,7 +79,7 @@ class PlaylistShareViewModel(
             schoolUrl = activeAccount.school.self
         )
 
-        val shareUrl = createPlaylistShareLinkUseCase(route.playlistUrl.toString()).toString()
+        val shareUrl = createPlaylistShareLinkUseCase(route.playlistUrl).toString()
         _uiState.update { it.copy(shareUrl = shareUrl) }
 
         viewModelScope.launch {

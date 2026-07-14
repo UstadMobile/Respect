@@ -9,6 +9,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.shared.viewmodel.RespectViewModel
@@ -18,10 +21,9 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.opds.model.LangMapObjectValue
-import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.OpenEelXapiConstants
+import world.respect.lib.xapi.ext.objectActivityNameOrNull
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiAgent
@@ -45,6 +47,7 @@ import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 
 data class BookmarkListUiState(
     val statements: List<XapiStatement> = emptyList(),
+    @Deprecated("Publications to be removed by Mandvi and replaced with infoFlow as per assignment screen")
     val publications: Map<String, OpdsPublication> = emptyMap(),
     val activeSortOrderOption: SortOrderOption = CommonSortOptions.DEFAULT,
     val sortOptions: List<SortOrderOption> = CommonSortOptions.ALL_OPTIONS,
@@ -58,6 +61,8 @@ class BookmarkListViewModel(
     private val _uiState = MutableStateFlow(BookmarkListUiState())
 
     val uiState = _uiState.asStateFlow()
+
+    private val activeSortOption = _uiState.map { it.activeSortOrderOption }.distinctUntilChanged()
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
     private val schoolDataSource: SchoolDataSource by inject()
@@ -88,85 +93,35 @@ class BookmarkListViewModel(
                     relatedActivities = true,
                 ),
                 dataLoadParams = DataLoadParams(),
-            ).collect { result ->
-                val statements = result.dataOrNull()?.statements ?: emptyList()
-                val publications = loadPublications(statements)
-                val sortedStatements = sortStatements(
-                    statements, publications, _uiState.value.activeSortOrderOption
-                )
-
-                _uiState.update {
-                    it.copy(
-                        statements = sortedStatements,
-                        publications = publications,
+            ).combine(activeSortOption) { statements, sortOrderOption ->
+                Pair(statements, sortOrderOption)
+            }.collect { (statements, sortOrderOption) ->
+                val stmtList = statements.dataOrNull()?.statements ?: emptyList()
+                _uiState.update { prev ->
+                    prev.copy(
+                        statements = when(sortOrderOption.flag) {
+                            CommonSortOptions.FLAG_TIME_ASC -> stmtList.sortedBy { it.timestamp }
+                            CommonSortOptions.FLAG_TIME_DESC -> stmtList.sortedByDescending { it.timestamp }
+                            CommonSortOptions.FLAG_TITLE_ASC -> stmtList.sortedBy {
+                                it.objectActivityNameOrNull()?.entries?.firstOrNull()?.value
+                            }
+                            CommonSortOptions.FLAG_TITLE_DESC -> stmtList.sortedByDescending {
+                                it.objectActivityNameOrNull()?.entries?.firstOrNull()?.value
+                            }
+                            else -> stmtList
+                        }
                     )
                 }
             }
         }
     }
 
-    private suspend fun loadPublications(
-        statements: List<XapiStatement>
-    ): Map<String, OpdsPublication> = coroutineScope {
-        statements.mapNotNull { stmt ->
-            val activityId = (stmt.`object` as? XapiActivity)?.id
-            if (activityId == null) {
-                Napier.w("Bookmark statement ${stmt.id} has non-Activity object, skipping")
-                return@mapNotNull null
-            }
-
-            async {
-                val publication = try {
-                    schoolDataSource.opdsPublicationDataSource.getByUrl(
-                        url = Url(activityId),
-                        params = DataLoadParams(),
-                        referrerUrl = null,
-                        expectedPublicationId = null,
-                    ).dataOrNull()?.resolve(Url(activityId))
-                } catch (e: Throwable) {
-                    Napier.w("Failed to load publication for bookmark $activityId", e)
-                    null
-                }
-                activityId to publication
-            }
-        }.awaitAll().mapNotNull { (id, pub) ->
-            pub?.let { id to it }
-        }.toMap()
-    }
     fun onSortOrderChanged(sortOrderOption: SortOrderOption) {
         _uiState.update {
             it.copy(
                 activeSortOrderOption = sortOrderOption,
-                statements = sortStatements(it.statements, it.publications, sortOrderOption),
             )
         }
-    }
-
-    private fun sortStatements(
-        statements: List<XapiStatement>,
-        publications: Map<String, OpdsPublication>,
-        sortOrderOption: SortOrderOption,
-    ): List<XapiStatement> {
-        return when(sortOrderOption.flag) {
-            CommonSortOptions.FLAG_TIME_ASC -> statements.sortedBy { it.timestamp }
-            CommonSortOptions.FLAG_TIME_DESC -> statements.sortedByDescending { it.timestamp }
-            CommonSortOptions.FLAG_TITLE_ASC -> statements.sortedBy { it.publicationTitle(publications) }
-            CommonSortOptions.FLAG_TITLE_DESC -> statements.sortedByDescending { it.publicationTitle(publications) }
-            else -> statements
-        }
-    }
-
-    private fun XapiStatement.publicationTitle(
-        publications: Map<String, OpdsPublication>,
-    ): String {
-        val activityId = (`object` as? XapiActivity)?.id ?: return ""
-        val publication = publications[activityId]
-        return publication?.metadata?.title?.let { langMap ->
-            when(langMap) {
-                is LangMapStringValue -> langMap.value
-                is LangMapObjectValue -> langMap.map.values.firstOrNull() ?: ""
-            }
-        } ?: ""
     }
 
     fun onClickRemoveBookmark(statement: XapiStatement) {
@@ -174,10 +129,7 @@ class BookmarkListViewModel(
             snackBarDispatcher.tryOrShowSnackbarOnError(
                 logMessage = "BookmarkListViewModel: error removing bookmark"
             ) {
-                removeBookmarkUseCase(
-                    agent = agent,
-                    statements = listOf(statement),
-                )
+                removeBookmarkUseCase(statements = listOf(statement),)
 
                 _uiState.update {
                     it.copy(

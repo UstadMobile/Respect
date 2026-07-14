@@ -98,7 +98,6 @@ fun BookmarkListScreen(
                         activeSortOrderOption = uiState.activeSortOrderOption,
                         sortOptions = uiState.sortOptions,
                         onClickSortOption = onClickSortOption,
-                        mode = defaultSortListMode(),
                     )
                 }
 

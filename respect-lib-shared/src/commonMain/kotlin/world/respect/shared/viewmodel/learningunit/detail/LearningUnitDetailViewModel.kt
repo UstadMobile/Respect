@@ -8,6 +8,8 @@ import com.ustadmobile.libcache.UstadCache
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -23,6 +25,8 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiAgent
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
@@ -48,11 +52,13 @@ data class LearningUnitDetailUiState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
     val showAssignButton: Boolean = false,
-    val isBookmarked: Boolean = false,
-
-    ) {
+    val bookmarks: DataLoadState<XapiStatementResult> = DataLoadingState(),
+) {
     val buttonsEnabled: Boolean
         get() = lessonDetail != null
+
+    val isBookmarked: Boolean
+        get() = bookmarks.dataOrNull()?.statements?.isNotEmpty() == true
 }
 
 class LearningUnitDetailViewModel(
@@ -78,17 +84,6 @@ class LearningUnitDetailViewModel(
     private val addBookmarkUseCase: AddBookmarkUseCase by inject()
 
     private val removeBookmarkUseCase: RemoveBookmarkUseCase by inject()
-
-    private val schoolUrl = accountManager.requireActiveSchoolUrl()
-
-    private val agent = XapiAgent(
-        account = XapiAccount(
-            homePage = schoolUrl.toString(),
-            name = requireNotNull(accountManager.activeAccount?.userGuid) {
-                "LearningUnitDetailViewModel: active account userGuid must not be null"
-            },
-        )
-    )
 
     init {
         viewModelScope.launch {
@@ -135,22 +130,16 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
-            snackBarDispatcher.tryOrShowSnackbarOnError(
-                logMessage = "LearningUnitDetailViewModel: error loading bookmark state"
-            ) {
-                val existingBookmarks = schoolDataSource.xapiResource.statements.get(
-                    listParams = XapiStatementsResource.GetStatementParams(
-                        agent = agent,
-                        verb = XapiVerb.ID_BOOKMARKED,
-                        activity = route.learningUnitManifestUrl.toString(),
-                        relatedActivities = true,
-                    )
-                ).dataOrNull()?.statements
-                    ?: throw IllegalStateException("Failed to load bookmark state")
-
-                _uiState.update {
-                    it.copy(isBookmarked = existingBookmarks.isNotEmpty())
-                }
+            schoolDataSource.xapiResource.statements.getAsFlow(
+                dataLoadParams = DataLoadParams(),
+                listParams = XapiStatementsResource.GetStatementParams(
+                    agent = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent,
+                    verb = XapiVerb.ID_BOOKMARKED,
+                    activity = route.learningUnitManifestUrl.toString(),
+                    relatedActivities = true,
+                )
+            ).collect { bookmarks ->
+                _uiState.update { it.copy(bookmarks = bookmarks) }
             }
         }
 
@@ -216,23 +205,19 @@ class LearningUnitDetailViewModel(
             snackBarDispatcher.tryOrShowSnackbarOnError(
                 logMessage = "LearningUnitDetailViewModel: error toggling bookmark"
             ) {
-                val opdsUrl = route.learningUnitManifestUrl.toString()
-
-                if (uiState.value.isBookmarked) {
-                    removeBookmarkUseCase(
-                        agent = agent,
-                        activityId = opdsUrl
-                    )
-                    _uiState.update { it.copy(isBookmarked = false) }
-                } else {
+                val bookmarksStmts = uiState.value.bookmarks.dataOrNull()?.statements ?: emptyList()
+                if(bookmarksStmts.isEmpty()) {
                     addBookmarkUseCase(
-                        agent = agent,
-                        activityId = opdsUrl,
+                        agent = accountManager.selectedAccountAndPersonFlow.filterNotNull()
+                            .first().xapiAgent,
+                        url = route.learningUnitManifestUrl,
                         title = uiState.value.lessonDetail?.metadata?.title,
                     )
-                    _uiState.update { it.copy(isBookmarked = true) }
+                }else {
+                    removeBookmarkUseCase(statements = bookmarksStmts)
                 }
             }
         }
     }
+
 }

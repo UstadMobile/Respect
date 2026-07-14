@@ -52,7 +52,12 @@ class RemoveBookmarkUseCase(
                 activity = activityId,
                 relatedActivities = true,
             )
-        ).dataOrNull()?.statements ?: emptyList()
+        ).dataOrNull()?.statements
+            ?: throw IllegalStateException("Cannot remove bookmark: failed to retrieve statements for activity $activityId")
+
+        if (existingStatements.isEmpty()) {
+            throw IllegalStateException("Cannot remove bookmark: no bookmark statement found for activity $activityId")
+        }
 
         invoke(agent, existingStatements)
     }

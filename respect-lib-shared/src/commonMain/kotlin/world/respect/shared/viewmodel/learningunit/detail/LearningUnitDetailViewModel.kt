@@ -135,17 +135,22 @@ class LearningUnitDetailViewModel(
         }
 
         viewModelScope.launch {
-            val existingBookmarks = schoolDataSource.xapiResource.statements.get(
-                listParams = XapiStatementsResource.GetStatementParams(
-                    agent = agent,
-                    verb = XapiVerb.ID_BOOKMARKED,
-                    activity = route.learningUnitManifestUrl.toString(),
-                    relatedActivities = true,
-                )
-            ).dataOrNull()?.statements ?: emptyList()
+            snackBarDispatcher.tryOrShowSnackbarOnError(
+                logMessage = "LearningUnitDetailViewModel: error loading bookmark state"
+            ) {
+                val existingBookmarks = schoolDataSource.xapiResource.statements.get(
+                    listParams = XapiStatementsResource.GetStatementParams(
+                        agent = agent,
+                        verb = XapiVerb.ID_BOOKMARKED,
+                        activity = route.learningUnitManifestUrl.toString(),
+                        relatedActivities = true,
+                    )
+                ).dataOrNull()?.statements
+                    ?: throw IllegalStateException("Failed to load bookmark state")
 
-            _uiState.update {
-                it.copy(isBookmarked = existingBookmarks.isNotEmpty())
+                _uiState.update {
+                    it.copy(isBookmarked = existingBookmarks.isNotEmpty())
+                }
             }
         }
 

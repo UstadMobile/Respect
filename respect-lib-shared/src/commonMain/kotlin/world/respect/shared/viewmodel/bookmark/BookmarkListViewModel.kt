@@ -34,6 +34,7 @@ import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.remove_bookmark
+import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.SortOrderOption
@@ -197,6 +198,9 @@ class BookmarkListViewModel(
         val activityId = (statement.`object` as? XapiActivity)?.id
         if (activityId == null) {
             Napier.w("Cannot navigate to bookmark: statement object is not an Activity")
+            snackBarDispatcher.showSnackBar(
+                Snack(message = Res.string.something_went_wrong.asUiText())
+            )
             return
         }
 

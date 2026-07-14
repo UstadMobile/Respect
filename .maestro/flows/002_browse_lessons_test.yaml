@@ -100,8 +100,11 @@ onFlowComplete:
 - assertVisible: "Download"
 - assertVisible: "Assign"
 - tapOn: "Bookmark"
-- back
-- assertVisible: "Statement Maker"
+- tapOn:
+    id: "nav_home"
+- tapOn: "Apps"
+- tapOn: "Example Web App"
+- tapOn: "Examples"
 - tapOn: "Statement Maker"
 - tapOn: "Bookmark"
 - tapOn:

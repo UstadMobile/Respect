@@ -80,6 +80,7 @@ data class TopNavigationItem(
     val icon: ImageVector,
     val label: StringResource,
     val routeName: String,
+    val testTag: String,
 )
 
 private val routeNamePrefix = "world.respect.shared.navigation"
@@ -90,24 +91,28 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         icon = Icons.Filled.GridView,
         label = Res.string.home,
         routeName = "$routeNamePrefix.Home",
+        testTag = "nav_home",
     ),
     TopNavigationItem(
         destRoute = AssignmentList,
         icon = Icons.Filled.ImportContacts,
         label = Res.string.assignments,
-        routeName = "$routeNamePrefix.Assignment"
+        routeName = "$routeNamePrefix.Assignment",
+        testTag = "nav_assignments",
     ),
     TopNavigationItem(
         destRoute = ClazzList,
         icon = Icons.AutoMirrored.Filled.LibraryBooks,
         label = Res.string.classes,
         routeName = "$routeNamePrefix.ClazzList",
+        testTag = "nav_classes",
     ),
     TopNavigationItem(
         destRoute = PersonList(isTopLevel = true),
         icon = Icons.Filled.Person,
         label = Res.string.people,
         routeName = "$routeNamePrefix.PersonList",
+        testTag = "nav_people",
     ),
 )
 val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
@@ -115,13 +120,15 @@ val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
         destRoute = AssignmentList,
         icon = Icons.Filled.ImportContacts,
         label = Res.string.assignments,
-        routeName = "$routeNamePrefix.Assignment"
+        routeName = "$routeNamePrefix.Assignment",
+        testTag = "nav_assignments",
     ),
     TopNavigationItem(
         destRoute = Home,
         icon = Icons.Filled.GridView,
         label = Res.string.home,
         routeName = "$routeNamePrefix.Home",
+        testTag = "nav_home",
     ),
 )
 
@@ -238,6 +245,7 @@ fun App(
 
                                     if(!skipIt) {
                                         NavigationBarItem(
+                                            modifier = Modifier.testTag(item.testTag),
                                             icon = {
                                                 Icon(item.icon, contentDescription = null)
                                             },

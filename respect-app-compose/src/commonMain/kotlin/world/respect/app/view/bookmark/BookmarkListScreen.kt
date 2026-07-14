@@ -25,8 +25,9 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectListSortHeader
-import world.respect.app.components.defaultSortListMode
 import world.respect.app.view.learningunit.list.PublicationListItem
+import io.ktor.http.Url
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.shared.generated.resources.Res
@@ -106,7 +107,11 @@ fun BookmarkListScreen(
                     key = { it.id ?: error("BookmarkListScreen: statement id is null") }
                 ) { statement ->
                     val activityId = (statement.`object` as? XapiActivity)?.id
-                    val publication = activityId?.let { uiState.publications[it] }
+
+                    val publication = activityId?.let {
+                        uiState.taskInfoFlow(Url(it))
+                            .collectAsState(initial = null).value?.dataOrNull()
+                    }
 
                     if (publication != null) {
                         PublicationListItem(

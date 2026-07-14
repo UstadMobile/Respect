@@ -4,13 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -20,13 +20,13 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.objectActivityNameOrNull
-import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiActivity
-import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -41,14 +41,14 @@ import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 
 data class BookmarkListUiState(
     val statements: List<XapiStatement> = emptyList(),
-    @Deprecated("Publications to be removed by Mandvi and replaced with infoFlow as per assignment screen")
-    val publications: Map<String, OpdsPublication> = emptyMap(),
+    val taskInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
+        flowOf(DataLoadingState())
+    },
     val activeSortOrderOption: SortOrderOption = CommonSortOptions.DEFAULT,
     val sortOptions: List<SortOrderOption> = CommonSortOptions.ALL_OPTIONS,
 )
@@ -65,29 +65,26 @@ class BookmarkListViewModel(
     private val activeSortOption = _uiState.map { it.activeSortOrderOption }.distinctUntilChanged()
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
+
     private val schoolDataSource: SchoolDataSource by inject()
+
     private val removeBookmarkUseCase: RemoveBookmarkUseCase by inject()
-
-    private val schoolUrl = accountManager.requireActiveSchoolUrl()
-
-    private val agent = XapiAgent(
-        account = XapiAccount(
-            homePage = schoolUrl.toString(),
-            name = requireNotNull(accountManager.activeAccount?.userGuid) {
-                "BookmarkListViewModel: active account userGuid must not be null"
-            },
-        )
-    )
 
     init {
         _appUiState.update {
             it.copy(title = Res.string.home.asUiText())
         }
 
+        _uiState.update {
+            it.copy(
+                taskInfoFlow = ::taskInfoFlowFor
+            )
+        }
+
         viewModelScope.launch {
             schoolDataSource.xapiResource.statements.getAsFlow(
                 listParams = XapiStatementsResource.GetStatementParams(
-                    agent = agent,
+                    agent = accountManager.selectedAccountAndPersonFlow.firstOrNull()?.xapiAgent,
                     verb = XapiVerb.ID_BOOKMARKED,
                     activity = OpenEelXapiConstants.CATEGORY_BOOKMARK_RECIPE,
                     relatedActivities = true,
@@ -122,6 +119,12 @@ class BookmarkListViewModel(
                 activeSortOrderOption = sortOrderOption,
             )
         }
+    }
+
+    fun taskInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
+        return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
+            url = url, params = DataLoadParams(), null, null
+        )
     }
 
     fun onClickRemoveBookmark(statement: XapiStatement) {

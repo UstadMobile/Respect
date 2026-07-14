@@ -104,7 +104,8 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Home"
-- assertVisible: "Home"
+- assertVisible:
+        id: "nav_home"
 - assertVisible: "Assignments"
 - assertVisible: "People"
 - runFlow:
@@ -203,7 +204,8 @@ onFlowComplete:
     id : "password"
 - inputText: "test123"
 - tapOn: "Login"
-- assertVisible: "Home"
+- assertVisible:
+         id: "nav_home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"

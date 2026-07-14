@@ -6,6 +6,7 @@ import androidx.navigation.toRoute
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -28,7 +29,6 @@ import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.username.GetActiveUsernameUseCase
 import world.respect.shared.domain.externallink.OpenExternalLinkUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
@@ -336,9 +336,6 @@ class PlaylistDetailViewModel(
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
-
-    private val getActiveUsernameUseCase: GetActiveUsernameUseCase by inject()
-
     private val route: PlaylistDetail = savedStateHandle.toRoute()
 
     private val _uiState = MutableStateFlow(LearningUnitListUiState())
@@ -428,13 +425,17 @@ class PlaylistDetailViewModel(
             throw IllegalStateException(" newName is blank")
 
         viewModelScope.launch {
-            val activeAccount = accountManager.activeAccount
-                ?: throw IllegalStateException("No active account when copying playlist")
+            val sessionAndPerson = accountManager.selectedAccountAndPersonFlow.first()
+                ?: throw IllegalStateException("No active session when copying playlist")
 
-            val username = getActiveUsernameUseCase()
+            val username = sessionAndPerson.person.username
+                ?: throw IllegalStateException(
+                    "Active person has no username: ${sessionAndPerson.person.guid}"
+                )
+
             @OptIn(ExperimentalUuidApi::class)
             val copiedFeed = MakePlaylistOpdsFeedUseCase(
-                schoolUrl = activeAccount.school.self
+                schoolUrl = sessionAndPerson.session.account.school.self
             ).invoke(
                 base = feed.copy(
                     metadata = feed.metadata.copy(title = newName)

@@ -23,7 +23,6 @@ import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.username.GetActiveUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_playlist
 import world.respect.shared.generated.resources.copy_playlist
@@ -95,7 +94,7 @@ class PlaylistEditViewModel(
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
-    private val getActiveUsernameUseCase: GetActiveUsernameUseCase by inject()
+
 
     private val route: PlaylistEdit = savedStateHandle.toRoute()
 
@@ -138,8 +137,14 @@ class PlaylistEditViewModel(
                     ?: throw IllegalStateException(
                         "No active account when initializing PlaylistEditViewModel"
                     )
-                val username = getActiveUsernameUseCase()
-
+                val sessionAndPerson = accountManager.selectedAccountAndPersonFlow.first()
+                    ?: throw IllegalStateException(
+                        "No active session when initializing PlaylistEditViewModel"
+                    )
+                val username = sessionAndPerson.person.username
+                    ?: throw IllegalStateException(
+                        "Active person has no username: ${sessionAndPerson.person.guid}"
+                    )
                 @OptIn(ExperimentalUuidApi::class)
                 _uiState.update {
                     it.copy(

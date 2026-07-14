@@ -27,7 +27,7 @@ class UstadCacheBuilder(
             persistentPath = Path(storagePath, DEFAULT_SUBPATH_PERSISTENT),
             cachePath = Path(appContext.cacheDir.absolutePath, DEFAULT_SUBPATH_CACHE),
         )
-    }
+    },
 ) {
 
     fun build(): UstadCache {

@@ -133,6 +133,7 @@ if [ "$1" == "cloud" ]; then
     NAME_ARG=""
     COMMIT_ARG=""
     BRANCH_ARG=""
+    DEVICE_OS_ARG=""
 
     if [ "$BUILD_TAG" != "" ]; then
         NAME_ARG="--name=$BUILD_TAG"
@@ -150,11 +151,16 @@ if [ "$1" == "cloud" ]; then
         PULLREQUEST_ARG="--pull-request-id=$PULLREQUEST"
     fi
 
+     if [ "$DEVICE_OS_ARG" == "" ]; then
+           DEVICE_OS_ARG="--device-os=android-35"
+     fi
+
     maestro cloud \
         --api-key=$MAESTRO_CLOUD_APIKEY \
         --project-id=$MAESTRO_CLOUD_PROJECTID \
         --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \
         --flows=.maestro/flows \
+        $DEVICE_OS_ARG \
         --format=junit \
         --output=build/maestro/report.xml \
         --timeout=300 \
@@ -172,16 +178,15 @@ if [ "$1" == "cloud" ]; then
         $TEST_APP_URL_ARG \
        | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
 
-    # Using PIPESTATUS[0] to check if Maestro failed, because the pipe (|) hides the original error code.
     MAESTRO_STATUS=${PIPESTATUS[0]}
+    echo "ci-run-maestro: Cloud run finished (Status: $MAESTRO_STATUS). Extracting URL.."
 
-    echo "ci-run-maestro: Cloud run finished. Extracting URL from log file..."
 
     MAESTRO_LOG_FILE="$TESTSERVERCONTROLLER_BASEDIR/lastMaestroRun.log"
 
     if [ -f "$MAESTRO_LOG_FILE" ]; then
-         # Grep the URL directly from the file
-         export MAESTRO_CLOUD_URL=$(grep -o 'https://app\.robintest\.com/[^ ]*' "$MAESTRO_LOG_FILE" | tail -1)
+        # This searches for any URL with stable part of the path — /upload/ — regardless of host
+        export MAESTRO_CLOUD_URL=$(grep -oE 'https://[^ ]*/upload/[^ ]*' "$MAESTRO_LOG_FILE" | tail -1)
 
          if [ -n "$MAESTRO_CLOUD_URL" ]; then
             echo "ci-run-maestro: Found URL: $MAESTRO_CLOUD_URL"
@@ -223,7 +228,51 @@ else
     MAESTRO_STATUS=$?
 fi
 
-
 echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
+
+function check_databases() {
+    echo "Checking database integrity..."
+
+    while read -r db; do
+        echo "Checking: $(basename "$db")"
+
+        if [ "$(sqlite3 "$db" "PRAGMA integrity_check;")" = "ok" ]; then
+            echo "PASS: $db"
+        else
+            echo "FAIL: $db"
+            exit 1
+        fi
+    done < <(find "$TESTSERVERCONTROLLER_BASEDIR" -path "*/e2e-client-artifacts/*.db")
+}
+
+check_databases
+
+echo "All databases passed integrity check."
+
+function create_test_artifact_zip() {
+    echo "ci-run-maestro: Archiving test artifacts..."
+
+    local OUTPUT_ZIP="$ROOTDIR/build/EndToEnd_Test_Artifacts_$(date +%d%m%Y_%H%M%S).zip"
+
+    if [ -d "$TESTSERVERCONTROLLER_BASEDIR" ]; then
+        cd "$TESTSERVERCONTROLLER_BASEDIR"
+
+        zip -r "$OUTPUT_ZIP" . \
+            -x "lastMaestroRun.log" \
+            -x "*/respect-server*/*" \
+            -x "*/process.pid" \
+            -x "*/stderr.log" \
+            -x "*/data/dir-admin.txt" \
+            -x "*/data/respect-app.db.lck" \
+            -x "*/data/server.properties"
+
+        cd "$ROOTDIR"
+        echo "ci-run-maestro: Artifacts zipped to $OUTPUT_ZIP"
+    else
+        echo "ci-run-maestro: Workspace directory not found, skipping zip."
+    fi
+}
+
+trap create_test_artifact_zip EXIT
 
 exit $MAESTRO_STATUS

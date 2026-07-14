@@ -12,14 +12,23 @@ import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.ihttp.request.iRequestBuilder
+import com.ustadmobile.ihttp.request.requestBuilder
+import com.ustadmobile.ihttp.response.IHttpResponse
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseJvm
+import com.ustadmobile.libcache.downloader.PinPublicationPrepareUseCase
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
+import com.ustadmobile.libcache.md5.urlHash
+import com.ustadmobile.libcache.novarysearch.normalizeForNoVarySearchIfNotNull
 import com.ustadmobile.libcache.response.StringResponse
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
+import com.ustadmobile.libcache.util.LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER
 import com.ustadmobile.libcache.util.initNapierLog
 import com.ustadmobile.libcache.util.newFileFromResource
 import com.ustadmobile.libcache.util.storeFileAsUrl
+import io.ktor.http.Headers
+import io.ktor.http.Url
+import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.asInputStream
 import kotlinx.io.files.Path
@@ -66,22 +75,25 @@ class UstadCacheJvmTest {
         }
     }
 
-    private fun UstadCache.assertCanStoreAndRetrieveFileAsCacheHit(
+    data class AssertCacheHitResult(
+        val response: IHttpResponse
+    )
+
+    private fun UstadCache.assertIsCacheHit(
         testFile: File,
         testUrl: String,
+        retrieveUrl: String = testUrl,
         mimeType: String,
         expectedContentEncoding: String? = null,
         requestHeaders: List<IHttpHeader> = emptyList(),
-    ) {
-        val request = runBlocking {
-            storeFileAsUrl(
-                testFile = testFile,
-                testUrl = testUrl,
-                mimeType = mimeType,
-                requestHeaders = requestHeaders
-            ).request
+        extraHeaders: Headers? = null,
+    ): AssertCacheHitResult {
+        val request = requestBuilder {
+            url = retrieveUrl
+            requestHeaders.forEach {
+                header(it.name, it.value)
+            }
         }
-
 
         //Check response body content matches
         val cacheResponse = runBlocking { retrieve(request) }
@@ -118,6 +130,49 @@ class UstadCacheJvmTest {
             }
         }
 
+        extraHeaders?.also { headers ->
+            headers.forEach { name, values ->
+                val allResponseHeaders = cacheResponse.headers.getAllByName(name)
+                values.forEach { extraHeaderVal ->
+                    assertTrue(
+                        actual = allResponseHeaders.any { it == extraHeaderVal },
+                        message = "Extra header $name with value $extraHeaderVal should be present"
+                    )
+                }
+            }
+        }
+
+        return AssertCacheHitResult(response = cacheResponse)
+    }
+
+    private fun UstadCache.assertCanStoreAndRetrieveFileAsCacheHit(
+        testFile: File,
+        testUrl: String,
+        retrieveUrl: String = testUrl,
+        mimeType: String,
+        expectedContentEncoding: String? = null,
+        requestHeaders: List<IHttpHeader> = emptyList(),
+        extraHeaders: Headers? = null,
+    ): AssertCacheHitResult {
+        runBlocking {
+            storeFileAsUrl(
+                testFile = testFile,
+                testUrl = testUrl,
+                mimeType = mimeType,
+                requestHeaders = requestHeaders,
+                extraHeaders = extraHeaders,
+            )
+        }
+
+        return assertIsCacheHit(
+            testFile = testFile,
+            testUrl = testUrl,
+            retrieveUrl = retrieveUrl,
+            mimeType = mimeType,
+            expectedContentEncoding = expectedContentEncoding,
+            requestHeaders = requestHeaders,
+            extraHeaders = extraHeaders,
+        )
     }
 
     data class FileCanBeCachedAndRetrievedContext(
@@ -126,19 +181,17 @@ class UstadCacheJvmTest {
         val createdLocks: List<Pair<EntryLockRequest, RetentionLock>>,
     )
 
-    private fun assertFileCanBeCachedAndRetrieved(
-        testFile: File,
-        testUrl: String,
-        mimeType: String,
-        expectContentEncoding: String? = null,
-        requestHeaders: List<IHttpHeader> = emptyList(),
-        createLock: Boolean = false,
-        block: FileCanBeCachedAndRetrievedContext.() -> Unit = { },
+    private fun withTestCache(
+        databaseDir: File,
+        block: (Pair<UstadCacheDb, UstadCacheImpl>) -> Unit,
     ) {
-        val tmpFile = tempDir.newFile("cachetest.db")
-        val cacheDb = Room.databaseBuilder<UstadCacheDb>(tmpFile.absolutePath)
+        val dbFile = File(databaseDir, DB_FILENAME)
+        databaseDir.takeIf { !it.exists() }?.mkdirs()
+
+        val cacheDb = Room.databaseBuilder<UstadCacheDb>(dbFile.absolutePath)
             .setDriver(BundledSQLiteDriver())
             .build()
+
         val ustadCache = UstadCacheImpl(
             pathsProvider = temporaryFolderPathsProvider,
             db = cacheDb,
@@ -150,44 +203,72 @@ class UstadCacheJvmTest {
             freshnessChecker = CacheControlFreshnessCheckerImpl(),
         )
 
-        val createdLocks = if(createLock) {
-            runBlocking { ustadCache.addRetentionLocks(listOf(EntryLockRequest(testUrl))) }
-        }else {
-            emptyList()
+        try {
+            block(Pair(cacheDb, ustadCache))
+        }finally {
+            ustadCache.close()
+            cacheDb.close()
         }
-
-        ustadCache.assertCanStoreAndRetrieveFileAsCacheHit(
-            testFile =testFile,
-            testUrl = testUrl,
-            mimeType = mimeType,
-            expectedContentEncoding = expectContentEncoding,
-            requestHeaders = requestHeaders,
-        )
-
-        runBlocking { ustadCache.commit() }
+    }
 
 
-        val cacheEntryInDb = runBlocking {
-            cacheDb.cacheEntryDao.findEntryAndBodyByKey(Md5Digest().urlKey(testUrl))
+    private fun assertFileCanBeCachedAndRetrieved(
+        testDataContent: File,
+        testUrl: String,
+        retrieveUrl: String = testUrl,
+        mimeType: String,
+        expectContentEncoding: String? = null,
+        requestHeaders: List<IHttpHeader> = emptyList(),
+        createLock: Boolean = false,
+        extraHeaders: Headers? = null,
+        databaseDir: File = tempDir.newFolder(),
+        block: FileCanBeCachedAndRetrievedContext.() -> Unit = { },
+    ) {
+        withTestCache(databaseDir) { (cacheDb, ustadCache) ->
+            val createdLocks = if(createLock) {
+                runBlocking { ustadCache.addRetentionLocks(listOf(EntryLockRequest(testUrl))) }
+            }else {
+                emptyList()
+            }
+
+            val result = ustadCache.assertCanStoreAndRetrieveFileAsCacheHit(
+                testFile =testDataContent,
+                testUrl = testUrl,
+                retrieveUrl = retrieveUrl,
+                mimeType = mimeType,
+                expectedContentEncoding = expectContentEncoding,
+                requestHeaders = requestHeaders,
+                extraHeaders = extraHeaders,
+            )
+
+            runBlocking { ustadCache.commit() }
+
+            val urlForKey = Url(retrieveUrl).normalizeForNoVarySearchIfNotNull(
+                result.response.headers["No-Vary-Search"]
+            )
+
+            val cacheEntryInDb = runBlocking {
+                cacheDb.cacheEntryDao.findEntryByKey(Md5Digest().urlHash(urlForKey))
+            }
+            assertNotNull(cacheEntryInDb)
+            val expectedPath = if(createLock) {
+                cachePaths.persistentPath
+            }else {
+                cachePaths.cachePath
+            }
+
+            assertTrue(cacheEntryInDb.storageUri.startsWith(expectedPath.toString()),
+                "Cache entry is stored in expected directory (createLock=$createLock, " +
+                        "expected path = $expectedPath, actual dir = ${cacheEntryInDb.storageUri}")
+
+            block(FileCanBeCachedAndRetrievedContext(cacheDb, ustadCache, createdLocks))
         }
-        assertNotNull(cacheEntryInDb)
-        val expectedPath = if(createLock) {
-            cachePaths.persistentPath
-        }else {
-            cachePaths.cachePath
-        }
-
-        assertTrue(cacheEntryInDb.storageUri.startsWith(expectedPath.toString()),
-            "Cache entry is stored in expected directory (createLock=$createLock, " +
-                    "expected path = $expectedPath, actual dir = ${cacheEntryInDb.storageUri}")
-
-        block(FileCanBeCachedAndRetrievedContext(cacheDb, ustadCache, createdLocks))
     }
 
     @Test
     fun givenNonCompressableFileStored_whenRequestMade_thenWillBeRetrievedAsCacheHitAndNotCompressed() {
         assertFileCanBeCachedAndRetrieved(
-            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testDataContent = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
             testUrl = "http://www.server.com/file.png",
             mimeType = "image/png",
             expectContentEncoding = "identity"
@@ -197,7 +278,7 @@ class UstadCacheJvmTest {
     @Test
     fun givenLockedEntryStored_whenRequestMade_thenWillBeRetrievedAsCacheHitAndSavedInPersistentPath() {
         assertFileCanBeCachedAndRetrieved(
-            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testDataContent = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
             testUrl = "http://www.server.com/file.png",
             mimeType = "image/png",
             expectContentEncoding = "identity",
@@ -209,15 +290,18 @@ class UstadCacheJvmTest {
     fun givenEntryNotLocked_whenLockAdded_thenWillBeMovedToPersistentDir() {
         val url = "http://www.server.com/file.png"
         assertFileCanBeCachedAndRetrieved(
-            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testDataContent = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
             testUrl = "http://www.server.com/file.png",
             mimeType = "image/png",
             expectContentEncoding = "identity"
         ) {
             runBlocking { cache.addRetentionLocks(listOf(EntryLockRequest(url))) }
             val entry = runBlocking { cache.getCacheEntry(url) }
-            assertTrue(entry?.storageUri?.startsWith(cachePaths.persistentPath.toString()) == true,
-                "After adding lock, entry should be in persistent path")
+            assertEquals(
+                expected = entry?.storageUri?.startsWith(cachePaths.persistentPath.toString()),
+                actual = true,
+                "After adding lock, entry should be in persistent path"
+            )
         }
     }
 
@@ -225,7 +309,7 @@ class UstadCacheJvmTest {
     fun givenEntryLocked_whenLockRemoved_thenWillBeMovedToCacheDir() {
         val url = "http://www.server.com/file.png"
         assertFileCanBeCachedAndRetrieved(
-            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testDataContent = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
             testUrl = "http://www.server.com/file.png",
             mimeType = "image/png",
             expectContentEncoding = "identity",
@@ -239,8 +323,11 @@ class UstadCacheJvmTest {
                 )
 
                 val entry = cache.getCacheEntry(url)
-                assertTrue(entry?.storageUri?.startsWith(cachePaths.cachePath.toString()) == true,
-                    "After adding lock, entry should be in persistent path")
+                assertEquals(
+                    expected = entry?.storageUri?.startsWith(cachePaths.cachePath.toString()),
+                    actual = true,
+                    message = "After adding lock, entry should be in persistent path"
+                )
             }
         }
     }
@@ -248,7 +335,7 @@ class UstadCacheJvmTest {
     @Test
     fun givenCompressableFileStored_whenRequestMade_thenWillBeRetrievedAsCacheHitAndBeCompressed() {
         assertFileCanBeCachedAndRetrieved(
-            testFile = tempDir.newFileFromResource(this::class.java, "/ustadmobile-epub.js"),
+            testDataContent = tempDir.newFileFromResource(this::class.java, "/ustadmobile-epub.js"),
             testUrl = "http://www.server.com/ustadmobile-epub.js",
             mimeType = "application/javascript",
             expectContentEncoding = "gzip",
@@ -259,7 +346,7 @@ class UstadCacheJvmTest {
     @Test
     fun givenCompressableFileStored_whenRequestMadeWithoutAcceptEncoding_thenWillBeRetrievedAsCacheHitAndBeCompressed() {
         assertFileCanBeCachedAndRetrieved(
-            testFile = tempDir.newFileFromResource(this::class.java, "/ustadmobile-epub.js"),
+            testDataContent = tempDir.newFileFromResource(this::class.java, "/ustadmobile-epub.js"),
             testUrl = "http://www.server.com/ustadmobile-epub.js",
             mimeType = "application/javascript",
             expectContentEncoding = "identity",
@@ -269,7 +356,7 @@ class UstadCacheJvmTest {
     @Test
     fun givenEmptyFileStored_whenRequestMade_thenWillBeRetrievedAsCacheHit() {
         assertFileCanBeCachedAndRetrieved(
-            testFile = tempDir.newFile(),
+            testDataContent = tempDir.newFile(),
             testUrl = "http://www.server.com/blank.txt",
             mimeType = "text/plain"
         )
@@ -293,7 +380,7 @@ class UstadCacheJvmTest {
         val url = "http://server.com/file.css"
         val payloads = listOf("font-weight: bold", "font-weight: bold !important")
         runBlocking {
-            payloads.forEachIndexed { index, payload ->
+            payloads.forEachIndexed { _, payload ->
                 ustadCache.store(listOf(
                     iRequestBuilder(url).let {
                         CacheEntryToStore(
@@ -367,7 +454,7 @@ class UstadCacheJvmTest {
 
             runBlocking {
                 ustadCache.commit()
-                cacheDb.cacheEntryDao.findEntryAndBodyByKey(md5Digest.urlKey(url))
+                cacheDb.cacheEntryDao.findEntryByKey(md5Digest.urlKey(url))
             }
         }
 
@@ -386,7 +473,7 @@ class UstadCacheJvmTest {
     fun givenFileCachedAndStored_whenPartialRequestMade_thenWillReceivePartialData() {
         val testUrl = "http://www.server.com/file.png"
         assertFileCanBeCachedAndRetrieved(
-            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testDataContent = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
             testUrl = testUrl,
             mimeType = "image/png",
             expectContentEncoding = "identity"
@@ -423,7 +510,7 @@ class UstadCacheJvmTest {
     fun givenFileCachedAndStored_whenPartialRequestMadeIfRangeNotMatched_thenWillReceiveFullResponse() {
         val testUrl = "http://www.server.com/file.png"
         assertFileCanBeCachedAndRetrieved(
-            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testDataContent = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
             testUrl = testUrl,
             mimeType = "image/png",
             expectContentEncoding = "identity"
@@ -451,7 +538,7 @@ class UstadCacheJvmTest {
     fun givenFileCachedAndStored_whenRequestHasCacheValidationHeaders_thenShouldRespond304NotModified() {
         val testUrl = "http://www.server.com/file.png"
         assertFileCanBeCachedAndRetrieved(
-            testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
+            testDataContent = tempDir.newFileFromResource(this::class.java, "/testfile1.png"),
             testUrl = testUrl,
             mimeType = "image/png",
             expectContentEncoding = "identity"
@@ -498,5 +585,84 @@ class UstadCacheJvmTest {
         }
     }
 
+    @Test
+    fun givenExtraHeaderSet_whenRetrieved_thenExtraHeaderIsAdded() {
+        val testDbDir = tempDir.newFolder()
+        val testFileContent = tempDir.newFileFromResource(this::class.java, "/testfile1.png")
+
+        assertFileCanBeCachedAndRetrieved(
+            testDataContent = testFileContent,
+            testUrl = "http://www.server.com/file.png",
+            mimeType = "image/png",
+            extraHeaders = headersOf("No-Vary-Search", "params"),
+            databaseDir = testDbDir,
+        )
+
+        withTestCache(testDbDir) { (_, ustadCache) ->
+            ustadCache.assertIsCacheHit(
+                testFile = testFileContent,
+                "http://www.server.com/file.png",
+                mimeType = "image/png",
+                extraHeaders = headersOf("No-Vary-Search", "params"),
+            )
+        }
+    }
+
+    @Test
+    fun givenNoVarySearchHeaderSet_whenRetrievedUsingMatchingUrl_thenIsCacheHit() {
+        data class NoVarySearchCase(
+            val storedAsUrl: String,
+            val retrieveUrl: String,
+            val noVarySearchHeader: String
+        )
+
+        listOf(
+            NoVarySearchCase(
+                "http://www.server.com/file.png",
+                "http://www.server.com/file.png?ts=1",
+                "params"
+            ),
+
+            NoVarySearchCase(
+                "http://www.server.com/file.png?lang=en&lesson=2",
+                "http://www.server.com/file.png?lang=en&lesson=2&actor=janedoe&endpoint=server",
+                "key-order, params=(\"endpoint\" \"actor\")",
+            ),
+            NoVarySearchCase(
+                "http://www.server.com/file.png?lang=en&lesson=2",
+                "http://www.server.com/file.png?lang=en&lesson=2&actor=janedoe&endpoint=server",
+                LAUNCH_LINK_NO_VARY_HEADER,
+            )
+        ).forEachIndexed { _, case ->
+            val testFile = tempDir.newFileFromResource(this::class.java, "/testfile1.png")
+            val dbDir =  tempDir.newFolder() //File("/home/mike/tmp/dbnovary$index")
+
+            assertFileCanBeCachedAndRetrieved(
+                testDataContent = testFile,
+                testUrl = case.storedAsUrl,
+                retrieveUrl = case.retrieveUrl,
+                mimeType = "image/png",
+                extraHeaders = headersOf("No-Vary-Search" to listOf(case.noVarySearchHeader)),
+                databaseDir = dbDir,
+            )
+
+            withTestCache(dbDir) { (_, ustadCache) ->
+                ustadCache.assertIsCacheHit(
+                    testFile = testFile,
+                    testUrl = case.storedAsUrl,
+                    retrieveUrl = case.retrieveUrl,
+                    mimeType = "image/png",
+                    extraHeaders = headersOf("No-Vary-Search" to listOf(case.noVarySearchHeader)),
+                )
+            }
+        }
+    }
+
+
+    companion object {
+
+        const val DB_FILENAME = "cache.db"
+
+    }
 
 }

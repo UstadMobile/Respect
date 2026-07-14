@@ -13,8 +13,10 @@ onFlowStart:
         NAME: "002_browse_lessons_test"
 
 onFlowComplete:
-  - runScript:
-      file: "scripts/teardown.js"
+  - runFlow:
+      file: "subflows/teardown.yaml"
+      env:
+        NAME: "db-final"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - tapOn:
@@ -42,11 +44,52 @@ onFlowComplete:
 - tapOn: "Lesson 001"
 - assertVisible: "Lesson 001"
 - assertVisible: "App name"
+- assertVisible: "Download"
 - tapOn: "Open"
 - extendedWaitUntil:
     visible: "Lesson 001"
-    timeout: 1000
+    timeout: 10000
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
-
+- setAirplaneMode: disabled
+- tapOn: "Apps"
+- tapOn: "Example Web App"
+- tapOn: "Lessons"
+- tapOn: "Examples"
+- tapOn: "Assignment Result Statement Demo"
+- assertVisible:
+    id: "app_title"
+    text: "Assignment Result Statement Demo"
+- tapOn: "Download"
+- extendedWaitUntil:
+    visible: "Downloaded"
+    timeout: 10000
+# Set device on Offline mode
+- setAirplaneMode: enabled
+- assertVisible: "Downloaded"
+- tapOn: "Apps"
+- stopApp
+- launchApp
+- assertVisible: "Apps"
+- tapOn: "Example Web App"
+- tapOn: "Lessons"
+- tapOn: "Examples"
+- tapOn: "Assignment Result Statement Demo"
+- assertVisible:
+    id: "app_title"
+    text: "Assignment Result Statement Demo"
+- assertVisible: "Downloaded"
+- tapOn: "Open"
+- extendedWaitUntil:
+    visible: "Assignment Result Statement Demo"
+    timeout: 10000
+- assertVisible: "Assignment Result.*"
+- tapOn: "Score"
+- inputText: 1
+- tapOn: "Send statement"
+- assertVisible: "Statement sent.*"
+- tapOn: "Close"
+- setAirplaneMode: disabled
+- tapOn: "Apps"
+- assertVisible: "Example Web App"
 

@@ -6,14 +6,15 @@ import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.DownloadJobItem
 import com.ustadmobile.libcache.db.entities.PinnedPublication
 import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
+import com.ustadmobile.libcache.util.LaunchNoVarySearchConstants
 import com.ustadmobile.libcache.util.withWriterTransaction
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.head
 import io.ktor.client.request.header
-import io.ktor.http.URLBuilder
 import io.ktor.http.contentLength
+import io.ktor.http.headersOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -73,18 +74,16 @@ class PinPublicationPrepareUseCase(
         val resourceAndAcquireJobItems = buildList {
             val acquisitionLinks = publication.findLearningUnitAcquisitionLinks()
 
-            //This isn't ideal - but needed to ensure it will open.
-            val acquisitionLinksWithRespectParams = acquisitionLinks.map {
-                it.copy(
-                    href = URLBuilder(manifestUrl.resolve(it.href.cleanHref()))
-                        .apply {
-                            this.parameters.append("respectLaunchVersion", "1")
-                        }
-                        .build().toString()
+            acquisitionLinks.forEach { acquisitionLink ->
+                cache.setExtraResponseHeaders(
+                    url = manifestUrl.resolve(acquisitionLink.href),
+                    extraResponseHeaders = headersOf(
+                        "No-Vary-Search" to listOf(LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER)
+                    )
                 )
             }
-            val linksToDownload = (publication.resources ?: emptyList()) +
-                    acquisitionLinks + acquisitionLinksWithRespectParams
+
+            val linksToDownload = (publication.resources ?: emptyList()) + acquisitionLinks
 
             addAll(
                 linksToDownload.map { resource ->

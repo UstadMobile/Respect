@@ -71,3 +71,18 @@ fun selectLang(
     return selectLangOrNull(preferredLocales, availableLocales)
         ?: throw IllegalStateException("Could not select lang: available=$availableLocales, preferred=$preferredLocales")
 }
+
+/**
+ * Select the best string to show from the LangMap based on the preferred locales
+ */
+fun selectStringOrNull(
+    langMap: Map<String, String>,
+    preferredLocales: List<String>,
+): String? {
+    return selectLangOrNull(
+        preferredLocales = preferredLocales,
+        availableLocales = langMap.keys.toList()
+    )?.let {
+        langMap[it]
+    }
+}

@@ -10,11 +10,13 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "001_002_add_user_direct_test.yaml"
+        NAME: "001_002_add_user_direct_test"
 
 onFlowComplete:
-  - runScript:
-      file: "scripts/teardown.js"
+  - runFlow:
+      file: "subflows/teardown.yaml"
+      env:
+        NAME: "db-final"
 ---
 - launchApp:
     arguments:
@@ -310,6 +312,10 @@ onFlowComplete:
 - assertVisible: "QR code badge"
 
 # Validate Parent User login
+- runFlow:
+    file: "subflows/e2e_artifact_upload.yaml"
+    env:
+      NAME: "db-admin-added-users"
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -368,6 +374,10 @@ onFlowComplete:
 - assertNotVisible: "People"
 
 # Validate Child User QR Login using Scan QR/badge
+- runFlow:
+    file: "subflows/e2e_artifact_upload.yaml"
+    env:
+      NAME: "db-parent-logged-in"
 - clearState: world.respect.app
 - launchApp:
     arguments:

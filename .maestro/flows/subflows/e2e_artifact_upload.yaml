@@ -1,0 +1,10 @@
+appId: world.respect.app
+---
+- stopApp
+- setAirplaneMode: disabled
+- openLink: "world.respect.app.e2eartifactupload:///?schoolUrl=${output.SCHOOL_URL_ENCODED}&name=${NAME}"
+
+- extendedWaitUntil:
+    visible:
+      id: "db_completed"
+    timeout: 30000

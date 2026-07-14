@@ -13,8 +13,10 @@ onFlowStart:
         NAME: "001_005_add_school_self_registration_test"
 
 onFlowComplete:
-  - runScript:
-      file: "scripts/teardown.js"
+  - runFlow:
+      file: "subflows/teardown.yaml"
+      env:
+        NAME: "db-teacher-validated-results"
 ---
 
 - launchApp:

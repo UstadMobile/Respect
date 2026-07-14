@@ -15,6 +15,7 @@ import com.ustadmobile.libcache.UstadCacheBuilder
 import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitorAndroid
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.db.migrations.addCacheDbMigrations
 import com.ustadmobile.libcache.downloader.EnqueueRunDownloadJobUseCase
 import com.ustadmobile.libcache.downloader.EnqueueRunDownloadJobUseCaseAndroid
 import com.ustadmobile.libcache.downloader.PinPublicationPrepareUseCase
@@ -148,8 +149,12 @@ import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCaseAndroid
+import world.respect.app.domain.e2eartifactupload.GetDbFilesForE2EArtifactUploadUseCaseAndroid
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
+import world.respect.shared.domain.e2eartifactupload.GetDbFilesForE2EArtifactUploadUseCase
+import world.respect.shared.domain.e2eartifactupload.E2EArtifactUploadUseCase
+import world.respect.shared.domain.e2eartifactupload.E2EArtifactUploadUseCaseClient
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
@@ -171,6 +176,7 @@ import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
 import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
+import world.respect.shared.domain.school.SchoolDbPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.domain.storage.CachePathsProviderAndroid
 import world.respect.shared.domain.storage.GetAndroidSdCardDirUseCase
@@ -269,6 +275,9 @@ import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCa
 import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCaseAndroid
+import world.respect.shared.viewmodel.statement.detail.RawStatementViewModel
+import world.respect.shared.viewmodel.statement.detail.StatementDetailViewModel
+import world.respect.shared.viewmodel.statement.list.StatementListViewModel
 import world.respect.shared.domain.xapi.xapinanohttpd.XapiResourceProviderAndroid
 
 
@@ -418,6 +427,9 @@ val appKoinModule = module {
     viewModelOf(::ExternalLinkViewModel)
     viewModelOf(::PlaylistShareViewModel)
 
+    viewModelOf(::StatementListViewModel)
+    viewModelOf(::StatementDetailViewModel)
+    viewModelOf(::RawStatementViewModel)
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -461,6 +473,7 @@ val appKoinModule = module {
             UstadCacheDb::class.java,
             UstadCacheBuilder.DEFAULT_DB_NAME
         ).addCallback(ClearNeighborsCallback())
+            .addCacheDbMigrations()
             .build()
     }
 
@@ -614,6 +627,20 @@ val appKoinModule = module {
     single<GetDeviceInfoUseCase> {
         GetDeviceInfoUseCaseAndroid(androidContext())
     }
+
+    single<GetDbFilesForE2EArtifactUploadUseCase> {
+        GetDbFilesForE2EArtifactUploadUseCaseAndroid(
+            context = androidContext(),
+        )
+    }
+
+    single<E2EArtifactUploadUseCase> {
+        E2EArtifactUploadUseCaseClient(
+            httpClient = get(),
+            getDbFilesForE2EArtifactUploadUseCase = get(),
+        )
+    }
+
 
     single<CreatePasskeyUseCaseAndroidChannelHost> {
         CreatePasskeyUseCaseAndroidChannelHost()
@@ -786,10 +813,14 @@ val appKoinModule = module {
             )
         }
 
+        scoped<SchoolDbPath> {
+            SchoolDbPath.forSchoolUrl(SchoolDirectoryEntryScopeId.parse(id).schoolUrl)
+        }
+
         scoped<RespectSchoolDatabase> {
             Room.databaseBuilder<RespectSchoolDatabase>(
                 androidContext(),
-                "school_3_" + SchoolDirectoryEntryScopeId.parse(id).schoolUrl.sanitizedForFilename()
+                get<SchoolDbPath>().filename
             )
                 .addCommonMigrations()
                 .build()
@@ -1085,6 +1116,7 @@ val appKoinModule = module {
             LaunchAppUseCaseAndroid(
                 appContext = androidContext().applicationContext,
                 getXapiLaunchUrlUseCase = get(),
+                ustadCache = get(),
             )
         }
 

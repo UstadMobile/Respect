@@ -63,6 +63,9 @@ import world.respect.app.view.scanqrcode.ScanQRCodeScreen
 import world.respect.app.view.schooldirectory.edit.SchoolDirectoryEditScreen
 import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
 import world.respect.app.view.settings.SettingsScreenForViewModel
+import world.respect.app.view.statement.detail.RawStatementScreen
+import world.respect.app.view.statement.detail.StatementDetailScreen
+import world.respect.app.view.statement.list.StatementListScreen
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.Acknowledgement
@@ -108,6 +111,7 @@ import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistList
 import world.respect.shared.navigation.PlaylistShare
 import world.respect.shared.navigation.QrCode
+import world.respect.shared.navigation.RawStatement
 import world.respect.shared.navigation.Report
 import world.respect.shared.navigation.ReportDetail
 import world.respect.shared.navigation.ReportEdit
@@ -121,6 +125,8 @@ import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.SignupScreen
+import world.respect.shared.navigation.StatementDetail
+import world.respect.shared.navigation.StatementList
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
@@ -248,6 +254,32 @@ fun AppNavHost(
 
         composable<AssignmentDetail> {
             AssignmentDetailScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<StatementList>{
+            StatementListScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<StatementDetail> {
+            StatementDetailScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+        composable<RawStatement> {
+            RawStatementScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,
@@ -654,5 +686,6 @@ fun AppNavHost(
                 )
             )
         }
+
     }
 }

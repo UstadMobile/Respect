@@ -23,9 +23,9 @@
     {"href": "icon.png", "type": "image/png" }
   ],
   "resources": [
-    {
-      "href": "XAPI.js",
-      "type": "text/javascript"
-    }
+    { "href": "index.html" },
+    { "href": "../../js/xapi_assignable_unit.js" },
+    { "href": "../../js/xapi_module.js" },
+    { "href": "icon.png" }
   ]
 }

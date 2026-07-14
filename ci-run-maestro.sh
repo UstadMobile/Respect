@@ -161,6 +161,7 @@ if [ "$1" == "cloud" ]; then
         --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \
         --flows=.maestro/flows \
         $DEVICE_OS_ARG \
+        --exclude-tags=test\
         --format=junit \
         --output=build/maestro/report.xml \
         --timeout=300 \

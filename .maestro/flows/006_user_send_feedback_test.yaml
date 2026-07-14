@@ -51,4 +51,4 @@ onFlowComplete:
 - tapOn: "Public forum"
 - runFlow:
     file: "subflows/chrome-first-run-check.yaml"
-- assertVisible: "UstadMobile/Respect"
+- assertVisible: "Welcome to discussions!"

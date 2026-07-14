@@ -17,7 +17,6 @@ import world.respect.datalayer.school.opds.ext.selfUrl
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.account.username.GetActiveUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_from_a_link
 import world.respect.shared.generated.resources.add_new
@@ -72,8 +71,6 @@ class PlaylistListViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
 
-    private val getActiveUsernameUseCase = GetActiveUsernameUseCase(accountManager)
-
     private val _uiState = MutableStateFlow(PlaylistListUiState())
 
     val uiState = _uiState.asStateFlow()
@@ -94,13 +91,13 @@ class PlaylistListViewModel(
             accountManager.selectedAccountAndPersonFlow.collect { sessionAndPerson ->
                 val isTeacherOrAdmin = sessionAndPerson?.person?.isAdmin() == true
 
-                val username = sessionAndPerson?.let { getActiveUsernameUseCase() } ?: ""
+                val username = sessionAndPerson?.person?.username.orEmpty()
                 val activeUserOwnerHref = sessionAndPerson?.let {
                     MakePlaylistOpdsFeedUseCase.getUserProfileUrl(
                         schoolUrl = it.session.account.school.self,
-                        username = username
+                        username = username,
                     )
-                } ?: ""
+                }.orEmpty()
 
                 _uiState.update {
                     it.copy(

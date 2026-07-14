@@ -337,7 +337,7 @@ class PlaylistDetailViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
 
-    private val getActiveUsernameUseCase = GetActiveUsernameUseCase(accountManager)
+    private val getActiveUsernameUseCase: GetActiveUsernameUseCase by inject()
 
     private val route: PlaylistDetail = savedStateHandle.toRoute()
 
@@ -487,9 +487,10 @@ class PlaylistDetailViewModel(
     }
 
     fun onClickNavigation(navigation: ReadiumLink) {
+        val resolvedUrl = route.playlistUrl.resolve(navigation.href)
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                PlaylistDetail.create(playlistUrl = Url(navigation.href))
+                PlaylistDetail.create(playlistUrl = resolvedUrl)
             )
         )
     }
@@ -499,6 +500,19 @@ class PlaylistDetailViewModel(
         } ?: throw IllegalStateException(
             "Publication has no self link: ${publication.metadata.title}"
         )
+
+        val manifestUrl = route.playlistUrl.resolve(selfLink.href)
+
+        val resultSent = resultReturner.sendResultIfResultExpected(
+            route = route,
+            navCommandFlow = _navCommandFlow,
+            result = LearningUnitSelection(
+                learningUnitManifestUrl = manifestUrl,
+                selectedPublication = publication,
+            )
+        )
+        if (resultSent) return
+
         if (selfLink.type == MIME_TYPE_HTML) {
             openExternalLinkUseCase(
                 url = selfLink.href,
@@ -507,24 +521,14 @@ class PlaylistDetailViewModel(
             return
         }
 
-        if (!resultReturner.sendResultIfResultExpected(
-                route = route,
-                navCommandFlow = _navCommandFlow,
-                result = LearningUnitSelection(
-                    learningUnitManifestUrl = Url(selfLink.href),
-                    selectedPublication = publication,
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                LearningUnitDetail.create(
+                    learningUnitManifestUrl = manifestUrl,
+                    expectedIdentifier = publication.metadata.identifier?.toString(),
                 )
             )
-        ) {
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(
-                    LearningUnitDetail.create(
-                        learningUnitManifestUrl = Url(selfLink.href),
-                        expectedIdentifier = publication.metadata.identifier?.toString(),
-                    )
-                )
-            )
-        }
+        )
     }
     fun onClickAssignSection(sectionIndex: Int) {
         val feed = _uiState.value.feed ?: throw IllegalStateException(

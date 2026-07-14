@@ -131,6 +131,7 @@ import world.respect.shared.domain.account.passkey.RevokePasskeyUseCaseClient
 import world.respect.shared.domain.account.passkey.VerifyPasskeyUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
+import world.respect.shared.domain.account.username.GetActiveUsernameUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCaseClient
 import world.respect.shared.domain.account.username.checkusernameunique.CheckUsernameUniqueUseCase
@@ -1100,6 +1101,11 @@ val appKoinModule = module {
         scoped<GetPublicationForXapiActivityUseCase> {
             GetPublicationForXapiActivityUseCase(
                 opdsPublicationDataSource = get<SchoolDataSource>().opdsPublicationDataSource,
+            )
+        }
+        scoped<GetActiveUsernameUseCase> {
+            GetActiveUsernameUseCase(
+                accountManager = get(),
             )
         }
     }

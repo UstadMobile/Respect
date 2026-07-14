@@ -95,7 +95,7 @@ class PlaylistEditViewModel(
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
-    private val getActiveUsernameUseCase = GetActiveUsernameUseCase(accountManager)
+    private val getActiveUsernameUseCase: GetActiveUsernameUseCase by inject()
 
     private val route: PlaylistEdit = savedStateHandle.toRoute()
 

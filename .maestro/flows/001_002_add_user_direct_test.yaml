@@ -1,6 +1,4 @@
 appId: world.respect.app
-tags:
-  - test
 onFlowStart:
   - clearState: world.respect.app
   - runScript:

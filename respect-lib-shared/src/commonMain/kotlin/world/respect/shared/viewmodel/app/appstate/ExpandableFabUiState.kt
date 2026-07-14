@@ -5,6 +5,7 @@ import world.respect.shared.resources.UiText
 data class ExpandableFabUiState(
     val visible: Boolean = false,
     val expanded: Boolean = false,
+    val text: UiText? = null,
     val items: List<ExpandableFabItem> = emptyList()
 )
 
@@ -15,5 +16,6 @@ data class ExpandableFabItem(
 )
 enum class ExpandableFabIcon {
     ADD,
-    INVITE
+    INVITE,
+    LINK,
 }

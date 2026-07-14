@@ -2,28 +2,35 @@ package world.respect.app.view.playlists.mapping.list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.Link
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.add_from_a_link
-import world.respect.shared.generated.resources.add_new
 import world.respect.shared.generated.resources.all
 import world.respect.shared.generated.resources.created_by
 import world.respect.shared.generated.resources.empty
@@ -31,7 +38,9 @@ import world.respect.shared.generated.resources.my_playlists
 import world.respect.shared.generated.resources.no_playlist_yet
 import world.respect.shared.generated.resources.no_playlist_yet_description
 import world.respect.shared.generated.resources.sections_and_items
-import world.respect.shared.viewmodel.playlists.mapping.list.*
+import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistFilter
+import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
+import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
 
 @Composable
 fun PlaylistListScreenForViewModel(
@@ -43,9 +52,6 @@ fun PlaylistListScreenForViewModel(
         uiState = uiState,
         onClickFilter = viewModel::onClickFilter,
         onClickPlaylist = viewModel::onClickPlaylist,
-        onClickDismissFabMenu = viewModel::onClickDismissFabMenu,
-        onClickAddNew = viewModel::onClickAddNew,
-        onClickAddFromLink = viewModel::onClickAddFromLink,
     )
 }
 
@@ -54,104 +60,64 @@ fun PlaylistListScreen(
     uiState: PlaylistListUiState = PlaylistListUiState(),
     onClickFilter: (PlaylistFilter) -> Unit = {},
     onClickPlaylist: (OpdsFeed) -> Unit = {},
-    onClickDismissFabMenu: () -> Unit = {},
-    onClickAddNew: () -> Unit = {},
-    onClickAddFromLink: () -> Unit = {},
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                item {
-                    FilterChip(
-                        selected = uiState.activeFilter == PlaylistFilter.ALL,
-                        onClick = { onClickFilter(PlaylistFilter.ALL) },
-                        label = { Text(stringResource(Res.string.all)) },
-                    )
-                }
-                item {
-                    FilterChip(
-                        selected = uiState.activeFilter == PlaylistFilter.MY_PLAYLISTS,
-                        onClick = { onClickFilter(PlaylistFilter.MY_PLAYLISTS) },
-                        label = { Text(stringResource(Res.string.my_playlists)) },
-                    )
-                }
+    Column(modifier = Modifier.fillMaxSize()) {
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultItemPadding(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            item {
+                FilterChip(
+                    selected = uiState.activeFilter == PlaylistFilter.ALL,
+                    onClick = { onClickFilter(PlaylistFilter.ALL) },
+                    label = { Text(stringResource(Res.string.all)) },
+                )
             }
-
-            if (uiState.showPlaylists.isEmpty()) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 64.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(
-                         painter = painterResource(Res.drawable.empty),
-                         contentDescription = stringResource(Res.string.no_playlist_yet),
-                         modifier = Modifier.size(200.dp),
-                         contentScale = ContentScale.Fit,
-                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(stringResource(Res.string.no_playlist_yet))
-                    Text(stringResource(Res.string.no_playlist_yet_description))
-                }
-            } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    itemsIndexed(
-                        items = uiState.showPlaylists,
-                        key = { index, feed ->
-                            feed.metadata.identifier?.toString()
-                                ?: "${feed.metadata.title}_$index"
-                        }
-                    ) { _, feed ->
-                        PlaylistListItem(
-                            feed = feed,
-                            ownerUsername = if (feed.links.any {
-                                    it.rel?.contains(MakePlaylistOpdsFeedUseCase.REL_OWNER) == true
-                                            && it.href == uiState.activeUserOwnerHref
-                                }) uiState.activeUsername else null,
-                            onClickFeed = { onClickPlaylist(feed) },
-                        )
-                    }
-                }
+            item {
+                FilterChip(
+                    selected = uiState.activeFilter == PlaylistFilter.MY_PLAYLISTS,
+                    onClick = { onClickFilter(PlaylistFilter.MY_PLAYLISTS) },
+                    label = { Text(stringResource(Res.string.my_playlists)) },
+                )
             }
         }
 
-        if (uiState.isFabMenuExpanded) {
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clickable { onClickDismissFabMenu() },
-            ) {}
-        }
-
-        if (uiState.isFabMenuExpanded) {
+        if (uiState.showPlaylists.isEmpty()) {
             Column(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(bottom = 88.dp, end = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.End,
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                ExtendedFloatingActionButton(
-                     modifier = Modifier
-                         .testTag("add_new"),
-                     onClick = onClickAddNew,
-                     icon = { Icon(Icons.Filled.Add, null) },
-                     text = { Text(stringResource(Res.string.add_new)) },
-                 )
-                 ExtendedFloatingActionButton(
-                     modifier = Modifier
-                         .testTag("add_from_a_link"),
-                     onClick = onClickAddFromLink,
-                     icon = { Icon(Icons.Filled.Link, null) },
-                     text = { Text(stringResource(Res.string.add_from_a_link)) },
-                 )
+                Image(
+                    painter = painterResource(Res.drawable.empty),
+                    contentDescription = stringResource(Res.string.no_playlist_yet),
+                    modifier = Modifier.size(200.dp),
+                    contentScale = ContentScale.Fit,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(stringResource(Res.string.no_playlist_yet))
+                Text(stringResource(Res.string.no_playlist_yet_description))
+            }
+        } else {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                itemsIndexed(
+                    items = uiState.showPlaylists,
+                    key = { index, feed ->
+                        feed.metadata.identifier?.toString()
+                            ?: "${feed.metadata.title}_$index"
+                    }
+                ) { _, feed ->
+                    PlaylistListItem(
+                        feed = feed,
+                        ownerUsername = if (feed.links.any {
+                                it.rel?.contains(MakePlaylistOpdsFeedUseCase.REL_OWNER) == true
+                                        && it.href == uiState.activeUserOwnerHref
+                            }) uiState.activeUsername else null,
+                        onClickFeed = { onClickPlaylist(feed) },
+                    )
+                }
             }
         }
     }
@@ -170,15 +136,15 @@ private fun PlaylistListItem(
     } ?: 0
 
     ListItem(
-             modifier = Modifier
-                 .fillMaxWidth()
-                 .clickable { onClickFeed() },
-             leadingContent = {
-                 Icon(
-                     imageVector = Icons.Filled.Book,
-                     contentDescription = feed.metadata.title,
-                 )
-             },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClickFeed() },
+        leadingContent = {
+            Icon(
+                imageVector = Icons.Filled.Book,
+                contentDescription = feed.metadata.title,
+            )
+        },
         headlineContent = {
             Text(feed.metadata.title)
         },

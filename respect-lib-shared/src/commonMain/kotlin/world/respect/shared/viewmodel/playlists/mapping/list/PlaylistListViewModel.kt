@@ -19,6 +19,8 @@ import world.respect.lib.opds.model.OpdsFeed
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.username.GetActiveUsernameUseCase
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.add_from_a_link
+import world.respect.shared.generated.resources.add_new
 import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.playlist
 import world.respect.shared.navigation.EnterLink
@@ -28,7 +30,9 @@ import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistList
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.app.appstate.ExpandableFabIcon
+import world.respect.shared.viewmodel.app.appstate.ExpandableFabItem
+import world.respect.shared.viewmodel.app.appstate.ExpandableFabUiState
 
 enum class PlaylistFilter {
     ALL,
@@ -41,7 +45,6 @@ data class PlaylistListUiState(
     val isTeacherOrAdmin: Boolean = false,
     val activeUserOwnerHref: String = "",
     val activeUsername: String = "",
-    val isFabMenuExpanded: Boolean = false,
 ) {
     val showPlaylists: List<OpdsFeed>
         get() = when (activeFilter) {
@@ -68,7 +71,9 @@ class PlaylistListViewModel(
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
+
     private val getActiveUsernameUseCase = GetActiveUsernameUseCase(accountManager)
+
     private val _uiState = MutableStateFlow(PlaylistListUiState())
 
     val uiState = _uiState.asStateFlow()
@@ -96,6 +101,7 @@ class PlaylistListViewModel(
                         username = username
                     )
                 } ?: ""
+
                 _uiState.update {
                     it.copy(
                         isTeacherOrAdmin = isTeacherOrAdmin,
@@ -107,16 +113,27 @@ class PlaylistListViewModel(
                 _appUiState.update {
                     it.copy(
                         title = Res.string.home.asUiText(),
-                        fabState = FabUiState(
+                        expandableFabState = ExpandableFabUiState(
                             visible = isTeacherOrAdmin,
-                            icon = FabUiState.FabIcon.ADD,
                             text = Res.string.playlist.asUiText(),
-                            onClick = ::onClickCreatePlaylist,
+                            items = listOf(
+                                ExpandableFabItem(
+                                    icon = ExpandableFabIcon.ADD,
+                                    text = Res.string.add_new.asUiText(),
+                                    onClick = ::onClickAddNew,
+                                ),
+                                ExpandableFabItem(
+                                    icon = ExpandableFabIcon.LINK,
+                                    text = Res.string.add_from_a_link.asUiText(),
+                                    onClick = ::onClickAddFromLink,
+                                ),
+                            )
                         )
                     )
                 }
             }
         }
+
         viewModelScope.launch {
             schoolDataSource.opdsFeedDataSource.getPlaylistsAsFlow(
                 schoolUrl = activeAccount.school.self
@@ -155,21 +172,11 @@ class PlaylistListViewModel(
         }
     }
 
-    fun onClickCreatePlaylist() {
-        _uiState.update { it.copy(isFabMenuExpanded = !it.isFabMenuExpanded) }
-    }
-
-    fun onClickDismissFabMenu() {
-        _uiState.update { it.copy(isFabMenuExpanded = false) }
-    }
-
     fun onClickAddNew() {
-        _uiState.update { it.copy(isFabMenuExpanded = false) }
         _navCommandFlow.tryEmit(NavCommand.Navigate(PlaylistEdit.create()))
     }
 
     fun onClickAddFromLink() {
-        _uiState.update { it.copy(isFabMenuExpanded = false) }
         _navCommandFlow.tryEmit(NavCommand.Navigate(EnterLink))
     }
 }

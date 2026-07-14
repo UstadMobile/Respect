@@ -38,8 +38,7 @@ onFlowComplete:
 # verify App got added to Apps section
 - tapOn: "Add App"
 - tapOn:
-    text: "Home"
-    index: 0
+    id: "nav_home"
 - assertVisible:
     id: "app_title"
     text: "Home"
@@ -81,8 +80,7 @@ onFlowComplete:
 - tapOn: "Close"
 - setAirplaneMode: disabled # Set device on Online mode
 - tapOn:
-    text: "Home"
-    index: 0
+    id: "nav_home"
 - tapOn: "Apps"
 - assertVisible: "Example Web App"
 - tapOn: "Bookmarks"
@@ -107,12 +105,12 @@ onFlowComplete:
 - tapOn: "Statement Maker"
 - tapOn: "Bookmark"
 - tapOn:
-    text: "Home"
-    index: 0
+    id: "nav_home"
 - tapOn: "Bookmarks"
 - assertVisible: "Lesson 001"
 - assertVisible: "Statement Maker"
-- assertVisible: "Home"
+- assertVisible:
+        id: "nav_home"
 - assertVisible:
     id: "app_title"
     text: "Home"

@@ -1,7 +1,4 @@
 #!/bin/bash
-# Do NOT use `set -e` globally — it would abort the script the instant Cypress
-# exits non-zero and skip the download logic below, even when a partial
-# video_urls.txt was already captured. We enable it selectively instead.
 set -u
 set -o pipefail
 
@@ -19,7 +16,7 @@ URL_FILE="$DOWNLOAD_DIR/video_urls.txt"
 mkdir -p "$DOWNLOAD_DIR"
 rm -f "$URL_FILE"   # fresh run every time
 
-# ---- Run Cypress (failure here must NOT kill the script) ------------------
+# ---- Run Cypress ------------------
 
 echo "Installing dependencies..."
 npm install
@@ -74,8 +71,6 @@ else
     echo "Warning: $URL_FILE was not generated (or is empty). No videos to download."
 fi
 
-# Propagate the real Cypress result so CI still reflects failures accurately,
-# while still having attempted the best-effort download above.
 if [ $EXIT_CODE -ne 0 ]; then
     echo "Video downloader script encountered an error (Cypress exit $EXIT_CODE)."
     exit $EXIT_CODE

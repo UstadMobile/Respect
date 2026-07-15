@@ -17,6 +17,11 @@ mkdir -p "$DOWNLOAD_DIR"
 rm -f "$URL_FILE"   # fresh run every time
 
 # ---- Run Cypress ------------------
+which node
+node -v
+which npm
+npm -v
+echo $PATH
 
 echo "Installing dependencies..."
 npm install

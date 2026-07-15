@@ -174,10 +174,16 @@ class PlaylistEditViewModel(
                 }
                 pendingAddItemSectionIndex = null
 
+                /*
+                 * A learning-unit pick returns either a single LearningUnitSelection (single-select
+                 * mode) or a List<LearningUnitSelection> (multi-select mode). The list is matched as
+                 * List<*> because generic type arguments are erased at runtime; filterIsInstance
+                 * recovers the element type.
+                 */
                 val publications: List<OpdsPublication> = when (val r = result.result) {
                     is LearningUnitSelection -> listOf(r.selectedPublication)
-                    is List<*> -> r.filterIsInstance<LearningUnitSelection>().map { it.selectedPublication }
-                    is OpdsPublication -> listOf(r)
+                    is List<*> -> r.filterIsInstance<LearningUnitSelection>()
+                        .map { it.selectedPublication }
                     else -> throw IllegalStateException(
                         "Expected LearningUnitSelection or List but got: ${result.result}"
                     )

@@ -4,11 +4,7 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
   const projectUrl = Cypress.env('projectUrl');
   const recivoOrgId = Cypress.env('recivoOrgId');
   const recivoApiKey = Cypress.env('recivoApiKey');
-
   // Logs via cy.task so it actually shows up in Jenkins/CI stdout.
-  // (console.log / cy.log inside spec code only reach the browser console,
-  // not the terminal running `cypress run` — that's why earlier log lines
-  // never appeared in the Jenkins output.)
   const log = (message) => cy.task('log', message, { log: false });
 
   const waitForOtp = (attempts = 0) => {
@@ -33,7 +29,8 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
         if (match) return match[0];
       }
 
-      cy.wait(1000);
+      // --- PAUSE ADDED HERE ---
+      cy.wait(1000); // Wait 1 second before trying again
       return waitForOtp(attempts + 1);
     });
   };
@@ -43,6 +40,7 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
     pageLoadTimeout: 60000,
   }, () => {
 
+    // Clear file
     cy.writeFile('cypress/downloads/video_urls.txt', '');
 
     // --- Step 1: Login ---
@@ -52,13 +50,11 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
 
     waitForOtp().then((otp) => {
       cy.get('input[data-test="otp-input"]').first().type(otp, { delay: 50 });
+      // Wait for domain change to app.maestro.dev
       cy.url({ timeout: 60000 }).should('include', 'app.maestro.dev');
     });
 
     // --- Step 2: Collect tests + video URLs inside app.maestro.dev ---
-    // cy.writeFile / cy.task do NOT work inside cy.origin() — isolated
-    // browser context, no Node bridge. Gather everything into a plain
-    // array, return it, and write/log from the outer context afterward.
     cy.origin('https://app.maestro.dev', { args: { projectUrl } }, ({ projectUrl }) => {
 
       cy.get('body', { timeout: 60000 }).should('be.visible');
@@ -91,10 +87,6 @@ describe('Login, collect tests & Save Video URLs', {}, () => {
           cy.task('log', `Skipped (no usable href): ${JSON.stringify(skipped)}`, { log: false });
         }
 
-        // Recursively polls for a <video> element's src, up to ~10s.
-        // Never throws — resolves to a URL string, or null if no video
-        // ever appears (which is expected for some Maestro runs, e.g.
-        // ones that failed before a recording was produced).
         const getVideoSrcOrNull = (attempts = 0) => {
           return cy.document().then((doc) => {
             const videoEl = doc.querySelector('video');

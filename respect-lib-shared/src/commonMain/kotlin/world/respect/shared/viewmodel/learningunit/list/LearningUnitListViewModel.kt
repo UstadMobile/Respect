@@ -47,7 +47,7 @@ import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
-import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistEditViewModel
 import kotlin.uuid.ExperimentalUuidApi
 
 data class LearningUnitListUiState(

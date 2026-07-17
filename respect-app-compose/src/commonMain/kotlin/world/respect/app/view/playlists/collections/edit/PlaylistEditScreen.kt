@@ -1,4 +1,4 @@
-package world.respect.app.view.playlists.mapping.edit
+package world.respect.app.view.playlists.collections.edit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -78,10 +78,10 @@ import world.respect.shared.generated.resources.title
 import world.respect.shared.generated.resources.use_link
 import world.respect.shared.generated.resources.use_link_description
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.viewmodel.playlists.mapping.edit.MovingItemState
-import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditUiState
-import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
-import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistSectionType
+import world.respect.shared.viewmodel.playlists.collections.edit.MovingItemState
+import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistEditUiState
+import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistSectionType
 
 @Composable
 fun PlaylistEditScreenForViewModel(

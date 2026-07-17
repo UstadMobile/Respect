@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.playlists.mapping.edit
+package world.respect.shared.viewmodel.playlists.collections.edit
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -44,7 +44,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
-import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
+import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListUiState
 import kotlin.uuid.ExperimentalUuidApi
 
 enum class PlaylistSectionType {

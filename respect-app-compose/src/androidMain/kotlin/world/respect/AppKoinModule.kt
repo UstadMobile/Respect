@@ -30,7 +30,6 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -255,10 +254,10 @@ import java.io.File
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
-import world.respect.shared.viewmodel.playlists.mapping.edit.PlaylistEditViewModel
-import world.respect.shared.viewmodel.playlists.mapping.externallink.ExternalLinkViewModel
-import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
-import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
+import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.playlists.collections.externallink.ExternalLinkViewModel
+import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListViewModel
+import world.respect.shared.viewmodel.playlists.collections.share.PlaylistShareViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase

@@ -1,6 +1,5 @@
-package world.respect.app.view.playlists.mapping.externallink
+package world.respect.app.view.playlists.collections.externallink
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +14,6 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,8 +36,8 @@ import world.respect.shared.generated.resources.next
 import world.respect.shared.generated.resources.required
 import world.respect.shared.generated.resources.title
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.viewmodel.playlists.mapping.externallink.ExternalLinkUiState
-import world.respect.shared.viewmodel.playlists.mapping.externallink.ExternalLinkViewModel
+import world.respect.shared.viewmodel.playlists.collections.externallink.ExternalLinkUiState
+import world.respect.shared.viewmodel.playlists.collections.externallink.ExternalLinkViewModel
 @Composable
 fun ExternalLinkScreenForViewModel(
     viewModel: ExternalLinkViewModel,

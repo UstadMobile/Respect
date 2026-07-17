@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.playlists.mapping.share
+package world.respect.shared.viewmodel.playlists.collections.share
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope

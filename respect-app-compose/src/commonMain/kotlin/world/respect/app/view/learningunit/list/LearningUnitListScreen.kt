@@ -262,6 +262,30 @@ fun PlaylistDetailScreen(
             HorizontalDivider()
         }
 
+        itemsIndexed(
+            items = uiState.navigation,
+            key = { index, _ -> "top_nav_$index" }
+        ) { _, navigation ->
+            NavigationListItem(
+                navigation = navigation,
+                isMultiSelectMode = false,
+                isSelected = false,
+                onClickNavigation = { onClickNavigation(navigation) },
+            )
+        }
+
+        itemsIndexed(
+            items = uiState.publications,
+            key = { index, _ -> "top_pub_$index" }
+        ) { _, publication ->
+            PublicationListItem(
+                publication = publication,
+                isMultiSelectMode = false,
+                isSelected = false,
+                onClickPublication = { onClickPublication(publication) },
+                onLongPressPublication = {},
+            )
+        }
         uiState.group.forEachIndexed { sectionIndex, group ->
             item(key = "section_$sectionIndex") {
                 PlaylistSectionHeader(

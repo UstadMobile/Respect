@@ -1,4 +1,4 @@
-package world.respect.app.view.playlists.mapping.share
+package world.respect.app.view.playlists.collections.share
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -49,8 +49,8 @@ import world.respect.shared.generated.resources.share_link
 import world.respect.shared.generated.resources.teachers_and_admins_in_my_school
 import world.respect.shared.generated.resources.who_can_edit
 import world.respect.shared.generated.resources.who_can_view
-import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareUiState
-import world.respect.shared.viewmodel.playlists.mapping.share.PlaylistShareViewModel
+import world.respect.shared.viewmodel.playlists.collections.share.PlaylistShareUiState
+import world.respect.shared.viewmodel.playlists.collections.share.PlaylistShareViewModel
 
 @Composable
 fun PlaylistShareScreenForViewModel(

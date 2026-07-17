@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.playlists.mapping.externallink
+package world.respect.shared.viewmodel.playlists.collections.externallink
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope

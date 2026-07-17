@@ -1,4 +1,4 @@
-package world.respect.app.view.playlists.mapping.list
+package world.respect.app.view.playlists.collections.list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -38,9 +38,9 @@ import world.respect.shared.generated.resources.my_playlists
 import world.respect.shared.generated.resources.no_playlist_yet
 import world.respect.shared.generated.resources.no_playlist_yet_description
 import world.respect.shared.generated.resources.sections_and_items
-import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistFilter
-import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListUiState
-import world.respect.shared.viewmodel.playlists.mapping.list.PlaylistListViewModel
+import world.respect.shared.viewmodel.playlists.collections.list.PlaylistFilter
+import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListUiState
+import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListViewModel
 
 @Composable
 fun PlaylistListScreenForViewModel(

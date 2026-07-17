@@ -73,7 +73,7 @@ onFlowComplete:
     id: "app_title"
     text: "Add playlist"
 - tapOn: "Save" # To test mandatory fields
-- assertVisible: "Required field"  #Title field is mandatory
+- assertVisible: "Required*"  #Title field is mandatory
 - tapOn: "Title*"
 - inputText: "Playlist - Grade 1"
 - tapOn: "Description"
@@ -228,7 +228,7 @@ onFlowComplete:
     id: "app_title"
     text: "Playlist - Grade 1"
 
-# Assigning lessons in a playlist to a assignment
+# Assigning lessons in a playlist to an assignment
 - tapOn:
     id: "header_assign_btn"
 - assertVisible:

@@ -12,6 +12,7 @@ import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitor
 import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitorAndroid
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
@@ -317,6 +318,10 @@ val appKoinModule = module {
         XXHashUidNumberMapper(xxStringHasher = get())
     }
 
+    single<ConnectivityMonitor> {
+        ConnectivityMonitorAndroid(androidContext())
+    }
+
     single<OkHttpClient> {
         val cachePathProvider: CachePathsProvider = get()
 
@@ -333,7 +338,7 @@ val appKoinModule = module {
                     tmpDirProvider = { File(cachePathProvider().tmpWorkPath.toString()) },
                     logger = NapierLoggingAdapter(),
                     json = get(),
-                    connectivityMonitor = ConnectivityMonitorAndroid(androidContext()),
+                    connectivityMonitor = get(),
                 )
             )
             .build()
@@ -617,6 +622,7 @@ val appKoinModule = module {
         E2EArtifactUploadUseCaseClient(
             httpClient = get(),
             getDbFilesForE2EArtifactUploadUseCase = get(),
+            connectivityMonitor = get(),
         )
     }
 

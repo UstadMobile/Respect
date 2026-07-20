@@ -148,7 +148,6 @@ onFlowComplete:
       PASSWORD: "test123"
 - tapOn: "Assignments"
 - tapOn: "Homework 1"
-- setAirplaneMode: enabled
 - assertVisible:
     id: "app_title"
     text: "Homework 1"
@@ -169,7 +168,6 @@ onFlowComplete:
 - tapOn: "Send statement"
 - assertVisible: "Statement sent.*"
 - tapOn: "Close"
-- setAirplaneMode: disabled
 - tapOn: "Assignments"
 - tapOn: "Homework 1"
 - assertVisible: "All (2)"

@@ -1,4 +1,6 @@
 appId: world.respect.app
+tags:
+  - "e2e"
 onFlowStart:
   - clearState: world.respect.app
   - runScript:
@@ -110,6 +112,12 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Homework 1"
+- setAirplaneMode: disabled
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 1"
 - assertVisible: "All (3)"
 - assertVisible: "Completed (0)"
 - assertVisible: "In-progress (0)"
@@ -122,7 +130,6 @@ onFlowComplete:
 - assertVisible: "Statement Maker"
 - assertVisible: "Assignment Result Statement Demo"
 - assertVisible: "Average"
-- setAirplaneMode: disabled
 - tapOn: "Assignments"
 - assertVisible:
     id: "app_title"

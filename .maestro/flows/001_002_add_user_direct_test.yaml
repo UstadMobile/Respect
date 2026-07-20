@@ -41,6 +41,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "People"
+- setAirplaneMode: enabled
 - tapOn:
     id: "ExpandableFab"   #  +Person button
 - tapOn: "Add new person"
@@ -177,6 +178,7 @@ onFlowComplete:
     id: "app_title"
     text: "ParentA User"
 - tapOn: "Child User"
+- setAirplaneMode: disabled
 - assertVisible:
     id: "app_title"
     text: "Child User"

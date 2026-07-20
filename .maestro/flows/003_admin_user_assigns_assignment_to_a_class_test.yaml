@@ -36,7 +36,17 @@ onFlowComplete:
     env:
       USERNAME: "teacherauser"
       PASSWORD: "test123"
-- assertVisible: "Apps"
+- tapOn: "Apps"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "Example Web App"
+- tapOn: "Lessons"
+- tapOn: "Examples"
+- assertVisible: "Lesson 001"
+- assertVisible: "Statement Maker"
+- assertVisible: "JS Tetris"
+- assertVisible: "Assignment Result Statement Demo"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"

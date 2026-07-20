@@ -47,6 +47,7 @@ onFlowComplete:
 - assertVisible: "Statement Maker"
 - assertVisible: "JS Tetris"
 - assertVisible: "Assignment Result Statement Demo"
+- tapOn: "Apps"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"

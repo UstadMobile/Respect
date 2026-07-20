@@ -10,8 +10,8 @@ ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
 
 
-TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.11"
-TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/10/artifact/build/distributions/$TESTSERVERCONTROLLER_BASENAME.zip"
+TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.12"
+TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/11/artifact/build/distributions/$TESTSERVERCONTROLLER_BASENAME.zip"
 
 echo "ROOTDIR=$ROOTDIR BASH_SOURCE=$BASH_SOURCE"
 
@@ -20,9 +20,11 @@ if [ ! -e $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; 
         mkdir -p $ROOTDIR/build/testservercontroller
     fi
 
-    #wget --quiet --output-document=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
-    cp /home/mike/IdeaProjects/TestServerController/build/distributions/$TESTSERVERCONTROLLER_BASENAME.zip \
-        $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
+    wget --quiet --output-document=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
+
+    #cp /home/mike/IdeaProjects/TestServerController/build/distributions/$TESTSERVERCONTROLLER_BASENAME.zip \
+    #    $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
+
     unzip -q -d $ROOTDIR/build/testservercontroller/ \
           $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
 fi
@@ -51,7 +53,7 @@ fi
 function create_test_artifact_zip() {
     echo "ci-run-maestro: Archiving test artifacts..."
 
-    local OUTPUT_ZIP="$ROOTDIR/build/EndToEnd_Test_Artifacts_$(date +%d%m%Y_%H%M%S).zip"
+    local OUTPUT_ZIP="$ROOTDIR/build/EndToEnd_Test_Artifacts_$(date +%Y%m%d_%H%M%S).zip"
 
     if [ -d "$TESTSERVERCONTROLLER_BASEDIR" ]; then
         cd "$TESTSERVERCONTROLLER_BASEDIR"

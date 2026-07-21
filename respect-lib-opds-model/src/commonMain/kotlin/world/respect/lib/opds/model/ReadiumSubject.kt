@@ -47,3 +47,12 @@ object ReadiumSubjectSerializer: StringOrObjectSerializer<ReadiumSubject>(
 object ReadiumSubjectToListTransformer: SingleItemToListTransformer<ReadiumSubject>(
     ReadiumSubject.serializer()
 )
+
+/**
+ * Extension property to get the name of a [ReadiumSubject] as a [LangMap].
+ */
+val ReadiumSubject.name: LangMap
+    get() = when (this) {
+        is ReadiumSubjectObject -> name
+        is ReadiumSubjectStringValue -> LangMapStringValue(value)
+    }

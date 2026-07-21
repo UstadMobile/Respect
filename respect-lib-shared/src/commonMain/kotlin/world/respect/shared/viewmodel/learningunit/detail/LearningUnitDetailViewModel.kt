@@ -6,6 +6,7 @@ import androidx.navigation.toRoute
 import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libcache.UstadCache
 import io.github.aakira.napier.Napier
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -15,15 +16,21 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.school.opds.ext.hasRel
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.findSelfLinks
+import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
+import world.respect.shared.domain.licenses.GetLicenseLabelUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
+import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
@@ -34,10 +41,12 @@ import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitDetailUiState(
     val lessonDetail: OpdsPublication? = null,
+    val appDetail: OpdsPublication? = null,
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
     val showAssignButton: Boolean = false,
+    val licenseLabel: UiText? = null,
 ) {
     val buttonsEnabled: Boolean
         get() = lessonDetail != null
@@ -63,6 +72,9 @@ class LearningUnitDetailViewModel(
 
     private val launchAppUseCase: LaunchAppUseCase by inject()
 
+    private val getLicenseLabelUseCase: GetLicenseLabelUseCase by inject()
+
+
     init {
         viewModelScope.launch {
             schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
@@ -73,11 +85,11 @@ class LearningUnitDetailViewModel(
             ).collect { result ->
                 when (result) {
                     is DataReadyState -> {
+
+                        val lessonPublication = result.data.resolve(route.learningUnitManifestUrl)
                         _uiState.update {
                             it.copy(
-                                lessonDetail = result.data.resolve(
-                                    route.learningUnitManifestUrl
-                                )
+                                lessonDetail = lessonPublication,
                             )
                         }
 
@@ -86,7 +98,42 @@ class LearningUnitDetailViewModel(
                                 title = result.data.metadata.title.asUiText()
                             )
                         }
+
+                        // Load associated app
+                        val appManifestHref = lessonPublication.links.firstOrNull {
+                            it.hasRel(REL_LAUNCHABLE_APP)
+                        }?.href
+
+                        if (appManifestHref != null) {
+                            schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
+                                url = route.learningUnitManifestUrl.resolve(appManifestHref),
+                                params = DataLoadParams(),
+                                referrerUrl = null,
+                                expectedPublicationId = null,
+                            ).collect { appResult ->
+
+                                if (appResult is DataReadyState) {
+                                    val appPublication = appResult.data.resolve(
+                                        route.learningUnitManifestUrl.resolve(appManifestHref)
+                                    )
+                                    val licenseLink =
+                                        appPublication.links.firstOrNull { it.hasRel(LICENSE) }
+
+                                    _uiState.update {
+                                        it.copy(
+                                            appDetail = appPublication,
+                                            licenseLabel = licenseLink?.let {
+                                                getLicenseLabelUseCase(
+                                                    it
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
+
                     else -> {
                     }
                 }
@@ -114,7 +161,8 @@ class LearningUnitDetailViewModel(
         //If app is null, then UiState.buttonsEnabled is false, so fallback return should never happen
         viewModelScope.launch {
             try {
-                val lessonPublication = _uiState.value.lessonDetail ?: throw IllegalStateException("Not ready")
+                val lessonPublication =
+                    _uiState.value.lessonDetail ?: throw IllegalStateException("Not ready")
 
                 launchAppUseCase(
                     LaunchAppUseCase.LaunchRequest(
@@ -123,7 +171,7 @@ class LearningUnitDetailViewModel(
                         assignmentActivityId = route.assignmentActivityId,
                     )
                 )
-            }catch(e: Throwable) {
+            } catch (e: Throwable) {
                 Napier.w("Something wrong opening learning unit", e)
                 snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
             }
@@ -133,13 +181,15 @@ class LearningUnitDetailViewModel(
     fun onClickDownload() {
         viewModelScope.launch {
             snackBarDispatcher.tryOrShowSnackbarOnError {
-                when(uiState.value.pinState.status) {
+                when (uiState.value.pinState.status) {
                     PublicationPinState.Status.NOT_PINNED -> {
                         ustadCache.pinPublication(route.learningUnitManifestUrl)
                     }
+
                     PublicationPinState.Status.READY -> {
                         ustadCache.unpinPublication(route.learningUnitManifestUrl)
                     }
+
                     else -> {
                         //Do nothing
                     }
@@ -162,5 +212,20 @@ class LearningUnitDetailViewModel(
                 )
             )
         )
+    }
+
+    fun onClickApp(app: OpdsPublication) {
+        val url = app.findSelfLinks().firstOrNull()?.href ?: return
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                destination = AppsDetail.create(manifestUrl = Url(url))
+            )
+        )
+    }
+
+    private companion object {
+        const val REL_LAUNCHABLE_APP =
+            "https://id.openeel.org/rel/launchable-app"
+        const val LICENSE = "license"
     }
 }

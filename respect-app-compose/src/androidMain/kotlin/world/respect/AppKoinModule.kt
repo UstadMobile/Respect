@@ -227,6 +227,7 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
+import world.respect.shared.domain.licenses.GetLicenseLabelUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
@@ -762,6 +763,9 @@ val appKoinModule = module {
         GetXapiActivityForPublicationUseCase()
     }
 
+    single<GetLicenseLabelUseCase> {
+        GetLicenseLabelUseCase()
+    }
 
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account

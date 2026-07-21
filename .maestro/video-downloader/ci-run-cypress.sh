@@ -17,14 +17,14 @@ mkdir -p "$DOWNLOAD_DIR"
 rm -f "$URL_FILE"   # fresh run every time
 
 # ---- Run Cypress ------------------
-#export NVM_DIR="/home/jenkins/.nvm"
-#source "$NVM_DIR/nvm.sh"
-#
-#nvm use 20.20.2
-#
-#echo "Node version after switch:"
-#which node
-#node -v
+export NVM_DIR="/home/jenkins/.nvm"
+source "$NVM_DIR/nvm.sh"
+
+nvm use 20.20.2
+
+echo "Node version after switch:"
+which node
+node -v
 
 echo "Installing dependencies..."
 npm install

@@ -90,6 +90,6 @@ onFlowComplete:
 - assertVisible: "Statement sent.*"
 - tapOn: "Close"
 - setAirplaneMode: disabled
-- tapOn: "Apps"
+- tapOn: "Home"
 - assertVisible: "Example Web App"
 

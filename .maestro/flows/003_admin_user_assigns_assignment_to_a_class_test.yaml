@@ -10,7 +10,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "003_admin_user_assigns_assignment_to_a_class_test"
+        NAME: ${'003_admin_user_assigns_assignment_to_a_class_test_' + Date.now()}
 
 onFlowComplete:
   - runFlow:

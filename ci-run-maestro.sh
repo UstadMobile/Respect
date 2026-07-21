@@ -10,8 +10,8 @@ ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
 
 
-TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.12"
-TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/11/artifact/build/distributions/$TESTSERVERCONTROLLER_BASENAME.zip"
+TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.14"
+TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/12/artifact/build/distributions/$TESTSERVERCONTROLLER_BASENAME.zip"
 
 echo "ROOTDIR=$ROOTDIR BASH_SOURCE=$BASH_SOURCE"
 
@@ -89,14 +89,13 @@ function check_databases() {
 
 function cleanup() {
     if [ "$TESTCONTROLLER_PID" != "" ]; then
-        echo "ci-run-maestro: note 'No instance for key AttributeKey: KOIN_SCOPE' can be safely ignored"
-        echo "ci-run-maestro: Stopping TestServerController"
-        wget -qO- "${TESTCONTROLLER_URL}shutdown"
-        sleep 10
-        if [ -d "/proc/$TESTCONTROLLER_PID" ]; then
-            echo "ci-run-maestro: calling kill just in case (no such process error can be ignored)"
-            kill $TESTCONTROLLER_PID
-        fi
+        echo "ci-run-maestro: Stopping TestServerController : pid=$TESTCONTROLLER_PID"
+
+        kill -SIGINT $TESTCONTROLLER_PID
+        pkill -SIGINT -P $TESTCONTROLLER_PID
+        sleep 5
+        kill $TESTCONTROLLER_PID
+        pkill -P $TESTCONTROLLER_PID
     fi
 
     create_test_artifact_zip

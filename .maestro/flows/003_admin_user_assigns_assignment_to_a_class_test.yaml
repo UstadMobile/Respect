@@ -1,6 +1,4 @@
 appId: world.respect.app
-tags:
-  - "e2e"
 onFlowStart:
   - clearState: world.respect.app
   - runScript:

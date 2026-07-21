@@ -160,7 +160,6 @@ if [ "$1" == "cloud" ]; then
         --project-id=$MAESTRO_CLOUD_PROJECTID \
         --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \
         --flows=.maestro/flows \
-        --include-tags=e2e \
         $DEVICE_OS_ARG \
         --format=junit \
         --output=build/maestro/report.xml \

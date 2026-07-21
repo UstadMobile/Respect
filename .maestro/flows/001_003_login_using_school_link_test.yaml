@@ -10,7 +10,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: ${'001_003_login_using_school_link_test_' + Date.now()}
+        NAME: 001_003_login_using_school_link_test
 
 onFlowComplete:
   - runFlow:

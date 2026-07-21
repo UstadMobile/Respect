@@ -138,7 +138,6 @@ $TESTCONTROLLER_BIN  \
     -P:testservercontroller.basedir=$TESTSERVERCONTROLLER_BASEDIR \
     -P:testservercontroller.env.DIR_ADMIN_AUTH=$DIR_ADMIN_AUTH_PASS \
     -P:testservercontroller.env.VERSION=$VERSION \
-    -P:ktor.deployment.shutdown.url=/api/shutdown \
     -P:testservercontroller.cmd="$ROOTDIR/ci-run-test-server.sh" &
 
 TESTCONTROLLER_PID=$!
@@ -207,7 +206,7 @@ if [ "$1" == "cloud" ]; then
     fi
 
      if [ "$DEVICE_OS_ARG" == "" ]; then
-           DEVICE_OS_ARG=e"--device-os=android-35"
+           DEVICE_OS_ARG="--device-os=android-35"
      fi
 
     maestro cloud \

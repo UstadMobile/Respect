@@ -80,7 +80,10 @@ fun Application.module() {
         setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
     }
 
+    environment.config.absoluteDataDir().takeIf { !it.exists() }?.mkdirs()
+
     environment.config.filePropertyOrNull(SERVER_CONFIG_PID_FILE)?.also { pidFile ->
+        pidFile.parentFile?.takeIf { !it.exists() }?.mkdirs()
         pidFile.writeText(ProcessHandle.current().pid().toString())
     }
 

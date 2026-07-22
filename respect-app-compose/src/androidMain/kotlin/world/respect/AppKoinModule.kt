@@ -28,6 +28,7 @@ import com.ustadmobile.libcache.webview.OkHttpWebViewClient
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
@@ -349,6 +350,9 @@ val appKoinModule = module {
             install(ContentNegotiation) {
                 json(json = get())
             }
+
+            install(HttpRequestRetry)
+
             engine {
                 preconfigured = get()
             }

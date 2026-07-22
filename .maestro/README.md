@@ -44,7 +44,7 @@ required.
 
 ```
 export TESTSERVER_CONTROLLER=http://192.168.1.2:8094/
-./ci-run-maestro.sh 
+./ci-run-e2e-tests.sh
 ```
 
 Where:
@@ -57,7 +57,7 @@ e.g.
 ```
 export TESTSERVER_CONTROLLER=http://192.168.1.2:8094/
 export MAESTRO_EXTRA_ARGS=" --include-tags=basic "
-./ci-run-maestro.sh 
+./ci-run-e2e-tests.sh
 ```
 
 # Maestro flow environment variables:

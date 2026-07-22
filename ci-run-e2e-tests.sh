@@ -1,35 +1,39 @@
 #!/bin/bash
 
-# Script used in CI environment (Continuous Integration - eg Jenkins) to run Maestro end to end tests (see
-# .maestro for test flows
+# Script used in CI environment (Continuous Integration - eg Jenkins) to run Maestro end to end tests
+# (see .maestro for test flows
 
 ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 
+CI_E2ERUN_DIR="$ROOTDIR/build/ci-e2e"
+if [ ! -e $CI_E2ERUN_DIR ]; then
+    mkdir -p $CI_E2ERUN_DIR
+fi
+
 # Root directory for TestServerController to use (each server will get its own sub directory)
 # TestServerController will create the directory automatically.
-TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
+TESTSERVERCONTROLLER_BASEDIR="$CI_E2ERUN_DIR/workspace"
+if [ ! -e $TESTSERVERCONTROLLER_BASEDIR ]; then
+    mkdir -p $TESTSERVERCONTROLLER_BASEDIR
+fi
 
-
-TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.14"
-TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/12/artifact/build/distributions/$TESTSERVERCONTROLLER_BASENAME.zip"
+TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.15"
+TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/13/artifact/build/distributions/testservercontroller-0.0.15.zip"
 
 echo "ROOTDIR=$ROOTDIR BASH_SOURCE=$BASH_SOURCE"
 
-if [ ! -e $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; then
-    if [ ! -e $ROOTDIR/build/testservercontroller ]; then
-        mkdir -p $ROOTDIR/build/testservercontroller
-    fi
+if [ ! -e $CI_E2ERUN_DIR/$TESTSERVERCONTROLLER_BASENAME ]; then
 
-    wget --quiet --output-document=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
+    wget --quiet --output-document=$CI_E2ERUN_DIR/$TESTSERVERCONTROLLER_BASENAME.zip \
+         $TESTSERVERCONTROLLER_DOWNLOAD_URL
 
-    #cp /home/mike/IdeaProjects/TestServerController/build/distributions/$TESTSERVERCONTROLLER_BASENAME.zip \
-    #    $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
+    cp /home/mike/IdeaProjects/TestServerController/build/distributions/$TESTSERVERCONTROLLER_BASENAME.zip \
+        $CI_E2ERUN_DIR/$TESTSERVERCONTROLLER_BASENAME.zip
 
-    unzip -q -d $ROOTDIR/build/testservercontroller/ \
-          $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
+    unzip -q -d $CI_E2ERUN_DIR $CI_E2ERUN_DIR/$TESTSERVERCONTROLLER_BASENAME.zip
 fi
 
-TESTCONTROLLER_BIN=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME/bin/testservercontroller
+TESTCONTROLLER_BIN=$CI_E2ERUN_DIR/$TESTSERVERCONTROLLER_BASENAME/bin/testservercontroller
 
 if [ "$TESTCONTROLLER_PORT" == "" ]; then
     TESTCONTROLLER_PORT=8094
@@ -53,7 +57,10 @@ fi
 function create_test_artifact_zip() {
     echo "ci-run-maestro: Archiving test artifacts..."
 
-    local OUTPUT_ZIP="$ROOTDIR/build/EndToEnd_Test_Artifacts_$(date +%Y%m%d_%H%M%S).zip"
+    local OUTPUT_ZIP="$CI_E2ERUN_DIR/artifacts/EndToEnd_Test_Artifacts_$(date +%Y%m%d_%H%M%S).zip"
+    if [ ! -e "$(dirname $OUTPUT_ZIP)" ]; then
+        mkdir -p $(dirname $OUTPUT_ZIP)
+    fi
 
     if [ -d "$TESTSERVERCONTROLLER_BASEDIR" ]; then
         cd "$TESTSERVERCONTROLLER_BASEDIR"
@@ -73,15 +80,9 @@ function create_test_artifact_zip() {
 }
 
 function check_databases() {
-    echo "Checking database integrity..."
-
     while read -r db; do
-        echo "Checking: $(basename "$db")"
-
-        if [ "$(sqlite3 "$db" "PRAGMA integrity_check;")" = "ok" ]; then
-            echo "PASS: $db"
-        else
-            echo "FAIL: $db"
+        if [ "$(sqlite3 "$db" "PRAGMA integrity_check;")" != "ok" ]; then
+            echo "ci-run-e2e-tests: FAIL - database does not pass integrity check: $db"
             exit 1
         fi
     done < <(find "$TESTSERVERCONTROLLER_BASEDIR" -path "*/e2e-client-artifacts/*.db")
@@ -89,11 +90,11 @@ function check_databases() {
 
 function cleanup() {
     if [ "$TESTCONTROLLER_PID" != "" ]; then
-        echo "ci-run-maestro: Stopping TestServerController : pid=$TESTCONTROLLER_PID"
+        echo "ci-run-e2e-tests: Stopping TestServerController : pid=$TESTCONTROLLER_PID"
 
         kill -SIGINT $TESTCONTROLLER_PID
         pkill -SIGINT -P $TESTCONTROLLER_PID
-        sleep 5
+        sleep 10
         kill $TESTCONTROLLER_PID
         pkill -P $TESTCONTROLLER_PID
     fi
@@ -142,7 +143,7 @@ $TESTCONTROLLER_BIN  \
 TESTCONTROLLER_PID=$!
 
 wait-port $TESTCONTROLLER_PORT
-echo "ci-run-maestro: TestServerController now running on port $TESTCONTROLLER_PORT (pid $TESTCONTROLLER_PID)"
+echo "ci-run-e2e-tests: TestServerController now running on port $TESTCONTROLLER_PORT (pid $TESTCONTROLLER_PID)"
 
 # Can now run maestro - the TESTSERVERCONTROLLER url is known and we also know the admin auth to create a new school etc.
 
@@ -154,15 +155,6 @@ MAESTRO_REPORT_FILE=$TESTSERVERCONTROLLER_BASEDIR/maestro/report.xml
 if [ ! -e $MAESTRO_OUTPUT_DIR ]; then
     mkdir -p $MAESTRO_OUTPUT_DIR
 fi
-
-if [ ! -e build/results ]; then
-    mkdir -p build/results
-fi
-
-if [ ! -e build/maestro/results ]; then
-    mkdir -p build/maestro/output
-fi
-
 
 TEST_APP_URL_ARG=""
 
@@ -208,6 +200,8 @@ if [ "$1" == "cloud" ]; then
            DEVICE_OS_ARG="--device-os=android-35"
      fi
 
+    MAESTRO_LOG_FILE="$TESTSERVERCONTROLLER_BASEDIR/lastMaestroRun.log"
+
     maestro cloud \
         --api-key=$MAESTRO_CLOUD_APIKEY \
         --project-id=$MAESTRO_CLOUD_PROJECTID \
@@ -215,7 +209,7 @@ if [ "$1" == "cloud" ]; then
         --flows=.maestro/flows \
         $DEVICE_OS_ARG \
         --format=junit \
-        --output=build/maestro/report.xml \
+        --output=$MAESTRO_REPORT_FILE \
         --timeout=300 \
         $NAME_ARG \
         --repo-name=Respect \
@@ -229,41 +223,39 @@ if [ "$1" == "cloud" ]; then
         --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
         --env SCHOOL_NAME=TestSchool \
         $TEST_APP_URL_ARG \
-       | tee $WORKSPACE/build/testservercontroller/workspace/lastMaestroRun.log  # | tee: Saves to file, Shows on Jenkins Console
+       | tee $MAESTRO_LOG_FILE  # | tee: Saves to file, Shows on Jenkins Console
 
     MAESTRO_STATUS=${PIPESTATUS[0]}
-    echo "ci-run-maestro: Cloud run finished (Status: $MAESTRO_STATUS). Extracting URL.."
+    echo "ci-run-e2e-tests: Cloud run finished (Status: $MAESTRO_STATUS). Extracting URL.."
 
-
-    MAESTRO_LOG_FILE="$TESTSERVERCONTROLLER_BASEDIR/lastMaestroRun.log"
 
     if [ -f "$MAESTRO_LOG_FILE" ]; then
         # This searches for any URL with stable part of the path — /upload/ — regardless of host
         export MAESTRO_CLOUD_URL=$(grep -oE 'https://[^ ]*/upload/[^ ]*' "$MAESTRO_LOG_FILE" | tail -1)
 
          if [ -n "$MAESTRO_CLOUD_URL" ]; then
-            echo "ci-run-maestro: Found URL: $MAESTRO_CLOUD_URL"
+            echo "ci-run-e2e-tests: Found URL: $MAESTRO_CLOUD_URL"
 
             export MAESTRO_EMAIL="$MAESTRO_EMAIL"
             export RECIVO_API_KEY="$RECIVO_API_KEY"
             export RECIVO_ORG_ID="$RECIVO_ORG_ID"
 
-            echo "ci-run-maestro: Navigating to downloader script..."
+            echo "ci-run-e2e-tests: Navigating to downloader script..."
             cd "$WORKSPACE/.maestro/video-downloader"
 
             # Ensure executable
             chmod +x ci-run-cypress.sh
 
             # Execute the script
-            ./ci-run-cypress.sh || echo "ci-run-maestro: Video downloader script encountered an error (ignoring)"
+            ./ci-run-cypress.sh || echo "ci-run-e2e-tests: Video downloader script encountered an error (ignoring)"
 
             # Return to original directory
             cd "$WORKSPACE"
          else
-            echo "ci-run-maestro: Skipping video download (No Cloud URL found in logs)."
+            echo "ci-run-e2e-tests: Skipping video download (No Cloud URL found in logs)."
          fi
     else
-         echo "ci-run-maestro: Log file not found. Skipping download."
+         echo "ci-run-e2e-tests: Log file not found. Skipping download."
     fi
 
 else
@@ -283,8 +275,7 @@ else
     MAESTRO_STATUS=$?
 fi
 
-echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
-
+echo "ci-run-e2e-tests: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
 
 check_databases
 

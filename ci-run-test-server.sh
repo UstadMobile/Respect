@@ -6,8 +6,8 @@
 # required to debug the script itself.
 
 # CI (Jenkins Scenario)
-# a) ci-run-maestro.sh starts TestServerController (where run command is set to this script).
-#    ci-run-maestro.sh will save the admin password to dir-admin.txt in advance (allowing the test
+# a) ci-run-e2e-tests.sh starts TestServerController (where run command is set to this script).
+#    ci-run-e2e-tests.sh will save the admin password to dir-admin.txt in advance (allowing the test
 #    itself to add a new school)
 # b) Maestro test calls TESTSERVERCONTROLLER_URL/start to start server process and get the allocated
 #     port. ci-run-test-server.sh also sets a shutdown url
@@ -16,7 +16,7 @@
 # d) Maestro test calls /stop?port=(portnum) to stop the server.
 
 # TESTSERVER_WORKSPACE and TESSTSERVER_PORT is set by TestServerController.
-# VERSION is set in ci-run-maestro.sh
+# VERSION is set in ci-run-e2e-tests.sh
 echo "ci-run-test-server.sh: Workspace = $TESTSERVER_WORKSPACE Port=$TESTSERVER_PORT"
 
 ROOTDIR=$(realpath $(dirname $BASH_SOURCE))

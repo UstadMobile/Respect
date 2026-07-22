@@ -4,7 +4,7 @@
 * Complete development environment setup as per main [README](../README.md)
 * Install [Maestro CLI](https://github.com/mobile-dev-inc/Maestro/releases).
 
-## Run an individual test:
+## Quick run an individual test:
 
 * Build the project as per the main [README](../README.md)
 * Start respect-server and add a school as per the main project README.
@@ -50,6 +50,16 @@ export TESTSERVER_CONTROLLER=http://192.168.1.2:8094/
 Where:
 * 192.168.1.2 is the local IP of the developer's laptop
 
+Note: You can filter which tests to run by setting the environment variable ```MAESTRO_EXTRA_ARGS```
+with arguments as per [Maestro test discovery and tags](https://docs.maestro.dev/maestro-flows/workspace-management/test-discovery-and-tags)
+e.g.
+
+```
+export TESTSERVER_CONTROLLER=http://192.168.1.2:8094/
+export MAESTRO_EXTRA_ARGS=" --include-tags=basic "
+./ci-run-maestro.sh 
+```
+
 # Maestro flow environment variables:
 * ```TESTCONTROLLER_URL```: sets the [TestServerController](https://github.com/UstadMobile/TestServerController) 
   URL for testserver controller that will create new blank server instance as required. If set, the 
@@ -60,7 +70,8 @@ Where:
 * ```SCHOOL_NAME```: explicitly set the school name to use (used in get started screen)
 * ```URL_SUBSTITUTION``` when there is a reverse proxy setup (e.g. to handle HTTPS) then it will 
   replace _PORT_ with the port number created by the test server e.g. https://_PORT_.ustadtesting.ustadmobile.com/
-* ```TEST_APP_URL```: A launchable app publication URL.
+* ```TEST_APP_URL```: A launchable app publication URL (used with 002_browse_lessons_test and 
+  assignment tests.
 
 ## Available test flows
 ---

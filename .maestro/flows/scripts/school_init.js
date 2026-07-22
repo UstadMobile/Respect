@@ -34,6 +34,7 @@ if(isSetUrl(TESTCONTROLLER_URL)) {
     console.log("Response body = " + testControllerResponse.body);
     const responseJson = json(testControllerResponse.body);
 
+    output.SCHOOL_PORT = responseJson.port;
     const serverUrl = isSetUrl(URL_SUBSTITUTION) ?
         URL_SUBSTITUTION.replace("_PORT_", responseJson.port) : responseJson.url;
 

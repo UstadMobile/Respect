@@ -17,6 +17,7 @@ onFlowComplete:
       file: "subflows/teardown.yaml"
       env:
         NAME: "db-final"
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - runFlow: "subflows/admin_add_app.yaml"

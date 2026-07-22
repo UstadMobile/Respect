@@ -10,8 +10,8 @@ ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 TESTSERVERCONTROLLER_BASEDIR="$ROOTDIR/build/testservercontroller/workspace"
 
 
-TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/9/artifact/build/distributions/testservercontroller-0.0.8.zip"
-TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.8"
+TESTSERVERCONTROLLER_BASENAME="testservercontroller-0.0.14"
+TESTSERVERCONTROLLER_DOWNLOAD_URL="https://devserver3.ustadmobile.com/jenkins/job/TestServerController/12/artifact/build/distributions/$TESTSERVERCONTROLLER_BASENAME.zip"
 
 echo "ROOTDIR=$ROOTDIR BASH_SOURCE=$BASH_SOURCE"
 
@@ -21,6 +21,10 @@ if [ ! -e $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME ]; 
     fi
 
     wget --quiet --output-document=$ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip $TESTSERVERCONTROLLER_DOWNLOAD_URL
+
+    #cp /home/mike/IdeaProjects/TestServerController/build/distributions/$TESTSERVERCONTROLLER_BASENAME.zip \
+    #    $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
+
     unzip -q -d $ROOTDIR/build/testservercontroller/ \
           $ROOTDIR/build/testservercontroller/$TESTSERVERCONTROLLER_BASENAME.zip
 fi
@@ -46,17 +50,55 @@ if [ "$TEST_LEARNINGSPACE_PORTRANGE" == "" ]; then
     TEST_LEARNINGSPACE_PORTRANGE="8000-9000"
 fi
 
+function create_test_artifact_zip() {
+    echo "ci-run-maestro: Archiving test artifacts..."
+
+    local OUTPUT_ZIP="$ROOTDIR/build/EndToEnd_Test_Artifacts_$(date +%Y%m%d_%H%M%S).zip"
+
+    if [ -d "$TESTSERVERCONTROLLER_BASEDIR" ]; then
+        cd "$TESTSERVERCONTROLLER_BASEDIR"
+
+        zip -q -r "$OUTPUT_ZIP" . \
+            -i "logs/*" \
+            -i "*/data/*" \
+            -i "*/logs/*" \
+            -i "*/logcat.txt" \
+            -i "maestro/*"
+
+        cd "$ROOTDIR"
+        echo "ci-run-maestro: Artifacts zipped to $OUTPUT_ZIP"
+    else
+        echo "ci-run-maestro: Workspace directory not found, skipping zip."
+    fi
+}
+
+function check_databases() {
+    echo "Checking database integrity..."
+
+    while read -r db; do
+        echo "Checking: $(basename "$db")"
+
+        if [ "$(sqlite3 "$db" "PRAGMA integrity_check;")" = "ok" ]; then
+            echo "PASS: $db"
+        else
+            echo "FAIL: $db"
+            exit 1
+        fi
+    done < <(find "$TESTSERVERCONTROLLER_BASEDIR" -path "*/e2e-client-artifacts/*.db")
+}
+
 function cleanup() {
     if [ "$TESTCONTROLLER_PID" != "" ]; then
-        echo "ci-run-maestro: note 'No instance for key AttributeKey: KOIN_SCOPE' can be safely ignored"
-        echo "ci-run-maestro: Stopping TestServerController"
-        wget -qO- "${TESTCONTROLLER_URL}shutdown"
-        sleep 10
-        if [ -d "/proc/$PID" ]; then
-            echo "ci-run-maestro: calling kill just in case (no such process error can be ignored)"
-            kill $TESTCONTROLLER_PID
-        fi
+        echo "ci-run-maestro: Stopping TestServerController : pid=$TESTCONTROLLER_PID"
+
+        kill -SIGINT $TESTCONTROLLER_PID
+        pkill -SIGINT -P $TESTCONTROLLER_PID
+        sleep 5
+        kill $TESTCONTROLLER_PID
+        pkill -P $TESTCONTROLLER_PID
     fi
+
+    create_test_artifact_zip
 }
 
 trap cleanup EXIT
@@ -82,6 +124,11 @@ fi
 DIR_ADMIN_TO_ENCODE="admin:$DIR_ADMIN_AUTH_PASS"
 DIR_ADMIN_AUTH_HEADER="Basic $(printf '%s' $DIR_ADMIN_TO_ENCODE | base64)"
 
+# Explicitly set to empty string if unset
+if [ "$MAESTRO_EXTRA_ARGS" == "" ]; then
+   MAESTRO_EXTRA_ARGS=""
+fi
+
 export JAVA_OPTS="-Dlogs_dir=$TESTSERVERCONTROLLER_BASEDIR/logs/"
 $TESTCONTROLLER_BIN  \
     -P:ktor.deployment.port=$TESTCONTROLLER_PORT \
@@ -90,7 +137,6 @@ $TESTCONTROLLER_BIN  \
     -P:testservercontroller.basedir=$TESTSERVERCONTROLLER_BASEDIR \
     -P:testservercontroller.env.DIR_ADMIN_AUTH=$DIR_ADMIN_AUTH_PASS \
     -P:testservercontroller.env.VERSION=$VERSION \
-    -P:ktor.deployment.shutdown.url=/shutdown \
     -P:testservercontroller.cmd="$ROOTDIR/ci-run-test-server.sh" &
 
 TESTCONTROLLER_PID=$!
@@ -101,6 +147,13 @@ echo "ci-run-maestro: TestServerController now running on port $TESTCONTROLLER_P
 # Can now run maestro - the TESTSERVERCONTROLLER url is known and we also know the admin auth to create a new school etc.
 
 echo "Run Maestro using $TESTSERVERCONTROLLER_URL"
+
+MAESTRO_OUTPUT_DIR=$TESTSERVERCONTROLLER_BASEDIR/maestro/output
+MAESTRO_REPORT_FILE=$TESTSERVERCONTROLLER_BASEDIR/maestro/report.xml
+
+if [ ! -e $MAESTRO_OUTPUT_DIR ]; then
+    mkdir -p $MAESTRO_OUTPUT_DIR
+fi
 
 if [ ! -e build/results ]; then
     mkdir -p build/results
@@ -214,6 +267,7 @@ if [ "$1" == "cloud" ]; then
     fi
 
 else
+
     maestro test \
       --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
       --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
@@ -221,58 +275,21 @@ else
       --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
       --env SCHOOL_NAME=TestSchool \
       $TEST_APP_URL_ARG \
+      $MAESTRO_EXTRA_ARGS \
       --format=junit \
-      --test-output-dir=build/maestro/output \
-      --output=build/maestro/report.xml \
+      --test-output-dir=$MAESTRO_OUTPUT_DIR \
+      --output=$MAESTRO_REPORT_FILE \
       .maestro/flows/*.yaml
     MAESTRO_STATUS=$?
 fi
 
 echo "ci-run-maestro: Maestro test completed. Workspaces are in $TESTSERVERCONTROLLER_BASEDIR"
 
-function check_databases() {
-    echo "Checking database integrity..."
-
-    while read -r db; do
-        echo "Checking: $(basename "$db")"
-
-        if [ "$(sqlite3 "$db" "PRAGMA integrity_check;")" = "ok" ]; then
-            echo "PASS: $db"
-        else
-            echo "FAIL: $db"
-            exit 1
-        fi
-    done < <(find "$TESTSERVERCONTROLLER_BASEDIR" -path "*/e2e-client-artifacts/*.db")
-}
 
 check_databases
 
 echo "All databases passed integrity check."
 
-function create_test_artifact_zip() {
-    echo "ci-run-maestro: Archiving test artifacts..."
 
-    local OUTPUT_ZIP="$ROOTDIR/build/EndToEnd_Test_Artifacts_$(date +%d%m%Y_%H%M%S).zip"
-
-    if [ -d "$TESTSERVERCONTROLLER_BASEDIR" ]; then
-        cd "$TESTSERVERCONTROLLER_BASEDIR"
-
-        zip -r "$OUTPUT_ZIP" . \
-            -x "lastMaestroRun.log" \
-            -x "*/respect-server*/*" \
-            -x "*/process.pid" \
-            -x "*/stderr.log" \
-            -x "*/data/dir-admin.txt" \
-            -x "*/data/respect-app.db.lck" \
-            -x "*/data/server.properties"
-
-        cd "$ROOTDIR"
-        echo "ci-run-maestro: Artifacts zipped to $OUTPUT_ZIP"
-    else
-        echo "ci-run-maestro: Workspace directory not found, skipping zip."
-    fi
-}
-
-trap create_test_artifact_zip EXIT
 
 exit $MAESTRO_STATUS

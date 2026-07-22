@@ -36,6 +36,7 @@ kotlin {
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
+            implementation(libs.napier)
         }
 
         jvmMain.dependencies {

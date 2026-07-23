@@ -12,6 +12,7 @@ import com.ustadmobile.core.domain.storage.GetOfflineStorageOptionsUseCase
 import com.ustadmobile.libcache.CachePathsProvider
 import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.UstadCacheBuilder
+import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitor
 import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitorAndroid
 import com.ustadmobile.libcache.db.ClearNeighborsCallback
 import com.ustadmobile.libcache.db.UstadCacheDb
@@ -27,6 +28,7 @@ import com.ustadmobile.libcache.webview.OkHttpWebViewClient
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
@@ -317,6 +319,10 @@ val appKoinModule = module {
         XXHashUidNumberMapper(xxStringHasher = get())
     }
 
+    single<ConnectivityMonitor> {
+        ConnectivityMonitorAndroid(androidContext())
+    }
+
     single<OkHttpClient> {
         val cachePathProvider: CachePathsProvider = get()
 
@@ -333,7 +339,7 @@ val appKoinModule = module {
                     tmpDirProvider = { File(cachePathProvider().tmpWorkPath.toString()) },
                     logger = NapierLoggingAdapter(),
                     json = get(),
-                    connectivityMonitor = ConnectivityMonitorAndroid(androidContext()),
+                    connectivityMonitor = get(),
                 )
             )
             .build()
@@ -344,6 +350,9 @@ val appKoinModule = module {
             install(ContentNegotiation) {
                 json(json = get())
             }
+
+            install(HttpRequestRetry)
+
             engine {
                 preconfigured = get()
             }
@@ -617,6 +626,7 @@ val appKoinModule = module {
         E2EArtifactUploadUseCaseClient(
             httpClient = get(),
             getDbFilesForE2EArtifactUploadUseCase = get(),
+            connectivityMonitor = get(),
         )
     }
 

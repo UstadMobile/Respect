@@ -1,14 +1,22 @@
 # Add a new Launchable Education App
 
-Intended audience: this guide is for app developers who want to add their app to an Open 
-Educational Experience Launcher. The launcher supports web technology based apps (HTML/Javascript)
-and Android native apps.
+**Intended audience**: this guide is for app developers who want to add their app to an Open 
+Educational Experience Launcher. 
 
-TODO: define terms
+The launcher supports web technology based apps (HTML/Javascript)
+and Android native apps. Compatible apps use [OPDS 2.0](https://specs.opds.io/opds-2.0.html) to 
+provide a catalog of available learning units and [xAPI](https://xapi.com/overview/) to send data
+on lesson completion back to the launcher.
+
+Terminology:
+* **Launchable Education App**: an educational app (e.g. math app, language app, assessment app) that 
+  can be launched from the apps list in the launcher.
+* **Learning Unit**: a distinct unit within a launchable app e.g. a lesson, assessment, etc. Each 
+  learning unit is represented by a [publication manifest](https://readium.org/webpub-manifest/).
 
 ## Step 1: Create an app manifest and OPDS app catalog for your app
-An Open Educational Experience Launcher gives students and teachers a way to browse a different
-apps, launch them, browse lessons within them, and make/share collections of lessons.
+An Open Educational Experience Launcher gives students and teachers a way to browse a different 
+apps, launch them, browse learning units within them, and make/share collections of learning units.
 
 **A) Create a launchable app manifest:** 
 
@@ -36,7 +44,7 @@ Example:
     },
     {
       "rel": "collection",
-      "href": "https://demo.openeel.org/default-catalog.json",
+      "href": "https://demo.openeel.org/default-collection.json",
       "type": "application/opds+json"
     },
     {
@@ -67,7 +75,7 @@ Example:
 ```
 For a more options see [README_LAUNCHABLE_APP.md](../respect-lib-opds-model/README_LAUNCHABLE_APP.md).
 
-**B) Create a default collection of publications:**
+**B) Create a default collection of learning units:**
 
 Example (default-catalog.json):
 ```json
@@ -172,6 +180,9 @@ Example (Lesson-manifest.json)
   ]
 }
 ```
+Notes:
+* The ```resources``` section SHOULD list all resources required for the lesson to function offline
+  such that they can be downloaded for offline use.
 
 **D) Create a tincan.xml file for each learning unit**
 
@@ -309,11 +320,11 @@ fun LessonScreen(
     }
 }
 ```
-See the full native demo app [on GitHub](https://www.github.com/UstadMobile/DemoLaunchableApp/).
+See the full native demo app (including library dependencies to add) [on GitHub](https://www.github.com/UstadMobile/DemoLaunchableApp/).
 
 # Step 4: Try adding your app on the launcher
 
 Login to the RESPECT launcher as an admin, go the Apps list, click add, then enter the URL for your
-launchable app manifest from step 1. You should now be able to browse lessons from the apps 
+launchable app manifest from step 1. You should now be able to browse learning units from the apps 
 collections, launch learning units, and receive usage data using xAPI.
 

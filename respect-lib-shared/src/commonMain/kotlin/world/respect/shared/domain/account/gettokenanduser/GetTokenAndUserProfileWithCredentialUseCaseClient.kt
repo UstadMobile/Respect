@@ -2,17 +2,21 @@ package world.respect.shared.domain.account.gettokenanduser
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.retry
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
 import io.ktor.http.appendPathSegments
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import io.ktor.http.takeFrom
 import world.respect.credentials.passkey.RespectCredential
 import world.respect.shared.domain.account.AuthResponse
 import world.respect.datalayer.school.model.DeviceInfo
+import world.respect.libutil.util.throwable.ForbiddenException
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 
 class GetTokenAndUserProfileWithCredentialUseCaseClient(
@@ -25,11 +29,16 @@ class GetTokenAndUserProfileWithCredentialUseCaseClient(
         credential: RespectCredential,
         deviceInfo: DeviceInfo?,
     ): AuthResponse {
-        return httpClient.post {
+        val response = httpClient.post {
+            retry {
+                retryOnExceptionOrServerErrors(maxRetries = DEFAULT_MAX_RETRIES)
+            }
+
             url {
                 takeFrom(schoolUrl)
                 appendPathSegments("api/school/respect/auth/auth-with-password")
             }
+
             header(
                 key = DeviceInfo.HEADER_NAME,
                 value = (deviceInfo ?: getDeviceInfoUseCase()).toHeaderLine(),
@@ -37,6 +46,17 @@ class GetTokenAndUserProfileWithCredentialUseCaseClient(
 
             contentType(ContentType.Application.Json)
             setBody(credential)
-        }.body()
+        }
+
+        return when {
+            response.status.isSuccess() -> response.body()
+            response.status == HttpStatusCode.Forbidden -> throw ForbiddenException()
+            else -> throw IllegalStateException(response.status.description)
+        }
+    }
+
+    companion object {
+
+        const val DEFAULT_MAX_RETRIES = 3
     }
 }

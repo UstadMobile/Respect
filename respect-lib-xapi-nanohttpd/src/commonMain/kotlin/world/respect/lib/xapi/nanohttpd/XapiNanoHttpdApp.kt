@@ -1,6 +1,7 @@
 package world.respect.lib.xapi.nanohttpd
 
 import fi.iki.elonen.NanoHTTPD
+import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import io.ktor.util.StringValuesImpl
 import kotlinx.coroutines.runBlocking
@@ -77,6 +78,16 @@ class XapiNanoHttpdApp(
         )
     }
 
+    private fun logResponse(
+        session: IHTTPSession,
+        response: Response
+    ) {
+        Napier.i(
+            tag = LOGTAG,
+            message = "HTTP ${response.status.requestStatus}: ${session.method} ${session.uri}"
+        )
+    }
+
     private fun serveXapiEndpoint(
         session: IHTTPSession,
         pathSegments: List<String>,
@@ -97,6 +108,11 @@ class XapiNanoHttpdApp(
 
         return runBlocking {
             try {
+                Napier.i(
+                    tag = LOGTAG,
+                    message = "${session.method} ${session.uri}"
+                )
+
                 when(session.method) {
                     /**
                      * Allow cross-origin requests as per
@@ -110,6 +126,7 @@ class XapiNanoHttpdApp(
                             0,
                         ).also {
                             it.addXapiCORSHeaders(session)
+                            logResponse(session, it)
                         }
                     }
 
@@ -128,6 +145,7 @@ class XapiNanoHttpdApp(
 
                         dataLoadState.toFixedLengthResponse(XapiStatementResult.serializer()).also {
                             it.addXapiCORSHeaders(session)
+                            logResponse(session, it)
                         }
                     }
 
@@ -148,6 +166,7 @@ class XapiNanoHttpdApp(
                         ).toFixedLengthResponse(
                             ListSerializer(Uuid.serializer())
                         ).also {
+                            logResponse(session, it)
                             it.addXapiCORSHeaders(session)
                         }
                     }
@@ -172,6 +191,7 @@ class XapiNanoHttpdApp(
                             0,
                         ).also {
                             it.addXapiCORSHeaders(session)
+                            logResponse(session, it)
                         }
                     }
 
@@ -183,12 +203,19 @@ class XapiNanoHttpdApp(
                             0,
                         ).also {
                             it.addXapiCORSHeaders(session)
+                            logResponse(session, it)
                         }
                     }
                 }
             }catch(e: Throwable) {
                 val responseStatus = Response.Status.lookup(
                     (e as? XapiException)?.httpStatusCode ?: 500
+                )
+
+                Napier.e(
+                    tag = LOGTAG,
+                    message = "Error serving: ${session.method} ${session.uri} (status=$responseStatus)",
+                    throwable = e,
                 )
 
                 newFixedLengthResponse(
@@ -212,6 +239,8 @@ class XapiNanoHttpdApp(
          * so to get the endpoint itself (eg https://school.example.org/) the segment index is 1
          */
         const val ENDPOINT_SEGMENT_INDEX = 1
+
+        const val LOGTAG = "XapiNanoHttpd"
 
     }
 }

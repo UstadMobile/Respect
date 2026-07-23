@@ -197,12 +197,50 @@ onFlowComplete:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
+# Test login error when login credential is not valid - Invalid Username
+- tapOn:
+    id: "username"
+- inputText: "teacheruser"
+- tapOn:
+    id : "password"
+- inputText: "test123"
+- tapOn: "Login"
+- assertVisible: "Invalid Username/Password"
+- back
+- tapOn:
+    id: "school_name_text"
+    text: ${SCHOOL_NAME}
+
+# Test login error when login credential is not valid - Invalid Password
+- tapOn:
+    id: "username"
+- inputText: "teacherauser"
+- tapOn:
+    id : "password"
+- inputText: "test1234"
+- tapOn: "Login"
+- assertVisible: "Invalid Username/Password"
+- back
+- tapOn:
+    id: "school_name_text"
+    text: ${SCHOOL_NAME}
+
+# Test error when device internet is not connected
+- setAirplaneMode: enabled
 - tapOn:
     id: "username"
 - inputText: "teacherauser"
 - tapOn:
     id : "password"
 - inputText: "test123"
+- tapOn: "Login"
+- assertVisible: "Network error: check your connection and try again"
+
+# Device back to Online mode - Login success
+- setAirplaneMode: disabled
+- assertVisible:
+    id: "app_title"
+    text: "Login"
 - tapOn: "Login"
 - assertVisible: "Apps"
 - tapOn: "Classes"

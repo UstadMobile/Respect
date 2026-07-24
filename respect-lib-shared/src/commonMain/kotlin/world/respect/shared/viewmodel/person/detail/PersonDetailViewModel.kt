@@ -11,34 +11,32 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.db.school.ext.fullName
+import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
-import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.datalayer.school.PersonDataSource
-import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.shared.params.GetListCommonParams
+import world.respect.lib.dataloadstate.ext.notLoadedIfEmpty
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.phonenumber.OnClickPhoneNumUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
+import world.respect.shared.navigation.CreateAccountSetUsername
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
-import world.respect.shared.navigation.CreateAccountSetUsername
-import world.respect.shared.util.ext.asUiText
-import world.respect.datalayer.db.school.ext.fullName
-import world.respect.datalayer.db.school.ext.isAdmin
-import world.respect.datalayer.db.school.ext.isAdminOrTeacher
-import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
-import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.shared.resources.UiText
-import world.respect.shared.util.exception.getUiTextOrGeneric
+import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import kotlin.getValue
 
 data class PersonDetailUiState(
     val guid: String = "",
@@ -90,21 +88,14 @@ class PersonDetailViewModel(
                 loadParams = DataLoadParams(),
                 params = PersonDataSource.GetListParams(
                     common = GetListCommonParams(
-                        guid = route.guid
+                        guid = route.guid+"!"
                     ),
                     includeRelated = true,
                 )
             ).combine(accountManager.selectedAccountAndPersonFlow) { person, activeAccount ->
                 Pair(person, activeAccount)
             }.collect { (persons, activeAccount) ->
-                if (persons is DataErrorResult) {
-                    _uiState.update { prev ->
-                        prev.copy(
-                           errorMessage = persons.error.getUiTextOrGeneric()
-                        )
-                    }
-                    return@collect
-                }
+
                 val personsVal = persons.dataOrNull()
 
                 val personVal = personsVal?.firstOrNull { it.guid == route.guid }
@@ -128,7 +119,7 @@ class PersonDetailViewModel(
 
                 _uiState.update { prev ->
                     prev.copy(
-                        persons = persons,
+                        persons  = persons.notLoadedIfEmpty(),
                         manageAccountVisible = hasAccountPermission && personVal?.username != null,
                         createAccountVisible = personVal != null &&
                                 activeAccount?.person?.isAdminOrTeacher() == true &&

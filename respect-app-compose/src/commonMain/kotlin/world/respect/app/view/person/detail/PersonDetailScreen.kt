@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -17,12 +18,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectDataLoadHost
 import world.respect.app.components.RespectDetailField
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.RespectQuickActionButton
 import world.respect.app.components.defaultItemPadding
-import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
@@ -61,103 +63,101 @@ fun PersonDetailScreen(
     onClickFamilyMember: (String) -> Unit,
 ) {
     val person = uiState.person
-
-    Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+    RespectDataLoadHost(
+        dataLoadState = uiState.persons,
+        modifier = Modifier.fillMaxSize().padding(vertical = 10.dp)
     ) {
-        uiState.errorMessage?.let { error ->
-            Text(
-                text = uiTextStringResource(error),
-                modifier = Modifier.defaultItemPadding()
-            )
-        }
-        Row(modifier = Modifier.fillMaxWidth()) {
-            if (uiState.manageAccountVisible){
-                RespectQuickActionButton(
-                    labelText = stringResource(Res.string.manage_account),
-                    imageVector = Icons.Default.Key,
-                    onClick = onClickManageAccount
-                )
+        Column(
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+        ) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                if (uiState.manageAccountVisible){
+                    RespectQuickActionButton(
+                        labelText = stringResource(Res.string.manage_account),
+                        imageVector = Icons.Default.Key,
+                        onClick = onClickManageAccount
+                    )
+                }
+
+                if(uiState.createAccountVisible){
+                    RespectQuickActionButton(
+                        labelText = stringResource(Res.string.create_account),
+                        imageVector = Icons.Default.Key,
+                        onClick = onClickCreateAccount,
+                    )
+                }
             }
 
-            if(uiState.createAccountVisible){
-                RespectQuickActionButton(
-                    labelText = stringResource(Res.string.create_account),
-                    imageVector = Icons.Default.Key,
-                    onClick = onClickCreateAccount,
-                )
-            }
-        }
+            HorizontalDivider()
 
-        HorizontalDivider()
-
-        person?.roles?.firstOrNull()?.also { role ->
-            RespectDetailField(
-                modifier = Modifier.defaultItemPadding(),
-                value = { Text(stringResource(role.roleEnum.label)) },
-                label = { Text(stringResource(Res.string.role)) },
-            )
-        }
-
-        person?.username?.also {
-            RespectDetailField(
-                modifier = Modifier.defaultItemPadding(),
-                label = { Text(stringResource(Res.string.username_label)) },
-                value = { Text(it) }
-            )
-        }
-
-        RespectDetailField(
-            modifier = Modifier.defaultItemPadding(),
-            label = { Text(stringResource(Res.string.gender)) },
-            value = { Text(person?.gender?.label?.let { stringResource(it) } ?: "")}
-        )
-
-        person?.dateOfBirth?.also {
-            RespectDetailField(
-                modifier = Modifier.defaultItemPadding(),
-                label = { (Text(stringResource(Res.string.date_of_birth))) },
-                value = { Text(it.toString()) }
-            )
-        }
-        person?.phoneNumber?.also {
-            RespectDetailField(
-                modifier = Modifier.defaultItemPadding().fillMaxWidth().clickable {
-                    onClickPhoneNumber()
-                },
-                label = { Text(stringResource(Res.string.phone_number)) },
-                value = { Text(it) }
-            )
-        }
-        person?.email
-            ?.takeIf { it.isNotBlank() }
-            ?.also { email ->
+            person?.roles?.firstOrNull()?.also { role ->
                 RespectDetailField(
                     modifier = Modifier.defaultItemPadding(),
-                    label = { Text(stringResource(Res.string.email)) },
-                    value = { Text(email) }
+                    value = { Text(stringResource(role.roleEnum.label)) },
+                    label = { Text(stringResource(Res.string.role)) },
                 )
             }
 
-        if (uiState.familyMembers.isNotEmpty()) {
-            Text(
+            person?.username?.also {
+                RespectDetailField(
+                    modifier = Modifier.defaultItemPadding(),
+                    label = { Text(stringResource(Res.string.username_label)) },
+                    value = { Text(it) }
+                )
+            }
+
+            RespectDetailField(
                 modifier = Modifier.defaultItemPadding(),
-                text = stringResource(Res.string.family_members),
-                style = MaterialTheme.typography.bodySmall,
+                label = { Text(stringResource(Res.string.gender)) },
+                value = { Text(person?.gender?.label?.let { stringResource(it) } ?: "")}
             )
 
-            uiState.familyMembers.forEach { familyPerson->
-                ListItem(
-                    modifier = Modifier.clickable {
-                        onClickFamilyMember(familyPerson.guid)
-                    },
-                    leadingContent = {
-                        RespectPersonAvatar(familyPerson.fullName())
-                    },
-                    headlineContent = {
-                        Text(familyPerson.fullName())
-                    }
+            person?.dateOfBirth?.also {
+                RespectDetailField(
+                    modifier = Modifier.defaultItemPadding(),
+                    label = { (Text(stringResource(Res.string.date_of_birth))) },
+                    value = { Text(it.toString()) }
                 )
+            }
+            person?.phoneNumber?.also {
+                RespectDetailField(
+                    modifier = Modifier.defaultItemPadding().fillMaxWidth().clickable {
+                        onClickPhoneNumber()
+                    },
+                    label = { Text(stringResource(Res.string.phone_number)) },
+                    value = { Text(it) }
+                )
+            }
+            person?.email
+                ?.takeIf { it.isNotBlank() }
+                ?.also { email ->
+                    RespectDetailField(
+                        modifier = Modifier.defaultItemPadding(),
+                        label = { Text(stringResource(Res.string.email)) },
+                        value = { Text(email) }
+                    )
+                }
+
+            if (uiState.familyMembers.isNotEmpty()) {
+                Text(
+                    modifier = Modifier.defaultItemPadding(),
+                    text = stringResource(Res.string.family_members),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+
+                uiState.familyMembers.forEach { familyPerson->
+                    ListItem(
+                        modifier = Modifier.clickable {
+                            onClickFamilyMember(familyPerson.guid)
+                        },
+                        leadingContent = {
+                            RespectPersonAvatar(familyPerson.fullName())
+                        },
+                        headlineContent = {
+                            Text(familyPerson.fullName())
+                        }
+                    )
+                }
             }
         }
     }

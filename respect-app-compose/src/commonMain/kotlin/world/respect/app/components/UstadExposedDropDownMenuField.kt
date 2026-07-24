@@ -15,6 +15,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import io.github.aakira.napier.Napier
+import world.respect.shared.util.LogTags
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,6 +30,7 @@ fun <T> RespectExposedDropDownMenuField(
     itemText: @Composable (T) -> String,
     enabled: Boolean = true,
     supportingText: (@Composable () -> Unit)? = null,
+    logline: String? = null,
 ) {
 
     //As per
@@ -38,7 +41,12 @@ fun <T> RespectExposedDropDownMenuField(
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = expanded,
-        onExpandedChange = { expanded = it }
+        onExpandedChange = {
+            logline?.also { line ->
+                Napier.d(tag = LogTags.TAG_CLICKTRACK, message = "$line : onExpandedChange: expanded = $it")
+            }
+            expanded = it
+        }
     ) {
 
         OutlinedTextField(

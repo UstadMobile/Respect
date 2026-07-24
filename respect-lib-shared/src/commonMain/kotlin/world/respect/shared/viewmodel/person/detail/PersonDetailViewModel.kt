@@ -33,6 +33,9 @@ import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.lib.dataloadstate.DataErrorResult
+import world.respect.shared.resources.UiText
+import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import kotlin.getValue
@@ -42,7 +45,8 @@ data class PersonDetailUiState(
     val persons: DataLoadState<List<Person>> = DataLoadingState(),
     val manageAccountVisible: Boolean = false,
     val createAccountVisible: Boolean = false,
-) {
+    val errorMessage: UiText? = null,
+    ) {
 
     val person: Person?
         get() = persons.dataOrNull()?.firstOrNull { it.guid == guid }
@@ -93,6 +97,14 @@ class PersonDetailViewModel(
             ).combine(accountManager.selectedAccountAndPersonFlow) { person, activeAccount ->
                 Pair(person, activeAccount)
             }.collect { (persons, activeAccount) ->
+                if (persons is DataErrorResult) {
+                    _uiState.update { prev ->
+                        prev.copy(
+                           errorMessage = persons.error.getUiTextOrGeneric()
+                        )
+                    }
+                    return@collect
+                }
                 val personsVal = persons.dataOrNull()
 
                 val personVal = personsVal?.firstOrNull { it.guid == route.guid }

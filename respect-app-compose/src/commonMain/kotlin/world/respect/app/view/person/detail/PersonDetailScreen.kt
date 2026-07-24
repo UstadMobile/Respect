@@ -22,6 +22,7 @@ import world.respect.app.components.RespectDetailField
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.RespectQuickActionButton
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.create_account
@@ -64,6 +65,12 @@ fun PersonDetailScreen(
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
     ) {
+        uiState.errorMessage?.let { error ->
+            Text(
+                text = uiTextStringResource(error),
+                modifier = Modifier.defaultItemPadding()
+            )
+        }
         Row(modifier = Modifier.fillMaxWidth()) {
             if (uiState.manageAccountVisible){
                 RespectQuickActionButton(

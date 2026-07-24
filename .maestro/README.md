@@ -84,6 +84,7 @@ export MAESTRO_EXTRA_ARGS=" --include-tags=basic "
 5. Teacher approves student → student joins class
 6. Teacher generates parent invite link to join class
 7. Parent joins using link → adds child to class
+
 ---
 ### 001_002_add_user_direct_test
 
@@ -98,6 +99,7 @@ export MAESTRO_EXTRA_ARGS=" --include-tags=basic "
 9. Create a student user for QR code validation
 10. Validate login, password change, and child mode access
 11. Verify QR-based login for student
+
 ---
 ### 001_003_login_using_school_link_test
 
@@ -106,6 +108,7 @@ export MAESTRO_EXTRA_ARGS=" --include-tags=basic "
 3. Enter valid school URL
 4. Perform login with credentials
 5. Verify successful access to the app
+
 ---
 ### 001_005_add_school_self_registration_test
 
@@ -114,14 +117,19 @@ export MAESTRO_EXTRA_ARGS=" --include-tags=basic "
 3. Creates system administrator account
 4. Logs into newly created school
 5. Verifies profile and logout/login flow
+
 ---
 ### 002_browse_lessons_test
 
-1. Admin logs in to the App
-2. Adds app using external manifest link
-3. Verifies app is added successfully
-4. Opens app and browses lessons
-5. Opens and validates a lesson content
+1. Admin logs into the app.
+2. Adds an app using an external manifest link.
+3. Verifies the app is added successfully.
+4. Browses the available lessons and validates lesson content.
+5. Downloads a lesson/activity for offline use.
+6. In offline mode user verifies the downloaded lesson can be accessed and completed without network connectivity.
+7. Submits a statement from the downloaded lesson and verifies successful submission.
+8. Returns online and verifies the app remains accessible.
+
 ---
 ### 003_admin_user_assigns_assignment_to_a_class_test
 
@@ -134,5 +142,6 @@ export MAESTRO_EXTRA_ARGS=" --include-tags=basic "
 7. Teacher verifies assignment progress, completion statistics, student results, and average scores.
 8. Teacher validates the generated xAPI statement details, including the raw xAPI statement.
 9. Teacher edits the assignment title and verifies the update.
+
 ---
 

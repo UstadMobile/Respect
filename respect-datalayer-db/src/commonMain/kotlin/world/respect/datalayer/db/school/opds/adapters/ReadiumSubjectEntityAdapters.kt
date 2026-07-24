@@ -7,6 +7,7 @@ import world.respect.datalayer.db.school.opds.entities.ReadiumSubjectEntity
 import world.respect.datalayer.db.shared.adapters.asEntities
 import world.respect.datalayer.db.shared.adapters.toModel
 import world.respect.datalayer.db.shared.entities.LangMapEntity
+import world.respect.datalayer.db.shared.ext.takeIfNotEmpty
 import world.respect.lib.opds.model.ReadiumSubject
 import world.respect.lib.opds.model.ReadiumSubjectObject
 import world.respect.lib.opds.model.ReadiumSubjectStringValue
@@ -72,7 +73,7 @@ fun ReadiumSubjectEntities.asModel(json: Json): ReadiumSubject {
                 json = json,
                 propType = ReadiumLinkEntity.PropertyType.READIUM_SUBJECT_LINKS,
                 propFk = readiumSubject.rseUid,
-            ),
+            ).takeIfNotEmpty(),
         )
     }
 }

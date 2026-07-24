@@ -2,8 +2,8 @@ package world.respect.app.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.runtime.Composable
@@ -12,7 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.not_found
 import world.respect.shared.util.exception.getUiTextOrGeneric
+import world.respect.shared.util.ext.asUiText
 
 /**
  * Simple component that will normally pass simply pass through the contents. If the data load
@@ -28,7 +32,9 @@ fun RespectDataLoadHost(
     modifier: Modifier = Modifier,
     contents: @Composable () -> Unit
 ) {
-    if(dataLoadState is DataErrorResult<*>) {
+    val exception = (dataLoadState as? DataErrorResult<*>)?.error
+
+    if(exception != null || dataLoadState is NoDataLoadedState<*>) {
         Column(
             modifier = modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -40,7 +46,9 @@ fun RespectDataLoadHost(
             )
 
             Text(
-                text = uiTextStringResource(dataLoadState.error.getUiTextOrGeneric())
+                text = uiTextStringResource(
+                    exception?.getUiTextOrGeneric() ?: Res.string.not_found.asUiText()
+                )
             )
         }
     }else {

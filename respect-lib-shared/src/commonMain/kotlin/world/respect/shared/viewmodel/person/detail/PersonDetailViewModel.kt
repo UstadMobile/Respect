@@ -88,7 +88,7 @@ class PersonDetailViewModel(
                 loadParams = DataLoadParams(),
                 params = PersonDataSource.GetListParams(
                     common = GetListCommonParams(
-                        guid = route.guid+"!"
+                        guid = route.guid
                     ),
                     includeRelated = true,
                 )

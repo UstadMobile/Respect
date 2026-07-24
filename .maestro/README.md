@@ -88,12 +88,12 @@ export MAESTRO_EXTRA_ARGS=" --include-tags=basic "
 ### 001_002_add_user_direct_test
 
 1. Admin logs into the app
-2. Admin adds a new user directly (Parent user)
+2. Admin adds a new user directly (Parent user) in offline mode
 3. Verify "Family member" field is not visible when role is changed to Teacher
 4. Validate "Edit" button functionality
 5. Validate mandatory fields and input constraints
 6. Add child user via Family member → Add person screen
-7. Create account for Parent user (username, password)
+7. Device back to online mode, then user Create account for Parent user (username, password)
 8. Create account for Child user (username, assign/manage QR code badge, set password)
 9. Create a student user for QR code validation
 10. Validate login, password change, and child mode access
@@ -125,10 +125,14 @@ export MAESTRO_EXTRA_ARGS=" --include-tags=basic "
 ---
 ### 003_admin_user_assigns_assignment_to_a_class_test
 
-1. Admin setup includes app, class and teacher creation
-2. Teacher logs in and accesses class
-3. Teacher creates a new assignment
-4. Assignment is linked with lesson content
-5. Assignment is saved and verified in class
+1. Admin sets up the school by adding an app, creating a class, and adding a teacher and students.
+2. Teacher logs in and verifies the available app and lesson content.
+3. In Offline mode - Teacher creates an assignment for the class with title, description, due date/time, and tasks.
+4. Teacher goes back online and verifies the assignment details, assigned class, students, and linked tasks.
+5. Student A completes all assignment activities and submits xAPI statements.
+6. Student B partially completes the assignment by submitting one activity.
+7. Teacher verifies assignment progress, completion statistics, student results, and average scores.
+8. Teacher validates the generated xAPI statement details, including the raw xAPI statement.
+9. Teacher edits the assignment title and verifies the update.
 ---
 

@@ -12,7 +12,7 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: 002_browse_lessons_test
+        NAME: "002_browse_lessons_test"
 
 onFlowComplete:
   - runFlow:

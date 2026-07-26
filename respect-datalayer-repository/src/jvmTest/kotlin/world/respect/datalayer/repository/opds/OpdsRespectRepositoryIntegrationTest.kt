@@ -46,6 +46,7 @@ import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -202,7 +203,7 @@ class OpdsRespectRepositoryIntegrationTest {
         opdsIntegrationTest {
             val url = Url("http://localhost:$port/resources/index.json")
             runBlocking {
-                withTimeout(15_000) {
+                withTimeout(15_000.milliseconds) {
                     opdsFeedRepository.getByUrlAsFlow(url, DataLoadParams()).filter {
                         it is DataReadyState
                     }.first()

@@ -40,17 +40,23 @@ fun SendDbToServerScreen(uiState: SendDbToServerUiState) {
                 )
             }
 
+            /**
+             * Even if the upload is failed: it is done. This is seen by e2e_artifact_upload.yaml.
+             *
+             * If the text assertion fails it will not proceed to call teardown.js which is needed
+             * to stop the server.
+             */
             uiState.errorMessage != null -> {
                 Text(
                     text = uiState.errorMessage,
-                    modifier = Modifier.testTag("db_failed"),
+                    modifier = Modifier.testTag("upload_done"),
                 )
             }
 
             else -> {
                 Text(
                     text = stringResource(Res.string.send_db_upload_complete),
-                    modifier = Modifier.testTag("db_completed"),
+                    modifier = Modifier.testTag("upload_done"),
                 )
             }
         }

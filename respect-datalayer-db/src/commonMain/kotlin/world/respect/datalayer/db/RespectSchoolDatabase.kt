@@ -13,6 +13,7 @@ import world.respect.datalayer.db.school.opds.daos.OpdsGroupEntityDao
 import world.respect.datalayer.db.school.opds.daos.OpdsPublicationEntityDao
 import world.respect.datalayer.db.school.opds.daos.PersonPasskeyEntityDao
 import world.respect.datalayer.db.school.opds.daos.ReadiumLinkEntityDao
+import world.respect.datalayer.db.school.opds.daos.ReadiumSubjectEntityDao
 import world.respect.datalayer.db.school.opds.entities.OpdsFacetEntity
 import world.respect.datalayer.db.school.opds.entities.OpdsFeedEntity
 import world.respect.datalayer.db.school.opds.entities.OpdsFeedMetadataEntity
@@ -187,6 +188,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getReadiumLinkEntityDao(): ReadiumLinkEntityDao
 
+    abstract fun getReadiumSubjectEntityDao(): ReadiumSubjectEntityDao
+
     abstract fun getOpdsGroupEntityDao(): OpdsGroupEntityDao
 
     abstract fun getActivityEntityDao(): XapiActivityEntityDao
@@ -229,6 +232,7 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
             OpdsFacetEntity.TABLE_ID,
             OpdsGroupEntity.TABLE_ID,
             OpdsFeedEntity.TABLE_ID,
+            ReadiumSubjectEntity.TABLE_ID,
         )
 
     }

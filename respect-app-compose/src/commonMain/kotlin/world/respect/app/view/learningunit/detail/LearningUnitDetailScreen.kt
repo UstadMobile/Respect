@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -107,14 +106,11 @@ fun LearningUnitDetailScreen(
             headlineContent = {
                 Text(
                     text = uiState.lessonDetail?.metadata?.title?.let { langMapString(it) } ?: "",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineSmall
                 )
             },
             supportingContent = {
                 Column(
-                    verticalArrangement =
-                        Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,

@@ -1,7 +1,9 @@
 package org.openeel.demo.demolaunchableappserver
 
 import com.eygraber.uri.Uri
+import io.ktor.http.ContentType
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondBytes
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import world.respect.lib.opds.model.LangMapStringValue
@@ -11,6 +13,8 @@ import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
 import world.respect.libutil.ext.resolve
 import world.respect.server.demoapp.ext.demoAppBaseUrl
+
+class DemoRouteClass()
 
 fun Route.DemoLaunchableAppManifestRoute() {
     get("appmanifest.json") {
@@ -65,7 +69,7 @@ fun Route.DemoLaunchableAppManifestRoute() {
                 ),
                 images = listOf(
                     ReadiumLink(
-                        href = domain.resolve("static/app-icon.png").toString(),
+                        href = domain.resolve("app_icon.png").toString(),
                         type = "image/png",
                     )
                 )
@@ -73,4 +77,11 @@ fun Route.DemoLaunchableAppManifestRoute() {
         )
     }
 
+
+    get("app_icon.png") {
+        call.respondBytes(
+            bytes = DemoRouteClass::class.java.getResourceAsStream("/demoapp/app_icon.png")!!.readBytes(),
+            contentType = ContentType.Image.PNG,
+        )
+    }
 }

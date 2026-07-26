@@ -82,7 +82,7 @@ fun Route.DemoLaunchableAppCollectionsRoute() {
                             ),
                             ReadiumLink(
                                 rel = listOf("https://id.openeel.org/rel/launchable-app"),
-                                href = baseUrl.resolve("/appmanifest.json").toString(),
+                                href = baseUrl.resolve("appmanifest.json").toString(),
                                 type = "application/opds-publication+json"
                             )
                         )

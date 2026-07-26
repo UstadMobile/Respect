@@ -40,6 +40,7 @@ import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
 import world.respect.libutil.util.throwable.unwrapHttpStatusCode
+import world.respect.server.demoapp.DemoLaunchableAppLessonRoute
 import world.respect.server.logging.LogbackAntiLog
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
 import world.respect.server.routes.passkey.RevokePasskeyRoute
@@ -236,6 +237,7 @@ fun Application.module() {
         route("demoapp") {
             DemoLaunchableAppManifestRoute()
             DemoLaunchableAppCollectionsRoute()
+            DemoLaunchableAppLessonRoute()
         }
 
         route("api") {

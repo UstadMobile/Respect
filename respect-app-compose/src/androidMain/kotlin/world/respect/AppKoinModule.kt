@@ -32,7 +32,6 @@ import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -160,6 +159,10 @@ import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
+import world.respect.shared.domain.externallink.OpenExternalLinkUseCase
+import world.respect.shared.domain.externallink.OpenExternalLinkUseCaseAndroid
+import world.respect.shared.domain.externallink.ExtractWebPageMetadataUseCase
+import world.respect.shared.domain.externallink.ExtractWebPageMetadataUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -207,6 +210,7 @@ import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
+import world.respect.shared.viewmodel.learningunit.list.PlaylistDetailViewModel
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
@@ -250,10 +254,12 @@ import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
 import world.respect.shared.viewmodel.settings.SettingsViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
+import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.playlists.collections.externallink.ExternalLinkViewModel
+import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListViewModel
+import world.respect.shared.viewmodel.playlists.collections.share.PlaylistShareViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
@@ -278,7 +284,6 @@ import world.respect.shared.domain.xapi.xapinanohttpd.XapiResourceProviderAndroi
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
 
-@DelicateCoroutinesApi
 val appKoinModule = module {
     single<Json> {
         Json {
@@ -358,7 +363,17 @@ val appKoinModule = module {
             }
         }
     }
-
+    single<OpenExternalLinkUseCase> {
+        OpenExternalLinkUseCaseAndroid(
+            appContext = androidContext().applicationContext
+        )
+    }
+    single<ExtractWebPageMetadataUseCase> {
+        ExtractWebPageMetadataUseCaseAndroid(
+            context = androidContext().applicationContext,
+            json = get()
+        )
+    }
 
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)
@@ -402,8 +417,6 @@ val appKoinModule = module {
     viewModelOf(::IndicatorDetailViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::ScanQRCodeViewModel)
-    viewModelOf(::CurriculumMappingListViewModel)
-    viewModelOf(::CurriculumMappingEditViewModel)
     viewModelOf(::CreateAccountSetUserNameViewModel)
     viewModelOf(::ChangePasswordViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)
@@ -415,6 +428,12 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
+    viewModelOf(::PlaylistListViewModel)
+    viewModelOf(::PlaylistDetailViewModel)
+    viewModelOf(::PlaylistEditViewModel)
+    viewModelOf(::ExternalLinkViewModel)
+    viewModelOf(::PlaylistShareViewModel)
+
     viewModelOf(::StatementListViewModel)
     viewModelOf(::StatementDetailViewModel)
     viewModelOf(::RawStatementViewModel)
@@ -827,8 +846,6 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
-
-
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
@@ -902,20 +919,13 @@ val appKoinModule = module {
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
             )
         }
-
     }
-
     /**
      * ScopeId is set as per RespectAccountScopeId
      *
      * The RespectAccount scope will be linked to SchoolDirectoryEntry (the parent) scope.
      */
     scope<RespectAccount> {
-        /* Koin doesn't have an onScopeCreated kind of function or event listener. The
-         * RespectAccount scope is linked ot the SchoolDirectoryEntry scope when
-         * RespectAccountSchoolScopeLink is retrieved. RespectAccountSchoolScopeLink is a root
-         * dependency that all dependencies on RespectAccountScope require.
-         */
         scoped<RespectAccountSchoolScopeLink> {
             val accountScopeId = RespectAccountScopeId.parse(id)
             val schoolDirectoryScope = SchoolDirectoryEntryScopeId(
@@ -931,8 +941,6 @@ val appKoinModule = module {
 
             RespectAccountSchoolScopeLink(accountScopeId.schoolUrl)
         }
-
-
         scoped<AuthTokenProvider> {
             get<RespectTokenManager>().providerFor(id)
         }

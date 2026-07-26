@@ -3,6 +3,7 @@ package world.respect.datalayer.db.school.opds.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import io.ktor.http.Url
+import world.respect.datalayer.school.model.StatusEnum
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -27,7 +28,9 @@ data class OpdsFeedEntity(
     val ofeLastModifiedHeader: Instant,
     val ofeEtag: String?,
     val ofeStored: Instant = Clock.System.now(),
-) {
+    val ofeStatus: StatusEnum = StatusEnum.ACTIVE,
+
+    ) {
 
     companion object {
 

@@ -14,6 +14,7 @@ import world.respect.datalayer.db.school.opds.entities.ReadiumLinkEntity.Propert
 import world.respect.datalayer.db.school.opds.entities.ReadiumSubjectEntity
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.datalayer.db.shared.entities.LangMapEntity
+import world.respect.datalayer.school.model.StatusEnum
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
@@ -92,6 +93,7 @@ fun OpdsFeed.asEntities(
             ofeLastModified = this.metadata.modified ?: Clock.System.now(),
             ofeLastModifiedHeader = Instant.fromEpochMilliseconds(dataLoadMetaInfo.lastModified),
             ofeEtag = dataLoadMetaInfo.etag,
+            ofeStatus = StatusEnum.fromValue(this.status),
         ),
         feedMetaData = buildList {
             add(feedMetadata)
@@ -157,7 +159,8 @@ fun OpdsFeedEntities.asModel(
                 langMapEntities = langMapEntities,
                 subjectEntities = subjects,
             ).asModel(json)
-        }
+        },
+        status = opdsFeed.ofeStatus.value,
     )
 }
 

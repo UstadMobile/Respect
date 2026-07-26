@@ -8,21 +8,24 @@ import kotlinx.coroutines.flow.update
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.enter_link
-import world.respect.shared.generated.resources.invalid_url
-import world.respect.shared.resources.UiText
-import world.respect.shared.navigation.AppsDetail
-import world.respect.shared.resources.StringResourceUiText
-import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataReadyState
-import world.respect.datalayer.SchoolDataSource
+import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.sharelink.CreatePlaylistShareLinkUseCase
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.enter_link
+import world.respect.shared.generated.resources.invalid_url
+import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.PlaylistDetail
+import world.respect.shared.resources.StringResourceUiText
+import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
-import kotlin.getValue
+import world.respect.shared.viewmodel.RespectViewModel
 
 data class EnterLinkUiState(
     val linkUrl: String = "",
@@ -64,6 +67,17 @@ class EnterLinkViewModel(
         launchWithLoadingIndicator {
             try {
                 val linkUrl = Url(uiState.value.linkUrl)
+
+                val playlistUrl = playlistUrlFromShareLinkOrNull(linkUrl)
+                if (playlistUrl != null) {
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            PlaylistDetail.create(playlistUrl)
+                        )
+                    )
+                    return@launchWithLoadingIndicator
+                }
+
                 val appResult = schoolDataSource.opdsPublicationDataSource.getByUrl(
                     url = linkUrl,
                     params = DataLoadParams(),
@@ -71,7 +85,7 @@ class EnterLinkViewModel(
                     expectedPublicationId = null,
                 )
 
-                if(appResult is DataReadyState) {
+                if (appResult is DataReadyState) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
                             AppsDetail.create(linkUrl)
@@ -90,4 +104,16 @@ class EnterLinkViewModel(
         }
     }
 
+    /**
+     * @return the OPDS feed url for the playlist that the given share link refers to, or null if
+     *         the given url is not a playlist share link.
+     */
+    private fun playlistUrlFromShareLinkOrNull(url: Url): Url? {
+        val shareLink = CreatePlaylistShareLinkUseCase.parseOrNull(url) ?: return null
+
+        return shareLink.schoolUrl.appendEndpointSegments(
+            OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME,
+            shareLink.playlistUuid,
+        )
+    }
 }

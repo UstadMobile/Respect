@@ -35,10 +35,10 @@ onFlowComplete:
 - assertVisible: "Add App"
 # verify App got added to Apps section
 - tapOn: "Add App"
-- tapOn: "Apps"
+- tapOn: "Home"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - assertVisible: "Example Web App"
 - tapOn: "Example Web App"
 - assertVisible: "Lessons"
@@ -93,6 +93,6 @@ onFlowComplete:
 - assertVisible: "Statement sent.*"
 - tapOn: "Close"
 - setAirplaneMode: disabled
-- tapOn: "Apps"
+- tapOn: "Home"
 - assertVisible: "Example Web App"
 

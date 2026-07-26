@@ -76,9 +76,7 @@ private fun SettingsListItem(
 
 @Composable
 fun SettingsScreenForViewModel(
-    viewModel: SettingsViewModel
+    viewModel: SettingsViewModel,
 ) {
-    SettingsScreen(
-        onNavigateToMapping = viewModel::onNavigateToMapping
-    )
+    SettingsScreen()
 }

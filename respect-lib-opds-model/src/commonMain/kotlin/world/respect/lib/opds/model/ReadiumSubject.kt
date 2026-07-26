@@ -19,9 +19,7 @@ data class ReadiumSubjectStringValue(override val value: String): ReadiumSubject
 
 object ReadiumSubjectStringValueSerializer: StringValueSerializer<ReadiumSubjectStringValue>(
     serialName = "ReadiumSubjectStringValue", stringToValue = {
-        ReadiumSubjectStringValue(
-            it
-        )
+        ReadiumSubjectStringValue(it)
     }
 )
 

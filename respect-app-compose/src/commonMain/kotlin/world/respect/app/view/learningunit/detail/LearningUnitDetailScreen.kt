@@ -83,149 +83,141 @@ fun LearningUnitDetailScreen(
     onClickAssign: () -> Unit,
     onClickApp: (OpdsPublication) -> Unit,
 ) {
-
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        ListItem(
+            leadingContent = {
+                val iconUrl = uiState.lessonDetail?.images?.firstOrNull()?.href
 
-        item {
-            ListItem(
-                leadingContent = {
-                    val iconUrl = uiState.lessonDetail?.images?.firstOrNull()?.href
+                iconUrl.also { icon ->
+                    RespectAsyncImage(
+                        uri = icon,
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(120.dp)
 
-                    iconUrl.also { icon ->
-                        RespectAsyncImage(
-                            uri = icon,
-                            contentDescription = "",
-                            contentScale = ContentScale.Crop,
+                    )
+                }
+            },
+            headlineContent = {
+                Text(
+                    text = uiState.lessonDetail?.metadata?.title?.let { langMapString(it) } ?: "",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            },
+            supportingContent = {
+                Column(
+                    verticalArrangement =
+                        Arrangement.spacedBy(4.dp),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable { uiState.appDetail?.let { onClickApp(it) } }
+                    ) {
+                        val appIconUrl = uiState.appDetail?.images?.firstOrNull()?.href
+                        Box(
                             modifier = Modifier
-                                .size(120.dp)
+                                .size(24.dp)
+                                .clip(CircleShape)
+                                .background(white)
+                                .border(1.dp, black, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (appIconUrl != null) {
+                                RespectAsyncImage(
+                                    uri = appIconUrl,
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                        }
 
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Text(
+                            text = uiState.appDetail?.metadata?.title?.let { langMapString(it) }
+                                ?: "",
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
-                },
-                headlineContent = {
-                    Text(
-                        text = uiState.lessonDetail?.metadata?.title?.let { langMapString(it) }
-                            ?: "",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                },
-                supportingContent = {
-                    Column(
-                        verticalArrangement =
-                            Arrangement.spacedBy(4.dp),
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable { uiState.appDetail?.let { onClickApp(it) } }
-                        ) {
-                            val appIconUrl = uiState.appDetail?.images?.firstOrNull()?.href
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(white)
-                                    .border(1.dp, black, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (appIconUrl != null) {
-                                    RespectAsyncImage(
-                                        uri = appIconUrl,
-                                        contentDescription = "",
-                                        contentScale = ContentScale.Fit,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.width(12.dp))
-
-                            Text(
-                                text = uiState.appDetail?.metadata?.title?.let { langMapString(it) }
-                                    ?: "",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                        val duration =
-                            uiState.lessonDetail?.links?.firstOrNull { it.duration != null }?.duration?.seconds
-                        if (duration != null) {
-                            Text(
-                                text = duration.toString(),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.Gray
-                            )
-                        }
+                    val duration =
+                        uiState.lessonDetail?.links?.firstOrNull { it.duration != null }?.duration?.seconds
+                    if (duration != null) {
+                        Text(
+                            text = duration.toString(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
                     }
                 }
-            )
-        }
-
-        item {
-            Button(
-                onClick = {
-                    onClickOpen()
-                },
-                enabled = uiState.buttonsEnabled,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(Res.string.open).uppercase())
             }
+        )
+
+        Button(
+            onClick = {
+                onClickOpen()
+            },
+            enabled = uiState.buttonsEnabled,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(Res.string.open))
         }
 
-        item {
-            HorizontalDivider()
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        HorizontalDivider()
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RespectQuickActionButton(
+                labelText = when(uiState.pinState.status) {
+                    PublicationPinState.Status.IN_PROGRESS -> stringResource(Res.string.cancel)
+                    PublicationPinState.Status.READY -> stringResource(Res.string.downloaded)
+                    else -> stringResource(Res.string.download)
+                },
+                iconContent = {
+                    RespectOfflineItemStatusIcon(
+                        state = uiState.pinState,
+                    )
+                },
+                onClick = onClickDownload,
+                enabled = uiState.buttonsEnabled,
+            )
+
+            if(uiState.showAssignButton) {
                 RespectQuickActionButton(
-                    labelText = when (uiState.pinState.status) {
-                        PublicationPinState.Status.IN_PROGRESS -> stringResource(Res.string.cancel)
-                        PublicationPinState.Status.READY -> stringResource(Res.string.downloaded)
-                        else -> stringResource(Res.string.download)
-                    },
-                    iconContent = {
-                        RespectOfflineItemStatusIcon(
-                            state = uiState.pinState,
-                        )
-                    },
-                    onClick = onClickDownload,
+                    imageVector =Icons.Filled.NearMe,
+                    labelText = stringResource(Res.string.assign),
+                    onClick = onClickAssign,
                     enabled = uiState.buttonsEnabled,
                 )
-
-                if (uiState.showAssignButton) {
-                    RespectQuickActionButton(
-                        imageVector = Icons.Filled.NearMe,
-                        labelText = stringResource(Res.string.assign),
-                        onClick = onClickAssign,
-                        enabled = uiState.buttonsEnabled,
-                    )
-                }
             }
         }
 
-        item {
-            HorizontalDivider()
-            FlowRow(
-                modifier = Modifier.fillMaxWidth().defaultItemPadding(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                uiState.licenseLabel?.let {
-                    Tag(text = "${stringResource(Res.string.license)}: ${uiTextStringResource(it)}")
-                }
 
-                uiState.lessonDetail?.metadata?.subject?.forEach { subject ->
-                    Tag(text = "${stringResource(Res.string.subject)}: ${langMapString(subject.name)}")
-                }
+        HorizontalDivider()
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            uiState.licenseLabel?.let {
+                Tag(text = "${stringResource(Res.string.license)}: ${uiTextStringResource(it)}")
+            }
+
+            uiState.lessonDetail?.metadata?.subject?.forEach { subject ->
+                Tag(text = "${stringResource(Res.string.subject)}: ${langMapString(subject.name)}")
             }
         }
+
     }
 }
 

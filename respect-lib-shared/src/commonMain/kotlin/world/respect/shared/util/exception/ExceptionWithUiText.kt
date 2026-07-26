@@ -1,8 +1,10 @@
 package world.respect.shared.util.exception
 
+import kotlinx.io.IOException
 import world.respect.libutil.ext.getCauseOfType
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.something_went_wrong
+import world.respect.shared.generated.resources.network_error_check_try_again
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 
@@ -29,6 +31,15 @@ fun Throwable.getUiText(): UiText? {
     return getCauseOfType<ExceptionWithUiMessage>()?.uiText
 }
 
+fun Throwable.isIoException(): Boolean {
+    return getCauseOfType<IOException>() != null
+}
+
 fun Throwable.getUiTextOrGeneric(): UiText {
-    return getUiText() ?: Res.string.something_went_wrong.asUiText()
+    val uiText = getUiText()
+    return when {
+        uiText != null -> uiText
+        isIoException() -> Res.string.network_error_check_try_again.asUiText()
+        else -> Res.string.something_went_wrong.asUiText()
+    }
 }

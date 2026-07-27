@@ -2,8 +2,6 @@ package world.respect.credentials.passkey.request
 
 import io.ktor.http.Url
 import io.ktor.util.encodeBase64
-import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getString
 import world.respect.credentials.passkey.RespectUserHandle
 import world.respect.credentials.passkey.model.AuthenticatorSelectionCriteria
 import world.respect.credentials.passkey.model.PublicKeyCredentialCreationOptionsJSON
@@ -26,7 +24,7 @@ import world.respect.libutil.ext.randomString
  */
 class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
     private val encodeUserHandleUseCase: EncodeUserHandleUseCase,
-    private val appName: StringResource,
+    private val appName: suspend () -> String,
     private val schoolUrl: Url,
 ) {
 
@@ -48,7 +46,7 @@ class CreatePublicKeyCredentialCreationOptionsJsonUseCase(
         return PublicKeyCredentialCreationOptionsJSON(
             rp = PublicKeyCredentialRpEntity(
                 id = request.rpId,
-                name = getString(appName),
+                name = appName(),
                 icon = null,
             ),
             user = PublicKeyCredentialUserEntityJSON(

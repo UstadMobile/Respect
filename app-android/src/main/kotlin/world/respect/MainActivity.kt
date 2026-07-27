@@ -10,7 +10,6 @@ import org.koin.android.ext.android.getKoin
 import org.koin.android.scope.AndroidScopeComponent
 import org.koin.androidx.scope.activityScope
 import org.koin.core.scope.Scope
-import world.respect.app.app.App
 import world.respect.credentials.passkey.CreatePasskeyUseCaseAndroidChannelHost
 import world.respect.credentials.passkey.CreatePasskeyUseCaseProcessor
 import world.respect.credentials.passkey.GetCredentialUseCase

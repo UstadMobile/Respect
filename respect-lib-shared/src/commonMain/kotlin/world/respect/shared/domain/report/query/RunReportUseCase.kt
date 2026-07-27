@@ -133,7 +133,7 @@ interface RunReportUseCase {
         val reportOptions: ReportOptions,
         val accountPersonUid: Long,
         val cacheControl: String? = null,
-        val timeZone: TimeZone,
+        val timeZoneId: String,
     ) {
 
         /**
@@ -181,12 +181,13 @@ interface RunReportUseCase {
             val resultList = mutableListOf<StatementReportRow>()
             val rowMap = this.associateBy { Pair(it.xAxis, it.subgroup) }
 
+            val timeZone = TimeZone.of(request.timeZoneId)
             var fromDateTime = Instant
-                .fromEpochMilliseconds(request.reportOptions.period.periodStartMillis(request.timeZone))
-                .toLocalDateTime(request.timeZone)
-            val reportEndMs = request.reportOptions.period.periodEndMillis(request.timeZone)
+                .fromEpochMilliseconds(request.reportOptions.period.periodStartMillis(timeZone))
+                .toLocalDateTime(timeZone)
+            val reportEndMs = request.reportOptions.period.periodEndMillis(timeZone)
 
-            while (fromDateTime.toInstant(request.timeZone).toEpochMilliseconds() < reportEndMs) {
+            while (fromDateTime.toInstant(timeZone).toEpochMilliseconds() < reportEndMs) {
                 val xAxisStr = fromDateTime.date.toString()
                 resultList.addAll(
                     allSubGroups.map { subgroup ->

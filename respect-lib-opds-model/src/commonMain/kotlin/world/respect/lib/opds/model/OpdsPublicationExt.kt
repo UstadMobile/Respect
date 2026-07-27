@@ -34,7 +34,7 @@ fun OpdsPublication.findLicenseLink(): ReadiumLink? =
 fun OpdsPublication.findTermsOfServiceLink(): ReadiumLink? =
     links.firstOrNull { it.rel?.contains("terms-of-service") == true }
 
-fun OpdsPublication.findPlayStoreLink(): ReadiumLink? =
+fun OpdsPublication.findGooglePlayLink(): ReadiumLink? =
     links.firstOrNull { it.rel?.contains("https://id.openeel.org/rel/appstore-android") == true }
 
 fun OpdsPublication.findCollection(): ReadiumLink? =

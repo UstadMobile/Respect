@@ -54,6 +54,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps_detail
 import world.respect.shared.generated.resources.invalid_link
 import  world.respect.shared.domain.license.GetLicenseLabelUseCase
+import  world.respect.shared.domain.license.GetLicenseLabelUseCase.LicenseResult
 
 data class AppsDetailUiState(
     val appDetail: DataLoadState<OpdsPublication>? = null,
@@ -247,21 +248,18 @@ class AppsDetailViewModel(
 
     fun onClickHighlightCard(hrefLink: String) {
         // open the link in a webview or browser
-
         val resolvedHighlightCard = route.manifestUrl.resolve(hrefLink).toString()
 
     }
 
     fun onClickLicense(hrefLink: String) {
         // open the link in a webview or browser
-
         val resolvedLicense = route.manifestUrl.resolve(hrefLink).toString()
 
     }
 
     fun onClickGooglePlay(hrefLink: String) {
         //open the link in google play store
-
         val resolvedGooglePlay = route.manifestUrl.resolve(hrefLink).toString()
 
     }

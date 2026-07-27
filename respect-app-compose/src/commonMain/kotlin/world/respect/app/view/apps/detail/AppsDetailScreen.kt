@@ -104,7 +104,8 @@ fun AppsDetailScreen(
 
 
             Text(
-                text = appDetail?.metadata?.title?.let { langMapString(it) } ?: ""
+                text = appDetail?.metadata?.title?.let { langMapString(it) } ?: "",
+                modifier = Modifier.defaultItemPadding()
             )
 
         }
@@ -228,7 +229,6 @@ fun AppsDetailScreen(
             modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
         )
 
-        //add description
         ListItem(
             headlineContent = {
                 Text(

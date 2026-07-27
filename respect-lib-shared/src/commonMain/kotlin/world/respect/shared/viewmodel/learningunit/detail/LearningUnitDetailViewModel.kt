@@ -9,6 +9,7 @@ import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -98,7 +99,7 @@ class LearningUnitDetailViewModel(
                 params = DataLoadParams(),
                 referrerUrl = route.learningUnitManifestUrl,
                 expectedPublicationId = route.expectedIdentifier
-            ).collect { result ->
+            ).collectLatest { result ->
 
                 val lessonDetailMapped = result.map { pub -> pub.resolve(route.learningUnitManifestUrl) }
                 val finalLessonDetail = when (lessonDetailMapped) {
@@ -111,15 +112,11 @@ class LearningUnitDetailViewModel(
                 }
 
                 _uiState.update {
-                    it.copy(
-                        lessonDetail = finalLessonDetail,
-                    )
+                    it.copy(lessonDetail = finalLessonDetail)
                 }
 
                 if (result is DataReadyState) {
                     val lessonPublication = result.data.resolve(route.learningUnitManifestUrl)
-
-                    // Load associated app
                     val appManifestHref = lessonPublication.findLaunchableAppLink()?.href
 
                     if (appManifestHref != null) {
@@ -135,9 +132,14 @@ class LearningUnitDetailViewModel(
                                 val appPublication = appResult.data.resolve(appManifestUrl)
 
                                 val licenseLabelResult = appPublication.findLicenseLink()?.let { licenseLink ->
-                                    getLicenseLabelUseCase(
-                                        appManifestUrl.resolve(licenseLink.href).toString()
-                                    )
+                                    try {
+                                        getLicenseLabelUseCase(
+                                            appManifestUrl.resolve(licenseLink.href).toString()
+                                        )
+                                    } catch (e: Exception) {
+                                        Napier.e("Error fetching license label", e)
+                                        null
+                                    }
                                 }
 
                                 _uiState.update {

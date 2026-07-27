@@ -3,11 +3,13 @@ package world.respect.shared.viewmodel.assignment.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -23,10 +25,12 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.isStudent
+import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.composites.AssignmentAndProgress
@@ -234,9 +238,22 @@ class AssignmentDetailViewModel(
                                 progress = state.data.progress.sortedBy { it.actor.name?.lowercase() ?: "" }
                             )
                         )
-                    } else state
+                    } else {
+                        state
+                    }
+                }.map { state ->
+                    if (state is NoDataLoadedState && state.reason == NoDataLoadedState.Reason.NOT_FOUND) {
+                        DataErrorResult(
+                            error = IllegalStateException(),
+                            metaInfo = state.metaInfo
+                        )
+                    } else {
+                        state
+                    }
+                }.catch { e ->
+                    Napier.w("AssignmentDetailViewModel: assignment progress flow error", e)
+                    emit(DataErrorResult(error = e))
                 }.shareIn(viewModelScope, SharingStarted.Lazily)
-
                 launch {
                     assignmentProgressFlow.collect { assignmentAndProgress ->
                         _appUiState.update { appState ->
@@ -299,7 +316,10 @@ class AssignmentDetailViewModel(
     fun taskInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
         return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = url, params = DataLoadParams(), null, null
-        )
+        ).catch { e ->
+            Napier.w("AssignmentDetailViewModel: failed loading task info for $url", e)
+            emit(DataErrorResult(error = e))
+        }
     }
 
     fun onClickTask(activity: XapiActivity) {

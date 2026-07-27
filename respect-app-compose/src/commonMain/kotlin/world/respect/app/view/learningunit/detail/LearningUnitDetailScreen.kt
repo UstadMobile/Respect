@@ -225,11 +225,11 @@ fun LearningUnitDetailScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                uiState.licenseLabel?.let { label ->
+                uiState.licenseLabelResult?.let { result ->
                     Tag(
                         text = "${stringResource(Res.string.license)}: ${
                             uiTextStringResource(
-                                label
+                                result.title
                             )
                         }",
                         onTagClick = { uiState.appDetail?.let { onClickLicense(it) } }

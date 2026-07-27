@@ -158,7 +158,6 @@ import world.respect.shared.domain.e2eartifactupload.E2EArtifactUploadUseCase
 import world.respect.shared.domain.e2eartifactupload.E2EArtifactUploadUseCaseClient
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
-import world.respect.shared.domain.license.GetLicenseLabelUseCase
 import world.respect.shared.domain.license.GetLicenseLabelUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
@@ -231,7 +230,7 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
-import world.respect.shared.domain.licenses.GetLicenseLabelUseCase
+import world.respect.shared.domain.license.GetLicenseLabelUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
@@ -780,10 +779,6 @@ val appKoinModule = module {
 
     single<GetXapiActivityForPublicationUseCase> {
         GetXapiActivityForPublicationUseCase()
-    }
-
-    single<GetLicenseLabelUseCase> {
-        GetLicenseLabelUseCase()
     }
 
     /**

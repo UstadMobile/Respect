@@ -7,6 +7,11 @@ val LEARNING_UNIT_MIME_TYPES = listOf("text/html", "application/xml", "applicati
  */
 const val REL_RESPECT_DEFAULT_CATALOG = "https://respect.ustadmobile.com/ns/default-lesson-catalog"
 
+/**
+ * Relationship for a link to a launchable app manifest
+ */
+const val REL_LAUNCHABLE_APP = "https://id.openeel.org/rel/launchable-app"
+
 fun OpdsPublication.findLearningUnitAcquisitionLinks(): List<ReadiumLink> {
     return links.filter { link ->
         link.rel?.any {
@@ -39,6 +44,9 @@ fun OpdsPublication.findGooglePlayLink(): ReadiumLink? =
 
 fun OpdsPublication.findCollection(): ReadiumLink? =
     links.firstOrNull { it.rel?.contains("collection") == true }
+
+fun OpdsPublication.findLaunchableAppLink(): ReadiumLink? =
+    links.firstOrNull { it.rel?.contains(REL_LAUNCHABLE_APP) == true }
 
 
 fun OpdsPublication.findIcons(): List<ReadiumLink> {

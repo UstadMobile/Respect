@@ -36,6 +36,13 @@ fun Route.DemoLaunchableAppCollectionsRoute() {
                         href = baseUrl.resolve("grade/$it/index.json").toString(),
                         title = "Grade $it",
                         type = "application/json",
+                        alternate = listOf(
+                            ReadiumLink(
+                                rel = listOf("icon"),
+                                href = baseUrl.resolve("static/grade.jpg").toString(),
+                                type = "image/png",
+                            ),
+                        )
                     )
                 }
             )
@@ -85,7 +92,13 @@ fun Route.DemoLaunchableAppCollectionsRoute() {
                                 href = baseUrl.resolve("appmanifest.json").toString(),
                                 type = "application/opds-publication+json"
                             )
-                        )
+                        ),
+                        images = listOf(
+                            ReadiumLink(
+                                href = baseUrl.resolve("static/books.png").toString(),
+                                type = "image/png"
+                            )
+                        ),
                     )
                 }
             )

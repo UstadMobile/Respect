@@ -235,6 +235,11 @@ fun Application.module() {
         }
 
         route("demoapp") {
+            staticResources(
+                remotePath = "static",
+                basePackage = "demoapp",
+            )
+
             DemoLaunchableAppManifestRoute()
             DemoLaunchableAppCollectionsRoute()
             DemoLaunchableAppLessonRoute()

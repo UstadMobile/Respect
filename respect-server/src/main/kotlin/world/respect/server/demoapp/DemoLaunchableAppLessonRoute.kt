@@ -31,6 +31,12 @@ fun Route.DemoLaunchableAppLessonRoute() {
                     ),
                     identifier = Uri.parse(lessonBase.toString())
                 ),
+                images = listOf(
+                    ReadiumLink(
+                        href = demoBase.resolve("static/books.png").toString(),
+                        type = "image/png"
+                    )
+                ),
                 links = listOf(
                     ReadiumLink(
                         rel = listOf("self"),

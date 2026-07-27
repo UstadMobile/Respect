@@ -5,42 +5,36 @@
     "author": "Mullah Nasruddin",
     "identifier": "https://example.app/id/lesson001",
     "language": "en",
-    "modified": "2015-09-29T17:00:00Z",
-    "subject": [
-      {
-        "name": {
-          "en": "Mathematics"
-        },
-        "scheme": "https://www.bisg.org/#bisac",
-        "code": "MAT000000"
-      }
-    ]
+    "modified": "2015-09-29T17:00:00Z"
   },
   "links": [
     {
       "rel": "self",
-      "href": "lesson001.json",
+      "href": "https://demo.openeel.org/Lesson-manifest.json",
       "type": "application/opds-publication+json"
     },
     {
       "rel": "https://id.openeel.org/rel/tincanxml",
       "href": "tincan.xml",
-      "type": "application/xml",
-      "duration": 180
+      "type": "application/xml"
     },
     {
       "rel": "https://id.openeel.org/rel/launchable-app",
-      "href": "launchable-app.json",
+      "href": "https://demo.openeel.org/launchable-app.json",
       "type": "application/opds-publication+json"
-    },
+    }
+  ],
+  "readingOrder": [
     {
-      "rel": "http://opds-spec.org/acquisition/open-access",
-      "href": "lesson001.html",
+      "href": "https://demo.openeel.org/Lesson",
       "type": "text/html"
     }
   ],
   "images": [
-    {"href": "icon.png", "type": "image/png" }
+    {
+      "href": "cover.png",
+      "type": "image/png"
+    }
   ],
   "resources": [
     {
@@ -50,13 +44,6 @@
     {
       "href": "video.mp4",
       "type": "video/mp4"
-    },
-    {
-      "href": "script.js",
-      "type": "text/javascript",
-      "rel": [
-        "respect-not-android"
-      ]
     }
   ]
 }

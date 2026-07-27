@@ -16,6 +16,8 @@
     <string name="done">Done</string>
     <string name="try_it">Try it</string>
     <string name="add_app">Add App</string>
+    <string name="license">Open License</string>
+    <string name="google_play">Get it on Google Play</string>
     <string name="lessons">Lessons</string>
     <string name="apps">Apps</string>
     <string name="app">App</string>
@@ -580,6 +582,10 @@
     <string name="developed_by">Developed by UstadMobile FZ-LLC</string>
 
     <string name="license_text">RESPECT App. Copyright 2025-2026 UstadMobile FZ-LLC.</string>
+
+    <string name="open_source">Open Source</string>
+
+    <string name="proprietary">Proprietary</string>
 
     <string name="respect_is_open_source">The RESPECT App is open-source software licensed under the AGPLv3 license. Contains open source libraries copyright respective contributors.</string>
 

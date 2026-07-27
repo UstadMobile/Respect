@@ -55,6 +55,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_app
 import world.respect.shared.generated.resources.google_play
 import world.respect.shared.generated.resources.lessons
+import world.respect.shared.generated.resources.license
 import world.respect.shared.viewmodel.apps.detail.AppsDetailUiState
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel
 
@@ -124,7 +125,7 @@ fun AppsDetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Balance,
-                            contentDescription = stringResource(Res.string.google_play),
+                            contentDescription = stringResource(Res.string.license),
                         )
 
                         Spacer(modifier = Modifier.width(4.dp))

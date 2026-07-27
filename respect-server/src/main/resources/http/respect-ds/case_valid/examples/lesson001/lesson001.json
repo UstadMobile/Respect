@@ -32,7 +32,7 @@
     {"rel": "http://opds-spec.org/acquisition/open-access", "href": "lesson001.html", "type": "text/html"}
   ],
   "images": [
-    {"href": "cover.png", "type": "image/png" }
+    {"href": "icon.png", "type": "image/png" }
   ],
   "resources": [
     {

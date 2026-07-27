@@ -18,9 +18,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NearMe
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,7 +42,6 @@ import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectDataLoadHost
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
-import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.langMapString
 import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.ext.dataOrNull
@@ -49,6 +50,7 @@ import world.respect.lib.opds.model.name
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.cancel
+import world.respect.shared.generated.resources.clock_icon
 import world.respect.shared.generated.resources.download
 import world.respect.shared.generated.resources.downloaded
 import world.respect.shared.generated.resources.license
@@ -85,7 +87,9 @@ fun LearningUnitDetailScreen(
 ) {
     RespectDataLoadHost(
         uiState.lessonDetail,
-        modifier = Modifier.fillMaxSize().padding(vertical = 10.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 10.dp)
     ) {
         val lessonDetail = uiState.lessonDetail.dataOrNull()
         Column(
@@ -94,45 +98,42 @@ fun LearningUnitDetailScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            ListItem(
-                leadingContent = {
-                    val iconUrl = lessonDetail?.images?.firstOrNull()?.href
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                val iconUrl = lessonDetail?.images?.firstOrNull()?.href
 
-                    iconUrl?.also { icon ->
-                        RespectAsyncImage(
-                            uri = icon,
-                            contentDescription = "",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(120.dp)
+                iconUrl?.also { icon ->
+                    RespectAsyncImage(
+                        uri = icon,
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                }
 
-                        )
-                    }
-                },
-                headlineContent = {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     Text(
                         text = lessonDetail?.metadata?.title?.let { langMapString(it) } ?: "",
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
-                },
-                supportingContent = {
-                    Column(
-                        verticalArrangement =
-                            Arrangement.spacedBy(4.dp)
-                    ) {
+
+                    uiState.appDetail?.let { app ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.clickable {
-                                uiState.appDetail?.let {
-                                    onClickApp(
-                                        it
-                                    )
-                                }
-                            }
-
+                            modifier = Modifier.clickable { onClickApp(app) }
                         ) {
-
-                            val appIconUrl = uiState.appDetail?.images?.firstOrNull()?.href
+                            val appIconUrl = app.images?.firstOrNull()?.href
                             Box(
                                 modifier = Modifier
                                     .size(20.dp)
@@ -151,43 +152,49 @@ fun LearningUnitDetailScreen(
                                 }
                             }
 
-                            Spacer(modifier = Modifier.width(12.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
 
                             Text(
-                                text = uiState.appDetail?.metadata?.title?.let {
-                                    langMapString(
-                                        it
-                                    )
-                                }
-                                    ?: "",
-                                style = MaterialTheme.typography.bodyMedium
+                                text = langMapString(app.metadata.title),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
+                    }
 
-                        val duration =
-                            lessonDetail?.links?.firstOrNull { it.duration != null }?.duration?.seconds
-                        if (duration != null) {
+                    val duration =
+                        lessonDetail?.links?.firstOrNull { it.duration != null }?.duration?.seconds
+                    if (duration != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Schedule,
+                                contentDescription = stringResource(Res.string.clock_icon),
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                             Text(
-                                text = duration.toString(),
+                                text = "$duration",
                                 style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-
                     }
                 }
-            )
+            }
 
             Button(
-                onClick = {
-                    onClickOpen()
-                },
+                onClick = onClickOpen,
                 enabled = uiState.buttonsEnabled,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(Res.string.open))
-
             }
+
             HorizontalDivider()
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
@@ -221,44 +228,32 @@ fun LearningUnitDetailScreen(
             HorizontalDivider()
 
             FlowRow(
-                modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 uiState.licenseLabelResult?.let { result ->
-                    Tag(
-                        text = "${stringResource(Res.string.license)}: ${
-                            uiTextStringResource(
-                                result.title
+                    AssistChip(
+                        onClick = { uiState.appDetail?.let { onClickLicense(it) } },
+                        label = {
+                            Text(
+                                text = "${stringResource(Res.string.license)}: ${uiTextStringResource(result.title)}"
                             )
-                        }",
-                        onTagClick = { uiState.appDetail?.let { onClickLicense(it) } }
+                        }
                     )
                 }
 
                 lessonDetail?.metadata?.subject?.forEach { subject ->
-                    Tag(
-                        text = "${stringResource(Res.string.subject)}: ${langMapString(subject.name)}",
+                    AssistChip(
+                        onClick = {},
+                        label = {
+                            Text(
+                                text = "${stringResource(Res.string.subject)}: ${langMapString(subject.name)}"
+                            )
+                        }
                     )
                 }
             }
         }
-    }
-}
-
-
-@Composable
-private fun Tag(text: String, onTagClick: () -> Unit = {}) {
-    Box(
-        modifier = Modifier
-            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(4.dp))
-            .clip(RoundedCornerShape(4.dp))
-            .clickable(enabled = onTagClick != {}, onClick = onTagClick)
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium
-        )
     }
 }

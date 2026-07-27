@@ -655,5 +655,6 @@
 
     <string name="not_found">Not found</string>
     <string name="license">License</string>
+    <string name="clock_icon">Clock</string>
 
 </resources>

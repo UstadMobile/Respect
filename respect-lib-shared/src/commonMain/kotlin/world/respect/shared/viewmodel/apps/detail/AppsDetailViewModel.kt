@@ -55,6 +55,7 @@ import world.respect.shared.generated.resources.apps_detail
 import world.respect.shared.generated.resources.invalid_link
 import  world.respect.shared.domain.license.GetLicenseLabelUseCase
 import  world.respect.shared.domain.license.GetLicenseLabelUseCase.LicenseResult
+import world.respect.shared.domain.school.LaunchCustomTabUseCase
 
 data class AppsDetailUiState(
     val appDetail: DataLoadState<OpdsPublication>? = null,
@@ -87,6 +88,9 @@ class AppsDetailViewModel(
     private val route: AppsDetail = savedStateHandle.toRoute()
 
     private val getLicenseLabelUseCase: GetLicenseLabelUseCase by inject()
+
+    private val launchCustomTabUseCase: LaunchCustomTabUseCase by inject()
+
 
     init {
         _appUiState.update {
@@ -247,28 +251,17 @@ class AppsDetailViewModel(
     }
 
     fun onClickHighlightCard(hrefLink: String) {
-        // open the link in a webview or browser
         val resolvedHighlightCard = route.manifestUrl.resolve(hrefLink).toString()
-
+        launchCustomTabUseCase(Url(resolvedHighlightCard))
     }
 
     fun onClickLicense(hrefLink: String) {
-        // open the link in a webview or browser
         val resolvedLicense = route.manifestUrl.resolve(hrefLink).toString()
-
+        launchCustomTabUseCase(Url(resolvedLicense))
     }
 
     fun onClickGooglePlay(hrefLink: String) {
-        //open the link in google play store
         val resolvedGooglePlay = route.manifestUrl.resolve(hrefLink).toString()
-
-    }
-
-    companion object {
-        const val BUTTONS_ROW = "buttons_row"
-        const val LESSON_HEADER = "lesson_header"
-        const val SCREENSHOT = "screenshot"
-        const val LEARNING_UNIT_LIST = "learning_unit_list"
-        const val APP_DETAIL = "app_detail"
+        launchCustomTabUseCase(Url(resolvedGooglePlay))
     }
 }

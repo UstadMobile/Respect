@@ -150,22 +150,10 @@ fun AppsDetailScreen(
             }
 
         }
-
         Row(
             horizontalArrangement =
                 Arrangement.spacedBy(12.dp)
         ) {
-            OutlinedButton(
-                onClick = onClickAdd,
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = null
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(stringResource(Res.string.add_app))
-            }
             if (!uiState.isAdded && uiState.showAddRemoveButton) {
                 OutlinedButton(
                     onClick = onClickAdd,
@@ -180,6 +168,7 @@ fun AppsDetailScreen(
                 }
             }
         }
+
         HorizontalDivider(
             thickness = 1.dp,
             modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
@@ -228,6 +217,11 @@ fun AppsDetailScreen(
         HorizontalDivider(
             thickness = 1.dp,
             modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
+        )
+
+        Text(
+            text = appDetail?.metadata?.description.orEmpty(),
+            modifier = Modifier.defaultItemPadding()
         )
 
         ListItem(

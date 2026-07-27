@@ -2,6 +2,7 @@
   "metadata": {
     "@type": "https://id.openeel.org/schema/launchable-app",
     "title": "Demo Launchable App",
+    "description": "This is a demo launchable app along with the lessons.",
     "author": {
       "name": "Ustad Mobile FZ-LLC"
     },
@@ -26,11 +27,11 @@
     },
     {
       "rel": "https://id.openeel.org/rel/appstore-android",
-      "href": "https://play.google.com/store/apps/details?id=demo.openeel.org",
+      "href": "https://play.google.com/store/apps/details?id=world.respect.app",
       "title": "Get it on Google Play",
       "alternate": [
         {
-          "href": "https://f-droid.org/en/packages/demo.openeel.org/",
+          "href": "https://play.google.com/store/apps/details?id=world.respect.app",
           "title": "Get it from F-Droid"
         }
       ]

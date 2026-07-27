@@ -44,7 +44,7 @@ Example:
     },
     {
       "rel": "collection",
-      "href": "https://demo.openeel.org/default-catalog.json",
+      "href": "https://demo.openeel.org/default-collection.json",
       "type": "application/opds+json"
     },
     {

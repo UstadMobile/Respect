@@ -6,5 +6,8 @@ appId: world.respect.app
 
 - extendedWaitUntil:
     visible:
-      id: "db_completed"
+      id: "upload_done"
     timeout: 30000
+- takeScreenshot:
+    path: e2e_artifact_upload
+    label: Screenshot of E2E artifact upload result

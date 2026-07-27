@@ -1,5 +1,7 @@
 package world.respect.libutil.util.throwable
 
+const val HTTP_STATUS_UNWRAP_MAX_DEPTH_COUNT = 20
+
 /**
  * Some exceptions map to a particular http status code This interface makes it easier for http
  * server and client components to handle exceptions e.g. an http server's exception handling can
@@ -20,3 +22,21 @@ class ExceptionWithHttpStatusCodeWrapper internal constructor(
 fun Throwable.withHttpStatus(statusCode: Int): Exception {
     return ExceptionWithHttpStatusCodeWrapper(this, message, statusCode)
 }
+
+fun Throwable.unwrapHttpStatusCode(
+    maxDepth: Int = HTTP_STATUS_UNWRAP_MAX_DEPTH_COUNT,
+): Int? {
+    var throwable: Throwable? = this
+
+    var depthCount: Int = 0
+    while (throwable != null && depthCount < maxDepth) {
+        if (throwable is ExceptionWithHttpStatusCode) {
+            return throwable.statusCode
+        }
+        throwable = throwable.cause
+        depthCount++
+    }
+
+    return null
+}
+

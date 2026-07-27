@@ -2,10 +2,12 @@ package world.respect
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.webkit.ConsoleMessage
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
@@ -26,6 +28,30 @@ import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 class WebViewActivity : AppCompatActivity() {
 
     private val webChromeClient = object: WebChromeClient() {
+
+        private fun ConsoleMessage.toLogLine(): String {
+            return buildString {
+                message()?.also { append(it) }
+                append(" lineNum=${lineNumber()}")
+                sourceId()?.also {
+                    append(" sourceId=$it")
+                }
+            }
+        }
+
+        override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+            val messageLevel = consoleMessage?.messageLevel() ?: return false
+
+            when(messageLevel) {
+                ConsoleMessage.MessageLevel.LOG -> Log.i(LOGTAG, consoleMessage.toLogLine())
+                ConsoleMessage.MessageLevel.WARNING -> Log.w(LOGTAG, consoleMessage.toLogLine())
+                ConsoleMessage.MessageLevel.ERROR -> Log.e(LOGTAG, consoleMessage.toLogLine())
+                ConsoleMessage.MessageLevel.TIP -> Log.i(LOGTAG, consoleMessage.toLogLine())
+                ConsoleMessage.MessageLevel.DEBUG -> Log.d(LOGTAG, consoleMessage.toLogLine())
+            }
+
+            return true
+        }
 
         override fun onReceivedTitle(view: WebView?, title: String?) {
             super.onReceivedTitle(view, title)
@@ -96,5 +122,10 @@ class WebViewActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    companion object {
+
+        const val LOGTAG = "WebViewActivity"
     }
 }

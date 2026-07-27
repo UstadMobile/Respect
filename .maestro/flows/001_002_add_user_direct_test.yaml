@@ -17,6 +17,7 @@ onFlowComplete:
       file: "subflows/teardown.yaml"
       env:
         NAME: "db-final"
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - launchApp:
     arguments:

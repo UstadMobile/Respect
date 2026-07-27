@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel.assignment.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitor
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
@@ -188,6 +190,7 @@ class AssignmentDetailViewModel(
     private val schoolDataSource: SchoolDataSource by inject()
 
     private val _uiState = MutableStateFlow(AssignmentDetailUiState())
+    private val connectivityMonitor: ConnectivityMonitor by inject()
 
     val uiState = _uiState.asStateFlow()
 
@@ -249,6 +252,16 @@ class AssignmentDetailViewModel(
                             metaInfo = state.metaInfo,
                             localState = state.localState,
                             remoteState = state.remoteState,
+                        )
+                    } else {
+                        state
+                    }
+                }.combine(connectivityMonitor.statusFlow) { state, connectivity ->
+                    if (!connectivity.isConnected && state !is DataErrorResult) {
+                        DataErrorResult(
+                            error = kotlinx.io.IOException(),
+                            metaInfo = state.metaInfo,
+                            localState = state,
                         )
                     } else {
                         state

@@ -32,6 +32,7 @@ import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.toPrettyString
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
@@ -242,10 +243,12 @@ class AssignmentDetailViewModel(
                         state
                     }
                 }.map { state ->
-                    if (state is NoDataLoadedState && state.reason == NoDataLoadedState.Reason.NOT_FOUND) {
-                        DataErrorResult(
-                            error = IllegalStateException(),
-                            metaInfo = state.metaInfo
+                    if (state is DataReadyState && state.data.progress.isEmpty()) {
+                        NoDataLoadedState(
+                            reason = NoDataLoadedState.Reason.NOT_FOUND,
+                            metaInfo = state.metaInfo,
+                            localState = state.localState,
+                            remoteState = state.remoteState,
                         )
                     } else {
                         state
@@ -316,7 +319,14 @@ class AssignmentDetailViewModel(
     fun taskInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
         return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = url, params = DataLoadParams(), null, null
-        ).catch { e ->
+        ).map { state ->
+            val remoteErr = state.remoteState as? DataErrorResult<*>
+            if(remoteErr != null) {
+                DataErrorResult(error = remoteErr.error, metaInfo = state.metaInfo, localState = state.localState, remoteState = state.remoteState)
+            } else {
+                state
+            }
+        }.catch { e ->
             Napier.w("AssignmentDetailViewModel: failed loading task info for $url", e)
             emit(DataErrorResult(error = e))
         }

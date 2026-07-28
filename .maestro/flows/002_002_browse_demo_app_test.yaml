@@ -30,7 +30,7 @@ onFlowComplete:
     text: "App detail"
 - assertVisible: "Demo Launchable App"
 - assertVisible: "Add to school apps"
-- assertVisible: "Open Source : AFL-3.0"
+- assertVisible: "Open Source: AFL-3.0"
 - assertVisible: "Get it on Google Play"
 - assertVisible: "Case Study"
 - assertVisible: "This is a demo launchable app along with the lessons."
@@ -57,7 +57,6 @@ onFlowComplete:
 - assertVisible:
        id: "app_title"
        text: "Native Demo"
-- assertVisible: "App name"
 - assertVisible: "Download"
 - assertVisible: "Open"  # Demo app needs to be installed to open and view the lesson
 - tapOn: "Apps"

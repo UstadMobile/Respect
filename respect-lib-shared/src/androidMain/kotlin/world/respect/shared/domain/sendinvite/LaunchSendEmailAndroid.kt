@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
-import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
@@ -14,37 +13,35 @@ class LaunchSendEmailAndroid(
     private val context: Context
 ) : LaunchSendEmailUseCase {
 
-    override suspend fun invoke(subject: String, body: String?, emailId: String?) {
-        val uri = buildMailToUri(subject, body, emailId)
-
+    override suspend fun invoke(
+        request: LaunchSendEmailUseCase.LaunchSendEmailRequest
+    ) {
         withContext(Dispatchers.Main) {
-            val intent = Intent(Intent.ACTION_SENDTO, uri)
+            val builder = Uri.Builder()
+                .scheme("mailto")
+
+            request.to?.also {
+                builder.opaquePart(request.to)
+            }
+
+            request.subject?.also {
+                builder.appendQueryParameter("subject", it)
+            }
+
+            request.body?.also {
+                builder.appendQueryParameter("body", it)
+            }
+
+            val intent = Intent(Intent.ACTION_SENDTO, builder.build())
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
             try {
                 context.startActivity(intent)
             } catch (e: ActivityNotFoundException) {
-                Log.w("EmailLinkLauncher", "No email app installed")
+                Log.w("LaunchSendEmailAndroid", "No email app installed")
                 throw e
             }
         }
-    }
-
-    private fun buildMailToUri(subject: String, body: String?,emailId: String?): Uri {
-
-        val uriBuilder = if(!emailId.isNullOrEmpty()) {
-            val encodedSubject = Uri.encode(subject)
-            "mailto:$emailId?subject=$encodedSubject".toUri().buildUpon()
-        } else {
-            Uri.Builder()
-                .scheme("mailto")
-                .appendQueryParameter("subject", subject)
-        }
-
-        if(!body.isNullOrEmpty()) {
-            uriBuilder.appendQueryParameter("body", body)
-        }
-        return uriBuilder.build()
     }
 
 }

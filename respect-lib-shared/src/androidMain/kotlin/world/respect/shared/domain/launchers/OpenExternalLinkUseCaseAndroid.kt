@@ -3,20 +3,21 @@ package world.respect.shared.domain.launchers
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import androidx.core.net.toUri
+import world.respect.shared.domain.openexternallink.OpenExternalLinkUseCase
 
-class WhatsAppLauncherUseCaseAndroid(
+class OpenExternalLinkUseCaseAndroid(
     private val context: Context
-) : WhatsAppLauncherUseCase {
+) : OpenExternalLinkUseCase {
 
-    override suspend fun launchWhatsApp(respectPhoneNumber: String) {
+    override suspend fun invoke(request: OpenExternalLinkUseCase.OpenLinkRequest) {
         withContext(Dispatchers.Main) {
             try {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
-                    "$WHATSAPP_URL$respectPhoneNumber".toUri()
+                    request.url.toString().toUri(),
                 ).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
@@ -24,14 +25,9 @@ class WhatsAppLauncherUseCaseAndroid(
                 context.startActivity(intent)
 
             } catch (e: ActivityNotFoundException) {
-                print("WhatsApp not installed + $e")
+               print("No browser found to open web URL $e")
             }
         }
     }
 
-    companion object{
-        const val WHATSAPP_URL = "https://wa.me/"
-    }
 }
-
-

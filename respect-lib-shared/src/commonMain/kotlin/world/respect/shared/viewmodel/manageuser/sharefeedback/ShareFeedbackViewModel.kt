@@ -2,13 +2,11 @@ package world.respect.shared.viewmodel.manageuser.sharefeedback
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinScopeComponent
-import org.koin.core.scope.Scope
-import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.launchers.WebLauncherUseCase
-import world.respect.shared.domain.launchers.WhatsAppLauncherUseCase
+import world.respect.shared.domain.openexternallink.OpenExternalLinkUseCase
+import world.respect.shared.domain.launchers.LaunchSendWhatsAppUseCase
 import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.send_feedback
@@ -16,14 +14,11 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
 class ShareFeedbackViewModel(
-    accountManager: RespectAccountManager,
     savedStateHandle: SavedStateHandle,
-    private val whatsAppLauncherUseCase: WhatsAppLauncherUseCase,
-    private val emailLauncherUseCase: LaunchSendEmailUseCase,
-    private val webLauncherUseCase: WebLauncherUseCase,
-) : RespectViewModel(savedStateHandle), KoinScopeComponent {
-
-    override val scope: Scope = accountManager.requireActiveAccountScope()
+    private val launchSendWhatsAppUseCase: LaunchSendWhatsAppUseCase,
+    private val launchSendEmailUseCase: LaunchSendEmailUseCase,
+    private val openExternalLinkUseCase: OpenExternalLinkUseCase,
+) : RespectViewModel(savedStateHandle) {
 
     init {
         _appUiState.update {
@@ -37,23 +32,25 @@ class ShareFeedbackViewModel(
 
     fun onClickWhatsApp() {
         viewModelScope.launch {
-            whatsAppLauncherUseCase.launchWhatsApp(WHATSAPP_NUMBER)
+            launchSendWhatsAppUseCase(WHATSAPP_NUMBER)
         }
     }
 
     fun onClickEmail() {
         viewModelScope.launch {
-            emailLauncherUseCase.invoke(
-                subject = EMAIL_SUBJECT,
-                body = "",
-                emailId = EMAIL_ADDRESS
+            launchSendEmailUseCase(
+                LaunchSendEmailUseCase.LaunchSendEmailRequest(
+                    subject = EMAIL_SUBJECT,
+                    body = "",
+                    to = EMAIL_ADDRESS
+                )
             )
         }
     }
 
     fun onClickPublicForum() {
         viewModelScope.launch {
-            webLauncherUseCase.launchWeb(FORUM_URL)
+            openExternalLinkUseCase(Url(FORUM_URL))
         }
     }
 

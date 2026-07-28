@@ -40,7 +40,6 @@ import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
-import org.jetbrains.compose.resources.getString
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
@@ -162,10 +161,10 @@ import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.license.GetLicenseLabelUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
-import world.respect.shared.domain.launchers.WhatsAppLauncherUseCase
-import world.respect.shared.domain.launchers.WhatsAppLauncherUseCaseAndroid
-import world.respect.shared.domain.launchers.WebLauncherUseCase
-import world.respect.shared.domain.launchers.WebLauncherUseCaseAndroid
+import world.respect.shared.domain.launchers.LaunchSendWhatsAppUseCase
+import world.respect.shared.domain.launchers.LaunchSendWhatsAppUseCaseAndroid
+import world.respect.shared.domain.openexternallink.OpenExternalLinkUseCase
+import world.respect.shared.domain.launchers.OpenExternalLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -190,8 +189,6 @@ import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCas
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCase
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCaseAndroid
 import world.respect.shared.domain.validateemail.ValidateEmailUseCase
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.app_name
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.NavResultReturnerImpl
 import world.respect.shared.util.di.RespectAccountScopeId
@@ -428,11 +425,11 @@ val appKoinModule = module {
     viewModelOf(::StatementDetailViewModel)
     viewModelOf(::RawStatementViewModel)
 
-    single<WhatsAppLauncherUseCase> {
-        WhatsAppLauncherUseCaseAndroid(androidContext())
+    single<LaunchSendWhatsAppUseCase> {
+        LaunchSendWhatsAppUseCaseAndroid(androidContext())
     }
-    single<WebLauncherUseCase> {
-        WebLauncherUseCaseAndroid(androidContext())
+    single<OpenExternalLinkUseCase> {
+        OpenExternalLinkUseCaseAndroid(androidContext())
     }
 
     single<GetOfflineStorageOptionsUseCase> {

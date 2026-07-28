@@ -33,6 +33,7 @@ dependencyResolutionManagement {
     }
 }
 
+include(":app-android")
 include(":respect-app-compose")
 include(":respect-server")
 include(":respect-lib-shared")

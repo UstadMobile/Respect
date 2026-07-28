@@ -32,12 +32,15 @@ import java.io.File
 import java.util.Properties
 import io.ktor.server.plugins.swagger.*
 import org.koin.ktor.ext.inject
+import org.openeel.demo.demolaunchableappserver.DemoLaunchableAppManifestRoute
+import org.openeel.demo.demolaunchableappserver.DemoLaunchableAppCollectionsRoute
 import world.respect.Greeting
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
 import world.respect.libutil.util.throwable.unwrapHttpStatusCode
+import world.respect.server.demoapp.DemoLaunchableAppLessonRoute
 import world.respect.server.logging.LogbackAntiLog
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
 import world.respect.server.routes.passkey.RevokePasskeyRoute
@@ -187,7 +190,9 @@ fun Application.module() {
         get("/") {
             call.respondText("Ktor: ${Greeting().greet()}")
         }
+
         SchoolRegistrationRoute()
+
         route(".well-known") {
             getRespectSchoolJson("respect-school.json")
 
@@ -227,6 +232,17 @@ fun Application.module() {
 
         route(RESPECT_SCHOOL_LINK_SEGMENT) {
             SchoolLinkRoute()
+        }
+
+        route("demoapp") {
+            staticResources(
+                remotePath = "static",
+                basePackage = "demoapp",
+            )
+
+            DemoLaunchableAppManifestRoute()
+            DemoLaunchableAppCollectionsRoute()
+            DemoLaunchableAppLessonRoute()
         }
 
         route("api") {

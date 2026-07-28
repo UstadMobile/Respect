@@ -40,12 +40,13 @@ import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
+import org.jetbrains.compose.resources.getString
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import world.respect.app.config.RespectBuildConfig
+import world.respect.app.BuildConfig
 import world.respect.callback.AddDirectoriesFromPropertiesUseCase
 import world.respect.callback.AddSchoolDirectoryCallback
 import world.respect.callback.migrate6to8AddDirectories
@@ -229,6 +230,7 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
+import world.respect.shared.domain.licenses.GetLicenseLabelUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
@@ -772,6 +774,9 @@ val appKoinModule = module {
         GetXapiActivityForPublicationUseCase()
     }
 
+    single<GetLicenseLabelUseCase> {
+        GetLicenseLabelUseCase()
+    }
 
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
@@ -871,7 +876,9 @@ val appKoinModule = module {
         scoped<CreatePublicKeyCredentialCreationOptionsJsonUseCase> {
             CreatePublicKeyCredentialCreationOptionsJsonUseCase(
                 encodeUserHandleUseCase = get(),
-                appName = Res.string.app_name,
+                appName = {
+                    "FFS" //getString(Res.string.app_name)
+                },
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
             )
         }
@@ -986,7 +993,7 @@ val appKoinModule = module {
                 ),
                 checkPersonPermissionUseCase = get(),
                 json = get(),
-                defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
+                defaultAppCatalogUrl = BuildConfig.RESPECT_DEFAULT_APP_LIST,
                 schoolUrl = accountScopeId.schoolUrl,
             )
         }
@@ -1004,7 +1011,7 @@ val appKoinModule = module {
                     tokenProvider = get(),
                     validationHelper = get(),
                     json = get(),
-                    defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
+                    defaultAppCatalogUrl = BuildConfig.RESPECT_DEFAULT_APP_LIST,
                     opdsFeedValidationHelper = localDs.opdsFeedDataSource,
                     opdsPublicationValidationHelper = localDs.opdsPublicationDataSource
                         .publicationNetworkValidationHelper
@@ -1120,7 +1127,7 @@ val appKoinModule = module {
             )
         }
 
-        scoped<UpdateClazzStudentXapiGroupUseCase>() {
+        scoped<UpdateClazzStudentXapiGroupUseCase> {
             val accountScopeId = RespectAccountScopeId.parse(id)
 
             UpdateClazzStudentXapiGroupUseCase(

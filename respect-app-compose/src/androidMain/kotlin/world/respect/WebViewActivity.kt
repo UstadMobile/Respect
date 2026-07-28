@@ -15,7 +15,7 @@ import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
 import org.koin.android.ext.android.inject
-import world.respect.app.R
+import world.respect.appcompose.R
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 
 /**

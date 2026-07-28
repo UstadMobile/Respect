@@ -32,7 +32,12 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.lib.dataloadstate.ext.map
-import world.respect.lib.opds.model.respectAppDefaultLessonList
+import world.respect.lib.opds.model.findCollection
+import world.respect.lib.opds.model.findHighlightCardLinks
+import world.respect.lib.opds.model.findLicenseLink
+import world.respect.lib.opds.model.findPlayStoreLink
+import world.respect.lib.opds.model.findTermsOfServiceLink
+import world.respect.lib.opds.model.respectAppManifestDefaultLessonList
 import world.respect.lib.opds.model.toStringMap
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.objectActivityOrNull
@@ -54,6 +59,10 @@ data class AppsDetailUiState(
     val publications: List<OpdsPublication> = emptyList(),
     val navigation: List<ReadiumLink> = emptyList(),
     val group: List<OpdsGroup> = emptyList(),
+    val highlightCards: List<ReadiumLink> = emptyList(),
+    val licenseLink: ReadiumLink? = null,
+    val termsOfServiceLink: ReadiumLink? = null,
+    val playStoreLink: ReadiumLink? = null,
     val isAdded: Boolean = false,
     val showAddRemoveButton: Boolean = false,
 )
@@ -88,23 +97,45 @@ class AppsDetailViewModel(
                 referrerUrl = null,
                 expectedPublicationId = null,
             ).collectLatest { result ->
+
+                val resolvedHighlightCards: List<ReadiumLink> = buildList {
+                    result.dataOrNull()?.findHighlightCardLinks()?.forEach { link ->
+                        add(link.copy(href = route.manifestUrl.resolve(link.href).toString()))
+                    }
+                }
+
+                val resolvedLicense = result.dataOrNull()?.findLicenseLink()?.let { link ->
+                    link.copy(href = route.manifestUrl.resolve(link.href).toString())
+                }
+
+                val resolvedTerms = result.dataOrNull()?.findTermsOfServiceLink()?.let { link ->
+                    link.copy(href = route.manifestUrl.resolve(link.href).toString())
+                }
+
+                val resolvedPlayStore = result.dataOrNull()?.findPlayStoreLink()?.let { link ->
+                    link.copy(href = route.manifestUrl.resolve(link.href).toString())
+                }
+
                 _uiState.update { prev ->
                     prev.copy(
-                        appDetail = result.map { it.resolve(route.manifestUrl) }
+                        appDetail = result.map { it.resolve(route.manifestUrl) },
+                        highlightCards = resolvedHighlightCards,
+                        licenseLink = resolvedLicense,
+                        termsOfServiceLink = resolvedTerms,
+                        playStoreLink = resolvedPlayStore,
                     )
                 }
 
-                val defaultLessonLink = result.dataOrNull()?.respectAppDefaultLessonList()
-                    ?: return@collectLatest
+                val collectionLink = result.dataOrNull()?.findCollection() ?: return@collectLatest
 
                 schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
-                    url = route.manifestUrl.resolve(defaultLessonLink.href),
+                    url = route.manifestUrl.resolve(collectionLink.href),
                     params = DataLoadParams()
-                ).collect { result ->
-                    when (result) {
+                ).collect { feedResult ->
+                    when (feedResult) {
                         is DataReadyState -> {
                             _uiState.update {
-                                val resolvedFeed = result.data.resolve(route.manifestUrl)
+                                val resolvedFeed = feedResult.data.resolve(route.manifestUrl)
 
                                 it.copy(
                                     navigation = resolvedFeed.navigation ?: emptyList(),
@@ -114,8 +145,10 @@ class AppsDetailViewModel(
                             }
                         }
 
+
                         else -> {}
                     }
+
                 }
             }
         }
@@ -147,7 +180,7 @@ class AppsDetailViewModel(
 
     fun onClickLessonList() {
         val appManifest = uiState.value.appDetail?.dataOrNull()
-        appManifest?.respectAppDefaultLessonList()?.also { defaultLessonListLink ->
+        appManifest?.findCollection()?.also { defaultLessonListLink ->
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     LearningUnitList.create(
@@ -159,13 +192,14 @@ class AppsDetailViewModel(
             )
         }
     }
+
     fun onClickPublication(publication: OpdsPublication) {
         try {
             val publicationHref = publication.links.selfPublicationLinkOrNull()?.href
                 ?: throw IllegalArgumentException().withUiText(Res.string.invalid_link.asUiText())
 
             val refererUrl = uiState.value.appDetail?.dataOrNull()
-                ?.respectAppDefaultLessonList()?.href
+                ?.findCollection()?.href
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
@@ -216,12 +250,18 @@ class AppsDetailViewModel(
             schoolDataSource.xapiResource.statements.post(listOf(statement))
         }
     }
+
+    fun onClickCard(hrefLink: String) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                LearningUnitDetail.create(
+                    learningUnitManifestUrl = route.manifestUrl.resolve(hrefLink))))
+    }
     companion object {
         const val BUTTONS_ROW = "buttons_row"
         const val LESSON_HEADER = "lesson_header"
         const val SCREENSHOT = "screenshot"
         const val LEARNING_UNIT_LIST = "learning_unit_list"
-        const val SELF = "self"
         const val APP_DETAIL = "app_detail"
     }
 }

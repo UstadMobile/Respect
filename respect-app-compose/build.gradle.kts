@@ -26,8 +26,6 @@ val acraPropertiesFile = System.getenv("ACRA")?.let {
 acraProperties.takeIf { acraPropertiesFile.exists() }
     ?.load(FileInputStream(acraPropertiesFile))
 
-// The applist list - see main README
-val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.directory/respect-ds/base.json"
 
 val ACRA_PROP_NAMES = listOf("uri", "basicAuthLogin", "basicAuthPassword")
 
@@ -39,10 +37,9 @@ ACRA_PROP_NAMES.forEach { propName ->
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.buildconfigPlugin)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
 }
 
@@ -51,25 +48,25 @@ compose.resources {
     packageOfResClass = "world.respect.app.generated.resources"
 }
 
-buildConfig {
-    packageName("world.respect.app.config")
-    className("RespectBuildConfig")
-
-    buildConfigField<String>("RESPECT_DEFAULT_APPLIST", defaultAppList)
-}
-
 kotlin {
     compilerOptions {
         optIn.add("kotlin.time.ExperimentalTime")
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
-    androidTarget {
+    android {
+        namespace = "world.respect.appcompose"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
-    }
 
+        androidResources {
+            enable = true
+        }
+    }
 
     jvm("desktop")
 
@@ -157,76 +154,6 @@ kotlin {
     }
 }
 
-android {
-    buildFeatures {
-        buildConfig = true
-    }
-
-    signingConfigs {
-        println("Keystore exists: ${keystorePropertiesFile.exists()}")
-        //See https://developer.android.com/build/building-cmdline#gradle_signing
-        if(keystorePropertiesFile.exists()) {
-            create("release") {
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
-            }
-        }
-    }
-
-    namespace = "world.respect.app"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-
-    defaultConfig {
-        applicationId = "world.respect.app"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 128
-        versionName = project.version.toString()
-
-        for(propName in ACRA_PROP_NAMES) {
-            buildConfigField(
-                type = "String",
-                name = "ACRA_${propName.uppercase()}",
-                value = "\"${acraProperties.getProperty(propName) ?: ""}\"   "
-            )
-        }
-    }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-
-            if(keystorePropertiesFile.exists()) {
-                signingConfig = signingConfigs.getByName("release")
-            }
-
-
-            proguardFiles(
-                // Default file with automatically generated optimization rules.
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                project.file("proguard-rules.pro")
-            )
-
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
-dependencies {
-    debugImplementation(compose.uiTooling)
-}
 
 compose.desktop {
     application {

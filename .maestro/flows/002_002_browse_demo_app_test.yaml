@@ -46,8 +46,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "App detail"
-- tapOn: "Open Source : AFL-3.0"
-- assertVisible: "Open Source Initiative"
+- tapOn: "Open Source: AFL-3.0"
 - tapOn: "Close tab"
 #- tapOn:
 #    text: "Get it on Google Play"

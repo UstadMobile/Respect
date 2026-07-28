@@ -29,9 +29,9 @@ onFlowComplete:
     id: "app_title"
     text: "App detail"
 - assertVisible: "Example Web App"
-- assertVisible: "Add App"
+- assertVisible: "Add to school apps"
 # verify App got added to Apps section
-- tapOn: "Add App"
+- tapOn: "Add to school apps"
 - tapOn: "Apps"
 - assertVisible:
     id: "app_title"

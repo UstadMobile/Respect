@@ -45,6 +45,7 @@ class TestOpdsPublicationEntityAdapter {
         val modelData = model.data
         assertNotNull(modelData)
         assertEquals(publication.metadata.title, modelData.metadata.title)
+        assertEquals(publication.metadata.subject, modelData.metadata.subject)
         assertEquals(publication.links, modelData.links)
         assertEquals(publication.images, modelData.images)
         assertEquals(publication.resources, modelData.resources)

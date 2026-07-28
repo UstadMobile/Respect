@@ -37,7 +37,7 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
-import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
+import world.respect.libutil.util.throwable.unwrapHttpStatusCode
 import world.respect.server.logging.LogbackAntiLog
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
 import world.respect.server.routes.passkey.RevokePasskeyRoute
@@ -81,6 +81,11 @@ fun Application.module() {
     }
 
     environment.config.absoluteDataDir().takeIf { !it.exists() }?.mkdirs()
+
+    environment.config.filePropertyOrNull(SERVER_CONFIG_PID_FILE)?.also { pidFile ->
+        pidFile.parentFile?.takeIf { !it.exists() }?.mkdirs()
+        pidFile.writeText(ProcessHandle.current().pid().toString())
+    }
 
     ktorServerPropertiesFile(
         dataDir = environment.config.absoluteDataDir()
@@ -157,9 +162,10 @@ fun Application.module() {
         exception<Throwable> { call, cause ->
             cause.printStackTrace()
 
-            if(cause is ExceptionWithHttpStatusCode) {
+            val httpStatusCode = cause.unwrapHttpStatusCode()
+            if(httpStatusCode != null) {
                 val responseText = cause.message
-                val httpStatus = HttpStatusCode.fromValue(cause.statusCode)
+                val httpStatus = HttpStatusCode.fromValue(httpStatusCode)
                 if(responseText != null) {
                     call.respondText(text = responseText, status = httpStatus)
                 }else {

@@ -20,7 +20,7 @@ class AuthenticatePasswordUseCaseDbImpl(
         credential: RespectPasswordCredential
     ) : AuthenticatePasswordUseCase.Response {
         val personEntity = schoolDb.getPersonEntityDao().findByUsername(credential.username)
-            ?: throw IllegalArgumentException()
+            ?: throw ForbiddenException("Invalid username/password")
 
         val expectedPassword = schoolDb.getPersonPasswordEntityDao().findByUid(
             uidNumberMapper(personEntity.person.pGuid)

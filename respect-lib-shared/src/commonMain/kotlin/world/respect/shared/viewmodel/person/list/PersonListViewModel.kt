@@ -203,23 +203,21 @@ class PersonListViewModel(
     }
 
     fun onClickItem(person: PersonListDetails) {
-        viewModelScope.launch {
-            val personSelected = schoolDataSource.personDataSource.findByGuid(
-                loadParams = DataLoadParams(),
-                guid = person.guid,
-            ).dataOrNull()
-
-            if(
-                !resultReturner.sendResultIfResultExpected(
+        if(route.resultExpected) {
+            viewModelScope.launch {
+                resultReturner.sendResultIfResultExpected(
                     route = route,
                     navCommandFlow = _navCommandFlow,
-                    result = personSelected,
-                )
-            ) {
-                _navCommandFlow.tryEmit(
-                    NavCommand.Navigate(PersonDetail(person.guid))
+                    result = schoolDataSource.personDataSource.findByGuid(
+                        loadParams = DataLoadParams(),
+                        guid = person.guid,
+                    ).dataOrNull(),
                 )
             }
+        }else {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(PersonDetail(person.guid))
+            )
         }
     }
 

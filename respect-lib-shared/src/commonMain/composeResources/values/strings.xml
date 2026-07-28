@@ -650,4 +650,8 @@
     <string name="duration_minutes_short">m</string>
     <string name="duration_seconds_short">s</string>
 
+    <string name="invalid_username_password">Invalid username/password</string>
+    <string name="network_error_check_try_again">Network error: check your connection and try again</string>
+
+    <string name="not_found">Not found</string>
 </resources>

@@ -87,22 +87,22 @@ fun DataLoadState<*>.isLoadedOrNotModified(): Boolean {
             (this is NoDataLoadedState && reason == NoDataLoadedState.Reason.NOT_MODIFIED)
 }
 
-fun <T: Any, R: Any> DataLoadState<T>.map(
-    transform: (T) -> R
+/**
+ * Transform a DataReadyState with a transformation that can act on the data. If not DataReadyState,
+ * then return the original DataLoadState.
+ */
+fun <T: Any, R: Any> DataLoadState<T>.mapDataReadyState(
+    transform: (DataReadyState<T>) -> DataLoadState<R>
 ): DataLoadState<R> {
     return when(this) {
         is DataReadyState -> {
-            DataReadyState(
-                data = transform(data),
-                metaInfo = metaInfo,
-                localState = localState?.map(transform),
-                remoteState = remoteState,
-            )
+            transform(this)
         }
+
         is DataLoadingState -> {
             DataLoadingState(
                 metaInfo = metaInfo,
-                localState = localState?.map(transform),
+                localState = localState?.mapDataReadyState(transform),
                 remoteState = remoteState,
             )
         }
@@ -110,7 +110,7 @@ fun <T: Any, R: Any> DataLoadState<T>.map(
             DataErrorResult(
                 error = error,
                 metaInfo = metaInfo,
-                localState = localState?.map(transform),
+                localState = localState?.mapDataReadyState(transform),
                 remoteState = remoteState,
             )
         }
@@ -118,7 +118,43 @@ fun <T: Any, R: Any> DataLoadState<T>.map(
             NoDataLoadedState(
                 reason = reason,
                 metaInfo = metaInfo,
-                localState = localState?.map(transform),
+                localState = localState?.mapDataReadyState(transform),
+                remoteState = remoteState,
+            )
+        }
+    }
+}
+
+fun <T: Any, R: Any> DataLoadState<T>.map(
+    transform: (T) -> R
+): DataLoadState<R> {
+    return mapDataReadyState {
+        DataReadyState(
+            data = transform(it.data),
+            metaInfo = metaInfo,
+            localState = localState?.map(transform),
+            remoteState = remoteState,
+        )
+    }
+}
+
+/**
+ * Convert the given DataLoadState into a NoDataLoadedState if the list is empty.
+ */
+fun <T: Any> DataLoadState<List<T>>.notLoadedIfEmpty(): DataLoadState<List<T>> {
+    return mapDataReadyState {
+        if(it.data.isNotEmpty()) {
+            DataReadyState(
+                data = it.data,
+                metaInfo = metaInfo,
+                localState = localState?.notLoadedIfEmpty(),
+                remoteState = remoteState,
+            )
+        }else {
+            NoDataLoadedState(
+                reason = NoDataLoadedState.Reason.NOT_FOUND,
+                metaInfo = metaInfo,
+                localState = localState?.notLoadedIfEmpty(),
                 remoteState = remoteState,
             )
         }
@@ -137,53 +173,21 @@ fun <T: Any, R: Any> DataLoadState<T>.map(
  *
  */
 fun <T: Any> DataLoadState<List<T>>.firstOrNotLoaded(): DataLoadState<T> {
-    return when {
-        this is DataReadyState && this.data.isNotEmpty() -> {
+    return mapDataReadyState {
+        if(it.data.isNotEmpty()) {
             DataReadyState(
-                data = data.first(),
+                data = it.data.first(),
                 metaInfo = metaInfo,
                 localState = localState?.firstOrNotLoaded(),
                 remoteState = remoteState,
             )
-        }
-
-        this is DataReadyState -> {
+        }else {
             NoDataLoadedState(
                 reason = NoDataLoadedState.Reason.NOT_FOUND,
                 metaInfo = metaInfo,
                 localState = localState?.firstOrNotLoaded(),
                 remoteState = remoteState,
             )
-        }
-
-        this is DataLoadingState -> {
-            DataLoadingState(
-                metaInfo = metaInfo,
-                localState = localState?.firstOrNotLoaded(),
-                remoteState = remoteState,
-            )
-        }
-
-        this is DataErrorResult -> {
-            DataErrorResult(
-                error = error,
-                metaInfo = metaInfo,
-                localState = localState?.firstOrNotLoaded(),
-                remoteState = remoteState,
-            )
-        }
-
-        this is NoDataLoadedState -> {
-            NoDataLoadedState(
-                reason = reason,
-                metaInfo = metaInfo,
-                localState = localState?.firstOrNotLoaded(),
-                remoteState = remoteState,
-            )
-        }
-
-        else -> {
-            throw IllegalStateException("Unknown type: not really possible")
         }
     }
 }

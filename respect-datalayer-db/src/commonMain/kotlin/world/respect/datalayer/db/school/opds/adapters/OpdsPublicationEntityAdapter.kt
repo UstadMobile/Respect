@@ -7,6 +7,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.opds.OpdsParentType
 import world.respect.datalayer.db.school.opds.entities.OpdsPublicationEntity
 import world.respect.datalayer.db.school.opds.entities.ReadiumLinkEntity
+import world.respect.datalayer.db.school.opds.entities.ReadiumSubjectEntity
 import world.respect.datalayer.db.shared.adapters.asEntities
 import world.respect.datalayer.db.shared.adapters.toModel
 import world.respect.datalayer.db.shared.entities.LangMapEntity
@@ -21,6 +22,7 @@ data class OpdsPublicationEntities(
     val opdsPublicationEntity: OpdsPublicationEntity,
     val langMapEntities: List<LangMapEntity>,
     val linkEntities: List<ReadiumLinkEntity>,
+    val subjectEntities: List<ReadiumSubjectEntity>,
 )
 
 fun OpdsPublication.asEntities(
@@ -61,6 +63,16 @@ fun OpdsPublication.asEntities(
         ) ?: emptyList()
     }
 
+    val subjectEntities = metadata.subject?.mapIndexed { index, subject ->
+        subject.asEntities(
+            primaryKeyGenerator = primaryKeyGenerator,
+            json = json,
+            topParentType = OpdsParentType.OPDS_PUBLICATION,
+            topParentUid = opeUid,
+            index = index
+        )
+    }.orEmpty()
+
     return OpdsPublicationEntities(
         opdsPublicationEntity = OpdsPublicationEntity(
             opeUid = opeUid,
@@ -80,12 +92,15 @@ fun OpdsPublication.asEntities(
         ),
         langMapEntities = metadata.title.toEntitiesSub(LangMapEntity.PropType.OPDS_PUB_TITLE) +
             metadata.sortAs.toEntitiesSub(LangMapEntity.PropType.OPDS_PUB_SORT_AS) +
-            metadata.subtitle.toEntitiesSub(LangMapEntity.PropType.OPDS_PUB_SUBTITLE),
+            metadata.subtitle.toEntitiesSub(LangMapEntity.PropType.OPDS_PUB_SUBTITLE) +
+            subjectEntities.flatMap { it.langMapEntities },
         linkEntities = links.toEntitiesSub(ReadiumLinkEntity.PropertyType.OPDS_PUB_LINKS) +
                 images.toEntitiesSub(ReadiumLinkEntity.PropertyType.OPDS_PUB_IMAGES) +
                 readingOrder.toEntitiesSub(ReadiumLinkEntity.PropertyType.OPDS_PUB_READING_ORDER) +
                 resources.toEntitiesSub(ReadiumLinkEntity.PropertyType.OPDS_PUB_RESOURCES) +
-                toc.toEntitiesSub(ReadiumLinkEntity.PropertyType.OPDS_PUB_TOC)
+                toc.toEntitiesSub(ReadiumLinkEntity.PropertyType.OPDS_PUB_TOC) +
+                subjectEntities.flatMap { it.readiumLinkEntities },
+        subjectEntities = subjectEntities.map { it.readiumSubject },
     )
 }
 
@@ -138,6 +153,16 @@ fun OpdsPublicationEntities.asModel(
                 description = opdsPublicationEntity.opeMdDescription,
                 numberOfPages = opdsPublicationEntity.opeMdNumberOfPages,
                 duration = opdsPublicationEntity.opeMdDuration,
+                subject = subjectEntities.map { subjectEntity ->
+                    ReadiumSubjectEntities(
+                        readiumSubject = subjectEntity,
+                        langMapEntities = langMapEntities.filter {
+                            it.lmePropFk == subjectEntity.rseUid &&
+                                it.lmePropType == LangMapEntity.PropType.READIUM_SUBJECT_NAME
+                        },
+                        readiumLinkEntities = linkEntities,//Will be filtered/handled by asModel fn
+                    ).asModel(json)
+                }.takeIfNotEmpty(),
             ),
             links = linkEntities.asModelsSub(ReadiumLinkEntity.PropertyType.OPDS_PUB_LINKS),
             images = linkEntities.asModelsSub(

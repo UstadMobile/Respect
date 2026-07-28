@@ -70,12 +70,14 @@ class OpdsPublicationDataSourceDb(
                 )
                 respectSchoolDatabase.getReadiumLinkEntityDao().deleteAllByPublicationUid(oldPubUid)
                 respectSchoolDatabase.getOpdsPublicationEntityDao().deleteByUid(oldPubUid)
+                respectSchoolDatabase.getReadiumSubjectEntityDao().deleteAllByPublicationUid(oldPubUid)
 
                 respectSchoolDatabase.getOpdsPublicationEntityDao().insertList(
                     listOf(publicationEntities.opdsPublicationEntity)
                 )
                 respectSchoolDatabase.getLangMapEntityDao().insertAsync(publicationEntities.langMapEntities)
                 respectSchoolDatabase.getReadiumLinkEntityDao().insertList(publicationEntities.linkEntities)
+                respectSchoolDatabase.getReadiumSubjectEntityDao().insertList(publicationEntities.subjectEntities)
             }
         }
     }
@@ -88,7 +90,12 @@ class OpdsPublicationDataSourceDb(
                 lmeEntityUid1 = this.opeUid,
                 lmeEntityUid2 = 0
             ),
-            linkEntities = respectSchoolDatabase.getReadiumLinkEntityDao().findAllByPubUid(this.opeUid)
+            linkEntities = respectSchoolDatabase.getReadiumLinkEntityDao().findAllByPubUid(
+                this.opeUid
+            ),
+            subjectEntities = respectSchoolDatabase.getReadiumSubjectEntityDao().findAllByPubUid(
+                this.opeUid
+            ),
         )
     }
 
@@ -113,7 +120,7 @@ class OpdsPublicationDataSourceDb(
         referrerUrl: Url?,
         expectedPublicationId: String?
     ) : DataLoadState<OpdsPublication> {
-        return respectSchoolDatabase.useReaderConnection {
+    return respectSchoolDatabase.useReaderConnection {
             respectSchoolDatabase.getOpdsPublicationEntityDao().findByUrlHash(
                 uidNumberMapper(url.toString())
             )?.loadPublicationEntities()?.asModel(json) ?: NoDataLoadedState.notFound()

@@ -45,5 +45,6 @@ fun RespectGenderExposedDropDownMenuField(
         },
         isError = isError,
         enabled = enabled,
+        logline = "Gender dropdown",
     )
 }

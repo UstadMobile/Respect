@@ -12,11 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
-import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -35,10 +33,9 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.download
-import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.ui.text.font.FontWeight
 import world.respect.shared.generated.resources.open
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.layout.ContentScale
 import com.ustadmobile.libcache.PublicationPinState
 import world.respect.app.app.RespectAsyncImage
@@ -46,7 +43,6 @@ import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
 import world.respect.app.components.langMapString
 import world.respect.shared.generated.resources.app_name
-import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.downloaded
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
@@ -75,128 +71,109 @@ fun LearningUnitDetailScreen(
     onClickAssign: () -> Unit,
     onClickBookmark: () -> Unit
 ) {
-
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        ListItem(
+            leadingContent = {
+                val iconUrl = uiState.lessonDetail?.images?.firstOrNull()?.href
 
-        item {
-            ListItem(
-                leadingContent = {
-                    val iconUrl = uiState.lessonDetail?.images?.firstOrNull()?.href
+                iconUrl.also { icon ->
+                    RespectAsyncImage(
+                        uri = icon,
+                        contentDescription = "",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(120.dp)
 
-                    iconUrl.also { icon ->
-                        RespectAsyncImage(
-                            uri = icon,
-                            contentDescription = "",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(120.dp)
-
-                        )
-                    }
-                },
-                headlineContent = {
-                    Text(
-                        text = uiState.lessonDetail?.metadata?.title?.let { langMapString(it) } ?: "",
-                        style = MaterialTheme.typography.titleMedium
                     )
-                },
-                supportingContent = {
-                    Column(
-                        verticalArrangement =
-                            Arrangement.spacedBy(4.dp)
+                }
+            },
+            headlineContent = {
+                Text(
+                    text = uiState.lessonDetail?.metadata?.title?.let { langMapString(it) } ?: "",
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            supportingContent = {
+                Column(
+                    verticalArrangement =
+                        Arrangement.spacedBy(4.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
+                        Box(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .clip(CircleShape)
+                                .background(white)
+                                .border(1.dp, black, CircleShape),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .clip(CircleShape)
-                                    .background(white)
-                                    .border(1.dp, black, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Android,
-                                    modifier = Modifier.padding(6.dp),
-                                    contentDescription = null
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(12.dp))
-
-                            Text(
-                                text = stringResource(Res.string.app_name),
+                            Icon(
+                                imageVector = Icons.Default.Android,
+                                modifier = Modifier.padding(6.dp),
+                                contentDescription = null
                             )
                         }
 
+                        Spacer(modifier = Modifier.width(12.dp))
+
                         Text(
-                            text = uiState.lessonDetail?.metadata?.subtitle
-                                ?.let { langMapString(it) } ?: ""
+                            text = stringResource(Res.string.app_name),
                         )
-
                     }
-                }
-            )
-        }
 
-        item {
-            Button(
-                onClick = {
-                    onClickOpen()
-                },
-                enabled = uiState.buttonsEnabled,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(Res.string.open))
-            }
-        }
-
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RespectQuickActionButton(
-                    labelText = when(uiState.pinState.status) {
-                        PublicationPinState.Status.IN_PROGRESS -> stringResource(Res.string.cancel)
-                        PublicationPinState.Status.READY -> stringResource(Res.string.downloaded)
-                        else -> stringResource(Res.string.download)
-                    },
-                    iconContent = {
-                        RespectOfflineItemStatusIcon(
-                            state = uiState.pinState,
-                        )
-                    },
-                    onClick = onClickDownload,
-                    enabled = uiState.buttonsEnabled,
-                )
-
-                RespectQuickActionButton(
-                    imageVector = if (uiState.isBookmarked) {
-                        Icons.Filled.Bookmark
-                    } else {
-                        Icons.Outlined.BookmarkBorder
-                    },
-                    labelText = stringResource(Res.string.bookmark),
-                    onClick = onClickBookmark,
-                    enabled = uiState.buttonsEnabled,
-                )
-
-                if(uiState.showAssignButton) {
-                    RespectQuickActionButton(
-                        imageVector =Icons.Filled.NearMe,
-                        labelText = stringResource(Res.string.assign),
-                        onClick = onClickAssign,
-                        enabled = uiState.buttonsEnabled,
+                    Text(
+                        text = uiState.lessonDetail?.metadata?.subtitle
+                            ?.let { langMapString(it) } ?: ""
                     )
+
                 }
+            }
+        )
+
+        Button(
+            onClick = {
+                onClickOpen()
+            },
+            enabled = uiState.buttonsEnabled,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(Res.string.open))
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RespectQuickActionButton(
+                labelText = when(uiState.pinState.status) {
+                    PublicationPinState.Status.IN_PROGRESS -> stringResource(Res.string.cancel)
+                    PublicationPinState.Status.READY -> stringResource(Res.string.downloaded)
+                    else -> stringResource(Res.string.download)
+                },
+                iconContent = {
+                    RespectOfflineItemStatusIcon(
+                        state = uiState.pinState,
+                    )
+                },
+                onClick = onClickDownload,
+                enabled = uiState.buttonsEnabled,
+            )
+
+            if(uiState.showAssignButton) {
+                RespectQuickActionButton(
+                    imageVector =Icons.Filled.NearMe,
+                    labelText = stringResource(Res.string.assign),
+                    onClick = onClickAssign,
+                    enabled = uiState.buttonsEnabled,
+                )
             }
         }
     }

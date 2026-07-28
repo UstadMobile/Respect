@@ -147,6 +147,7 @@ class LearningUnitDetailViewModel(
 
 
     fun onClickOpen() {
+        Napier.d("LauncherAppViewModel: onClickOpen")
         //If app is null, then UiState.buttonsEnabled is false, so fallback return should never happen
         viewModelScope.launch {
             try {

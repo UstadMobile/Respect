@@ -1,13 +1,22 @@
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
     id("maven-publish")
 }
 
 kotlin {
-    androidTarget {
+    android {
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        namespace = "world.respect.lib.cache"
 
+        compilerOptions {
+
+        }
+
+        kotlin {
+            jvmToolchain(17)
+        }
     }
 
     jvm {
@@ -36,25 +45,5 @@ kotlin {
             implementation(projects.respectLibIhttpIostreams)
         }
 
-    }
-}
-
-android {
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    namespace = "world.respect.lib.ihttp.core"
-
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlin {
-        jvmToolchain(17)
     }
 }

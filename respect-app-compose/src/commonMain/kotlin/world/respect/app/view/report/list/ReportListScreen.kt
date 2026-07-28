@@ -80,7 +80,7 @@ private fun ReportGridCard(
                     reportUid = report.guid.toLong(),
                     reportOptions = ReportOptions(),
                     accountPersonUid = activeUserPersonUid,
-                    timeZone = TimeZone.currentSystemDefault()
+                    timeZoneId = TimeZone.currentSystemDefault().id,
                 ),
                 results = emptyList()
             ),

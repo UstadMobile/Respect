@@ -45,6 +45,21 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Home"
+- assertVisible: "Example Web App"
+- tapOn: "Example Web App"
+- assertVisible: "Lessons"
+- tapOn: "Lessons"
+- tapOn: "Examples"
+- tapOn: "Lesson 001"
+- assertVisible: "Lesson 001"
+- assertVisible: "Download"
+- tapOn: "Open"
+- extendedWaitUntil:
+    visible: "Lesson 001"
+    timeout: 10000
+- assertVisible: "Hello World Lesson"
+- tapOn: "Close"
+- setAirplaneMode: disabled
 - tapOn: "Apps"
 - tapOn: "Example Web App"
 - tapOn: "Lessons"

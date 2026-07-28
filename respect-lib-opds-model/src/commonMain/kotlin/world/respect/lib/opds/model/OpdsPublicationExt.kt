@@ -22,11 +22,33 @@ fun OpdsPublication.findSelfLinks(): List<ReadiumLink> {
     }
 }
 
+fun OpdsPublication.findHighlightCardLinks(): List<ReadiumLink> {
+    return links.filter {
+        it.rel?.contains("https://id.openeel.org/rel/app-highlight-card") == true
+    }
+}
+
+fun OpdsPublication.findLicenseLink(): ReadiumLink? =
+    links.firstOrNull { it.rel?.contains("license") == true }
+
+fun OpdsPublication.findTermsOfServiceLink(): ReadiumLink? =
+    links.firstOrNull { it.rel?.contains("terms-of-service") == true }
+
+fun OpdsPublication.findPlayStoreLink(): ReadiumLink? =
+    links.firstOrNull { it.rel?.contains("https://id.openeel.org/rel/appstore-android") == true }
+
+fun OpdsPublication.findCollection(): ReadiumLink? =
+    links.firstOrNull {
+        it.rel?.contains("collection") == true
+    } ?: respectAppManifestDefaultLessonList()
+
+
+
 fun OpdsPublication.findIcons(): List<ReadiumLink> {
     return images ?: emptyList()
 }
 
-fun OpdsPublication.respectAppDefaultLessonList(): ReadiumLink? {
+fun OpdsPublication.respectAppManifestDefaultLessonList(): ReadiumLink? {
     return links.firstOrNull {
         REL_RESPECT_DEFAULT_CATALOG in (it.rel ?: emptyList())
     }

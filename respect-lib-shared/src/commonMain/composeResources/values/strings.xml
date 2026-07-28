@@ -654,4 +654,6 @@
     <string name="network_error_check_try_again">Network error: check your connection and try again</string>
 
     <string name="not_found">Not found</string>
+    <string name="license">License</string>
+
 </resources>

@@ -2,9 +2,12 @@ package world.respect.app.view.learningunit.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,11 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,7 +30,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
 import org.jetbrains.compose.resources.stringResource
@@ -41,11 +49,23 @@ import com.ustadmobile.libcache.PublicationPinState
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
+import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.langMapString
+import world.respect.app.components.uiTextStringResource
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.name
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.app_name
 import world.respect.shared.generated.resources.cancel
+import world.respect.shared.generated.resources.download
 import world.respect.shared.generated.resources.downloaded
+import world.respect.shared.generated.resources.license
+import world.respect.shared.generated.resources.open
+import world.respect.shared.generated.resources.subject
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
+import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun LearningUnitDetailScreen(
@@ -58,10 +78,12 @@ fun LearningUnitDetailScreen(
         onClickOpen = viewModel::onClickOpen,
         onClickDownload = viewModel::onClickDownload,
         onClickAssign = viewModel::onClickAssign,
-        onClickBookmark = viewModel::onClickBookmark
+        onClickApp = viewModel::onClickApp,
+        onClickBookmark = viewModel::onClickBookmark,
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 
 fun LearningUnitDetailScreen(
@@ -69,7 +91,8 @@ fun LearningUnitDetailScreen(
     onClickOpen: () -> Unit,
     onClickDownload: () -> Unit,
     onClickAssign: () -> Unit,
-    onClickBookmark: () -> Unit
+    onClickApp: (OpdsPublication) -> Unit,
+    onClickBookmark: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -95,44 +118,52 @@ fun LearningUnitDetailScreen(
             headlineContent = {
                 Text(
                     text = uiState.lessonDetail?.metadata?.title?.let { langMapString(it) } ?: "",
-                    fontWeight = FontWeight.Bold
                 )
             },
             supportingContent = {
                 Column(
-                    verticalArrangement =
-                        Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable { uiState.appDetail?.let { onClickApp(it) } }
                     ) {
+                        val appIconUrl = uiState.appDetail?.images?.firstOrNull()?.href
                         Box(
                             modifier = Modifier
-                                .size(20.dp)
+                                .size(24.dp)
                                 .clip(CircleShape)
                                 .background(white)
                                 .border(1.dp, black, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Android,
-                                modifier = Modifier.padding(6.dp),
-                                contentDescription = null
-                            )
+                            if (appIconUrl != null) {
+                                RespectAsyncImage(
+                                    uri = appIconUrl,
+                                    contentDescription = "",
+                                    contentScale = ContentScale.Fit,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.width(12.dp))
 
                         Text(
-                            text = stringResource(Res.string.app_name),
+                            text = uiState.appDetail?.metadata?.title?.let { langMapString(it) }
+                                ?: "",
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
-
-                    Text(
-                        text = uiState.lessonDetail?.metadata?.subtitle
-                            ?.let { langMapString(it) } ?: ""
-                    )
-
+                    val duration =
+                        uiState.lessonDetail?.links?.firstOrNull { it.duration != null }?.duration?.seconds
+                    if (duration != null) {
+                        Text(
+                            text = duration.toString(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
                 }
             }
         )
@@ -146,6 +177,8 @@ fun LearningUnitDetailScreen(
         ) {
             Text(stringResource(Res.string.open))
         }
+
+        HorizontalDivider()
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -176,5 +209,36 @@ fun LearningUnitDetailScreen(
                 )
             }
         }
+
+
+        HorizontalDivider()
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            uiState.licenseLabel?.let {
+                Tag(text = "${stringResource(Res.string.license)}: ${uiTextStringResource(it)}")
+            }
+
+            uiState.lessonDetail?.metadata?.subject?.forEach { subject ->
+                Tag(text = "${stringResource(Res.string.subject)}: ${langMapString(subject.name)}")
+            }
+        }
+
+    }
+}
+
+@Composable
+private fun Tag(text: String) {
+    Box(
+        modifier = Modifier
+            .border(1.dp, Color.Black, RoundedCornerShape(4.dp))
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }

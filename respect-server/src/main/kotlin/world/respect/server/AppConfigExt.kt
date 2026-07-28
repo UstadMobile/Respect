@@ -17,6 +17,11 @@ const val SERVER_CONFIG_KEY_DIRS_USE_VIRTUALHOST = "ktor.school.directories.virt
 const val SERVER_CONFIG_KEY_REGISTRATION_PIN = "ktor.school.registration.pin"
 
 /**
+ * If set save the PID to the given file when running
+ */
+const val SERVER_CONFIG_PID_FILE = "ktor.pidfile"
+
+/**
  * File that contains the password for directory management.
  */
 const val DIRECTORY_ADMIN_FILENAME = "dir-admin.txt"

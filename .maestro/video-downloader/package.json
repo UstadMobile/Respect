@@ -12,6 +12,6 @@
     "url": "https://github.com/UstadMobile/Respect.git"
   },
   "devDependencies": {
-    "cypress": "14.0.0"
+    "cypress": "15.18.1"
   }
 }

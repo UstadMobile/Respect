@@ -9,5 +9,5 @@ appId: world.respect.app
       id: "upload_done"
     timeout: 30000
 - takeScreenshot:
-    path: e2e_artifact_upload
+    path: ${SCREENSHOT_DIR}/e2e_artifact_upload
     label: Screenshot of E2E artifact upload result

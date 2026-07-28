@@ -37,7 +37,6 @@ import world.respect.lib.opds.model.findHighlightCardLinks
 import world.respect.lib.opds.model.findLicenseLink
 import world.respect.lib.opds.model.findGooglePlayLink
 import world.respect.lib.opds.model.findTermsOfServiceLink
-import world.respect.lib.opds.model.respectAppDefaultLessonList
 import world.respect.lib.opds.model.toStringMap
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.objectActivityOrNull
@@ -91,7 +90,6 @@ class AppsDetailViewModel(
 
     private val launchCustomTabUseCase: LaunchCustomTabUseCase by inject()
 
-
     init {
         _appUiState.update {
             it.copy(
@@ -106,7 +104,6 @@ class AppsDetailViewModel(
                 referrerUrl = null,
                 expectedPublicationId = null,
             ).collectLatest { result ->
-
                 _uiState.update { prev ->
                     prev.copy(
                         appDetail = result.map { it.resolve(route.manifestUrl) },
@@ -117,17 +114,18 @@ class AppsDetailViewModel(
                     )
                 }
 
-                val collectionLink = result.dataOrNull()?.findCollection() ?: return@collectLatest
-                result.dataOrNull()?.findLicenseLink()?.let { licenseLink ->
-                    val licenseLabelResult = getLicenseLabelUseCase(
-                        route.manifestUrl.resolve(licenseLink.href).toString()
-                    )
-                    _uiState.update { it.copy(licenseLabelResult = licenseLabelResult) }
+                launch {
+                    result.dataOrNull()?.findLicenseLink()?.also { licenseLink ->
+                        val licenseLabelResult = getLicenseLabelUseCase(
+                            route.manifestUrl.resolve(licenseLink.href).toString()
+                        )
+
+                        _uiState.update { it.copy(licenseLabelResult = licenseLabelResult) }
+                    }
                 }
 
-                val lessonList = result.dataOrNull()?.findCollection()
-                    ?: result.dataOrNull()?.respectAppDefaultLessonList()
-                    ?: return@collectLatest
+
+                val collectionLink = result.dataOrNull()?.findCollection() ?: return@collectLatest
 
                 schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
                     url = route.manifestUrl.resolve(collectionLink.href),
@@ -229,10 +227,6 @@ class AppsDetailViewModel(
                 )
             )
         )
-    }
-
-    fun onClickTry() {
-        /*TRY Button Click*/
     }
 
     fun onClickAdd() {

@@ -92,6 +92,7 @@ fun LearningUnitDetailScreen(
             .defaultScreenPadding()
     ) {
         val lessonDetail = uiState.lessonDetail.dataOrNull()
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -125,7 +126,6 @@ fun LearningUnitDetailScreen(
                     Text(
                         text = lessonDetail?.metadata?.title?.let { langMapString(it) } ?: "",
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
                     )
 
                     uiState.appDetail?.let { app ->
@@ -157,13 +157,11 @@ fun LearningUnitDetailScreen(
                             Text(
                                 text = langMapString(app.metadata.title),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
 
-                    val duration =
-                        lessonDetail?.links?.firstOrNull { it.duration != null }?.duration?.seconds
+                    val duration = lessonDetail?.links?.firstOrNull { it.duration != null }?.duration?.seconds
                     if (duration != null) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -171,10 +169,11 @@ fun LearningUnitDetailScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Schedule,
-                                contentDescription = stringResource(Res.string.clock_icon),
+                                contentDescription = null,
                                 modifier = Modifier.size(20.dp),
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+
                             Text(
                                 text = "$duration",
                                 style = MaterialTheme.typography.bodySmall,

@@ -4,7 +4,7 @@ import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import world.respect.app.R
+import world.respect.appcompose.R
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.domain.license.GetLicenseLabelUseCase.LicenseResult
 import world.respect.shared.generated.resources.Res
@@ -32,7 +32,7 @@ class GetLicenseLabelUseCaseAndroid(
                         || entry.licenseStewardUrl == licenseUrl
             }?.let { entry ->
                 LicenseResult(
-                    title = StringUiText("${getString(Res.string.open_source)} : ${entry.spdxId}"),
+                    title = StringUiText("${getString(Res.string.open_source)}: ${entry.spdxId}"),
                     isOpenSource = true,
                 )
             } ?: LicenseResult(

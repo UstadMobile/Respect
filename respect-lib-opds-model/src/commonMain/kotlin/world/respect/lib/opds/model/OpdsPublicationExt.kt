@@ -43,7 +43,10 @@ fun OpdsPublication.findGooglePlayLink(): ReadiumLink? =
     links.firstOrNull { it.rel?.contains("https://id.openeel.org/rel/appstore-android") == true }
 
 fun OpdsPublication.findCollection(): ReadiumLink? =
-    links.firstOrNull { it.rel?.contains("collection") == true }
+    links.firstOrNull {
+        it.rel?.contains("collection") == true
+    } ?: respectAppManifestDefaultLessonList()
+
 
 fun OpdsPublication.findLaunchableAppLink(): ReadiumLink? =
     links.firstOrNull { it.rel?.contains(REL_LAUNCHABLE_APP) == true }
@@ -53,7 +56,7 @@ fun OpdsPublication.findIcons(): List<ReadiumLink> {
     return images ?: emptyList()
 }
 
-fun OpdsPublication.respectAppDefaultLessonList(): ReadiumLink? {
+fun OpdsPublication.respectAppManifestDefaultLessonList(): ReadiumLink? {
     return links.firstOrNull {
         REL_RESPECT_DEFAULT_CATALOG in (it.rel ?: emptyList())
     }

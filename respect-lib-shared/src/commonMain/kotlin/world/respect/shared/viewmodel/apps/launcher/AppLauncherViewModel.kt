@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -39,7 +38,8 @@ import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.opds.model.respectAppDefaultLessonList
+import world.respect.lib.opds.model.findCollection
+import world.respect.lib.opds.model.respectAppManifestDefaultLessonList
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
 import world.respect.lib.xapi.model.XapiStatement
@@ -158,7 +158,7 @@ class AppLauncherViewModel(
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 if(route.resultDest != null) {
-                    val defaultLessonListHref = app.dataOrNull()?.respectAppDefaultLessonList()?.href
+                    val defaultLessonListHref = app.dataOrNull()?.findCollection()?.href
                         ?: return
                     val defaultLessonUrl = url.resolve(defaultLessonListHref)
 

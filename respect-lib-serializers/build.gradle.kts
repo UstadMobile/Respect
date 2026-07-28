@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
     id("maven-publish")
 }
@@ -10,13 +10,15 @@ plugins {
 kotlin {
 
     compilerOptions {
+        jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
+
         optIn.add("kotlin.time.ExperimentalTime")
     }
 
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
+    android {
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        namespace = "${rootProject.group}.lib.serializers"
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
     jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
@@ -47,14 +49,3 @@ kotlin {
     }
 }
 
-android {
-    namespace = "world.respect.lib.serializers"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
-}

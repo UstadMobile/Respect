@@ -37,7 +37,7 @@ import world.respect.lib.opds.model.findHighlightCardLinks
 import world.respect.lib.opds.model.findLicenseLink
 import world.respect.lib.opds.model.findGooglePlayLink
 import world.respect.lib.opds.model.findTermsOfServiceLink
-import world.respect.lib.opds.model.respectAppDefaultLessonList
+import world.respect.lib.opds.model.respectAppManifestDefaultLessonList
 import world.respect.lib.opds.model.toStringMap
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.objectActivityOrNull
@@ -117,19 +117,10 @@ class AppsDetailViewModel(
                     )
                 }
 
-                result.dataOrNull()?.findLicenseLink()?.let { licenseLink ->
-                    val licenseLabelResult = getLicenseLabelUseCase(
-                        route.manifestUrl.resolve(licenseLink.href).toString()
-                    )
-                    _uiState.update { it.copy(licenseLabelResult = licenseLabelResult) }
-                }
-
-                val lessonLink = result.dataOrNull()?.findCollection()
-                    ?: result.dataOrNull()?.respectAppDefaultLessonList()
-                    ?: return@collectLatest
+                val collectionLink = result.dataOrNull()?.findCollection() ?: return@collectLatest
 
                 schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
-                    url = route.manifestUrl.resolve(lessonLink.href),
+                    url = route.manifestUrl.resolve(collectionLink.href),
                     params = DataLoadParams()
                 ).collect { result ->
                     when (result) {
@@ -180,7 +171,7 @@ class AppsDetailViewModel(
 
     fun onClickLessonList() {
         val appManifest = uiState.value.appDetail?.dataOrNull()
-        appManifest?.respectAppDefaultLessonList()?.also { defaultLessonListLink ->
+        appManifest?.findCollection()?.also { defaultLessonListLink ->
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     LearningUnitList.create(
@@ -192,13 +183,14 @@ class AppsDetailViewModel(
             )
         }
     }
+
     fun onClickPublication(publication: OpdsPublication) {
         try {
             val publicationHref = publication.links.selfPublicationLinkOrNull()?.href
                 ?: throw IllegalArgumentException().withUiText(Res.string.invalid_link.asUiText())
 
             val refererUrl = uiState.value.appDetail?.dataOrNull()
-                ?.respectAppDefaultLessonList()?.href
+                ?.findCollection()?.href
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(

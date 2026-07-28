@@ -116,22 +116,21 @@ class LearningUnitDetailViewModel(
                 }
 
                 if (result is DataReadyState) {
-                    val lessonPublication = result.data.resolve(route.learningUnitManifestUrl)
-                    val appManifestHref = lessonPublication.findLaunchableAppLink()?.href
+                    val lessonPublication = lessonDetailMapped.dataOrNull() ?: return@collectLatest
+                    val appManifestHref = lessonPublication.findLaunchableAppLink()?.href ?: return@collectLatest
+                    val appManifestUrl = route.learningUnitManifestUrl.resolve(appManifestHref)
 
-                    if (appManifestHref != null) {
-                        val appManifestUrl = route.learningUnitManifestUrl.resolve(appManifestHref)
-                        schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
-                            url = appManifestUrl,
-                            params = DataLoadParams(),
-                            referrerUrl = null,
-                            expectedPublicationId = null,
-                        ).collect { appResult ->
+                    schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
+                        url = appManifestUrl,
+                        params = DataLoadParams(),
+                        referrerUrl = null,
+                        expectedPublicationId = null,
+                    ).collectLatest { appResult ->
+                        if (appResult is DataReadyState) {
+                            val appPublication = appResult.data.resolve(appManifestUrl)
 
-                            if (appResult is DataReadyState) {
-                                val appPublication = appResult.data.resolve(appManifestUrl)
-
-                                val licenseLabelResult = appPublication.findLicenseLink()?.let { licenseLink ->
+                            val licenseLabelResult =
+                                appPublication.findLicenseLink()?.let { licenseLink ->
                                     try {
                                         getLicenseLabelUseCase(
                                             appManifestUrl.resolve(licenseLink.href).toString()
@@ -142,12 +141,11 @@ class LearningUnitDetailViewModel(
                                     }
                                 }
 
-                                _uiState.update {
-                                    it.copy(
-                                        appDetail = appPublication,
-                                        licenseLabelResult = licenseLabelResult
-                                    )
-                                }
+                            _uiState.update {
+                                it.copy(
+                                    appDetail = appPublication,
+                                    licenseLabelResult = licenseLabelResult
+                                )
                             }
                         }
                     }

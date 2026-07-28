@@ -42,6 +42,7 @@ import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectDataLoadHost
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
+import world.respect.app.components.defaultScreenPadding
 import world.respect.app.components.langMapString
 import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.ext.dataOrNull
@@ -89,7 +90,7 @@ fun LearningUnitDetailScreen(
         uiState.lessonDetail,
         modifier = Modifier
             .fillMaxSize()
-            .padding(vertical = 10.dp)
+            .defaultScreenPadding()
     ) {
         val lessonDetail = uiState.lessonDetail.dataOrNull()
         Column(

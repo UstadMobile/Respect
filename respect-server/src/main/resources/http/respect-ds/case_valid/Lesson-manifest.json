@@ -5,22 +5,32 @@
     "author": "Mullah Nasruddin",
     "identifier": "https://example.app/id/lesson001",
     "language": "en",
-    "modified": "2015-09-29T17:00:00Z"
+    "modified": "2015-09-29T17:00:00Z",
+    "subject": [
+      {
+        "name": {
+          "en": "Mathematics"
+        },
+        "scheme": "https://www.bisg.org/#bisac",
+        "code": "MAT000000"
+      }
+    ]
   },
   "links": [
     {
       "rel": "self",
-      "href": "https://demo.openeel.org/Lesson-manifest.json",
+      "href": "Lesson-manifest.json",
       "type": "application/opds-publication+json"
     },
     {
       "rel": "https://id.openeel.org/rel/tincanxml",
       "href": "tincan.xml",
-      "type": "application/xml"
+      "type": "application/xml",
+      "duration": 180
     },
     {
       "rel": "https://id.openeel.org/rel/launchable-app",
-      "href": "https://demo.openeel.org/launchable-app.json",
+      "href": "launchable-app.json",
       "type": "application/opds-publication+json"
     }
   ],
@@ -32,7 +42,7 @@
   ],
   "images": [
     {
-      "href": "cover.png",
+      "href": "icon.png",
       "type": "image/png"
     }
   ],

@@ -37,7 +37,7 @@ import world.respect.lib.opds.model.findHighlightCardLinks
 import world.respect.lib.opds.model.findLicenseLink
 import world.respect.lib.opds.model.findGooglePlayLink
 import world.respect.lib.opds.model.findTermsOfServiceLink
-import world.respect.lib.opds.model.respectAppManifestDefaultLessonList
+import world.respect.lib.opds.model.respectAppDefaultLessonList
 import world.respect.lib.opds.model.toStringMap
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.objectActivityOrNull
@@ -118,6 +118,16 @@ class AppsDetailViewModel(
                 }
 
                 val collectionLink = result.dataOrNull()?.findCollection() ?: return@collectLatest
+                result.dataOrNull()?.findLicenseLink()?.let { licenseLink ->
+                    val licenseLabelResult = getLicenseLabelUseCase(
+                        route.manifestUrl.resolve(licenseLink.href).toString()
+                    )
+                    _uiState.update { it.copy(licenseLabelResult = licenseLabelResult) }
+                }
+
+                val lessonList = result.dataOrNull()?.findCollection()
+                    ?: result.dataOrNull()?.respectAppDefaultLessonList()
+                    ?: return@collectLatest
 
                 schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
                     url = route.manifestUrl.resolve(collectionLink.href),
@@ -234,7 +244,8 @@ class AppsDetailViewModel(
 
             val statement = createBlankAppListingStatement(
                 appActivityId = route.manifestUrl.toString(),
-                appTitle = uiState.value.appDetail?.dataOrNull()?.metadata?.title?.toStringMap() ?: emptyMap(),
+                appTitle = uiState.value.appDetail?.dataOrNull()?.metadata?.title?.toStringMap()
+                    ?: emptyMap(),
                 actor = actor,
                 manifestUrl = route.manifestUrl.toString()
             )
@@ -243,17 +254,14 @@ class AppsDetailViewModel(
     }
 
     fun onClickHighlightCard(hrefLink: String) {
-        val resolvedHighlightCard = route.manifestUrl.resolve(hrefLink).toString()
-        launchCustomTabUseCase(Url(resolvedHighlightCard))
+        launchCustomTabUseCase(Url(hrefLink))
     }
 
     fun onClickLicense(hrefLink: String) {
-        val resolvedLicense = route.manifestUrl.resolve(hrefLink).toString()
-        launchCustomTabUseCase(Url(resolvedLicense))
+        launchCustomTabUseCase(Url(hrefLink))
     }
 
     fun onClickGooglePlay(hrefLink: String) {
-        val resolvedGooglePlay = route.manifestUrl.resolve(hrefLink).toString()
-        launchCustomTabUseCase(Url(resolvedGooglePlay))
+        launchCustomTabUseCase(Url(hrefLink))
     }
 }

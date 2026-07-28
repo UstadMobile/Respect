@@ -124,12 +124,12 @@ class AppsDetailViewModel(
                     _uiState.update { it.copy(licenseLabelResult = licenseLabelResult) }
                 }
 
-                val lessonLink = result.dataOrNull()?.findCollection()
+                val lessonList = result.dataOrNull()?.findCollection()
                     ?: result.dataOrNull()?.respectAppDefaultLessonList()
                     ?: return@collectLatest
 
                 schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
-                    url = route.manifestUrl.resolve(lessonLink.href),
+                    url = route.manifestUrl.resolve(lessonList.href),
                     params = DataLoadParams()
                 ).collect { result ->
                     when (result) {
@@ -180,25 +180,28 @@ class AppsDetailViewModel(
 
     fun onClickLessonList() {
         val appManifest = uiState.value.appDetail?.dataOrNull()
-        appManifest?.respectAppDefaultLessonList()?.also { defaultLessonListLink ->
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(
-                    LearningUnitList.create(
-                        opdsFeedUrl = route.manifestUrl.resolve(defaultLessonListLink.href),
-                        appManifestUrl = route.manifestUrl,
-                        resultDest = route.resultDest,
+        (appManifest?.findCollection()
+            ?: appManifest?.respectAppDefaultLessonList())
+            ?.also { lessonList ->
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        LearningUnitList.create(
+                            opdsFeedUrl = route.manifestUrl.resolve(lessonList.href),
+                            appManifestUrl = route.manifestUrl,
+                            resultDest = route.resultDest,
+                        )
                     )
                 )
-            )
-        }
+            }
     }
+
     fun onClickPublication(publication: OpdsPublication) {
         try {
             val publicationHref = publication.links.selfPublicationLinkOrNull()?.href
                 ?: throw IllegalArgumentException().withUiText(Res.string.invalid_link.asUiText())
 
-            val refererUrl = uiState.value.appDetail?.dataOrNull()
-                ?.respectAppDefaultLessonList()?.href
+            val refererUrl = uiState.value.appDetail?.dataOrNull()?.findCollection()?.href
+                ?: uiState.value.appDetail?.dataOrNull()?.respectAppDefaultLessonList()?.href
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
@@ -209,7 +212,7 @@ class AppsDetailViewModel(
                     )
                 )
             )
-        }catch(e: Throwable) {
+        } catch (e: Throwable) {
             Napier.w("Something wrong opening publication", e)
             snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
         }
@@ -242,7 +245,8 @@ class AppsDetailViewModel(
 
             val statement = createBlankAppListingStatement(
                 appActivityId = route.manifestUrl.toString(),
-                appTitle = uiState.value.appDetail?.dataOrNull()?.metadata?.title?.toStringMap() ?: emptyMap(),
+                appTitle = uiState.value.appDetail?.dataOrNull()?.metadata?.title?.toStringMap()
+                    ?: emptyMap(),
                 actor = actor,
                 manifestUrl = route.manifestUrl.toString()
             )
@@ -251,17 +255,14 @@ class AppsDetailViewModel(
     }
 
     fun onClickHighlightCard(hrefLink: String) {
-        val resolvedHighlightCard = route.manifestUrl.resolve(hrefLink).toString()
-        launchCustomTabUseCase(Url(resolvedHighlightCard))
+        launchCustomTabUseCase(Url(hrefLink))
     }
 
     fun onClickLicense(hrefLink: String) {
-        val resolvedLicense = route.manifestUrl.resolve(hrefLink).toString()
-        launchCustomTabUseCase(Url(resolvedLicense))
+        launchCustomTabUseCase(Url(hrefLink))
     }
 
     fun onClickGooglePlay(hrefLink: String) {
-        val resolvedGooglePlay = route.manifestUrl.resolve(hrefLink).toString()
-        launchCustomTabUseCase(Url(resolvedGooglePlay))
+        launchCustomTabUseCase(Url(hrefLink))
     }
 }

@@ -169,10 +169,7 @@ fun AppsDetailScreen(
             }
         }
 
-        HorizontalDivider(
-            thickness = 1.dp,
-            modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
-        )
+
 
 
         if (uiState.highlightCards.isNotEmpty()) {
@@ -182,6 +179,11 @@ fun AppsDetailScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
             ) {
+
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
+                )
 
                 HorizontalPager(
                     state = pagerState,
@@ -211,13 +213,15 @@ fun AppsDetailScreen(
                         )
                     }
                 }
+
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
+                )
+
             }
         }
 
-        HorizontalDivider(
-            thickness = 1.dp,
-            modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
-        )
 
         Text(
             text = appDetail?.metadata?.description.orEmpty(),

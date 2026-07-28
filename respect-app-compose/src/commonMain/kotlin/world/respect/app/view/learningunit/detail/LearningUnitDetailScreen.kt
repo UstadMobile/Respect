@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,9 +18,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.NearMe
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.libcache.PublicationPinState
@@ -38,16 +38,19 @@ import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
+import world.respect.app.components.RespectDataLoadHost
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
-import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.defaultScreenPadding
 import world.respect.app.components.langMapString
 import world.respect.app.components.uiTextStringResource
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.name
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.cancel
+import world.respect.shared.generated.resources.clock_icon
 import world.respect.shared.generated.resources.download
 import world.respect.shared.generated.resources.downloaded
 import world.respect.shared.generated.resources.license
@@ -69,10 +72,10 @@ fun LearningUnitDetailScreen(
         onClickDownload = viewModel::onClickDownload,
         onClickAssign = viewModel::onClickAssign,
         onClickApp = viewModel::onClickApp,
+        onClickLicense = viewModel::onClickLicense,
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LearningUnitDetailScreen(
     uiState: LearningUnitDetailUiState,
@@ -80,152 +83,176 @@ fun LearningUnitDetailScreen(
     onClickDownload: () -> Unit,
     onClickAssign: () -> Unit,
     onClickApp: (OpdsPublication) -> Unit,
+    onClickLicense: (OpdsPublication) -> Unit,
 ) {
-    Column(
+    RespectDataLoadHost(
+        uiState.lessonDetail,
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .defaultScreenPadding()
     ) {
-        ListItem(
-            leadingContent = {
-                val iconUrl = uiState.lessonDetail?.images?.firstOrNull()?.href
+        val lessonDetail = uiState.lessonDetail.dataOrNull()
 
-                iconUrl.also { icon ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                val iconUrl = lessonDetail?.images?.firstOrNull()?.href
+
+                iconUrl?.also { icon ->
                     RespectAsyncImage(
                         uri = icon,
                         contentDescription = "",
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(120.dp)
-
+                            .clip(RoundedCornerShape(8.dp))
                     )
                 }
-            },
-            headlineContent = {
-                Text(
-                    text = uiState.lessonDetail?.metadata?.title?.let { langMapString(it) } ?: "",
-                )
-            },
-            supportingContent = {
+
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable { uiState.appDetail?.let { onClickApp(it) } }
-                    ) {
-                        val appIconUrl = uiState.appDetail?.images?.firstOrNull()?.href
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(CircleShape)
-                                .background(white)
-                                .border(1.dp, black, CircleShape),
-                            contentAlignment = Alignment.Center
+                    Text(
+                        text = lessonDetail?.metadata?.title?.let { langMapString(it) } ?: "",
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+
+                    uiState.appDetail?.let { app ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable { onClickApp(app) }
                         ) {
-                            if (appIconUrl != null) {
-                                RespectAsyncImage(
-                                    uri = appIconUrl,
-                                    contentDescription = "",
-                                    contentScale = ContentScale.Fit,
-                                    modifier = Modifier.fillMaxSize()
-                                )
+                            val appIconUrl = app.images?.firstOrNull()?.href
+                            Box(
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .clip(CircleShape)
+                                    .background(white)
+                                    .border(1.dp, black, CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (appIconUrl != null) {
+                                    RespectAsyncImage(
+                                        uri = appIconUrl,
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Fit,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
                             }
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Text(
+                                text = langMapString(app.metadata.title),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
                         }
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Text(
-                            text = uiState.appDetail?.metadata?.title?.let { langMapString(it) }
-                                ?: "",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
                     }
-                    val duration =
-                        uiState.lessonDetail?.links?.firstOrNull { it.duration != null }?.duration?.seconds
+
+                    val duration = lessonDetail?.links?.firstOrNull { it.duration != null }?.duration?.seconds
                     if (duration != null) {
-                        Text(
-                            text = duration.toString(),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Schedule,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            Text(
+                                text = "$duration",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }
-        )
 
-        Button(
-            onClick = {
-                onClickOpen()
-            },
-            enabled = uiState.buttonsEnabled,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(stringResource(Res.string.open))
-        }
-
-        HorizontalDivider()
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RespectQuickActionButton(
-                labelText = when(uiState.pinState.status) {
-                    PublicationPinState.Status.IN_PROGRESS -> stringResource(Res.string.cancel)
-                    PublicationPinState.Status.READY -> stringResource(Res.string.downloaded)
-                    else -> stringResource(Res.string.download)
-                },
-                iconContent = {
-                    RespectOfflineItemStatusIcon(
-                        state = uiState.pinState,
-                    )
-                },
-                onClick = onClickDownload,
+            Button(
+                onClick = onClickOpen,
                 enabled = uiState.buttonsEnabled,
-            )
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(Res.string.open))
+            }
 
-            if(uiState.showAssignButton) {
+            HorizontalDivider()
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 RespectQuickActionButton(
-                    imageVector =Icons.Filled.NearMe,
-                    labelText = stringResource(Res.string.assign),
-                    onClick = onClickAssign,
+                    labelText = when (uiState.pinState.status) {
+                        PublicationPinState.Status.IN_PROGRESS -> stringResource(Res.string.cancel)
+                        PublicationPinState.Status.READY -> stringResource(Res.string.downloaded)
+                        else -> stringResource(Res.string.download)
+                    },
+                    iconContent = {
+                        RespectOfflineItemStatusIcon(
+                            state = uiState.pinState,
+                        )
+                    },
+                    onClick = onClickDownload,
                     enabled = uiState.buttonsEnabled,
                 )
+
+                if (uiState.showAssignButton) {
+                    RespectQuickActionButton(
+                        imageVector = Icons.Filled.NearMe,
+                        labelText = stringResource(Res.string.assign),
+                        onClick = onClickAssign,
+                        enabled = uiState.buttonsEnabled,
+                    )
+                }
+            }
+
+            HorizontalDivider()
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                uiState.licenseLabelResult?.let { result ->
+                    AssistChip(
+                        onClick = { uiState.appDetail?.let { onClickLicense(it) } },
+                        label = {
+                            Text(
+                                text = "${stringResource(Res.string.license)}: ${uiTextStringResource(result.title)}"
+                            )
+                        }
+                    )
+                }
+
+                lessonDetail?.metadata?.subject?.forEach { subject ->
+                    AssistChip(
+                        onClick = {},
+                        label = {
+                            Text(
+                                text = "${stringResource(Res.string.subject)}: ${langMapString(subject.name)}"
+                            )
+                        }
+                    )
+                }
             }
         }
-
-
-        HorizontalDivider()
-        FlowRow(
-            modifier = Modifier.fillMaxWidth().defaultItemPadding(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            uiState.licenseLabel?.let {
-                Tag(text = "${stringResource(Res.string.license)}: ${uiTextStringResource(it)}")
-            }
-
-            uiState.lessonDetail?.metadata?.subject?.forEach { subject ->
-                Tag(text = "${stringResource(Res.string.subject)}: ${langMapString(subject.name)}")
-            }
-        }
-
-    }
-}
-
-@Composable
-private fun Tag(text: String) {
-    Box(
-        modifier = Modifier
-            .border(1.dp, Color.Black, RoundedCornerShape(4.dp))
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium
-        )
     }
 }

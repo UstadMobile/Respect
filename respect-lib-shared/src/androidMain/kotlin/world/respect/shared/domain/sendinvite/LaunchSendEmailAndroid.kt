@@ -13,27 +13,35 @@ class LaunchSendEmailAndroid(
     private val context: Context
 ) : LaunchSendEmailUseCase {
 
-    override suspend fun invoke(subject: String, body: String) {
+    override suspend fun invoke(
+        request: LaunchSendEmailUseCase.LaunchSendEmailRequest
+    ) {
         withContext(Dispatchers.Main) {
-            val uri = buildMailToUri(subject, body)
-            val intent = Intent(Intent.ACTION_SENDTO, uri)
+            val builder = Uri.Builder()
+                .scheme("mailto")
+
+            request.to?.also {
+                builder.opaquePart(request.to)
+            }
+
+            request.subject?.also {
+                builder.appendQueryParameter("subject", it)
+            }
+
+            request.body?.also {
+                builder.appendQueryParameter("body", it)
+            }
+
+            val intent = Intent(Intent.ACTION_SENDTO, builder.build())
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
             try {
                 context.startActivity(intent)
             } catch (e: ActivityNotFoundException) {
-                Log.w("EmailLinkLauncher", "No email app installed")
+                Log.w("LaunchSendEmailAndroid", "No email app installed")
                 throw e
             }
         }
-    }
-
-    private fun buildMailToUri(subject: String, body: String): Uri {
-        return Uri.Builder()
-            .scheme("mailto")
-            .appendQueryParameter("subject", subject)
-            .appendQueryParameter("body", body)
-            .build()
     }
 
 }

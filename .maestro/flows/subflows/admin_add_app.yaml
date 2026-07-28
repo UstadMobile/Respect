@@ -13,5 +13,5 @@ appId: world.respect.app
 - assertVisible:
     id: "app_title"
     text: "App detail"
-- tapOn: "Add App"
+- tapOn: "Add to school apps"
 - tapOn: "Apps"

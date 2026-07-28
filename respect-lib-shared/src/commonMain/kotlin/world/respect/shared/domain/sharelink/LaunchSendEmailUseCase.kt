@@ -1,5 +1,13 @@
 package world.respect.shared.domain.sharelink
 
 interface LaunchSendEmailUseCase {
-    suspend operator fun invoke(subject: String, body: String)
+
+    data class LaunchSendEmailRequest(
+        val subject: String?,
+        val body: String?,
+        val to: String?
+    )
+
+    suspend operator fun invoke(request: LaunchSendEmailRequest)
+
 }

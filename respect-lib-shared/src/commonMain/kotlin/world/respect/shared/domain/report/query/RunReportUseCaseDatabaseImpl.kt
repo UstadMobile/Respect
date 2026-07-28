@@ -2,6 +2,7 @@ package world.respect.shared.domain.report.query
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.datetime.TimeZone
 
 /**
  *
@@ -18,8 +19,9 @@ class RunReportUseCaseDatabaseImpl(
     override fun invoke(
         request: RunReportUseCase.RunReportRequest,
     ): Flow<RunReportUseCase.RunReportResult> {
-        if (request.reportOptions.period.periodStartMillis(request.timeZone) >=
-            request.reportOptions.period.periodEndMillis(request.timeZone)
+        val timeZone = TimeZone.of(request.timeZoneId)
+        if (request.reportOptions.period.periodStartMillis(timeZone) >=
+            request.reportOptions.period.periodEndMillis(timeZone)
         ) {
             throw IllegalArgumentException("Invalid time range: to time must be after from time")
         }

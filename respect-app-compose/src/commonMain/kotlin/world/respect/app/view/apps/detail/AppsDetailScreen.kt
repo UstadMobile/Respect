@@ -1,8 +1,12 @@
 package world.respect.app.view.apps.detail
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,12 +18,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +37,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,6 +59,7 @@ import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.BUTTONS_ROW
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.LEARNING_UNIT_LIST
 import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.LESSON_HEADER
+import world.respect.shared.viewmodel.apps.detail.AppsDetailViewModel.Companion.SCREENSHOT
 
 @Composable
 fun AppsDetailScreen(
@@ -61,7 +73,8 @@ fun AppsDetailScreen(
         onClickLessonList = { viewModel.onClickLessonList() },
         onClickPublication = { viewModel.onClickPublication(it) },
         onClickNavigation = { viewModel.onClickNavigation(it) },
-        onClickAdd = { viewModel.onClickAdd() }
+        onClickAdd = { viewModel.onClickAdd() },
+        onClickCard = { viewModel.onClickCard(it) }
     )
 }
 
@@ -71,7 +84,8 @@ fun AppsDetailScreen(
     onClickLessonList: () -> Unit,
     onClickPublication: (OpdsPublication) -> Unit,
     onClickNavigation: (ReadiumLink) -> Unit,
-    onClickAdd: () -> Unit
+    onClickAdd: () -> Unit,
+    onClickCard: (String) -> Unit
 ) {
 
     val appDetail = (uiState.appDetail as? DataReadyState)?.data
@@ -118,7 +132,7 @@ fun AppsDetailScreen(
                 horizontalArrangement =
                     Arrangement.spacedBy(12.dp)
             ) {
-                if(!uiState.isAdded && uiState.showAddRemoveButton) {
+                if (!uiState.isAdded && uiState.showAddRemoveButton) {
                     OutlinedButton(
                         onClick = onClickAdd,
                         modifier = Modifier.weight(1f)
@@ -134,6 +148,77 @@ fun AppsDetailScreen(
             }
         }
 
+        item(
+            key = SCREENSHOT
+        ) {
+            val highlightCards = uiState.highlightCards
+            if (highlightCards.isNotEmpty()) {
+                val pagerState = rememberPagerState(pageCount = { highlightCards.size })
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+
+                    HorizontalPager(
+                        state = pagerState,
+                        pageSize = PageSize.Fixed(280.dp),
+                        pageSpacing = 16.dp,
+                        contentPadding = PaddingValues(horizontal = 8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                    ) { page ->
+                        val shape = RoundedCornerShape(12.dp)
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .shadow(
+                                    elevation = 4.dp,
+                                    shape = shape,
+                                    clip = true
+                                )
+                                .background(MaterialTheme.colorScheme.primaryContainer)
+                                .clickable {
+                                    onClickCard(highlightCards[page].href)
+                                },
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Text(
+                                text = highlightCards[page].title ?: "",
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        repeat(highlightCards.size) { index ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .size(10.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (pagerState.currentPage == index)
+                                            MaterialTheme.colorScheme.primary
+                                        else
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                                    )
+                            )
+                        }
+                    }
+                }
+            }
+        }
         item(
             key = LESSON_HEADER
         ) {

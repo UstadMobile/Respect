@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
@@ -13,9 +14,10 @@ class LaunchSendEmailAndroid(
     private val context: Context
 ) : LaunchSendEmailUseCase {
 
-    override suspend fun invoke(subject: String, body: String) {
+    override suspend fun invoke(subject: String, body: String?, emailId: String?) {
+        val uri = buildMailToUri(subject, body, emailId)
+
         withContext(Dispatchers.Main) {
-            val uri = buildMailToUri(subject, body)
             val intent = Intent(Intent.ACTION_SENDTO, uri)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
@@ -28,12 +30,21 @@ class LaunchSendEmailAndroid(
         }
     }
 
-    private fun buildMailToUri(subject: String, body: String): Uri {
-        return Uri.Builder()
-            .scheme("mailto")
-            .appendQueryParameter("subject", subject)
-            .appendQueryParameter("body", body)
-            .build()
+    private fun buildMailToUri(subject: String, body: String?,emailId: String?): Uri {
+
+        val uriBuilder = if(!emailId.isNullOrEmpty()) {
+            val encodedSubject = Uri.encode(subject)
+            "mailto:$emailId?subject=$encodedSubject".toUri().buildUpon()
+        } else {
+            Uri.Builder()
+                .scheme("mailto")
+                .appendQueryParameter("subject", subject)
+        }
+
+        if(!body.isNullOrEmpty()) {
+            uriBuilder.appendQueryParameter("body", body)
+        }
+        return uriBuilder.build()
     }
 
 }

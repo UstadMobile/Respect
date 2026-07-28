@@ -629,6 +629,8 @@ class LearningUnitViewer(
 @Serializable
 object AccountList : RespectAppRoute
 
+@Serializable
+object ShareFeedback : RespectAppRoute
 
 /**
  * @property addToClassUid if the PersonList screen has been navigated when the user clicks

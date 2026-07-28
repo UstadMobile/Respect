@@ -229,8 +229,9 @@ class InvitePersonViewModel(
         viewModelScope.launch {
             _uiState.value.invite.dataOrNull()?.code?.also { code ->
                 emailLinkLauncher(
-                    subject = getString(Res.string.invitation) ,
-                    body= createInviteLinkUseCase(code).toString()
+                    subject = getString(Res.string.invitation),
+                    body = createInviteLinkUseCase(code).toString(),
+                    emailId = ""
                 )
             }
         }

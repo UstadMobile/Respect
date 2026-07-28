@@ -9,6 +9,7 @@ import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -16,21 +17,29 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
-import world.respect.datalayer.school.opds.ext.hasRel
+import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.findLaunchableAppLink
+import world.respect.lib.opds.model.findLicenseLink
 import world.respect.lib.opds.model.findSelfLinks
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
-import world.respect.shared.domain.licenses.GetLicenseLabelUseCase
+import world.respect.shared.domain.license.GetLicenseLabelUseCase
+import world.respect.shared.domain.license.GetLicenseLabelUseCase.LicenseResult
+import world.respect.shared.domain.school.LaunchCustomTabUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.resources.UiText
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
@@ -40,16 +49,16 @@ import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class LearningUnitDetailUiState(
-    val lessonDetail: OpdsPublication? = null,
+    val lessonDetail: DataLoadState<OpdsPublication> = DataLoadingState(),
     val appDetail: OpdsPublication? = null,
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
     val showAssignButton: Boolean = false,
-    val licenseLabel: UiText? = null,
+    val licenseLabelResult: LicenseResult? = null,
 ) {
     val buttonsEnabled: Boolean
-        get() = lessonDetail != null
+        get() = lessonDetail.dataOrNull() != null
 }
 
 class LearningUnitDetailViewModel(
@@ -74,67 +83,71 @@ class LearningUnitDetailViewModel(
 
     private val getLicenseLabelUseCase: GetLicenseLabelUseCase by inject()
 
+    private val launchCustomTabUseCase: LaunchCustomTabUseCase by inject()
+
 
     init {
+        _appUiState.update {
+            it.copy(
+                title = route.title?.asUiText() ?: it.title
+            )
+        }
+
         viewModelScope.launch {
             schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
                 url = route.learningUnitManifestUrl,
                 params = DataLoadParams(),
                 referrerUrl = route.learningUnitManifestUrl,
                 expectedPublicationId = route.expectedIdentifier
-            ).collect { result ->
-                when (result) {
-                    is DataReadyState -> {
+            ).collectLatest { result ->
 
-                        val lessonPublication = result.data.resolve(route.learningUnitManifestUrl)
-                        _uiState.update {
-                            it.copy(
-                                lessonDetail = lessonPublication,
-                            )
-                        }
+                val lessonDetailMapped = result.map { pub -> pub.resolve(route.learningUnitManifestUrl) }
+                val finalLessonDetail = when (lessonDetailMapped) {
+                    is NoDataLoadedState -> DataErrorResult(
+                        error = IllegalStateException(),
+                        metaInfo = lessonDetailMapped.metaInfo
+                    )
 
-                        _appUiState.update {
-                            it.copy(
-                                title = result.data.metadata.title.asUiText()
-                            )
-                        }
+                    else -> lessonDetailMapped
+                }
 
-                        // Load associated app
-                        val appManifestHref = lessonPublication.links.firstOrNull {
-                            it.hasRel(REL_LAUNCHABLE_APP)
-                        }?.href
+                _uiState.update {
+                    it.copy(lessonDetail = finalLessonDetail)
+                }
 
-                        if (appManifestHref != null) {
-                            schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
-                                url = route.learningUnitManifestUrl.resolve(appManifestHref),
-                                params = DataLoadParams(),
-                                referrerUrl = null,
-                                expectedPublicationId = null,
-                            ).collect { appResult ->
+                if (result is DataReadyState) {
+                    val lessonPublication = lessonDetailMapped.dataOrNull() ?: return@collectLatest
+                    val appManifestHref = lessonPublication.findLaunchableAppLink()?.href ?: return@collectLatest
+                    val appManifestUrl = route.learningUnitManifestUrl.resolve(appManifestHref)
 
-                                if (appResult is DataReadyState) {
-                                    val appPublication = appResult.data.resolve(
-                                        route.learningUnitManifestUrl.resolve(appManifestHref)
-                                    )
-                                    val licenseLink =
-                                        appPublication.links.firstOrNull { it.hasRel(LICENSE) }
+                    schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
+                        url = appManifestUrl,
+                        params = DataLoadParams(),
+                        referrerUrl = null,
+                        expectedPublicationId = null,
+                    ).collectLatest { appResult ->
+                        if (appResult is DataReadyState) {
+                            val appPublication = appResult.data.resolve(appManifestUrl)
 
-                                    _uiState.update {
-                                        it.copy(
-                                            appDetail = appPublication,
-                                            licenseLabel = licenseLink?.let {
-                                                getLicenseLabelUseCase(
-                                                    it
-                                                )
-                                            }
+                            val licenseLabelResult =
+                                appPublication.findLicenseLink()?.let { licenseLink ->
+                                    try {
+                                        getLicenseLabelUseCase(
+                                            appManifestUrl.resolve(licenseLink.href).toString()
                                         )
+                                    } catch (e: Exception) {
+                                        Napier.e("Error fetching license label", e)
+                                        null
                                     }
                                 }
+
+                            _uiState.update {
+                                it.copy(
+                                    appDetail = appPublication,
+                                    licenseLabelResult = licenseLabelResult
+                                )
                             }
                         }
-                    }
-
-                    else -> {
                     }
                 }
             }
@@ -163,7 +176,8 @@ class LearningUnitDetailViewModel(
         viewModelScope.launch {
             try {
                 val lessonPublication =
-                    _uiState.value.lessonDetail ?: throw IllegalStateException("Not ready")
+                    _uiState.value.lessonDetail.dataOrNull()
+                        ?: throw IllegalStateException("Not ready")
 
                 launchAppUseCase(
                     LaunchAppUseCase.LaunchRequest(
@@ -200,7 +214,7 @@ class LearningUnitDetailViewModel(
     }
 
     fun onClickAssign() {
-        val publicationVal = uiState.value.lessonDetail ?: return
+        val publicationVal = uiState.value.lessonDetail.dataOrNull() ?: return
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
@@ -224,9 +238,15 @@ class LearningUnitDetailViewModel(
         )
     }
 
-    private companion object {
-        const val REL_LAUNCHABLE_APP =
-            "https://id.openeel.org/rel/launchable-app"
-        const val LICENSE = "license"
+    fun onClickLicense(app: OpdsPublication) {
+        val licenseHref = app.findLicenseLink()?.href ?: return
+
+        try {
+            launchCustomTabUseCase(Url(licenseHref))
+        } catch (e: Throwable) {
+            Napier.w("Something wrong opening license", e)
+            snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
+        }
     }
+
 }

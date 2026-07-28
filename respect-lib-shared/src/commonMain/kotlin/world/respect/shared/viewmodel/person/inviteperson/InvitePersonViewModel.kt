@@ -81,7 +81,7 @@ class InvitePersonViewModel(
     private val setClipboardStringUseCase: SetClipboardStringUseCase,
     private val smsLinkLauncher: LaunchSendSmsUseCase,
     private val shareLinkLauncher: LaunchShareLinkUseCase,
-    private val emailLinkLauncher: LaunchSendEmailUseCase
+    private val launchSendEmailUseCase: LaunchSendEmailUseCase
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     private val route: InvitePerson = savedStateHandle.toRoute()
@@ -228,9 +228,12 @@ class InvitePersonViewModel(
     fun onSendLinkViaEmail() {
         viewModelScope.launch {
             _uiState.value.invite.dataOrNull()?.code?.also { code ->
-                emailLinkLauncher(
-                    subject = getString(Res.string.invitation) ,
-                    body= createInviteLinkUseCase(code).toString()
+                launchSendEmailUseCase(
+                    LaunchSendEmailUseCase.LaunchSendEmailRequest(
+                        subject = getString(Res.string.invitation),
+                        body = createInviteLinkUseCase(code).toString(),
+                        to = null,
+                    )
                 )
             }
         }

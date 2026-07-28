@@ -40,7 +40,6 @@ import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
-import org.jetbrains.compose.resources.getString
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
@@ -159,8 +158,13 @@ import world.respect.shared.domain.e2eartifactupload.E2EArtifactUploadUseCase
 import world.respect.shared.domain.e2eartifactupload.E2EArtifactUploadUseCaseClient
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
+import world.respect.shared.domain.license.GetLicenseLabelUseCaseAndroid
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
+import world.respect.shared.domain.launchers.LaunchSendWhatsAppUseCase
+import world.respect.shared.domain.launchers.LaunchSendWhatsAppUseCaseAndroid
+import world.respect.shared.domain.openexternallink.OpenExternalLinkUseCase
+import world.respect.shared.domain.launchers.OpenExternalLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -185,8 +189,6 @@ import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCas
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCase
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCaseAndroid
 import world.respect.shared.domain.validateemail.ValidateEmailUseCase
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.app_name
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.NavResultReturnerImpl
 import world.respect.shared.util.di.RespectAccountScopeId
@@ -209,6 +211,7 @@ import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
+import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
@@ -230,7 +233,7 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
-import world.respect.shared.domain.licenses.GetLicenseLabelUseCase
+import world.respect.shared.domain.license.GetLicenseLabelUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
@@ -388,6 +391,7 @@ val appKoinModule = module {
     viewModelOf(::OtherOptionsSignupViewModel)
     viewModelOf(::EnterPasswordSignupViewModel)
     viewModelOf(::AccountListViewModel)
+    viewModelOf(::ShareFeedbackViewModel)
     viewModelOf(::ManageAccountViewModel)
     viewModelOf(::PersonListViewModel)
     viewModelOf(::InvitePersonViewModel)
@@ -420,6 +424,13 @@ val appKoinModule = module {
     viewModelOf(::StatementListViewModel)
     viewModelOf(::StatementDetailViewModel)
     viewModelOf(::RawStatementViewModel)
+
+    single<LaunchSendWhatsAppUseCase> {
+        LaunchSendWhatsAppUseCaseAndroid(androidContext())
+    }
+    single<OpenExternalLinkUseCase> {
+        OpenExternalLinkUseCaseAndroid(androidContext())
+    }
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -661,6 +672,13 @@ val appKoinModule = module {
         GetWarningsUseCaseAndroid()
     }
 
+    single<GetLicenseLabelUseCase> {
+        GetLicenseLabelUseCaseAndroid(
+            context = androidContext(),
+            json = get(),
+        )
+    }
+
     single<EncryptPersonPasswordUseCase> {
         EncryptPersonPasswordUseCaseImpl()
     }
@@ -772,10 +790,6 @@ val appKoinModule = module {
 
     single<GetXapiActivityForPublicationUseCase> {
         GetXapiActivityForPublicationUseCase()
-    }
-
-    single<GetLicenseLabelUseCase> {
-        GetLicenseLabelUseCase()
     }
 
     /**

@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.flowOf
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.ext.objectActivityOrNull
-import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.bookmark
@@ -75,7 +74,7 @@ fun BookmarkListScreen(
                 ) {
                     Image(
                         painter = painterResource(Res.drawable.no_bookmark),
-                        contentDescription = stringResource(resource = Res.string.no_bookmark),
+                        contentDescription = null,
                         contentScale = ContentScale.Fit,
                         modifier = Modifier.size(200.dp)
                     )

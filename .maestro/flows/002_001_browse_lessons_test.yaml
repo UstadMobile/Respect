@@ -23,7 +23,8 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Home"
-- tapOn: "Apps"
+- tapOn:
+    id: "nav_home"
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add from Link"
@@ -57,7 +58,8 @@ onFlowComplete:
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
 - setAirplaneMode: disabled
-- tapOn: "Apps"
+- tapOn:
+    id: "nav_home"
 - tapOn: "Example Web App"
 - tapOn: "Lessons"
 - tapOn: "Examples"
@@ -74,7 +76,8 @@ onFlowComplete:
 - assertVisible: "Downloaded"
 - stopApp
 - launchApp
-- assertVisible: "Apps"
+- assertVisible:
+    id: "nav_home"
 - tapOn: "Example Web App"
 - tapOn: "Lessons"
 - tapOn: "Examples"

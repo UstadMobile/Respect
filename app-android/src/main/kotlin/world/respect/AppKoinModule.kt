@@ -427,7 +427,6 @@ val appKoinModule = module {
     viewModelOf(::StatementListViewModel)
     viewModelOf(::StatementDetailViewModel)
     viewModelOf(::RawStatementViewModel)
-
     viewModelOf(::BookmarkListViewModel)
 
     single<LaunchSendWhatsAppUseCase> {
@@ -1168,7 +1167,6 @@ val appKoinModule = module {
                 schoolDataSource = get(),
             )
         }
-
 
         scoped<GetPublicationForXapiActivityUseCase> {
             GetPublicationForXapiActivityUseCase(

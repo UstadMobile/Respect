@@ -304,6 +304,7 @@ fun AppNavHost(
                 )
             )
         }
+
         composable<ClazzList> {
             val viewModel: ClazzListViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,

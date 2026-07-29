@@ -52,8 +52,8 @@ import world.respect.shared.domain.xapi.createBlankAppListingStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps_detail
 import world.respect.shared.generated.resources.invalid_link
-import  world.respect.shared.domain.license.GetLicenseLabelUseCase
-import  world.respect.shared.domain.license.GetLicenseLabelUseCase.LicenseResult
+import world.respect.shared.domain.license.GetLicenseLabelUseCase
+import world.respect.shared.domain.license.GetLicenseLabelUseCase.LicenseLabelResult
 import world.respect.shared.domain.school.LaunchCustomTabUseCase
 
 data class AppsDetailUiState(
@@ -67,7 +67,7 @@ data class AppsDetailUiState(
     val termsOfServiceLink: ReadiumLink? = null,
     val isAdded: Boolean = false,
     val showAddRemoveButton: Boolean = false,
-    val licenseLabelResult: LicenseResult? = null,
+    val licenseLabelResult: LicenseLabelResult? = null,
 )
 
 class AppsDetailViewModel(

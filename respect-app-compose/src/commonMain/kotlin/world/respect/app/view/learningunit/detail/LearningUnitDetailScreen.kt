@@ -80,7 +80,6 @@ fun LearningUnitDetailScreen(
 }
 
 @Composable
-
 fun LearningUnitDetailScreen(
     uiState: LearningUnitDetailUiState,
     onClickOpen: () -> Unit,
@@ -91,12 +90,12 @@ fun LearningUnitDetailScreen(
     onClickLicense: (OpdsPublication) -> Unit,
 ) {
     RespectDataLoadHost(
-        uiState.lessonDetail,
+        uiState.learningUnit,
         modifier = Modifier
             .fillMaxSize()
             .defaultScreenPadding()
     ) {
-        val lessonDetail = uiState.lessonDetail.dataOrNull()
+        val lessonDetail = uiState.learningUnit.dataOrNull()
 
         Column(
             modifier = Modifier
@@ -133,7 +132,7 @@ fun LearningUnitDetailScreen(
                         style = MaterialTheme.typography.titleLarge,
                     )
 
-                    uiState.appDetail?.let { app ->
+                    uiState.appDetail.dataOrNull()?.also { app ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.clickable { onClickApp(app) }
@@ -227,7 +226,7 @@ fun LearningUnitDetailScreen(
                     },
                     labelText = stringResource(Res.string.bookmark),
                     onClick = onClickBookmark,
-                    enabled = uiState.buttonsEnabled,
+                    enabled = uiState.bookmarkButtonEnabled,
                 )
 
                 if (uiState.showAssignButton) {
@@ -247,9 +246,9 @@ fun LearningUnitDetailScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                uiState.licenseLabelResult?.let { result ->
+                uiState.licenseLabel?.also { result ->
                     AssistChip(
-                        onClick = { uiState.appDetail?.let { onClickLicense(it) } },
+                        onClick = { uiState.appDetail.dataOrNull()?.also { onClickLicense(it) } },
                         label = {
                             Text(
                                 text = "${stringResource(Res.string.license)}: ${uiTextStringResource(result.title)}"

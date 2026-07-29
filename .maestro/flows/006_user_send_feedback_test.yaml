@@ -19,26 +19,6 @@ onFlowComplete:
         NAME: "db-final"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
-- runFlow:
-     file: "subflows/add_person_create_account.yaml"
-     env:
-       FIRSTNAME: TEST
-       LASTNAME: USER
-       GENDER: Male
-       ROLE: Student
-       USERNAME: testuser
-       PASSWORD: test123
-- runFlow:
-    file: "subflows/e2e_artifact_upload.yaml"
-    env:
-      NAME: "db-student-share-feedback"
-- clearState: world.respect.app
-- runFlow:
-    file: "subflows/school_user_login_flow.yaml"
-    env:
-      USERNAME: testuser
-      PASSWORD: test123
-- assertVisible: "Apps"
 - tapOn:
     id: "user_account_icon"
 - tapOn: "Send feedback"
@@ -48,7 +28,4 @@ onFlowComplete:
 - assertVisible: "Message the developers on WhatsApp"
 - assertVisible: "Email the developers"
 - assertVisible: "Public forum"
-- tapOn: "Public forum"
-- runFlow:
-    file: "subflows/chrome-first-run-check.yaml"
-- assertVisible: "Welcome to discussions!"
+

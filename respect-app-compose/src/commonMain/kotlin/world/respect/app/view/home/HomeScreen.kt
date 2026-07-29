@@ -71,34 +71,20 @@ fun HomeScreen(
         ) {
             when(selectedTab) {
                 HomeScreenTabs.APPS -> {
-                    val viewModel: AppLauncherViewModel = respectViewModel(
-                        onSetAppUiState = onSetAppUiState,
-                        navController = respectNavController,
-                    )
-
                     AppLauncherScreen(
-                        viewModel = viewModel
-                    )
-                }
-
-                /* Temporary example.
-                HomeScreenTabs.PLAYLISTS -> {
-                    AssignmentListScreen(
                         viewModel = respectViewModel(
                             onSetAppUiState = onSetAppUiState,
                             navController = respectNavController,
                         )
                     )
-                }*/
+                }
 
                 HomeScreenTabs.BOOKMARK -> {
-                    val viewModel: BookmarkListViewModel = respectViewModel(
-                        onSetAppUiState = onSetAppUiState,
-                        navController = respectNavController,
-                    )
-
                     BookmarkListScreen(
-                        viewModel = viewModel
+                        viewModel = respectViewModel(
+                            onSetAppUiState = onSetAppUiState,
+                            navController = respectNavController,
+                        )
                     )
                 }
             }

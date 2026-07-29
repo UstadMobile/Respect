@@ -1,6 +1,4 @@
 appId: world.respect.app
-tags:
-  - browselessons
 onFlowStart:
   - clearState: world.respect.app
   - runScript:
@@ -12,14 +10,13 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "002_browse_lessons_test"
+        NAME: "002_001_browse_lessons_test"
 
 onFlowComplete:
   - runFlow:
       file: "subflows/teardown.yaml"
       env:
         NAME: "db-final"
-        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - assertVisible: "Home"
@@ -37,9 +34,9 @@ onFlowComplete:
     id: "app_title"
     text: "App detail"
 - assertVisible: "Example Web App"
-- assertVisible: "Add App"
+- assertVisible: "Add to school apps"
 # verify App got added to Apps section
-- tapOn: "Add App"
+- tapOn: "Add to school apps"
 - tapOn:
     id: "nav_home"
 - assertVisible:

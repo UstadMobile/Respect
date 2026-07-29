@@ -190,7 +190,7 @@ fun LearningUnitDetailScreen(
 
             Button(
                 onClick = onClickOpen,
-                enabled = uiState.buttonsEnabled,
+                enabled = uiState.openButtonEnabled,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(Res.string.open))
@@ -215,7 +215,7 @@ fun LearningUnitDetailScreen(
                         )
                     },
                     onClick = onClickDownload,
-                    enabled = uiState.buttonsEnabled,
+                    enabled = uiState.openButtonEnabled,
                 )
 
                 RespectQuickActionButton(
@@ -234,7 +234,7 @@ fun LearningUnitDetailScreen(
                         imageVector = Icons.Filled.NearMe,
                         labelText = stringResource(Res.string.assign),
                         onClick = onClickAssign,
-                        enabled = uiState.buttonsEnabled,
+                        enabled = uiState.openButtonEnabled,
                     )
                 }
             }

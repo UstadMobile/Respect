@@ -68,8 +68,8 @@ data class LearningUnitDetailUiState(
     val licenseLabel: LicenseLabelResult? = null,
     val bookmarks: DataLoadState<XapiStatementResult> = DataLoadingState(),
 ) {
-    val buttonsEnabled: Boolean
-        get() = learningUnit.isReadyAndSettled()
+    val openButtonEnabled: Boolean
+        get() = learningUnit.dataOrNull() != null
 
     //The bookmark state is a separate API call.
     val bookmarkButtonEnabled: Boolean
@@ -211,6 +211,7 @@ class LearningUnitDetailViewModel(
 
     fun onClickOpen() {
         Napier.d("LauncherAppViewModel: onClickOpen")
+
         //If app is null, then UiState.buttonsEnabled is false, so fallback return should never happen
         viewModelScope.launch {
             try {

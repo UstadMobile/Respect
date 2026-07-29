@@ -9,9 +9,9 @@ import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -27,18 +27,14 @@ import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.map
-import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findLaunchableAppLink
 import world.respect.lib.opds.model.findLicenseLink
 import world.respect.lib.opds.model.findSelfLinks
-import world.respect.libutil.ext.resolve
-import world.respect.lib.xapi.model.XapiAccount
-import world.respect.lib.xapi.model.XapiAgent
-import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.bookmark.AddBookmarkUseCase
 import world.respect.shared.domain.bookmark.RemoveBookmarkUseCase
@@ -288,12 +284,13 @@ class LearningUnitDetailViewModel(
                 logMessage = "LearningUnitDetailViewModel: error toggling bookmark"
             ) {
                 val bookmarksStmts = uiState.value.bookmarks.dataOrNull()?.statements ?: emptyList()
+
                 if(bookmarksStmts.isEmpty()) {
                     addBookmarkUseCase(
                         agent = accountManager.selectedAccountAndPersonFlow.filterNotNull()
                             .first().xapiAgent,
                         url = route.learningUnitManifestUrl,
-                        title = uiState.value.lessonDetail?.metadata?.title,
+                        title = uiState.value.lessonDetail.dataOrNull()?.metadata?.title,
                     )
                 }else {
                     removeBookmarkUseCase(statements = bookmarksStmts)

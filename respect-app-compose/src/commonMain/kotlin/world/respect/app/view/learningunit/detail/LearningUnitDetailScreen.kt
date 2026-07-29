@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
@@ -37,15 +39,6 @@ import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
 import org.jetbrains.compose.resources.stringResource
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
-import world.respect.shared.generated.resources.assign
-import world.respect.shared.generated.resources.download
-import androidx.compose.ui.text.font.FontWeight
-import world.respect.shared.generated.resources.open
-import androidx.compose.material3.ListItem
-import androidx.compose.ui.layout.ContentScale
-import com.ustadmobile.libcache.PublicationPinState
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectDataLoadHost
 import world.respect.app.components.RespectOfflineItemStatusIcon
@@ -58,9 +51,8 @@ import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.name
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign
-import world.respect.shared.generated.resources.app_name
+import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.cancel
-import world.respect.shared.generated.resources.clock_icon
 import world.respect.shared.generated.resources.download
 import world.respect.shared.generated.resources.downloaded
 import world.respect.shared.generated.resources.license
@@ -224,6 +216,17 @@ fun LearningUnitDetailScreen(
                         )
                     },
                     onClick = onClickDownload,
+                    enabled = uiState.buttonsEnabled,
+                )
+
+                RespectQuickActionButton(
+                    imageVector = if (uiState.isBookmarked) {
+                        Icons.Filled.Bookmark
+                    } else {
+                        Icons.Outlined.BookmarkBorder
+                    },
+                    labelText = stringResource(Res.string.bookmark),
+                    onClick = onClickBookmark,
                     enabled = uiState.buttonsEnabled,
                 )
 

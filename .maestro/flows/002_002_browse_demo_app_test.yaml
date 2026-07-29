@@ -37,7 +37,8 @@ onFlowComplete:
 - assertVisible: "Lessons"
 # verify App got added to Apps section
 - tapOn: "Add to school apps"
-- tapOn: "Home"
+- tapOn:
+    id: "nav_home"
 - assertVisible:
     id: "app_title"
     text: "Home"
@@ -59,5 +60,6 @@ onFlowComplete:
        text: "Native Demo"
 - assertVisible: "Download"
 - assertVisible: "Open"  # Demo app needs to be installed to open and view the lesson
-- tapOn: "Home"
+- tapOn:
+    id: "nav_home"
 - assertVisible: "Demo Launchable App"

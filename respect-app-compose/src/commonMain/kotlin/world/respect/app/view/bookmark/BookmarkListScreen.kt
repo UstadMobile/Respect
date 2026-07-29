@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -27,7 +28,10 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectListSortHeader
 import world.respect.app.view.learningunit.list.PublicationListItem
 import io.ktor.http.Url
+import kotlinx.coroutines.flow.flowOf
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.shared.generated.resources.Res
@@ -106,12 +110,17 @@ fun BookmarkListScreen(
                     uiState.statements,
                     key = { it.id ?: error("BookmarkListScreen: statement id is null") }
                 ) { statement ->
-                    val activityId = (statement.`object` as? XapiActivity)?.id
-
-                    val publication = activityId?.let {
-                        uiState.taskInfoFlow(Url(it))
-                            .collectAsState(initial = null).value?.dataOrNull()
+                    val activityId = statement.objectActivityOrNull()?.id
+                    val publicationFlow = remember(activityId) {
+                        if(activityId != null) {
+                            uiState.taskInfoFlow(Url(activityId))
+                        } else {
+                            flowOf(DataLoadingState())
+                        }
                     }
+
+                    val publicationLoadState by publicationFlow.collectAsState(DataLoadingState())
+                    val publication = publicationLoadState.dataOrNull()
 
                     if (publication != null) {
                         PublicationListItem(

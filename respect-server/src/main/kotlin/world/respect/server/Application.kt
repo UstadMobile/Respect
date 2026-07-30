@@ -17,6 +17,7 @@ import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.request.path
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
@@ -162,6 +163,13 @@ fun Application.module() {
     }
 
     install(StatusPages) {
+        status(HttpStatusCode.Unauthorized) { call, status ->
+            if(call.request.path().startsWith("/api/school/xapi/")) {
+                call.respond(HttpStatusCode.Forbidden)
+            }else {
+                call.respond(status)
+            }
+        }
         exception<Throwable> { call, cause ->
             cause.printStackTrace()
 
@@ -269,7 +277,12 @@ fun Application.module() {
 
             route("school") {
                 route("xapi") {
-                    authenticate(AUTH_CONFIG_SCHOOL) {
+                    // xAPI credential rejection is a forbidden operation
+                    // (403), including when the credential is absent or
+                    // invalid. Optional provider handling lets the route's
+                    // requireAccountScope enforce that contract uniformly
+                    // instead of Ktor issuing its default 401 challenge.
+                    authenticate(AUTH_CONFIG_SCHOOL, optional = true) {
                         XapiStatementsResourceRoute(json = json)
                     }
                 }

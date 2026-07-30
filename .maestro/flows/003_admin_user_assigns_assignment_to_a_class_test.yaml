@@ -37,7 +37,8 @@ onFlowComplete:
     env:
       USERNAME: "teacherauser"
       PASSWORD: "test123"
-- assertVisible: "Apps"
+- assertVisible:
+        id: "nav_home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
@@ -78,7 +79,7 @@ onFlowComplete:
 - tapOn: "Task"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - tapOn: "Example Web App"
 - assertVisible:
     id: "app_title"
@@ -88,7 +89,7 @@ onFlowComplete:
 - tapOn: "Task"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - tapOn: "Example Web App"
 - assertVisible:
     id: "app_title"

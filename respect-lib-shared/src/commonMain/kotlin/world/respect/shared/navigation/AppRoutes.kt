@@ -155,6 +155,9 @@ data class AssignmentEdit(
 }
 
 @Serializable
+object BookmarkList : RespectAppRoute
+
+@Serializable
 data class StatementList(
     val activityId: String,
     private val xapiActorStr: String,

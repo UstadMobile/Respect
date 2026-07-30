@@ -64,7 +64,7 @@ fun Route.DemoLaunchableAppManifestRoute() {
                     ),
                     ReadiumLink(
                         rel = listOf("license"),
-                        href = "http://opensource.org/licenses/MIT"
+                        href = "https://opensource.org/license/mit"
                     )
                 ),
                 images = listOf(

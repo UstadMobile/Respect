@@ -217,7 +217,6 @@ if [ "$1" == "cloud" ]; then
         $COMMIT_ARG \
         $BRANCH_ARG \
         $PULLREQUEST_ARG \
-        --env SCREENSHOT_DIR=$MAESTRO_OUTPUT_DIR \
         --env DIR_ADMIN_AUTH_PASS=$DIR_ADMIN_AUTH_PASS \
         --env TESTCONTROLLER_URL=$TESTCONTROLLER_URL \
         --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
@@ -267,7 +266,6 @@ else
       --env SCHOOL_ADMIN_PASSWORD=$SCHOOL_ADMIN_PASSWORD \
       --env DIR_ADMIN_AUTH_HEADER="$DIR_ADMIN_AUTH_HEADER" \
       --env SCHOOL_NAME=TestSchool \
-      --env SCREENSHOT_DIR=$MAESTRO_OUTPUT_DIR \
       $TEST_APP_URL_ARG \
       $MAESTRO_EXTRA_ARGS \
       --format=junit \

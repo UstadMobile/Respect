@@ -58,7 +58,9 @@ onFlowComplete:
 - inputText: "User"
 - tapOn: "Save"
 - assertVisible: "Required field"   # Gender field is mandatory
-- tapOn: "Gender*"
+- tapOn:
+    text: "Gender*"
+    retryTapIfNoChange: true
 - tapOn: "Female"
 - tapOn:
     id: "role"
@@ -166,7 +168,9 @@ onFlowComplete:
 - inputText: "Child"
 - tapOn: "Last name*"
 - inputText: "User"
-- tapOn: "Gender*"
+- tapOn:
+    text: "Gender*"
+    retryTapIfNoChange: true
 - tapOn: "Female"
 - assertVisible:
     id: "app_title"
@@ -244,7 +248,9 @@ onFlowComplete:
 - inputText: "Test"
 - tapOn: "Last name*"
 - inputText: "User"
-- tapOn: "Gender*"
+- tapOn:
+    text: "Gender*"
+    retryTapIfNoChange: true
 - tapOn: "Female"
 - tapOn:
     id: "role"

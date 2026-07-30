@@ -93,8 +93,11 @@ onFlowComplete:
 - assertVisible: "Assignment Result.*"
 - tapOn: "Score"
 - inputText: 1
-- tapOn: "Send statement"
-- assertVisible: "Statement sent.*"
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn: "Send statement"
+      - assertVisible: "Statement sent.*"
 - tapOn: "Close"
 - setAirplaneMode: disabled # Set device on Online mode
 - tapOn:

@@ -12,7 +12,9 @@ appId: world.respect.app
 - inputText: ${FIRSTNAME}
 - tapOn: "Last name*"
 - inputText: ${LASTNAME}
-- tapOn: "Gender*"
+- tapOn:
+        text: "Gender*"
+        retryTapIfNoChange: true
 - tapOn: "Female"
 - tapOn: "Save"
 - assertVisible:

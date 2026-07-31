@@ -327,7 +327,7 @@ val appKoinModule = module {
         XXHashUidNumberMapper(xxStringHasher = get())
     }
 
-    single<ConnectivityMonitor> {
+    single<ConnectivityMonitor>(createdAtStart = true) {
         ConnectivityMonitorAndroid(androidContext())
     }
 

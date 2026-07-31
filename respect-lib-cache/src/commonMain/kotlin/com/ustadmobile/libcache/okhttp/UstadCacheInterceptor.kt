@@ -324,7 +324,9 @@ class UstadCacheInterceptor(
                     .message("Gateway Timeout")
                     .code(504)
                     .body("Gateway Timeout: only-if-cached if true, but not available in cache".toResponseBody())
-                    .build()
+                    .build().also {
+                        logger?.d(LOG_TAG, "$logPrefix MISS(only-if-cached) $url ${it.logSummary()}")
+                    }
             }
 
             /*
@@ -340,7 +342,13 @@ class UstadCacheInterceptor(
                 cachedResponseStatus.ifNotModifiedSince?.also {
                     validateRequestBuilder.addHeader("if-modified-since", it)
                 }
-                val validationResponse = chain.proceed(validateRequestBuilder.build())
+                val validationResponse = try {
+                    chain.proceed(validateRequestBuilder.build())
+                }catch(e: Throwable) {
+                    logger?.e(LOG_TAG, "$logPrefix: $url : exception validating", e)
+                    throw e
+                }
+
                 if(validationResponse.code == 304) {
                     validationResponse.close()
                     runBlocking {
@@ -407,7 +415,16 @@ class UstadCacheInterceptor(
                     request.removeXInterceptHeaders()
                 }
 
-                val response = chain.proceed(networkRequest)
+                val response = try {
+                    chain.proceed(networkRequest)
+                }catch(e: Throwable) {
+                    logger?.e(
+                        tag = LOG_TAG,
+                        message = "$logPrefix: $url : exception sending network request",
+                        throwable = e
+                    )
+                    throw e
+                }
                 
                 if(
                     responseCacheabilityChecker.canStore(

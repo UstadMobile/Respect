@@ -241,8 +241,6 @@ class UstadCacheJvmTest {
                 extraHeaders = extraHeaders,
             )
 
-            runBlocking { ustadCache.commit() }
-
             val urlForKey = Url(retrieveUrl).normalizeForNoVarySearchIfNotNull(
                 result.response.headers["No-Vary-Search"]
             )
@@ -453,7 +451,6 @@ class UstadCacheJvmTest {
             )
 
             runBlocking {
-                ustadCache.commit()
                 cacheDb.cacheEntryDao.findEntryByKey(md5Digest.urlKey(url))
             }
         }

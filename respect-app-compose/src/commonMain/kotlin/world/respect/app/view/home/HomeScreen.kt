@@ -15,17 +15,17 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.view.apps.launcher.AppLauncherScreen
-import world.respect.app.view.assignment.list.AssignmentListScreen
+import world.respect.app.view.bookmark.BookmarkListScreen
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
-import world.respect.shared.generated.resources.textbooks
+import world.respect.shared.generated.resources.bookmarks
 import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.viewmodel.app.appstate.AppUiState
-import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 
 enum class HomeScreenTabs(val label: StringResource) {
     APPS(Res.string.apps),
+    BOOKMARK(Res.string.bookmarks)
 
     //Temporary example
     //PLAYLISTS(Res.string.textbooks)
@@ -69,25 +69,22 @@ fun HomeScreen(
         ) {
             when(selectedTab) {
                 HomeScreenTabs.APPS -> {
-                    val viewModel: AppLauncherViewModel = respectViewModel(
-                        onSetAppUiState = onSetAppUiState,
-                        navController = respectNavController,
-                    )
-
                     AppLauncherScreen(
-                        viewModel = viewModel
-                    )
-                }
-
-                /* Temporary example.
-                HomeScreenTabs.PLAYLISTS -> {
-                    AssignmentListScreen(
                         viewModel = respectViewModel(
                             onSetAppUiState = onSetAppUiState,
                             navController = respectNavController,
                         )
                     )
-                }*/
+                }
+
+                HomeScreenTabs.BOOKMARK -> {
+                    BookmarkListScreen(
+                        viewModel = respectViewModel(
+                            onSetAppUiState = onSetAppUiState,
+                            navController = respectNavController,
+                        )
+                    )
+                }
             }
         }
     }

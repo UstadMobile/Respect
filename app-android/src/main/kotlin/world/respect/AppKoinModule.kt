@@ -159,6 +159,8 @@ import world.respect.shared.domain.e2eartifactupload.E2EArtifactUploadUseCaseCli
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
 import world.respect.shared.domain.license.GetLicenseLabelUseCaseAndroid
+import world.respect.shared.domain.bookmark.AddBookmarkUseCase
+import world.respect.shared.domain.bookmark.RemoveBookmarkUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 import world.respect.shared.domain.launchers.LaunchSendWhatsAppUseCase
@@ -278,6 +280,7 @@ import world.respect.shared.viewmodel.statement.detail.RawStatementViewModel
 import world.respect.shared.viewmodel.statement.detail.StatementDetailViewModel
 import world.respect.shared.viewmodel.statement.list.StatementListViewModel
 import world.respect.shared.domain.xapi.xapinanohttpd.XapiResourceProviderAndroid
+import world.respect.shared.viewmodel.bookmark.BookmarkListViewModel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -424,10 +427,12 @@ val appKoinModule = module {
     viewModelOf(::StatementListViewModel)
     viewModelOf(::StatementDetailViewModel)
     viewModelOf(::RawStatementViewModel)
+    viewModelOf(::BookmarkListViewModel)
 
     single<LaunchSendWhatsAppUseCase> {
         LaunchSendWhatsAppUseCaseAndroid(androidContext())
     }
+
     single<OpenExternalLinkUseCase> {
         OpenExternalLinkUseCaseAndroid(androidContext())
     }
@@ -1148,6 +1153,18 @@ val appKoinModule = module {
                 schoolDataSource = get(),
                 authenticatedUserPrincipalId = accountScopeId.accountPrincipalId,
                 schoolUrl = accountScopeId.schoolUrl,
+            )
+        }
+
+        scoped<AddBookmarkUseCase> {
+            AddBookmarkUseCase(
+                schoolDataSource = get(),
+            )
+        }
+
+        scoped<RemoveBookmarkUseCase> {
+            RemoveBookmarkUseCase(
+                schoolDataSource = get(),
             )
         }
 

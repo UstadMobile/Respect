@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
@@ -49,8 +51,8 @@ import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.name
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign
+import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.cancel
-import world.respect.shared.generated.resources.clock_icon
 import world.respect.shared.generated.resources.download
 import world.respect.shared.generated.resources.downloaded
 import world.respect.shared.generated.resources.license
@@ -73,6 +75,7 @@ fun LearningUnitDetailScreen(
         onClickAssign = viewModel::onClickAssign,
         onClickApp = viewModel::onClickApp,
         onClickLicense = viewModel::onClickLicense,
+        onClickBookmark = viewModel::onClickBookmark,
     )
 }
 
@@ -83,15 +86,16 @@ fun LearningUnitDetailScreen(
     onClickDownload: () -> Unit,
     onClickAssign: () -> Unit,
     onClickApp: (OpdsPublication) -> Unit,
+    onClickBookmark: () -> Unit,
     onClickLicense: (OpdsPublication) -> Unit,
 ) {
     RespectDataLoadHost(
-        uiState.lessonDetail,
+        uiState.learningUnit,
         modifier = Modifier
             .fillMaxSize()
             .defaultScreenPadding()
     ) {
-        val lessonDetail = uiState.lessonDetail.dataOrNull()
+        val lessonDetail = uiState.learningUnit.dataOrNull()
 
         Column(
             modifier = Modifier
@@ -128,7 +132,7 @@ fun LearningUnitDetailScreen(
                         style = MaterialTheme.typography.titleLarge,
                     )
 
-                    uiState.appDetail?.let { app ->
+                    uiState.appDetail.dataOrNull()?.also { app ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.clickable { onClickApp(app) }
@@ -186,7 +190,7 @@ fun LearningUnitDetailScreen(
 
             Button(
                 onClick = onClickOpen,
-                enabled = uiState.buttonsEnabled,
+                enabled = uiState.openButtonEnabled,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(Res.string.open))
@@ -211,7 +215,18 @@ fun LearningUnitDetailScreen(
                         )
                     },
                     onClick = onClickDownload,
-                    enabled = uiState.buttonsEnabled,
+                    enabled = uiState.openButtonEnabled,
+                )
+
+                RespectQuickActionButton(
+                    imageVector = if (uiState.isBookmarked) {
+                        Icons.Filled.Bookmark
+                    } else {
+                        Icons.Outlined.BookmarkBorder
+                    },
+                    labelText = stringResource(Res.string.bookmark),
+                    onClick = onClickBookmark,
+                    enabled = uiState.bookmarkButtonEnabled,
                 )
 
                 if (uiState.showAssignButton) {
@@ -219,7 +234,7 @@ fun LearningUnitDetailScreen(
                         imageVector = Icons.Filled.NearMe,
                         labelText = stringResource(Res.string.assign),
                         onClick = onClickAssign,
-                        enabled = uiState.buttonsEnabled,
+                        enabled = uiState.openButtonEnabled,
                     )
                 }
             }
@@ -231,9 +246,9 @@ fun LearningUnitDetailScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                uiState.licenseLabelResult?.let { result ->
+                uiState.licenseLabel?.also { result ->
                     AssistChip(
-                        onClick = { uiState.appDetail?.let { onClickLicense(it) } },
+                        onClick = { uiState.appDetail.dataOrNull()?.also { onClickLicense(it) } },
                         label = {
                             Text(
                                 text = "${stringResource(Res.string.license)}: ${uiTextStringResource(result.title)}"

@@ -14,6 +14,7 @@ import android.webkit.WebView
 import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
+import io.github.aakira.napier.Napier
 import org.koin.android.ext.android.inject
 import world.respect.appcompose.R
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
@@ -75,6 +76,9 @@ class WebViewActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val intentUrlExtra = intent.getStringExtra(LaunchAppUseCaseAndroid.EXTRA_URL)
+        Napier.d(tag = LOGTAG, message = "WebViewActivity: onCreate: url=$intentUrlExtra")
+
         setContentView(R.layout.activity_web_view)
 
         setSupportActionBar(findViewById(R.id.toolbar))
@@ -88,9 +92,9 @@ class WebViewActivity : AppCompatActivity() {
         //Content will be loaded from HTTPs and will then make requests to 127.0.0.1 for xAPI
         //statement submission
         webView.settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
-        val url = intent.getStringExtra(LaunchAppUseCaseAndroid.EXTRA_URL) ?:
-            throw IllegalStateException("No url specified")
+        val url = intentUrlExtra ?: throw IllegalStateException("No url specified")
 
+        Napier.d(tag = LOGTAG, message = "WebViewActivity: onCreate:loading url=$url")
         webView.loadUrl(url)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -126,6 +130,6 @@ class WebViewActivity : AppCompatActivity() {
 
     companion object {
 
-        const val LOGTAG = "WebViewActivity"
+        const val LOGTAG = "WebViewActivityTag"
     }
 }

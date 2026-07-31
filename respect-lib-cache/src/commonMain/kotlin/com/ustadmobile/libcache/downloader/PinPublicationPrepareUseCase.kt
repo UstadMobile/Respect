@@ -22,6 +22,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.coroutineScope
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.findLearningUnitAcquisitionLinks
 import world.respect.libutil.ext.resolve
 import java.util.concurrent.CopyOnWriteArrayList
@@ -83,7 +84,12 @@ class PinPublicationPrepareUseCase(
                 )
             }
 
-            val linksToDownload = (publication.resources ?: emptyList()) + acquisitionLinks
+            val linksToDownload = buildList {
+                publication.resources?.also { addAll(it) }
+                addAll(acquisitionLinks)
+                add(ReadiumLink(href = manifestUrl.toString()))
+                publication.images?.also { addAll(it) }
+            }
 
             addAll(
                 linksToDownload.map { resource ->

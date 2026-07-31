@@ -272,7 +272,21 @@ class UstadCacheInterceptor(
 
         //If there is no chance of being able to cache (not http get or using no-store in request)
         if(!request.mightBeCacheable(requestCacheControlHeader)) {
-            return chain.proceed(request.removeXInterceptHeaders())
+            return try {
+                chain.proceed(request.removeXInterceptHeaders()).also {
+                    logger?.v(
+                        tag = LOG_TAG,
+                        message = "$logPrefix : MISS(not-cacheable) $url ${it.logSummary()}"
+                    )
+                }
+            }catch(e: Throwable) {
+                logger?.e(
+                    tag = LOG_TAG,
+                    message = "$logPrefix: $url Exception proceeding with non-cacheable request",
+                    throwable = e,
+                )
+                throw e
+            }
         }
 
         val partialFile = request.headers[HEADER_X_INTERCEPTOR_PARTIAL_FILE]?.let {

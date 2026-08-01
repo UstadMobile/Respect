@@ -83,7 +83,10 @@ fun Application.module() {
         setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
     }
 
-    environment.config.absoluteDataDir().takeIf { !it.exists() }?.mkdirs()
+    val absoluteDataDir = environment.config.absoluteDataDir()
+    absoluteDataDir.takeIf { !it.exists() }?.mkdirs()
+
+    Napier.d("Respect-server: init : Data dir=$absoluteDataDir")
 
     environment.config.filePropertyOrNull(SERVER_CONFIG_PID_FILE)?.also { pidFile ->
         pidFile.parentFile?.takeIf { !it.exists() }?.mkdirs()
@@ -91,7 +94,7 @@ fun Application.module() {
     }
 
     ktorServerPropertiesFile(
-        dataDir = environment.config.absoluteDataDir()
+        dataDir = absoluteDataDir
     ).writer().use { serverPropWriter ->
         serverProperties.store(serverPropWriter, null)
     }

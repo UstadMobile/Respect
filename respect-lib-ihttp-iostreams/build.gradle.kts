@@ -11,7 +11,7 @@ kotlin {
 
     android {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
-        namespace = "world.respect.lib.cache"
+        namespace = "${rootProject.group}.libihttpiostreams"
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
 

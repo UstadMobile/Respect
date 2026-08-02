@@ -38,6 +38,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
+import nl.adaptivity.xmlutil.serialization.XML
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidApplication
@@ -797,6 +798,12 @@ val appKoinModule = module {
         GetXapiActivityForPublicationUseCase()
     }
 
+    single<XML> {
+        XML.v1 {
+            recommended_1_0_0()
+        }
+    }
+
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -1135,6 +1142,8 @@ val appKoinModule = module {
                 schoolDb = get(),
                 uidNumberMapper = get(),
                 applicationContext = androidApplication(),
+                httpClient = get(),
+                xml = get(),
             )
         }
 

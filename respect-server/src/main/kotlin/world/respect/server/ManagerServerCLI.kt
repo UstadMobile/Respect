@@ -21,13 +21,15 @@ import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT_ADMIN_USERNAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
+import world.respect.server.domain.school.demoapp.SaveDemoAppToStaticFilesUseCase
 import java.io.File
 import java.util.Properties
 import kotlin.system.exitProcess
 import kotlin.time.Clock
 
 fun managerServerMain(ns: Namespace) {
-    val json = Json { encodeDefaults = true }
+    val json = Json { encodeDefaults = false }
     val httpClient = HttpClient(OkHttp) {
         install(ContentNegotiation) {
             json(json = json)
@@ -94,6 +96,21 @@ fun managerServerMain(ns: Namespace) {
                     )
                 }
                 println("Response: ${response.status}")
+            }
+
+            CMD_MAKE_DEMO_APP -> {
+                val baseUrl = Url(ns.getString("url"))
+                val destDir = File(ns.getString("dir"))
+
+                val saveDemoAppToStaticFilesUseCase = SaveDemoAppToStaticFilesUseCase(
+                    makeDemoAppManifestUseCase = MakeDemoAppManifestUseCase(),
+                    json = json,
+                )
+
+                saveDemoAppToStaticFilesUseCase(
+                    destDir = destDir,
+                    baseUrl = baseUrl,
+                )
             }
         }
 

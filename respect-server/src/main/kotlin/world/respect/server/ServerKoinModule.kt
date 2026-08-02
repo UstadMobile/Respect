@@ -46,6 +46,7 @@ import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCas
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.server.domain.school.add.RegisterSchoolUseCaseImpl
+import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
 import world.respect.server.domain.school.verify.VerifySchoolUrlPointsToThisServerUseCase
 import world.respect.server.util.SchoolUrlVerificationManager
 import world.respect.shared.domain.account.RespectAccount
@@ -204,6 +205,11 @@ fun serverKoinModule(
 
     single<EncryptPersonPasswordUseCase> {
         EncryptPersonPasswordUseCaseImpl()
+    }
+
+
+    single<MakeDemoAppManifestUseCase>() {
+        MakeDemoAppManifestUseCase()
     }
 
     /*

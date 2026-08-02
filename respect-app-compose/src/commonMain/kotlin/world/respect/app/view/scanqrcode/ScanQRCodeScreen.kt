@@ -43,7 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.ncgroup.kscan.BarcodeFormats
+import org.ncgroup.kscan.BarcodeFormat
 import org.ncgroup.kscan.BarcodeResult
 import org.ncgroup.kscan.ScannerView
 import world.respect.app.util.scanqrcode.PermissionStatus
@@ -123,7 +123,7 @@ fun ScanQRCodeScreen(
                     Box(modifier = Modifier.fillMaxSize()) {
                         ScannerView(
                             codeTypes = listOf(
-                                BarcodeFormats.FORMAT_QR_CODE,
+                                BarcodeFormat.FORMAT_QR_CODE,
                             ),
                             scannerUiOptions = null,
                             modifier = Modifier.fillMaxSize()

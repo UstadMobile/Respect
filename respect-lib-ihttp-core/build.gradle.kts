@@ -6,17 +6,14 @@ plugins {
 }
 
 kotlin {
+    compilerOptions {
+        jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
+    }
+
     android {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
-        namespace = "world.respect.lib.cache"
-
-        compilerOptions {
-
-        }
-
-        kotlin {
-            jvmToolchain(17)
-        }
+        namespace = "${rootProject.group}.libihttpcore"
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
     jvm {

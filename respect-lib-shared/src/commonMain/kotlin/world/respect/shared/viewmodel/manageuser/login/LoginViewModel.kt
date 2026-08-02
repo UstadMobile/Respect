@@ -206,7 +206,7 @@ class LoginViewModel(
 
             try {
                 val authResponse = accountManager.login(
-                    credential = RespectPasswordCredential(username, password),
+                    credential = RespectPasswordCredential(username.trim(), password.trim()),
                     schoolUrl = route.schoolUrl
                 )
 

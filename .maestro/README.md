@@ -43,7 +43,7 @@ Running multiple tests with Maestro requires a blank server installation for eac
 required.
 
 ```
-export TESTSERVER_CONTROLLER=http://192.168.1.2:8094/
+export TESTSERVER_CONTROLLER_URL=http://192.168.1.2:8094/
 ./ci-run-e2e-tests.sh
 ```
 
@@ -55,8 +55,16 @@ with arguments as per [Maestro test discovery and tags](https://docs.maestro.dev
 e.g.
 
 ```
-export TESTSERVER_CONTROLLER=http://192.168.1.2:8094/
+export TESTSERVER_CONTROLLER_URL=http://192.168.1.2:8094/
 export MAESTRO_EXTRA_ARGS=" --include-tags=basic "
+./ci-run-e2e-tests.sh
+```
+
+or set a particular test to run using ```MAESTRO_FLOW``` arg
+
+```
+export TESTSERVER_CONTROLLER_URL=http://192.168.1.2:8094/
+export MAESTRO_FLOW=./maestro/flows/flow_name.yaml
 ./ci-run-e2e-tests.sh
 ```
 

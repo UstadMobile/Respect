@@ -272,7 +272,21 @@ class UstadCacheInterceptor(
 
         //If there is no chance of being able to cache (not http get or using no-store in request)
         if(!request.mightBeCacheable(requestCacheControlHeader)) {
-            return chain.proceed(request.removeXInterceptHeaders())
+            return try {
+                chain.proceed(request.removeXInterceptHeaders()).also {
+                    logger?.v(
+                        tag = LOG_TAG,
+                        message = "$logPrefix : MISS(not-cacheable) $url ${it.logSummary()}"
+                    )
+                }
+            }catch(e: Throwable) {
+                logger?.e(
+                    tag = LOG_TAG,
+                    message = "$logPrefix: $url Exception proceeding with non-cacheable request",
+                    throwable = e,
+                )
+                throw e
+            }
         }
 
         val partialFile = request.headers[HEADER_X_INTERCEPTOR_PARTIAL_FILE]?.let {
@@ -324,7 +338,9 @@ class UstadCacheInterceptor(
                     .message("Gateway Timeout")
                     .code(504)
                     .body("Gateway Timeout: only-if-cached if true, but not available in cache".toResponseBody())
-                    .build()
+                    .build().also {
+                        logger?.d(LOG_TAG, "$logPrefix MISS(only-if-cached) $url ${it.logSummary()}")
+                    }
             }
 
             /*
@@ -340,7 +356,13 @@ class UstadCacheInterceptor(
                 cachedResponseStatus.ifNotModifiedSince?.also {
                     validateRequestBuilder.addHeader("if-modified-since", it)
                 }
-                val validationResponse = chain.proceed(validateRequestBuilder.build())
+                val validationResponse = try {
+                    chain.proceed(validateRequestBuilder.build())
+                }catch(e: Throwable) {
+                    logger?.e(LOG_TAG, "$logPrefix: $url : exception validating", e)
+                    throw e
+                }
+
                 if(validationResponse.code == 304) {
                     validationResponse.close()
                     runBlocking {
@@ -407,7 +429,16 @@ class UstadCacheInterceptor(
                     request.removeXInterceptHeaders()
                 }
 
-                val response = chain.proceed(networkRequest)
+                val response = try {
+                    chain.proceed(networkRequest)
+                }catch(e: Throwable) {
+                    logger?.e(
+                        tag = LOG_TAG,
+                        message = "$logPrefix: $url : exception sending network request",
+                        throwable = e
+                    )
+                    throw e
+                }
                 
                 if(
                     responseCacheabilityChecker.canStore(

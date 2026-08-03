@@ -2,7 +2,9 @@ package world.respect.server.domain.school.demoapp
 
 import io.ktor.http.Url
 import kotlinx.serialization.json.Json
+import nl.adaptivity.xmlutil.serialization.XML
 import org.openeel.demo.demolaunchableappserver.DemoConstants
+import world.respect.lib.xapi.rusticilaunch.model.TinCanXmlDocument
 import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase.Companion.GRADE_ICON_NAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.GRADES_DIR_NAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_DIR_NAME
@@ -15,7 +17,9 @@ class SaveDemoAppToStaticFilesUseCase(
     private val makeDemoAppCollectionUseCase: MakeDemoAppCollectionUseCase,
     private val makeDemoAppGradeCollectionsUseCase: MakeDemoAppGradeCollectionsUseCase,
     private val makeDemoAppLessonManifestUseCase: MakeDemoAppLessonManifestUseCase,
+    private val makeDemoAppLessonTinCanXmlUseCase: MakeDemoAppLessonTinCanXmlUseCase,
     private val json: Json,
+    private val xml: XML,
 ) {
 
     operator fun invoke(
@@ -69,6 +73,17 @@ class SaveDemoAppToStaticFilesUseCase(
                         makeDemoAppLessonManifestUseCase(
                             demoBase = baseUrl,
                             grade = gradeNum,
+                            lessonNum = lessonNum,
+                        )
+                    )
+                )
+
+                File(lessonDir, "tincan.xml").writeText(
+                    xml.encodeToString(
+                        TinCanXmlDocument.serializer(),
+                        makeDemoAppLessonTinCanXmlUseCase(
+                            baseUrl = baseUrl,
+                            gradeNum = gradeNum,
                             lessonNum = lessonNum,
                         )
                     )

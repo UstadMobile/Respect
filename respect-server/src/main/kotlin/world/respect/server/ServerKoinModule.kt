@@ -12,6 +12,8 @@ import io.ktor.server.config.ApplicationConfig
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
+import nl.adaptivity.xmlutil.core.XmlVersion
+import nl.adaptivity.xmlutil.serialization.XML
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
 import world.respect.credentials.passkey.request.DecodeUserHandleUseCase
@@ -50,6 +52,7 @@ import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppLessonManifestUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonTinCanXmlUseCase
 import world.respect.server.domain.school.verify.VerifySchoolUrlPointsToThisServerUseCase
 import world.respect.server.util.SchoolUrlVerificationManager
 import world.respect.shared.domain.account.RespectAccount
@@ -119,6 +122,13 @@ fun serverKoinModule(
         Json {
             ignoreUnknownKeys = true
             encodeDefaults = false
+        }
+    }
+
+    single<XML> {
+        XML.v1 {
+            recommended_1_0_0()
+            xmlVersion = XmlVersion.XML10
         }
     }
 
@@ -225,6 +235,10 @@ fun serverKoinModule(
 
     single<MakeDemoAppLessonManifestUseCase> {
         MakeDemoAppLessonManifestUseCase()
+    }
+
+    single<MakeDemoAppLessonTinCanXmlUseCase> {
+        MakeDemoAppLessonTinCanXmlUseCase()
     }
 
     /*

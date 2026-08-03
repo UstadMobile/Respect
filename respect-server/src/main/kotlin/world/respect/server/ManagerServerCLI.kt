@@ -15,6 +15,8 @@ import io.ktor.util.encodeBase64
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import net.sourceforge.argparse4j.inf.Namespace
+import nl.adaptivity.xmlutil.core.XmlVersion
+import nl.adaptivity.xmlutil.serialization.XML
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.libutil.ext.appendEndpointSegments
@@ -24,6 +26,7 @@ import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT
 import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppLessonManifestUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonTinCanXmlUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
 import world.respect.server.domain.school.demoapp.SaveDemoAppToStaticFilesUseCase
 import java.io.File
@@ -37,6 +40,11 @@ fun managerServerMain(ns: Namespace) {
         install(ContentNegotiation) {
             json(json = json)
         }
+    }
+
+    val xml = XML.v1 {
+        recommended_1_0_0()
+        xmlVersion = XmlVersion.XML10
     }
 
     val dataDir = ns.getString("datadir")?.let { File(it) }
@@ -110,6 +118,8 @@ fun managerServerMain(ns: Namespace) {
                     makeDemoAppCollectionUseCase = MakeDemoAppCollectionUseCase(),
                     makeDemoAppGradeCollectionsUseCase = MakeDemoAppGradeCollectionsUseCase(),
                     makeDemoAppLessonManifestUseCase = MakeDemoAppLessonManifestUseCase(),
+                    makeDemoAppLessonTinCanXmlUseCase = MakeDemoAppLessonTinCanXmlUseCase(),
+                    xml = xml,
                     json = json,
                 )
 

@@ -72,6 +72,8 @@ class MakeDemoAppGradeCollectionsUseCase {
 
         const val GRADES_DIR_NAME = "grade"
 
+        const val LESSON_DIR_NAME = "lesson"
+
         const val COLLECTION_FILE_NAME = "index.json"
 
         const val LESSON_ICON_NAME = "books.png"

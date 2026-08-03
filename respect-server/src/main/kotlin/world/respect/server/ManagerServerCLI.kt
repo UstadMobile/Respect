@@ -23,6 +23,7 @@ import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT_ADMIN_USERNAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonManifestUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
 import world.respect.server.domain.school.demoapp.SaveDemoAppToStaticFilesUseCase
 import java.io.File
@@ -108,6 +109,7 @@ fun managerServerMain(ns: Namespace) {
                     makeDemoAppManifestUseCase = MakeDemoAppManifestUseCase(),
                     makeDemoAppCollectionUseCase = MakeDemoAppCollectionUseCase(),
                     makeDemoAppGradeCollectionsUseCase = MakeDemoAppGradeCollectionsUseCase(),
+                    makeDemoAppLessonManifestUseCase = MakeDemoAppLessonManifestUseCase(),
                     json = json,
                 )
 

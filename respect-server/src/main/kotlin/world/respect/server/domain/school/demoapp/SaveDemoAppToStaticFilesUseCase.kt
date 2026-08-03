@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import org.openeel.demo.demolaunchableappserver.DemoConstants
 import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase.Companion.GRADE_ICON_NAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.GRADES_DIR_NAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_DIR_NAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_ICON_NAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase.Companion.APP_MANIFEST_FILENAME
 import java.io.File
@@ -13,6 +14,7 @@ class SaveDemoAppToStaticFilesUseCase(
     private val makeDemoAppManifestUseCase: MakeDemoAppManifestUseCase,
     private val makeDemoAppCollectionUseCase: MakeDemoAppCollectionUseCase,
     private val makeDemoAppGradeCollectionsUseCase: MakeDemoAppGradeCollectionsUseCase,
+    private val makeDemoAppLessonManifestUseCase: MakeDemoAppLessonManifestUseCase,
     private val json: Json,
 ) {
 
@@ -56,6 +58,22 @@ class SaveDemoAppToStaticFilesUseCase(
                     )
                 )
             )
+            val lessonsDir = File(gradeDir, LESSON_DIR_NAME).also { it.mkdirs() }
+            (1..DemoConstants.NUM_LESSONS).forEach { lessonNum ->
+                val lessonDir = File(lessonsDir, lessonNum.toString()).also { it.mkdirs() }
+
+                File(
+                    lessonDir, MakeDemoAppLessonManifestUseCase.LESSON_MANIFEST_FILENAME
+                ).writeText(
+                    json.encodeToString(
+                        makeDemoAppLessonManifestUseCase(
+                            demoBase = baseUrl,
+                            grade = gradeNum,
+                            lessonNum = lessonNum,
+                        )
+                    )
+                )
+            }
         }
 
     }

@@ -48,6 +48,7 @@ import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.server.domain.school.add.RegisterSchoolUseCaseImpl
 import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonManifestUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
 import world.respect.server.domain.school.verify.VerifySchoolUrlPointsToThisServerUseCase
 import world.respect.server.util.SchoolUrlVerificationManager
@@ -210,7 +211,7 @@ fun serverKoinModule(
     }
 
 
-    single<MakeDemoAppManifestUseCase>() {
+    single<MakeDemoAppManifestUseCase> {
         MakeDemoAppManifestUseCase()
     }
 
@@ -220,6 +221,10 @@ fun serverKoinModule(
 
     single<MakeDemoAppGradeCollectionsUseCase> {
         MakeDemoAppGradeCollectionsUseCase()
+    }
+
+    single<MakeDemoAppLessonManifestUseCase> {
+        MakeDemoAppLessonManifestUseCase()
     }
 
     /*

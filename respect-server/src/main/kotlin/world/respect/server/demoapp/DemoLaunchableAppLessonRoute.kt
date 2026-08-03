@@ -1,59 +1,24 @@
 package world.respect.server.demoapp
 
-import com.eygraber.uri.Uri
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
-import world.respect.lib.opds.model.LangMapStringValue
-import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.opds.model.ReadiumContributorStringValue
-import world.respect.lib.opds.model.ReadiumLink
-import world.respect.lib.opds.model.ReadiumMetadata
-import world.respect.libutil.ext.resolve
+import org.koin.ktor.ext.getKoin
 import world.respect.server.demoapp.ext.demoAppBaseUrl
+import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.GRADES_DIR_NAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_DIR_NAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonManifestUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonManifestUseCase.Companion.LESSON_MANIFEST_FILENAME
 
 fun Route.DemoLaunchableAppLessonRoute() {
+    val koin = getKoin()
 
-    get("grade/{grade}/lesson/{lesson}/manifest.json") {
-        val grade = call.parameters["grade"]!!
-        val lessonNum = call.parameters["lesson"]!!
-
-        val demoBase = call.demoAppBaseUrl()
-        val lessonBase = demoBase.resolve("grade/$grade/lesson/$lessonNum/")
-
+    get("$GRADES_DIR_NAME/{grade}/$LESSON_DIR_NAME/{lesson}/$LESSON_MANIFEST_FILENAME") {
         call.respond(
-            OpdsPublication(
-                metadata = ReadiumMetadata(
-                    title = LangMapStringValue("Lesson $lessonNum - Grade $grade"),
-                    type = Uri.parse("http://schema.org/Game"),
-                    author = listOf(
-                        ReadiumContributorStringValue("Mullah Nasruddin")
-                    ),
-                    identifier = Uri.parse(lessonBase.toString())
-                ),
-                images = listOf(
-                    ReadiumLink(
-                        href = demoBase.resolve("static/books.png").toString(),
-                        type = "image/png"
-                    )
-                ),
-                links = listOf(
-                    ReadiumLink(
-                        rel = listOf("self"),
-                        href = lessonBase.resolve("manifest.json").toString(),
-                        type = "application/opds-publication+json"
-                    ),
-                    ReadiumLink(
-                        rel = listOf("https://id.openeel.org/rel/tincanxml"),
-                        href = lessonBase.resolve("tincan.xml").toString(),
-                        type = "application/xml"
-                    ),
-                    ReadiumLink(
-                        rel = listOf("https://id.openeel.org/rel/launchable-app"),
-                        href = demoBase.resolve("appmanifest.json").toString(),
-                        type = "application/opds-publication+json"
-                    )
-                )
+            koin.get<MakeDemoAppLessonManifestUseCase>().invoke(
+                demoBase = call.demoAppBaseUrl(),
+                grade = call.parameters["grade"]!!.toInt(),
+                lessonNum = call.parameters["lesson"]!!.toInt(),
             )
         )
     }

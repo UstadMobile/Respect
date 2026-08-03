@@ -37,7 +37,6 @@ fun Route.DemoLaunchableAppCollectionsRoute() {
                 gradeNum = grade.toInt(),
             )
         )
-
     }
 
 }

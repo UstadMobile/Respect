@@ -21,6 +21,8 @@ import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT_ADMIN_USERNAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
 import world.respect.server.domain.school.demoapp.SaveDemoAppToStaticFilesUseCase
 import java.io.File
@@ -104,6 +106,8 @@ fun managerServerMain(ns: Namespace) {
 
                 val saveDemoAppToStaticFilesUseCase = SaveDemoAppToStaticFilesUseCase(
                     makeDemoAppManifestUseCase = MakeDemoAppManifestUseCase(),
+                    makeDemoAppCollectionUseCase = MakeDemoAppCollectionUseCase(),
+                    makeDemoAppGradeCollectionsUseCase = MakeDemoAppGradeCollectionsUseCase(),
                     json = json,
                 )
 

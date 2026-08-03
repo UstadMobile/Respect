@@ -1,6 +1,7 @@
 package world.respect.server.demoapp
 
 import io.ktor.http.ContentType
+import io.ktor.server.html.respondHtml
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
@@ -11,9 +12,11 @@ import world.respect.lib.xapi.rusticilaunch.model.TinCanXmlDocument
 import world.respect.server.demoapp.ext.demoAppBaseUrl
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.GRADES_DIR_NAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_DIR_NAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.LESSON_HTML_FILENAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppLessonManifestUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppLessonManifestUseCase.Companion.LESSON_MANIFEST_FILENAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppLessonTinCanXmlUseCase
+import world.respect.server.domain.school.demoapp.demoAppLessonHtml
 
 fun Route.DemoLaunchableAppLessonRoute() {
     val koin = getKoin()
@@ -42,6 +45,16 @@ fun Route.DemoLaunchableAppLessonRoute() {
                 )
             )
         )
+    }
+
+    get("$GRADES_DIR_NAME/{grade}/$LESSON_DIR_NAME/{lesson}/$LESSON_HTML_FILENAME") {
+        call.respondHtml {
+            demoAppLessonHtml(
+                baseUrl = call.demoAppBaseUrl(),
+                gradeNum = call.parameters["grade"]!!.toInt(),
+                lessonNum = call.parameters["lesson"]!!.toInt(),
+            )
+        }
     }
 
 }

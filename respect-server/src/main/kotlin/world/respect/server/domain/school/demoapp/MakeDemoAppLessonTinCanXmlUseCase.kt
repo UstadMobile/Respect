@@ -8,6 +8,7 @@ import world.respect.lib.xapi.rusticilaunch.model.TinCanXmlLaunch
 import world.respect.libutil.ext.resolve
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.GRADES_DIR_NAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_DIR_NAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.LESSON_HTML_FILENAME
 
 class MakeDemoAppLessonTinCanXmlUseCase {
 
@@ -27,7 +28,7 @@ class MakeDemoAppLessonTinCanXmlUseCase {
                         name = "Grade $gradeNum Lesson $lessonNum",
                         launch = TinCanXmlLaunch(
                             lang = "en-US",
-                            value = "lesson.html"
+                            value = LESSON_HTML_FILENAME,
                         )
                     )
                 )

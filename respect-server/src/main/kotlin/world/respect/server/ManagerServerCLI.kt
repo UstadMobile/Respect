@@ -25,6 +25,7 @@ import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT_ADMIN_USERNAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppLessonManifestUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppLessonTinCanXmlUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
@@ -119,6 +120,7 @@ fun managerServerMain(ns: Namespace) {
                     makeDemoAppGradeCollectionsUseCase = MakeDemoAppGradeCollectionsUseCase(),
                     makeDemoAppLessonManifestUseCase = MakeDemoAppLessonManifestUseCase(),
                     makeDemoAppLessonTinCanXmlUseCase = MakeDemoAppLessonTinCanXmlUseCase(),
+                    makeDemoAppLessonHtmlUseCase = MakeDemoAppLessonHtmlUseCase(),
                     xml = xml,
                     json = json,
                 )

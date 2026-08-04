@@ -22,6 +22,7 @@ import kotlinx.html.stream.createHTML
 import kotlinx.html.title
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.libutil.ext.resolve
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.LESSON_JS_FILENAME
 
 
 fun HTML.demoAppLessonHtml(
@@ -34,7 +35,7 @@ fun HTML.demoAppLessonHtml(
 
         script {
             type = "module"
-            src = baseUrl.resolve("static/lesson_xapi.js").toString()
+            src = baseUrl.resolve("static/$LESSON_JS_FILENAME").toString()
         }
 
         meta {
@@ -161,6 +162,10 @@ class MakeDemoAppLessonHtmlUseCase {
     companion object {
 
         const val LESSON_HTML_FILENAME = "lesson.html"
+
+        const val LESSON_JS_FILENAME = "lesson_xapi.js"
+
+        const val XAPI_MODULE_FILENAME = "xapi_module.js"
 
     }
 }

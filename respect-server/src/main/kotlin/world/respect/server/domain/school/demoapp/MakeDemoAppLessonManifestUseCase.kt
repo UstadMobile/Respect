@@ -11,6 +11,9 @@ import world.respect.libutil.ext.resolve
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.GRADES_DIR_NAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_DIR_NAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_ICON_NAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.LESSON_HTML_FILENAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.LESSON_JS_FILENAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.XAPI_MODULE_FILENAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase.Companion.APP_MANIFEST_FILENAME
 
 class MakeDemoAppLessonManifestUseCase {
@@ -53,7 +56,12 @@ class MakeDemoAppLessonManifestUseCase {
                     href = demoBase.resolve(APP_MANIFEST_FILENAME).toString(),
                     type = "application/opds-publication+json"
                 )
-            )
+            ),
+            resources = listOf(
+                ReadiumLink(href = lessonBase.resolve(LESSON_HTML_FILENAME).toString()),
+                ReadiumLink(href = demoBase.resolve("static/$LESSON_JS_FILENAME").toString()),
+                ReadiumLink(href = demoBase.resolve("static/$XAPI_MODULE_FILENAME").toString()),
+            ),
         )
     }
 
@@ -62,6 +70,5 @@ class MakeDemoAppLessonManifestUseCase {
 
         const val LESSON_MANIFEST_FILENAME = "manifest.json"
 
-        const val LESSON_MANIFEST_ICON_NAME = "app_icon.png"
     }
 }

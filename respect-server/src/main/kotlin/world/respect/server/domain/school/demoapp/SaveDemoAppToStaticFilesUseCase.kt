@@ -9,15 +9,23 @@ import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase.C
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.GRADES_DIR_NAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_DIR_NAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_ICON_NAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.LESSON_HTML_FILENAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.LESSON_JS_FILENAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.XAPI_MODULE_FILENAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase.Companion.APP_MANIFEST_FILENAME
 import java.io.File
 
+/**
+ * Save the demo app to static files in a given directory (e.g. to be served using a static file
+ * server such as Apache)
+ */
 class SaveDemoAppToStaticFilesUseCase(
     private val makeDemoAppManifestUseCase: MakeDemoAppManifestUseCase,
     private val makeDemoAppCollectionUseCase: MakeDemoAppCollectionUseCase,
     private val makeDemoAppGradeCollectionsUseCase: MakeDemoAppGradeCollectionsUseCase,
     private val makeDemoAppLessonManifestUseCase: MakeDemoAppLessonManifestUseCase,
     private val makeDemoAppLessonTinCanXmlUseCase: MakeDemoAppLessonTinCanXmlUseCase,
+    private val makeDemoAppLessonHtmlUseCase: MakeDemoAppLessonHtmlUseCase,
     private val json: Json,
     private val xml: XML,
 ) {
@@ -42,7 +50,9 @@ class SaveDemoAppToStaticFilesUseCase(
             json.encodeToString(makeDemoAppCollectionUseCase(baseUrl))
         )
 
-        listOf(GRADE_ICON_NAME, LESSON_ICON_NAME).forEach { resourceName ->
+        listOf(
+            GRADE_ICON_NAME, LESSON_ICON_NAME, LESSON_JS_FILENAME, XAPI_MODULE_FILENAME
+        ).forEach { resourceName ->
             File(staticDir, resourceName).writeBytes(
                 this::class.java.getResourceAsStream("/demoapp/$resourceName")!!.readBytes()
             )
@@ -86,6 +96,14 @@ class SaveDemoAppToStaticFilesUseCase(
                             gradeNum = gradeNum,
                             lessonNum = lessonNum,
                         )
+                    )
+                )
+
+                File(lessonDir, LESSON_HTML_FILENAME).writeText(
+                    makeDemoAppLessonHtmlUseCase(
+                        baseUrl = baseUrl,
+                        gradeNum = gradeNum,
+                        lessonNum = lessonNum,
                     )
                 )
             }

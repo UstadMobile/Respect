@@ -27,6 +27,7 @@ kotlin {
             implementation(kotlin("stdlib-common"))
             api(projects.respectLibIhttpCore)
             implementation(projects.respectLibOpdsModel)
+            implementation(projects.respectLibXapiCore)
             implementation(projects.respectLibIhttpIostreams)
             implementation(projects.respectLibXxhash)
             implementation(projects.respectLibUtil)
@@ -36,6 +37,7 @@ kotlin {
             implementation(libs.ktor.client.core)
             implementation(libs.napier)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.xmlutil.serialization)
 
             implementation(libs.nanohttpd)
             implementation(libs.okhttp)

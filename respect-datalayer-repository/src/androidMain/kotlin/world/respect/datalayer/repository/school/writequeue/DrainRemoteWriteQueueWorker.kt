@@ -5,8 +5,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import io.github.aakira.napier.Napier
 import org.koin.core.component.KoinComponent
-import org.koin.core.qualifier.TypeQualifier
-import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
+import world.respect.datalayer.repository.school.worker.getWorkerKoinScope
 
 class DrainRemoteWriteQueueWorker(
     context: Context,
@@ -14,16 +13,9 @@ class DrainRemoteWriteQueueWorker(
 ): CoroutineWorker(context, params), KoinComponent {
 
     override suspend fun doWork(): Result {
-        val scopeId = inputData.getString(EnqueueDrainRemoteWriteQueueUseCase.DATA_SCOPE_ID)
-            ?: throw IllegalStateException()
-        val scopeQualifierName = Class.forName(
-            inputData.getString(EnqueueDrainRemoteWriteQueueUseCase.DATA_SCOPE_QUALIFIER)!!
-        ).kotlin
 
-        val logPrefix: String by lazy { "DrainRemoteWriteQueueWorker(Scope=$scopeId)" }
-
-        val scope = getKoin().getOrCreateScope(scopeId, TypeQualifier(scopeQualifierName))
-        val drainRemoteWriteQueueUseCase: DrainRemoteWriteQueueUseCase = scope.get()
+        val drainRemoteWriteQueueUseCase: DrainRemoteWriteQueueUseCase = getWorkerKoinScope().get()
+        val logPrefix = "DrainRemoteWriteQueueWorker"
 
         return try {
             drainRemoteWriteQueueUseCase()

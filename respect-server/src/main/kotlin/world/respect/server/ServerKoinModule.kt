@@ -1,7 +1,13 @@
 package world.respect.server
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.Url
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.config.ApplicationConfig
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
@@ -15,14 +21,18 @@ import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
-import world.respect.datalayer.db.MIGRATION_2_3
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.addCommonMigrations
+import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
+import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
+import world.respect.datalayer.db.school.domain.GetPermissionLastModifiedUseCaseDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.datalayer.school.domain.GetPermissionLastModifiedUseCase
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
@@ -31,13 +41,22 @@ import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.server.account.invite.GetInviteInfoUseCaseServer
 import world.respect.server.account.invite.username.UsernameSuggestionUseCaseServer
+import world.respect.server.account.invite.username.checkusernameunique.CheckUsernameUniqueUseCaseServer
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
+import world.respect.server.domain.school.add.RegisterSchoolUseCaseImpl
+import world.respect.server.domain.school.verify.VerifySchoolUrlPointsToThisServerUseCase
+import world.respect.server.util.SchoolUrlVerificationManager
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
+import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
+import world.respect.shared.domain.account.child.AddChildAccountUseCase
+import world.respect.shared.domain.account.child.AddChildAccountUseCaseDb
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase
+import world.respect.shared.domain.account.invite.CreateInviteUseCase
+import world.respect.shared.domain.account.invite.CreateInviteUseCaseDb
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCase
 import world.respect.shared.domain.account.invite.RedeemInviteUseCaseDb
@@ -52,17 +71,24 @@ import world.respect.shared.domain.account.passkey.RevokePersonPasskeyUseCaseDbI
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
+import world.respect.shared.domain.account.username.checkusernameunique.CheckUsernameUniqueUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCaseDbImpl
+import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
+import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
+import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.school.add.RegisterSchoolUseCase
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
+import world.respect.sharedse.domain.account.authenticatepassword.AuthenticateQrBadgeUseCaseDbImpl
 import java.io.File
 
 const val APP_DB_FILENAME = "respect-app.db"
+const val CUSTOM_PROTO = "world.respect.app"
 
 fun serverKoinModule(
     config: ApplicationConfig,
@@ -75,13 +101,25 @@ fun serverKoinModule(
             .setDriver(BundledSQLiteDriver())
             .addCallback(AddServerManagedDirectoryCallback(xxStringHasher = get()))
             .addCommonMigrations()
+            .addMigrations(
+                object: Migration(6, 8) {
+                    override fun migrate(connection: SQLiteConnection) {
+                        //do nothing on server.
+                    }
+                }
+            )
             .build()
     }
 
     single<Json> {
         Json {
             ignoreUnknownKeys = true
+            encodeDefaults = false
         }
+    }
+
+    single<SchoolConfig> {
+        SchoolConfig.fromConfig(config)
     }
 
     single<XXStringHasher> {
@@ -92,9 +130,6 @@ fun serverKoinModule(
         XXHashUidNumberMapper(xxStringHasher = get())
     }
 
-    single<PrimaryKeyGenerator> {
-        PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
-    }
     single<SchoolDirectoryDataSourceLocal> {
         SchoolDirectoryDataSourceDb(
             respectAppDb = get(),
@@ -107,7 +142,6 @@ fun serverKoinModule(
             respectAppDatabase = get(),
             json = get(),
             xxStringHasher = get(),
-            primaryKeyGenerator = get(),
         )
     }
 
@@ -126,11 +160,35 @@ fun serverKoinModule(
             encryptPasswordUseCase = get(),
         )
     }
-
+    single<RegisterSchoolUseCase> {
+        RegisterSchoolUseCaseImpl(
+            registerSchoolPin = config.propertyOrNull(
+                SERVER_CONFIG_KEY_REGISTRATION_PIN
+            )?.getString()
+        )
+    }
+    single<SchoolUrlVerificationManager> {
+        SchoolUrlVerificationManager()
+    }
+    single<HttpClient> {
+        HttpClient(OkHttp) {
+            install(ContentNegotiation) {
+                json(json = get())
+            }
+        }
+    }
+    single<VerifySchoolUrlPointsToThisServerUseCase> {
+        VerifySchoolUrlPointsToThisServerUseCase(
+            verificationManager = get(),
+            httpClient = get()
+        )
+    }
     single<DecodeUserHandleUseCase> {
         DecodeUserHandleUseCaseImpl()
     }
-
+    single<UrlToCustomDeepLinkUseCase> {
+        UrlToCustomDeepLinkUseCase(customProtocol = CUSTOM_PROTO)
+    }
     single<LoadAaguidJsonUseCase> {
         LoadAaguidJsonUseCaseJvm(
             json = get(),
@@ -201,7 +259,6 @@ fun serverKoinModule(
             Room.databaseBuilder<RespectSchoolDatabase>(dbFile.absolutePath)
                 .setDriver(BundledSQLiteDriver())
                 .addCommonMigrations()
-                .addMigrations(MIGRATION_2_3(false))
                 .build()
         }
 
@@ -217,6 +274,7 @@ fun serverKoinModule(
                 verifyPasskeyUseCase = get(),
                 respectAppDataSource = get(),
                 authenticatePasswordUseCase = get(),
+                authenticateQrBadgeUseCase  = get()
             )
         }
 
@@ -224,6 +282,13 @@ fun serverKoinModule(
             AuthenticatePasswordUseCaseDbImpl(
                 schoolDb = get(),
                 encryptPersonPasswordUseCase = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<AuthenticateQrBadgeUseCase> {
+            AuthenticateQrBadgeUseCaseDbImpl(
+                schoolDb = get(),
                 uidNumberMapper = get(),
             )
         }
@@ -251,6 +316,7 @@ fun serverKoinModule(
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseServer(
                 schoolDb = get(),
+                uidNumberMapper = get(),
             )
         }
 
@@ -270,7 +336,31 @@ fun serverKoinModule(
                 json = get(),
                 getPasskeyProviderInfoUseCase = get(),
                 encryptPersonPasswordUseCase = get(),
+                checkUsernameUniqueUseCase = get(),
             )
+        }
+
+        scoped<CreateInviteUseCase> {
+            CreateInviteUseCaseDb(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
+        scoped<CreateInviteLinkUseCase> {
+            CreateInviteLinkUseCase(
+                schoolUrl = schoolUrl(),
+            )
+        }
+
+        scoped<AddDefaultSchoolPermissionGrantsUseCase>() {
+            AddDefaultSchoolPermissionGrantsUseCase(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
+        scoped<CheckUsernameUniqueUseCase> {
+            CheckUsernameUniqueUseCaseServer(schoolDb = get())
         }
     }
 
@@ -288,19 +378,65 @@ fun serverKoinModule(
      * be done in a way that is thread safe.
      */
     scope<RespectAccount> {
+        factory<CheckPersonPermissionUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            CheckPersonPermissionUseCaseDbImpl(
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                schoolDb = get(),
+                uidNumberMapper = get(),
+            )
+        }
+
         factory<SchoolDataSourceLocal> {
             val accountScopeId = RespectAccountScopeId.parse(id)
 
             SchoolDataSourceDb(
                 schoolDb = get(),
                 uidNumberMapper = get(),
-                authenticatedUser = accountScopeId.accountPrincipalId
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                checkPersonPermissionUseCase = get(),
+                json = get(),
+                primaryKeyGenerator = get<SchoolPrimaryKeyGenerator>().primaryKeyGenerator,
+                defaultAppCatalogUrl = RespectServerBuildConfig.RESPECT_DEFAULT_APPLIST,
+                schoolUrl = accountScopeId.schoolUrl,
             )
         }
 
         factory<SchoolDataSource> {
             get<SchoolDataSourceLocal>()
         }
+
+        factory<GetPermissionLastModifiedUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            GetPermissionLastModifiedUseCaseDbImpl(
+                schoolDb = get(),
+                numberMapper = get(),
+                authenticatedUser = accountScopeId.accountPrincipalId,
+            )
+        }
+
+        factory<AddChildAccountUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            AddChildAccountUseCaseDb(
+                schoolPrimaryKeyGenerator = get(),
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                schoolDataSource = get(),
+            )
+        }
+
+        factory<UpdateClazzStudentXapiGroupUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            UpdateClazzStudentXapiGroupUseCase(
+                schoolDataSource = get(),
+                authenticatedUserPrincipalId = accountScopeId.accountPrincipalId,
+                schoolUrl = accountScopeId.schoolUrl,
+            )
+        }
+
     }
 
 

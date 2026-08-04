@@ -13,9 +13,8 @@ import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
-import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.other_options
@@ -24,13 +23,10 @@ import world.respect.shared.navigation.EnterPasswordSignup
 import world.respect.shared.navigation.HowPasskeyWorks
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OtherOptionsSignup
-import world.respect.shared.navigation.SignupScreen
-import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.manageuser.profile.ProfileType
 
 data class OtherOptionsSignupUiState(
     val passkeyError: String? = null,
@@ -129,6 +125,7 @@ class OtherOptionsSignupViewModel(
                                 schoolUrl = route.schoolUrl
                             )
 
+                            /*
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(
                                     destination = if(
@@ -140,11 +137,18 @@ class OtherOptionsSignupViewModel(
                                             inviteRequest = redeemRequest
                                         )
                                     }else {
-                                        WaitingForApproval()
+                                        if (redeemRequest.invite.forClassGuid == null &&
+                                            redeemRequest.invite.forFamilyOfGuid == null){
+                                            RespectAppLauncher()
+                                        }else{
+                                            WaitingForApproval()
+
+                                        }
                                     },
                                     clearBackStack = true,
                                 )
                             )
+                            */
                         }
 
                         is CreatePasskeyUseCase.Error -> {

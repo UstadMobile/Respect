@@ -13,8 +13,8 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.credentials.passkey.CheckPasskeySupportUseCase
 import world.respect.credentials.passkey.CreatePasskeyUseCase
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.adapters.toPersonPasskey
 import world.respect.datalayer.school.model.PersonPasskey
@@ -47,7 +47,7 @@ class PasskeyListViewModel(
     private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val createPasskeyUseCase: CreatePasskeyUseCase? by lazy {
         scope.getOrNull()
@@ -116,7 +116,7 @@ class PasskeyListViewModel(
             try {
                 val accountAndPerson = accountManager.selectedAccountAndPersonFlow.first()
                 val username = accountAndPerson?.person?.username ?: return@launch
-                val rpId = accountAndPerson.account.school.rpId ?: return@launch
+                val rpId = accountAndPerson.session.account.school.rpId ?: return@launch
                 val passkeyResult = createPasskeyUseCase?.invoke(
                     request = CreatePasskeyUseCase.Request(
                         personUid = accountAndPerson.person.guid,

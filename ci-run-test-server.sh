@@ -6,8 +6,8 @@
 # required to debug the script itself.
 
 # CI (Jenkins Scenario)
-# a) ci-run-maestro.sh starts TestServerController (where run command is set to this script).
-#    ci-run-maestro.sh will save the admin password to dir-admin.txt in advance (allowing the test
+# a) ci-run-e2e-tests.sh starts TestServerController (where run command is set to this script).
+#    ci-run-e2e-tests.sh will save the admin password to dir-admin.txt in advance (allowing the test
 #    itself to add a new school)
 # b) Maestro test calls TESTSERVERCONTROLLER_URL/start to start server process and get the allocated
 #     port. ci-run-test-server.sh also sets a shutdown url
@@ -16,13 +16,14 @@
 # d) Maestro test calls /stop?port=(portnum) to stop the server.
 
 # TESTSERVER_WORKSPACE and TESSTSERVER_PORT is set by TestServerController.
+# VERSION is set in ci-run-e2e-tests.sh
 echo "ci-run-test-server.sh: Workspace = $TESTSERVER_WORKSPACE Port=$TESTSERVER_PORT"
 
 ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 
 echo $ROOTDIR
 
-unzip -q -d $TESTSERVER_WORKSPACE $ROOTDIR/respect-server/build/distributions/respect-server-1.0.0.zip
+unzip -q -d $TESTSERVER_WORKSPACE $ROOTDIR/respect-server/build/distributions/respect-server-$VERSION.zip
 
 DATADIR=$TESTSERVER_WORKSPACE/data
 mkdir -p $DATADIR
@@ -34,14 +35,16 @@ echo "ci-run-test-server.sh: saved admin auth to $DATADIR/dir-admin.txt"
 
 export JAVA_OPTS="-Dlogs_dir=$TESTSERVER_WORKSPACE/logs/"
 echo "ci-run-test-server.sh starting server :"
-echo $TESTSERVER_WORKSPACE/respect-server-1.0.0/bin/respect-server runserver \
+echo $TESTSERVER_WORKSPACE/respect-server-$VERSION/bin/respect-server runserver \
           -P:ktor.deployment.port=$TESTSERVER_PORT \
-          -P:ktor.deployment.shutdown.url=/api/shutdown \
           -P:ktor.respect.datadir=$TESTSERVER_WORKSPACE/data \
+          -P:ktor.e2eartifactupload.enabled=true \
+          -P:ktor.pidfile=$SERVER_PIDFILE \
 
 # Could set the credentials required to create a new instance here.
-$TESTSERVER_WORKSPACE/respect-server-1.0.0/bin/respect-server runserver \
+$TESTSERVER_WORKSPACE/respect-server-$VERSION/bin/respect-server runserver \
      -P:ktor.deployment.port=$TESTSERVER_PORT \
-     -P:ktor.deployment.shutdown.url=/api/shutdown \
      -P:ktor.respect.datadir=$TESTSERVER_WORKSPACE/data \
+     -P:ktor.e2eartifactupload.enabled=true \
+     -P:ktor.pidfile=$SERVER_PIDFILE \
 

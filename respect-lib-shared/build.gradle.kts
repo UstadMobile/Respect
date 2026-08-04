@@ -1,8 +1,7 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
@@ -15,14 +14,22 @@ compose.resources {
 
 
 kotlin {
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
+    compilerOptions {
+        jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
+
+        optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
-    compilerOptions {
-        optIn.add("kotlin.time.ExperimentalTime")
+    android {
+        //As per https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8232/org.jetbrains.compose.resources.MissingResourceException-Missing-resource-with-path-composeResources
+        androidResources {
+            enable = true
+        }
+
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        namespace = "${rootProject.group}.shared"
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
     jvm()
@@ -34,6 +41,7 @@ kotlin {
             api(projects.respectLibUtil)
             api(projects.respectDatalayerDb)
             api(projects.respectDatalayerHttp)
+            api(projects.respectLibXapiCore)
 
             implementation(projects.respectLibCache)
             implementation(projects.respectLibXxhash)
@@ -57,13 +65,23 @@ kotlin {
 
             implementation(libs.multiplatformsettings)
             implementation(libs.napier)
+            implementation(libs.qrose)
+            implementation(libs.urlencoder)
+
         }
 
         androidMain.dependencies {
+            api(projects.respectLibXapiNanohttpd)
             implementation(libs.androidx.preference)
             implementation(libs.androidx.preference.ktx)
             implementation(libs.acra.core)
             implementation(libs.libphonenumber.android)
+            implementation(libs.androidx.biometric.ktx)
+            implementation(libs.installreferrer)
+
+            implementation(libs.androidx.browser)
+            implementation(projects.respectLibXapiCore)
+            implementation(projects.respectLibXapiIpcShared)
         }
 
         jvmMain.dependencies {
@@ -96,18 +114,3 @@ kotlin {
     }
 }
 
-android {
-    namespace = "world.respect.shared"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
-}
-dependencies {
-    implementation(project(":respect-datalayer-repository"))
-    implementation(project(":respect-datalayer-repository"))
-}

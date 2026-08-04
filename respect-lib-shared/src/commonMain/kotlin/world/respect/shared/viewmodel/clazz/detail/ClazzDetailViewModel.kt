@@ -13,11 +13,11 @@ import kotlinx.datetime.toLocalDateTime
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.model.Clazz
@@ -51,7 +51,16 @@ import world.respect.shared.util.FilterChipsOption
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdminOrTeacher
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
+import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
+import world.respect.datalayer.school.ext.relatedPersonRoleEnum
+import world.respect.datalayer.school.ext.writePermissionFlag
+import world.respect.datalayer.school.model.ClassInvite
+import world.respect.datalayer.school.model.ClassInviteModeEnum
+import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
+import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
+import world.respect.shared.domain.permissions.CheckSchoolPermissionsUseCase
+import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
@@ -81,7 +90,16 @@ data class ClazzDetailUiState(
     val inviteCodePrefix: String? = null,
     val showAddStudent: Boolean = false,
     val showAddTeacher: Boolean = false,
-)
+    val addPersonPermissions: List<Long> = emptyList(),
+) {
+
+    fun showApproveOption(person: Person): Boolean {
+        return person.roles.firstOrNull()?.let {
+            it.roleEnum.writePermissionFlag in addPersonPermissions
+        } ?: false
+    }
+
+}
 
 class ClazzDetailViewModel(
     savedStateHandle: SavedStateHandle,
@@ -90,7 +108,7 @@ class ClazzDetailViewModel(
     private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
 
@@ -103,6 +121,8 @@ class ClazzDetailViewModel(
     val uiState = _uiState.asStateFlow()
 
     private val route: ClazzDetail = savedStateHandle.toRoute()
+
+    private val updateClazzStudentXapiGroupUseCase: UpdateClazzStudentXapiGroupUseCase by inject()
 
     private fun pagingSourceByRole(role: EnrollmentRoleEnum): PagingSourceFactoryHolder<Int, Person> {
         return PagingSourceFactoryHolder {
@@ -124,6 +144,10 @@ class ClazzDetailViewModel(
     private val teachersPendingPagingSource = pagingSourceByRole(EnrollmentRoleEnum.PENDING_TEACHER)
 
     private val studentsPendingPagingSource = pagingSourceByRole(EnrollmentRoleEnum.PENDING_STUDENT)
+
+    private val enqueuePullSyncUseCase: EnqueueRunPullSyncUseCase by inject()
+
+    private val checkSchoolPermissionUseCase: CheckSchoolPermissionsUseCase by inject()
 
     init {
         _appUiState.update {
@@ -155,6 +179,16 @@ class ClazzDetailViewModel(
                     FilterChipsOption(Res.string.active.asUiText())
                 ),
             )
+        }
+
+
+        viewModelScope.launch {
+            enqueuePullSyncUseCase()
+
+            val availablePermissions = checkSchoolPermissionUseCase(
+                PermissionsRequiredByRole.WRITE_PERMISSIONS.flagList
+            )
+            _uiState.update { it.copy(addPersonPermissions = availablePermissions) }
         }
 
         viewModelScope.launch {
@@ -195,7 +229,7 @@ class ClazzDetailViewModel(
                 ).collect { navResult ->
                     val personToEnrol = navResult.result as? Person ?: return@collect
 
-                    try {
+                    snackBarDispatcher.tryOrShowSnackbarOnError {
                         schoolDataSource.enrollmentDataSource.store(
                             listOf(
                                 Enrollment(
@@ -211,8 +245,10 @@ class ClazzDetailViewModel(
                                 )
                             )
                         )
-                    }catch(e: Throwable) {
-                        e.printStackTrace()
+
+                        if(enrolmentRole == EnrollmentRoleEnum.STUDENT) {
+                            updateClazzStudentXapiGroupUseCase(route.guid)
+                        }
                     }
                 }
             }
@@ -221,26 +257,28 @@ class ClazzDetailViewModel(
     }
 
     fun onClickAddPersonToClazz(roleType: EnrollmentRoleEnum) {
-        val clazz = _uiState.value.clazz.dataOrNull() ?: return
+        viewModelScope.launch {
+            val clazz = _uiState.value.clazz.dataOrNull() ?: return@launch
 
-        val classInviteCode = when(roleType){
-            EnrollmentRoleEnum.TEACHER -> clazz.teacherInviteCode
-            EnrollmentRoleEnum.STUDENT -> clazz.studentInviteCode
-            else -> null
-        }
-
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                PersonList.create(
-                    isTopLevel = false,
-                    resultDest = RouteResultDest(
-                        resultKey = "$RESULT_KEY_PREFIX${roleType.value}",
-                        resultPopUpTo = route,
-                    ),
-                    showInviteCode = classInviteCode,
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    PersonList.create(
+                        isTopLevel = false,
+                        resultDest = RouteResultDest(
+                            resultKey = "$RESULT_KEY_PREFIX${roleType.value}",
+                            resultPopUpTo = route,
+                        ),
+                        inviteUid = ClassInvite.uidFor(
+                            route.guid, roleType, ClassInviteModeEnum.DIRECT
+                        ),
+                        classUid = clazz.guid,
+                        className = clazz.title,
+                        addToClassRole = roleType,
+                        filterByRole = roleType.relatedPersonRoleEnum,
+                    )
                 )
             )
-        )
+         }
     }
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
@@ -253,22 +291,27 @@ class ClazzDetailViewModel(
         _uiState.update { it.copy(selectedChip = chip) }
     }
 
-    fun onClickAcceptInvite(user: Person) {
+    private fun onClickAcceptOrDecline(
+        user: Person,
+        approved: Boolean
+    ) {
         viewModelScope.launch {
-            try {
+            snackBarDispatcher.tryOrShowSnackbarOnError("Exception approving invite") {
                 approveOrDeclineInviteRequestUseCase(
                     personUid = user.guid,
-                    classUid = route.guid,
-                    approved = true,
+                    approved = approved,
                 )
-            }catch(e: Throwable) {
-                e.printStackTrace()
             }
         }
     }
 
-    fun onClickDismissInvite(user: Person) {}
+    fun onClickAcceptInvite(user: Person) {
+        onClickAcceptOrDecline(user, true)
+    }
 
+    fun onClickDismissInvite(user: Person) {
+        onClickAcceptOrDecline(user, false)
+    }
 
     fun onTogglePendingSection() {
         _uiState.update { it.copy(isPendingExpanded = !it.isPendingExpanded) }

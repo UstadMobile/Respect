@@ -11,9 +11,9 @@ import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthTokenProvider
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.ext.firstOrNotLoaded
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
@@ -42,7 +42,7 @@ class ClassDataSourceHttp(
         return URLBuilder(respectEndpointUrl(ClassDataSource.ENDPOINT_NAME))
             .apply {
                 parameters.appendCommonListParams(common)
-                parameters.appendIfNotNull(PARAM_NAME_INVITE_CODE, inviteCode)
+                parameters.appendIfNotNull(PARAM_NAME_INVITE_CODE, inviteGuid)
             }
             .build()
     }

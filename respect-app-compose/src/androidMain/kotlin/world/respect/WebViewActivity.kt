@@ -2,15 +2,21 @@ package world.respect
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
+import android.webkit.ConsoleMessage
 import android.webkit.WebChromeClient
+import android.webkit.WebSettings
 import android.webkit.WebView
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
+import io.github.aakira.napier.Napier
 import org.koin.android.ext.android.inject
-import world.respect.app.R
+import world.respect.appcompose.R
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
 
 /**
@@ -24,11 +30,45 @@ class WebViewActivity : AppCompatActivity() {
 
     private val webChromeClient = object: WebChromeClient() {
 
+        private fun ConsoleMessage.toLogLine(): String {
+            return buildString {
+                message()?.also { append(it) }
+                append(" lineNum=${lineNumber()}")
+                sourceId()?.also {
+                    append(" sourceId=$it")
+                }
+            }
+        }
+
+        override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+            val messageLevel = consoleMessage?.messageLevel() ?: return false
+
+            when(messageLevel) {
+                ConsoleMessage.MessageLevel.LOG -> Log.i(LOGTAG, consoleMessage.toLogLine())
+                ConsoleMessage.MessageLevel.WARNING -> Log.w(LOGTAG, consoleMessage.toLogLine())
+                ConsoleMessage.MessageLevel.ERROR -> Log.e(LOGTAG, consoleMessage.toLogLine())
+                ConsoleMessage.MessageLevel.TIP -> Log.i(LOGTAG, consoleMessage.toLogLine())
+                ConsoleMessage.MessageLevel.DEBUG -> Log.d(LOGTAG, consoleMessage.toLogLine())
+            }
+
+            return true
+        }
+
         override fun onReceivedTitle(view: WebView?, title: String?) {
             super.onReceivedTitle(view, title)
             this@WebViewActivity.title = title ?: ""
         }
 
+        override fun onProgressChanged(view: WebView?, newProgress: Int) {
+            val progressBar = findViewById<ProgressBar>(R.id.progress_bar) ?: return
+
+            if(newProgress < 100) {
+                progressBar.progress = newProgress
+                progressBar.takeIf { it.visibility != View.VISIBLE }?.visibility = View.VISIBLE
+            }else {
+                progressBar.takeIf { it.visibility != View.GONE }?.visibility = View.GONE
+            }
+        }
     }
 
     private val webViewClient: OkHttpWebViewClient by inject()
@@ -36,6 +76,9 @@ class WebViewActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val intentUrlExtra = intent.getStringExtra(LaunchAppUseCaseAndroid.EXTRA_URL)
+        Napier.d(tag = LOGTAG, message = "WebViewActivity: onCreate: url=$intentUrlExtra")
+
         setContentView(R.layout.activity_web_view)
 
         setSupportActionBar(findViewById(R.id.toolbar))
@@ -45,9 +88,13 @@ class WebViewActivity : AppCompatActivity() {
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.mediaPlaybackRequiresUserGesture = false
-        val url = intent.getStringExtra(LaunchAppUseCaseAndroid.EXTRA_URL) ?:
-            throw IllegalStateException("No url specified")
 
+        //Content will be loaded from HTTPs and will then make requests to 127.0.0.1 for xAPI
+        //statement submission
+        webView.settings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+        val url = intentUrlExtra ?: throw IllegalStateException("No url specified")
+
+        Napier.d(tag = LOGTAG, message = "WebViewActivity: onCreate:loading url=$url")
         webView.loadUrl(url)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -79,5 +126,10 @@ class WebViewActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    companion object {
+
+        const val LOGTAG = "WebViewActivityTag"
     }
 }

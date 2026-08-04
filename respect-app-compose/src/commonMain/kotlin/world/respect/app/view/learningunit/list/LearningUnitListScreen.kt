@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,9 +30,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.duration
 import world.respect.app.app.RespectAsyncImage
-import world.respect.app.components.RespectListSortHeader
-import world.respect.app.components.defaultItemPadding
-import world.respect.shared.viewmodel.app.appstate.getTitle
+import world.respect.app.components.langMapString
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListUiState
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.util.SortOrderOption
@@ -58,26 +55,17 @@ fun LearningUnitListScreen(
 @Composable
 fun LearningUnitListScreen(
     uiState: LearningUnitListUiState,
-    onSortOrderChanged: (SortOrderOption) -> Unit = { },
+    @Suppress("unused") onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onClickPublication: (OpdsPublication) -> Unit,
     onClickNavigation: (ReadiumLink) -> Unit
 
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
-        RespectListSortHeader(
-            modifier = Modifier.defaultItemPadding(),
-            activeSortOrderOption = uiState.activeSortOrderOption,
-            sortOptions = uiState.sortOptions,
-            enabled = uiState.fieldsEnabled,
-            onClickSortOption = onSortOrderChanged,
-        )
-
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
             itemsIndexed(
                 items = uiState.navigation,
                 key = { index, navigation ->
@@ -223,70 +211,3 @@ fun NavigationListItem(
     )
 }
 
-@Composable
-fun PublicationListItem(
-    publication: OpdsPublication, onClickPublication: (OpdsPublication) -> Unit
-) {
-    ListItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Max)
-            .clickable {
-                onClickPublication(publication)
-            },
-
-        leadingContent = {
-            val iconUrl = publication.images?.firstOrNull()?.href
-
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(48.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                iconUrl.also { icon ->
-                    RespectAsyncImage(
-                        uri = icon,
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(36.dp)
-                    )
-                }
-            }
-        },
-
-        headlineContent = {
-            Text(
-                text = publication.metadata.title.getTitle()
-            )
-        },
-
-        supportingContent = {
-            Column(
-                verticalArrangement =
-                    Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = stringResource(Res.string.classes),
-                )
-                Row(
-                    horizontalArrangement =
-                        Arrangement.spacedBy(8.dp)
-                ) {
-                    publication.metadata.language
-                        ?.let { language ->
-                            Text(
-                                text = language.joinToString(", ")
-                            )
-                        }
-
-                    publication.metadata.duration
-                        ?.let { duration ->
-                            Text(text = "${stringResource(Res.string.duration)} - $duration")
-                        }
-                }
-            }
-        },
-    )
-}

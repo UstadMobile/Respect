@@ -13,7 +13,7 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.report.ReportOptions
 import world.respect.datalayer.school.model.Report
 import world.respect.shared.domain.account.RespectAccountManager
@@ -47,7 +47,7 @@ class ReportDetailViewModel(
     accountManager: RespectAccountManager
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
     private val route: ReportDetail = savedStateHandle.toRoute()
     private val reportUid = route.reportUid
     private val schoolDataSource: SchoolDataSource by inject()
@@ -86,7 +86,7 @@ class ReportDetailViewModel(
                     reportUid = reportUid.toLong(),
                     reportOptions = report.dataOrNull()?.reportOptions ?: ReportOptions(),
                     accountPersonUid = 0L,
-                    timeZone = TimeZone.currentSystemDefault()
+                    timeZoneId = TimeZone.currentSystemDefault().id
                 )
                 runReportUseCase(request).collect { reportResult ->
                     val xAxisFormatter = createGraphFormatterUseCase(

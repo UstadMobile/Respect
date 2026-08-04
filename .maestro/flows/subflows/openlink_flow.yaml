@@ -1,0 +1,9 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+---
+- launchApp:
+    appId: "world.respect.app"
+    arguments:
+      launchUrl: ${URL}
+

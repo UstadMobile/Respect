@@ -22,14 +22,18 @@ enum class EnrollmentRoleEnum(
 
     PENDING_STUDENT("pending_student", 4);
 
+    val requiresApproval: Boolean
+        get() = this == PENDING_TEACHER || this == PENDING_STUDENT
+
     companion object {
 
-
-        @Suppress("unused") //Reserved for DB usage
         const val TEACHER_FLAG = 1
 
-        @Suppress("unused") //Reserved for DB usage
         const val STUDENT_FLAG = 2
+
+        const val PENDING_TEACHER_FLAG = 3
+
+        const val PENDING_STUDENT_FLAG = 4
 
         fun fromValue(value: String): EnrollmentRoleEnum {
             return entries.first { it.value == value }

@@ -1,4 +1,6 @@
 appId: world.respect.app
+tags:
+  - basic
 onFlowStart:
   - clearState: world.respect.app
   - runScript:
@@ -13,8 +15,11 @@ onFlowStart:
         NAME: "001_003_login_using_school_link_test"
 
 onFlowComplete:
-  - runScript:
-      file: "scripts/teardown.js"
+  - runFlow:
+      file: "subflows/teardown.yaml"
+      env:
+        NAME: "db-final"
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - launchApp:
     arguments:
@@ -31,12 +36,12 @@ onFlowComplete:
 - inputText: "Test"  #Entering text instead of link
 - tapOn: "Next"
 - assertVisible: "Invalid app Url"
-
-- tapOn: "Paste the link here"
-- eraseText
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "Paste the link here"
 - inputText: ${output.SCHOOL_URL}
 - tapOn: "Next"
-
 - tapOn:
     id: "username"
 - inputText: "admin"
@@ -48,5 +53,6 @@ onFlowComplete:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Apps"
+- assertVisible:
+       id: "nav_home"
 

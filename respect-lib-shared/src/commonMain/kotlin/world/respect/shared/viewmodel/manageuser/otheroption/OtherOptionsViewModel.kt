@@ -8,8 +8,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.datalayer.RespectAppDataSource
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
+import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.invalid_code
 import world.respect.shared.generated.resources.invalid_url
@@ -32,6 +34,7 @@ class OtherOptionsViewModel(
     savedStateHandle: SavedStateHandle,
     private val respectAppDataSource: RespectAppDataSource,
     private val getDevModeEnabledUseCase: GetDevModeEnabledUseCase,
+    private val resolveUrlToNavCommandUseCase: ResolveUrlToNavCommandUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
     private val _uiState = MutableStateFlow(OtherOptionsUiState())
@@ -46,6 +49,10 @@ class OtherOptionsViewModel(
                     userAccountIconVisible = false,
                 )
             }
+
+            getDevModeEnabledUseCase().also { devModeEnabled ->
+                _uiState.update { it.copy(manageDirectoriesVisible = devModeEnabled) }
+            }
         }
     }
 
@@ -54,7 +61,6 @@ class OtherOptionsViewModel(
             it.copy(
                 link = link,
                 errorMessage = null,
-                manageDirectoriesVisible= getDevModeEnabledUseCase(),
             )
         }
     }
@@ -70,7 +76,14 @@ class OtherOptionsViewModel(
 
          launchWithLoadingIndicator {
              try {
-                 val schoolUrl = Url(link)
+                 val url = Url(link)
+                 val navCommand = resolveUrlToNavCommandUseCase(url)
+                 if(navCommand != null) {
+                     _navCommandFlow.tryEmit(navCommand)
+                     return@launchWithLoadingIndicator
+                 }
+
+                 val schoolUrl = url.normalizeForEndpoint()
                  val schoolEntry = respectAppDataSource.schoolDirectoryEntryDataSource
                      .getSchoolDirectoryEntryByUrl(schoolUrl).dataOrNull()
 
@@ -78,9 +91,7 @@ class OtherOptionsViewModel(
                      throw IllegalStateException()
 
                  _navCommandFlow.tryEmit(
-                     NavCommand.Navigate(
-                         LoginScreen.create(Url(link))
-                     )
+                     NavCommand.Navigate(LoginScreen.create(schoolUrl))
                  )
              }catch(_: Throwable){
                  _uiState.update {
@@ -91,7 +102,7 @@ class OtherOptionsViewModel(
     }
 
     fun onClickManageSchoolDirectories() {
-        _navCommandFlow.tryEmit(NavCommand.Navigate(SchoolDirectoryList))
+        _navCommandFlow.tryEmit(NavCommand.Navigate(SchoolDirectoryList.create()))
     }
 
 }

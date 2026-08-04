@@ -1,15 +1,17 @@
 import com.android.build.gradle.internal.tasks.factory.dependsOn
 
+val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.directory/respect-ds/base.json"
+
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.ktor)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
     application
     alias(libs.plugins.swagger.generator)
+    alias(libs.plugins.buildconfigPlugin)
 }
 
-group = "world.respect.app"
-version = "1.0.0"
+
 
 application {
     mainClass.set("world.respect.server.ServerAppMainKt")
@@ -18,10 +20,21 @@ application {
 
 kotlin {
     compilerOptions {
+        compilerOptions {
+            jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
+        }
+
         optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 }
 
+buildConfig {
+    packageName("world.respect.server")
+    className("RespectServerBuildConfig")
+
+    buildConfigField<String>("RESPECT_DEFAULT_APPLIST", defaultAppList)
+}
 
 // As per https://swagger.io/docs/open-source-tools/swagger-codegen/codegen-v3/workflow-integration/
 swaggerSources {
@@ -63,8 +76,11 @@ dependencies {
     implementation(libs.ktor.server.cors)
     implementation(libs.ktor.server.status.pages)
 
+    implementation(libs.sqlite.jdbc)
     implementation(libs.napier)
     implementation(libs.webauthn4j.core)
+
+    implementation(libs.ktor.server.html.builder)
 
     testImplementation(libs.kotlin.test.junit)
 

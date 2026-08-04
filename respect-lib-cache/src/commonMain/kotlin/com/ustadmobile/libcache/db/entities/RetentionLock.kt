@@ -13,8 +13,8 @@ import androidx.room.PrimaryKey
  * otherwise be evicted based on last access time).
  *
  * @property lockKey The key as per CacheEntry.key
- * @property A remark that can be added at the time of creating the lock e.g. a note on why the entry
- *           is to be retained
+ * @property lockRemark a remark that can be added at the time of creating the lock e.g. a note on
+ *           why the entry is to be retained
  * @property lockPublicationUid if this lock is part of a publication, the publication uid
  */
 @Entity(

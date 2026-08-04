@@ -1,5 +1,10 @@
 # RESPECT
 
+![RESPECT app screenshots](https://github.com/user-attachments/assets/32a25b61-cb8c-4fcf-8099-9f15ade408f0)
+
+RESPECT is an open source digital library for EdTech apps. It makes it easier for educators to 
+discover and use high-quality apps with a single account in all settings, while giving developers 
+the platform they need to grow their impact globally.
 
 [<img src="https://devserver3.ustadmobile.com/jenkins/job/RESPECT-Primary/badge/icon?subject=Build">](https://devserver3.ustadmobile.com/jenkins/job/RESPECT-Primary)
 
@@ -15,7 +20,8 @@ backend server source code in its modules. Android Studio is the development env
 entire project. 
 
 *  __Step 1: Download and install Android Studio__: If you don't already have the latest version, download
-   from [https://developer.android.com/studio](https://developer.android.com/studio).
+   from [https://developer.android.com/studio](https://developer.android.com/studio). The latest [stable
+   channel version](https://developer.android.com/studio/releases) is recommended.
 
 * __Step 2: Install dependencies__
     * JDK17 or JDK21
@@ -64,14 +70,39 @@ list (default or local)
 
 * __Step 6: Build/run and Android app__: In Android Studio use the run/debug button to run the 
  ```respect-app-compose``` module. See [respect-app-compose](respect-app-compose/) for further
- details on running via the command line etc.
+ details on running via the command line etc. You can login to your school using the Android app
+ by tapping ```Other options```, entering the school URL, then use the username admin and the
+ password you set in step 5.
+
+## Contributing
+
+We welcome community contributions including code, bug reports, feature requests, localization and more. Please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Community
 
-Join our [Community Slack Space](https://join.slack.com/t/respectdevelopers/shared_invite/zt-3h04mk3r6-SO1hBLbn0yj5kczPS7q2eg).
+Join our [Community Slack Space](https://join.slack.com/t/respectdevelopers/shared_invite/zt-3t8dpyxxs-0nSsFsLGau5MjVZQzrlvqA).
+
+## Build environment variables
+
+The following environment variables can be set:
+
+```
+RESPECT_DEFAULT_APPLIST - the default list of RESPECT Compatible app manifest URLs e.g. https://respect.world/respect-ds/manifestlist.json
+```
+
+## Publishing
+
+As per [Kotlin docs](https://kotlinlang.org/docs/multiplatform/multiplatform-publish-lib-setup.html#publishing-to-a-local-maven-repository)
+
+If the environment variable ```GIT_TAG_NAME``` is set (eg by [Jenkins plugin](https://plugins.jenkins.io/git-tag-message/)), 
+this will be used as the version, otherwise the version will be read from the ```gradle.properties``` file.
 
 ## Legal and license
 
 Copyright 2024-2025 UstadMobile FZ-LLC. This code is substantially derived from [UstadMobile](https://www.github.com/UstadMobile/UstadMobile/).
 Documentation: [CC-BY](https://creativecommons.org/licenses/by/4.0/) license.
 Code and all other works: [AGPLv3](LICENSE) license.
+
+‘RESPECT™’ and ‘RESPECT compatible™’ are trademarks of the Spix Foundation.
+‘OneRoster®’ and ‘LTI®’ are registered trademarks of 1EdTech Consortium Inc.
+All other trademarks and registered trademarks are the properties of their respective owners.

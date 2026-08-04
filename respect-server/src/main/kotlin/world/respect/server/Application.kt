@@ -1,6 +1,7 @@
 package world.respect.server
 
 import io.github.aakira.napier.Napier
+import io.ktor.http.CacheControl
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
@@ -11,6 +12,8 @@ import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.basic
 import io.ktor.server.auth.bearer
+import io.ktor.server.http.content.staticFiles
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
@@ -20,7 +23,6 @@ import kotlinx.serialization.json.Json
 import org.koin.ktor.ext.getKoin
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
-import world.respect.Greeting
 import world.respect.libutil.ext.randomString
 import world.respect.server.routes.AUTH_CONFIG_DIRECTORY_ADMIN_BASIC
 import world.respect.server.routes.AuthRoute
@@ -30,28 +32,44 @@ import java.io.File
 import java.util.Properties
 import io.ktor.server.plugins.swagger.*
 import org.koin.ktor.ext.inject
+import org.openeel.demo.demolaunchableappserver.DemoLaunchableAppManifestRoute
+import org.openeel.demo.demolaunchableappserver.DemoLaunchableAppCollectionsRoute
+import world.respect.Greeting
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
-import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
+import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
+import world.respect.libutil.util.throwable.unwrapHttpStatusCode
+import world.respect.server.demoapp.DemoLaunchableAppLessonRoute
 import world.respect.server.logging.LogbackAntiLog
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
 import world.respect.server.routes.passkey.RevokePasskeyRoute
 import world.respect.server.routes.passkey.VerifySignInWithPasskeyRoute
+import world.respect.server.routes.qrcode.PersonQrBadgeRoute
 import world.respect.server.routes.school.respect.AddChildAccountRoute
-import world.respect.server.routes.school.respect.AssignmentRoute
 import world.respect.server.routes.school.respect.ClassRoute
 import world.respect.server.routes.school.respect.EnrollmentRoute
 import world.respect.server.routes.school.respect.InviteInfoRoute
+import world.respect.server.routes.school.respect.InviteRoute
 import world.respect.server.routes.school.respect.PersonPasskeyRoute
 import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
+import world.respect.server.routes.school.respect.PlaylistRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
 import world.respect.server.routes.school.respect.SchoolAppRoute
+import world.respect.server.routes.school.respect.SchoolRegistrationRoute
+import world.respect.server.routes.school.respect.SchoolLinkRoute
+import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
+import world.respect.server.routes.school.respect.SchoolValidationRoute
+import world.respect.server.routes.e2etestartifactsroute.ReceiveE2EArtifactUploadRoute
+import world.respect.server.routes.school.xapi.XapiStatementsResourceRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
+import world.respect.server.routes.username.checkusernameunique.CheckUsernameUniqueRoute
 import world.respect.server.util.ext.getSchoolKoinScope
+import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.virtualHost
 import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUseCase
+import world.respect.shared.domain.e2eartifactupload.E2EArtifactUploadUseCase
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 
 const val AUTH_CONFIG_SCHOOL = "auth-school-bearer"
@@ -65,16 +83,25 @@ fun Application.module() {
         setProperty(SERVER_PROPERTIES_KEY_PORT, environment.config.port.toString())
     }
 
-    environment.config.absoluteDataDir().takeIf { !it.exists() }?.mkdirs()
+    val absoluteDataDir = environment.config.absoluteDataDir()
+    absoluteDataDir.takeIf { !it.exists() }?.mkdirs()
+
+    Napier.d("Respect-server: init : Data dir=$absoluteDataDir")
+
+    environment.config.filePropertyOrNull(SERVER_CONFIG_PID_FILE)?.also { pidFile ->
+        pidFile.parentFile?.takeIf { !it.exists() }?.mkdirs()
+        pidFile.writeText(ProcessHandle.current().pid().toString())
+    }
 
     ktorServerPropertiesFile(
-        dataDir = environment.config.absoluteDataDir()
+        dataDir = absoluteDataDir
     ).writer().use { serverPropWriter ->
         serverProperties.store(serverPropWriter, null)
     }
 
     val wellKnownDir = File(ktorAppHomeDir(), "well-known")
     val assetLinksFile = File(wellKnownDir, "assetlinks.json")
+    val termsFile = File(wellKnownDir, "terms.html")
 
     val dirAdminFile = File(environment.config.absoluteDataDir(), DIRECTORY_ADMIN_FILENAME)
     dirAdminFile.takeIf { !it.exists() }?.also {
@@ -141,9 +168,10 @@ fun Application.module() {
         exception<Throwable> { call, cause ->
             cause.printStackTrace()
 
-            if(cause is ExceptionWithHttpStatusCode) {
+            val httpStatusCode = cause.unwrapHttpStatusCode()
+            if(httpStatusCode != null) {
                 val responseText = cause.message
-                val httpStatus = HttpStatusCode.fromValue(cause.statusCode)
+                val httpStatus = HttpStatusCode.fromValue(httpStatusCode)
                 if(responseText != null) {
                     call.respondText(text = responseText, status = httpStatus)
                 }else {
@@ -166,18 +194,59 @@ fun Application.module() {
             call.respondText("Ktor: ${Greeting().greet()}")
         }
 
+        SchoolRegistrationRoute()
+
         route(".well-known") {
             getRespectSchoolJson("respect-school.json")
 
             get("assetlinks.json") {
                 call.respondFile(assetLinksFile)
             }
+
+            get("terms.html") {
+                if(termsFile.exists()) {
+                    call.respondFile(termsFile)
+                }else {
+                    call.response.cacheControl(CacheControl.NoStore(null))
+
+                    call.respondText(
+                        contentType = ContentType.Text.Plain,
+                        status = HttpStatusCode.NotFound,
+                        text = "Terms/conditions not found: the server administrator can set this as per the INSTALL.md by saving terms.html into the well-known directory."
+                    )
+                }
+            }
+
+            SchoolValidationRoute()
         }
 
         swaggerUI(
             path = "swagger",
             swaggerFile = "openapi/openapi.yaml",
         )
+
+        environment.config.filePropertyOrNull(
+            propertyName = SERVER_CONFIG_KEY_STATICFILES
+        )?.also { staticFilesDir ->
+            staticFiles("/static-extra", staticFilesDir)
+        }
+
+        staticResources("/static-resources", "http")
+
+        route(RESPECT_SCHOOL_LINK_SEGMENT) {
+            SchoolLinkRoute()
+        }
+
+        route("demoapp") {
+            staticResources(
+                remotePath = "static",
+                basePackage = "demoapp",
+            )
+
+            DemoLaunchableAppManifestRoute()
+            DemoLaunchableAppCollectionsRoute()
+            DemoLaunchableAppLessonRoute()
+        }
 
         route("api") {
             route("passkey"){
@@ -195,14 +264,20 @@ fun Application.module() {
             }
             route("directory") {
                 val respectAppDataSource: RespectAppDataSource by inject()
-                RespectSchoolDirectoryRoute(respectAppDataSource)
+                RespectSchoolDirectoryRoute(
+                    respectAppDataSource = respectAppDataSource,
+                    filterByHost = environment.config.schoolDirsUseVirtualHost()
+                )
             }
 
             route("school") {
+                route("xapi") {
+                    authenticate(AUTH_CONFIG_SCHOOL) {
+                        XapiStatementsResourceRoute(json = json)
+                    }
+                }
+
                 route("respect") {
-                    AddChildAccountRoute(
-                        addChildAccountUseCase = { it.getSchoolKoinScope().get() }
-                    )
                     route("auth") {
                         AuthRoute()
                     }
@@ -214,20 +289,48 @@ fun Application.module() {
                             getInviteInfoUseCase = { it.getSchoolKoinScope().get() }
                         )
                     }
+
                     route("username"){
                         UsernameSuggestionRoute(
                             usernameSuggestionUseCase = { it.getSchoolKoinScope().get() }
                         )
+
+                        CheckUsernameUniqueRoute(
+                            checkUsernameUniqueUseCase = { it.getSchoolKoinScope().get() }
+                        )
                     }
+
+
+
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         SchoolAppRoute()
+                        SchoolPermissionGrantRoute()
                         PersonRoute()
+                        InviteRoute()
                         PersonPasskeyRoute()
                         PersonPasswordRoute()
                         ClassRoute()
                         EnrollmentRoute()
-                        AssignmentRoute()
+                        PersonQrBadgeRoute()
+                        AddChildAccountRoute(
+                            addChildAccountUseCase = { it.requireAccountScope().get() }
+                        )
                     }
+
+                    authenticate(AUTH_CONFIG_SCHOOL, optional = true) {
+                        PlaylistRoute()
+                    }
+                }
+            }
+
+            if (environment.config.e2eArtifactUploadEnabled()) {
+                val e2eUploadsDir = File(
+                    environment.config.absoluteDataDir(),
+                    E2EArtifactUploadUseCase.DEFAULT_UPLOAD_DIR_NAME
+                )
+
+                route(E2EArtifactUploadUseCase.ENDPOINT_DIR) {
+                    ReceiveE2EArtifactUploadRoute(e2eUploadsDir = e2eUploadsDir)
                 }
             }
         }

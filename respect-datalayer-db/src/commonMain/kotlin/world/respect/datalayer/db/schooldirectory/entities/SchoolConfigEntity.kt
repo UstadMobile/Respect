@@ -4,9 +4,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * Represents the configuration of a realm which is hosted on this server.
+ * Represents the server configuration of a School which is hosted on this server.
+ *
  * @param rcUid UID as per RealmEntity.reUid
- * @param dbUrl database URL or path for the realm-specific database.
+ * @param dbUrl database URL or path for the school-specific database.
  */
 @Entity
 class SchoolConfigEntity(

@@ -8,14 +8,14 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.util.reflect.TypeInfo
-import world.respect.datalayer.DataErrorResult
-import world.respect.datalayer.DataLayerHeaders
-import world.respect.datalayer.DataLayerParams
-import world.respect.datalayer.DataLoadMetaInfo
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.NoDataLoadedState
-import world.respect.datalayer.NoDataLoadedState.Reason
+import world.respect.lib.dataloadstate.DataErrorResult
+import world.respect.lib.dataloadstate.DataLayerHeaders
+import world.respect.lib.dataloadstate.DataLayerParams
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.dataloadstate.NoDataLoadedState.Reason
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
@@ -107,7 +107,9 @@ class OffsetLimitHttpPagingSource<T: Any>(
                 return when {
                     listLoadState is NoDataLoadedState && listLoadState.reason == Reason.NOT_MODIFIED -> {
                         Napier.d(tag = DataLayerTags.TAG_DATALAYER) { "$logPrefix not modified" }
-                        LoadResult.Error(CacheableHttpPagingSource.NotModifiedNonException())
+                        LoadResult.Error(
+                            CacheableHttpPagingSource.NotModifiedNonException(listLoadState.metaInfo)
+                        )
                     }
 
                     listLoadState is NoDataLoadedState && listLoadState.reason == Reason.NOT_FOUND -> {

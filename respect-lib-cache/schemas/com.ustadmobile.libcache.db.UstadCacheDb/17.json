@@ -1,0 +1,560 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 17,
+    "identityHash": "22a29c8f98c5e24efceba5a4d46a0c1c",
+    "entities": [
+      {
+        "tableName": "CacheEntry",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`key` TEXT NOT NULL, `url` TEXT NOT NULL, `urlWithoutSearch` TEXT, `urlWithoutSearchHash` TEXT, `message` TEXT NOT NULL, `statusCode` INTEGER NOT NULL, `cacheFlags` INTEGER NOT NULL, `method` INTEGER NOT NULL, `lastAccessed` INTEGER NOT NULL, `lastValidated` INTEGER NOT NULL, `integrity` TEXT, `responseHeaders` TEXT NOT NULL, `storageUri` TEXT NOT NULL, `storageSize` INTEGER NOT NULL, `uncompressedSize` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`key`))",
+        "fields": [
+          {
+            "fieldPath": "key",
+            "columnName": "key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "urlWithoutSearch",
+            "columnName": "urlWithoutSearch",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "urlWithoutSearchHash",
+            "columnName": "urlWithoutSearchHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "message",
+            "columnName": "message",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statusCode",
+            "columnName": "statusCode",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cacheFlags",
+            "columnName": "cacheFlags",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "method",
+            "columnName": "method",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastAccessed",
+            "columnName": "lastAccessed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastValidated",
+            "columnName": "lastValidated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "integrity",
+            "columnName": "integrity",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "responseHeaders",
+            "columnName": "responseHeaders",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storageUri",
+            "columnName": "storageUri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "storageSize",
+            "columnName": "storageSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uncompressedSize",
+            "columnName": "uncompressedSize",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "key"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_lastAccessed",
+            "unique": false,
+            "columnNames": [
+              "lastAccessed"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_lastAccessed` ON `${TABLE_NAME}` (`lastAccessed`)"
+          },
+          {
+            "name": "idx_urlWithoutSearchHash",
+            "unique": false,
+            "columnNames": [
+              "urlWithoutSearchHash"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_urlWithoutSearchHash` ON `${TABLE_NAME}` (`urlWithoutSearchHash`)"
+          },
+          {
+            "name": "index_CacheEntry_integrity",
+            "unique": false,
+            "columnNames": [
+              "integrity"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CacheEntry_integrity` ON `${TABLE_NAME}` (`integrity`)"
+          }
+        ]
+      },
+      {
+        "tableName": "RequestedEntry",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `requestSha256` TEXT NOT NULL, `requestedKey` TEXT NOT NULL, `batchId` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestSha256",
+            "columnName": "requestSha256",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestedKey",
+            "columnName": "requestedKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "batchId",
+            "columnName": "batchId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_RequestedEntry_batchId",
+            "unique": false,
+            "columnNames": [
+              "batchId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_RequestedEntry_batchId` ON `${TABLE_NAME}` (`batchId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "RetentionLock",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`lockId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `lockKey` TEXT NOT NULL, `lockRemark` TEXT NOT NULL, `lockPublicationUid` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "lockId",
+            "columnName": "lockId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lockKey",
+            "columnName": "lockKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lockRemark",
+            "columnName": "lockRemark",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lockPublicationUid",
+            "columnName": "lockPublicationUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "lockId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "idx_lockKey",
+            "unique": false,
+            "columnNames": [
+              "lockKey"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_lockKey` ON `${TABLE_NAME}` (`lockKey`)"
+          }
+        ]
+      },
+      {
+        "tableName": "NeighborCache",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`neighborUid` INTEGER NOT NULL, `neighborDeviceName` TEXT NOT NULL, `neighborIp` TEXT NOT NULL, `neighborUdpPort` INTEGER NOT NULL, `neighborHttpPort` INTEGER NOT NULL, `neighborDiscovered` INTEGER NOT NULL, `neighborPingTime` INTEGER NOT NULL, `neighborLastSeen` INTEGER NOT NULL, `neighborStatus` INTEGER NOT NULL, PRIMARY KEY(`neighborUid`))",
+        "fields": [
+          {
+            "fieldPath": "neighborUid",
+            "columnName": "neighborUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "neighborDeviceName",
+            "columnName": "neighborDeviceName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "neighborIp",
+            "columnName": "neighborIp",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "neighborUdpPort",
+            "columnName": "neighborUdpPort",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "neighborHttpPort",
+            "columnName": "neighborHttpPort",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "neighborDiscovered",
+            "columnName": "neighborDiscovered",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "neighborPingTime",
+            "columnName": "neighborPingTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "neighborLastSeen",
+            "columnName": "neighborLastSeen",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "neighborStatus",
+            "columnName": "neighborStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "neighborUid"
+          ]
+        }
+      },
+      {
+        "tableName": "NeighborCacheEntry",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nceNeighborUid` INTEGER NOT NULL, `nceUrlHash` INTEGER NOT NULL, PRIMARY KEY(`nceNeighborUid`, `nceUrlHash`))",
+        "fields": [
+          {
+            "fieldPath": "nceNeighborUid",
+            "columnName": "nceNeighborUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nceUrlHash",
+            "columnName": "nceUrlHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "nceNeighborUid",
+            "nceUrlHash"
+          ]
+        }
+      },
+      {
+        "tableName": "NewCacheEntry",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cacheEntryKey` TEXT NOT NULL, `nceUrl` TEXT NOT NULL, PRIMARY KEY(`cacheEntryKey`))",
+        "fields": [
+          {
+            "fieldPath": "cacheEntryKey",
+            "columnName": "cacheEntryKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nceUrl",
+            "columnName": "nceUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "cacheEntryKey"
+          ]
+        }
+      },
+      {
+        "tableName": "DownloadJob",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`djUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `djType` INTEGER NOT NULL, `djStatus` INTEGER NOT NULL, `djName` TEXT, `djPubManifestUrl` TEXT, `djPubManifestHash` INTEGER NOT NULL, `djTimeCreated` INTEGER NOT NULL DEFAULT 0, `djCreationType` INTEGER NOT NULL DEFAULT 0)",
+        "fields": [
+          {
+            "fieldPath": "djUid",
+            "columnName": "djUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "djType",
+            "columnName": "djType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "djStatus",
+            "columnName": "djStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "djName",
+            "columnName": "djName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "djPubManifestUrl",
+            "columnName": "djPubManifestUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "djPubManifestHash",
+            "columnName": "djPubManifestHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "djTimeCreated",
+            "columnName": "djTimeCreated",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "djCreationType",
+            "columnName": "djCreationType",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "djUid"
+          ]
+        }
+      },
+      {
+        "tableName": "DownloadJobItem",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`djiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `djiDjUid` INTEGER NOT NULL, `djiTotalSize` INTEGER NOT NULL, `djiTransferred` INTEGER NOT NULL, `djiAttemptCount` INTEGER NOT NULL, `djiUrl` TEXT NOT NULL, `djiDest` TEXT, `djiType` INTEGER NOT NULL, `djiStatus` INTEGER NOT NULL, `djiEntityEtag` INTEGER NOT NULL DEFAULT 0, `djiLockIdToRelease` INTEGER NOT NULL DEFAULT 0, `djiPartialTmpFile` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "djiUid",
+            "columnName": "djiUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "djiDjUid",
+            "columnName": "djiDjUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "djiTotalSize",
+            "columnName": "djiTotalSize",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "djiTransferred",
+            "columnName": "djiTransferred",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "djiAttemptCount",
+            "columnName": "djiAttemptCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "djiUrl",
+            "columnName": "djiUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "djiDest",
+            "columnName": "djiDest",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "djiType",
+            "columnName": "djiType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "djiStatus",
+            "columnName": "djiStatus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "djiEntityEtag",
+            "columnName": "djiEntityEtag",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "djiLockIdToRelease",
+            "columnName": "djiLockIdToRelease",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "djiPartialTmpFile",
+            "columnName": "djiPartialTmpFile",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "djiUid"
+          ]
+        },
+        "indices": [
+          {
+            "name": "transferjob_djuid",
+            "unique": false,
+            "columnNames": [
+              "djiDjUid"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `transferjob_djuid` ON `${TABLE_NAME}` (`djiDjUid`)"
+          }
+        ]
+      },
+      {
+        "tableName": "PinnedPublication",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ppUrlHash` INTEGER NOT NULL, `title` TEXT NOT NULL, PRIMARY KEY(`ppUrlHash`))",
+        "fields": [
+          {
+            "fieldPath": "ppUrlHash",
+            "columnName": "ppUrlHash",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ppUrlHash"
+          ]
+        }
+      },
+      {
+        "tableName": "CacheEntryExtraHeaders",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ceehKey` TEXT NOT NULL, `ceehUrl` TEXT NOT NULL, `extraHeaders` TEXT NOT NULL, PRIMARY KEY(`ceehKey`))",
+        "fields": [
+          {
+            "fieldPath": "ceehKey",
+            "columnName": "ceehKey",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ceehUrl",
+            "columnName": "ceehUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "extraHeaders",
+            "columnName": "extraHeaders",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ceehKey"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '22a29c8f98c5e24efceba5a4d46a0c1c')"
+    ]
+  }
+}

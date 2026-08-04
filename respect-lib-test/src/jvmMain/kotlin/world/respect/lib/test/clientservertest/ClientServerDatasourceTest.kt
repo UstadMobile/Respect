@@ -31,6 +31,8 @@ import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
+import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
+import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.http.SchoolDataSourceHttp
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
@@ -38,10 +40,13 @@ import world.respect.datalayer.repository.SchoolDataSourceRepository
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.model.AuthToken
+import world.respect.datalayer.school.model.Person
+import world.respect.datalayer.school.model.PersonGenderEnum
+import world.respect.datalayer.school.model.PersonRole
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.opds.model.LangMapStringValue
-import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.findFreePort
 import world.respect.libutil.util.time.systemTimeInMillis
@@ -54,19 +59,7 @@ import kotlin.time.Clock
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationClient
 
-data class DataSourceTestClient(
-    val schoolDataSource: SchoolDataSource,
-    val schoolDataSourceLocal: SchoolDataSourceLocal,
-    val schoolDataSourceRemote: SchoolDataSource,
-    val validationHelper: ExtendedDataSourceValidationHelper,
-    val scope: CoroutineScope,
-) {
 
-    fun close() {
-        scope.cancel()
-    }
-
-}
 
 class ClientServerDataSourceTestBuilder internal constructor(
     private val baseDir: File,
@@ -76,8 +69,57 @@ class ClientServerDataSourceTestBuilder internal constructor(
     },
     numClients: Int = 1,
     val stringHasher: XXStringHasher = XXStringHasherCommonJvm(),
-    val authenticatedUser: AuthenticatedUserPrincipalId = AuthenticatedUserPrincipalId("4242")
+    val adminUserId: AuthenticatedUserPrincipalId = AuthenticatedUserPrincipalId("4242"),
+    val useDefaultPermissions: Boolean = true,
 ) {
+
+    private val serverDir = File(baseDir, "server").also { it.mkdirs() }
+
+    val port = findFreePort()
+
+    val schoolUrl = Url("http://localhost:$port/")
+
+    val serverSchoolSourceAndDb = newLocalSchoolDatabase(
+        serverDir, stringHasher, adminUserId
+    )
+
+    val serverDb: RespectSchoolDatabase
+        get() = serverSchoolSourceAndDb.first
+
+    val serverAdminPerson = Person(
+        guid = adminUserId.guid,
+        givenName = "Admin",
+        familyName = "User",
+        gender = PersonGenderEnum.UNSPECIFIED,
+        roles = listOf(
+            PersonRole(true, PersonRoleEnum.SYSTEM_ADMINISTRATOR)
+        ),
+    )
+
+    inner class DataSourceTestClient(
+        val schoolDb: RespectSchoolDatabase,
+        val schoolDataSource: SchoolDataSource,
+        val schoolDataSourceLocal: SchoolDataSourceLocal,
+        val schoolDataSourceRemote: SchoolDataSource,
+        val validationHelper: ExtendedDataSourceValidationHelper,
+        val scope: CoroutineScope,
+    ) {
+
+        suspend fun insertServerAdminAndDefaultGrants() {
+            schoolDataSourceLocal.personDataSource.updateLocal(listOf(serverAdminPerson))
+            if(useDefaultPermissions) {
+                AddDefaultSchoolPermissionGrantsUseCase(
+                    schoolDb = schoolDb,
+                    uidNumberMapper = XXHashUidNumberMapper(stringHasher),
+                ).invoke()
+            }
+        }
+
+        fun close() {
+            scope.cancel()
+        }
+
+    }
 
     private lateinit var serverRouting: Routing.() -> Unit
 
@@ -91,29 +133,41 @@ class ClientServerDataSourceTestBuilder internal constructor(
         ).setDriver(BundledSQLiteDriver())
             .build()
 
+        val uidMapper = XXHashUidNumberMapper(stringHasher)
+
         val schoolDataSource = SchoolDataSourceDb(
             schoolDb = schoolDb,
-            uidNumberMapper = XXHashUidNumberMapper(stringHasher),
+            uidNumberMapper = uidMapper,
             authenticatedUser = localAuthenticatedUser,
+            checkPersonPermissionUseCase = CheckPersonPermissionUseCaseDbImpl(
+                authenticatedUser = localAuthenticatedUser,
+                schoolDb = schoolDb,
+                uidNumberMapper = uidMapper,
+            ),
+            defaultAppCatalogUrl = null,
+            json = Json { ignoreUnknownKeys = true },
+            schoolUrl = schoolUrl,
         )
 
         return Pair(schoolDb, schoolDataSource)
     }
 
 
-    val port = findFreePort()
 
-    private val serverDir = File(baseDir, "server").also { it.mkdirs() }
-
-    val serverSchoolSourceAndDb = newLocalSchoolDatabase(
-        serverDir, stringHasher, authenticatedUser
-    )
-
-    val serverSchoolDataSource = serverSchoolSourceAndDb.second
+    val serverSchoolDataSource = serverSchoolSourceAndDb.also { (database, datasource) ->
+        runBlocking {
+            datasource.personDataSource.updateLocal(listOf(serverAdminPerson))
+            if(useDefaultPermissions) {
+                AddDefaultSchoolPermissionGrantsUseCase(
+                    schoolDb = database,
+                    uidNumberMapper = XXHashUidNumberMapper(stringHasher),
+                ).invoke()
+            }
+        }
+    }.second
 
     val serverSchoolPrimaryKeyGenerator = SchoolPrimaryKeyGenerator()
 
-    val schoolUrl = Url("http://localhost:$port/")
 
     val schoolDirectoryEntry = SchoolDirectoryEntry(
         name = LangMapStringValue("test school"),
@@ -160,12 +214,11 @@ class ClientServerDataSourceTestBuilder internal constructor(
         val clientAppDataSource: RespectAppDataSourceLocal = RespectAppDataSourceDb(
             respectAppDatabase = clientAppDb,
             json = json,
-            xxStringHasher = stringHasher,
-            primaryKeyGenerator = PrimaryKeyGenerator(RespectAppDatabase.TABLE_IDS)
+            xxStringHasher = stringHasher
         )
 
         val (schoolDb, schoolDataSourceLocal) = newLocalSchoolDatabase(
-            clientDir, stringHasher, authenticatedUser
+            clientDir, stringHasher, adminUserId
         )
 
 
@@ -191,6 +244,8 @@ class ClientServerDataSourceTestBuilder internal constructor(
             httpClient = httpClient,
             tokenProvider =  { AuthToken(token, systemTimeInMillis(), 3600) },
             validationHelper = clientValidationHelper,
+            defaultAppCatalogUrl = null,
+            json = json,
         )
 
         val drainQueueSignal = Channel<Boolean>(capacity = Channel.UNLIMITED)
@@ -201,7 +256,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
         val remoteWriteQueue = RemoteWriteQueueDbImpl(
             schoolDb = schoolDb,
-            account = authenticatedUser,
+            account = adminUserId,
             enqueueDrainRemoteWriteQueueUseCase = enqueueRemoteWorkUseCase,
         )
 
@@ -227,6 +282,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
         }
 
         DataSourceTestClient(
+            schoolDb = schoolDb,
             schoolDataSource = clientDataSource,
             schoolDataSourceLocal = schoolDataSourceLocal,
             schoolDataSourceRemote = schoolDataSourceRemote,
@@ -244,10 +300,12 @@ class ClientServerDataSourceTestBuilder internal constructor(
 
 suspend fun clientServerDatasourceTest(
     baseDir: File,
+    useDefaultPermissions: Boolean = true,
     block: suspend ClientServerDataSourceTestBuilder.() -> Unit,
 ) {
     val testBuilder = ClientServerDataSourceTestBuilder(
         baseDir = baseDir,
+        useDefaultPermissions = useDefaultPermissions,
     )
 
     try {

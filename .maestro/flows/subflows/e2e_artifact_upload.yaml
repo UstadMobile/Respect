@@ -1,0 +1,13 @@
+appId: world.respect.app
+---
+- stopApp
+- setAirplaneMode: disabled
+- openLink: "world.respect.app.e2eartifactupload:///?schoolUrl=${output.SCHOOL_URL_ENCODED}&name=${NAME}"
+
+- extendedWaitUntil:
+    visible:
+      id: "upload_done"
+    timeout: 30000
+- takeScreenshot:
+    path: e2e_artifact_upload
+    label: Screenshot of E2E artifact upload result

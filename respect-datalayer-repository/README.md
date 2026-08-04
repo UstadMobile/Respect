@@ -55,7 +55,8 @@ supported by an API (e.g. xAPI statements resource).
 > with a value of the timestamp for which all Statements that have or will have a "stored" property before that time are known with reasonable certainty to be available for retrieval
 
 Generally a Last-Modified HTTP header SHOULD actually be the most recent stored time of any data 
-included in the response: because this is the most recent time the response actually changed.
+included in the response: because this is the most recent time the response of this server actually 
+changed.
 
 When permissions change this can lead to a situation where a client using stored since parameter would
 not receive new entities because they were stored before the stored-since, but the client
@@ -69,3 +70,22 @@ requests that typically originate from the UI (e.g. where the client pulls data 
 visiting a particular screen). If-None-Match etags / If-Modified-Since should be used instead. 
 Consider a paged list: if the since parameter is used it becomes almost impossible to align local
 and remote data.
+
+**Handling deletions**
+
+In an offline-first system data is, by nature, distributed amongst various nodes. This makes 
+handling deletion more complicated. Simply deleting from any node's database is insufficient, even
+if from the server, the data would still be present on other nodes.
+
+Each entity has a status field (see StatusEnum.kt). When data is to be deleted, the status must be
+changed to to_be_deleted (this change should be saved using the _store_ function the same as any 
+other update). Any personal data should be removed at this point (set status to_be_deleted and set
+any personal data fields to null).
+
+It should then generally be excluding from db query results. When the repository pulls remote updates
+from the server, it will set includeDeleted=true to ensure that any deletions are pulled down so 
+they take effect locally.
+
+The actual deletion will happen after a period of time (e.g. 10 days) has passed. Each node will
+periodically search for entities with the status to_be_deleted where the time since last modified 
+exceeds the period (e.g. 10 days), and then actually delete those entities.

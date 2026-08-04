@@ -12,8 +12,8 @@ import kotlinx.datetime.TimeZone
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.model.Report
 import world.respect.shared.domain.account.RespectAccountManager
@@ -45,7 +45,7 @@ class ReportListViewModel(
     accountManager: RespectAccountManager
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
     private val _uiState = MutableStateFlow(ReportListUiState())
     val uiState: Flow<ReportListUiState> = _uiState.asStateFlow()
     private val schoolDataSource: SchoolDataSource by inject()
@@ -82,7 +82,7 @@ class ReportListViewModel(
             reportUid = report.guid.toLong(),
             reportOptions = report.reportOptions,
             accountPersonUid = 0L, // TODO: Get actual user ID
-            timeZone = TimeZone.currentSystemDefault()
+            timeZoneId = TimeZone.currentSystemDefault().id
         )
 
         return runReportUseCase(request).map { reportResult ->

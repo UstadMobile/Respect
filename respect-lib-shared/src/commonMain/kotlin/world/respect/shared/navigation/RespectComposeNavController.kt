@@ -18,6 +18,8 @@ class RespectComposeNavController(
     fun onCollectNavCommand(
         navCommand: NavCommand,
     ) {
+        println("acknowledgement init"+navCommand.timestamp +" "+lastNavCommandTime)
+
         if(navCommand.timestamp <= lastNavCommandTime)
             return
 

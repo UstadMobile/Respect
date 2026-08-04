@@ -11,10 +11,10 @@ import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthTokenProvider
-import world.respect.datalayer.DataLayerParams
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.ext.firstOrNotLoaded
+import world.respect.lib.dataloadstate.DataLayerParams
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
@@ -47,6 +47,7 @@ class PersonDataSourceHttp(
                 parameters.appendCommonListParams(common)
                 parameters.appendIfNotNull(DataLayerParams.FILTER_BY_CLASS_UID, filterByClazzUid)
                 parameters.appendIfNotNull(DataLayerParams.FILTER_BY_ENROLLMENT_ROLE, filterByEnrolmentRole?.value)
+                parameters.appendIfNotNull(DataLayerParams.FILTER_BY_PERSON_STATUS, filterByPersonStatus?.value)
                 parameters.appendIfNotNull(DataLayerParams.FILTER_BY_NAME, filterByName)
                 parameters.appendIfNotNull(DataLayerParams.INCLUDE_RELATED, includeRelated.toString())
                 parameters.appendIfNotNull(DataLayerParams.IN_CLASS_ON_DAY, inClassOnDay?.toString())

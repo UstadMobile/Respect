@@ -2,8 +2,8 @@ package world.respect.datalayer.school
 
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.shared.WritableDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
@@ -13,14 +13,14 @@ interface ClassDataSource: WritableDataSource<Clazz> {
 
     data class GetListParams(
         val common: GetListCommonParams = GetListCommonParams(),
-        val inviteCode: String? = null,
+        val inviteGuid: String? = null,
     ) {
         companion object {
 
             fun fromParams(params: StringValues) : GetListParams {
                 return GetListParams(
                     common = GetListCommonParams.fromParams(params),
-                    inviteCode = params[PARAM_NAME_INVITE_CODE],
+                    inviteGuid = params[PARAM_NAME_INVITE_CODE],
                 )
             }
 

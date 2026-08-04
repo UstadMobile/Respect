@@ -11,11 +11,15 @@
     <string name="example_url_placeholder">e.g. https://</string>
     <string name="next">Next</string>
     <string name="save">Save</string>
+    <string name="qr_or_password_required">QR code badge or password required</string>
+    <string name="password_not_set_error">Password is required before saving</string>
     <string name="done">Done</string>
     <string name="try_it">Try it</string>
-    <string name="add_app">Add App</string>
+    <string name="add_app">Add to school apps</string>
+    <string name="google_play">Get it on Google Play</string>
     <string name="lessons">Lessons</string>
     <string name="apps">Apps</string>
+    <string name="home">Home</string>
     <string name="app">App</string>
     <string name="assignments">Assignments</string>
     <string name="assignment">Assignment</string>
@@ -23,6 +27,8 @@
     <string name="edit_assignment">Edit assignment</string>
     <string name="classes">Classes</string>
     <string name="clazz">Class</string>
+    <string name="assigned_to">Assigned to</string>
+    <string name="assign_to">Assign to</string>
     <string name="remove_from_class">Remove from class</string>
     <string name="manage_enrollments">Manage enrollments</string>
     <string name="report">Report</string>
@@ -41,6 +47,12 @@
     <string name="downloaded">Downloaded</string>
     <string name="share">Share</string>
     <string name="assign">Assign</string>
+    <string name="bookmark">Bookmark</string>
+    <string name="no_bookmark">No bookmarks yet</string>
+    <string name="msg_see_bookmark">Bookmark a lesson or a playlist to see it here.</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="remove_bookmark">Bookmark removed</string>
+    <string name="undo">Undo</string>
     <string name="related_lessons">Related Lessons</string>
     <string name="duration">Duration</string>
     <string name="more_info">More Info</string>
@@ -61,12 +73,35 @@
     <string name="already_have_account">I already have an account</string>
     <string name="add_my_school">Add my school</string>
     <string name="required_field">Required field</string>
+    <string name="enter_one_field">If you need response, one of the field is required</string>
     <string name="login">Login</string>
     <string name="userId_placeholder">user@school.example.org</string>
     <string name="password_label">Password</string>
+
+    <string name="qr_badge_options">QR Badge Options</string>
+    <string name="assign_new_badge_replace">Assign new badge (replace)</string>
+    <string name="revoke_badge">Revoke badge</string>
+
+    <string name="quick_easy_sign_in">Quick and easy sign-in for students</string>
+    <string name="qr_code_badge_description">QR code badges enable students to quickly and safely sign-in, even on shared devices, without needing to use usernames and passwords</string>
+    <string name="assign_qr_code_badge">Assign QR code badge</string>
+    <string name="change_qr_code_badge">Change QR code badge</string>
+    <string name="or">OR</string>
+    <string name="set_password">Set password</string>
+    <string name="require_password">Require Password</string>
+    <string name="password_too_short">Password must be at least %d characters</string>
+    <string name="save_password">Save Password</string>
+    <string name="creating_account_for">Creating account for %s</string>
+    <string name="password_cannot_be_empty">Password cannot be empty</string>
+    <string name="learn_more">Learn More</string>
+    <string name="percentage_format">%1$d%</string>
+    <string name="no_data">--</string>
+    <string name="task_image">Task Image</string>
     <string name="password_placeholder">Enter your password</string>
     <string name="invitation">Invitation</string>
     <string name="invitation_for">Invitation for:</string>
+    <string name="congratulation">Congratulations</string>
+    <string name="successfully_registered_school">You have successfully registered the school</string>
     <string name="i_am_student">I’m a Student</string>
     <string name="i_am_parent">I’m a Parent</string>
     <string name="accept">Accept</string>
@@ -89,15 +124,24 @@
     <string name="phone_number">Phone number</string>
     <string name="create_account">Create account</string>
     <string name="username_label">Username</string>
+    <string name="qr_code_badge">QR Code Badge</string>
     <string name="manage_account">Manage account</string>
+    <string name="error_assign_qr_code">Failed to assign QR code</string>
+    <string name="error_qr_already_assigned">This QR code is already assigned to another student</string>
     <string name="passkey_not_supported">Passkeys are not supported</string>
     <string name="required">Required*</string>
     <string name="date_later">Start date cannot be later than end date*</string>
     <string name="signup_with_passkey">Sign-up with passkey</string>
     <string name="cancel">Cancel</string>
+    <string name="url">Url</string>
+    <string name="paste_url">Paste Url</string>
     <string name="ok">Ok</string>
+    <string name="request_permission">Request Permission</string>
+    <string name="camera_access_required">Camera Access Required</string>
     <string name="name">Name</string>
+    <string name="camera_permission">Please enable camera access in app settings to scan QR codes</string>
     <string name="other_options">Other options</string>
+    <string name="scan_qr_code_badge">Scan QR code/badge</string>
     <string name="something_went_wrong">Something went wrong.</string>
     <string name="waiting_title">Waiting for approval</string>
     <string name="please_wait">Please wait</string>
@@ -114,6 +158,7 @@
     <string name="accept_invite">Accept Invite</string>">
     <string name="dismiss_invite">Dismiss invite</string>
     <string name="pending_requests">Pending requests</string>">
+    <string name="pending_requests_to_join">Pending request to join</string>">
     <string name="copy_invite_code">Copy invite code : </string>">
     <string name="share_with_link_or_qr_code">Invite with link or QR code</string>">
     <string name="share_qr_code">Share QR code</string>">
@@ -127,6 +172,8 @@
     <string name="remove_picture">Remove picture</string>
     <string name="select_date">Select date</string>
     <string name="first_name">First name</string>"
+    <string name="next_button">Next</string>
+    <string name="shared_device_login_title">Enter Roll Number</string>
     <string name="last_name">Last name</string>"
     <string name="ascending">Ascending</string>
     <string name="descending">Descending</string>
@@ -135,15 +182,35 @@
     <string name="edit_clazz">Edit class</string>
     <string name="add_clazz">Add class</string>
     <string name="settings">Settings</string>
+    <string name="select_class">Select Class</string>
+    <string name="select_student">Select Student</string>
+    <string name="enter_roll_number">Enter Roll Number</string>
+    <string name="shared_device_setting">Shared device setting</string>
+    <string name="scan_qr_code">Scan QR code badge</string>
+    <string name="teacher_admin_login">Teacher or admin login</string>
     <string name="school_directory">School Directory</string>
     <string name="lets_get_started">Let's get started</string>
-    <string name="enter_school_name">School name</string>
+    <string name="school_name">School name</string>
     <string name="school_name_placeholder">Type school name here...</string>
     <string name="i_have_an_invite_code">I have an invite code</string>
     <string name="invalid_school_name">Invalid school name</string>
     <string name="school_not_found">School not found: please ask your admin to add your school.</string>
     <string name="add_directory">Add Directory</string>
     <string name="edit_directory">Edit Directory</string>
+
+    <string name="school_wise_setting">School-wise setting</string>
+    <string name="allow_students_select_account">Allow students to select their account on a shared device</string>
+    <string name="allow_students_select_description">This will allow students to select their account</string>
+    <string name="require_roll_number">Require students to enter their roll number</string>
+    <string name="require_roll_number_description">This will make students to enter their roll number after selecting their name</string>
+    <string name="shared_device_settings">Shared device settings</string>
+
+    <string name="shared_school_device">Shared school device</string>
+    <string name="shared_school_device_description">Mark to make a device a shared school mode</string>
+    <string name="shared_device_warning">This device will change to shared device once this setting is on</string>
+    <string name="shared_device_confirm_dialog">Are you sure to make this device as a shared school device?</string>
+    <string name="close_button">Close</string>
+    <string name="device_settings">Device settings</string>
 
     <string name="enter_school_link">Enter the link provided by your teacher or school admin</string>
     <string name="paste_link_here">Paste the link here</string>
@@ -173,6 +240,25 @@
 
 
     <string name="add_account">Add account</string>
+    <string name="send_feedback">Send feedback</string>
+    <string name="feedback_submitted">Feedback submitted</string>
+    <string name="feedback_submitted_message">Thank you for your feedback. Respect team will review it internally.</string>
+    <string name="quick_contact">Quick Contact</string>
+    <string name="whatsapp_respect">Message the developers on WhatsApp</string>
+    <string name="email_respect">Email the developers</string>
+    <string name="public_forum">Public forum</string>
+    <string name="category">Category</string>
+    <string name="your_feedback">Your feedback</string>
+    <string name="describe_feedback_placeholder">Describe your issue or feedback in detail</string>
+    <string name="want_response_from_team">I want a response from the Respect team</string>
+    <string name="submit_feedback">Submit feedback</string>
+    <string name="feedback_respect">Feedback about RESPECT</string>
+    <string name="category_launcher">Respect launcher related issues</string>
+    <string name="category_integrated_apps">Integrated Apps related issues</string>
+    <string name="category_question">Question</string>
+    <string name="category_rate_us">Rate us</string>
+    <string name="category_other">Other</string>
+    <string name="error_message">Error: try again</string>
     <string name="logout">Logout</string>
     <string name="profile">Profile</string>
 
@@ -246,6 +332,7 @@
     <!-- Score Metrics -->
     <string name="average_score">Average Score</string>
     <string name="total_score">Total Score</string>
+    <string name="score">Score</string>
 
     <!-- Count Metrics -->
     <string name="number_of_activities">Number of Activities</string>
@@ -258,6 +345,7 @@
     <string name="top_5_schools">Top 5 Schools</string>
     <string name="top_5_students">Top 5 Students</string>
     <string name="percentage">Percentage</string>
+    <string name="percent_format">%1$d%%</string>
     <string name="indicators">Indicators</string>
     <string name="manage_indicators">Manage Indicators</string>
     <string name="indicator">Indicator</string>
@@ -351,6 +439,8 @@
     <string name="delete">Delete</string>
 
     <string name="accounts">Accounts</string>
+    <string name="parents_only">Parents only</string>
+    <string name="continue_using_fingerprint_or">Continue using fingerprint, biometrics, or device PIN</string>
 
     <string name="people">People</string>
     <string name="person">Person</string>
@@ -398,6 +488,8 @@
     <string name="change_password">Change password</string>
     <string name="created">Created</string>
     <string name="last_updated">Last Updated</string>
+    <string name="badge">Badge</string>
+    <string name="assigned">assigned</string>
     <string name="delete_this_passkey">Delete this passkey?</string>
     <string name="loss_access_passkey_dialog">You could lose access to the account if you dont have another way to sign in.</string>
 
@@ -426,6 +518,9 @@
     <string name="password_must_be_at_least">Password must be at least 6 characters</string>
     <string name="saved">Saved</string>
 
+    <string name="qr_code_invalid_format">Invalid QR code Scanned</string>
+    <string name="try_again">Try again</string>
+
     <string name="manage_school_directories">Manage school directories</string>
     <string name="school_directories">School directories</string>
 
@@ -441,7 +536,17 @@
     <string name="date">Date</string>
     <string name="time">Time</string>
     <string name="assignment_tasks">Assignment tasks</string>
+    <string name="tasks">Tasks</string>
+    <string name="assignment_name">Assignment name</string>
+    <string name="assignment_title">Assignment title</string>
     <string name="lesson_assessment">Lesson/assessment</string>
+    <string name="deadline">Deadline</string>
+
+    <string name="all_students">All</string>
+    <string name="completed_status">Completed</string>
+    <string name="in_progress_status">In-progress</string>
+    <string name="not_started_status">Not Started</string>
+    <string name="failed">Failed</string>
 
     <string name="due_date">Due date</string>
     <string name="family_members">Family members</string>
@@ -457,9 +562,124 @@
 
     <string name="pending_student">Pending student</string>
     <string name="pending_teacher">Pending teacher</string>
+    <string name="pending">Pending</string>
 
     <string name="edit_enrollment">Edit enrollment</string>
 
+    <string name="regenerate_invite_code">Regenerate invite code</string>
+    <string name="copy_link">Copy link</string>
+    <string name="invite_settings">Invite settings</string>
+    <string name="invite_multiple_allowed">Invite multiple people</string>
+    <string name="approval_required">Approval required</string>
+    <string name="allow_multiple_people_to_use_this_invite">Allow multiple people to use this invite</string>
+    <string name="invite_via_sms">Send link via SMS</string>
+    <string name="invite_via_email">Send link via email</string>
+    <string name="invite_via_share">Share link</string>
+    <string name="qr_code">QR code</string>
+    <string name="code">Code</string>
+    <string name="copy">Copy</string>
+    <string name="code_private_info">
+        This code is private. If it is shared with someone, they can enter this code here to join.
+    </string>
+    <string name="class_name_or_school_name">Class name or school name</string>
+
+
     <string name="section_name">Section name</string>
+    <string name="qr_code_private_screen">This QR code is private. If it is shared with someone, they can scan to join.</string>
+
+    <string name="not_set">Not set</string>
+
+    <string name="school_server_url">School server URL</string>
+
+    <string name="approval_not_required_until">Approval not required until:</string>
+
+    <string name="reset_code">Reset code</string>
+
+    <string name="invite_students_directly">Invite students directly</string>
+    <string name="students_register_themselves">Students register themselves</string>
+
+
+    <string name="invite_via_parents">Invite via parents</string>
+    <string name="parents_register_and">Parents register and student uses parents' device</string>
+
+    <string name="something_wrong_with_invite">Something went wrong: please check invite code and connection</string>
+
+    <string name="developed_by">Developed by UstadMobile FZ-LLC</string>
+
+    <string name="license_text">RESPECT App. Copyright 2025-2026 UstadMobile FZ-LLC.</string>
+
+    <string name="open_source">Open Source</string>
+
+    <string name="proprietary">Proprietary</string>
+
+    <string name="respect_is_open_source">The RESPECT App is open-source software licensed under the AGPLv3 license. Contains open source libraries copyright respective contributors.</string>
+
+    <string name="supported_by_spix_foundation">Supported by Spix Foundation.</string>
+
+    <string name="select_host">Select Host</string>
+
+    <string name="no_tasks_selected_yet">No task selected yet.</string>
+    <string name="please_click_plus_button_to_add_one">Please click the + button to add one</string>
+
+    <string name="username_already_taken">Username already taken</string>
+
+    <string name="invalid_link">Invalid link</string>
+    <!-- developer note key has suffix to avoid conflict with extension functions -->
+    <string name="average_str">Average</string>
+    <string name="no_student_data_available">No student data available</string>
+    <string name="unknown_class">Unknown Class</string>
+    <string name="task_completed">task completed</string>
+    <string name="task">Task</string>
+    <string name="student_completed">student completed</string>
+    <string name="menu">Menu</string>
+    <string name="fingerprint">Fingerprint</string>
+    <string name="track_changes">TrackChanges</string>>
+    <string name="calendar_month">CalendarMonth</string>>
+    <string name="toggle_fullscreen">Toggle Fullscreen</string>>
+
+    <string name="no_matching_data_available_yet">No matching data available, yet</string>
+
+    <string name="nothing_here_at_the_moment">Nothing here at the moment</string>
+    <string name="no_matching_activity">No matching activity yet</string>
+
+    <string name="xapi_verb_assigned">assigned</string>
+
+    <string name="uploading">Uploading…</string>
+    <string name="send_db_upload_complete">Upload complete</string>
+
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <string name="sunday">Sunday</string>
+
+    <string name="timestamp">Timestamp</string>
+    <string name="verb">Verb</string>
+    <string name="_object">Object</string>
+    <string name="actor">Actor</string>
+    <string name="result">Result</string>
+    <string name="interaction_type">Interaction type</string>
+    <string name="account_homepage">Account homepage</string>
+    <string name="account_name">Account name</string>
+    <string name="score_scaled">Score (scaled)</string>
+
+    <string name="show_raw_xapi">Show raw xAPI (advanced)</string>
+    <string name="raw_statement">Raw statement</string>
+
+    <string name="duration_hours_short">h</string>
+    <string name="duration_minutes_short">m</string>
+    <string name="duration_seconds_short">s</string>
+
+    <string name="invalid_username_password">Invalid username/password</string>
+    <string name="network_error_check_try_again">Network error: check your connection and try again</string>
+
+    <string name="not_found">Not found</string>
+    <string name="license">License</string>
+    <string name="clock_icon">Clock</string>
 
 </resources>

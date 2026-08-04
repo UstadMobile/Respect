@@ -2,23 +2,26 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
 }
 
 kotlin {
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
+    android {
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        namespace = "${rootProject.group}.datalayer.db"
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
     jvm()
 
     compilerOptions {
+        jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
+
         optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
     sourceSets {
@@ -31,15 +34,15 @@ kotlin {
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
-            implementation(libs.androidx.room.runtime)
-            implementation(libs.androidx.paging.common)
-            implementation(libs.androidx.room.paging)
+            api(libs.androidx.room.runtime)
+            api(libs.androidx.paging.common)
+            api(libs.androidx.room.paging)
             implementation(libs.napier)
 
         }
 
         androidMain.dependencies {
-            implementation(libs.androidx.room.ktx)
+            api(libs.androidx.room.ktx)
         }
 
         jvmMain.dependencies {
@@ -48,6 +51,7 @@ kotlin {
 
         jvmTest.dependencies {
             implementation(libs.androidx.sqlite.bundled)
+            implementation(projects.respectLibTestResources)
         }
 
         val commonTest by getting {
@@ -68,14 +72,3 @@ dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
 }
 
-android {
-    namespace = "world.respect.datalayer.db"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
-}

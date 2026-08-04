@@ -26,6 +26,7 @@ val acraPropertiesFile = System.getenv("ACRA")?.let {
 acraProperties.takeIf { acraPropertiesFile.exists() }
     ?.load(FileInputStream(acraPropertiesFile))
 
+
 val ACRA_PROP_NAMES = listOf("uri", "basicAuthLogin", "basicAuthPassword")
 
 ACRA_PROP_NAMES.forEach { propName ->
@@ -36,7 +37,7 @@ ACRA_PROP_NAMES.forEach { propName ->
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
@@ -50,14 +51,22 @@ compose.resources {
 kotlin {
     compilerOptions {
         optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
-    androidTarget {
+    android {
+        namespace = "world.respect.appcompose"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+
+        androidResources {
+            enable = true
         }
     }
-
 
     jvm("desktop")
 
@@ -71,6 +80,7 @@ kotlin {
         androidMain.dependencies {
             api(projects.respectCredentials)
             implementation(projects.respectLibSharedSe)
+            implementation(projects.respectLibXapiIpcServer)
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.play.service.auth)
             implementation(compose.preview)
@@ -90,6 +100,7 @@ kotlin {
             implementation(libs.acra.http)
             implementation(libs.acra.core)
             implementation(libs.libphonenumber.android)
+            implementation(libs.accompanist.permissions)
         }
 
         commonMain.dependencies {
@@ -131,6 +142,8 @@ kotlin {
             implementation(libs.kotlinx.io.core)
             implementation(libs.androidx.paging.compose)
             implementation(libs.reorderable)
+            implementation(libs.kscan)
+            implementation(libs.qrose)
         }
 
         desktopMain.dependencies {
@@ -141,76 +154,6 @@ kotlin {
     }
 }
 
-android {
-    buildFeatures {
-        buildConfig = true
-    }
-
-    signingConfigs {
-        println("Keystore exists: ${keystorePropertiesFile.exists()}")
-        //See https://developer.android.com/build/building-cmdline#gradle_signing
-        if(keystorePropertiesFile.exists()) {
-            create("release") {
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
-            }
-        }
-    }
-
-    namespace = "world.respect.app"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-
-    defaultConfig {
-        applicationId = "world.respect.app"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 112
-        versionName = "1.0.12"
-
-        for(propName in ACRA_PROP_NAMES) {
-            buildConfigField(
-                type = "String",
-                name = "ACRA_${propName.uppercase()}",
-                value = "\"${acraProperties.getProperty(propName) ?: ""}\"   "
-            )
-        }
-    }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-
-            if(keystorePropertiesFile.exists()) {
-                signingConfig = signingConfigs.getByName("release")
-            }
-
-
-            proguardFiles(
-                // Default file with automatically generated optimization rules.
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                project.file("proguard-rules.pro")
-            )
-
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-}
-
-dependencies {
-    debugImplementation(compose.uiTooling)
-}
 
 compose.desktop {
     application {

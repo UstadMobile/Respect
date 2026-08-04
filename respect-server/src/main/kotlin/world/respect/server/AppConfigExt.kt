@@ -8,9 +8,25 @@ const val DEFAULT_DATA_DIR_NAME = "data"
 const val SERVER_PROPERTIES_KEY_PORT = "port"
 
 /**
+ * KTOR server configuration that can be used to run a static directory on the same port.
+ */
+const val SERVER_CONFIG_KEY_STATICFILES = "ktor.extrastaticfiles.dir"
+
+const val SERVER_CONFIG_KEY_DIRS_USE_VIRTUALHOST = "ktor.school.directories.virtualhost"
+
+const val SERVER_CONFIG_KEY_REGISTRATION_PIN = "ktor.school.registration.pin"
+
+/**
+ * If set save the PID to the given file when running
+ */
+const val SERVER_CONFIG_PID_FILE = "ktor.pidfile"
+
+/**
  * File that contains the password for directory management.
  */
 const val DIRECTORY_ADMIN_FILENAME = "dir-admin.txt"
+
+const val SERVER_CONFIG_E2E_ARTIFACT_UPLOAD_ENABLED = "ktor.e2eartifactupload.enabled"
 
 const val DEFAULT_DIR_ADMIN_PASS_LENGTH = 16
 
@@ -85,6 +101,18 @@ fun ktorServerPropertiesFile(
 }
 
 /**
+ * Used when handling file properties. If the File is already absolute, leave it is as is. Otherwise,
+ * return a File relative to the server home directory.
+ */
+fun File.relativeToHomeDirIfNotAbsolute() : File {
+    return if(isAbsolute) {
+        this
+    }else {
+        File(ktorAppHomeDir(), this.path)
+    }
+}
+
+/**
  * Get a File for a property e.g. for the data directory or well known directory
  *
  * @param propertyName the config property name
@@ -99,10 +127,14 @@ fun ApplicationConfig.fileProperty(
     val path = propertyOrNull(propertyName)?.getString() ?: defaultPath
     val file = File(path)
 
-    return if(file.isAbsolute) {
-        file
-    }else {
-        File(ktorAppHomeDir(), path)
+    return file.relativeToHomeDirIfNotAbsolute()
+}
+
+fun ApplicationConfig.filePropertyOrNull(
+    propertyName: String
+): File? {
+    return propertyOrNull(propertyName)?.getString()?.let {
+        File(it).relativeToHomeDirIfNotAbsolute()
     }
 }
 
@@ -111,3 +143,10 @@ fun ApplicationConfig.absoluteDataDir() = fileProperty(
     propertyName = "ktor.respect.datadir", defaultPath = DEFAULT_DATA_DIR_NAME
 )
 
+fun ApplicationConfig.schoolDirsUseVirtualHost(): Boolean {
+    return propertyOrNull(SERVER_CONFIG_KEY_DIRS_USE_VIRTUALHOST)?.getString()?.toBoolean() ?: false
+}
+
+fun ApplicationConfig.e2eArtifactUploadEnabled(): Boolean {
+    return propertyOrNull(SERVER_CONFIG_E2E_ARTIFACT_UPLOAD_ENABLED)?.getString()?.toBoolean() ?: false
+}

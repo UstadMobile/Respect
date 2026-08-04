@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.github.aakira.napier.Napier
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -15,19 +16,23 @@ import world.respect.credentials.passkey.GetCredentialUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.credentials.passkey.password.SavePasswordUseCase
-import world.respect.datalayer.DataReadyState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.libutil.util.throwable.unwrapHttpStatusCode
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.something_went_wrong
-import world.respect.shared.navigation.JoinClazzWithCode
+import world.respect.shared.generated.resources.invalid_username_password
+import world.respect.shared.navigation.EnterInviteCode
+import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.RespectAppLauncher
+import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
@@ -95,7 +100,7 @@ class LoginViewModel(
                 if (isPasskeySupported){
                     when (val credentialResult = getCredentialUseCase(rpId?:"")) {
                         is GetCredentialUseCase.PasskeyCredentialResult -> {
-                            accountManager.login(
+                            val authResponse = accountManager.login(
                                 RespectPasskeyCredential(
                                     passkeyWebAuthNResponse = credentialResult.passkeyWebAuthNResponse
                                 ),
@@ -104,7 +109,12 @@ class LoginViewModel(
 
                             _navCommandFlow.tryEmit(
                                 NavCommand.Navigate(
-                                    destination = RespectAppLauncher(), clearBackStack = true
+                                    destination = if(authResponse.person.status == PersonStatusEnum.PENDING_APPROVAL) {
+                                        WaitingForApproval()
+                                    }else {
+                                        Home
+                                    },
+                                    clearBackStack = true
                                 )
                             )
                         }
@@ -184,7 +194,8 @@ class LoginViewModel(
                     passwordError = if (password.isEmpty())
                         StringResourceUiText(Res.string.required_field)
                     else
-                        null
+                        null,
+                    errorText = null,
                 )
             }
 
@@ -192,32 +203,39 @@ class LoginViewModel(
                 return@launchWithLoadingIndicator
             }
 
-            viewModelScope.launch {
-                try {
-                    accountManager.login(
-                        credential = RespectPasswordCredential(username, password),
-                        schoolUrl = route.schoolUrl
-                    )
-                   if (!usingSavedPassword){
-                       savePasswordUseCase(
-                           username = username,
-                           password = password
-                       )
-                   }
 
-                    _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(
-                            destination = RespectAppLauncher(),
-                            clearBackStack = true,
-                        )
+            try {
+                val authResponse = accountManager.login(
+                    credential = RespectPasswordCredential(username.trim(), password.trim()),
+                    schoolUrl = route.schoolUrl
+                )
+
+               if (!usingSavedPassword){
+                   savePasswordUseCase(
+                       username = username,
+                       password = password
+                   )
+               }
+
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        destination = if(authResponse.person.status == PersonStatusEnum.PENDING_APPROVAL) {
+                            WaitingForApproval()
+                        }else {
+                            Home
+                        },
+                        clearBackStack = true,
                     )
-                }catch(e: Exception) {
-                    e.printStackTrace()
-                    _uiState.update { prev ->
-                        prev.copy(
-                            errorText = e.getUiTextOrGeneric()
-                        )
-                    }
+                )
+            }catch(e: Exception) {
+                _uiState.update { prev ->
+                    prev.copy(
+                        errorText = if(e.unwrapHttpStatusCode() == HttpStatusCode.Forbidden.value) {
+                            Res.string.invalid_username_password.asUiText()
+                        }else {
+                            e.getUiTextOrGeneric()
+                        }
+                    )
                 }
             }
         }
@@ -225,7 +243,7 @@ class LoginViewModel(
 
     fun onClickInviteCode() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(JoinClazzWithCode.create(route.schoolUrl))
+            NavCommand.Navigate(EnterInviteCode.create(route.schoolUrl))
         )
     }
 

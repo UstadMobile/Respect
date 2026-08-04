@@ -6,14 +6,15 @@ import com.ustadmobile.libcache.db.UstadCacheDb
 import com.ustadmobile.libcache.db.entities.DownloadJobItem
 import com.ustadmobile.libcache.db.entities.PinnedPublication
 import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
+import com.ustadmobile.libcache.util.LaunchNoVarySearchConstants
 import com.ustadmobile.libcache.util.withWriterTransaction
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.head
 import io.ktor.client.request.header
-import io.ktor.http.URLBuilder
 import io.ktor.http.contentLength
+import io.ktor.http.headersOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -21,6 +22,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.coroutineScope
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.findLearningUnitAcquisitionLinks
 import world.respect.libutil.ext.resolve
 import java.util.concurrent.CopyOnWriteArrayList
@@ -73,18 +75,21 @@ class PinPublicationPrepareUseCase(
         val resourceAndAcquireJobItems = buildList {
             val acquisitionLinks = publication.findLearningUnitAcquisitionLinks()
 
-            //This isn't ideal - but needed to ensure it will open.
-            val acquisitionLinksWithRespectParams = acquisitionLinks.map {
-                it.copy(
-                    href = URLBuilder(manifestUrl.resolve(it.href.cleanHref()))
-                        .apply {
-                            this.parameters.append("respectLaunchVersion", "1")
-                        }
-                        .build().toString()
+            acquisitionLinks.forEach { acquisitionLink ->
+                cache.setExtraResponseHeaders(
+                    url = manifestUrl.resolve(acquisitionLink.href),
+                    extraResponseHeaders = headersOf(
+                        "No-Vary-Search" to listOf(LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER)
+                    )
                 )
             }
-            val linksToDownload = (publication.resources ?: emptyList()) +
-                    acquisitionLinks + acquisitionLinksWithRespectParams
+
+            val linksToDownload = buildList {
+                publication.resources?.also { addAll(it) }
+                addAll(acquisitionLinks)
+                add(ReadiumLink(href = manifestUrl.toString()))
+                publication.images?.also { addAll(it) }
+            }
 
             addAll(
                 linksToDownload.map { resource ->

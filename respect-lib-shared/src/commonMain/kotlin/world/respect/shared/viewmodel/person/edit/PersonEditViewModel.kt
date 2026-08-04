@@ -16,13 +16,14 @@ import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataLoadingState
-import world.respect.datalayer.DataReadyState
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.ext.isReadyAndSettled
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.isReadyAndSettled
 import world.respect.datalayer.school.PersonDataSource
+import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
@@ -32,6 +33,7 @@ import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.domain.validateemail.ValidateEmailUseCase
+import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_person
 import world.respect.shared.generated.resources.date_of_birth_in_future
@@ -52,6 +54,7 @@ import world.respect.shared.util.LaunchDebouncer
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import kotlin.collections.first
 import kotlin.getValue
 import kotlin.time.Clock
@@ -110,15 +113,18 @@ class PersonEditViewModel(
     private val phoneNumValidatorUseCase: PhoneNumValidatorUseCase,
     private val navResultReturner: NavResultReturner,
     private val validateEmailUseCase: ValidateEmailUseCase,
+    private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
 
     val route: PersonEdit = savedStateHandle.toRoute()
 
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
+
+    private val getWritableRolesListUseCase: GetWritableRolesListUseCase by inject()
 
     private val guid = route.guid ?: schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
         Person.TABLE_ID
@@ -152,26 +158,17 @@ class PersonEditViewModel(
             val currentPersonRole = accountManager.selectedAccountAndPersonFlow.first()
                 ?.person?.roles?.first()?.roleEnum
 
+            val roleOptions = if (route.presetRole != null) {
+                listOf(route.presetRole)
+            } else if(currentPersonRole != null ){
+                getWritableRolesListUseCase(currentPersonRole)
+            }else {
+                emptyList()
+            }
+
             _uiState.update { prev ->
                 prev.copy(
-                    roleOptions = if (route.presetRole != null) {
-                        listOf(route.presetRole)
-                    } else {
-                        when (currentPersonRole) {
-                            PersonRoleEnum.TEACHER -> listOf(
-                                PersonRoleEnum.STUDENT,
-                                PersonRoleEnum.PARENT,
-                                PersonRoleEnum.TEACHER,
-                            )
-                            PersonRoleEnum.SITE_ADMINISTRATOR, PersonRoleEnum.SYSTEM_ADMINISTRATOR -> listOf(
-                                PersonRoleEnum.STUDENT,
-                                PersonRoleEnum.PARENT,
-                                PersonRoleEnum.TEACHER,
-                                PersonRoleEnum.SYSTEM_ADMINISTRATOR,
-                            )
-                            else -> emptyList()
-                        }
-                    },
+                    roleOptions = roleOptions,
                     hasManageFamilyPermission = currentPersonRole == PersonRoleEnum.TEACHER
                             || currentPersonRole == PersonRoleEnum.SITE_ADMINISTRATOR
                             || currentPersonRole == PersonRoleEnum.SYSTEM_ADMINISTRATOR
@@ -304,10 +301,12 @@ class PersonEditViewModel(
             NavCommand.Navigate(
                 PersonList.create(
                     filterByRole = filterByRole,
+                    personGuid = route.guid,
                     resultDest = RouteResultDest(
                         resultPopUpTo = route,
                         resultKey = PERSON_SELECT_RESULT
-                    )
+                    ),
+                    hideInvite = true,
                 )
             )
         )
@@ -366,7 +365,7 @@ class PersonEditViewModel(
             return
 
         launchWithLoadingIndicator {
-            try {
+            snackBarDispatcher.tryOrShowSnackbarOnError {
                 val modTime = Clock.System.now()
                 val familyMembersAdded = uiState.value.familyMembers.mapNotNull { familyPerson ->
                     if(guid !in familyPerson.relatedPersonUids) {
@@ -413,8 +412,6 @@ class PersonEditViewModel(
                         _navCommandFlow.tryEmit(NavCommand.PopUp())
                     }
                 }
-            } catch (_: Throwable) {
-                //needs to display snack bar here
             }
         }
     }

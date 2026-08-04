@@ -12,7 +12,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.ktor.http.Url
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.BasicWebView
 import world.respect.app.components.defaultItemPadding
@@ -43,7 +42,7 @@ fun TermsAndConditionScreen(
             .defaultScreenPadding()
     ) {
         BasicWebView(
-            url = Url("https://www.ustadmobile.com/policies/ustad.html"),
+            url = uiState.termsAndConditionsUrl,
             modifier = Modifier.weight(1f)
         )
 

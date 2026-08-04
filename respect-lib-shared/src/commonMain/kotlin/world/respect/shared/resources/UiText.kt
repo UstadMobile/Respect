@@ -12,4 +12,5 @@ data class StringResourceUiText(val resource: StringResource): UiText()
 
 data class StringUiText(val text: String): UiText()
 
+data class LangMapUiText(val langMap: Map<String, String>): UiText()
 

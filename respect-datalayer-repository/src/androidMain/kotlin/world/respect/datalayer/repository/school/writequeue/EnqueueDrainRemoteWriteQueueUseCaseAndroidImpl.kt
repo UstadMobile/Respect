@@ -8,6 +8,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
+import world.respect.datalayer.repository.school.worker.putKoinScope
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import kotlin.reflect.KClass
 
@@ -28,11 +29,9 @@ class EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl(
                         .setRequiredNetworkType(NetworkType.CONNECTED)
                         .build()
                 )
-                .setInputData(Data.Builder()
-                    .putString(EnqueueDrainRemoteWriteQueueUseCase.DATA_SCOPE_ID, scopeId)
-                    .putString(EnqueueDrainRemoteWriteQueueUseCase.DATA_SCOPE_QUALIFIER,
-                        scopeClass.qualifiedName)
-                    .build())
+                .setInputData(
+                    Data.Builder().putKoinScope(scopeId, scopeClass).build()
+                )
                 .build()
         )
     }

@@ -3,33 +3,27 @@ package world.respect.shared.viewmodel.apps.launcher
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.RespectAppDataSource
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.compatibleapps.model.RespectAppManifest
-import world.respect.datalayer.ext.dataOrNull
-import world.respect.datalayer.school.SchoolAppDataSource
-import world.respect.datalayer.school.model.SchoolApp
-import world.respect.datalayer.school.model.StatusEnum
-import world.respect.datalayer.shared.paging.EmptyPagingSourceFactory
-import world.respect.datalayer.shared.paging.IPagingSourceFactory
-import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
-import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app
-import world.respect.shared.generated.resources.apps
+import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.empty_list_description_admin
 import world.respect.shared.generated.resources.empty_list_description_non_admin
 import world.respect.shared.navigation.AppsDetail
@@ -40,47 +34,61 @@ import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RespectAppList
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.util.ext.isAdmin
+import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.map
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.findCollection
+import world.respect.lib.opds.model.respectAppManifestDefaultLessonList
+import world.respect.lib.xapi.OpenEelXapiConstants
+import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatementRef
+import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.libutil.ext.resolve
+import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
 data class AppLauncherUiState(
-    val apps : IPagingSourceFactory<Int, SchoolApp> = EmptyPagingSourceFactory(),
-    val respectAppForSchoolApp: (SchoolApp) -> Flow<DataLoadState<RespectAppManifest>> = { emptyFlow() },
+    val apps: DataLoadState<List<XapiStatement>> = DataLoadingState(),
+    val respectPublicationForXapiStatement: (XapiStatement) -> Flow<DataLoadState<OpdsPublication>> = {
+        emptyFlow()
+    },
     val canRemove: Boolean = false,
-    val emptyListDescription: UiText?=null,
-)
+    val emptyListDescription: UiText? = null,
+    val appMustLoadToBeClickable: Boolean = false,
+) {
+
+    fun isAppClickable(appState: DataLoadState<OpdsPublication>): Boolean {
+        return !appMustLoadToBeClickable || appState.dataOrNull() != null
+    }
+
+}
 
 class AppLauncherViewModel(
     savedStateHandle: SavedStateHandle,
-    private val appDataSource: RespectAppDataSource,
     private val accountManager: RespectAccountManager,
     private val getDevModeEnabledUseCase: GetDevModeEnabledUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val _uiState = MutableStateFlow(AppLauncherUiState())
 
     val uiState = _uiState.asStateFlow()
 
-    var errorMessage: String = ""
-
     private val route: RespectAppLauncher = savedStateHandle.toRoute()
 
     private val schoolDataSource: SchoolDataSource by inject()
 
-    private val pagingSourceHolder = PagingSourceFactoryHolder {
-        schoolDataSource.schoolAppDataSource.listAsPagingSource(
-            loadParams = DataLoadParams(),
-            params = SchoolAppDataSource.GetListParams()
-        )
-    }
+    private val getPublicationForXapiActivityUseCase: GetPublicationForXapiActivityUseCase by inject()
 
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.apps.asUiText(),
+                title = Res.string.home.asUiText(),
                 onClickSettings = ::onClickSettings,
                 fabState = FabUiState(
                     icon = FabUiState.FabIcon.ADD,
@@ -100,10 +108,22 @@ class AppLauncherViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                respectAppForSchoolApp = this@AppLauncherViewModel::respectAppForSchoolApp,
-                apps = pagingSourceHolder
+                respectPublicationForXapiStatement = getPublicationForXapiActivityUseCase::invoke,
+                appMustLoadToBeClickable = route.resultDest != null,
             )
+        }
 
+        viewModelScope.launch {
+            schoolDataSource.xapiResource.statements.getAsFlow(
+                listParams = XapiStatementsResource.GetStatementParams(
+                    verb = XapiVerb.ID_LISTED_APP,
+                    activity = OpenEelXapiConstants.CATEGORY_APP_LISTING_RECIPE,
+                    relatedActivities = true,
+                ),
+                dataLoadParams = DataLoadParams(),
+            ).collectLatest { state ->
+                _uiState.update { it.copy(apps = state.map { result -> result.statements }) }
+            }
         }
 
         viewModelScope.launch {
@@ -131,15 +151,19 @@ class AppLauncherViewModel(
         }
     }
 
-    fun onClickApp(app: DataLoadState<RespectAppManifest>) {
+
+    fun onClickApp(app: DataLoadState<OpdsPublication>) {
         val url = app.metaInfo.url ?: return
-        val appData = app.dataOrNull() ?: return
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 if(route.resultDest != null) {
+                    val defaultLessonListHref = app.dataOrNull()?.findCollection()?.href
+                        ?: return
+                    val defaultLessonUrl = url.resolve(defaultLessonListHref)
+
                     LearningUnitList.create(
-                        opdsFeedUrl = url.resolve(appData.learningUnits.toString()),
+                        opdsFeedUrl = defaultLessonUrl,
                         appManifestUrl = url,
                         resultDest = route.resultDest,
                     )
@@ -158,26 +182,39 @@ class AppLauncherViewModel(
         )
     }
 
-    fun onClickRemove(app: DataLoadState<RespectAppManifest>) {
-        val manifestUrl = app.metaInfo.url ?: return
+    fun onClickRemove(app: DataLoadState<OpdsPublication>) {
+        val manifestUrl = app.metaInfo.url ?: run {
+            Napier.w("app has no manifest url, cannot remove")
+            return
+        }
+
         viewModelScope.launch {
-            schoolDataSource.schoolAppDataSource.store(
+            val existing = schoolDataSource.xapiResource.statements.get(
+                XapiStatementsResource.GetStatementParams(
+                    verb = XapiVerb.ID_LISTED_APP,
+                    activity = manifestUrl.toString(),
+                ),
+                DataLoadParams(),
+            ).dataOrNull()?.statements?.mostRecentByTimestampOrNull() ?: run {
+                Napier.w("no listed-app statement found for $manifestUrl")
+                return@launch
+            }
+
+            val actor = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent ?: run {
+                Napier.w("no actor for selected account, cannot void")
+                return@launch
+            }
+
+            schoolDataSource.xapiResource.statements.post(
                 listOf(
-                    SchoolApp(
-                        uid = manifestUrl.toString(),
-                        appManifestUrl = manifestUrl,
-                        status = StatusEnum.TO_BE_DELETED
+                    XapiStatement(
+                        actor = actor,
+                        verb = XapiVerb(id = XapiVerb.ID_VOIDED),
+                        `object` = XapiStatementRef(id = existing.id.toString()),
                     )
                 )
             )
         }
     }
 
-    fun respectAppForSchoolApp(schoolApp: SchoolApp): Flow<DataLoadState<RespectAppManifest>> {
-        return appDataSource.compatibleAppsDataSource.getAppAsFlow(
-            schoolApp.appManifestUrl,
-            DataLoadParams()
-        )
-    }
 }
-

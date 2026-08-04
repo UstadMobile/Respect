@@ -14,7 +14,7 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.report.DefaultIndicators
 import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.datalayer.school.model.report.ReportOptions
@@ -66,7 +66,7 @@ class ReportEditViewModel(
     private val navResultReturner: NavResultReturner
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    override val scope: Scope = accountManager.requireSelectedAccountScope()
+    override val scope: Scope = accountManager.requireActiveAccountScope()
     private val schoolDataSource: SchoolDataSource by inject()
     private val route: ReportEdit = savedStateHandle.toRoute()
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()

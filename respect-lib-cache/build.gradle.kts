@@ -1,19 +1,21 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
-    alias(libs.plugins.atomicfu)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
 }
 
 kotlin {
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
+    compilerOptions {
+        jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
+    }
+
+    android {
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        namespace = "${rootProject.group}.libcache"
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
     jvm {
@@ -42,6 +44,7 @@ kotlin {
             implementation(libs.kotlinx.date.time)
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
+            implementation(libs.cache4k)
         }
 
         commonTest.dependencies {
@@ -90,23 +93,4 @@ dependencies {
 }
 
 
-android {
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    namespace = "world.respect.lib.cache"
 
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    sourceSets["main"].res.srcDirs("src/androidMain/res")
-    sourceSets["main"].resources.srcDirs("src/commonMain/resources")
-
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlin {
-        jvmToolchain(17)
-    }
-}

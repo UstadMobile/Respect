@@ -10,6 +10,7 @@ fun Person.asListDetails(): PersonListDetails {
         familyName = familyName,
         username = username,
         email = email,
-        phoneNumber = phoneNumber
+        phoneNumber = phoneNumber,
+        role = roles.firstOrNull { it.isPrimaryRole }?.roleEnum,
     )
 }

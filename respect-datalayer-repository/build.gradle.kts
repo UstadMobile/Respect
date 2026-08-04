@@ -2,20 +2,22 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
-    alias(libs.plugins.atomicfu)
 }
 
 kotlin {
     compilerOptions {
+        jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
+
         optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
+    android {
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        namespace = "${rootProject.group}.datalayer.repository"
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
     jvm()
@@ -49,6 +51,7 @@ kotlin {
             implementation(projects.respectServer)
             implementation(projects.respectLibPrimarykeygen)
             implementation(projects.respectLibXxhash)
+            implementation(projects.respectLibTestResources)
 
             implementation(libs.turbine)
             implementation(projects.respectDatalayerHttp)
@@ -76,17 +79,5 @@ kotlin {
             implementation(libs.koin.ktor)
             implementation(libs.mockito.kotlin)
         }
-    }
-}
-
-android {
-    namespace = "world.respect.datalayer.repository"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 }

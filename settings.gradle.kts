@@ -14,6 +14,9 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
 
 dependencyResolutionManagement {
     repositories {
@@ -30,6 +33,7 @@ dependencyResolutionManagement {
     }
 }
 
+include(":app-android")
 include(":respect-app-compose")
 include(":respect-server")
 include(":respect-lib-shared")
@@ -52,3 +56,10 @@ include(":respect-lib-cache")
 include(":respect-lib-serializers")
 include(":respect-lib-opds-model")
 include(":respect-lib-test")
+include(":respect-lib-test-resources")
+include(":respect-lib-xapi-core")
+include(":respect-lib-dataloadstate")
+include(":respect-lib-xapi-nanohttpd")
+include(":respect-lib-xapi-ipc-shared")
+include(":respect-lib-xapi-ipc-server")
+include(":respect-lib-xapi-ipc-client")

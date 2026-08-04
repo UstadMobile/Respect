@@ -20,8 +20,10 @@ import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitor
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_ETAG_IS_INTEGRITY
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTEGRITY
 import com.ustadmobile.libcache.headers.CouponHeader.Companion.HEADER_X_INTERCEPTOR_PARTIAL_FILE
+import com.ustadmobile.libcache.headers.hasCacheValidators
 import com.ustadmobile.libcache.integrity.sha256Integrity
 import com.ustadmobile.libcache.logging.UstadCacheLogger
+import com.ustadmobile.libcache.response.ByteArrayResponse
 import com.ustadmobile.libcache.response.HttpPathResponse
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.FileSystem
@@ -270,7 +272,21 @@ class UstadCacheInterceptor(
 
         //If there is no chance of being able to cache (not http get or using no-store in request)
         if(!request.mightBeCacheable(requestCacheControlHeader)) {
-            return chain.proceed(request.removeXInterceptHeaders())
+            return try {
+                chain.proceed(request.removeXInterceptHeaders()).also {
+                    logger?.v(
+                        tag = LOG_TAG,
+                        message = "$logPrefix : MISS(not-cacheable) $url ${it.logSummary()}"
+                    )
+                }
+            }catch(e: Throwable) {
+                logger?.e(
+                    tag = LOG_TAG,
+                    message = "$logPrefix: $url Exception proceeding with non-cacheable request",
+                    throwable = e,
+                )
+                throw e
+            }
         }
 
         val partialFile = request.headers[HEADER_X_INTERCEPTOR_PARTIAL_FILE]?.let {
@@ -293,16 +309,15 @@ class UstadCacheInterceptor(
         }
 
         val isConnected = connectivityMonitor.statusFlow.value.isConnected
+        val useOnlyCacheResponse = !isConnected || requestCacheControlHeader?.onlyIfCached == true
+        val isFreshOrUseOnlyCache = cachedResponseStatus?.isFresh == true || useOnlyCacheResponse
 
         return when {
             /*
              * When response isFresh - can immediately return the cached response.
              * If the cache-control only-if-cached is set, then
              */
-            cacheResponse != null &&
-                    (cachedResponseStatus?.isFresh == true ||
-                            !isConnected ||
-                            requestCacheControlHeader?.onlyIfCached == true) -> {
+            cacheResponse != null && isFreshOrUseOnlyCache -> {
                 cacheResponse.asOkHttpResponse().also {
                     logger?.d(LOG_TAG, "$logPrefix HIT(valid) $url ${it.logSummary()}")
                 }
@@ -323,7 +338,9 @@ class UstadCacheInterceptor(
                     .message("Gateway Timeout")
                     .code(504)
                     .body("Gateway Timeout: only-if-cached if true, but not available in cache".toResponseBody())
-                    .build()
+                    .build().also {
+                        logger?.d(LOG_TAG, "$logPrefix MISS(only-if-cached) $url ${it.logSummary()}")
+                    }
             }
 
             /*
@@ -339,7 +356,13 @@ class UstadCacheInterceptor(
                 cachedResponseStatus.ifNotModifiedSince?.also {
                     validateRequestBuilder.addHeader("if-modified-since", it)
                 }
-                val validationResponse = chain.proceed(validateRequestBuilder.build())
+                val validationResponse = try {
+                    chain.proceed(validateRequestBuilder.build())
+                }catch(e: Throwable) {
+                    logger?.e(LOG_TAG, "$logPrefix: $url : exception validating", e)
+                    throw e
+                }
+
                 if(validationResponse.code == 304) {
                     validationResponse.close()
                     runBlocking {
@@ -348,8 +371,24 @@ class UstadCacheInterceptor(
                         )
                     }
 
-                    cacheResponse.asOkHttpResponse().also {
-                        logger?.d(LOG_TAG, "$logPrefix HIT(validated) $url ${it.logSummary()}")
+                    if(cacheRequest.headers.hasCacheValidators()) {
+                        //the underlying request had cache validation info, so we can return a
+                        //304 not modified response directly
+                        ByteArrayResponse(
+                            request = cacheRequest,
+                            mimeType = cacheResponse.headers["content-type"] ?: "application/octet-stream",
+                            responseCode = 304,
+                            body = ByteArray(0),
+                        ).asOkHttpResponse().also {
+                            logger?.d(
+                                tag = LOG_TAG,
+                                message = "$logPrefix validated : returning 304 as per validation params ${it.logSummary()}"
+                            )
+                        }
+                    }else {
+                        cacheResponse.asOkHttpResponse().also {
+                            logger?.d(LOG_TAG, "$logPrefix HIT(validated) $url ${it.logSummary()}")
+                        }
                     }
                 }else {
                     logger?.d(LOG_TAG, "$logPrefix MISS(invalid) $url")
@@ -390,7 +429,16 @@ class UstadCacheInterceptor(
                     request.removeXInterceptHeaders()
                 }
 
-                val response = chain.proceed(networkRequest)
+                val response = try {
+                    chain.proceed(networkRequest)
+                }catch(e: Throwable) {
+                    logger?.e(
+                        tag = LOG_TAG,
+                        message = "$logPrefix: $url : exception sending network request",
+                        throwable = e
+                    )
+                    throw e
+                }
                 
                 if(
                     responseCacheabilityChecker.canStore(

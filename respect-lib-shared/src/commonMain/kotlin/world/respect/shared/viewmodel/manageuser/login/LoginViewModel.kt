@@ -49,7 +49,7 @@ data class LoginUiState(
     val errorText: UiText? = null,
     val usernameError: StringResourceUiText? = null,
     val passwordError: StringResourceUiText? = null,
-    val connectedTag: Boolean = true
+    val isConnected: Boolean = true
 )
 
 class LoginViewModel(

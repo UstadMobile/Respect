@@ -370,8 +370,10 @@ val appKoinModule = module {
     }
 
     single<GetCountryForUrlUseCase> {
-        GetCountryForUrlUseCaseImpl(httpClient = get())
-
+        GetCountryForUrlUseCaseImpl(
+            httpClient = get(),
+            geolocationEndpoint = BuildConfig.GEOLOCATION_API_ENDPOINT
+        )
     }
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)

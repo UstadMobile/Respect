@@ -9,39 +9,31 @@ import kotlinx.serialization.Serializable
 import java.util.concurrent.ConcurrentHashMap
 
 class GetCountryForUrlUseCaseImpl(
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val geolocationEndpoint: String
 ) : GetCountryForUrlUseCase {
 
     private val countryCache = ConcurrentHashMap<String, String?>()
-
-    companion object {
-        private const val GEOLOCATION_API_ENDPOINT = "http://192.168.1.5:8080"
-    }
 
     override suspend operator fun invoke(schoolUrl: Url): String? {
         val schoolUrlStr = schoolUrl.toString()
         countryCache[schoolUrlStr]?.let {
             return it
         }
-
+        if (geolocationEndpoint.isBlank()) return null
         return try {
             val host = schoolUrl.host
-
             val encodedHost = host.encodeURLParameter()
-            val endpointUrl = "$GEOLOCATION_API_ENDPOINT/api/country/$encodedHost"
-
+            val endpointUrl = "$geolocationEndpoint/json/$encodedHost"
             val response = httpClient.get(endpointUrl)
             val apiResponse: CountryResponse = response.body()
-
             val countryCode = if (apiResponse.status == "success") {
                 apiResponse.countryCode ?: "Unknown"
             } else {
                 "Unknown"
             }
-
             countryCache[schoolUrlStr] = countryCode
             countryCode
-
         } catch (e: Exception) {
             countryCache[schoolUrlStr] = "unknown"
             "unknown"

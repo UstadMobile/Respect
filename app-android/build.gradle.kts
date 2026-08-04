@@ -135,6 +135,11 @@ android {
             name = "RESPECT_DEFAULT_APP_LIST",
             value = "\"$defaultAppList\""
         )
+        buildConfigField(
+            type = "String",
+            name = "GEOLOCATION_API_ENDPOINT",
+            value = "\"${System.getenv("GEOLOCATION_API_ENDPOINT") ?: ""}\""
+        )
     }
 
     packaging {

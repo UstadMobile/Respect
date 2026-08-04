@@ -727,6 +727,7 @@ val appKoinModule = module {
             db = get(),
             cache = get(),
             enqueueRunDownloadJobUseCase = get(),
+            xml = get(),
         )
     }
 

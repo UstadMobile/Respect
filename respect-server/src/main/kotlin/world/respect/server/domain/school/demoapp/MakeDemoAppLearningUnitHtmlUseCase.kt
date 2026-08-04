@@ -163,7 +163,7 @@ class MakeDemoAppLearningUnitHtmlUseCase {
 
         const val LEARNING_UNIT_HTML_FILENAME = "learningunit.html"
 
-        const val LEARNING_UNIT_JS_FILENAME = "learningunit_xapi.js"
+        const val LEARNING_UNIT_JS_FILENAME = "learning_unit_xapi.js"
 
         const val XAPI_MODULE_FILENAME = "xapi_module.js"
 

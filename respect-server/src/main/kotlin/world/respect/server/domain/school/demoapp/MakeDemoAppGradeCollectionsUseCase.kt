@@ -11,6 +11,7 @@ import world.respect.lib.opds.model.ReadiumContributorStringValue
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
 import world.respect.libutil.ext.resolve
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitManifestUseCase.Companion.LESSON_MANIFEST_FILENAME
 
 class MakeDemoAppGradeCollectionsUseCase {
 
@@ -30,7 +31,7 @@ class MakeDemoAppGradeCollectionsUseCase {
                 )
             ),
             publications = (1..DemoConstants.NUM_LESSONS).map { lessonNum ->
-                val lessonBase = baseUrl.resolve("$GRADES_DIR_NAME/$gradeNum/lesson/$lessonNum/")
+                val lessonBase = baseUrl.resolve("$GRADES_DIR_NAME/$gradeNum/$LEARNING_UNITS_DIR_NAME/$lessonNum/")
                 OpdsPublication(
                     metadata = ReadiumMetadata(
                         title = LangMapStringValue("Lesson $lessonNum - Grade $gradeNum"),
@@ -43,7 +44,7 @@ class MakeDemoAppGradeCollectionsUseCase {
                     links = listOf(
                         ReadiumLink(
                             rel = listOf("self"),
-                            href = lessonBase.resolve("manifest.json").toString(),
+                            href = lessonBase.resolve(LESSON_MANIFEST_FILENAME).toString(),
                             type = "application/opds-publication+json"
                         ),
                         ReadiumLink(

@@ -22,20 +22,20 @@ import kotlinx.html.stream.createHTML
 import kotlinx.html.title
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.libutil.ext.resolve
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.LESSON_JS_FILENAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUseCase.Companion.LEARNING_UNIT_JS_FILENAME
 
 
-fun HTML.demoAppLessonHtml(
+fun HTML.demoAppLearningUnitHtml(
     baseUrl: Url,
     gradeNum: Int,
     lessonNum: Int,
 ) {
     head {
-        title { + "Grade $gradeNum Lesson $lessonNum" }
+        title { + "Grade $gradeNum learning unit #$lessonNum" }
 
         script {
             type = "module"
-            src = baseUrl.resolve("static/$LESSON_JS_FILENAME").toString()
+            src = baseUrl.resolve("static/$LEARNING_UNIT_JS_FILENAME").toString()
         }
 
         meta {
@@ -143,7 +143,7 @@ fun HTML.demoAppLessonHtml(
     }
 }
 
-class MakeDemoAppLessonHtmlUseCase {
+class MakeDemoAppLearningUnitHtmlUseCase {
 
     operator fun invoke(
         baseUrl: Url,
@@ -151,7 +151,7 @@ class MakeDemoAppLessonHtmlUseCase {
         lessonNum: Int,
     ): String {
         return createHTML().html {
-            demoAppLessonHtml(
+            demoAppLearningUnitHtml(
                 baseUrl = baseUrl,
                 gradeNum = gradeNum,
                 lessonNum = lessonNum
@@ -161,9 +161,9 @@ class MakeDemoAppLessonHtmlUseCase {
 
     companion object {
 
-        const val LESSON_HTML_FILENAME = "lesson.html"
+        const val LEARNING_UNIT_HTML_FILENAME = "learningunit.html"
 
-        const val LESSON_JS_FILENAME = "lesson_xapi.js"
+        const val LEARNING_UNIT_JS_FILENAME = "learningunit_xapi.js"
 
         const val XAPI_MODULE_FILENAME = "xapi_module.js"
 

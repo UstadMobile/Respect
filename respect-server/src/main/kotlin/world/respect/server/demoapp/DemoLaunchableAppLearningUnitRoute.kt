@@ -11,19 +11,19 @@ import org.koin.ktor.ext.getKoin
 import world.respect.lib.xapi.rusticilaunch.model.TinCanXmlDocument
 import world.respect.server.demoapp.ext.demoAppBaseUrl
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.GRADES_DIR_NAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_DIR_NAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.LESSON_HTML_FILENAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonManifestUseCase
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonManifestUseCase.Companion.LESSON_MANIFEST_FILENAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonTinCanXmlUseCase
-import world.respect.server.domain.school.demoapp.demoAppLessonHtml
+import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LEARNING_UNITS_DIR_NAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUseCase.Companion.LEARNING_UNIT_HTML_FILENAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitManifestUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitManifestUseCase.Companion.LESSON_MANIFEST_FILENAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitTinCanXmlUseCase
+import world.respect.server.domain.school.demoapp.demoAppLearningUnitHtml
 
 fun Route.DemoLaunchableAppLessonRoute() {
     val koin = getKoin()
 
-    get("$GRADES_DIR_NAME/{grade}/$LESSON_DIR_NAME/{lesson}/$LESSON_MANIFEST_FILENAME") {
+    get("$GRADES_DIR_NAME/{grade}/$LEARNING_UNITS_DIR_NAME/{lesson}/$LESSON_MANIFEST_FILENAME") {
         call.respond(
-            koin.get<MakeDemoAppLessonManifestUseCase>().invoke(
+            koin.get<MakeDemoAppLearningUnitManifestUseCase>().invoke(
                 demoBase = call.demoAppBaseUrl(),
                 grade = call.parameters["grade"]!!.toInt(),
                 lessonNum = call.parameters["lesson"]!!.toInt(),
@@ -31,14 +31,14 @@ fun Route.DemoLaunchableAppLessonRoute() {
         )
     }
 
-    get("$GRADES_DIR_NAME/{grade}/$LESSON_DIR_NAME/{lesson}/tincan.xml") {
+    get("$GRADES_DIR_NAME/{grade}/$LEARNING_UNITS_DIR_NAME/{lesson}/tincan.xml") {
         val xml = koin.get<XML>()
 
         call.respondText(
             contentType = ContentType.Application.Xml,
             text = xml.encodeToString(
                 TinCanXmlDocument.serializer(),
-                koin.get<MakeDemoAppLessonTinCanXmlUseCase>().invoke(
+                koin.get<MakeDemoAppLearningUnitTinCanXmlUseCase>().invoke(
                     baseUrl = call.demoAppBaseUrl(),
                     gradeNum = call.parameters["grade"]!!.toInt(),
                     lessonNum = call.parameters["lesson"]!!.toInt(),
@@ -47,9 +47,9 @@ fun Route.DemoLaunchableAppLessonRoute() {
         )
     }
 
-    get("$GRADES_DIR_NAME/{grade}/$LESSON_DIR_NAME/{lesson}/$LESSON_HTML_FILENAME") {
+    get("$GRADES_DIR_NAME/{grade}/$LEARNING_UNITS_DIR_NAME/{lesson}/$LEARNING_UNIT_HTML_FILENAME") {
         call.respondHtml {
-            demoAppLessonHtml(
+            demoAppLearningUnitHtml(
                 baseUrl = call.demoAppBaseUrl(),
                 gradeNum = call.parameters["grade"]!!.toInt(),
                 lessonNum = call.parameters["lesson"]!!.toInt(),

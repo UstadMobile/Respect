@@ -9,21 +9,21 @@ import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
 import world.respect.libutil.ext.resolve
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.GRADES_DIR_NAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_DIR_NAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_ICON_NAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.LESSON_HTML_FILENAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.LESSON_JS_FILENAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.XAPI_MODULE_FILENAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LEARNING_UNITS_DIR_NAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LEARNING_UNIT_ICON_NAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUseCase.Companion.LEARNING_UNIT_HTML_FILENAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUseCase.Companion.LEARNING_UNIT_JS_FILENAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUseCase.Companion.XAPI_MODULE_FILENAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase.Companion.APP_MANIFEST_FILENAME
 
-class MakeDemoAppLessonManifestUseCase {
+class MakeDemoAppLearningUnitManifestUseCase {
 
     operator fun invoke(
         demoBase: Url,
         grade: Int,
         lessonNum: Int,
     ): OpdsPublication {
-        val lessonBase = demoBase.resolve("$GRADES_DIR_NAME/$grade/$LESSON_DIR_NAME/$lessonNum/")
+        val lessonBase = demoBase.resolve("$GRADES_DIR_NAME/$grade/$LEARNING_UNITS_DIR_NAME/$lessonNum/")
 
         return OpdsPublication(
             metadata = ReadiumMetadata(
@@ -36,7 +36,7 @@ class MakeDemoAppLessonManifestUseCase {
             ),
             images = listOf(
                 ReadiumLink(
-                    href = demoBase.resolve("static/$LESSON_ICON_NAME").toString(),
+                    href = demoBase.resolve("static/$LEARNING_UNIT_ICON_NAME").toString(),
                     type = "image/png"
                 )
             ),
@@ -58,8 +58,8 @@ class MakeDemoAppLessonManifestUseCase {
                 )
             ),
             resources = listOf(
-                ReadiumLink(href = lessonBase.resolve(LESSON_HTML_FILENAME).toString()),
-                ReadiumLink(href = demoBase.resolve("static/$LESSON_JS_FILENAME").toString()),
+                ReadiumLink(href = lessonBase.resolve(LEARNING_UNIT_HTML_FILENAME).toString()),
+                ReadiumLink(href = demoBase.resolve("static/$LEARNING_UNIT_JS_FILENAME").toString()),
                 ReadiumLink(href = demoBase.resolve("static/$XAPI_MODULE_FILENAME").toString()),
             ),
         )

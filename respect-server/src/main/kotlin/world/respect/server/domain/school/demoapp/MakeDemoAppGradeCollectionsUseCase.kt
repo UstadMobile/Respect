@@ -59,7 +59,7 @@ class MakeDemoAppGradeCollectionsUseCase {
                     ),
                     images = listOf(
                         ReadiumLink(
-                            href = baseUrl.resolve("static/$LESSON_ICON_NAME").toString(),
+                            href = baseUrl.resolve("static/$LEARNING_UNIT_ICON_NAME").toString(),
                             type = "image/png"
                         )
                     ),
@@ -72,11 +72,11 @@ class MakeDemoAppGradeCollectionsUseCase {
 
         const val GRADES_DIR_NAME = "grade"
 
-        const val LESSON_DIR_NAME = "lesson"
+        const val LEARNING_UNITS_DIR_NAME = "learningunits"
 
         const val COLLECTION_FILE_NAME = "index.json"
 
-        const val LESSON_ICON_NAME = "books.png"
+        const val LEARNING_UNIT_ICON_NAME = "books.png"
     }
 
 }

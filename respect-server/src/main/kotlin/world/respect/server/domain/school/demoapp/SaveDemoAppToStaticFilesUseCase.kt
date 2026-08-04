@@ -7,11 +7,11 @@ import org.openeel.demo.demolaunchableappserver.DemoConstants
 import world.respect.lib.xapi.rusticilaunch.model.TinCanXmlDocument
 import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase.Companion.GRADE_ICON_NAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.GRADES_DIR_NAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_DIR_NAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LESSON_ICON_NAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.LESSON_HTML_FILENAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.LESSON_JS_FILENAME
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase.Companion.XAPI_MODULE_FILENAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LEARNING_UNITS_DIR_NAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase.Companion.LEARNING_UNIT_ICON_NAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUseCase.Companion.LEARNING_UNIT_HTML_FILENAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUseCase.Companion.LEARNING_UNIT_JS_FILENAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUseCase.Companion.XAPI_MODULE_FILENAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase.Companion.APP_MANIFEST_FILENAME
 import java.io.File
 
@@ -23,9 +23,9 @@ class SaveDemoAppToStaticFilesUseCase(
     private val makeDemoAppManifestUseCase: MakeDemoAppManifestUseCase,
     private val makeDemoAppCollectionUseCase: MakeDemoAppCollectionUseCase,
     private val makeDemoAppGradeCollectionsUseCase: MakeDemoAppGradeCollectionsUseCase,
-    private val makeDemoAppLessonManifestUseCase: MakeDemoAppLessonManifestUseCase,
-    private val makeDemoAppLessonTinCanXmlUseCase: MakeDemoAppLessonTinCanXmlUseCase,
-    private val makeDemoAppLessonHtmlUseCase: MakeDemoAppLessonHtmlUseCase,
+    private val makeDemoAppLearningUnitManifestUseCase: MakeDemoAppLearningUnitManifestUseCase,
+    private val makeDemoAppLearningUnitTinCanXmlUseCase: MakeDemoAppLearningUnitTinCanXmlUseCase,
+    private val makeDemoAppLearningUnitHtmlUseCase: MakeDemoAppLearningUnitHtmlUseCase,
     private val json: Json,
     private val xml: XML,
 ) {
@@ -51,7 +51,7 @@ class SaveDemoAppToStaticFilesUseCase(
         )
 
         listOf(
-            GRADE_ICON_NAME, LESSON_ICON_NAME, LESSON_JS_FILENAME, XAPI_MODULE_FILENAME
+            GRADE_ICON_NAME, LEARNING_UNIT_ICON_NAME, LEARNING_UNIT_JS_FILENAME, XAPI_MODULE_FILENAME
         ).forEach { resourceName ->
             File(staticDir, resourceName).writeBytes(
                 this::class.java.getResourceAsStream("/demoapp/$resourceName")!!.readBytes()
@@ -72,15 +72,15 @@ class SaveDemoAppToStaticFilesUseCase(
                     )
                 )
             )
-            val lessonsDir = File(gradeDir, LESSON_DIR_NAME).also { it.mkdirs() }
+            val lessonsDir = File(gradeDir, LEARNING_UNITS_DIR_NAME).also { it.mkdirs() }
             (1..DemoConstants.NUM_LESSONS).forEach { lessonNum ->
                 val lessonDir = File(lessonsDir, lessonNum.toString()).also { it.mkdirs() }
 
                 File(
-                    lessonDir, MakeDemoAppLessonManifestUseCase.LESSON_MANIFEST_FILENAME
+                    lessonDir, MakeDemoAppLearningUnitManifestUseCase.LESSON_MANIFEST_FILENAME
                 ).writeText(
                     json.encodeToString(
-                        makeDemoAppLessonManifestUseCase(
+                        makeDemoAppLearningUnitManifestUseCase(
                             demoBase = baseUrl,
                             grade = gradeNum,
                             lessonNum = lessonNum,
@@ -91,7 +91,7 @@ class SaveDemoAppToStaticFilesUseCase(
                 File(lessonDir, "tincan.xml").writeText(
                     xml.encodeToString(
                         TinCanXmlDocument.serializer(),
-                        makeDemoAppLessonTinCanXmlUseCase(
+                        makeDemoAppLearningUnitTinCanXmlUseCase(
                             baseUrl = baseUrl,
                             gradeNum = gradeNum,
                             lessonNum = lessonNum,
@@ -99,8 +99,8 @@ class SaveDemoAppToStaticFilesUseCase(
                     )
                 )
 
-                File(lessonDir, LESSON_HTML_FILENAME).writeText(
-                    makeDemoAppLessonHtmlUseCase(
+                File(lessonDir, LEARNING_UNIT_HTML_FILENAME).writeText(
+                    makeDemoAppLearningUnitHtmlUseCase(
                         baseUrl = baseUrl,
                         gradeNum = gradeNum,
                         lessonNum = lessonNum,

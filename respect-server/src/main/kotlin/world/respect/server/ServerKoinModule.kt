@@ -50,9 +50,9 @@ import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.server.domain.school.add.RegisterSchoolUseCaseImpl
 import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonManifestUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitManifestUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonTinCanXmlUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitTinCanXmlUseCase
 import world.respect.server.domain.school.verify.VerifySchoolUrlPointsToThisServerUseCase
 import world.respect.server.util.SchoolUrlVerificationManager
 import world.respect.shared.domain.account.RespectAccount
@@ -233,12 +233,12 @@ fun serverKoinModule(
         MakeDemoAppGradeCollectionsUseCase()
     }
 
-    single<MakeDemoAppLessonManifestUseCase> {
-        MakeDemoAppLessonManifestUseCase()
+    single<MakeDemoAppLearningUnitManifestUseCase> {
+        MakeDemoAppLearningUnitManifestUseCase()
     }
 
-    single<MakeDemoAppLessonTinCanXmlUseCase> {
-        MakeDemoAppLessonTinCanXmlUseCase()
+    single<MakeDemoAppLearningUnitTinCanXmlUseCase> {
+        MakeDemoAppLearningUnitTinCanXmlUseCase()
     }
 
     /*

@@ -25,9 +25,9 @@ import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT_ADMIN_USERNAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonHtmlUseCase
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonManifestUseCase
-import world.respect.server.domain.school.demoapp.MakeDemoAppLessonTinCanXmlUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitManifestUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitTinCanXmlUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
 import world.respect.server.domain.school.demoapp.SaveDemoAppToStaticFilesUseCase
 import java.io.File
@@ -118,9 +118,9 @@ fun managerServerMain(ns: Namespace) {
                     makeDemoAppManifestUseCase = MakeDemoAppManifestUseCase(),
                     makeDemoAppCollectionUseCase = MakeDemoAppCollectionUseCase(),
                     makeDemoAppGradeCollectionsUseCase = MakeDemoAppGradeCollectionsUseCase(),
-                    makeDemoAppLessonManifestUseCase = MakeDemoAppLessonManifestUseCase(),
-                    makeDemoAppLessonTinCanXmlUseCase = MakeDemoAppLessonTinCanXmlUseCase(),
-                    makeDemoAppLessonHtmlUseCase = MakeDemoAppLessonHtmlUseCase(),
+                    makeDemoAppLearningUnitManifestUseCase = MakeDemoAppLearningUnitManifestUseCase(),
+                    makeDemoAppLearningUnitTinCanXmlUseCase = MakeDemoAppLearningUnitTinCanXmlUseCase(),
+                    makeDemoAppLearningUnitHtmlUseCase = MakeDemoAppLearningUnitHtmlUseCase(),
                     xml = xml,
                     json = json,
                 )

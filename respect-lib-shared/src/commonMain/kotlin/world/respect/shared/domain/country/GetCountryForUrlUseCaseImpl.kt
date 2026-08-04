@@ -1,44 +1,48 @@
 package world.respect.shared.domain.country
 
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.Url
 import io.ktor.http.encodeURLParameter
 import kotlinx.serialization.Serializable
-import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * Gets the country for a school URL using an IP address country lookup server.
+ *
+ * There is deliberately no cache here: the HttpClient uses UstadCacheInterceptor, so responses
+ * are cached by the HTTP cache as per the Cache-Control header set by the lookup server.
+ *
+ * The server implements the same JSON API format as ip-api.com.
+ * Reference: https://ip-api.com/docs/api:json
+ *
+ * @param geolocationEndpoint Base URL of the lookup server, as per the
+ *        GEOLOCATION_API_ENDPOINT build environment variable.
+ */
 class GetCountryForUrlUseCaseImpl(
     private val httpClient: HttpClient,
-    private val geolocationEndpoint: String
+    private val geolocationEndpoint: String,
 ) : GetCountryForUrlUseCase {
 
-    private val countryCache = ConcurrentHashMap<String, String?>()
-
     override suspend operator fun invoke(schoolUrl: Url): String? {
-        val schoolUrlStr = schoolUrl.toString()
-        countryCache[schoolUrlStr]?.let {
-            return it
+        if (geolocationEndpoint.isBlank()) {
+            Napier.w("GetCountryForUrlUseCase: GEOLOCATION_API_ENDPOINT is not set")
+            return null
         }
-        if (geolocationEndpoint.isBlank()) return null
-        return try {
-            val host = schoolUrl.host
-            val encodedHost = host.encodeURLParameter()
-            val endpointUrl = "$geolocationEndpoint/json/$encodedHost"
-            val response = httpClient.get(endpointUrl)
-            val apiResponse: CountryResponse = response.body()
-            val countryCode = if (apiResponse.status == "success") {
-                apiResponse.countryCode ?: "Unknown"
-            } else {
-                "Unknown"
-            }
-            countryCache[schoolUrlStr] = countryCode
-            countryCode
-        } catch (e: Exception) {
-            countryCache[schoolUrlStr] = "unknown"
-            "unknown"
-        }
+
+        val encodedHost = schoolUrl.host.encodeURLParameter()
+        val response: CountryResponse = httpClient
+            .get("$geolocationEndpoint/json/$encodedHost")
+            .body()
+
+        return response.countryCode?.takeIf { response.status == STATUS_SUCCESS }
     }
+
+    companion object {
+        private const val STATUS_SUCCESS = "success"
+    }
+
     @Serializable
     private data class CountryResponse(
         val status: String,

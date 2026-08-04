@@ -1,6 +1,6 @@
 package world.respect.app.components
 
-import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -9,20 +9,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import org.koin.compose.koinInject
 import world.respect.shared.domain.country.GetCountryForUrlUseCase
 import world.respect.shared.util.getFlagEmoji
 
+/**
+ * Shows the flag of the country in which the given school is hosted. Shows nothing where the
+ * country cannot be determined.
+ */
 @Composable
 fun CountryFlag(
     schoolUrl: Url,
     modifier: Modifier = Modifier,
-    size: Dp = 20.dp,
     getCountryForUrlUseCase: GetCountryForUrlUseCase = koinInject(),
 ) {
     var countryCode by remember(schoolUrl) { mutableStateOf<String?>(null) }
@@ -31,18 +31,16 @@ fun CountryFlag(
         countryCode = try {
             getCountryForUrlUseCase(schoolUrl)
         } catch (e: Exception) {
+            Napier.w("CountryFlag: could not get country for $schoolUrl", e)
             null
         }
     }
-    val flagEmoji = getFlagEmoji(countryCode)
 
-    val displayEmoji = if (flagEmoji.isEmpty()) "" else flagEmoji
-
-    Text(
-        text = displayEmoji,
-        fontSize = (size.value * 0.85).sp,
-        fontFamily = FontFamily.Default,
-        modifier = modifier.size(size)
-    )
+    getFlagEmoji(countryCode).takeIf { it.isNotEmpty() }?.also { flagEmoji ->
+        Text(
+            text = flagEmoji,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = modifier,
+        )
+    }
 }
-fun Modifier.flagSizeMedium() = this.size(20.dp)

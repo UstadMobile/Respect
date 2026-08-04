@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import world.respect.app.components.CountryFlag
 import world.respect.app.components.RespectPersonAvatar
-import world.respect.app.components.flagSizeMedium
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.shared.domain.account.RespectSessionAndPerson
@@ -65,8 +64,8 @@ fun AccountListItem(
                         modifier = Modifier.padding(start = 8.dp)
                     )
                     CountryFlag(
-                        schoolUrl = account.account.school.self,
-                        modifier = Modifier.flagSizeMedium()
+                        schoolUrl = account.session.account.school.self,
+                        modifier = Modifier.padding(start = 8.dp)
                     )
                 }
                 extras()

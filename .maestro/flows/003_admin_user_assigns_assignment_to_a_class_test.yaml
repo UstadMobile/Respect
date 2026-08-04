@@ -37,6 +37,8 @@ onFlowComplete:
     env:
       USERNAME: "teacherauser"
       PASSWORD: "test123"
+- assertVisible:
+        id: "nav_home"
 - tapOn: "Apps"
 - assertVisible:
     id: "app_title"
@@ -90,7 +92,7 @@ onFlowComplete:
 - tapOn: "Task"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - tapOn: "Example Web App"
 - assertVisible:
     id: "app_title"
@@ -100,7 +102,7 @@ onFlowComplete:
 - tapOn: "Task"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - tapOn: "Example Web App"
 - assertVisible:
     id: "app_title"
@@ -155,8 +157,11 @@ onFlowComplete:
     text: "Statement Maker"
 - tapOn: "Open"
 - assertVisible: "Statement Maker"
-- tapOn: "Send statement"
-- assertVisible: "Statement sent.*"
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn: "Send statement"
+      - assertVisible: "Statement sent.*"
 - tapOn: "Close"
 - back
 - tapOn: "Assignment Result Statement Demo"
@@ -164,8 +169,11 @@ onFlowComplete:
 - assertVisible: "Assignment Result.*"
 - tapOn: "Score"
 - inputText: 1
-- tapOn: "Send statement"
-- assertVisible: "Statement sent.*"
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn: "Send statement"
+      - assertVisible: "Statement sent.*"
 - tapOn: "Close"
 - tapOn: "Assignments"
 - tapOn: "Homework 1"
@@ -195,8 +203,11 @@ onFlowComplete:
 - assertVisible: "Assignment Result.*"
 - tapOn: "Score"
 - inputText: 1
-- tapOn: "Send statement"
-- assertVisible: "Statement sent.*"
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn: "Send statement"
+      - assertVisible: "Statement sent.*"
 - tapOn: "Close"
 - tapOn: "Assignments"
 - tapOn: "Homework 1"

@@ -130,6 +130,10 @@ if [ "$MAESTRO_EXTRA_ARGS" == "" ]; then
    MAESTRO_EXTRA_ARGS=""
 fi
 
+if [ "$MAESTRO_FLOW" == "" ]; then
+    MAESTRO_FLOW=.maestro/flows/*.yaml
+fi
+
 export JAVA_OPTS="-Dlogs_dir=$TESTSERVERCONTROLLER_BASEDIR/logs/"
 $TESTCONTROLLER_BIN  \
     -P:ktor.deployment.port=$TESTCONTROLLER_PORT \
@@ -205,7 +209,7 @@ if [ "$1" == "cloud" ]; then
     maestro cloud \
         --api-key=$MAESTRO_CLOUD_APIKEY \
         --project-id=$MAESTRO_CLOUD_PROJECTID \
-        --app-file=./respect-app-compose/build/outputs/apk/release/respect-app-compose-release.apk \
+        --app-file=./app-android/build/outputs/apk/release/app-android-release.apk \
         --flows=.maestro/flows \
         $DEVICE_OS_ARG \
         --format=junit \
@@ -271,7 +275,7 @@ else
       --format=junit \
       --test-output-dir=$MAESTRO_OUTPUT_DIR \
       --output=$MAESTRO_REPORT_FILE \
-      .maestro/flows/*.yaml
+      $MAESTRO_FLOW
     MAESTRO_STATUS=$?
 fi
 

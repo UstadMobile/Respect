@@ -31,6 +31,10 @@ function onClickMakeStatement() {
          }
 
          console.log(result);
+    }).catch((error) => {
+         const errorStr = JSON.stringify(error.toJSON(), null, 2);
+         console.log(errorStr);
+         document.getElementById("error").innerText = errorStr;
     });
 }
 

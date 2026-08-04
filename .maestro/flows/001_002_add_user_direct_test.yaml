@@ -59,7 +59,9 @@ onFlowComplete:
 - inputText: "User"
 - tapOn: "Save"
 - assertVisible: "Required field"   # Gender field is mandatory
-- tapOn: "Gender*"
+- tapOn:
+    text: "Gender*"
+    retryTapIfNoChange: true
 - tapOn: "Female"
 - tapOn:
     id: "role"
@@ -167,7 +169,9 @@ onFlowComplete:
 - inputText: "Child"
 - tapOn: "Last name*"
 - inputText: "User"
-- tapOn: "Gender*"
+- tapOn:
+    text: "Gender*"
+    retryTapIfNoChange: true
 - tapOn: "Female"
 - assertVisible:
     id: "app_title"
@@ -246,7 +250,9 @@ onFlowComplete:
 - inputText: "Test"
 - tapOn: "Last name*"
 - inputText: "User"
-- tapOn: "Gender*"
+- tapOn:
+    text: "Gender*"
+    retryTapIfNoChange: true
 - tapOn: "Female"
 - tapOn:
     id: "role"
@@ -372,7 +378,8 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Assignments"
-- assertVisible: "Apps"
+- assertVisible:
+       id: "nav_home"
 - assertNotVisible: "Classes"
 - assertNotVisible: "People"
 
@@ -395,10 +402,11 @@ onFlowComplete:
 - tapOn: "Url"
 - inputText:  ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
 - tapOn: "OK"
-- assertVisible: "Apps"
+- assertVisible:
+        id: "nav_home"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - assertVisible: "Assignments"
 - assertVisible: "Classes"
 - assertVisible: "People"

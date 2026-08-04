@@ -37,7 +37,9 @@ appId: world.respect.app
     text: "Your profile"
 - tapOn: "Your name*"
 - inputText: "Student User"
-- tapOn: "Gender*"
+- tapOn:
+      text: "Gender*"
+      retryTapIfNoChange: true
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
 - runScript:

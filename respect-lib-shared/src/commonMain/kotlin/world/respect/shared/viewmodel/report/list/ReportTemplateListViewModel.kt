@@ -81,7 +81,7 @@ class ReportTemplateListViewModel(
                                 reportUid = 0L,
                                 reportOptions = ReportOptions(),
                                 accountPersonUid = activeUserPersonUid,
-                                timeZone = TimeZone.currentSystemDefault()
+                                timeZoneId = TimeZone.currentSystemDefault().id
                             ),
                             results = emptyList()
                         ),
@@ -95,7 +95,7 @@ class ReportTemplateListViewModel(
                 reportUid = report.guid.toLong(),
                 reportOptions = report.reportOptions,
                 accountPersonUid = activeUserPersonUid,
-                timeZone = TimeZone.currentSystemDefault()
+                timeZoneId = TimeZone.currentSystemDefault().id
             )
 
             return runReportUseCase(request).map { reportResult ->

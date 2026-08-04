@@ -114,7 +114,7 @@ fun serverKoinModule(
     single<Json> {
         Json {
             ignoreUnknownKeys = true
-            encodeDefaults = true
+            encodeDefaults = false
         }
     }
 

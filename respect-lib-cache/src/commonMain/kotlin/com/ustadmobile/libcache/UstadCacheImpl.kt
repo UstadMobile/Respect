@@ -41,12 +41,12 @@ import com.ustadmobile.libcache.novarysearch.normalizeForNoVarySearch
 import com.ustadmobile.libcache.novarysearch.removeAllSearchParams
 import com.ustadmobile.libcache.response.ByteArrayResponse
 import com.ustadmobile.libcache.util.concurrentSafeMapOf
+import com.ustadmobile.libcache.util.receivePending
 import io.github.reactivecircus.cache4k.Cache
 import io.github.reactivecircus.cache4k.CacheEvent
 import io.ktor.http.Headers
 import io.ktor.http.Url
 import kotlinx.atomicfu.atomic
-import kotlinx.atomicfu.getAndUpdate
 import kotlinx.atomicfu.locks.ReentrantLock
 import kotlinx.atomicfu.locks.withLock
 import kotlinx.atomicfu.update
@@ -54,6 +54,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.isActive
@@ -141,13 +142,25 @@ class UstadCacheImpl(
         val previousStorageUriToDelete: String? = null,
     )
 
+    private val pendingCacheUpdates = concurrentSafeMapOf<String, CacheEvent.Updated<String, CacheEntryAndMetadata>>()
+
+    sealed interface UpdateToCommit
+
     data class LastAccessedUpdate(
         val key: String,
         val accessTime: Long,
+    ): UpdateToCommit
+
+    data class CacheEntryUpdate(
+        val event: CacheEvent.Updated<String, CacheEntryAndMetadata>
+    ): UpdateToCommit
+
+    /**
+     *
+     */
+    private val updatesToCommitChannel = Channel<UpdateToCommit>(
+        capacity = Channel.UNLIMITED,
     )
-
-
-    private val pendingCacheUpdates = concurrentSafeMapOf<String, CacheEvent.Updated<String, CacheEntryAndMetadata>>()
 
     /**
      *
@@ -169,6 +182,7 @@ class UstadCacheImpl(
                             CacheEvent.Updated(event.key, prev.oldValue, event.newValue)
                         }
                     }
+                    updatesToCommitChannel.trySend(CacheEntryUpdate(event))
 
                     event.newValue.entry?.urlWithoutSearch?.also { urlWithoutSearch ->
                         urlWithoutSearchToKeysWriteLock.withLock {
@@ -188,6 +202,8 @@ class UstadCacheImpl(
             }
         }
         .build()
+
+
 
     suspend fun Cache<Url, Set<String>>.getOrLoadKeysFromDbAndPending(
         urlWithoutSearch: Url
@@ -334,15 +350,7 @@ class UstadCacheImpl(
     init {
         scope.launch {
             while(isActive) {
-                delay(databaseCommitInterval.milliseconds)
-                commit()
-            }
-        }
-
-        scope.launch {
-            while(isActive) {
                 delay(trimInterval.milliseconds)
-                commit()
                 trimmer.trim()
             }
         }
@@ -351,6 +359,76 @@ class UstadCacheImpl(
             trimmer.evictedEntriesFlow.collect { evictedEntries ->
                 evictedEntries.forEach { evictedKey ->
                     memoryCache.invalidate(evictedKey)
+                }
+            }
+        }
+
+        scope.launch {
+            while(isActive) {
+                val updatesToCommit = listOf(updatesToCommitChannel.receive()) +
+                        updatesToCommitChannel.receivePending(maxItems = 100)
+
+                val cacheUpdateEvents = updatesToCommit.mapNotNull {
+                    (it as? CacheEntryUpdate)?.event
+                }
+
+                val lastAccessedUpdates = updatesToCommit.filterIsInstance<LastAccessedUpdate>()
+
+                //Ideally this would be done by creating a map
+
+                db.useWriterConnection { con ->
+                    con.withTransaction(SQLiteTransactionType.IMMEDIATE) {
+                        db.cacheEntryDao.upsertList(
+                            entry = cacheUpdateEvents.mapNotNull { it.newValue.entry }
+                        )
+
+                        val newLocks = cacheUpdateEvents.flatMap { event ->
+                            event.newValue.locks.filter { newLock ->
+                                !event.oldValue.locks.any { it.lockId == newLock.lockId }
+                            }
+                        }
+
+                        val deletedLocks = cacheUpdateEvents.flatMap { event ->
+                            event.oldValue.locks.filter { oldLock ->
+                                !event.newValue.locks.any { it.lockId == oldLock.lockId }
+                            }
+                        }
+
+                        if(newLocks.isNotEmpty())
+                            db.retentionLockDao.upsertList(newLocks)
+
+                        if(deletedLocks.isNotEmpty())
+                            db.retentionLockDao.delete(deletedLocks)
+
+                        val extraHeaderChanges = cacheUpdateEvents.mapNotNull { evt ->
+                            when {
+                                //There are no extra headers
+                                evt.newValue.extraHeaders == null && evt.oldValue.extraHeaders == null -> {
+                                    null
+                                }
+
+                                //There is no update - same as before
+                                evt.newValue.extraHeaders == evt.oldValue.extraHeaders -> {
+                                    null
+                                }
+
+                                else -> {
+                                    evt.oldValue.extraHeaders
+                                }
+                            }
+                        }
+
+                        if(extraHeaderChanges.isNotEmpty())
+                            db.cacheEntryExtraHeadersDao.upsertList(extraHeaderChanges)
+
+                        cacheUpdateEvents.forEach {
+                            pendingCacheUpdates.remove(it.key)
+                        }
+
+                        lastAccessedUpdates.forEach {
+                            db.cacheEntryDao.updateLastAccessedTime(it.key, it.accessTime)
+                        }
+                    }
                 }
             }
         }
@@ -895,77 +973,12 @@ class UstadCacheImpl(
         }
     }
 
-    suspend fun commit() {
-        val cacheUpdateEvents = pendingCacheUpdates.entries.toList()
-        cacheUpdateEvents.forEach {
-            pendingCacheUpdates.remove(it.key)
-        }
-
-        val lastAccessUpdates = pendingLastAccessedUpdates.getAndUpdate {
-            emptyList()
-        }
-
-        val updatesMap = mutableMapOf<String, Long>()
-
-        lastAccessUpdates.forEach {
-            updatesMap[it.key] = it.accessTime
-        }
-
-        db.useWriterConnection { con ->
-            con.withTransaction(SQLiteTransactionType.IMMEDIATE) {
-                db.cacheEntryDao.upsertList(
-                    entry = cacheUpdateEvents.mapNotNull { it.value.newValue.entry }
-                )
-
-                val newLocks = cacheUpdateEvents.flatMap { event ->
-                    event.value.newValue.locks.filter { newLock ->
-                        !event.value.oldValue.locks.any { it.lockId == newLock.lockId }
-                    }
-                }
-
-                val deletedLocks = cacheUpdateEvents.flatMap { event ->
-                    event.value.oldValue.locks.filter { oldLock ->
-                        !event.value.newValue.locks.any { it.lockId == oldLock.lockId }
-                    }
-                }
-
-                if(newLocks.isNotEmpty())
-                    db.retentionLockDao.upsertList(newLocks)
-
-                if(deletedLocks.isNotEmpty())
-                    db.retentionLockDao.delete(deletedLocks)
-
-                val extraHeaderChanges = cacheUpdateEvents.mapNotNull { evt ->
-                    when {
-                        //There are no extra headers
-                        evt.value.newValue.extraHeaders == null && evt.value.oldValue.extraHeaders == null -> {
-                            null
-                        }
-
-                        evt.value.newValue.extraHeaders == evt.value.oldValue.extraHeaders -> {
-                            null
-                        }
-
-                        else -> {
-                            evt.value.oldValue.extraHeaders
-                        }
-                    }
-                }
-
-                if(extraHeaderChanges.isNotEmpty())
-                    db.cacheEntryExtraHeadersDao.upsertList(extraHeaderChanges)
-
-                updatesMap.forEach {
-                    db.cacheEntryDao.updateLastAccessedTime(it.key, it.value)
-                }
-            }
-        }
-    }
-
     override fun close() {
+        updatesToCommitChannel.close()
         scope.cancel()
+
         runBlocking {
-            commit()
+
         }
     }
 

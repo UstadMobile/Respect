@@ -2,19 +2,21 @@ package world.respect.shared.domain.geticonforxapiactivity
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
+import world.respect.shared.util.ext.resolve
 
 class GetPublicationForXapiActivityUseCase(
     private val opdsPublicationDataSource: OpdsPublicationDataSource,
 ) {
-
 
     operator fun invoke(
         activity: XapiActivity
@@ -25,7 +27,9 @@ class GetPublicationForXapiActivityUseCase(
                 params = DataLoadParams(),
                 referrerUrl = null,
                 expectedPublicationId = null,
-            )
+            ).map { dataLoadState ->
+                dataLoadState.map { it.resolve(publicationUrl) }
+            }
         } ?: flowOf(NoDataLoadedState(NoDataLoadedState.Reason.NOT_FOUND))
     }
 

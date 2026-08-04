@@ -82,7 +82,7 @@ class ReportListViewModel(
             reportUid = report.guid.toLong(),
             reportOptions = report.reportOptions,
             accountPersonUid = 0L, // TODO: Get actual user ID
-            timeZone = TimeZone.currentSystemDefault()
+            timeZoneId = TimeZone.currentSystemDefault().id
         )
 
         return runReportUseCase(request).map { reportResult ->

@@ -19,6 +19,7 @@ import world.respect.shared.viewmodel.curriculum.mapping.model.CurriculumMapping
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.manageuser.signup.SignupScreenModeEnum
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryMode
+import world.respect.lib.opds.model.LangMap
 import kotlin.uuid.Uuid
 
 /**
@@ -152,6 +153,9 @@ data class AssignmentEdit(
     }
 
 }
+
+@Serializable
+object BookmarkList : RespectAppRoute
 
 @Serializable
 data class StatementList(
@@ -575,6 +579,7 @@ class LearningUnitDetail(
     private val refererUrlStr: String? = null,
     val expectedIdentifier: String? = null,
     val assignmentActivityId: String? = null,
+    private val titleStr: String? = null,
 ) : RespectAppRoute {
 
     @Transient
@@ -583,6 +588,9 @@ class LearningUnitDetail(
     @Transient
     val refererUrl = refererUrlStr?.let { Url(it) }
 
+    @Transient
+    val title: LangMap? = titleStr?.let { Json.decodeFromString(LangMap.serializer(), it) }
+
     companion object {
 
         fun create(
@@ -590,11 +598,13 @@ class LearningUnitDetail(
             refererUrl: Url? = null,
             expectedIdentifier: String? = null,
             assignmentActivityId: String? = null,
+            title: LangMap? = null,
         ) = LearningUnitDetail(
             learningUnitManifestUrlStr = learningUnitManifestUrl.toString(),
             refererUrlStr = refererUrl?.toString(),
             expectedIdentifier = expectedIdentifier,
             assignmentActivityId = assignmentActivityId,
+            titleStr = title?.let { Json.encodeToString(LangMap.serializer(), it) },
         )
 
     }
@@ -622,6 +632,8 @@ class LearningUnitViewer(
 @Serializable
 object AccountList : RespectAppRoute
 
+@Serializable
+object ShareFeedback : RespectAppRoute
 
 /**
  * @property addToClassUid if the PersonList screen has been navigated when the user clicks

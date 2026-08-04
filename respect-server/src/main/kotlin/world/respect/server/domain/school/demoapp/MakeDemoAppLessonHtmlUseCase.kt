@@ -13,6 +13,7 @@ import kotlinx.html.html
 import kotlinx.html.id
 import kotlinx.html.input
 import kotlinx.html.label
+import kotlinx.html.meta
 import kotlinx.html.option
 import kotlinx.html.pre
 import kotlinx.html.script
@@ -35,6 +36,11 @@ fun HTML.demoAppLessonHtml(
             type = "module"
             src = baseUrl.resolve("static/lesson_xapi.js").toString()
         }
+
+        meta {
+            name = "viewport"
+            content = "width=device-width, initial-scale=1"
+        }
     }
 
     body {
@@ -42,18 +48,13 @@ fun HTML.demoAppLessonHtml(
             + "Demo Learning Unit Grade $gradeNum Unit $lessonNum"
         }
 
-        + "Actor"
         pre {
            id = "actor_info"
         }
-        br()
 
-        + "Activity id:"
         pre {
             id = "activity_id"
         }
-
-        br()
 
         h3 {
             + "Send result (pass/fail)"
@@ -61,16 +62,22 @@ fun HTML.demoAppLessonHtml(
 
         label {
             htmlFor = "score_text"
-            + "Score"
+            + "Scaled score (must be between 0 and 1):"
         }
+
+        br()
 
         input(type = InputType.text) {
             id = "score_text"
         }
 
+        br()
+
         label {
             htmlFor = "verb_id"
+            +"Result:"
         }
+        br()
 
         select {
             id = "verb_id"
@@ -81,10 +88,56 @@ fun HTML.demoAppLessonHtml(
                 }
             }
         }
-
+        br()
+        br()
         button {
             id = "send_result_button"
             + "Send result statement"
+        }
+
+        pre {
+            id = "send_result_result"
+        }
+
+        h3 {
+            + "Send completed statement"
+        }
+
+        button {
+            id = "send_completed_button"
+
+            + "Send completed statement"
+        }
+
+        pre {
+            id = "send_completed_result"
+        }
+
+
+        h3 {
+            + "Send progressed statement"
+        }
+
+        label {
+            htmlFor = "progress_text"
+            + "Progress (must be between 0 and 100):"
+        }
+
+        br()
+
+        input(type = InputType.text) {
+            id = "progress_text"
+        }
+
+        br()
+
+        button {
+            id = "send_progress_button"
+            + "Send progressed statement"
+        }
+
+        pre {
+            id = "send_progress_result"
         }
     }
 }

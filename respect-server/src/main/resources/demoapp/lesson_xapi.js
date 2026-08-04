@@ -12,6 +12,30 @@ const xapi = new XAPI({
     auth: auth
 });
 
+function sendAndSetResultText(statementObj, resultDomId) {
+    const logPrefix = "lesson_xapi: #" + resultDomId;
+
+    document.getElementById(resultDomId).innerText = "";
+    console.log(logPrefix + " sending statement");
+    xapi.sendStatement({
+        statement: statementObj
+    }).then((result) => {
+         console.log(logPrefix + " statement sent successfully.");
+         if(Array.isArray(result.data)) {
+             document.getElementById(resultDomId).innerText = "Statement sent: " + result.data.join();
+         }else {
+             document.getElementById(resultDomId).innerText = "Statement sent: " + result.data.toString();
+         }
+
+         console.log(result);
+    }).catch((error) => {
+         const errorStr = JSON.stringify(error.toJSON(), null, 2);
+         console.error("ERROR: " + errorStr);
+         document.getElementById(resultDomId).innerText = errorStr;
+    });
+}
+
+
 function onClickSendResult() {
     const verbId = document.getElementById("verb_id").value;
     const statementObj = {
@@ -31,29 +55,53 @@ function onClickSendResult() {
         }
     };
 
-    console.log("lesson_xapi: Send result stmt")
-    xapi.sendStatement({
-        statement: statementObj
-    }).then((result) => {
-         console.log("XapiAuJs: Assignable unit: got result.");
-         if(Array.isArray(result.data)) {
-             document.getElementById("result").innerText = "Statement sent: " + result.data.join();
-         }else {
-             document.getElementById("result").innerText = "Statement sent: " + result.data.toString();
-         }
+    sendAndSetResultText(statementObj, "send_result_result");
+}
 
-         console.log(result);
-    }).catch((error) => {
-         const errorStr = JSON.stringify(error.toJSON(), null, 2);
-         console.log(errorStr);
-         document.getElementById("error").innerText = errorStr;
-    });
+function onClickSendCompleted() {
+    const statementObj = {
+        actor: queryParamsObject.actor,
+        verb: {
+            id: "http://adlnet.gov/expapi/verbs/completed"
+        },
+        object: {
+            id: searchParams.get("activity_id")
+        },
+        result: {
+            completion: true,
+        }
+    };
+
+    sendAndSetResultText(statementObj, "send_completed_result");
+}
+
+function onClickSendProgressed() {
+    const statementObj = {
+        actor: queryParamsObject.actor,
+        verb: {
+            id: "http://adlnet.gov/expapi/verbs/completed"
+        },
+        object: {
+            id: searchParams.get("activity_id")
+        },
+        result: {
+            completion: true,
+            extensions: {
+                "https://w3id.org/xapi/cmi5/result/extensions/progress": parseInt(document.getElementById("progress_text").value)
+            }
+        }
+    };
+
+    sendAndSetResultText(statementObj, "send_progress_result");
 }
 
 addEventListener("DOMContentLoaded", (event) => {
     document.getElementById("send_result_button").addEventListener('click', onClickSendResult);
-    document.getElementById("actor_info").innerText = JSON.stringify(queryParamsObject.actor);
-    document.getElementById("activity_id").innerText = searchParams.get("activity_id");
+    document.getElementById("send_completed_button").addEventListener('click', onClickSendCompleted);
+    document.getElementById("send_progress_button").addEventListener('click', onClickSendProgressed);
+
+    document.getElementById("actor_info").innerText = "Actor: " + JSON.stringify(queryParamsObject.actor);
+    document.getElementById("activity_id").innerText = "Activity ID: " + searchParams.get("activity_id");
 });
 
-console.log("XapiAuJs: loaded");
+console.log("lesson_xapi: loaded");

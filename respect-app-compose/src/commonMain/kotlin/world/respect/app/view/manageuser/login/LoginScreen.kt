@@ -128,4 +128,13 @@ fun LoginScreen(
 
         RespectShortVersionInfoText(Modifier.defaultItemPadding().fillMaxWidth())
     }
+
+    if (uiState.isConnected) {
+        Text(
+            text = "",
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("internet_connected_tag")
+        )
+    }
 }

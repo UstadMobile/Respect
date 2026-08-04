@@ -221,6 +221,10 @@ onFlowComplete:
 
 # Device back to Online mode - Login success
 - setAirplaneMode: disabled
+- extendedWaitUntil:
+    visible:
+      id: "internet_connected_tag"
+    timeout: 10000
 - assertVisible:
     id: "app_title"
     text: "Login"

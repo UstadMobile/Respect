@@ -36,6 +36,7 @@ import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.StringUiText
 import world.respect.shared.resources.UiText
+import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitor
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import world.respect.shared.util.exception.getUiText
 import world.respect.shared.util.exception.getUiTextOrGeneric
@@ -48,6 +49,7 @@ data class LoginUiState(
     val errorText: UiText? = null,
     val usernameError: StringResourceUiText? = null,
     val passwordError: StringResourceUiText? = null,
+    val connectedTag: Boolean = true
 )
 
 class LoginViewModel(
@@ -56,8 +58,9 @@ class LoginViewModel(
     getCredentialUseCase: GetCredentialUseCase,
     respectAppDataSource: RespectAppDataSource,
     private val filterUsernameUseCase: FilterUsernameUseCase,
-    private val savePasswordUseCase: SavePasswordUseCase
-) : RespectViewModel(savedStateHandle), KoinScopeComponent {
+    private val savePasswordUseCase: SavePasswordUseCase,
+    private val connectivityMonitor: ConnectivityMonitor
+    ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     private val _uiState = MutableStateFlow(LoginUiState())
 
@@ -84,6 +87,14 @@ class LoginViewModel(
                     hideBottomNavigation = true,
                     userAccountIconVisible = false
                 )
+            }
+
+            connectivityMonitor.statusFlow.collect { state ->
+                _uiState.update {
+                    it.copy(
+                        isConnected = state.isConnected
+                    )
+                }
             }
         }
         viewModelScope.launch {

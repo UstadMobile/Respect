@@ -41,7 +41,10 @@ import com.ustadmobile.libcache.novarysearch.normalizeForNoVarySearch
 import com.ustadmobile.libcache.novarysearch.removeAllSearchParams
 import com.ustadmobile.libcache.response.ByteArrayResponse
 import com.ustadmobile.libcache.util.concurrentSafeMapOf
+import com.ustadmobile.libcache.util.receiveAndUpdateBacklogSize
 import com.ustadmobile.libcache.util.receivePending
+import com.ustadmobile.libcache.util.sendAndUpdateBacklogSize
+import com.ustadmobile.libcache.util.trySendAndUpdateBacklogSize
 import io.github.reactivecircus.cache4k.Cache
 import io.github.reactivecircus.cache4k.CacheEvent
 import io.ktor.http.Headers
@@ -57,6 +60,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -115,8 +120,6 @@ class UstadCacheImpl(
 
     private val logPrefix = "UstadCache($cacheName):"
 
-    private val pendingLastAccessedUpdates = atomic(emptyList<LastAccessedUpdate>())
-
     /**
      * Data class that is used to track the status of a CacheEntryToStore as it is processed.
      *
@@ -156,11 +159,21 @@ class UstadCacheImpl(
     ): UpdateToCommit
 
     /**
-     *
+     * Updates that need to be committed to the database are put onto this channel to a) avoid the
+     * client having to wait for the database update to finish and b) batch updates together where
+     * possible.
      */
     private val updatesToCommitChannel = Channel<UpdateToCommit>(
         capacity = Channel.UNLIMITED,
     )
+
+    private val _updateBacklogSize = MutableStateFlow(0)
+
+    /**
+     * Allows tests to wait until all updates have been committed to the database before making
+     * assertions on the database.
+     */
+    internal val updateBacklogSize = _updateBacklogSize.asStateFlow()
 
     /**
      *
@@ -182,7 +195,9 @@ class UstadCacheImpl(
                             CacheEvent.Updated(event.key, prev.oldValue, event.newValue)
                         }
                     }
-                    updatesToCommitChannel.trySend(CacheEntryUpdate(event))
+                    updatesToCommitChannel.trySendAndUpdateBacklogSize(
+                        CacheEntryUpdate(event), _updateBacklogSize,
+                    )
 
                     event.newValue.entry?.urlWithoutSearch?.also { urlWithoutSearch ->
                         urlWithoutSearchToKeysWriteLock.withLock {
@@ -365,8 +380,9 @@ class UstadCacheImpl(
 
         scope.launch {
             while(isActive) {
-                val updatesToCommit = listOf(updatesToCommitChannel.receive()) +
-                        updatesToCommitChannel.receivePending(maxItems = 100)
+                val updatesToCommit = listOf(
+                    updatesToCommitChannel.receiveAndUpdateBacklogSize(_updateBacklogSize)
+                ) + updatesToCommitChannel.receivePending(maxItems = 100, _updateBacklogSize)
 
                 val cacheUpdateEvents = updatesToCommit.mapNotNull {
                     (it as? CacheEntryUpdate)?.event
@@ -689,9 +705,16 @@ class UstadCacheImpl(
         if(entry != null) {
             if(fileSystem.exists(Path(entry.storageUri))) {
                 logger?.d(LOG_TAG, "$logPrefix FOUND ${request.url}")
-                pendingLastAccessedUpdates.update { prev ->
-                    prev + LastAccessedUpdate(entryAndLocks.urlKey, Clock.System.now().toEpochMilliseconds())
-                }
+
+                val timeNow = Clock.System.now().toEpochMilliseconds()
+
+                updatesToCommitChannel.sendAndUpdateBacklogSize(
+                    LastAccessedUpdate(entryAndLocks.urlKey,timeNow),
+                    _updateBacklogSize
+                )
+
+
+
 
                 val responseHeaders = entry.makeHttpResponseHeaders(
                     entryAndLocks.extraHeaders?.extraHeaders

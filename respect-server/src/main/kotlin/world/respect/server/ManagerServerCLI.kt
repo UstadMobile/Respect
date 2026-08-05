@@ -15,23 +15,37 @@ import io.ktor.util.encodeBase64
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import net.sourceforge.argparse4j.inf.Namespace
+import nl.adaptivity.xmlutil.core.XmlVersion
+import nl.adaptivity.xmlutil.serialization.XML
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT_ADMIN_USERNAME
+import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitManifestUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitTinCanXmlUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
+import world.respect.server.domain.school.demoapp.SaveDemoAppToStaticFilesUseCase
 import java.io.File
 import java.util.Properties
 import kotlin.system.exitProcess
 import kotlin.time.Clock
 
 fun managerServerMain(ns: Namespace) {
-    val json = Json { encodeDefaults = true }
+    val json = Json { encodeDefaults = false }
     val httpClient = HttpClient(OkHttp) {
         install(ContentNegotiation) {
             json(json = json)
         }
+    }
+
+    val xml = XML.v1 {
+        recommended_1_0_0()
+        xmlVersion = XmlVersion.XML10
     }
 
     val dataDir = ns.getString("datadir")?.let { File(it) }
@@ -94,6 +108,27 @@ fun managerServerMain(ns: Namespace) {
                     )
                 }
                 println("Response: ${response.status}")
+            }
+
+            CMD_MAKE_DEMO_APP -> {
+                val baseUrl = Url(ns.getString("url"))
+                val destDir = File(ns.getString("dir"))
+
+                val saveDemoAppToStaticFilesUseCase = SaveDemoAppToStaticFilesUseCase(
+                    makeDemoAppManifestUseCase = MakeDemoAppManifestUseCase(),
+                    makeDemoAppCollectionUseCase = MakeDemoAppCollectionUseCase(),
+                    makeDemoAppGradeCollectionsUseCase = MakeDemoAppGradeCollectionsUseCase(),
+                    makeDemoAppLearningUnitManifestUseCase = MakeDemoAppLearningUnitManifestUseCase(),
+                    makeDemoAppLearningUnitTinCanXmlUseCase = MakeDemoAppLearningUnitTinCanXmlUseCase(),
+                    makeDemoAppLearningUnitHtmlUseCase = MakeDemoAppLearningUnitHtmlUseCase(),
+                    xml = xml,
+                    json = json,
+                )
+
+                saveDemoAppToStaticFilesUseCase(
+                    destDir = destDir,
+                    baseUrl = baseUrl,
+                )
             }
         }
 

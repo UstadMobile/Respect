@@ -33,6 +33,7 @@ kotlin {
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
+            api(libs.xmlutil.serialization)
         }
 
         jvmMain.dependencies {

@@ -29,6 +29,8 @@ import com.ustadmobile.libcache.util.storeFileAsUrl
 import io.ktor.http.Headers
 import io.ktor.http.Url
 import io.ktor.http.headersOf
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.asInputStream
 import kotlinx.io.files.Path
@@ -175,6 +177,10 @@ class UstadCacheJvmTest {
         )
     }
 
+    private suspend fun UstadCacheImpl.awaitUpdatesCommitted() {
+        updateBacklogSize.first { it == 0 }
+    }
+
     data class FileCanBeCachedAndRetrievedContext(
         val cacheDb: UstadCacheDb,
         val cache: UstadCacheImpl,
@@ -246,6 +252,7 @@ class UstadCacheJvmTest {
             )
 
             val cacheEntryInDb = runBlocking {
+                ustadCache.awaitUpdatesCommitted()
                 cacheDb.cacheEntryDao.findEntryByKey(Md5Digest().urlHash(urlForKey))
             }
             assertNotNull(cacheEntryInDb)
@@ -451,6 +458,7 @@ class UstadCacheJvmTest {
             )
 
             runBlocking {
+                ustadCache.awaitUpdatesCommitted()
                 cacheDb.cacheEntryDao.findEntryByKey(md5Digest.urlKey(url))
             }
         }

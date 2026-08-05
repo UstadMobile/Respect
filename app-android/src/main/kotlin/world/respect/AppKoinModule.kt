@@ -38,6 +38,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
+import nl.adaptivity.xmlutil.serialization.XML
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.koin.android.ext.koin.androidApplication
@@ -726,6 +727,7 @@ val appKoinModule = module {
             db = get(),
             cache = get(),
             enqueueRunDownloadJobUseCase = get(),
+            xml = get(),
         )
     }
 
@@ -795,6 +797,12 @@ val appKoinModule = module {
 
     single<GetXapiActivityForPublicationUseCase> {
         GetXapiActivityForPublicationUseCase()
+    }
+
+    single<XML> {
+        XML.v1 {
+            recommended_1_0_0()
+        }
     }
 
     /**
@@ -1135,6 +1143,8 @@ val appKoinModule = module {
                 schoolDb = get(),
                 uidNumberMapper = get(),
                 applicationContext = androidApplication(),
+                httpClient = get(),
+                xml = get(),
             )
         }
 

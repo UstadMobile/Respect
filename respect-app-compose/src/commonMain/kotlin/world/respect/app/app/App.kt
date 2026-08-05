@@ -32,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.rememberNavController
+import com.ustadmobile.libcache.connectivitymonitor.ConnectivityMonitor
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -154,8 +155,10 @@ fun App(
     val coroutineScope = rememberCoroutineScope()
 
     val accountManager: RespectAccountManager = koinInject()
+    val connectivityMonitor: ConnectivityMonitor = koinInject()
     val biometricAuthUseCase : BiometricAuthUseCase = koinInject()
     val activeAccount by accountManager.selectedAccountAndPersonFlow.collectAsState(null)
+    val connectivityState by connectivityMonitor.statusFlow.collectAsState()
     val topLevelNavItems = if (activeAccount?.isChild == true) {
         APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD
     } else {
@@ -202,6 +205,7 @@ fun App(
                         RespectAppBar(
                             compactHeader = (widthClass != SizeClass.EXPANDED),
                             appUiState = appUiStateVal,
+                            isConnectedToInternet = connectivityState.isConnected,
                             navController = navController,
                             topLevelItems = topLevelNavItems,
                             onProfileClick = {

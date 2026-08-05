@@ -1,6 +1,7 @@
 package world.respect.app.app
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -59,11 +60,16 @@ import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
 
 
+const val INTERNET_CONNECTED_TAG = "internet_connected"
+
+const val INTERNET_DISCONNECTED_TAG = "internet_disconnected"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RespectAppBar(
     compactHeader: Boolean,
     appUiState: AppUiState,
+    isConnectedToInternet: Boolean,
     navController: NavController,
     onProfileClick: () -> Unit = {},
     topLevelItems: List<TopNavigationItem>,
@@ -109,6 +115,19 @@ fun RespectAppBar(
     Box(
         contentAlignment = Alignment.BottomCenter
     ) {
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .testTag(
+                    if (isConnectedToInternet) {
+                        INTERNET_CONNECTED_TAG
+                    } else {
+                        INTERNET_DISCONNECTED_TAG
+                    }
+                )
+        )
+
         TopAppBar(
             title = {
                 Text(

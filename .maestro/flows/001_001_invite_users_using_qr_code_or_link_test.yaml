@@ -213,6 +213,10 @@ onFlowComplete:
 
 # Test error when device internet is not connected
 - setAirplaneMode: enabled
+- extendedWaitUntil:
+    visible:
+      id: "internet_disconnected"
+    timeout: 10000
 - tapOn:
     id : "username"
 - inputText: "teacherauser"
@@ -223,7 +227,7 @@ onFlowComplete:
 - setAirplaneMode: disabled
 - extendedWaitUntil:
     visible:
-      id: "internet_connected_tag"
+      id: "internet_connected"
     timeout: 10000
 - assertVisible:
     id: "app_title"

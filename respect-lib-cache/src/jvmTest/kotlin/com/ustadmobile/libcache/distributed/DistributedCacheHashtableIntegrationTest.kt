@@ -122,7 +122,6 @@ class DistributedCacheHashtableIntegrationTest {
             pathsProvider = TestCachePathProvider(rootDir1),
             db = cacheDb1,
             xxStringHasher = XXStringHasherCommonJvm(),
-            databaseCommitInterval = 100,
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
                 cacheDb1, XXStringHasherCommonJvm()
             ),
@@ -133,7 +132,6 @@ class DistributedCacheHashtableIntegrationTest {
             pathsProvider = TestCachePathProvider(rootDir2),
             db = cacheDb2,
             xxStringHasher = XXStringHasherCommonJvm(),
-            databaseCommitInterval = 100,
             enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
                 cacheDb2, XXStringHasherCommonJvm()
             ),

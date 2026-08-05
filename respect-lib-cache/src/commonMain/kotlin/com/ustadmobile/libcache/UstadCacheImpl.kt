@@ -50,9 +50,9 @@ import io.github.reactivecircus.cache4k.CacheEvent
 import io.ktor.http.Headers
 import io.ktor.http.Url
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.getAndUpdate
 import kotlinx.atomicfu.locks.ReentrantLock
 import kotlinx.atomicfu.locks.withLock
-import kotlinx.atomicfu.update
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -64,7 +64,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.withLock
 import kotlinx.io.asSink
 import kotlinx.io.buffered
@@ -85,7 +84,6 @@ import kotlin.uuid.Uuid
  * @param sizeLimit A function that returns the current size limit for the cache. This will be
  *        invoked on the periodic trims that are run. The limit applies to evictable entries e.g.
  *        entries which do not have any retentionlock.
- * @param databaseCommitInterval the interval period to commit updates to the database. When entries
  */
 @OptIn(ExperimentalTime::class, ExperimentalUuidApi::class)
 class UstadCacheImpl(
@@ -96,7 +94,6 @@ class UstadCacheImpl(
     sizeLimit: () -> Long = { UstadCache.DEFAULT_SIZE_LIMIT },
     private val logger: UstadCacheLogger? = null,
     private val listener: UstadCache.CacheListener? = null,
-    private val databaseCommitInterval: Int = 2_000,
     private val trimInterval: Int = 30_000,
     private val responseValidityChecker: ResponseValidityChecker = ResponseValidityChecker(),
     private val trimmer: UstadCacheTrimmer = UstadCacheTrimmer(
@@ -181,6 +178,8 @@ class UstadCacheImpl(
     private val urlWithoutSearchToKeysCache = Cache.Builder<Url, Set<String>>().build()
 
     private val urlWithoutSearchToKeysWriteLock = ReentrantLock()
+
+    private val closed = atomic(false)
 
 
     private val memoryCache = Cache.Builder<String, CacheEntryAndMetadata>()
@@ -380,71 +379,77 @@ class UstadCacheImpl(
 
         scope.launch {
             while(isActive) {
-                val updatesToCommit = listOf(
-                    updatesToCommitChannel.receiveAndUpdateBacklogSize(_updateBacklogSize)
-                ) + updatesToCommitChannel.receivePending(maxItems = 100, _updateBacklogSize)
+                try {
+                    val updatesToCommit = listOf(
+                        updatesToCommitChannel.receiveAndUpdateBacklogSize(_updateBacklogSize)
+                    ) + updatesToCommitChannel.receivePending(maxItems = 100, _updateBacklogSize)
 
-                val cacheUpdateEvents = updatesToCommit.mapNotNull {
-                    (it as? CacheEntryUpdate)?.event
-                }
+                    val cacheUpdateEvents = updatesToCommit.mapNotNull {
+                        (it as? CacheEntryUpdate)?.event
+                    }
 
-                val lastAccessedUpdates = updatesToCommit.filterIsInstance<LastAccessedUpdate>()
+                    val lastAccessedUpdates = updatesToCommit.filterIsInstance<LastAccessedUpdate>()
 
-                //Ideally this would be done by creating a map
+                    //Ideally this would be done by creating a map
 
-                db.useWriterConnection { con ->
-                    con.withTransaction(SQLiteTransactionType.IMMEDIATE) {
-                        db.cacheEntryDao.upsertList(
-                            entry = cacheUpdateEvents.mapNotNull { it.newValue.entry }
-                        )
+                    db.useWriterConnection { con ->
+                        con.withTransaction(SQLiteTransactionType.IMMEDIATE) {
+                            db.cacheEntryDao.upsertList(
+                                entry = cacheUpdateEvents.mapNotNull { it.newValue.entry }
+                            )
 
-                        val newLocks = cacheUpdateEvents.flatMap { event ->
-                            event.newValue.locks.filter { newLock ->
-                                !event.oldValue.locks.any { it.lockId == newLock.lockId }
-                            }
-                        }
-
-                        val deletedLocks = cacheUpdateEvents.flatMap { event ->
-                            event.oldValue.locks.filter { oldLock ->
-                                !event.newValue.locks.any { it.lockId == oldLock.lockId }
-                            }
-                        }
-
-                        if(newLocks.isNotEmpty())
-                            db.retentionLockDao.upsertList(newLocks)
-
-                        if(deletedLocks.isNotEmpty())
-                            db.retentionLockDao.delete(deletedLocks)
-
-                        val extraHeaderChanges = cacheUpdateEvents.mapNotNull { evt ->
-                            when {
-                                //There are no extra headers
-                                evt.newValue.extraHeaders == null && evt.oldValue.extraHeaders == null -> {
-                                    null
-                                }
-
-                                //There is no update - same as before
-                                evt.newValue.extraHeaders == evt.oldValue.extraHeaders -> {
-                                    null
-                                }
-
-                                else -> {
-                                    evt.oldValue.extraHeaders
+                            val newLocks = cacheUpdateEvents.flatMap { event ->
+                                event.newValue.locks.filter { newLock ->
+                                    !event.oldValue.locks.any { it.lockId == newLock.lockId }
                                 }
                             }
-                        }
 
-                        if(extraHeaderChanges.isNotEmpty())
-                            db.cacheEntryExtraHeadersDao.upsertList(extraHeaderChanges)
+                            val deletedLocks = cacheUpdateEvents.flatMap { event ->
+                                event.oldValue.locks.filter { oldLock ->
+                                    !event.newValue.locks.any { it.lockId == oldLock.lockId }
+                                }
+                            }
 
-                        cacheUpdateEvents.forEach {
-                            pendingCacheUpdates.remove(it.key)
-                        }
+                            if(newLocks.isNotEmpty())
+                                db.retentionLockDao.upsertList(newLocks)
 
-                        lastAccessedUpdates.forEach {
-                            db.cacheEntryDao.updateLastAccessedTime(it.key, it.accessTime)
+                            if(deletedLocks.isNotEmpty())
+                                db.retentionLockDao.delete(deletedLocks)
+
+                            val extraHeaderChanges = cacheUpdateEvents.mapNotNull { evt ->
+                                when {
+                                    //There are no extra headers
+                                    evt.newValue.extraHeaders == null && evt.oldValue.extraHeaders == null -> {
+                                        null
+                                    }
+
+                                    //There is no update - same as before
+                                    evt.newValue.extraHeaders == evt.oldValue.extraHeaders -> {
+                                        null
+                                    }
+
+                                    else -> {
+                                        evt.oldValue.extraHeaders
+                                    }
+                                }
+                            }
+
+                            if(extraHeaderChanges.isNotEmpty())
+                                db.cacheEntryExtraHeadersDao.upsertList(extraHeaderChanges)
+
+                            cacheUpdateEvents.forEach {
+                                pendingCacheUpdates.remove(it.key)
+                            }
+
+                            lastAccessedUpdates.forEach {
+                                db.cacheEntryDao.updateLastAccessedTime(it.key, it.accessTime)
+                            }
                         }
                     }
+                }catch(e: Throwable) {
+                    logger?.w(LOG_TAG, throwable = e) { "$logPrefix: exception committing updates to database"}
+                    if(isActive)
+                        delay(COMMIT_RETRY_DELAY.milliseconds)
                 }
             }
         }
@@ -454,6 +459,7 @@ class UstadCacheImpl(
         storeRequest: List<CacheEntryToStore>,
         progressListener: StoreProgressListener?
     ): List<StoreResult> {
+        assertNotClosed()
         val md5Digest = Md5Digest()
         val timeNow = Clock.System.now().toEpochMilliseconds()
         val entryPaths = pathsProvider()
@@ -697,6 +703,7 @@ class UstadCacheImpl(
      */
     override suspend fun retrieve(request: IHttpRequest): IHttpResponse? {
         logger?.i(LOG_TAG, "$logPrefix Retrieve ${request.url}")
+        assertNotClosed()
 
         val url = Url(request.url)
         val entryAndLocks = memoryCache.getOrLoadFromDb(url)
@@ -810,14 +817,17 @@ class UstadCacheImpl(
     }
 
     override suspend fun getCacheEntry(url: String): CacheEntry? {
+        assertNotClosed()
         return memoryCache.getOrLoadFromDb(Url(url)).entry?.copy()
     }
 
     override suspend fun getLocks(url: String): List<RetentionLock> {
+        assertNotClosed()
         return memoryCache.getOrLoadFromDb(Url(url)).locks
     }
 
     override suspend fun getEntries(urls: Set<String>): Map<String, CacheEntry> {
+        assertNotClosed()
         return db.useReaderConnection { con ->
             con.deferredTransaction {
                 urls.mapNotNull { url ->
@@ -830,6 +840,7 @@ class UstadCacheImpl(
     }
 
     override suspend fun getEntriesLocallyAvailable(urls: Set<String>): Map<String, Boolean> {
+        assertNotClosed()
         val hashesToUrl = urls.associateBy {
             xxStringHasher.hash(it)
         }
@@ -889,6 +900,7 @@ class UstadCacheImpl(
         logger?.v(LOG_TAG) {
             "$logPrefix add retention locks for ${locks.joinToString { it.url } }"
         }
+        assertNotClosed()
         val md5Digest = Md5Digest()
 
         return locks.map { lockRequest ->
@@ -927,6 +939,7 @@ class UstadCacheImpl(
         logger?.v(LOG_TAG) {
             "$logPrefix remove retention locks for ${locksToRemove.joinToString { "#${it.lockId}${it.url}" } }"
         }
+        assertNotClosed()
 
         locksToRemove.forEach { removeRequest ->
             memoryCache.update(Url(removeRequest.url)) { prev ->
@@ -946,14 +959,17 @@ class UstadCacheImpl(
     }
 
     override suspend fun findLocksByPublicationUid(publicationUid: Long): List<RetentionLock> {
+        assertNotClosed()
         return db.retentionLockDao.findByPublicationUid(publicationUid)
     }
 
     override suspend fun pinPublication(manifestUrl: Url) {
+        assertNotClosed()
         enqueuePinPublicationPrepareUseCase(manifestUrl)
     }
 
     override suspend fun unpinPublication(manifestUrl: Url) {
+        assertNotClosed()
         val locks = findLocksByPublicationUid(
             xxStringHasher.hash(manifestUrl.toString())
         )
@@ -976,6 +992,7 @@ class UstadCacheImpl(
     }
 
     override fun publicationPinState(manifestUrl: Url): Flow<PublicationPinState> {
+        assertNotClosed()
         return db.downloadJobItemDao.publicationPinState(
             pubManifestHash = xxStringHasher.hash(manifestUrl.toString())
         )
@@ -985,6 +1002,7 @@ class UstadCacheImpl(
         url: Url,
         extraResponseHeaders: Headers
     ) {
+        assertNotClosed()
         memoryCache.update(url) { prev ->
             prev.copy(
                 extraHeaders = CacheEntryExtraHeaders(
@@ -996,12 +1014,22 @@ class UstadCacheImpl(
         }
     }
 
+    private fun assertNotClosed() {
+        if(closed.value) {
+            val exception = IllegalStateException("$logPrefix: Cache is closed")
+            logger?.e(LOG_TAG, "Closed", throwable = exception)
+            throw exception
+        }
+    }
+
     override fun close() {
-        updatesToCommitChannel.close()
-        scope.cancel()
-
-        runBlocking {
-
+        if(!closed.getAndUpdate { true }) {
+            logger?.i(LOG_TAG, "$logPrefix: closing")
+            scope.cancel()
+            updatesToCommitChannel.close()
+            logger?.i(LOG_TAG, "$logPrefix: closed")
+        }else {
+            logger?.i(LOG_TAG, "$logPrefix: already closed")
         }
     }
 
@@ -1026,6 +1054,8 @@ class UstadCacheImpl(
          * body of the response; only the headers and metadata
          */
         const val MEMORY_CACHE_DEFAULT_NUM_ENTRIES = 10_000L
+
+        private const val COMMIT_RETRY_DELAY = 500
 
     }
 }

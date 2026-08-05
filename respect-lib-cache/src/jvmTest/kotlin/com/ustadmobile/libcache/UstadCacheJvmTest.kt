@@ -3,34 +3,32 @@ package com.ustadmobile.libcache
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.ustadmobile.ihttp.headers.IHttpHeader
-import com.ustadmobile.libcache.db.UstadCacheDb
-import com.ustadmobile.libcache.db.entities.RetentionLock
-import com.ustadmobile.libcache.headers.requireIntegrity
-import com.ustadmobile.libcache.integrity.sha256Integrity
-import com.ustadmobile.libcache.io.RangeInputStream
-import com.ustadmobile.libcache.io.uncompress
-import com.ustadmobile.libcache.md5.Md5Digest
-import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.ihttp.request.requestBuilder
 import com.ustadmobile.ihttp.response.IHttpResponse
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
+import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseJvm
-import com.ustadmobile.libcache.downloader.PinPublicationPrepareUseCase
+import com.ustadmobile.libcache.headers.requireIntegrity
+import com.ustadmobile.libcache.integrity.sha256Integrity
+import com.ustadmobile.libcache.io.RangeInputStream
+import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
+import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlHash
+import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.libcache.novarysearch.normalizeForNoVarySearchIfNotNull
 import com.ustadmobile.libcache.response.StringResponse
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import com.ustadmobile.libcache.util.LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER
+import com.ustadmobile.libcache.util.awaitUpdatesCommitted
 import com.ustadmobile.libcache.util.initNapierLog
 import com.ustadmobile.libcache.util.newFileFromResource
 import com.ustadmobile.libcache.util.storeFileAsUrl
 import io.ktor.http.Headers
 import io.ktor.http.Url
 import io.ktor.http.headersOf
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.asInputStream
 import kotlinx.io.files.Path
@@ -50,7 +48,9 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-
+/**
+ * 05/Aug/2026: closing the database using Room 2.8.4's bundled driver is causing JVM crashes.
+ */
 class UstadCacheJvmTest {
 
     @get:Rule
@@ -183,13 +183,10 @@ class UstadCacheJvmTest {
         try {
             block(this)
         }finally {
-            this.close()
+            //this.close()
         }
     }
 
-    private suspend fun UstadCacheImpl.awaitUpdatesCommitted() {
-        updateBacklogSize.first { it == 0 }
-    }
 
     data class FileCanBeCachedAndRetrievedContext(
         val cacheDb: UstadCacheDb,
@@ -223,7 +220,8 @@ class UstadCacheJvmTest {
             block(Pair(cacheDb, ustadCache))
         }finally {
             ustadCache.close()
-            cacheDb.close()
+            //See class KDoc
+            //cacheDb.close()
         }
     }
 

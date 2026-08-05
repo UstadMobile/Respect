@@ -9,6 +9,7 @@ import com.ustadmobile.ihttp.response.IHttpResponse
 import com.ustadmobile.libcache.CacheEntryToStore
 import com.ustadmobile.libcache.StoreResult
 import com.ustadmobile.libcache.UstadCache
+import com.ustadmobile.libcache.UstadCacheImpl
 import com.ustadmobile.libcache.novarysearch.NoVarySearch
 import com.ustadmobile.libcache.novarysearch.normalizeForNoVarySearchIfNotNull
 import com.ustadmobile.libcache.response.HttpPathResponse
@@ -16,6 +17,7 @@ import io.ktor.http.Headers
 import io.ktor.http.Url
 import io.ktor.http.toHttpDate
 import io.ktor.util.date.GMTDate
+import kotlinx.coroutines.flow.first
 import kotlinx.io.files.Path
 import kotlinx.io.files.SystemFileSystem
 import java.io.File
@@ -73,4 +75,8 @@ suspend fun UstadCache.storeFileAsUrl(
     )
 
     return FileStoredAsUrl(request, response, storeResult.first(), testFile)
+}
+
+suspend fun UstadCacheImpl.awaitUpdatesCommitted() {
+    updateBacklogSize.first { it == 0 }
 }

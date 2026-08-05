@@ -205,7 +205,7 @@ onFlowComplete:
 # Test login error when login credential is not valid - Invalid username
 - tapOn:
     id: "username"
-- inputText: "teacherauser"
+- inputText: "teacheruser"
 - tapOn:
     id : "password"
 - inputText: "test123"

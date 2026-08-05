@@ -133,21 +133,19 @@ fun RespectAppBar(
     ) {
         TopAppBar(
             title = {
-                Box {
-                    Text(
-                        text = appUiState.title?.let { uiTextStringResource(it) } ?: "",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.testTag("app_title"),
-                    )
+                Text(
+                    text = appUiState.title?.let { uiTextStringResource(it) } ?: "",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.testTag("app_title"),
+                )
 
-                    Text(
-                        modifier = Modifier.testTag("pending_write_count")
-                            .alpha(0f),
-                        text = pendingWriteCount.toString(),
-                        fontSize = 1.sp,
-                    )
-                }
+                Text(
+                    modifier = Modifier.testTag("pending_write_count")
+                        .alpha(0f),
+                    text = pendingWriteCount.toString(),
+                    fontSize = 1.sp,
+                )
             },
             navigationIcon = {
                 if (canGoBack) {

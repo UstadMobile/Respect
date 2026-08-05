@@ -1,6 +1,7 @@
 package world.respect.datalayer.http.schooldirectory
 
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.retry
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
@@ -48,7 +49,12 @@ class SchoolDirectoryEntryDataSourceHttp(
                     url = dir.baseUrl.appendEndpointSegments("api/directory/school"),
                     dataLoadParams = loadParams,
                 ) {
+                    retry {
+                        retryOnExceptionOrServerErrors(DEFAULT_MAX_RETRIES)
+                    }
+
                     headers[HttpHeaders.CacheControl] = "no-store"
+
                 }.map { dataLoadState ->
                     dataLoadState.map { list ->
                         list.map { it.copy(inDirectoryUrl = dir.baseUrl) }
@@ -102,6 +108,10 @@ class SchoolDirectoryEntryDataSourceHttp(
                 dir.baseUrl.appendEndpointSegments("api/directory/school")
             ) {
                 headers[HttpHeaders.CacheControl] = "no-store"
+
+                retry {
+                    retryOnExceptionOrServerErrors(DEFAULT_MAX_RETRIES)
+                }
             }.map { list ->
                 list.map { it.copy(inDirectoryUrl = dir.baseUrl) }
             }
@@ -120,5 +130,11 @@ class SchoolDirectoryEntryDataSourceHttp(
         return httpClient.getAsDataLoadState<SchoolDirectoryEntry>(
             url.resolve(RESPECT_SCHOOL_JSON_PATH)
         )
+    }
+
+    companion object {
+
+        const val DEFAULT_MAX_RETRIES = 3
+
     }
 }

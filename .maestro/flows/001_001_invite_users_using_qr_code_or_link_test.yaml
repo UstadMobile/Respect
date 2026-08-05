@@ -214,7 +214,7 @@ onFlowComplete:
 - runFlow:
     file: "subflows/erase_text.yaml"
     env:
-      TEXT: "teacherauser"
+      TEXT: "teacheruser"
 
 # Test error when device internet is not connected
 - setAirplaneMode: enabled

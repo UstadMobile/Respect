@@ -58,6 +58,10 @@ class SaveDemoAppToStaticFilesUseCase(
             )
         }
 
+        File(destDir, "index.html").writeBytes(
+            this::class.java.getResourceAsStream("/demoapp/index.html")!!.readBytes()
+        )
+
         val gradesDir = File(destDir, GRADES_DIR_NAME).also { it.mkdirs() }
         (1..DemoConstants.NUM_LESSONS).forEach { gradeNum ->
             val gradeDir = File(gradesDir, gradeNum.toString()).also {

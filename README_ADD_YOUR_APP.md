@@ -5,8 +5,10 @@ Educational Experience Launcher.
 
 The launcher supports web technology based apps (HTML/Javascript)
 and Android native apps. Compatible apps use [OPDS 2.0](https://specs.opds.io/opds-2.0.html) to 
-provide a catalog of available learning units and [xAPI](https://xapi.com/overview/) to send data
+provide a collection of available learning units and [xAPI](https://xapi.com/overview/) to send data
 on lesson completion back to the launcher.
+
+You can find a full example collection of learning units at [https://demo.openeel.org](https://demo.openeel.org/).
 
 Terminology:
 * **Launchable Education App**: an educational app (e.g. math app, language app, assessment app) that 
@@ -14,7 +16,7 @@ Terminology:
 * **Learning Unit**: a distinct unit within a launchable app e.g. a lesson, assessment, etc. Each 
   learning unit is represented by a [publication manifest](https://readium.org/webpub-manifest/).
 
-## Step 1: Create an app manifest and OPDS app catalog for your app
+## Step 1: Create an app manifest and OPDS collection for your app
 An Open Educational Experience Launcher gives students and teachers a way to browse a different 
 apps, launch them, browse learning units within them, and make/share collections of learning units.
 
@@ -77,7 +79,7 @@ For a more options see [README_LAUNCHABLE_APP.md](../respect-lib-opds-model/READ
 
 **B) Create a default collection of learning units:**
 
-Example (default-catalog.json):
+Example (default-collection.json):
 ```json
 {
   "metadata": {
@@ -85,7 +87,7 @@ Example (default-catalog.json):
   },
 
   "links": [
-    {"rel": "self", "href": "https://demo.openeel.org/default-catalog.json", "type": "application/opds+json"}
+    {"rel": "self", "href": "https://demo.openeel.org/default-collection.json", "type": "application/opds+json"}
   ],
 
   "publications": [

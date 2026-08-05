@@ -276,7 +276,6 @@ class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
             argWhere { entries -> entries.any { it.request.url == requestUrl } }
         )
 
-        runBlocking { ustadCache.commit() }
         val storedEntryAfterRequest = runBlocking {
             cacheDb.cacheEntryDao.findEntryByKey(
                 Md5Digest().urlKey(requestUrl))
@@ -298,7 +297,6 @@ class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
         val validationRequest = mockWebServer.takeRequest()
         assertEquals(etagVal, validationRequest.getHeader("if-none-match"))
 
-        runBlocking { ustadCache.commit() }
         val storedEntryAfterValidation = runBlocking {
             cacheDb.cacheEntryDao.findEntryByKey(Md5Digest().urlKey(requestUrl))
         }

@@ -22,6 +22,8 @@ interface GetTokenAndUserProfileWithCredentialUseCase {
 
     companion object {
 
+        const val LOGTAG_AUTH = "Auth"
+
         const val PARAM_NAME_USERNAME = "username"
 
     }

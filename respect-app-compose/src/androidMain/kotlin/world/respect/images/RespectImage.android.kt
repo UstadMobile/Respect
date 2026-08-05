@@ -3,7 +3,7 @@ package world.respect.images
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
-import world.respect.app.R
+import world.respect.appcompose.R
 
 
 private val nameMap = mapOf(

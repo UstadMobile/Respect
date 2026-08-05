@@ -1,6 +1,4 @@
 appId: world.respect.app
-tags:
-  - browselessons
 onFlowStart:
   - clearState: world.respect.app
   - runScript:
@@ -12,16 +10,21 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "002_browse_lessons_test"
+        NAME: "002_001_browse_lessons_test"
 
 onFlowComplete:
   - runFlow:
       file: "subflows/teardown.yaml"
       env:
         NAME: "db-final"
-        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
+- assertVisible: "Home"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- tapOn:
+    id: "nav_home"
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add from Link"
@@ -32,13 +35,14 @@ onFlowComplete:
     id: "app_title"
     text: "App detail"
 - assertVisible: "Example Web App"
-- assertVisible: "Add App"
+- assertVisible: "Add to school apps"
 # verify App got added to Apps section
-- tapOn: "Add App"
-- tapOn: "Apps"
+- tapOn: "Add to school apps"
+- tapOn:
+    id: "nav_home"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - assertVisible: "Example Web App"
 - tapOn: "Example Web App"
 - assertVisible: "Lessons"
@@ -46,7 +50,6 @@ onFlowComplete:
 - tapOn: "Examples"
 - tapOn: "Lesson 001"
 - assertVisible: "Lesson 001"
-- assertVisible: "App name"
 - assertVisible: "Download"
 - tapOn: "Open"
 - extendedWaitUntil:
@@ -55,7 +58,8 @@ onFlowComplete:
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
 - setAirplaneMode: disabled
-- tapOn: "Apps"
+- tapOn:
+    id: "nav_home"
 - tapOn: "Example Web App"
 - tapOn: "Lessons"
 - tapOn: "Examples"
@@ -70,10 +74,10 @@ onFlowComplete:
 # Set device on Offline mode
 - setAirplaneMode: enabled
 - assertVisible: "Downloaded"
-- tapOn: "Apps"
 - stopApp
 - launchApp
-- assertVisible: "Apps"
+- assertVisible:
+    id: "nav_home"
 - tapOn: "Example Web App"
 - tapOn: "Lessons"
 - tapOn: "Examples"
@@ -89,10 +93,56 @@ onFlowComplete:
 - assertVisible: "Assignment Result.*"
 - tapOn: "Score"
 - inputText: 1
-- tapOn: "Send statement"
-- assertVisible: "Statement sent.*"
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn: "Send statement"
+      - assertVisible: "Statement sent.*"
 - tapOn: "Close"
-- setAirplaneMode: disabled
+- setAirplaneMode: disabled # Set device on Online mode
+- tapOn:
+    id: "nav_home"
 - tapOn: "Apps"
 - assertVisible: "Example Web App"
-
+- tapOn: "Bookmarks"
+- assertVisible: "No bookmarks yet"
+- assertVisible: "Bookmark a lesson or a playlist to see it here."
+- tapOn: "Apps"
+- tapOn: "Example Web App"
+- tapOn: "Examples"
+- tapOn: "Lesson 001"
+- assertVisible: "Lesson 001"
+- tapOn: "Open"
+- extendedWaitUntil:
+    visible: "Lesson 001"
+    timeout: 1000
+- assertVisible: "Hello World Lesson"
+- tapOn: "Close"
+- assertVisible: "Download"
+- assertVisible: "Assign"
+- tapOn: "Bookmark"
+- tapOn:
+    id: "nav_home"
+- tapOn: "Apps"
+- tapOn: "Example Web App"
+- tapOn: "Examples"
+- tapOn: "Statement Maker"
+- tapOn: "Bookmark"
+- tapOn:
+    id: "nav_home"
+- tapOn: "Bookmarks"
+- assertVisible: "Lesson 001"
+- assertVisible: "Statement Maker"
+- assertVisible:
+        id: "nav_home"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- tapOn: "Bookmarks"
+- assertVisible: "Lesson 001"
+- assertVisible: "Statement Maker"
+- tapOn:                       #Remove bookmark
+    text: "Bookmark"
+    index: 0
+- assertNotVisible: "Lesson 001"
+- assertVisible: "Statement Maker"

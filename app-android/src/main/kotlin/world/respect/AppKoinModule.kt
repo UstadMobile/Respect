@@ -45,7 +45,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import world.respect.app.config.RespectBuildConfig
+import world.respect.app.BuildConfig
 import world.respect.callback.AddDirectoriesFromPropertiesUseCase
 import world.respect.callback.AddSchoolDirectoryCallback
 import world.respect.callback.migrate6to8AddDirectories
@@ -158,8 +158,15 @@ import world.respect.shared.domain.e2eartifactupload.E2EArtifactUploadUseCase
 import world.respect.shared.domain.e2eartifactupload.E2EArtifactUploadUseCaseClient
 import world.respect.shared.domain.getwarnings.GetWarningsUseCase
 import world.respect.shared.domain.getwarnings.GetWarningsUseCaseAndroid
+import world.respect.shared.domain.license.GetLicenseLabelUseCaseAndroid
+import world.respect.shared.domain.bookmark.AddBookmarkUseCase
+import world.respect.shared.domain.bookmark.RemoveBookmarkUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
+import world.respect.shared.domain.launchers.LaunchSendWhatsAppUseCase
+import world.respect.shared.domain.launchers.LaunchSendWhatsAppUseCaseAndroid
+import world.respect.shared.domain.openexternallink.OpenExternalLinkUseCase
+import world.respect.shared.domain.launchers.OpenExternalLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -184,8 +191,6 @@ import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCas
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCase
 import world.respect.shared.domain.usagereporting.SetUsageReportingEnabledUseCaseAndroid
 import world.respect.shared.domain.validateemail.ValidateEmailUseCase
-import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.app_name
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.NavResultReturnerImpl
 import world.respect.shared.util.di.RespectAccountScopeId
@@ -208,6 +213,7 @@ import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
+import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
@@ -229,6 +235,7 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
+import world.respect.shared.domain.license.GetLicenseLabelUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCaseAndroid
@@ -273,6 +280,7 @@ import world.respect.shared.viewmodel.statement.detail.RawStatementViewModel
 import world.respect.shared.viewmodel.statement.detail.StatementDetailViewModel
 import world.respect.shared.viewmodel.statement.list.StatementListViewModel
 import world.respect.shared.domain.xapi.xapinanohttpd.XapiResourceProviderAndroid
+import world.respect.shared.viewmodel.bookmark.BookmarkListViewModel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -319,7 +327,7 @@ val appKoinModule = module {
         XXHashUidNumberMapper(xxStringHasher = get())
     }
 
-    single<ConnectivityMonitor> {
+    single<ConnectivityMonitor>(createdAtStart = true) {
         ConnectivityMonitorAndroid(androidContext())
     }
 
@@ -386,6 +394,7 @@ val appKoinModule = module {
     viewModelOf(::OtherOptionsSignupViewModel)
     viewModelOf(::EnterPasswordSignupViewModel)
     viewModelOf(::AccountListViewModel)
+    viewModelOf(::ShareFeedbackViewModel)
     viewModelOf(::ManageAccountViewModel)
     viewModelOf(::PersonListViewModel)
     viewModelOf(::InvitePersonViewModel)
@@ -418,6 +427,15 @@ val appKoinModule = module {
     viewModelOf(::StatementListViewModel)
     viewModelOf(::StatementDetailViewModel)
     viewModelOf(::RawStatementViewModel)
+    viewModelOf(::BookmarkListViewModel)
+
+    single<LaunchSendWhatsAppUseCase> {
+        LaunchSendWhatsAppUseCaseAndroid(androidContext())
+    }
+
+    single<OpenExternalLinkUseCase> {
+        OpenExternalLinkUseCaseAndroid(androidContext())
+    }
 
     single<GetOfflineStorageOptionsUseCase> {
         GetOfflineStorageOptionsUseCaseAndroid(
@@ -659,6 +677,13 @@ val appKoinModule = module {
         GetWarningsUseCaseAndroid()
     }
 
+    single<GetLicenseLabelUseCase> {
+        GetLicenseLabelUseCaseAndroid(
+            context = androidContext(),
+            json = get(),
+        )
+    }
+
     single<EncryptPersonPasswordUseCase> {
         EncryptPersonPasswordUseCaseImpl()
     }
@@ -772,7 +797,6 @@ val appKoinModule = module {
         GetXapiActivityForPublicationUseCase()
     }
 
-
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -871,7 +895,9 @@ val appKoinModule = module {
         scoped<CreatePublicKeyCredentialCreationOptionsJsonUseCase> {
             CreatePublicKeyCredentialCreationOptionsJsonUseCase(
                 encodeUserHandleUseCase = get(),
-                appName = Res.string.app_name,
+                appName = {
+                    "FFS" //getString(Res.string.app_name)
+                },
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
             )
         }
@@ -986,7 +1012,7 @@ val appKoinModule = module {
                 ),
                 checkPersonPermissionUseCase = get(),
                 json = get(),
-                defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
+                defaultAppCatalogUrl = BuildConfig.RESPECT_DEFAULT_APP_LIST,
                 schoolUrl = accountScopeId.schoolUrl,
             )
         }
@@ -1004,7 +1030,7 @@ val appKoinModule = module {
                     tokenProvider = get(),
                     validationHelper = get(),
                     json = get(),
-                    defaultAppCatalogUrl = RespectBuildConfig.RESPECT_DEFAULT_APPLIST,
+                    defaultAppCatalogUrl = BuildConfig.RESPECT_DEFAULT_APP_LIST,
                     opdsFeedValidationHelper = localDs.opdsFeedDataSource,
                     opdsPublicationValidationHelper = localDs.opdsPublicationDataSource
                         .publicationNetworkValidationHelper
@@ -1120,13 +1146,25 @@ val appKoinModule = module {
             )
         }
 
-        scoped<UpdateClazzStudentXapiGroupUseCase>() {
+        scoped<UpdateClazzStudentXapiGroupUseCase> {
             val accountScopeId = RespectAccountScopeId.parse(id)
 
             UpdateClazzStudentXapiGroupUseCase(
                 schoolDataSource = get(),
                 authenticatedUserPrincipalId = accountScopeId.accountPrincipalId,
                 schoolUrl = accountScopeId.schoolUrl,
+            )
+        }
+
+        scoped<AddBookmarkUseCase> {
+            AddBookmarkUseCase(
+                schoolDataSource = get(),
+            )
+        }
+
+        scoped<RemoveBookmarkUseCase> {
+            RemoveBookmarkUseCase(
+                schoolDataSource = get(),
             )
         }
 

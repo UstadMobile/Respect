@@ -7,6 +7,7 @@ import world.respect.datalayer.db.school.opds.entities.OpdsFeedMetadataEntity
 import world.respect.datalayer.db.school.opds.entities.OpdsGroupEntity
 import world.respect.datalayer.db.school.opds.entities.OpdsPublicationEntity
 import world.respect.datalayer.db.school.opds.entities.ReadiumLinkEntity
+import world.respect.datalayer.db.school.opds.entities.ReadiumSubjectEntity
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.ReadiumLink
@@ -18,6 +19,7 @@ data class OpdsGroupEntities(
     val publications: List<OpdsPublicationEntity>,
     val links: List<ReadiumLinkEntity>,
     val langMapEntities: List<LangMapEntity>,
+    val subjectEntities: List<ReadiumSubjectEntity>,
 )
 
 fun OpdsGroup.asEntities(
@@ -76,7 +78,8 @@ fun OpdsGroup.asEntities(
             addAll(links.asEntitiesSub(ReadiumLinkEntity.PropertyType.OPDS_GROUP_LINKS))
             addAll(navigation.asEntitiesSub(ReadiumLinkEntity.PropertyType.OPDS_GROUP_NAVIGATION))
             addAll(publicationEntities.flatMap { it.linkEntities })
-        }
+        },
+        subjectEntities = publicationEntities.flatMap { it.subjectEntities },
     )
 }
 
@@ -103,6 +106,7 @@ fun OpdsGroupEntities.asModel(
                 opdsPublicationEntity = publication,
                 langMapEntities = langMapEntities.filter { it.lmeTopParentUid1 == publication.opeUid },
                 linkEntities = links.filter { it.rlePropFk == publication.opeUid },
+                subjectEntities = subjectEntities.filter { it.rseTopParentUid == publication.opeUid },
             ).asModel(json).data
         }
     )

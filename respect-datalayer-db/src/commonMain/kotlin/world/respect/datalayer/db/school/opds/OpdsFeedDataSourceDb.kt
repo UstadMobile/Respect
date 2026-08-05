@@ -48,6 +48,7 @@ class OpdsFeedDataSourceDb(
             publications = schoolDb.getOpdsPublicationEntityDao().findByFeedUid(
                 this.ofeUid),
             groups = schoolDb.getOpdsGroupEntityDao().findByFeedUid(this.ofeUid),
+            subjects = schoolDb.getReadiumSubjectEntityDao().findAllByFeedUid(this.ofeUid),
         ).asModel(json)
     }
 

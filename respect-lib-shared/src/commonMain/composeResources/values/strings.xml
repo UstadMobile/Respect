@@ -15,9 +15,11 @@
     <string name="password_not_set_error">Password is required before saving</string>
     <string name="done">Done</string>
     <string name="try_it">Try it</string>
-    <string name="add_app">Add App</string>
+    <string name="add_app">Add to school apps</string>
+    <string name="google_play">Get it on Google Play</string>
     <string name="lessons">Lessons</string>
     <string name="apps">Apps</string>
+    <string name="home">Home</string>
     <string name="app">App</string>
     <string name="assignments">Assignments</string>
     <string name="assignment">Assignment</string>
@@ -46,6 +48,11 @@
     <string name="share">Share</string>
     <string name="assign">Assign</string>
     <string name="bookmark">Bookmark</string>
+    <string name="no_bookmark">No bookmarks yet</string>
+    <string name="msg_see_bookmark">Bookmark a lesson or a playlist to see it here.</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="remove_bookmark">Bookmark removed</string>
+    <string name="undo">Undo</string>
     <string name="related_lessons">Related Lessons</string>
     <string name="duration">Duration</string>
     <string name="more_info">More Info</string>
@@ -66,6 +73,7 @@
     <string name="already_have_account">I already have an account</string>
     <string name="add_my_school">Add my school</string>
     <string name="required_field">Required field</string>
+    <string name="enter_one_field">If you need response, one of the field is required</string>
     <string name="login">Login</string>
     <string name="userId_placeholder">user@school.example.org</string>
     <string name="password_label">Password</string>
@@ -232,6 +240,25 @@
 
 
     <string name="add_account">Add account</string>
+    <string name="send_feedback">Send feedback</string>
+    <string name="feedback_submitted">Feedback submitted</string>
+    <string name="feedback_submitted_message">Thank you for your feedback. Respect team will review it internally.</string>
+    <string name="quick_contact">Quick Contact</string>
+    <string name="whatsapp_respect">Message the developers on WhatsApp</string>
+    <string name="email_respect">Email the developers</string>
+    <string name="public_forum">Public forum</string>
+    <string name="category">Category</string>
+    <string name="your_feedback">Your feedback</string>
+    <string name="describe_feedback_placeholder">Describe your issue or feedback in detail</string>
+    <string name="want_response_from_team">I want a response from the Respect team</string>
+    <string name="submit_feedback">Submit feedback</string>
+    <string name="feedback_respect">Feedback about RESPECT</string>
+    <string name="category_launcher">Respect launcher related issues</string>
+    <string name="category_integrated_apps">Integrated Apps related issues</string>
+    <string name="category_question">Question</string>
+    <string name="category_rate_us">Rate us</string>
+    <string name="category_other">Other</string>
+    <string name="error_message">Error: try again</string>
     <string name="logout">Logout</string>
     <string name="profile">Profile</string>
 
@@ -581,6 +608,10 @@
 
     <string name="license_text">RESPECT App. Copyright 2025-2026 UstadMobile FZ-LLC.</string>
 
+    <string name="open_source">Open Source</string>
+
+    <string name="proprietary">Proprietary</string>
+
     <string name="respect_is_open_source">The RESPECT App is open-source software licensed under the AGPLv3 license. Contains open source libraries copyright respective contributors.</string>
 
     <string name="supported_by_spix_foundation">Supported by Spix Foundation.</string>
@@ -646,4 +677,9 @@
 
     <string name="invalid_username_password">Invalid username/password</string>
     <string name="network_error_check_try_again">Network error: check your connection and try again</string>
+
+    <string name="not_found">Not found</string>
+    <string name="license">License</string>
+    <string name="clock_icon">Clock</string>
+
 </resources>

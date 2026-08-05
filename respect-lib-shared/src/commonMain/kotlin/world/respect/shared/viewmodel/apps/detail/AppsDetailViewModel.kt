@@ -32,7 +32,11 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.lib.dataloadstate.ext.map
-import world.respect.lib.opds.model.respectAppDefaultLessonList
+import world.respect.lib.opds.model.findCollection
+import world.respect.lib.opds.model.findHighlightCardLinks
+import world.respect.lib.opds.model.findLicenseLink
+import world.respect.lib.opds.model.findGooglePlayLink
+import world.respect.lib.opds.model.findTermsOfServiceLink
 import world.respect.lib.opds.model.toStringMap
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.objectActivityOrNull
@@ -48,14 +52,22 @@ import world.respect.shared.domain.xapi.createBlankAppListingStatement
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps_detail
 import world.respect.shared.generated.resources.invalid_link
+import world.respect.shared.domain.license.GetLicenseLabelUseCase
+import world.respect.shared.domain.license.GetLicenseLabelUseCase.LicenseLabelResult
+import world.respect.shared.domain.school.LaunchCustomTabUseCase
 
 data class AppsDetailUiState(
     val appDetail: DataLoadState<OpdsPublication>? = null,
     val publications: List<OpdsPublication> = emptyList(),
     val navigation: List<ReadiumLink> = emptyList(),
     val group: List<OpdsGroup> = emptyList(),
+    val highlightCards: List<ReadiumLink> = emptyList(),
+    val licenseLink: ReadiumLink? = null,
+    val googlePlayLink: ReadiumLink? = null,
+    val termsOfServiceLink: ReadiumLink? = null,
     val isAdded: Boolean = false,
     val showAddRemoveButton: Boolean = false,
+    val licenseLabelResult: LicenseLabelResult? = null,
 )
 
 class AppsDetailViewModel(
@@ -74,6 +86,10 @@ class AppsDetailViewModel(
 
     private val route: AppsDetail = savedStateHandle.toRoute()
 
+    private val getLicenseLabelUseCase: GetLicenseLabelUseCase by inject()
+
+    private val launchCustomTabUseCase: LaunchCustomTabUseCase by inject()
+
     init {
         _appUiState.update {
             it.copy(
@@ -90,15 +106,29 @@ class AppsDetailViewModel(
             ).collectLatest { result ->
                 _uiState.update { prev ->
                     prev.copy(
-                        appDetail = result.map { it.resolve(route.manifestUrl) }
+                        appDetail = result.map { it.resolve(route.manifestUrl) },
+                        highlightCards = result.dataOrNull()?.findHighlightCardLinks().orEmpty(),
+                        licenseLink = result.dataOrNull()?.findLicenseLink(),
+                        googlePlayLink = result.dataOrNull()?.findGooglePlayLink(),
+                        termsOfServiceLink = result.dataOrNull()?.findTermsOfServiceLink(),
                     )
                 }
 
-                val defaultLessonLink = result.dataOrNull()?.respectAppDefaultLessonList()
-                    ?: return@collectLatest
+                launch {
+                    result.dataOrNull()?.findLicenseLink()?.also { licenseLink ->
+                        val licenseLabelResult = getLicenseLabelUseCase(
+                            route.manifestUrl.resolve(licenseLink.href).toString()
+                        )
+
+                        _uiState.update { it.copy(licenseLabelResult = licenseLabelResult) }
+                    }
+                }
+
+
+                val collectionLink = result.dataOrNull()?.findCollection() ?: return@collectLatest
 
                 schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
-                    url = route.manifestUrl.resolve(defaultLessonLink.href),
+                    url = route.manifestUrl.resolve(collectionLink.href),
                     params = DataLoadParams()
                 ).collect { result ->
                     when (result) {
@@ -114,8 +144,10 @@ class AppsDetailViewModel(
                             }
                         }
 
+
                         else -> {}
                     }
+
                 }
             }
         }
@@ -147,7 +179,7 @@ class AppsDetailViewModel(
 
     fun onClickLessonList() {
         val appManifest = uiState.value.appDetail?.dataOrNull()
-        appManifest?.respectAppDefaultLessonList()?.also { defaultLessonListLink ->
+        appManifest?.findCollection()?.also { defaultLessonListLink ->
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     LearningUnitList.create(
@@ -159,13 +191,14 @@ class AppsDetailViewModel(
             )
         }
     }
+
     fun onClickPublication(publication: OpdsPublication) {
         try {
             val publicationHref = publication.links.selfPublicationLinkOrNull()?.href
                 ?: throw IllegalArgumentException().withUiText(Res.string.invalid_link.asUiText())
 
             val refererUrl = uiState.value.appDetail?.dataOrNull()
-                ?.respectAppDefaultLessonList()?.href
+                ?.findCollection()?.href
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
@@ -196,10 +229,6 @@ class AppsDetailViewModel(
         )
     }
 
-    fun onClickTry() {
-        /*TRY Button Click*/
-    }
-
     fun onClickAdd() {
         viewModelScope.launch {
             val actor = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent ?: run {
@@ -209,19 +238,24 @@ class AppsDetailViewModel(
 
             val statement = createBlankAppListingStatement(
                 appActivityId = route.manifestUrl.toString(),
-                appTitle = uiState.value.appDetail?.dataOrNull()?.metadata?.title?.toStringMap() ?: emptyMap(),
+                appTitle = uiState.value.appDetail?.dataOrNull()?.metadata?.title?.toStringMap()
+                    ?: emptyMap(),
                 actor = actor,
                 manifestUrl = route.manifestUrl.toString()
             )
             schoolDataSource.xapiResource.statements.post(listOf(statement))
         }
     }
-    companion object {
-        const val BUTTONS_ROW = "buttons_row"
-        const val LESSON_HEADER = "lesson_header"
-        const val SCREENSHOT = "screenshot"
-        const val LEARNING_UNIT_LIST = "learning_unit_list"
-        const val SELF = "self"
-        const val APP_DETAIL = "app_detail"
+
+    fun onClickHighlightCard(hrefLink: String) {
+        launchCustomTabUseCase(Url(hrefLink))
+    }
+
+    fun onClickLicense(hrefLink: String) {
+        launchCustomTabUseCase(Url(hrefLink))
+    }
+
+    fun onClickGooglePlay(hrefLink: String) {
+        launchCustomTabUseCase(Url(hrefLink))
     }
 }

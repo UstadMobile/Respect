@@ -86,7 +86,7 @@ class ReportDetailViewModel(
                     reportUid = reportUid.toLong(),
                     reportOptions = report.dataOrNull()?.reportOptions ?: ReportOptions(),
                     accountPersonUid = 0L,
-                    timeZone = TimeZone.currentSystemDefault()
+                    timeZoneId = TimeZone.currentSystemDefault().id
                 )
                 runReportUseCase(request).collect { reportResult ->
                     val xAxisFormatter = createGraphFormatterUseCase(

@@ -13,8 +13,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -50,7 +52,7 @@ import world.respect.navigation.NavCommandEffect
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.apps
+import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.assignments
 import world.respect.shared.generated.resources.parents_only
 import world.respect.shared.generated.resources.cancel
@@ -64,8 +66,7 @@ import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonList
 import world.respect.shared.navigation.RespectComposeNavController
-import world.respect.shared.resources.StringResourceUiText
-import world.respect.shared.resources.StringUiText
+import world.respect.shared.resources.getUiTextString
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.SnackBarFlowDispatcher
@@ -80,6 +81,7 @@ data class TopNavigationItem(
     val icon: ImageVector,
     val label: StringResource,
     val routeName: String,
+    val testTag: String,
 )
 
 private val routeNamePrefix = "world.respect.shared.navigation"
@@ -88,26 +90,30 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
     TopNavigationItem(
         destRoute = Home,
         icon = Icons.Filled.GridView,
-        label = Res.string.apps,
+        label = Res.string.home,
         routeName = "$routeNamePrefix.Home",
+        testTag = "nav_home",
     ),
     TopNavigationItem(
         destRoute = AssignmentList,
         icon = Icons.Filled.ImportContacts,
         label = Res.string.assignments,
-        routeName = "$routeNamePrefix.Assignment"
+        routeName = "$routeNamePrefix.Assignment",
+        testTag = "nav_assignments",
     ),
     TopNavigationItem(
         destRoute = ClazzList,
         icon = Icons.AutoMirrored.Filled.LibraryBooks,
         label = Res.string.classes,
         routeName = "$routeNamePrefix.ClazzList",
+        testTag = "nav_classes",
     ),
     TopNavigationItem(
         destRoute = PersonList(isTopLevel = true),
         icon = Icons.Filled.Person,
         label = Res.string.people,
         routeName = "$routeNamePrefix.PersonList",
+        testTag = "nav_people",
     ),
 )
 val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
@@ -115,13 +121,15 @@ val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(
         destRoute = AssignmentList,
         icon = Icons.Filled.ImportContacts,
         label = Res.string.assignments,
-        routeName = "$routeNamePrefix.Assignment"
+        routeName = "$routeNamePrefix.Assignment",
+        testTag = "nav_assignments",
     ),
     TopNavigationItem(
         destRoute = Home,
         icon = Icons.Filled.GridView,
-        label = Res.string.apps,
+        label = Res.string.home,
         routeName = "$routeNamePrefix.Home",
+        testTag = "nav_home",
     ),
 )
 
@@ -182,18 +190,17 @@ fun App(
 
     val koin = getKoin()
 
-    LaunchedEffect(Unit) {
-        koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest {
-            val uiText = it.message
-            val message = if(uiText is StringUiText) {
-                uiText.text
-            }else if(uiText is StringResourceUiText) {
-                getString(uiText.resource)
-            }else {
-                ""
-            }
 
-            snackbarHostState.showSnackbar(message, it.action)
+    LaunchedEffect(Unit) {
+        koin.get<SnackBarFlowDispatcher>().snackFlow.collectLatest { snack->
+            val result = snackbarHostState.showSnackbar(
+                message = getUiTextString(snack.message),
+                actionLabel = snack.action?.let { getUiTextString(it) },
+                duration = SnackbarDuration.Short,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                snack.onAction?.invoke()
+            }
         }
     }
 
@@ -242,6 +249,7 @@ fun App(
 
                                     if(!skipIt) {
                                         NavigationBarItem(
+                                            modifier = Modifier.testTag(item.testTag),
                                             icon = {
                                                 Icon(item.icon, contentDescription = null)
                                             },

@@ -109,7 +109,7 @@ class LaunchAppUseCaseAndroid(
         intent.flags = FLAG_ACTIVITY_NEW_TASK
         val launchUrlStr = webViewLaunchUrl.toString()
         intent.putExtra(EXTRA_URL, launchUrlStr)
-        Napier.i("LaunchAppUseCaseAndroid: launching $launchUrlStr")
+        Napier.i("LaunchAppUseCaseAndroid: launching WebViewActivity for url $launchUrlStr")
         appContext.startActivity(intent)
     }
 

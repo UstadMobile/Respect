@@ -39,11 +39,24 @@ onFlowComplete:
       PASSWORD: "test123"
 - assertVisible:
         id: "nav_home"
+- tapOn: "Apps"
+- assertVisible:
+    id: "app_title"
+    text: "Apps"
+- tapOn: "Example Web App"
+- tapOn: "Lessons"
+- tapOn: "Examples"
+- assertVisible: "Lesson 001"
+- assertVisible: "Statement Maker"
+- assertVisible: "JS Tetris"
+- assertVisible: "Assignment Result Statement Demo"
+- tapOn: "Apps"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
     text: "Classes"
 - assertVisible: "TestClass"
+- setAirplaneMode: enabled
 - tapOn: "Assignments"
 - tapOn:
     id: "floating_action_button"   #  +Assignment button
@@ -97,6 +110,12 @@ onFlowComplete:
 - tapOn: "Examples"
 - tapOn: "Assignment Result Statement Demo"
 - tapOn: "Save"
+- assertVisible:
+    id: "app_title"
+    text: "Homework 1"
+- setAirplaneMode: disabled
+- tapOn: "Assignments"
+- tapOn: "Homework 1"
 - assertVisible:
     id: "app_title"
     text: "Homework 1"

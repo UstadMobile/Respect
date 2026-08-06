@@ -21,17 +21,17 @@ import world.respect.shared.util.getFlagEmoji
  */
 @Composable
 fun CountryFlag(
-    schoolUrl: Url,
+    url: Url,
     modifier: Modifier = Modifier,
     getCountryForUrlUseCase: GetCountryForUrlUseCase = koinInject(),
 ) {
-    var countryCode by remember(schoolUrl) { mutableStateOf<String?>(null) }
+    var countryCode by remember(url) { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(schoolUrl) {
+    LaunchedEffect(url) {
         countryCode = try {
-            getCountryForUrlUseCase(schoolUrl)
+            getCountryForUrlUseCase(url)
         } catch (e: Exception) {
-            Napier.w("CountryFlag: could not get country for $schoolUrl", e)
+            Napier.w("CountryFlag: could not get country for $url", e)
             null
         }
     }

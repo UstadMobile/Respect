@@ -9,9 +9,6 @@ import io.github.aakira.napier.Napier
  * ISO 3166-1 alpha-2 country code, e.g. "DE" becomes the indicator for D followed by the
  * indicator for E.
  *
- * Each regional indicator is above the range of a single Kotlin Char, so it is written as two
- * Chars: a fixed prefix, followed by a Char which counts up from the indicator for 'A'.
- *
  * References:
  * - Emoji flag sequences: https://unicode.org/reports/tr51/
  * - Regional indicator code chart: https://www.unicode.org/charts/PDF/U1F100.pdf
@@ -33,21 +30,14 @@ fun getFlagEmoji(countryCode: String?): String {
 
     return buildString {
         code.forEach { letter ->
-            append(REGIONAL_INDICATOR_PREFIX)
-            append(REGIONAL_INDICATOR_A + (letter - 'A'))
+            append(Character.toChars(REGIONAL_INDICATOR_A + (letter - 'A')))
         }
     }
 }
 
-/**
- * First of the two Chars used to write any regional indicator symbol. This is the same for all
- * 26 letters.
- */
-private const val REGIONAL_INDICATOR_PREFIX = '\uD83C'
-
-/**
- * Second Char for REGIONAL INDICATOR SYMBOL LETTER A (U+1F1E6). B, C, D etc follow sequentially.
- */
-private const val REGIONAL_INDICATOR_A = '\uDDE6'
+/** Code point for REGIONAL INDICATOR SYMBOL LETTER A. B, C, D etc follow sequentially.
+ * 1F1E6 [A] REGIONAL INDICATOR SYMBOL LETTER A as per https://www.unicode.org/charts/PDF/U1F100.pdf
+ **/
+private const val REGIONAL_INDICATOR_A = 0x1F1E6
 
 private const val COUNTRY_CODE_LENGTH = 2

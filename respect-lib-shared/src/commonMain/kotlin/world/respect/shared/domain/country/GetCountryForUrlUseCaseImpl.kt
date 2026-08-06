@@ -9,7 +9,7 @@ import io.ktor.http.encodeURLParameter
 import kotlinx.serialization.Serializable
 
 /**
- * Gets the country for a school URL using an IP address country lookup server.
+ * Gets the country for a URL using an IP address country lookup server.
  *
  * There is deliberately no cache here: the HttpClient uses UstadCacheInterceptor, so responses
  * are cached by the HTTP cache as per the Cache-Control header set by the lookup server.
@@ -25,13 +25,13 @@ class GetCountryForUrlUseCaseImpl(
     private val geolocationEndpoint: String,
 ) : GetCountryForUrlUseCase {
 
-    override suspend operator fun invoke(schoolUrl: Url): String? {
+    override suspend operator fun invoke(url: Url): String? {
         if (geolocationEndpoint.isBlank()) {
             Napier.w("GetCountryForUrlUseCase: GEOLOCATION_API_ENDPOINT is not set")
             return null
         }
 
-        val encodedHost = schoolUrl.host.encodeURLParameter()
+        val encodedHost = url.host.encodeURLParameter()
         val response: CountryResponse = httpClient
             .get("$geolocationEndpoint/json/$encodedHost")
             .body()

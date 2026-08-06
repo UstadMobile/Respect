@@ -64,7 +64,7 @@ fun AccountListItem(
                         modifier = Modifier.padding(start = 8.dp)
                     )
                     CountryFlag(
-                        schoolUrl = account.session.account.school.self,
+                        url = account.session.account.school.self,
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }

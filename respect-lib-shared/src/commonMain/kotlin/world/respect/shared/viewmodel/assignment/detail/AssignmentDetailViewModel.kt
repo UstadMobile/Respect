@@ -3,11 +3,13 @@ package world.respect.shared.viewmodel.assignment.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
@@ -23,6 +25,7 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.isStudent
+import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
@@ -234,9 +237,13 @@ class AssignmentDetailViewModel(
                                 progress = state.data.progress.sortedBy { it.actor.name?.lowercase() ?: "" }
                             )
                         )
-                    } else state
+                    } else {
+                        state
+                    }
+                }.catch { e ->
+                    Napier.w("Assignment progress flow error", e)
+                    emit(DataErrorResult(error = e))
                 }.shareIn(viewModelScope, SharingStarted.Lazily)
-
                 launch {
                     assignmentProgressFlow.collect { assignmentAndProgress ->
                         _appUiState.update { appState ->
@@ -299,7 +306,17 @@ class AssignmentDetailViewModel(
     fun taskInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
         return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = url, params = DataLoadParams(), null, null
-        )
+        ).map { state ->
+            val remoteErr = state.remoteState as? DataErrorResult<*>
+            if(remoteErr != null) {
+                DataErrorResult(error = remoteErr.error, metaInfo = state.metaInfo, localState = state.localState, remoteState = state.remoteState)
+            } else {
+                state
+            }
+        }.catch { e ->
+            Napier.w("failed loading task info for $url", e)
+            emit(DataErrorResult(error = e))
+        }
     }
 
     fun onClickTask(activity: XapiActivity) {

@@ -796,7 +796,10 @@ val appKoinModule = module {
     }
 
     single<GetXapiActivityForPublicationUseCase> {
-        GetXapiActivityForPublicationUseCase()
+        GetXapiActivityForPublicationUseCase(
+            xml = get(),
+            httpClient = get(),
+        )
     }
 
     single<XML> {

@@ -3,6 +3,7 @@ package world.respect.shared.viewmodel.assignment.edit
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +46,7 @@ import world.respect.shared.domain.xapi.createBlankAssignmentStatement
 import world.respect.shared.ext.studentsXapiGroup
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_assignment
+import world.respect.shared.generated.resources.could_not_load_unit_to_assign
 import world.respect.shared.generated.resources.edit_assignment
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
@@ -179,9 +181,19 @@ class AssignmentEditViewModel(
                     assignmentActivityId = assignmentActivityId,
                     instructor = instructor
                 )
-                val initialStmt = route.learningUnitSelected?.let {
-                    val activity = getXapiActivityForPublicationUseCase(it.selectedPublication)
-                    baseStmt.addActivityToContextActivitiesGrouping(activity)
+
+                val activityToAdd = route.learningUnitSelected?.let {
+                    try {
+                        getXapiActivityForPublicationUseCase(it.selectedPublication)
+                    }catch(e: Throwable) {
+                        Napier.w("Could not load activity unit for assignment init", e)
+                        snackBarDispatcher.showSnackBar(Snack(Res.string.could_not_load_unit_to_assign.asUiText()))
+                        null
+                    }
+                }
+
+                val initialStmt = activityToAdd?.let {
+                    baseStmt.addActivityToContextActivitiesGrouping(it)
                 } ?: baseStmt
 
                 _uiState.update { prev ->

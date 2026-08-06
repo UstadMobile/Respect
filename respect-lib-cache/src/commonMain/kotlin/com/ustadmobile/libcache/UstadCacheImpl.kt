@@ -41,7 +41,6 @@ import com.ustadmobile.libcache.novarysearch.normalizeForNoVarySearch
 import com.ustadmobile.libcache.novarysearch.removeAllSearchParams
 import com.ustadmobile.libcache.response.ByteArrayResponse
 import com.ustadmobile.libcache.util.concurrentSafeMapOf
-import com.ustadmobile.libcache.util.receiveAndUpdateBacklogSize
 import com.ustadmobile.libcache.util.receivePending
 import com.ustadmobile.libcache.util.sendAndUpdateBacklogSize
 import com.ustadmobile.libcache.util.trySendAndUpdateBacklogSize
@@ -62,6 +61,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
@@ -379,11 +379,11 @@ class UstadCacheImpl(
 
         scope.launch {
             while(isActive) {
-                try {
-                    val updatesToCommit = listOf(
-                        updatesToCommitChannel.receiveAndUpdateBacklogSize(_updateBacklogSize)
-                    ) + updatesToCommitChannel.receivePending(maxItems = 100, _updateBacklogSize)
+                val updatesToCommit = listOf(
+                    updatesToCommitChannel.receive()
+                ) + updatesToCommitChannel.receivePending(maxItems = 100)
 
+                try {
                     val cacheUpdateEvents = updatesToCommit.mapNotNull {
                         (it as? CacheEntryUpdate)?.event
                     }
@@ -446,6 +446,8 @@ class UstadCacheImpl(
                             }
                         }
                     }
+
+                    _updateBacklogSize.update { it - updatesToCommit.size }
                 }catch(e: Throwable) {
                     logger?.w(LOG_TAG, throwable = e) { "$logPrefix: exception committing updates to database"}
                     if(isActive)

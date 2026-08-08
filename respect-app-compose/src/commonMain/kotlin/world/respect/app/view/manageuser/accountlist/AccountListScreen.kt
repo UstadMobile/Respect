@@ -46,6 +46,7 @@ fun AccountListScreen(
     viewModel: AccountListViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
     AccountListScreen(
         uiState = uiState,
         onClickAccount = viewModel::onClickAccount,

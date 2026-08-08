@@ -15,18 +15,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import world.respect.app.components.CountryFlag
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.shared.domain.account.RespectSessionAndPerson
+
 
 @Composable
 fun AccountListItem(
     account: RespectSessionAndPerson,
     onClickAccount: ((RespectAccount) -> Unit)?,
     extras: @Composable () -> Unit = { },
-) {
-    ListItem(
+){
+   ListItem(
         modifier = Modifier.clickable {
             onClickAccount?.also {
                 onClickAccount(account.session.account)
@@ -61,8 +63,11 @@ fun AccountListItem(
                         maxLines = 1,
                         modifier = Modifier.padding(start = 8.dp)
                     )
+                    CountryFlag(
+                        url = account.session.account.school.self,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 }
-
                 extras()
             }
         }

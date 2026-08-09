@@ -1,4 +1,4 @@
-package world.respect.shared.domain.country
+package world.respect.shared.domain.geolookup
 
 import io.ktor.http.Url
 

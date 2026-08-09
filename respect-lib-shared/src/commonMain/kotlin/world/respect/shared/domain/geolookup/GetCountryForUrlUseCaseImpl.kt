@@ -1,6 +1,7 @@
-package world.respect.shared.domain.country
+package world.respect.shared.domain.geolookup
 
 import io.github.aakira.napier.Napier
+import io.github.reactivecircus.cache4k.Cache
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -22,21 +23,26 @@ import kotlinx.serialization.Serializable
  */
 class GetCountryForUrlUseCaseImpl(
     private val httpClient: HttpClient,
-    private val geolocationEndpoint: String,
+    private val geolocationEndpoint: Url,
 ) : GetCountryForUrlUseCase {
 
+    private val cache = Cache.Builder<String, CountryResponse>().build()
+
     override suspend operator fun invoke(url: Url): String? {
-        if (geolocationEndpoint.isBlank()) {
-            Napier.w("GetCountryForUrlUseCase: GEOLOCATION_API_ENDPOINT is not set")
-            return null
-        }
+        val host = url.host
 
-        val encodedHost = url.host.encodeURLParameter()
-        val response: CountryResponse = httpClient
-            .get("$geolocationEndpoint/json/$encodedHost")
-            .body()
+        if(cache.get(host)?.status != STATUS_SUCCESS)
+            cache.invalidate(host)
 
-        return response.countryCode?.takeIf { response.status == STATUS_SUCCESS }
+        return cache.get(host) {
+            val encodedHost = host.encodeURLParameter()
+            try {
+                httpClient.get("$geolocationEndpoint/json/$encodedHost").body()
+            } catch (e: Throwable) {
+                Napier.w("CountryFlag: could not get country for $url", e)
+                CountryResponse(status = "error")
+            }
+        }.takeIf { it.status == STATUS_SUCCESS }?.countryCode
     }
 
     companion object {

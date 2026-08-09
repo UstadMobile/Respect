@@ -19,17 +19,16 @@ import io.github.aakira.napier.Napier
  * @return Flag emoji string, or an empty string where countryCode is null or is not a valid
  *         two-letter code.
  */
-fun getFlagEmoji(countryCode: String?): String {
-    if (countryCode == null) return ""
-
+fun countryCodeToFlagEmoji(countryCode: String): String {
     val code = countryCode.uppercase()
     if (code.length != COUNTRY_CODE_LENGTH || !code.all { it in 'A'..'Z' }) {
-        Napier.w("getFlagEmoji: not a valid ISO 3166-1 alpha-2 country code: $countryCode")
+        Napier.w("countryCodeToFlagEmoji: not a valid ISO 3166-1 alpha-2 country code: $countryCode")
         return ""
     }
 
     return buildString {
         code.forEach { letter ->
+            @Suppress("KotlinArrayToString")
             append(Character.toChars(REGIONAL_INDICATOR_A + (letter - 'A')))
         }
     }

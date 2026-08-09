@@ -37,7 +37,7 @@ val ACRA_PROP_NAMES = listOf("uri", "basicAuthLogin", "basicAuthPassword")
 val defaultAppList = System.getenv("RESPECT_DEFAULT_APPLIST") ?: "https://respect.directory/respect-ds/base.json"
 
 // The IP address country lookup server endpoint
-val geolocationApiEndpoint = System.getenv("GEOLOCATION_API_ENDPOINT") ?: ""
+val geolocationApiEndpoint = System.getenv("GEOLOCATION_API_ENDPOINT") ?: "https://geoip.ustadmobile.com/"
 
 // https://kotlinlang.org/docs/multiplatform/multiplatform-project-agp-9-migration.html#configure-the-build-script-for-the-android-app
 

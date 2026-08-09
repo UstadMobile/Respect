@@ -30,6 +30,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -147,8 +148,8 @@ import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCaseAndroid
-import world.respect.shared.domain.country.GetCountryForUrlUseCase
-import world.respect.shared.domain.country.GetCountryForUrlUseCaseImpl
+import world.respect.shared.domain.geolookup.GetCountryForUrlUseCase
+import world.respect.shared.domain.geolookup.GetCountryForUrlUseCaseImpl
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
@@ -370,12 +371,15 @@ val appKoinModule = module {
         }
     }
 
-    single<GetCountryForUrlUseCase> {
-        GetCountryForUrlUseCaseImpl(
-            httpClient = get(),
-            geolocationEndpoint = BuildConfig.GEOLOCATION_API_ENDPOINT
-        )
+    BuildConfig.GEOLOCATION_API_ENDPOINT.takeIf { it.isNotEmpty() }?.also { geoIpEndpoint ->
+        single<GetCountryForUrlUseCase> {
+            GetCountryForUrlUseCaseImpl(
+                httpClient = get(),
+                geolocationEndpoint = Url(geoIpEndpoint),
+            )
+        }
     }
+
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::AppsDetailViewModel)
     viewModelOf(::AppLauncherViewModel)

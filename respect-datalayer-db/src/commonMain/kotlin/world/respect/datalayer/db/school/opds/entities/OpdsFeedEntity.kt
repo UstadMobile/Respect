@@ -29,8 +29,7 @@ data class OpdsFeedEntity(
     val ofeEtag: String?,
     val ofeStored: Instant = Clock.System.now(),
     val ofeStatus: StatusEnum = StatusEnum.ACTIVE,
-
-    ) {
+) {
 
     companion object {
 

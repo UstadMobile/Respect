@@ -5,7 +5,14 @@
     "author": "Mullah Nasruddin",
     "identifier": "https://example.app/id/lesson001",
     "language": "en",
-    "modified": "2015-09-29T17:00:00Z"
+    "modified": "2015-09-29T17:00:00Z",
+    "subject": [
+      {
+        "name": "Mathematics",
+        "scheme": "https://www.bisg.org/#bisac",
+        "code": "MAT000000"
+      }
+    ]
   },
   "links": [
     {"rel": "self", "href": "$TESTBASEURL/grade1/lesson001/lesson001.json", "type": "application/opds-publication+json"},

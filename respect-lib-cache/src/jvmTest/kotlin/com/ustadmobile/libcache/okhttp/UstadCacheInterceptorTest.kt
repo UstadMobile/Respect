@@ -14,6 +14,7 @@ import com.ustadmobile.libcache.partial.ContentRange.Companion.parseRangeHeader
 import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import com.ustadmobile.libcache.util.ResourcesDispatcher
+import com.ustadmobile.libcache.util.awaitUpdatesCommitted
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.readByteArray
 import okhttp3.Request
@@ -77,143 +78,143 @@ class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
 
     @Test
     fun givenEntryNotYetCached_whenRequested_thenWillRespondAndCacheIt() {
-        val mockWebServer = MockWebServer().also { server ->
+        MockWebServer().also { server ->
             server.dispatcher = ResourcesDispatcher(javaClass) {
                 it.addHeader("content-type", "image/png")
             }
 
             server.start()
+        }.use { mockWebServer ->
+            val requestUrl = "${mockWebServer.url("/testfile1.png")}"
+            val response = okHttpClient.newCall(
+                Request.Builder().url(requestUrl).build()
+            ).execute()
+
+            val responseBytes = response.body!!.bytes()
+            val resourceBytes = javaClass.getResourceAsStream("/testfile1.png")!!
+                .readAllBytes()
+            Assert.assertArrayEquals(resourceBytes, responseBytes)
+            ustadCache.verifyUrlStored(requestUrl)
+
+            val cacheResponse = runBlocking { ustadCache.retrieve(iRequestBuilder(requestUrl)) }
+            assertEquals(CompressionType.NONE,
+                CompressionType.byHeaderVal(cacheResponse!!.headers["content-encoding"]),
+                "Non-compressable mime type should not be encoded"
+            )
+
+            interceptorTmpDir.assertTempDirectoryIsEmptied()
         }
-
-        val requestUrl = "${mockWebServer.url("/testfile1.png")}"
-        val response = okHttpClient.newCall(
-            Request.Builder().url(requestUrl).build()
-        ).execute()
-
-        val responseBytes = response.body!!.bytes()
-        val resourceBytes = javaClass.getResourceAsStream("/testfile1.png")!!
-            .readAllBytes()
-        Assert.assertArrayEquals(resourceBytes, responseBytes)
-        ustadCache.verifyUrlStored(requestUrl)
-
-        val cacheResponse = runBlocking { ustadCache.retrieve(iRequestBuilder(requestUrl)) }
-        assertEquals(CompressionType.NONE,
-            CompressionType.byHeaderVal(cacheResponse!!.headers["content-encoding"]),
-            "Non-compressable mime type should not be encoded"
-        )
-
-        interceptorTmpDir.assertTempDirectoryIsEmptied()
     }
 
     @Test
     fun givenCompressableEntryNotYetCachedNotEncoded_whenRequested_thenWillRespondAndCacheIt() {
-        val mockWebServer = MockWebServer().also {
+        MockWebServer().also {
             it.dispatcher = ResourcesDispatcher(javaClass) {
                 it.addHeader("content-type", "application/javascript")
             }
 
             it.start()
-        }
+        }.use { mockWebServer ->
+            val requestUrl = "${mockWebServer.url("/ustadmobile-epub.js")}"
+            val response = okHttpClient.newCall(
+                Request.Builder().url(requestUrl).build()
+            ).execute()
+            val responseBytes = response.body!!.bytes()
+            val resourceBytes = javaClass.getResourceAsStream("/ustadmobile-epub.js")!!
+                .readAllBytes()
+            Assert.assertArrayEquals(resourceBytes, responseBytes)
 
-        val requestUrl = "${mockWebServer.url("/ustadmobile-epub.js")}"
-        val response = okHttpClient.newCall(
-            Request.Builder().url(requestUrl).build()
-        ).execute()
-        val responseBytes = response.body!!.bytes()
-        val resourceBytes = javaClass.getResourceAsStream("/ustadmobile-epub.js")!!
-            .readAllBytes()
-        Assert.assertArrayEquals(resourceBytes, responseBytes)
-
-        //Now check the cached response is compressed
-        val cacheResponse = runBlocking {
-            ustadCache.retrieve(
-                iRequestBuilder(requestUrl) {
-                    header("accept-encoding", "gzip, br, deflate")
-                }
-            )
+            //Now check the cached response is compressed
+            val cacheResponse = runBlocking {
+                ustadCache.retrieve(
+                    iRequestBuilder(requestUrl) {
+                        header("accept-encoding", "gzip, br, deflate")
+                    }
+                )
+            }
+            assertNotEquals(CompressionType.NONE, CompressionType.byHeaderVal(
+                cacheResponse!!.headers["content-encoding"]),
+                "compression type should not be none - e.g. should be compressed")
+            val cacheResponseBytes = cacheResponse.bodyAsUncompressedSourceIfContentEncoded()!!.readByteArray()
+            Assert.assertArrayEquals(resourceBytes, cacheResponseBytes)
         }
-        assertNotEquals(CompressionType.NONE, CompressionType.byHeaderVal(
-            cacheResponse!!.headers["content-encoding"]),
-            "compression type should not be none - e.g. should be compressed")
-        val cacheResponseBytes = cacheResponse.bodyAsUncompressedSourceIfContentEncoded()!!.readByteArray()
-        Assert.assertArrayEquals(resourceBytes, cacheResponseBytes)
     }
 
 
     @Test
     fun givenCompressableEntryNotYetCachedAlreadyEncoded_whenRequested_thenWillRespondAndCacheIt() {
-        val mockWebServer = MockWebServer().also {
+        MockWebServer().also {
             it.dispatcher = ResourcesDispatcher(javaClass, contentEncoding = "gzip") {
                 it.addHeader("content-type", "application/javascript")
             }
 
             it.start()
-        }
+        }.use { mockWebServer ->
+            val requestUrl = "${mockWebServer.url("/ustadmobile-epub.js")}"
+            val response = okHttpClient.newCall(
+                Request.Builder().url(requestUrl).build()
+            ).execute()
+            val responseBytes = response.body!!.bytes()
+            val resourceBytes = javaClass.getResourceAsStream("/ustadmobile-epub.js")!!
+                .readAllBytes()
+            Assert.assertArrayEquals(resourceBytes, responseBytes)
 
-        val requestUrl = "${mockWebServer.url("/ustadmobile-epub.js")}"
-        val response = okHttpClient.newCall(
-            Request.Builder().url(requestUrl).build()
-        ).execute()
-        val responseBytes = response.body!!.bytes()
-        val resourceBytes = javaClass.getResourceAsStream("/ustadmobile-epub.js")!!
-            .readAllBytes()
-        Assert.assertArrayEquals(resourceBytes, responseBytes)
-
-        //Now check the cached response is compressed
-        val cacheResponse = runBlocking {
-            ustadCache.retrieve(
-                iRequestBuilder(requestUrl) {
-                    header("accept-encoding", "gzip, deflate, br")
-                }
-            )
+            //Now check the cached response is compressed
+            val cacheResponse = runBlocking {
+                ustadCache.retrieve(
+                    iRequestBuilder(requestUrl) {
+                        header("accept-encoding", "gzip, deflate, br")
+                    }
+                )
+            }
+            assertNotEquals(CompressionType.NONE, CompressionType.byHeaderVal(
+                cacheResponse!!.headers["content-encoding"]),
+                "compression type should not be none - e.g. should be compressed")
+            val cacheResponseBytes = cacheResponse.bodyAsUncompressedSourceIfContentEncoded()!!.readByteArray()
+            Assert.assertArrayEquals(resourceBytes, cacheResponseBytes)
         }
-        assertNotEquals(CompressionType.NONE, CompressionType.byHeaderVal(
-            cacheResponse!!.headers["content-encoding"]),
-            "compression type should not be none - e.g. should be compressed")
-        val cacheResponseBytes = cacheResponse.bodyAsUncompressedSourceIfContentEncoded()!!.readByteArray()
-        Assert.assertArrayEquals(resourceBytes, cacheResponseBytes)
     }
 
     @Test
     fun givenImmutableEntryWasCached_whenRequested_thenCacheWillHit() {
-        val mockWebServer = MockWebServer().also {
+        MockWebServer().also {
             it.dispatcher = ResourcesDispatcher(javaClass) {
                 it.addHeader("content-type", "image/png")
                 it.addHeader("cache-control", "immutable")
             }
 
             it.start()
+        }.use { mockWebServer ->
+            val requestUrl = mockWebServer.url("/testfile1.png").toString()
+            val request = Request.Builder().url(requestUrl).build()
+            val initResponseBytes = okHttpClient.newCall(request).execute().use {
+                it.body!!.bytes()
+            }
+
+            /*
+             * Note: the verify call can pass immediately as soon as the UstadCache.store function is
+             * called, at which time the caching of the actual request might not be complete. Therefor
+             * we will wait for the listener to confirm that the request has been stored.
+             */
+            verify(cacheListener, timeout(5000)).onEntriesStored(
+                argWhere { entries -> entries.any { it.request.url == requestUrl } }
+            )
+
+            val cachedResponse = okHttpClient.newCall(request).execute()
+            val resourceBytes = javaClass.getResourceAsStream("/testfile1.png")!!.readAllBytes()
+            val cacheResponseBytes = cachedResponse.use { it.body!!.bytes() }
+            Assert.assertArrayEquals(resourceBytes, initResponseBytes)
+            Assert.assertArrayEquals(initResponseBytes, cacheResponseBytes)
+
+            //Should only have made one request
+            assertEquals(1, mockWebServer.requestCount)
+
+            assertEquals(
+                sha256Integrity(resourceBytes.sha256()), cachedResponse.headers["etag"],
+                message = "Cached response should have etag set to the sha256 integrity string")
+            assertEquals("true", cachedResponse.header(HEADER_ETAG_IS_INTEGRITY))
+            interceptorTmpDir.assertTempDirectoryIsEmptied()
         }
-
-        val requestUrl = mockWebServer.url("/testfile1.png").toString()
-        val request = Request.Builder().url(requestUrl).build()
-        val initResponseBytes = okHttpClient.newCall(request).execute().use {
-            it.body!!.bytes()
-        }
-
-        /*
-         * Note: the verify call can pass immediately as soon as the UstadCache.store function is
-         * called, at which time the caching of the actual request might not be complete. Therefor
-         * we will wait for the listener to confirm that the request has been stored.
-         */
-        verify(cacheListener, timeout(5000)).onEntriesStored(
-            argWhere { entries -> entries.any { it.request.url == requestUrl } }
-        )
-
-        val cachedResponse = okHttpClient.newCall(request).execute()
-        val resourceBytes = javaClass.getResourceAsStream("/testfile1.png")!!.readAllBytes()
-        val cacheResponseBytes = cachedResponse.use { it.body!!.bytes() }
-        Assert.assertArrayEquals(resourceBytes, initResponseBytes)
-        Assert.assertArrayEquals(initResponseBytes, cacheResponseBytes)
-
-        //Should only have made one request
-        assertEquals(1, mockWebServer.requestCount)
-
-        assertEquals(
-            sha256Integrity(resourceBytes.sha256()), cachedResponse.headers["etag"],
-            message = "Cached response should have etag set to the sha256 integrity string")
-        assertEquals("true", cachedResponse.header(HEADER_ETAG_IS_INTEGRITY))
-        interceptorTmpDir.assertTempDirectoryIsEmptied()
     }
 
 
@@ -226,31 +227,31 @@ class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
     fun givenEntryIsStale_whenRequestedWithValidationHeader_thenResponseShouldBe304NotModified() {
         val etagVal = "abc"
 
-        val mockWebServer = MockWebServer().also {
+        MockWebServer().also {
             it.dispatcher = dispatcherWithETag(etagVal)
 
             it.start()
+        }.use { mockWebServer ->
+            val requestUrl = mockWebServer.url("/testfile1.png").toString()
+            val request = Request.Builder().url(requestUrl)
+                .addHeader("cache-control", "must-revalidate")
+                .build()
+
+            okHttpClient.newCall(request).execute().use {
+                it.body.bytes()
+            }
+
+            val notModifiedRequest = Request.Builder()
+                .url(requestUrl)
+                .addHeader("if-none-match", etagVal)
+                .build()
+
+            okHttpClient.newCall(notModifiedRequest).execute().use { notModifiedResponse ->
+                assertEquals(304, notModifiedResponse.code)
+            }
+
+            assertEquals(2, mockWebServer.requestCount)
         }
-
-        val requestUrl = mockWebServer.url("/testfile1.png").toString()
-        val request = Request.Builder().url(requestUrl)
-            .addHeader("cache-control", "must-revalidate")
-            .build()
-
-        okHttpClient.newCall(request).execute().use {
-            it.body!!.bytes()
-        }
-
-        val notModifiedRequest = Request.Builder()
-            .url(requestUrl)
-            .addHeader("if-none-match", etagVal)
-            .build()
-
-        okHttpClient.newCall(notModifiedRequest).execute().use { notModifiedResponse ->
-            assertEquals(304, notModifiedResponse.code)
-        }
-
-        assertEquals(2, mockWebServer.requestCount)
     }
 
     @Test
@@ -258,117 +259,118 @@ class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
         val etagVal = "etagVal"
         val resourceBytes = javaClass.getResourceAsStream("/testfile1.png")!!.readAllBytes()
 
-        val mockWebServer = MockWebServer().also {
+        MockWebServer().also {
             it.dispatcher = dispatcherWithETag(etagVal)
 
             it.start()
+        }.use { mockWebServer ->
+            val requestUrl = mockWebServer.url("/testfile1.png").toString()
+            val request = Request.Builder().url(requestUrl)
+                .addHeader("cache-control", "must-revalidate")
+                .build()
+
+            val initResponseBytes = okHttpClient.newCall(request).execute().use {
+                it.body.bytes()
+            }
+
+            verify(cacheListener, timeout(5000)).onEntriesStored(
+                argWhere { entries -> entries.any { it.request.url == requestUrl } }
+            )
+
+            val storedEntryAfterRequest = runBlocking {
+                ustadCache.awaitUpdatesCommitted()
+                cacheDb.cacheEntryDao.findEntryByKey(
+                    Md5Digest().urlKey(requestUrl))
+            }
+
+            val cachedResponse = okHttpClient.newCall(request).execute()
+            val cachedResponseBytes = cachedResponse.use {
+                it.body.bytes()
+            }
+
+
+            Assert.assertArrayEquals(resourceBytes, initResponseBytes)
+            Assert.assertArrayEquals(initResponseBytes, cachedResponseBytes)
+
+            assertEquals(2, mockWebServer.requestCount)
+
+            //The second request should have an if-none-match header
+            mockWebServer.takeRequest()
+            val validationRequest = mockWebServer.takeRequest()
+            assertEquals(etagVal, validationRequest.getHeader("if-none-match"))
+
+            val storedEntryAfterValidation = runBlocking {
+                ustadCache.awaitUpdatesCommitted()
+                cacheDb.cacheEntryDao.findEntryByKey(Md5Digest().urlKey(requestUrl))
+            }
+
+            assertNotNull(storedEntryAfterValidation)
+            assertNotNull(storedEntryAfterRequest)
+            assertTrue(storedEntryAfterValidation.lastValidated > storedEntryAfterRequest.lastValidated,
+                "Last validated time in cache db should be updated")
+            val headersAfterValidation = IHttpHeaders.fromString(
+                storedEntryAfterValidation.responseHeaders)
+            assertEquals("image/png", headersAfterValidation["content-type"])
+            assertEquals(resourceBytes.size.toString(), headersAfterValidation["content-length"])
+
+            interceptorTmpDir.assertTempDirectoryIsEmptied()
         }
-
-        val requestUrl = mockWebServer.url("/testfile1.png").toString()
-        val request = Request.Builder().url(requestUrl)
-            .addHeader("cache-control", "must-revalidate")
-            .build()
-        val initResponseBytes = okHttpClient.newCall(request).execute().use {
-            it.body!!.bytes()
-        }
-
-        verify(cacheListener, timeout(5000)).onEntriesStored(
-            argWhere { entries -> entries.any { it.request.url == requestUrl } }
-        )
-
-        runBlocking { ustadCache.commit() }
-        val storedEntryAfterRequest = runBlocking {
-            cacheDb.cacheEntryDao.findEntryByKey(
-                Md5Digest().urlKey(requestUrl))
-        }
-
-        val cachedResponse = okHttpClient.newCall(request).execute()
-        val cachedResponseBytes = cachedResponse.use {
-            it.body!!.bytes()
-        }
-
-
-        Assert.assertArrayEquals(resourceBytes, initResponseBytes)
-        Assert.assertArrayEquals(initResponseBytes, cachedResponseBytes)
-
-        assertEquals(2, mockWebServer.requestCount)
-
-        //The second request should have an if-none-match header
-        mockWebServer.takeRequest()
-        val validationRequest = mockWebServer.takeRequest()
-        assertEquals(etagVal, validationRequest.getHeader("if-none-match"))
-
-        runBlocking { ustadCache.commit() }
-        val storedEntryAfterValidation = runBlocking {
-            cacheDb.cacheEntryDao.findEntryByKey(Md5Digest().urlKey(requestUrl))
-        }
-
-        assertNotNull(storedEntryAfterValidation)
-        assertNotNull(storedEntryAfterRequest)
-        assertTrue(storedEntryAfterValidation.lastValidated > storedEntryAfterRequest.lastValidated,
-            "Last validated time in cache db should be updated")
-        val headersAfterValidation = IHttpHeaders.fromString(
-            storedEntryAfterValidation.responseHeaders)
-        assertEquals("image/png", headersAfterValidation["content-type"])
-        assertEquals(resourceBytes.size.toString(), headersAfterValidation["content-length"])
-
-        interceptorTmpDir.assertTempDirectoryIsEmptied()
     }
 
     @Test
     fun givenRequestNotStorable_whenRequested_thenIsNotStored() {
-        val mockWebServer = MockWebServer().also {
+        MockWebServer().also {
             it.dispatcher = ResourcesDispatcher(javaClass) {
                 it.addHeader("content-type", "image/png")
                 it.addHeader("cache-control", "immutable")
             }
 
             it.start()
+        }.use { mockWebServer ->
+            val requestUrl = mockWebServer.url("/testfile1.png").toString()
+            val request = Request.Builder()
+                .url(requestUrl)
+                .addHeader("cache-control", "no-store")
+                .build()
+            val responseBytes = okHttpClient.newCall(request).execute().use {
+                it.body!!.bytes()
+            }
+            verifyNoInteractions(ustadCache)
+            Assert.assertArrayEquals(
+                javaClass.getResourceAsStream("/testfile1.png")!!.readAllBytes(),
+                responseBytes
+            )
+            interceptorTmpDir.assertTempDirectoryIsEmptied()
         }
-
-        val requestUrl = mockWebServer.url("/testfile1.png").toString()
-        val request = Request.Builder()
-            .url(requestUrl)
-            .addHeader("cache-control", "no-store")
-            .build()
-        val responseBytes = okHttpClient.newCall(request).execute().use {
-            it.body!!.bytes()
-        }
-        verifyNoInteractions(ustadCache)
-        Assert.assertArrayEquals(
-            javaClass.getResourceAsStream("/testfile1.png")!!.readAllBytes(),
-            responseBytes
-        )
-        interceptorTmpDir.assertTempDirectoryIsEmptied()
     }
 
     @Test
     fun givenResponseHasNoStoreHeader_whenRequested_thenIsNotStored() {
-        val mockWebServer = MockWebServer().also {
+        MockWebServer().also {
             it.dispatcher = ResourcesDispatcher(javaClass) {
                 it.addHeader("content-type", "image/png")
                 it.addHeader("cache-control", "no-store")
             }
 
             it.start()
-        }
+        }.use { mockWebServer ->
+            val requestUrl = mockWebServer.url("/testfile1.png").toString()
+            val request = Request.Builder()
+                .url(requestUrl)
+                .build()
+            val responseBytes = okHttpClient.newCall(request).execute().use {
+                it.body!!.bytes()
+            }
+            verifyBlocking(ustadCache, times(0)) {
+                store(anyOrNull(), anyOrNull())
+            }
 
-        val requestUrl = mockWebServer.url("/testfile1.png").toString()
-        val request = Request.Builder()
-            .url(requestUrl)
-            .build()
-        val responseBytes = okHttpClient.newCall(request).execute().use {
-            it.body!!.bytes()
+            Assert.assertArrayEquals(
+                javaClass.getResourceAsStream("/testfile1.png")!!.readAllBytes(),
+                responseBytes
+            )
+            interceptorTmpDir.assertTempDirectoryIsEmptied()
         }
-        verifyBlocking(ustadCache, times(0)) {
-            store(anyOrNull(), anyOrNull())
-        }
-
-        Assert.assertArrayEquals(
-            javaClass.getResourceAsStream("/testfile1.png")!!.readAllBytes(),
-            responseBytes
-        )
-        interceptorTmpDir.assertTempDirectoryIsEmptied()
     }
 
 
@@ -392,46 +394,46 @@ class UstadCacheInterceptorTest : AbstractCacheInterceptorTest() {
             resumeFileOut.flush()
         }
 
-        val mockWebServer = MockWebServer().also {
+        MockWebServer().also {
             it.dispatcher = ResourcesDispatcher(javaClass) {
                 it.addHeader("content-type", "image/png")
                 it.addHeader("etag", etag)
             }
 
             it.start()
+        }.use { mockWebServer ->
+            val requestUrl = "${mockWebServer.url(resourcePath)}"
+            val response = okHttpClient.newCall(
+                Request.Builder().url(requestUrl)
+                    .addHeader(HEADER_X_INTERCEPTOR_PARTIAL_FILE, resumeFile.toString())
+                    .build()
+            ).execute()
+            response.body?.bytes() //Read body
+
+
+            val cacheResponse = runBlocking {
+                ustadCache.retrieve(
+                    iRequestBuilder(requestUrl) {
+                        header("accept-encoding", "gzip, br, deflate")
+                    }
+                )
+            }
+            assertNotNull(cacheResponse)
+
+            val cacheResponseBytes = cacheResponse
+                .bodyAsUncompressedSourceIfContentEncoded()!!.readByteArray()
+            val resourceBytes = this::class.java.getResourceAsStream(resourcePath)!!.readAllBytes()
+            Assert.assertArrayEquals(
+                resourceBytes,
+                cacheResponseBytes)
+
+            val request = mockWebServer.takeRequest()
+            assertEquals(etag, request.headers["if-range"])
+
+            val rangeHeader =  parseRangeHeader(request.headers["range"]!!,
+                resourceBytes.size.toLong())
+            assertEquals(1000L, rangeHeader.fromByte)
         }
-
-        val requestUrl = "${mockWebServer.url(resourcePath)}"
-        val response = okHttpClient.newCall(
-            Request.Builder().url(requestUrl)
-                .addHeader(HEADER_X_INTERCEPTOR_PARTIAL_FILE, resumeFile.toString())
-                .build()
-        ).execute()
-        response.body?.bytes() //Read body
-
-
-        val cacheResponse = runBlocking {
-            ustadCache.retrieve(
-                iRequestBuilder(requestUrl) {
-                    header("accept-encoding", "gzip, br, deflate")
-                }
-            )
-        }
-        assertNotNull(cacheResponse)
-
-        val cacheResponseBytes = cacheResponse
-            .bodyAsUncompressedSourceIfContentEncoded()!!.readByteArray()
-        val resourceBytes = this::class.java.getResourceAsStream(resourcePath)!!.readAllBytes()
-        Assert.assertArrayEquals(
-            resourceBytes,
-            cacheResponseBytes)
-
-        val request = mockWebServer.takeRequest()
-        assertEquals(etag, request.headers["if-range"])
-
-        val rangeHeader =  parseRangeHeader(request.headers["range"]!!,
-            resourceBytes.size.toLong())
-        assertEquals(1000L, rangeHeader.fromByte)
     }
 
 

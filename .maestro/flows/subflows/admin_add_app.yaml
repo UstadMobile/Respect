@@ -4,7 +4,6 @@ appId: world.respect.app
 - assertVisible:
     id: "app_title"
     text: "Home"
-- tapOn: "Apps"
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add from Link"
@@ -14,7 +13,6 @@ appId: world.respect.app
 - assertVisible:
     id: "app_title"
     text: "App detail"
-- tapOn: "Add App"
+- tapOn: "Add to school apps"
 - tapOn:
-      text: "Home"
-      index: 0
+    id: "nav_home"

@@ -5,5 +5,6 @@ appId: world.respect.app
     file: "e2e_artifact_upload.yaml"
     env:
       NAME: ${NAME}
+      TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 - runScript:
     file: "../scripts/teardown.js"

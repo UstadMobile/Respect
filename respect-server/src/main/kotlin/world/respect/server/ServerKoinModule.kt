@@ -12,6 +12,8 @@ import io.ktor.server.config.ApplicationConfig
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.files.Path
 import kotlinx.serialization.json.Json
+import nl.adaptivity.xmlutil.core.XmlVersion
+import nl.adaptivity.xmlutil.serialization.XML
 import org.koin.core.scope.Scope
 import org.koin.dsl.module
 import world.respect.credentials.passkey.request.DecodeUserHandleUseCase
@@ -46,6 +48,11 @@ import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCas
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddServerManagedDirectoryCallback
 import world.respect.server.domain.school.add.RegisterSchoolUseCaseImpl
+import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitManifestUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitTinCanXmlUseCase
 import world.respect.server.domain.school.verify.VerifySchoolUrlPointsToThisServerUseCase
 import world.respect.server.util.SchoolUrlVerificationManager
 import world.respect.shared.domain.account.RespectAccount
@@ -114,7 +121,14 @@ fun serverKoinModule(
     single<Json> {
         Json {
             ignoreUnknownKeys = true
-            encodeDefaults = true
+            encodeDefaults = false
+        }
+    }
+
+    single<XML> {
+        XML.v1 {
+            recommended_1_0_0()
+            xmlVersion = XmlVersion.XML10
         }
     }
 
@@ -204,6 +218,27 @@ fun serverKoinModule(
 
     single<EncryptPersonPasswordUseCase> {
         EncryptPersonPasswordUseCaseImpl()
+    }
+
+
+    single<MakeDemoAppManifestUseCase> {
+        MakeDemoAppManifestUseCase()
+    }
+
+    single<MakeDemoAppCollectionUseCase> {
+        MakeDemoAppCollectionUseCase()
+    }
+
+    single<MakeDemoAppGradeCollectionsUseCase> {
+        MakeDemoAppGradeCollectionsUseCase()
+    }
+
+    single<MakeDemoAppLearningUnitManifestUseCase> {
+        MakeDemoAppLearningUnitManifestUseCase()
+    }
+
+    single<MakeDemoAppLearningUnitTinCanXmlUseCase> {
+        MakeDemoAppLearningUnitTinCanXmlUseCase()
     }
 
     /*

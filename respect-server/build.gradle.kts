@@ -20,6 +20,10 @@ application {
 
 kotlin {
     compilerOptions {
+        compilerOptions {
+            jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
+        }
+
         optIn.add("kotlin.time.ExperimentalTime")
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }

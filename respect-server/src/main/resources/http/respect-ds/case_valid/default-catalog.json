@@ -1,0 +1,45 @@
+{
+  "metadata": {
+    "title": "Default Lesson collection"
+  },
+
+  "links": [
+    {"rel": "self", "href": "https://demo.openeel.org/default-catalog.json", "type": "application/opds+json"}
+  ],
+
+  "publications": [
+    {
+      "metadata": {
+        "@type": "http://schema.org/Game",
+        "title": "Native Demo",
+        "author": "Mullah Nasruddin",
+        "identifier": "https://demo.openeel.org/Lesson",
+        "language": "en",
+        "modified": "2015-09-29T17:00:00Z",
+        "subject": [
+          {
+            "name": "Mathematics",
+            "scheme": "https://www.bisg.org/#bisac",
+            "code": "MAT000000"
+          }
+        ]
+      },
+      "links": [
+        {"rel": "self", "href": "Lesson-manifest.json", "type": "application/opds-publication+json"},
+        {
+          "rel": "https://id.openeel.org/rel/tincanxml",
+          "href": "tincan.xml",
+          "type": "application/xml"
+        },
+        {
+          "rel": "https://id.openeel.org/rel/launchable-app",
+          "href": "https://demo.openeel.org/launchable-app.json",
+          "type": "application/opds-publication+json"
+        }
+      ],
+      "images": [
+        {"href": "Lesson-cover.png", "type": "image/png"  }
+      ]
+    }
+  ]
+}

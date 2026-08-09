@@ -10,6 +10,8 @@ const val CMD_RUN_SERVER = "runserver"
 
 const val CMD_ADD_SCHOOL = "addschool"
 
+const val CMD_MAKE_DEMO_APP = "makedemoapp"
+
 fun main(args: Array<String>) {
     val parser = ArgumentParsers.newFor("respect-server").build()
 
@@ -33,6 +35,11 @@ fun main(args: Array<String>) {
                     "entry only if the directory host url matches this"
             )
             .help("Admin password")
+    }
+
+    subparsers.addParser(CMD_MAKE_DEMO_APP).help("Make a demo launchable app including OPDS feeds, TinCan and example lessons").also {
+        it.addArgument("-u", "--url").help("Base URL of demo launchable app")
+        it.addArgument("-d", "--dir").help("Dir to save static resources for the demo app")
     }
 
     val ns: Namespace?

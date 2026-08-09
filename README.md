@@ -20,7 +20,8 @@ backend server source code in its modules. Android Studio is the development env
 entire project. 
 
 *  __Step 1: Download and install Android Studio__: If you don't already have the latest version, download
-   from [https://developer.android.com/studio](https://developer.android.com/studio).
+   from [https://developer.android.com/studio](https://developer.android.com/studio). The latest [stable
+   channel version](https://developer.android.com/studio/releases) is recommended.
 
 * __Step 2: Install dependencies__
     * JDK17 or JDK21

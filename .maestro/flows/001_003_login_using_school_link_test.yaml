@@ -1,4 +1,6 @@
 appId: world.respect.app
+tags:
+  - basic
 onFlowStart:
   - clearState: world.respect.app
   - runScript:
@@ -17,6 +19,7 @@ onFlowComplete:
       file: "subflows/teardown.yaml"
       env:
         NAME: "db-final"
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - launchApp:
     arguments:
@@ -50,5 +53,6 @@ onFlowComplete:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
-- assertVisible: "Home"
+- assertVisible:
+    id: "nav_home"
 

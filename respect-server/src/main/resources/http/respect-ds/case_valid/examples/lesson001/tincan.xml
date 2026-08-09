@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tincan xmlns="http://projecttincan.com/tincan.xsd">
+    <activities>
+        <activity id="https://example.app/id/lesson001" type="http://activitystrea.ms/schema/1.0/game">
+            <name>Lesson 001</name>
+            <description lang="en-US">Lesson 001</description>
+            <launch lang="en-us">lesson001.html</launch>
+        </activity>
+    </activities>
+</tincan>

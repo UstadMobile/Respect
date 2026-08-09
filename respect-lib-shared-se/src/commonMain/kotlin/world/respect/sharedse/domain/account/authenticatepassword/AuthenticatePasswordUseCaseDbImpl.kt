@@ -1,5 +1,6 @@
 package world.respect.sharedse.domain.account.authenticatepassword
 
+import io.github.aakira.napier.Napier
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -9,6 +10,7 @@ import io.ktor.util.decodeBase64Bytes
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.adapters.toPersonEntities
 import world.respect.libutil.util.throwable.ForbiddenException
+import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase.Companion.LOGTAG_AUTH
 
 class AuthenticatePasswordUseCaseDbImpl(
     private val schoolDb: RespectSchoolDatabase,
@@ -20,11 +22,16 @@ class AuthenticatePasswordUseCaseDbImpl(
         credential: RespectPasswordCredential
     ) : AuthenticatePasswordUseCase.Response {
         val personEntity = schoolDb.getPersonEntityDao().findByUsername(credential.username)
-            ?: throw IllegalArgumentException()
+            ?: throw ForbiddenException("Invalid username/password").also {
+                Napier.d(tag = LOGTAG_AUTH) { "AuthenticatePasswordUseCaseDbImpl: user ${credential.username} not found" }
+            }
 
+        val uidNum = uidNumberMapper(personEntity.person.pGuid)
         val expectedPassword = schoolDb.getPersonPasswordEntityDao().findByUid(
-            uidNumberMapper(personEntity.person.pGuid)
-        ) ?: throw ForbiddenException("Invalid username/password")
+            uidNum = uidNum
+        ) ?: throw ForbiddenException("Invalid username/password").also {
+            Napier.d(tag = LOGTAG_AUTH) { "AuthenticatePasswordUseCaseDbImpl: password not found for ${credential.username} uid=$uidNum" }
+        }
 
         val credentialEncrypted = encryptPersonPasswordUseCase(
             EncryptPersonPasswordUseCase.Request(
@@ -39,11 +46,17 @@ class AuthenticatePasswordUseCaseDbImpl(
                 expectedPassword.authEncoded.decodeBase64Bytes()
             )
         ) {
-            throw ForbiddenException("Invalid username/password")
+            throw ForbiddenException("Invalid username/password").also {
+                Napier.d(tag = LOGTAG_AUTH) {
+                    "AuthenticatePasswordUseCaseDbImpl: password for ${credential.username} does not match"
+                }
+            }
         }
 
         return AuthenticatePasswordUseCase.Response(
             authenticatedPerson = personEntity.toPersonEntities().toModel()
-        )
+        ).also {
+            Napier.d(tag = LOGTAG_AUTH) { "AuthenticatePasswordUseCaseDbImpl: Authenticate ${credential.username} with password successful" }
+        }
     }
 }

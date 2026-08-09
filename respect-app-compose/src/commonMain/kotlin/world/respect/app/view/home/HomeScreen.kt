@@ -15,10 +15,12 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.view.apps.launcher.AppLauncherScreen
+import world.respect.app.view.bookmark.BookmarkListScreen
 import world.respect.app.view.playlists.collections.list.PlaylistListScreenForViewModel
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
+import world.respect.shared.generated.resources.bookmarks
 import world.respect.shared.generated.resources.playlists
 import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.viewmodel.app.appstate.AppUiState
@@ -27,9 +29,7 @@ import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListVie
 
 enum class HomeScreenTabs(val label: StringResource) {
     APPS(Res.string.apps),
-
-    //Temporary example
-    //PLAYLISTS(Res.string.textbooks)
+    BOOKMARK(Res.string.bookmarks),
     PLAYLISTS(Res.string.playlists)
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,13 +70,20 @@ fun HomeScreen(
         ) {
             when(selectedTab) {
                 HomeScreenTabs.APPS -> {
-                    val viewModel: AppLauncherViewModel = respectViewModel(
-                        onSetAppUiState = onSetAppUiState,
-                        navController = respectNavController,
-                    )
-
                     AppLauncherScreen(
-                        viewModel = viewModel
+                        viewModel = respectViewModel(
+                            onSetAppUiState = onSetAppUiState,
+                            navController = respectNavController,
+                        )
+                    )
+                }
+
+                HomeScreenTabs.BOOKMARK -> {
+                    BookmarkListScreen(
+                        viewModel = respectViewModel(
+                            onSetAppUiState = onSetAppUiState,
+                            navController = respectNavController,
+                        )
                     )
                 }
 

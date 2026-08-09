@@ -29,7 +29,7 @@ import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.externallink.OpenExternalLinkUseCase
+import world.respect.shared.domain.openexternallink.OpenExternalLinkUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.generated.resources.language
@@ -221,7 +221,8 @@ class LearningUnitListViewModel(
                     LearningUnitDetail.create(
                         learningUnitManifestUrl = learningUnitManifestUrl,
                         refererUrl = route.opdsFeedUrl,
-                        expectedIdentifier = publication.metadata.identifier.toString()
+                        expectedIdentifier = publication.metadata.identifier.toString(),
+                        title = publication.metadata.title,
                     )
                 )
             )
@@ -495,6 +496,7 @@ class PlaylistDetailViewModel(
             )
         )
     }
+
     fun onClickPublication(publication: OpdsPublication) {
         val selfLink = publication.links.find {
             it.rel?.contains(LearningUnitListViewModel.SELF) == true
@@ -515,10 +517,9 @@ class PlaylistDetailViewModel(
         if (resultSent) return
 
         if (selfLink.type == MIME_TYPE_HTML) {
-            openExternalLinkUseCase(
-                url = selfLink.href,
-                title = publication.metadata.title.toString()
-            )
+            viewModelScope.launch {
+                openExternalLinkUseCase(url = route.playlistUrl.resolve(selfLink.href))
+            }
             return
         }
 

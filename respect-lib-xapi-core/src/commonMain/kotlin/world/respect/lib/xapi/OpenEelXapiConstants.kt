@@ -37,5 +37,6 @@ object OpenEelXapiConstants {
 
     const val CATEGORY_APP_LISTING_RECIPE = "https://id.openeel.org/recipes/applisting"
 
+    const val CATEGORY_BOOKMARK_RECIPE = "https://id.openeel.org/recipes/bookmark"
 
 }

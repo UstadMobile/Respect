@@ -4,14 +4,14 @@
 * Complete development environment setup as per main [README](../README.md)
 * Install [Maestro CLI](https://github.com/mobile-dev-inc/Maestro/releases).
 
-## Run an individual test:
+## Quick run an individual test:
 
 * Build the project as per the main [README](../README.md)
 * Start respect-server and add a school as per the main project README.
 * Install the APK on the Android Emulator or device being used to run tests
   e.g. run project using Android Studio, drag/drop file onto Android emulator, or install using adb command:
 ```
-adb install ./respect-app-compose/build/outputs/apk/debug/respect-app-compose-debug.apk
+adb install ./app-android/build/outputs/apk/debug/app-android-debug.apk
 ```
 
 * Run the server with e2e artifact upload enabled
@@ -43,12 +43,30 @@ Running multiple tests with Maestro requires a blank server installation for eac
 required.
 
 ```
-export TESTSERVER_CONTROLLER=http://192.168.1.2:8094/
-./ci-run-maestro.sh 
+export TESTSERVER_CONTROLLER_URL=http://192.168.1.2:8094/
+./ci-run-e2e-tests.sh
 ```
 
 Where:
 * 192.168.1.2 is the local IP of the developer's laptop
+
+Note: You can filter which tests to run by setting the environment variable ```MAESTRO_EXTRA_ARGS```
+with arguments as per [Maestro test discovery and tags](https://docs.maestro.dev/maestro-flows/workspace-management/test-discovery-and-tags)
+e.g.
+
+```
+export TESTSERVER_CONTROLLER_URL=http://192.168.1.2:8094/
+export MAESTRO_EXTRA_ARGS=" --include-tags=basic "
+./ci-run-e2e-tests.sh
+```
+
+or set a particular test to run using ```MAESTRO_FLOW``` arg
+
+```
+export TESTSERVER_CONTROLLER_URL=http://192.168.1.2:8094/
+export MAESTRO_FLOW=./maestro/flows/flow_name.yaml
+./ci-run-e2e-tests.sh
+```
 
 # Maestro flow environment variables:
 * ```TESTCONTROLLER_URL```: sets the [TestServerController](https://github.com/UstadMobile/TestServerController) 
@@ -60,7 +78,8 @@ Where:
 * ```SCHOOL_NAME```: explicitly set the school name to use (used in get started screen)
 * ```URL_SUBSTITUTION``` when there is a reverse proxy setup (e.g. to handle HTTPS) then it will 
   replace _PORT_ with the port number created by the test server e.g. https://_PORT_.ustadtesting.ustadmobile.com/
-* ```TEST_APP_URL```: A launchable app publication URL.
+* ```TEST_APP_URL```: A launchable app publication URL (used with 002_browse_lessons_test and 
+  assignment tests.
 
 ## Available test flows
 ---

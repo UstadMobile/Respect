@@ -1,8 +1,7 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
@@ -15,15 +14,22 @@ compose.resources {
 
 
 kotlin {
-    androidTarget {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
-        }
-    }
-
     compilerOptions {
+        jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
+
         optIn.add("kotlin.time.ExperimentalTime")
         optIn.add("kotlin.uuid.ExperimentalUuidApi")
+    }
+
+    android {
+        //As per https://youtrack.jetbrains.com/projects/CMP/issues/CMP-8232/org.jetbrains.compose.resources.MissingResourceException-Missing-resource-with-path-composeResources
+        androidResources {
+            enable = true
+        }
+
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        namespace = "${rootProject.group}.shared"
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
     jvm()
@@ -61,6 +67,7 @@ kotlin {
             implementation(libs.napier)
             implementation(libs.qrose)
             implementation(libs.urlencoder)
+            implementation(libs.cache4k)
 
         }
 
@@ -108,18 +115,3 @@ kotlin {
     }
 }
 
-android {
-    namespace = "world.respect.shared"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    defaultConfig {
-        minSdk = libs.versions.android.minSdk.get().toInt()
-    }
-}
-dependencies {
-    implementation(project(":respect-datalayer-repository"))
-    implementation(project(":respect-datalayer-repository"))
-}

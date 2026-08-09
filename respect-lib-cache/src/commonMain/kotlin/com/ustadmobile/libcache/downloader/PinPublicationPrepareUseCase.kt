@@ -13,6 +13,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.head
 import io.ktor.client.request.header
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.contentLength
 import io.ktor.http.headersOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,8 +22,12 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.coroutineScope
+import nl.adaptivity.xmlutil.serialization.XML
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.findLearningUnitAcquisitionLinks
+import world.respect.lib.opds.model.findTinCanXmlLink
+import world.respect.lib.xapi.rusticilaunch.model.TinCanXmlDocument
 import world.respect.libutil.ext.resolve
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -42,6 +47,7 @@ class PinPublicationPrepareUseCase(
     private val db: UstadCacheDb,
     private val cache: UstadCache,
     private val enqueueRunDownloadJobUseCase: EnqueueRunDownloadJobUseCase,
+    private val xml: XML,
 ) {
 
 
@@ -70,20 +76,48 @@ class PinPublicationPrepareUseCase(
             ?: throw IllegalArgumentException("no manifest url")
 
         val publication: OpdsPublication = httpClient.get(manifestUrl).body()
+        val tinCanXmlLink = publication.findTinCanXmlLink()
+        val tinCanXmlUrl = tinCanXmlLink?.href?.let { manifestUrl.resolve(it) }
+        val tinCanXmlDocument = tinCanXmlUrl?.let {
+            val xmlStr = httpClient.get(it).bodyAsText()
+            xml.decodeFromString(TinCanXmlDocument.serializer(), xmlStr)
+        }
 
-        val resourceAndAcquireJobItems = buildList {
+        val tinCanLaunchUrls = tinCanXmlDocument?.activities?.activity?.mapNotNull { activity ->
+            activity.launch?.value?.let { tinCanXmlUrl.resolve(it) }
+        } ?: emptyList()
+
+        val resourceAndAcquireJobItems = buildList<DownloadJobItem> {
             val acquisitionLinks = publication.findLearningUnitAcquisitionLinks()
+            val acquisitionLinksUrls = acquisitionLinks.map {
+                manifestUrl.resolve(it.href)
+            }
 
-            acquisitionLinks.forEach { acquisitionLink ->
+            /*
+             * For any url that might be launched with xAPI Launch Parameters, set no vary search
+             * header. If this is not set the variance in the xAPI launch parameters will cause lead
+             * to a cache miss and offline loading will fail.
+             */
+            (acquisitionLinksUrls + tinCanLaunchUrls).distinct().forEach { launchableUrl ->
                 cache.setExtraResponseHeaders(
-                    url = manifestUrl.resolve(acquisitionLink.href),
+                    url = launchableUrl,
                     extraResponseHeaders = headersOf(
                         "No-Vary-Search" to listOf(LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER)
                     )
                 )
             }
 
-            val linksToDownload = (publication.resources ?: emptyList()) + acquisitionLinks
+            val linksToDownload: List<ReadiumLink> = buildList {
+                tinCanXmlLink?.also { add(it) }
+                addAll(
+                    tinCanLaunchUrls.map { ReadiumLink(href = it.toString()) }
+                )
+
+                publication.resources?.also { addAll(it) }
+                addAll(acquisitionLinks)
+                add(ReadiumLink(href = manifestUrl.toString()))
+                publication.images?.also { addAll(it) }
+            }
 
             addAll(
                 linksToDownload.map { resource ->

@@ -1,10 +1,17 @@
 appId: world.respect.app
 ---
-- stopApp
 - setAirplaneMode: disabled
+# Wait for all pending remote writes to complete. See AppBar.kt for note on this.
+- assertVisible:
+    id: "pending_write_count"
+    text: "0"
+- stopApp
 - openLink: "world.respect.app.e2eartifactupload:///?schoolUrl=${output.SCHOOL_URL_ENCODED}&name=${NAME}"
 
 - extendedWaitUntil:
     visible:
-      id: "db_completed"
+      id: "upload_done"
     timeout: 30000
+- takeScreenshot:
+    path: e2e_artifact_upload
+    label: Screenshot of E2E artifact upload result

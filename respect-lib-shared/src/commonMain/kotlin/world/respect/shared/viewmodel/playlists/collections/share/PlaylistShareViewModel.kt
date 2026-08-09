@@ -47,7 +47,7 @@ class PlaylistShareViewModel(
     private val setClipboardStringUseCase: SetClipboardStringUseCase,
     private val shareLinkLauncher: LaunchShareLinkUseCase,
     private val smsLinkLauncher: LaunchSendSmsUseCase,
-    private val emailLinkLauncher: LaunchSendEmailUseCase,
+    private val launchSendEmailUseCase: LaunchSendEmailUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -126,9 +126,12 @@ class PlaylistShareViewModel(
 
     fun onClickSendViaEmail() {
         viewModelScope.launch {
-            emailLinkLauncher(
-                subject = getString(Res.string.share_playlist),
-                body = _uiState.value.shareUrl,
+            launchSendEmailUseCase(
+                LaunchSendEmailUseCase.LaunchSendEmailRequest(
+                    subject = getString(Res.string.share_playlist),
+                    body = _uiState.value.shareUrl,
+                    to = null,
+                )
             )
         }
     }

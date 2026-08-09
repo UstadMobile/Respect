@@ -13,6 +13,8 @@ import io.ktor.server.plugins.autohead.AutoHeadResponse
 import io.ktor.server.plugins.conditionalheaders.ConditionalHeaders
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.runBlocking
+import nl.adaptivity.xmlutil.core.XmlVersion
+import nl.adaptivity.xmlutil.serialization.XML
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyBlocking
 import world.respect.lib.opds.model.OpdsPublication
@@ -30,6 +32,11 @@ class DownloadIntegrationTest : AbstractCacheInterceptorTest() {
         val port: Int,
         val baseUrl: Url,
     )
+
+    private val xml = XML.v1 {
+        recommended_1_0_0()
+        xmlVersion = XmlVersion.XML10
+    }
 
     private suspend fun downloadIntegrationTest(
         block: suspend DownloadIntegrationTestContext.() -> Unit
@@ -81,7 +88,8 @@ class DownloadIntegrationTest : AbstractCacheInterceptorTest() {
                     db = cacheDb,
                     httpClient = httpClient,
                     cache = ustadCache,
-                    enqueueRunDownloadJobUseCase = mockEnqueueRunDownloadUseCase
+                    enqueueRunDownloadJobUseCase = mockEnqueueRunDownloadUseCase,
+                    xml = xml,
                 )
 
                 val manifestUrl = baseUrl.resolve("lesson001/lesson001.json")

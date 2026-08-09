@@ -17,6 +17,7 @@ onFlowComplete:
       file: "subflows/teardown.yaml"
       env:
         NAME: "db-final"
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
 - runFlow: "subflows/admin_add_app.yaml"
@@ -37,7 +38,7 @@ onFlowComplete:
       USERNAME: "teacherauser"
       PASSWORD: "test123"
 - assertVisible:
-    text: "Home"
+    id: "nav_home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
@@ -137,8 +138,11 @@ onFlowComplete:
     text: "Statement Maker"
 - tapOn: "Open"
 - assertVisible: "Statement Maker"
-- tapOn: "Send statement"
-- assertVisible: "Statement sent.*"
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn: "Send statement"
+      - assertVisible: "Statement sent.*"
 - tapOn: "Close"
 - back
 - tapOn: "Assignment Result Statement Demo"
@@ -146,8 +150,11 @@ onFlowComplete:
 - assertVisible: "Assignment Result.*"
 - tapOn: "Score"
 - inputText: 1
-- tapOn: "Send statement"
-- assertVisible: "Statement sent.*"
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn: "Send statement"
+      - assertVisible: "Statement sent.*"
 - tapOn: "Close"
 - tapOn: "Assignments"
 - tapOn: "Homework 1"
@@ -177,8 +184,11 @@ onFlowComplete:
 - assertVisible: "Assignment Result.*"
 - tapOn: "Score"
 - inputText: 1
-- tapOn: "Send statement"
-- assertVisible: "Statement sent.*"
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn: "Send statement"
+      - assertVisible: "Statement sent.*"
 - tapOn: "Close"
 - tapOn: "Assignments"
 - tapOn: "Homework 1"

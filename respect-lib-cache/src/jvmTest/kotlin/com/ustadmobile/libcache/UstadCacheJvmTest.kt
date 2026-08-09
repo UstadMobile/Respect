@@ -3,26 +3,26 @@ package com.ustadmobile.libcache
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.ustadmobile.ihttp.headers.IHttpHeader
-import com.ustadmobile.libcache.db.UstadCacheDb
-import com.ustadmobile.libcache.db.entities.RetentionLock
-import com.ustadmobile.libcache.headers.requireIntegrity
-import com.ustadmobile.libcache.integrity.sha256Integrity
-import com.ustadmobile.libcache.io.RangeInputStream
-import com.ustadmobile.libcache.io.uncompress
-import com.ustadmobile.libcache.md5.Md5Digest
-import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.ihttp.request.iRequestBuilder
 import com.ustadmobile.ihttp.request.requestBuilder
 import com.ustadmobile.ihttp.response.IHttpResponse
 import com.ustadmobile.libcache.cachecontrol.CacheControlFreshnessCheckerImpl
+import com.ustadmobile.libcache.db.UstadCacheDb
+import com.ustadmobile.libcache.db.entities.RetentionLock
 import com.ustadmobile.libcache.downloader.EnqueuePinPublicationPrepareUseCaseJvm
-import com.ustadmobile.libcache.downloader.PinPublicationPrepareUseCase
+import com.ustadmobile.libcache.headers.requireIntegrity
+import com.ustadmobile.libcache.integrity.sha256Integrity
+import com.ustadmobile.libcache.io.RangeInputStream
+import com.ustadmobile.libcache.io.uncompress
 import com.ustadmobile.libcache.logging.NapierLoggingAdapter
+import com.ustadmobile.libcache.md5.Md5Digest
 import com.ustadmobile.libcache.md5.urlHash
+import com.ustadmobile.libcache.md5.urlKey
 import com.ustadmobile.libcache.novarysearch.normalizeForNoVarySearchIfNotNull
 import com.ustadmobile.libcache.response.StringResponse
 import com.ustadmobile.libcache.response.bodyAsUncompressedSourceIfContentEncoded
 import com.ustadmobile.libcache.util.LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER
+import com.ustadmobile.libcache.util.awaitUpdatesCommitted
 import com.ustadmobile.libcache.util.initNapierLog
 import com.ustadmobile.libcache.util.newFileFromResource
 import com.ustadmobile.libcache.util.storeFileAsUrl
@@ -48,7 +48,9 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-
+/**
+ * 05/Aug/2026: closing the database using Room 2.8.4's bundled driver is causing JVM crashes.
+ */
 class UstadCacheJvmTest {
 
     @get:Rule
@@ -175,6 +177,17 @@ class UstadCacheJvmTest {
         )
     }
 
+    private inline fun UstadCacheDb.useDb(
+        block: (UstadCacheDb) -> Unit
+    ) {
+        try {
+            block(this)
+        }finally {
+            //this.close()
+        }
+    }
+
+
     data class FileCanBeCachedAndRetrievedContext(
         val cacheDb: UstadCacheDb,
         val cache: UstadCacheImpl,
@@ -207,7 +220,8 @@ class UstadCacheJvmTest {
             block(Pair(cacheDb, ustadCache))
         }finally {
             ustadCache.close()
-            cacheDb.close()
+            //See class KDoc
+            //cacheDb.close()
         }
     }
 
@@ -241,13 +255,12 @@ class UstadCacheJvmTest {
                 extraHeaders = extraHeaders,
             )
 
-            runBlocking { ustadCache.commit() }
-
             val urlForKey = Url(retrieveUrl).normalizeForNoVarySearchIfNotNull(
                 result.response.headers["No-Vary-Search"]
             )
 
             val cacheEntryInDb = runBlocking {
+                ustadCache.awaitUpdatesCommitted()
                 cacheDb.cacheEntryDao.findEntryByKey(Md5Digest().urlHash(urlForKey))
             }
             assertNotNull(cacheEntryInDb)
@@ -364,109 +377,112 @@ class UstadCacheJvmTest {
 
     @Test
     fun givenResponseIsUpdated_whenRetrieved_thenLatestResponseWillBeReturned(){
-        val cacheDb = Room.databaseBuilder<UstadCacheDb>(
+        Room.databaseBuilder<UstadCacheDb>(
             tempDir.newFile("cachetest.db").absolutePath
-        ).setDriver(BundledSQLiteDriver()).build()
-        val ustadCache = UstadCacheImpl(
-            pathsProvider = temporaryFolderPathsProvider,
-            xxStringHasher = XXStringHasherCommonJvm(),
-            db = cacheDb,
-            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
-                cacheDb, XXStringHasherCommonJvm()
-            ),
-            freshnessChecker = CacheControlFreshnessCheckerImpl(),
-        )
+        ).setDriver(BundledSQLiteDriver()).build().useDb { cacheDb ->
+            val ustadCache = UstadCacheImpl(
+                pathsProvider = temporaryFolderPathsProvider,
+                xxStringHasher = XXStringHasherCommonJvm(),
+                db = cacheDb,
+                enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                    cacheDb, XXStringHasherCommonJvm()
+                ),
+                freshnessChecker = CacheControlFreshnessCheckerImpl(),
+            )
 
-        val url = "http://server.com/file.css"
-        val payloads = listOf("font-weight: bold", "font-weight: bold !important")
-        runBlocking {
-            payloads.forEachIndexed { _, payload ->
-                ustadCache.store(listOf(
-                    iRequestBuilder(url).let {
-                        CacheEntryToStore(
-                            request = it,
-                            response = StringResponse(
+            val url = "http://server.com/file.css"
+            val payloads = listOf("font-weight: bold", "font-weight: bold !important")
+            runBlocking {
+                payloads.forEachIndexed { _, payload ->
+                    ustadCache.store(listOf(
+                        iRequestBuilder(url).let {
+                            CacheEntryToStore(
                                 request = it,
-                                mimeType = "text/css",
-                                body = payload,
+                                response = StringResponse(
+                                    request = it,
+                                    mimeType = "text/css",
+                                    body = payload,
+                                )
                             )
-                        )
-                    }
-                ))
+                        }
+                    ))
+                }
+
+                val response = ustadCache.retrieve(iRequestBuilder(url))
+                val responseBytes = response?.bodyAsUncompressedSourceIfContentEncoded()
+                    ?.asInputStream()?.readAllBytes()
+                val responseStr = responseBytes?.let { String(it) }
+                assertEquals(payloads.last(), responseStr)
             }
-
-            val response = ustadCache.retrieve(iRequestBuilder(url))
-            val responseBytes = response?.bodyAsUncompressedSourceIfContentEncoded()
-                ?.asInputStream()?.readAllBytes()
-            val responseStr = responseBytes?.let { String(it) }
-            assertEquals(payloads.last(), responseStr)
         }
-
     }
 
 
     @Test
     fun givenEntryNotStored_whenRetrieved_thenWillReturnNull() {
-        val cacheDb = Room.databaseBuilder<UstadCacheDb>(
+        Room.databaseBuilder<UstadCacheDb>(
             tempDir.newFile("cachetest.db").absolutePath
-        ).setDriver(BundledSQLiteDriver()).build()
-        val ustadCache = UstadCacheImpl(
-            pathsProvider = temporaryFolderPathsProvider,
-            db = cacheDb,
-            xxStringHasher = XXStringHasherCommonJvm(),
-            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
-                cacheDb, XXStringHasherCommonJvm()
-            ),
-            freshnessChecker = CacheControlFreshnessCheckerImpl(),
-        )
+        ).setDriver(BundledSQLiteDriver()).build().useDb { cacheDb ->
+            val ustadCache = UstadCacheImpl(
+                pathsProvider = temporaryFolderPathsProvider,
+                db = cacheDb,
+                xxStringHasher = XXStringHasherCommonJvm(),
+                enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                    cacheDb, XXStringHasherCommonJvm()
+                ),
+                freshnessChecker = CacheControlFreshnessCheckerImpl(),
+            )
 
-        val url = "http://server.com/file.css"
-        assertNull(runBlocking { ustadCache.retrieve(iRequestBuilder(url)) } )
+            val url = "http://server.com/file.css"
+            assertNull(runBlocking { ustadCache.retrieve(iRequestBuilder(url)) } )
+        }
     }
 
     @Test
     fun givenResponseIsNotUpdated_whenStored_thenWillUpdateLastAccessAndValidationTime() {
-        val cacheDb = Room.databaseBuilder<UstadCacheDb>(
+        Room.databaseBuilder<UstadCacheDb>(
             tempDir.newFile("cachetest.db").absolutePath
-        ).setDriver(BundledSQLiteDriver()).build()
-        val ustadCache = UstadCacheImpl(
-            pathsProvider = temporaryFolderPathsProvider,
-            db = cacheDb,
-            xxStringHasher = XXStringHasherCommonJvm(),
-            enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
-                cacheDb, XXStringHasherCommonJvm()
-            ),
-            freshnessChecker = CacheControlFreshnessCheckerImpl(),
-        )
-
-        val url = "http://server.com/file.css"
-        val tmpFile = tempDir.newFile().also {
-            it.writeText("font-weight: bold")
-        }
-
-        val md5Digest = Md5Digest()
-        val entryAfterStored = (1..2).map {
-            ustadCache.assertCanStoreAndRetrieveFileAsCacheHit(
-                testFile = tmpFile,
-                testUrl = url,
-                mimeType = "text/css"
+        ).setDriver(BundledSQLiteDriver()).build().useDb { cacheDb ->
+            val ustadCache = UstadCacheImpl(
+                pathsProvider = temporaryFolderPathsProvider,
+                db = cacheDb,
+                xxStringHasher = XXStringHasherCommonJvm(),
+                enqueuePinPublicationPrepareUseCase = EnqueuePinPublicationPrepareUseCaseJvm(
+                    cacheDb, XXStringHasherCommonJvm()
+                ),
+                freshnessChecker = CacheControlFreshnessCheckerImpl(),
             )
 
-            runBlocking {
-                ustadCache.commit()
-                cacheDb.cacheEntryDao.findEntryByKey(md5Digest.urlKey(url))
+            val url = "http://server.com/file.css"
+            val tmpFile = tempDir.newFile().also {
+                it.writeText("font-weight: bold")
             }
+
+            val md5Digest = Md5Digest()
+            val entryAfterStored = (1..2).map {
+                ustadCache.assertCanStoreAndRetrieveFileAsCacheHit(
+                    testFile = tmpFile,
+                    testUrl = url,
+                    mimeType = "text/css"
+                )
+
+                runBlocking {
+                    ustadCache.awaitUpdatesCommitted()
+                    cacheDb.cacheEntryDao.findEntryByKey(md5Digest.urlKey(url))
+                }
+            }
+
+
+            assertTrue(entryAfterStored.last()!!.lastValidated > entryAfterStored.first()!!.lastValidated,
+                message = "Last validated time should be updated after ")
+
+            //Cache tmp directory should not have any leftover files.
+            val cacheTmpDir = File(rootDir, "tmpWork")
+
+            assertTrue(cacheTmpDir.exists())
+            assertEquals(0, cacheTmpDir.list()!!.size)
         }
 
-
-        assertTrue(entryAfterStored.last()!!.lastValidated > entryAfterStored.first()!!.lastValidated,
-            message = "Last validated time should be updated after ")
-
-        //Cache tmp directory should not have any leftover files.
-        val cacheTmpDir = File(rootDir, "tmpWork")
-
-        assertTrue(cacheTmpDir.exists())
-        assertEquals(0, cacheTmpDir.list()!!.size)
     }
 
     @Test

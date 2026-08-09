@@ -17,6 +17,7 @@ onFlowComplete:
       file: "subflows/teardown.yaml"
       env:
         NAME: "db-final"
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 # Invite new user:
 - runFlow: "subflows/school_admin_login_flow.yaml"
@@ -86,7 +87,9 @@ onFlowComplete:
     text: "Your profile"
 - tapOn: "Your name*"
 - inputText: "TeacherA User"
-- tapOn: "Gender*"
+- tapOn:
+    text: "Gender*"
+    retryTapIfNoChange: true
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
 - runScript:
@@ -104,7 +107,8 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Home"
-- assertVisible: "Home"
+- assertVisible:
+    id: "nav_home"
 - assertVisible: "Assignments"
 - assertVisible: "People"
 - runFlow:
@@ -158,7 +162,9 @@ onFlowComplete:
     text: "Your profile"
 - tapOn: "Your name*"
 - inputText: "Student User"
-- tapOn: "Gender*"
+- tapOn:
+    text: "Gender*"
+    retryTapIfNoChange: true
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
 - runScript:
@@ -203,7 +209,8 @@ onFlowComplete:
     id : "password"
 - inputText: "test123"
 - tapOn: "Login"
-- assertVisible: "Home"
+- assertVisible:
+    id: "nav_home"
 - tapOn: "Classes"
 - assertVisible:
     id: "app_title"
@@ -249,7 +256,9 @@ onFlowComplete:
     text: "Your profile"
 - tapOn: "Your name*"
 - inputText: "Parent User"
-- tapOn: "Gender*"
+- tapOn:
+    text: "Gender*"
+    retryTapIfNoChange: true
 - tapOn: "Female"
 - tapOn: "Your date of birth*"
 - runScript:
@@ -269,7 +278,9 @@ onFlowComplete:
 - tapOn: "Sign-up"
 - tapOn: "Child's name*"
 - inputText: "Student User2"
-- tapOn: "Gender*"
+- tapOn:
+    text: "Gender*"
+    retryTapIfNoChange: true
 - tapOn: "Female"
 - tapOn: "Child's date of birth*"
 - runScript:

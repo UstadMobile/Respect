@@ -11,6 +11,7 @@ import world.respect.datalayer.db.school.opds.entities.OpdsPublicationEntity
 import world.respect.datalayer.db.school.opds.entities.ReadiumLinkEntity
 import world.respect.datalayer.db.school.opds.entities.ReadiumLinkEntity.PropertyType.OPDS_FEED_LINKS
 import world.respect.datalayer.db.school.opds.entities.ReadiumLinkEntity.PropertyType.OPDS_FEED_NAVIGATION
+import world.respect.datalayer.db.school.opds.entities.ReadiumSubjectEntity
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.school.model.StatusEnum
@@ -26,7 +27,8 @@ class OpdsFeedEntities(
     val langMapEntities: List<LangMapEntity>,
     val linkEntities: List<ReadiumLinkEntity>,
     val publications: List<OpdsPublicationEntity>,
-    val groups: List<OpdsGroupEntity>
+    val groups: List<OpdsGroupEntity>,
+    val subjects: List<ReadiumSubjectEntity>,
 )
 
 fun OpdsFeed.asEntities(
@@ -116,7 +118,8 @@ fun OpdsFeed.asEntities(
             addAll(publicationEntities.map { it.opdsPublicationEntity } )
             addAll(groupEntities.flatMap { it.publications })
         },
-        groups = groupEntities.map { it.group }
+        groups = groupEntities.map { it.group },
+        subjects = publicationEntities.flatMap { it.subjectEntities },
     )
 }
 
@@ -139,7 +142,10 @@ fun OpdsFeedEntities.asModel(
                 },
                 linkEntities = linkEntities.filter { link ->
                     link.rleOpdsParentUid == publication.opeUid
-                }
+                },
+                subjectEntities = subjects.filter { subject ->
+                    subject.rseTopParentUid == publication.opeUid
+                },
             ).asModel(json).data
         },
         navigation = linkEntities.asModels(json, OPDS_FEED_NAVIGATION, feedUid),
@@ -151,6 +157,7 @@ fun OpdsFeedEntities.asModel(
                 publications = publications.filter { it.opeOgeUid == groupEntity.ogeUid },
                 links = linkEntities,
                 langMapEntities = langMapEntities,
+                subjectEntities = subjects,
             ).asModel(json)
         },
         status = opdsFeed.ofeStatus.value,

@@ -1,0 +1,31 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "006_user_send_feedback_test"
+
+onFlowComplete:
+  - runFlow:
+      file: "subflows/teardown.yaml"
+      env:
+        NAME: "db-final"
+---
+- runFlow: "subflows/school_admin_login_flow.yaml"
+- tapOn:
+    id: "user_account_icon"
+- tapOn: "Send feedback"
+- assertVisible:
+    id: "app_title"
+    text: "Send feedback"
+- assertVisible: "Message the developers on WhatsApp"
+- assertVisible: "Email the developers"
+- assertVisible: "Public forum"
+

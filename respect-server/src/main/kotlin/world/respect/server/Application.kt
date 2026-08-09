@@ -243,6 +243,10 @@ fun Application.module() {
                 basePackage = "demoapp",
             )
 
+            get("/") {
+                call.respondResource("/demoapp/index.html")
+            }
+
             DemoLaunchableAppManifestRoute()
             DemoLaunchableAppCollectionsRoute()
             DemoLaunchableAppLessonRoute()

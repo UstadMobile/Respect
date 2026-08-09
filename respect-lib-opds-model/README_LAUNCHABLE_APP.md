@@ -22,12 +22,12 @@ Example:
   "links": [
     {
       "rel": "self",
-      "href": "https://demo.openeel.org/launchable-app.json",
+      "href": "https://demo.openeel.org/appmanifest.json",
       "type": "application/opds-publication+json"
     },
     {
       "rel": "collection",
-      "href": "https://demo.openeel.org/default-catalog.json",
+      "href": "https://demo.openeel.org/default-collection.json",
       "type": "application/opds+json"
     },
     {
@@ -98,7 +98,7 @@ e.g.
   },
 
   "links": [
-    {"rel": "self", "href": "https://demo.openeel.org/default-catalog.json", "type": "application/opds+json"}
+    {"rel": "self", "href": "https://demo.openeel.org/default-collection.json", "type": "application/opds+json"}
   ],
 
   "publications": [
@@ -119,7 +119,11 @@ e.g.
         ]
       },
       "links": [
-        {"rel": "self", "href": "Lesson-manifest.json", "type": "application/opds-publication+json"},
+        {
+          "rel": "self", 
+          "href": "grade/1/learningunits/1/manifest.json", 
+          "type": "application/opds-publication+json"
+        },
         {
           "rel": "https://id.openeel.org/rel/tincanxml",
           "href": "tincan.xml",
@@ -127,7 +131,7 @@ e.g.
         },
         {
           "rel": "https://id.openeel.org/rel/launchable-app",
-          "href": "https://demo.openeel.org/launchable-app.json",
+          "href": "https://demo.openeel.org/appmanifest.json",
           "type": "application/opds-publication+json"
         }
       ],
@@ -157,7 +161,7 @@ launched.
   "links": [
     {
       "rel": "self",
-      "href": "https://demo.openeel.org/Lesson-manifest.json",
+      "href": "manifest.json",
       "type": "application/opds-publication+json"
     },
     {
@@ -173,7 +177,7 @@ launched.
   ],
   "readingOrder": [
     {
-      "href": "https://demo.openeel.org/Lesson",
+      "href": "learningunit.html",
       "type": "text/html"
     }
   ],

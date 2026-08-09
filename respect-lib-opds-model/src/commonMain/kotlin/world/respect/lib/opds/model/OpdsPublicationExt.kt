@@ -12,6 +12,11 @@ const val REL_RESPECT_DEFAULT_CATALOG = "https://respect.ustadmobile.com/ns/defa
  */
 const val REL_LAUNCHABLE_APP = "https://id.openeel.org/rel/launchable-app"
 
+/**
+ * Relationship for a link to a tincan.xml file
+ */
+const val REL_TINCAN_XML = "https://id.openeel.org/rel/tincanxml"
+
 fun OpdsPublication.findLearningUnitAcquisitionLinks(): List<ReadiumLink> {
     return links.filter { link ->
         link.rel?.any {
@@ -51,6 +56,8 @@ fun OpdsPublication.findCollection(): ReadiumLink? =
 fun OpdsPublication.findLaunchableAppLink(): ReadiumLink? =
     links.firstOrNull { it.rel?.contains(REL_LAUNCHABLE_APP) == true }
 
+fun OpdsPublication.findTinCanXmlLink(): ReadiumLink? =
+    links.firstOrNull { it.rel?.contains(REL_TINCAN_XML) == true }
 
 fun OpdsPublication.findIcons(): List<ReadiumLink> {
     return images ?: emptyList()

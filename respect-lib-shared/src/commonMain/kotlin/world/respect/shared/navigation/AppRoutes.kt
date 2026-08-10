@@ -321,19 +321,14 @@ class AppsDetail private constructor(
         }
     }
 }
-
 @Serializable
 class LearningUnitList(
     private val opdsFeedUrlStr: String,
-    private val appManifestUrlStr: String,
-    private val resultDestStr: String?,
+    private val resultDestStr: String? = null,
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
     val opdsFeedUrl = Url(opdsFeedUrlStr)
-
-    @Transient
-    val appManifestUrl = Url(appManifestUrlStr)
 
     @Transient
     override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
@@ -341,18 +336,13 @@ class LearningUnitList(
     companion object {
         fun create(
             opdsFeedUrl: Url,
-            appManifestUrl: Url,
             resultDest: ResultDest? = null,
-        ): LearningUnitList {
-            return LearningUnitList(
-                opdsFeedUrlStr = opdsFeedUrl.toString(),
-                appManifestUrlStr = appManifestUrl.toString(),
-                resultDestStr = resultDest.encodeToJsonStringOrNull(),
-            )
-        }
+        ) = LearningUnitList(
+            opdsFeedUrlStr = opdsFeedUrl.toString(),
+            resultDestStr = resultDest.encodeToJsonStringOrNull(),
+        )
     }
 }
-
 @Serializable
 class EnterPasswordSignup private constructor(
     private val schoolUrlStr: String,
@@ -756,28 +746,6 @@ class PlaylistList private constructor(
             resultDest: ResultDest? = null,
         ) = PlaylistList(
             resultDestStr = resultDest.encodeToJsonStringOrNull()
-        )
-    }
-}
-@Serializable
-class PlaylistDetail private constructor(
-    private val playlistUrlStr: String,
-    private val resultDestStr: String? = null,
-) : RespectAppRoute, RouteWithResultDest {
-
-    @Transient
-    val playlistUrl = Url(playlistUrlStr)
-
-    @Transient
-    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
-
-    companion object {
-        fun create(
-            playlistUrl: Url,
-            resultDest: ResultDest? = null,
-        ) = PlaylistDetail(
-            playlistUrlStr = playlistUrl.toString(),
-            resultDestStr = resultDest.encodeToJsonStringOrNull(),
         )
     }
 }

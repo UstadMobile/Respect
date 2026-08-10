@@ -32,9 +32,9 @@ import world.respect.shared.generated.resources.playlist_section
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.ExternalLinkEdit
+import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
-import world.respect.shared.navigation.PlaylistDetail
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistList
 import world.respect.shared.navigation.RespectAppLauncher
@@ -461,7 +461,7 @@ class PlaylistEditViewModel(
                 )
                 fromSection.copy(publications = items)
             }
-             prev.copy(feed = prev.feed?.copy(groups = sections))
+            prev.copy(feed = prev.feed?.copy(groups = sections))
         }
     }
 
@@ -546,7 +546,7 @@ class PlaylistEditViewModel(
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    destination = PlaylistDetail.create(playlistUrl = savedPlaylistUrl),
+                    destination = LearningUnitList.create(opdsFeedUrl = savedPlaylistUrl),
                     popUpTo = PlaylistList.create(),
                     popUpToInclusive = false,
                 )

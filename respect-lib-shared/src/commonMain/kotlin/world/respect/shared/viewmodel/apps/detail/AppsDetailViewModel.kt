@@ -184,7 +184,6 @@ class AppsDetailViewModel(
                 NavCommand.Navigate(
                     LearningUnitList.create(
                         opdsFeedUrl = route.manifestUrl.resolve(defaultLessonListLink.href),
-                        appManifestUrl = route.manifestUrl,
                         resultDest = route.resultDest,
                     )
                 )
@@ -223,7 +222,6 @@ class AppsDetailViewModel(
             NavCommand.Navigate(
                 LearningUnitList.create(
                     opdsFeedUrl = route.manifestUrl.resolve(navigationHref),
-                    appManifestUrl = route.manifestUrl,
                 )
             )
         )

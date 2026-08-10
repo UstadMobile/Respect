@@ -164,7 +164,6 @@ class AppLauncherViewModel(
 
                     LearningUnitList.create(
                         opdsFeedUrl = defaultLessonUrl,
-                        appManifestUrl = url,
                         resultDest = route.resultDest,
                     )
                 }else {

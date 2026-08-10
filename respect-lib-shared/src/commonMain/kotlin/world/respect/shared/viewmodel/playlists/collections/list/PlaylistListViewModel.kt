@@ -23,8 +23,8 @@ import world.respect.shared.generated.resources.add_new
 import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.playlist
 import world.respect.shared.navigation.EnterLink
+import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.PlaylistDetail
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistList
 import world.respect.shared.util.ext.asUiText
@@ -151,21 +151,14 @@ class PlaylistListViewModel(
             ?: throw IllegalStateException(
                 "Playlist feed has no self URL: ${feed.metadata.title}"
             )
-        val isPickMode = route.resultDest != null
-        if (isPickMode) {
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(
-                    PlaylistDetail.create(
-                        playlistUrl = playlistUrl,
-                        resultDest = route.resultDest,
-                    )
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                LearningUnitList.create(
+                    opdsFeedUrl = playlistUrl,
+                    resultDest = route.resultDest,
                 )
             )
-        } else {
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(PlaylistDetail.create(playlistUrl = playlistUrl))
-            )
-        }
+        )
     }
 
     fun onClickAddNew() {

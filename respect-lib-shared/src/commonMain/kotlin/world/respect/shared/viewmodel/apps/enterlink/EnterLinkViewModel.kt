@@ -20,8 +20,8 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enter_link
 import world.respect.shared.generated.resources.invalid_url
 import world.respect.shared.navigation.AppsDetail
+import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.PlaylistDetail
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
@@ -62,7 +62,6 @@ class EnterLinkViewModel(
             )
         }
     }
-
     fun onClickNext() {
         launchWithLoadingIndicator {
             try {
@@ -72,7 +71,7 @@ class EnterLinkViewModel(
                 if (playlistUrl != null) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            PlaylistDetail.create(playlistUrl)
+                            LearningUnitList.create(opdsFeedUrl = playlistUrl)
                         )
                     )
                     return@launchWithLoadingIndicator
@@ -103,7 +102,6 @@ class EnterLinkViewModel(
             }
         }
     }
-
     /**
      * @return the OPDS feed url for the playlist that the given share link refers to, or null if
      *         the given url is not a playlist share link.

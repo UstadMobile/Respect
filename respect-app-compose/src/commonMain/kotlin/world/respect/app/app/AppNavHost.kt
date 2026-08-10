@@ -22,7 +22,6 @@ import world.respect.app.view.enrollment.list.EnrollmentListScreen
 import world.respect.app.view.home.HomeScreen
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
 import world.respect.app.view.learningunit.list.LearningUnitListScreen
-import world.respect.app.view.playlists.collections.detail.PlaylistDetailScreen
 import world.respect.app.view.manageuser.accountlist.AccountListScreen
 import world.respect.app.view.manageuser.acceptinvite.AcceptInviteScreen
 import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
@@ -109,7 +108,6 @@ import world.respect.shared.navigation.PasskeyList
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.navigation.PersonList
-import world.respect.shared.navigation.PlaylistDetail
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistList
 import world.respect.shared.navigation.PlaylistShare
@@ -604,16 +602,6 @@ fun AppNavHost(
                 )
             )
         }
-
-        composable<PlaylistDetail> {
-            PlaylistDetailScreen(
-                viewModel = respectViewModel(
-                    onSetAppUiState = onSetAppUiState,
-                    navController = respectNavController,
-                )
-            )
-        }
-
         composable<PlaylistEdit> {
             PlaylistEditScreen(
                 viewModel = respectViewModel(

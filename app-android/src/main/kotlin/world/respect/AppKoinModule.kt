@@ -218,7 +218,6 @@ import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
-import world.respect.shared.viewmodel.playlists.collections.detail.PlaylistDetailViewModel
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
@@ -446,7 +445,6 @@ val appKoinModule = module {
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
     viewModelOf(::PlaylistListViewModel)
-    viewModelOf(::PlaylistDetailViewModel)
     viewModelOf(::PlaylistEditViewModel)
     viewModelOf(::ExternalLinkViewModel)
     viewModelOf(::PlaylistShareViewModel)

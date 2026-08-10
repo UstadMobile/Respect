@@ -24,7 +24,6 @@ import world.respect.shared.generated.resources.bookmarks
 import world.respect.shared.generated.resources.playlists
 import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.viewmodel.app.appstate.AppUiState
-import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListViewModel
 
 enum class HomeScreenTabs(val label: StringResource) {

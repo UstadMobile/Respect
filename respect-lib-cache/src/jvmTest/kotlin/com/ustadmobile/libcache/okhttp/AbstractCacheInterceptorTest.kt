@@ -27,6 +27,7 @@ import kotlin.test.BeforeTest
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlin.test.AfterTest
 
 /**
  * Test that contains common setup for any test that uses the OKHttp interceptor e.g. The
@@ -114,6 +115,16 @@ abstract class AbstractCacheInterceptorTest {
                 preconfigured = okHttpClient
             }
         }
+    }
+
+    @AfterTest
+    fun tearDown() {
+        ustadCache.close()
+
+        //See UstadCacheJvmTest note
+        //cacheDb.close()
+
+        httpClient.close()
     }
 
 }

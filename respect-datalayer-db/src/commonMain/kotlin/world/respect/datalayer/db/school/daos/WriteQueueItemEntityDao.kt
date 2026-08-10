@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 
 @Dao
@@ -36,6 +37,14 @@ interface WriteQueueItemEntityDao {
         ids: List<Int>,
         timeWritten: Long
     )
+
+    @Query("""
+        SELECT COUNT(*) 
+          FROM WriteQueueItemEntity
+         WHERE WriteQueueItemEntity.wqiAccountGuid = :accountGuid
+           AND WriteQueueItemEntity.wqiTimeWritten = 0
+    """)
+    fun pendingCountAsFlow(accountGuid: String): Flow<Int>
 
 
 }

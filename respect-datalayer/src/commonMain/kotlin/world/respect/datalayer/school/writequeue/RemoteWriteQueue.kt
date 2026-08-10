@@ -1,5 +1,7 @@
 package world.respect.datalayer.school.writequeue
 
+import kotlinx.coroutines.flow.Flow
+
 /**
  * Represents a queue of items to be sent to the remote datasource. This queue is used by the
  * Repository. When write operations are run on the repository it will update the local datasource
@@ -19,5 +21,12 @@ interface RemoteWriteQueue {
     suspend fun getPending(limit: Int): List<WriteQueueItem>
 
     suspend fun markSent(ids: List<Int>)
+
+    /**
+     * Get the size of the pending backlog as a flow. Useful to wait for the write queue to be
+     * completely drained
+     */
+    fun queueSizeAsFlow(): Flow<Int>
+
 
 }

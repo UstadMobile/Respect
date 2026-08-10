@@ -32,21 +32,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ustadmobile.libuicompose.theme.appBarSelectionModeBackgroundColor
 import com.ustadmobile.libuicompose.theme.appBarSelectionModeContentColor
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.getKoin
 import org.koin.compose.koinInject
 import world.respect.app.components.RespectPersonAvatar
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.util.ext.toImageVector
 import world.respect.datalayer.db.school.ext.fullName
+import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.back
@@ -86,6 +92,22 @@ fun RespectAppBar(
 
     val accountManager: RespectAccountManager = koinInject()
     val activeAccount by accountManager.selectedAccountAndPersonFlow.collectAsState(null)
+    val activeSessionVal = activeAccount?.session
+
+    /*
+     * Automated end-to-end test need to wait for pending writes to be saved to the server before
+     * clearing the app state.
+     */
+    val koin = getKoin()
+    val writeQueue: Flow<Int> = remember(activeSessionVal?.account?.scopeId) {
+        if(activeSessionVal != null) {
+            koin.getScope(activeSessionVal.account.scopeId).get<RemoteWriteQueue>().queueSizeAsFlow()
+        }else{
+            flowOf(0)
+        }
+    }
+
+    val pendingWriteCount by writeQueue.collectAsState(1)
 
     var searchActive by remember {
         mutableStateOf(false)
@@ -135,6 +157,13 @@ fun RespectAppBar(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.testTag("app_title"),
+                )
+
+                Text(
+                    modifier = Modifier.testTag("pending_write_count")
+                        .alpha(0f),
+                    text = pendingWriteCount.toString(),
+                    fontSize = 1.sp,
                 )
             },
             navigationIcon = {
@@ -245,7 +274,6 @@ fun RespectAppBar(
                         ) {
                             RespectPersonAvatar(name = it.person.fullName())
                         }
-
                     }
                 }
 

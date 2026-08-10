@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.update
  */
 fun <T> Channel<T>.receivePending(
     maxItems: Int = Int.MAX_VALUE,
-    backlogCount: MutableStateFlow<Int>?,
 ) : List<T> {
     val list = mutableListOf<T>()
     var itemCount = 0
@@ -21,10 +20,6 @@ fun <T> Channel<T>.receivePending(
         item?.also { list.add(it) }
     } while (item != null && itemCount++ < maxItems)
 
-    if(itemCount > 0) {
-        backlogCount?.update { it - itemCount }
-    }
-
     return list.toList()
 }
 
@@ -32,9 +27,11 @@ fun <T> Channel<T>.trySendAndUpdateBacklogSize(
     element: T,
     backlogCount: MutableStateFlow<Int>
 ) : ChannelResult<Unit> {
+    backlogCount.update { it + 1 }
+
     return trySend(element).also { result ->
-        if(result.isSuccess) {
-            backlogCount.update { it + 1 }
+        if(!result.isSuccess) {
+            backlogCount.update { it - 1 }
         }
     }
 }
@@ -45,12 +42,4 @@ suspend fun <T> Channel<T>.sendAndUpdateBacklogSize(
 )  {
     backlogCount.update { it + 1 }
     send(element)
-}
-
-suspend fun <T> Channel<T>.receiveAndUpdateBacklogSize(
-    backlogCount: MutableStateFlow<Int>
-) : T {
-    val item = receive()
-    backlogCount.update { it - 1 }
-    return item
 }

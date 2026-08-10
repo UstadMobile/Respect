@@ -1,5 +1,6 @@
 package world.respect.datalayer.db.school.writequeue
 
+import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.asEntity
@@ -35,6 +36,12 @@ class RemoteWriteQueueDbImpl(
         schoolDb.getWriteQueueItemEntityDao().updateTimeWritten(
             ids = ids,
             timeWritten = systemTimeInMillis(),
+        )
+    }
+
+    override fun queueSizeAsFlow(): Flow<Int> {
+        return schoolDb.getWriteQueueItemEntityDao().pendingCountAsFlow(
+            accountGuid = account.guid,
         )
     }
 

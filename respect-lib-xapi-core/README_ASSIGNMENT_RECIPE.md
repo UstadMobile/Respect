@@ -31,7 +31,7 @@ Use the following verb:
 
 ### Appendix A: Example assignment statement
 
-```
+```json
 {
   "id": "6690e6c9-3ef0-4ed3-8b37-7f3964730bee",
   "actor": {

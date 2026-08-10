@@ -43,7 +43,7 @@ import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListUiS
 import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListViewModel
 
 @Composable
-fun PlaylistListScreenForViewModel(
+fun PlaylistListScreen(
     viewModel: PlaylistListViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()

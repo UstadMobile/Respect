@@ -75,7 +75,7 @@ private fun SettingsListItem(
 }
 
 @Composable
-fun SettingsScreenForViewModel(
+fun SettingsScreen(
     viewModel: SettingsViewModel,
 ) {
     SettingsScreen()

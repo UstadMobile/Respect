@@ -22,7 +22,7 @@ import world.respect.app.view.enrollment.list.EnrollmentListScreen
 import world.respect.app.view.home.HomeScreen
 import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
 import world.respect.app.view.learningunit.list.LearningUnitListScreen
-import world.respect.app.view.learningunit.list.PlaylistDetailScreenForViewModel
+import world.respect.app.view.playlists.collections.detail.PlaylistDetailScreen
 import world.respect.app.view.manageuser.accountlist.AccountListScreen
 import world.respect.app.view.manageuser.acceptinvite.AcceptInviteScreen
 import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
@@ -49,10 +49,10 @@ import world.respect.app.view.person.passkeyList.PasskeyListScreen
 import world.respect.app.view.person.qrcode.InviteQrScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetPasswordScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetUsernameScreen
-import world.respect.app.view.playlists.collections.externallink.ExternalLinkScreenForViewModel
-import world.respect.app.view.playlists.collections.edit.PlaylistEditScreenForViewModel
-import world.respect.app.view.playlists.collections.list.PlaylistListScreenForViewModel
-import world.respect.app.view.playlists.collections.share.PlaylistShareScreenForViewModel
+import world.respect.app.view.playlists.collections.externallink.ExternalLinkScreen
+import world.respect.app.view.playlists.collections.edit.PlaylistEditScreen
+import world.respect.app.view.playlists.collections.list.PlaylistListScreen
+import world.respect.app.view.playlists.collections.share.PlaylistShareScreen
 import world.respect.app.view.report.detail.ReportDetailScreen
 import world.respect.app.view.report.edit.ReportEditScreen
 import world.respect.app.view.report.filteredit.ReportFilterEditScreen
@@ -64,7 +64,7 @@ import world.respect.app.view.report.list.ReportTemplateListScreen
 import world.respect.app.view.scanqrcode.ScanQRCodeScreen
 import world.respect.app.view.schooldirectory.edit.SchoolDirectoryEditScreen
 import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
-import world.respect.app.view.settings.SettingsScreenForViewModel
+import world.respect.app.view.settings.SettingsScreen
 import world.respect.app.view.statement.detail.RawStatementScreen
 import world.respect.app.view.statement.detail.StatementDetailScreen
 import world.respect.app.view.statement.list.StatementListScreen
@@ -584,7 +584,7 @@ fun AppNavHost(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            SettingsScreenForViewModel(viewModel = viewModel)
+            SettingsScreen(viewModel = viewModel)
         }
 
         composable<ScanQRCode> {
@@ -597,7 +597,7 @@ fun AppNavHost(
         }
 
         composable<PlaylistList> {
-            PlaylistListScreenForViewModel(
+            PlaylistListScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,
@@ -606,7 +606,7 @@ fun AppNavHost(
         }
 
         composable<PlaylistDetail> {
-            PlaylistDetailScreenForViewModel(
+            PlaylistDetailScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,
@@ -615,7 +615,7 @@ fun AppNavHost(
         }
 
         composable<PlaylistEdit> {
-            PlaylistEditScreenForViewModel(
+            PlaylistEditScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,
@@ -623,7 +623,7 @@ fun AppNavHost(
             )
         }
         composable<PlaylistShare> {
-            PlaylistShareScreenForViewModel(
+            PlaylistShareScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,
@@ -631,7 +631,7 @@ fun AppNavHost(
             )
         }
         composable<ExternalLinkEdit> {
-            ExternalLinkScreenForViewModel(
+            ExternalLinkScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,

@@ -84,7 +84,7 @@ import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistEditVie
 import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistSectionType
 
 @Composable
-fun PlaylistEditScreenForViewModel(
+fun PlaylistEditScreen(
     viewModel: PlaylistEditViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()

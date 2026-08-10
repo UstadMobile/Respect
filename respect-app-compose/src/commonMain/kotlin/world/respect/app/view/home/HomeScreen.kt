@@ -16,7 +16,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.view.apps.launcher.AppLauncherScreen
 import world.respect.app.view.bookmark.BookmarkListScreen
-import world.respect.app.view.playlists.collections.list.PlaylistListScreenForViewModel
+import world.respect.app.view.playlists.collections.list.PlaylistListScreen
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
@@ -92,7 +92,7 @@ fun HomeScreen(
                         onSetAppUiState = onSetAppUiState,
                         navController = respectNavController,
                     )
-                    PlaylistListScreenForViewModel(viewModel = viewModel)
+                    PlaylistListScreen(viewModel = viewModel)
                 }
             }
         }

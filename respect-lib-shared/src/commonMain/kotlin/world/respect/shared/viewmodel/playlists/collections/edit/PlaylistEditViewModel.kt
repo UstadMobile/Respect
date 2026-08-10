@@ -94,6 +94,7 @@ class PlaylistEditViewModel(
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
+    private val makePlaylistOpdsFeedUseCase: MakePlaylistOpdsFeedUseCase by inject()
 
 
     private val route: PlaylistEdit = savedStateHandle.toRoute()
@@ -148,9 +149,7 @@ class PlaylistEditViewModel(
                 @OptIn(ExperimentalUuidApi::class)
                 _uiState.update {
                     it.copy(
-                        feed = MakePlaylistOpdsFeedUseCase(
-                            schoolUrl = activeAccount.school.self
-                        ).invoke(
+                        feed = makePlaylistOpdsFeedUseCase.invoke(
                             base = OpdsFeed(
                                 metadata = OpdsFeedMetadata(title = ""),
                                 links = emptyList(),

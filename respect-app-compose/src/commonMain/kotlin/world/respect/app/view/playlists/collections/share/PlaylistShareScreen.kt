@@ -53,7 +53,7 @@ import world.respect.shared.viewmodel.playlists.collections.share.PlaylistShareU
 import world.respect.shared.viewmodel.playlists.collections.share.PlaylistShareViewModel
 
 @Composable
-fun PlaylistShareScreenForViewModel(
+fun PlaylistShareScreen(
     viewModel: PlaylistShareViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()

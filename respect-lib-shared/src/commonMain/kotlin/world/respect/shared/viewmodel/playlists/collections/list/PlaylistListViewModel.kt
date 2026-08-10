@@ -50,14 +50,13 @@ data class PlaylistListUiState(
             PlaylistFilter.ALL -> playlists
             PlaylistFilter.MY_PLAYLISTS -> playlists.filter { feed ->
                 feed.links.any { link ->
-                    link.rel?.contains(REL_OWNER) == true
+                    link.rel?.contains(MakePlaylistOpdsFeedUseCase.REL_OWNER) == true
                             && link.href == activeUserOwnerHref
                 }
             }
         }
 
     companion object {
-        const val REL_OWNER = MakePlaylistOpdsFeedUseCase.REL_OWNER
         const val REL_SELF = "self"
     }
 }

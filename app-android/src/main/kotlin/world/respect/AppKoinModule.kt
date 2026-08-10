@@ -95,6 +95,7 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
 import world.respect.datalayer.school.domain.GetWritableRolesListUseCaseImpl
+import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
@@ -217,7 +218,7 @@ import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
-import world.respect.shared.viewmodel.learningunit.list.PlaylistDetailViewModel
+import world.respect.shared.viewmodel.playlists.collections.detail.PlaylistDetailViewModel
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
@@ -1183,22 +1184,29 @@ val appKoinModule = module {
         }
 
         scoped<AddBookmarkUseCase> {
-            AddBookmarkUseCase(
-                schoolDataSource = get(),
-            )
-        }
+             AddBookmarkUseCase(
+                 schoolDataSource = get(),
+             )
+         }
 
-        scoped<RemoveBookmarkUseCase> {
-            RemoveBookmarkUseCase(
-                schoolDataSource = get(),
-            )
-        }
+         scoped<RemoveBookmarkUseCase> {
+             RemoveBookmarkUseCase(
+                 schoolDataSource = get(),
+             )
+         }
 
-        scoped<GetPublicationForXapiActivityUseCase> {
-            GetPublicationForXapiActivityUseCase(
-                opdsPublicationDataSource = get<SchoolDataSource>().opdsPublicationDataSource,
-            )
-        }
+         scoped<GetPublicationForXapiActivityUseCase> {
+             GetPublicationForXapiActivityUseCase(
+                 opdsPublicationDataSource = get<SchoolDataSource>().opdsPublicationDataSource,
+             )
+         }
+
+         scoped<MakePlaylistOpdsFeedUseCase> {
+             val accountScopeId = RespectAccountScopeId.parse(id)
+             MakePlaylistOpdsFeedUseCase(
+                 schoolUrl = accountScopeId.schoolUrl
+             )
+         }
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()

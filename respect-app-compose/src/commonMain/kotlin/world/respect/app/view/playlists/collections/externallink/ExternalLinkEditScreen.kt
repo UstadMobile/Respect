@@ -39,7 +39,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.playlists.collections.externallink.ExternalLinkUiState
 import world.respect.shared.viewmodel.playlists.collections.externallink.ExternalLinkViewModel
 @Composable
-fun ExternalLinkScreenForViewModel(
+fun ExternalLinkScreen(
     viewModel: ExternalLinkViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()

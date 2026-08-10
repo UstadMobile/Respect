@@ -67,6 +67,7 @@ kotlin {
             implementation(libs.napier)
             implementation(libs.qrose)
             implementation(libs.urlencoder)
+            implementation(libs.cache4k)
 
         }
 

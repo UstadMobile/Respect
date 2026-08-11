@@ -159,7 +159,7 @@ onFlowComplete:
 - assertVisible: "No playlist yet"
 - assertVisible: "Add a playlist by clicking on the + playlist"
 - tapOn:
-    id: "floating_action_button"   # Playlist button
+    id: "ExpandableFab"
 - assertVisible:
      id: "add_new"
 - assertVisible:

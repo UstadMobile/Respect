@@ -3,16 +3,19 @@ package world.respect.shared.viewmodel.playlists.collections.externallink
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.opds.model.ReadiumMetadata
-import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.LangMapStringValue
+import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
+import world.respect.lib.opds.model.ReadiumMetadata
 import world.respect.shared.domain.externallink.ExtractWebPageMetadataUseCase
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.could_not_load_link
 import world.respect.shared.generated.resources.done
 import world.respect.shared.generated.resources.external_link
 import world.respect.shared.generated.resources.required_field
@@ -25,6 +28,7 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
+import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 
 data class ExternalLinkUiState(
     val url: String = "",
@@ -66,7 +70,6 @@ class ExternalLinkViewModel(
         }
     }
 
-
     fun onUrlChanged(url: String) {
         _uiState.update {
             it.copy(
@@ -76,6 +79,10 @@ class ExternalLinkViewModel(
         }
     }
 
+    /**
+     * Loads the metadata for the URL that the user has entered so that the title, description, and
+     * thumbnail can be shown and edited before the link is added.
+     */
     fun onClickNext() {
         val url = _uiState.value.url.trim()
 
@@ -85,8 +92,14 @@ class ExternalLinkViewModel(
             }
             return
         }
+
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update {
+                it.copy(
+                    url = url,
+                    isLoading = true
+                )
+            }
             try {
                 val metadata = extractWebPageMetadataUseCase(url)
                 _uiState.update {
@@ -95,25 +108,28 @@ class ExternalLinkViewModel(
                         title = metadata.title ?: "",
                         description = metadata.description ?: "",
                         imageUrl = metadata.imageUrl,
-                        isLoading = false
+                        isLoading = false,
+                    )
+                }
+
+                _appUiState.update { prev ->
+                    prev.copy(
+                        actionBarButtonState = ActionBarButtonUiState(
+                            visible = true,
+                            text = Res.string.done.asUiText(),
+                            onClick = ::onClickDone,
+                        )
                     )
                 }
             } catch (e: Exception) {
+                Napier.w("Could not extract metadata for $url", e)
+
                 _uiState.update {
                     it.copy(
-                        step = ExternalLinkUiState.Step.METADATA,
-                        isLoading = false
+                        urlError = Res.string.could_not_load_link.asUiText(),
+                        isLoading = false,
                     )
                 }
-            }
-            _appUiState.update { prev ->
-                prev.copy(
-                    actionBarButtonState = ActionBarButtonUiState(
-                        visible = true,
-                        text = Res.string.done.asUiText(),
-                        onClick = ::onClickDone
-                    )
-                )
             }
         }
     }
@@ -164,7 +180,10 @@ class ExternalLinkViewModel(
         resultReturner.sendResult(
             NavResult(
                 key = resultDest.resultKey,
-                result = publication,
+                result = LearningUnitSelection(
+                    learningUnitManifestUrl = Url(state.url),
+                    selectedPublication = publication,
+                ),
             )
         )
 

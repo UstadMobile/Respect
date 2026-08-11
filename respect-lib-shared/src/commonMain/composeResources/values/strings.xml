@@ -673,6 +673,7 @@
     <string name="use_link_description">Add from an external link</string>
     <string name="external_link">External Link</string>
     <string name="add_thumbnail">Add Thumbnail</string>
+    <string name="could_not_load_link">Could not load this link. Please check the address.</string>
 
 
 

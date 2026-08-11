@@ -26,6 +26,7 @@ import world.respect.shared.generated.resources.report
 import world.respect.shared.generated.resources.reports
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.ReportDetail
+import world.respect.shared.navigation.ReportTemplateList
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
@@ -111,11 +112,11 @@ class ReportListViewModel(
     }
 
     fun onClickAdd() {
-//        _navCommandFlow.tryEmit(
-//            NavCommand.Navigate(
-//                ReportTemplateList
-//            )
-//        )
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                ReportTemplateList
+            )
+        )
     }
 
     fun onClickEntry(entry: Report) {

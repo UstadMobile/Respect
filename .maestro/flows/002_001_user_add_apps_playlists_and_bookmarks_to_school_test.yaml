@@ -63,9 +63,9 @@ onFlowComplete:
 - tapOn: "Lessons"
 - tapOn: "Examples"
 - tapOn: "Assignment Result Statement Demo"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Assignment Result Statement Demo"
+- assertVisible:
+    id: "app_title"
+    text: "Assignment Result Statement Demo"
 - tapOn: "Download"
 - extendedWaitUntil:
     visible: "Downloaded"
@@ -81,9 +81,9 @@ onFlowComplete:
 - tapOn: "Lessons"
 - tapOn: "Examples"
 - tapOn: "Assignment Result Statement Demo"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Assignment Result Statement Demo"
+- assertVisible:
+    id: "app_title"
+    text: "Assignment Result Statement Demo"
 - assertVisible: "Downloaded"
 - tapOn: "Open"
 - extendedWaitUntil:

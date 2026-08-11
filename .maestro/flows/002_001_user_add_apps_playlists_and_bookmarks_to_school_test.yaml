@@ -151,7 +151,7 @@ onFlowComplete:
     file: "subflows/admin_add_class.yaml"
     env:
       CLASSNAME: "TestClass"
-- assertVisible:
+- tapOn:
     id: "nav_home"
 - tapOn: "Playlists"
 - assertVisible: "All"

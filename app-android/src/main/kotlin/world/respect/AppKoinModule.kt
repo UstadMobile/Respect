@@ -373,11 +373,9 @@ val appKoinModule = module {
             }
         }
     }
-
     single<ExtractWebPageMetadataUseCase> {
         ExtractWebPageMetadataUseCaseAndroid(
-            context = androidContext().applicationContext,
-            json = get()
+            httpClient = get()
         )
     }
 

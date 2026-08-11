@@ -10,31 +10,36 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "002_user_add_apps_playlists_bookmarks_test"
+        NAME: "002_001_user_add_apps_playlists_and_bookmarks_to_school_test"
 
 onFlowComplete:
   - runScript:
       file: "scripts/teardown.js"
 ---
 - runFlow: "subflows/school_admin_login_flow.yaml"
+- assertVisible: "Home"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- tapOn:
+    id: "nav_home"
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add from Link"
 - tapOn: "Link*"
-- inputText: ${output.SCHOOL_URL}static-resources/respect-ds/case_valid/appmanifest.json
+- inputText: ${output.TEST_APP_URL}
 - tapOn: "Next"
 - assertVisible:
     id: "app_title"
     text: "App detail"
 - assertVisible: "Example Web App"
-- assertVisible: "Add App"
 # verify App got added to Apps section
-- tapOn: "Add App"
+- tapOn: "Add to school apps"
 - tapOn:
+    id: "nav_home"
+- assertVisible:
+    id: "app_title"
     text: "Home"
-    index: 0
-- tapOn: "Apps"
-- assertVisible: "Playlists"
 - assertVisible: "Example Web App"
 - tapOn: "Example Web App"
 - assertVisible: "Lessons"
@@ -42,20 +47,110 @@ onFlowComplete:
 - tapOn: "Examples"
 - tapOn: "Lesson 001"
 - assertVisible: "Lesson 001"
-- assertVisible: "App name"
+- assertVisible: "Download"
+- tapOn: "Open"
+- extendedWaitUntil:
+    visible: "Lesson 001"
+    timeout: 10000
+- assertVisible: "Hello World Lesson"
+- tapOn: "Close"
+- setAirplaneMode: disabled
+- tapOn:
+    id: "nav_home"
+- tapOn: "Example Web App"
+- tapOn: "Lessons"
+- tapOn: "Examples"
+- tapOn: "Assignment Result Statement Demo"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Assignment Result Statement Demo"
+- tapOn: "Download"
+- extendedWaitUntil:
+    visible: "Downloaded"
+    timeout: 10000
+# Set device on Offline mode
+- setAirplaneMode: enabled
+- assertVisible: "Downloaded"
+- stopApp
+- launchApp
+- assertVisible:
+    id: "nav_home"
+- tapOn: "Example Web App"
+- tapOn: "Lessons"
+- tapOn: "Examples"
+- tapOn: "Assignment Result Statement Demo"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Assignment Result Statement Demo"
+- assertVisible: "Downloaded"
+- tapOn: "Open"
+- extendedWaitUntil:
+    visible: "Assignment Result Statement Demo"
+    timeout: 10000
+- assertVisible: "Assignment Result.*"
+- tapOn: "Score"
+- inputText: 1
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn: "Send statement"
+      - assertVisible: "Statement sent.*"
+- tapOn: "Close"
+- setAirplaneMode: disabled # Set device on Online mode
+- tapOn:
+    id: "nav_home"
+- tapOn: "Apps"
+- assertVisible: "Playlists"
+- assertVisible: "Bookmarks"
+- assertVisible: "Example Web App"
+- tapOn: "Bookmarks"
+- assertVisible: "No bookmarks yet"
+- assertVisible: "Bookmark a lesson or a playlist to see it here."
+- tapOn: "Apps"
+- tapOn: "Example Web App"
+- tapOn: "Examples"
+- tapOn: "Lesson 001"
+- assertVisible: "Lesson 001"
 - tapOn: "Open"
 - extendedWaitUntil:
     visible: "Lesson 001"
     timeout: 1000
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
+- assertVisible: "Download"
+- assertVisible: "Assign"
+- assertVisible: "License:.*"
+- assertVisible: "Subject:.*"
+- tapOn: "Bookmark"
+- tapOn:
+    id: "nav_home"
+- tapOn: "Apps"
+- tapOn: "Example Web App"
+- tapOn: "Examples"
+- tapOn: "Statement Maker"
+- tapOn: "Bookmark"
+- tapOn:
+    id: "nav_home"
+- assertVisible:
+    id: "nav_home"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- tapOn: "Bookmarks"
+- assertVisible: "Lesson 001"
+- assertVisible: "Statement Maker"
+- tapOn:                       #Remove bookmark
+    text: "Bookmark"
+    index: 0
+- assertNotVisible: "Lesson 001"
+- assertVisible: "Statement Maker"
+
 - runFlow:
     file: "subflows/admin_add_class.yaml"
     env:
-      CLASSNAME: "New Class"
-- tapOn:
-    text: "Home"
-    index: 0
+      CLASSNAME: "TestClass"
+- assertVisible:
+    id: "nav_home"
 - tapOn: "Playlists"
 - assertVisible: "All"
 - assertVisible: "My Playlists"
@@ -73,7 +168,7 @@ onFlowComplete:
     id: "app_title"
     text: "Add playlist"
 - tapOn: "Save" # To test mandatory fields
-- assertVisible: "Required*"  #Title field is mandatory
+- assertVisible: "Required field"  #Title field is mandatory
 - tapOn: "Title*"
 - inputText: "Playlist - Grade 1"
 - tapOn: "Description"
@@ -155,8 +250,9 @@ onFlowComplete:
 - assertVisible: "Statement Maker"
 - back
 - tapOn:
-    id: "expand_collapse_icon"
+    id: "expand_collapse_icon"    #Collapse - Playlist section day 1
     index: 0
+- assertNotVisible: "Examples"
 - assertVisible: "Learning item section"
 - assertVisible: "Lesson 001"
 - tapOn:
@@ -237,7 +333,7 @@ onFlowComplete:
 - tapOn: "Assignment title*"
 - inputText: "Homework 1"
 - tapOn: "Class"
-- tapOn: "New Class"
+- tapOn: "TestClass"
 - tapOn: "Due date"
 - runScript:
     file: "scripts/setDate.js"
@@ -330,7 +426,7 @@ onFlowComplete:
 - tapOn: "Assignment title*"
 - inputText: "Homework 2"
 - tapOn: "Class"
-- tapOn: "New Class"
+- tapOn: "TestClass"
 - tapOn: "Due date"
 - runScript:
     file: "scripts/setDate.js"

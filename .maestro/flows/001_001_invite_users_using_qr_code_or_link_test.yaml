@@ -1,4 +1,6 @@
 appId: world.respect.app
+tags:
+  - e2e
 onFlowStart:
   - clearState: world.respect.app
   - runScript:
@@ -209,6 +211,10 @@ onFlowComplete:
     id : "password"
 - inputText: "test123"
 - tapOn: "Login"
+- runFlow:
+    when:
+      visible: "Save password for Respect?"
+    file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
     id: "nav_home"
 - tapOn: "Classes"

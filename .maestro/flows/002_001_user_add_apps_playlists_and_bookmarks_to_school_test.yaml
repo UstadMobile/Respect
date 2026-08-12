@@ -355,7 +355,8 @@ onFlowComplete:
     id: "app_title"
     text: "Homework 1"
 - assertVisible: "Lesson 001"
-- tapOn: "Home"
+- tapOn:
+    id: "nav_home"
 - tapOn: "Playlists"
 - tapOn: "Playlist - Grade 1"
 #- tapOn: "Share"

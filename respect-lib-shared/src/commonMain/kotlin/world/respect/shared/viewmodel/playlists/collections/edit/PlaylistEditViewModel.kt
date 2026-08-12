@@ -130,6 +130,7 @@ class PlaylistEditViewModel(
                         }
                     )
                     _uiState.update { it.copy(feed = fixedFeed) }
+                    restoreAppBarState()
                 }
             }
         } else {
@@ -547,8 +548,8 @@ class PlaylistEditViewModel(
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     destination = LearningUnitList.create(opdsFeedUrl = savedPlaylistUrl),
-                    popUpTo = PlaylistList.create(),
-                    popUpToInclusive = false,
+                    popUpTo = PlaylistEdit.create(),
+                    popUpToInclusive = true,
                 )
             )
         }

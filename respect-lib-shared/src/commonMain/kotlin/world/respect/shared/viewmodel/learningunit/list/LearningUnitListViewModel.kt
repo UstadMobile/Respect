@@ -158,8 +158,7 @@ class LearningUnitListViewModel(
                         }
                         _appUiState.update {
                             it.copy(
-                                title = result.data.metadata.title.asUiText(),
-                                searchState = AppBarSearchUiState(visible = true)
+                                title = result.data.metadata.title.asUiText()
                             )
                         }
 

@@ -444,6 +444,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Playlist - Grade 1"
+- tapOn: "Examples"
 - tapOn: "Statement Maker"
 - assertVisible:
     id: "app_title"

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
@@ -27,6 +28,7 @@ import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.openexternallink.OpenExternalLinkUseCase
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.copy_of_playlist
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.generated.resources.language
 import world.respect.shared.navigation.AssignmentEdit
@@ -362,14 +364,15 @@ class LearningUnitListViewModel(
     fun onClickCopy() {
         val feed = _uiState.value.feed
             ?: throw IllegalStateException("onClickCopy called but feed is null")
-        _uiState.update {
-            it.copy(
-                showCopyDialog = true,
-                copyDialogName = feed.metadata.title,
-            )
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    showCopyDialog = true,
+                    copyDialogName = getString(Res.string.copy_of_playlist, feed.metadata.title),
+                )
+            }
         }
     }
-
     fun onCopyDialogDismiss() {
         _uiState.update { it.copy(showCopyDialog = false, copyDialogName = "") }
     }

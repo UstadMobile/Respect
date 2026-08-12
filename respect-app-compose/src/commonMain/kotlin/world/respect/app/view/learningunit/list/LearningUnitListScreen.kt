@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -36,7 +35,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -55,7 +53,6 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.copy
-import world.respect.shared.generated.resources.copy_of_playlist
 import world.respect.shared.generated.resources.copy_playlist
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.duration
@@ -76,13 +73,6 @@ fun LearningUnitListScreen(
     viewModel: LearningUnitListViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val copyOfTemplate = stringResource(Res.string.copy_of_playlist)
-
-    LaunchedEffect(uiState.showCopyDialog) {
-        if (uiState.showCopyDialog) {
-            viewModel.onCopyDialogNameChanged(copyOfTemplate.format(uiState.copyDialogName))
-        }
-    }
 
     LearningUnitListScreen(
         uiState = uiState,

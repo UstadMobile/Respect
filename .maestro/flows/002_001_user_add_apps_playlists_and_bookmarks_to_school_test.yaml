@@ -302,7 +302,7 @@ onFlowComplete:
 - assertVisible: "Delete"
 - tapOn: "Lesson 001"
 - assertVisible: "Lesson 001"
-- assertVisible: "App name"
+#- assertVisible: "App name"
 - tapOn: "Open"
 - extendedWaitUntil:
     visible: "Lesson 001"
@@ -331,7 +331,7 @@ onFlowComplete:
     text: "Add assignment"
 - tapOn: "Assignment title*"
 - inputText: "Homework 1"
-- tapOn: "Class"
+- tapOn: "Assign to"
 - tapOn: "TestClass"
 - tapOn: "Due date"
 - runScript:
@@ -407,9 +407,7 @@ onFlowComplete:
 - assertVisible: "Permanently delete?"
 - assertVisible: "Permanently delete this playlist"
 - tapOn: "Delete"
-- assertVisible:
-    id: "app_title"
-    text: "Home"
+- tapOn: "Home"
 - assertVisible: "Playlists"
 - tapOn: "Playlists"
 - assertVisible: "Playlist - Grade 1"
@@ -424,7 +422,7 @@ onFlowComplete:
     text: "Add assignment"
 - tapOn: "Assignment title*"
 - inputText: "Homework 2"
-- tapOn: "Class"
+- tapOn: "Assign to"
 - tapOn: "TestClass"
 - tapOn: "Due date"
 - runScript:

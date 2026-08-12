@@ -160,12 +160,9 @@ onFlowComplete:
 - assertVisible: "Add a playlist by clicking on the + playlist"
 - tapOn:
     id: "ExpandableFab"
-- assertVisible:
-     id: "add_new"
-- assertVisible:
-      id: "add_from_a_link"
-- tapOn:
-    id: "add_new"
+- assertVisible: "Add new"
+- assertVisible: "Add from a link"
+- tapOn: "Add new"
 - assertVisible:
     id: "app_title"
     text: "Add playlist"

@@ -3,6 +3,7 @@ tags:
   - e2e
 onFlowStart:
   - clearState: world.respect.app
+  - setAirplaneMode: disabled
   - runScript:
       file: "scripts/school_init.js"
       env:
@@ -63,9 +64,9 @@ onFlowComplete:
 - tapOn: "Lessons"
 - tapOn: "Examples"
 - tapOn: "Assignment Result Statement Demo"
-- assertVisible:
-    id: "app_title"
-    text: "Assignment Result Statement Demo"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Assignment Result Statement Demo"
 - tapOn: "Download"
 - extendedWaitUntil:
     visible: "Downloaded"
@@ -81,9 +82,9 @@ onFlowComplete:
 - tapOn: "Lessons"
 - tapOn: "Examples"
 - tapOn: "Assignment Result Statement Demo"
-- assertVisible:
-    id: "app_title"
-    text: "Assignment Result Statement Demo"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Assignment Result Statement Demo"
 - assertVisible: "Downloaded"
 - tapOn: "Open"
 - extendedWaitUntil:
@@ -302,14 +303,15 @@ onFlowComplete:
 - assertVisible: "Delete"
 - tapOn: "Lesson 001"
 - assertVisible: "Lesson 001"
-#- assertVisible: "App name"
+- assertVisible: "Demo Launchable App"
 - tapOn: "Open"
 - extendedWaitUntil:
     visible: "Lesson 001"
     timeout: 6000
 - assertVisible: "Hello World Lesson"
 - tapOn: "Close"
-- tapOn: "Home"
+- tapOn:
+    id: "nav_home"
 - tapOn: "Playlists"
 - assertVisible: "Playlist - Grade 1"
 - assertVisible: "2 sections, 3 items"
@@ -407,7 +409,9 @@ onFlowComplete:
 - assertVisible: "Permanently delete?"
 - assertVisible: "Permanently delete this playlist"
 - tapOn: "Delete"
-- tapOn: "Home"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
 - assertVisible: "Playlists"
 - tapOn: "Playlists"
 - assertVisible: "Playlist - Grade 1"

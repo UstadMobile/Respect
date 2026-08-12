@@ -1,9 +1,6 @@
 appId: world.respect.app
-tags:
-  - e2e
 onFlowStart:
   - clearState: world.respect.app
-  - setAirplaneMode: disabled
   - runScript:
       file: "scripts/school_init.js"
       env:
@@ -64,9 +61,9 @@ onFlowComplete:
 - tapOn: "Lessons"
 - tapOn: "Examples"
 - tapOn: "Assignment Result Statement Demo"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Assignment Result Statement Demo"
+- assertVisible:
+    id: "app_title"
+    text: "Assignment Result Statement Demo"
 - tapOn: "Download"
 - extendedWaitUntil:
     visible: "Downloaded"
@@ -82,9 +79,9 @@ onFlowComplete:
 - tapOn: "Lessons"
 - tapOn: "Examples"
 - tapOn: "Assignment Result Statement Demo"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Assignment Result Statement Demo"
+- assertVisible:
+    id: "app_title"
+    text: "Assignment Result Statement Demo"
 - assertVisible: "Downloaded"
 - tapOn: "Open"
 - extendedWaitUntil:
@@ -173,7 +170,7 @@ onFlowComplete:
 - inputText: "Playlist - Grade 1"
 - tapOn: "Description"
 - inputText: "Test list"
-#- tapOn: "Subject"  # Need to Implement
+#- tapOn: "Subject"    # Need to Implement
 #- tapOn: "English"
 #- tapOn: "Grade"
 #- tapOn: "Grade 1"
@@ -359,6 +356,7 @@ onFlowComplete:
     id: "nav_home"
 - tapOn: "Playlists"
 - tapOn: "Playlist - Grade 1"
+
 #- tapOn: "Share"
 #- assertVisible:
 #    id: "app_title"

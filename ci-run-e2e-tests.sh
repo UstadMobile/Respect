@@ -214,7 +214,6 @@ if [ "$1" == "cloud" ]; then
         $DEVICE_OS_ARG \
         --format=junit \
         --output=$MAESTRO_REPORT_FILE \
-        --include-tags=e2e\
         --timeout=300 \
         $NAME_ARG \
         --repo-name=Respect \

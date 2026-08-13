@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -41,12 +40,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
+import world.respect.app.components.RespectQuickActionButton
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.langMapString
 import world.respect.lib.opds.model.OpdsPublication
@@ -309,51 +308,44 @@ private fun FeedHeader(
                 .defaultItemPadding(),
             horizontalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            FeedActionButton(
-                icon = Icons.Filled.Share,
-                label = stringResource(Res.string.share),
-                onClick = onClickShare,
-                testTag = "share_btn",
+            RespectQuickActionButton(
+                modifier = Modifier.testTag("share_btn"),
+                labelText = stringResource(Res.string.share),
+                iconContent = {
+                    Icon(Icons.Filled.Share, null)
+                },
+                onClick = onClickShare
             )
-            FeedActionButton(
-                icon = Icons.Filled.ContentCopy,
-                label = stringResource(Res.string.copy_playlist),
-                onClick = onClickCopy,
-                testTag = "copy_btn",
+
+            RespectQuickActionButton(
+                modifier = Modifier.testTag("copy_btn"),
+                labelText = stringResource(Res.string.copy_playlist),
+                iconContent = {
+                    Icon(Icons.Filled.ContentCopy, null)
+                },
+                onClick = onClickCopy
             )
-            FeedActionButton(
-                icon = Icons.Filled.Task,
-                label = stringResource(Res.string.assign),
-                onClick = onClickAssign,
-                testTag = "header_assign_btn",
+
+            RespectQuickActionButton(
+                modifier = Modifier.testTag("header_assign_btn"),
+                labelText = stringResource(Res.string.assign),
+                iconContent = {
+                    Icon(Icons.Filled.Task, null)
+                },
+                onClick = onClickAssign
             )
+
             if (uiState.isTeacherOrAdmin) {
-                FeedActionButton(
-                    icon = Icons.Filled.Delete,
-                    label = stringResource(Res.string.delete),
+                RespectQuickActionButton(
+                    modifier = Modifier.testTag("delete_btn"),
+                    labelText = stringResource(Res.string.delete),
+                    iconContent = {
+                        Icon(Icons.Filled.Delete, null)
+                    },
                     onClick = onClickDelete,
-                    testTag = "delete_btn",
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun FeedActionButton(
-    icon: ImageVector,
-    label: String,
-    onClick: () -> Unit,
-    testTag: String,
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        IconButton(
-            onClick = onClick,
-            modifier = Modifier.testTag(testTag),
-        ) {
-            Icon(imageVector = icon, contentDescription = label)
-        }
-        Text(text = label, style = MaterialTheme.typography.labelSmall)
     }
 }
 

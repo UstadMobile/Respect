@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.getString
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
@@ -15,8 +16,7 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.datalayer.school.opds.ext.selfUrl
-import world.respect.lib.dataloadstate.DataLoadParams
-import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsFeedMetadata
 import world.respect.lib.opds.model.OpdsGroup
@@ -36,16 +36,15 @@ import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PlaylistEdit
-import world.respect.shared.navigation.PlaylistList
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
-import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import world.respect.shared.viewmodel.app.appstate.Snack
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListUiState
-import kotlin.uuid.ExperimentalUuidApi
 
 enum class PlaylistSectionType {
     NAVIGATION,
@@ -89,6 +88,8 @@ class PlaylistEditViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val resultReturner: NavResultReturner,
+    private val snackBarDispatcher: SnackBarDispatcher,
+    private val json: Json,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -112,160 +113,6 @@ class PlaylistEditViewModel(
         set(value) { savedStateHandle[KEY_PENDING_ADD_PLAYLIST_SECTION_INDEX] = value }
 
     init {
-        restoreAppBarState()
-        val existingPlaylistUrl = route.playlistUrl
-        if (existingPlaylistUrl != null) {
-            viewModelScope.launch {
-                val result = schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
-                    url = existingPlaylistUrl,
-                    params = DataLoadParams(),
-                ).first { it is DataReadyState } as DataReadyState
-
-                if (_uiState.value.feed == null) {
-                    val fixedFeed = result.data.copy(
-                        groups = result.data.groups?.map { group ->
-                            group.copy(
-                                navigation = group.navigation?.takeIf { it.isNotEmpty() },
-                            )
-                        }
-                    )
-                    _uiState.update { it.copy(feed = fixedFeed) }
-                    restoreAppBarState()
-                }
-            }
-        } else {
-            viewModelScope.launch {
-                val activeAccount = accountManager.activeAccount
-                    ?: throw IllegalStateException(
-                        "No active account when initializing PlaylistEditViewModel"
-                    )
-                val sessionAndPerson = accountManager.selectedAccountAndPersonFlow.first()
-                    ?: throw IllegalStateException(
-                        "No active session when initializing PlaylistEditViewModel"
-                    )
-                val username = sessionAndPerson.person.username
-                    ?: throw IllegalStateException(
-                        "Active person has no username: ${sessionAndPerson.person.guid}"
-                    )
-                @OptIn(ExperimentalUuidApi::class)
-                _uiState.update {
-                    it.copy(
-                        feed = makePlaylistOpdsFeedUseCase.invoke(
-                            base = OpdsFeed(
-                                metadata = OpdsFeedMetadata(title = ""),
-                                links = emptyList(),
-                                publications = emptyList(),
-                                groups = emptyList(),
-                            ),
-                            username = username,
-                        )
-                    )
-                }
-                restoreAppBarState()
-            }
-        }
-
-        viewModelScope.launch {
-            resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
-                val sectionIndex = pendingAddItemSectionIndex
-                if (sectionIndex == null) {
-                    _navCommandFlow.tryEmit(NavCommand.PopUp())
-                    return@collect
-                }
-                pendingAddItemSectionIndex = null
-
-                /*
-                 * A learning-unit pick returns either a single LearningUnitSelection (single-select
-                 * mode) or a List<LearningUnitSelection> (multi-select mode). The list is matched as
-                 * List<*> because generic type arguments are erased at runtime; filterIsInstance
-                 * recovers the element type.
-                 */
-                val publications: List<OpdsPublication> = when (val r = result.result) {
-                    is LearningUnitSelection -> listOf(r.selectedPublication)
-                    is List<*> -> r.filterIsInstance<LearningUnitSelection>()
-                        .map { it.selectedPublication }
-                    else -> throw IllegalStateException(
-                        "Expected LearningUnitSelection or List but got: ${result.result}"
-                    )
-                }
-                _uiState.first { it.feed != null }
-
-                _uiState.update { prev ->
-                    val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
-                    val section = sections.getOrNull(sectionIndex)
-                        ?: throw IllegalStateException("No section at index $sectionIndex")
-                    sections[sectionIndex] = section.copy(
-                        publications = (section.publications ?: emptyList()) + publications
-                    )
-                    prev.copy(feed = prev.feed?.copy(groups = sections))
-                }
-                restoreAppBarState()
-            }
-        }
-        viewModelScope.launch {
-            resultReturner.filteredResultFlowForKey(KEY_PLAYLIST).collect { result ->
-                val sectionIndex = pendingAddPlaylistSectionIndex
-                if (sectionIndex == null) {
-                    _navCommandFlow.tryEmit(NavCommand.PopUp())
-                    return@collect
-                }
-                pendingAddPlaylistSectionIndex = null
-
-                val navLink = when (val data = result.result) {
-                    is OpdsPublication -> {
-                        val selfLink = data.links.firstOrNull {
-                            it.rel?.contains(PlaylistListUiState.REL_SELF) == true
-                        } ?: data.links.firstOrNull()
-
-                        ReadiumLink(
-                            href = selfLink?.href
-                                ?: throw IllegalStateException("No href for playlist"),
-                            title = data.metadata.title.toString().takeIf { it.isNotBlank() }
-                                ?: selfLink.title,
-                            rel = listOf(PlaylistListUiState.REL_SELF),
-                            type = OpdsFeed.MEDIA_TYPE,
-                        )
-                    }
-                    is ReadiumLink -> {
-                        if (data.title.isNullOrBlank()) {
-                            throw IllegalStateException(
-                                "ReadiumLink result has no title"
-                            )
-                        }
-                        data
-                    }
-                    else -> throw IllegalStateException(
-                        "Expected OpdsPublication or ReadiumLink but got: ${result.result}"
-                    )
-                }
-
-                require(!navLink.title.isNullOrBlank()) {
-                    "Playlist navigation must have a title"
-                }
-
-                _uiState.first { it.feed != null }
-
-                _uiState.update { prev ->
-                    val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
-
-                    val section = sections.getOrNull(sectionIndex)
-                        ?: throw IllegalStateException("No section at index $sectionIndex")
-
-                    sections[sectionIndex] = section.copy(
-                        navigation = (section.navigation ?: emptyList()) + navLink
-                    )
-
-                    prev.copy(
-                        feed = prev.feed?.copy(groups = sections)
-                    )
-                }
-
-                restoreAppBarState()
-            }
-        }
-    }
-
-    fun restoreAppBarState() {
         _appUiState.update { prev ->
             prev.copy(
                 title = when {
@@ -282,6 +129,142 @@ class PlaylistEditViewModel(
                 hideBottomNavigation = true,
             )
         }
+
+        launchWithLoadingIndicator(
+            onShowError = { snackBarDispatcher.showSnackBar(Snack(it)) }
+        ) {
+            if(route.playlistUrl != null) {
+                loadEntity(
+                    json = json,
+                    serializer = OpdsFeed.serializer(),
+                    loadFn = { params ->
+                        schoolDataSource.opdsFeedDataSource.getByUrl(
+                            url = route.playlistUrl,
+                            params = params,
+                        )
+                    },
+                    uiUpdateFn = { state ->
+                        _uiState.update { it.copy(feed = state.dataOrNull()) }
+                    }
+                )
+            }else {
+                val newFeed = makePlaylistOpdsFeedUseCase(
+                    base = OpdsFeed(
+                        metadata = OpdsFeedMetadata(title = ""),
+                        links = emptyList(),
+                        publications = emptyList(),
+                        groups = emptyList(),
+                    ),
+                    username = accountManager.activeAccount?.userGuid ?: ""
+                )
+                _uiState.update { it.copy(feed = newFeed) }
+            }
+
+            launch {
+                resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
+                    val sectionIndex = pendingAddItemSectionIndex
+                    if (sectionIndex == null) {
+                        _navCommandFlow.tryEmit(NavCommand.PopUp())
+                        return@collect
+                    }
+                    pendingAddItemSectionIndex = null
+
+                    /*
+                     * A learning-unit pick returns either a single LearningUnitSelection (single-select
+                     * mode) or a List<LearningUnitSelection> (multi-select mode). The list is matched as
+                     * List<*> because generic type arguments are erased at runtime; filterIsInstance
+                     * recovers the element type.
+                     */
+                    /*
+                    val publications: List<OpdsPublication> = when (val r = result.result) {
+                        is LearningUnitSelection -> listOf(r.selectedPublications)
+                        is List<*> -> r.filterIsInstance<LearningUnitSelection>()
+                            .map { it.selectedPublications }
+                        else -> throw IllegalStateException(
+                            "Expected LearningUnitSelection or List but got: ${result.result}"
+                        )
+                    }
+
+                    _uiState.first { it.feed != null }
+
+                    _uiState.update { prev ->
+                        val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
+                        val section = sections.getOrNull(sectionIndex)
+                            ?: throw IllegalStateException("No section at index $sectionIndex")
+                        sections[sectionIndex] = section.copy(
+                            publications = (section.publications ?: emptyList()) + publications
+                        )
+                        prev.copy(feed = prev.feed?.copy(groups = sections))
+                    }
+                    restoreAppBarState()
+                     */
+                }
+            }
+
+            launch {
+                resultReturner.filteredResultFlowForKey(KEY_PLAYLIST).collect { result ->
+                    val sectionIndex = pendingAddPlaylistSectionIndex
+                    if (sectionIndex == null) {
+                        _navCommandFlow.tryEmit(NavCommand.PopUp())
+                        return@collect
+                    }
+                    pendingAddPlaylistSectionIndex = null
+
+                    val navLink = when (val data = result.result) {
+                        is OpdsPublication -> {
+                            val selfLink = data.links.firstOrNull {
+                                it.rel?.contains(PlaylistListUiState.REL_SELF) == true
+                            } ?: data.links.firstOrNull()
+
+                            ReadiumLink(
+                                href = selfLink?.href
+                                    ?: throw IllegalStateException("No href for playlist"),
+                                title = data.metadata.title.toString().takeIf { it.isNotBlank() }
+                                    ?: selfLink.title,
+                                rel = listOf(PlaylistListUiState.REL_SELF),
+                                type = OpdsFeed.MEDIA_TYPE,
+                            )
+                        }
+                        is ReadiumLink -> {
+                            if (data.title.isNullOrBlank()) {
+                                throw IllegalStateException(
+                                    "ReadiumLink result has no title"
+                                )
+                            }
+                            data
+                        }
+                        else -> throw IllegalStateException(
+                            "Expected OpdsPublication or ReadiumLink but got: ${result.result}"
+                        )
+                    }
+
+                    require(!navLink.title.isNullOrBlank()) {
+                        "Playlist navigation must have a title"
+                    }
+
+                    _uiState.first { it.feed != null }
+
+                    _uiState.update { prev ->
+                        val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
+
+                        val section = sections.getOrNull(sectionIndex)
+                            ?: throw IllegalStateException("No section at index $sectionIndex")
+
+                        sections[sectionIndex] = section.copy(
+                            navigation = (section.navigation ?: emptyList()) + navLink
+                        )
+
+                        prev.copy(
+                            feed = prev.feed?.copy(groups = sections)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun restoreAppBarState() {
+        //Should not have been here
     }
 
     fun onTitleChanged(title: String) {

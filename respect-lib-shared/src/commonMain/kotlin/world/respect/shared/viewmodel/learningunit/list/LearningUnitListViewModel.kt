@@ -3,10 +3,10 @@ package world.respect.shared.viewmodel.learningunit.list
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -15,20 +15,26 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
-import world.respect.datalayer.school.opds.ext.selfUrl
 import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.map
+import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.lib.opds.model.OpdsFacet
 import world.respect.lib.opds.model.OpdsFeed
-import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
+import world.respect.lib.opds.model.findSelfLinks
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.openexternallink.OpenExternalLinkUseCase
+import world.respect.shared.ext.resultExpected
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.generated.resources.language
+import world.respect.shared.generated.resources.not_found
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
@@ -36,23 +42,21 @@ import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistShare
-import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.SortOrderOption
+import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
-import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
+import world.respect.shared.viewmodel.app.appstate.Snack
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
 import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
 import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistEditViewModel
-import kotlin.uuid.ExperimentalUuidApi
 
 data class LearningUnitListUiState(
-    val publications: List<OpdsPublication> = emptyList(),
-    val navigation: List<ReadiumLink> = emptyList(),
-    val group: List<OpdsGroup> = emptyList(),
+    val feed: DataLoadState<OpdsFeed> = DataLoadingState(),
     val facetOptions: List<OpdsFacet> = emptyList(),
     val selectedFilterTitle: String? = null,
     val sortOptions: List<SortOrderOption> = emptyList(),
@@ -60,7 +64,6 @@ data class LearningUnitListUiState(
         Res.string.language, 1, true
     ),
     val fieldsEnabled: Boolean = true,
-    val feed: OpdsFeed? = null,
     val isTeacherOrAdmin: Boolean = false,
     val collapsedSections: Set<String> = emptySet(),
     val isMultiSelectMode: Boolean = false,
@@ -83,20 +86,12 @@ data class LearningUnitListUiState(
         get() = selectedPublications.size
 }
 
-private fun LearningUnitListUiState.withFeedContent(feed: OpdsFeed): LearningUnitListUiState {
-    return copy(
-        feed = feed,
-        navigation = feed.navigation ?: emptyList(),
-        publications = feed.publications ?: emptyList(),
-        group = feed.groups ?: emptyList(),
-    )
-}
-
 class LearningUnitListViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val resultReturner: NavResultReturner,
     private val openExternalLinkUseCase: OpenExternalLinkUseCase,
+    private val snackBarDispatcher: SnackBarDispatcher,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -137,39 +132,18 @@ class LearningUnitListViewModel(
         }
 
         viewModelScope.launch {
-            _appUiState.update {
-                it.copy(searchState = AppBarSearchUiState(visible = true))
-            }
-
             schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
                 url = route.opdsFeedUrl,
                 params = DataLoadParams()
             ).collect { result ->
-                when (result) {
-                    is DataReadyState -> {
-                        val resolvedFeed = result.data.resolve(route.opdsFeedUrl)
-                        val facetOptions = result.data.facets ?: emptyList()
-                        val sortOptions = facetOptions.mapIndexed { index, _ ->
-                            SortOrderOption(
-                                fieldMessageId = Res.string.language,
-                                flag = index + 1,
-                                order = true
-                            )
-                        }
-                        _appUiState.update {
-                            it.copy(
-                                title = result.data.metadata.title.asUiText()
-                            )
-                        }
+                _uiState.update { prev ->
+                    prev.copy(
+                        feed = result.map { it.resolve(route.opdsFeedUrl) }
+                    )
+                }
 
-                        _uiState.update {
-                            it.withFeedContent(resolvedFeed).copy(
-                                facetOptions = facetOptions,
-                                sortOptions = sortOptions,
-                            )
-                        }
-                    }
-                    else -> {}
+                if(result is DataReadyState) {
+                    _appUiState.update { it.copy(title = result.data.metadata.title.asUiText()) }
                 }
             }
         }
@@ -178,81 +152,46 @@ class LearningUnitListViewModel(
     fun onSortOrderChanged(sortOption: SortOrderOption) {
         _uiState.update { it.copy(activeSortOrderOption = sortOption) }
     }
+
     fun onClickPublication(publication: OpdsPublication) {
-        if (route.resultDest != null &&
-            route.resultDest.resultKey != PlaylistEditViewModel.KEY_PLAYLIST
-        ) {
-            if (route.resultDest.resultKey == AssignmentEditViewModel.KEY_LEARNING_UNIT) {
+        when {
+            uiState.value.isMultiSelectMode -> {
+
+            }
+
+            route.resultExpected -> {
                 resultReturner.sendResultIfResultExpected(
                     route = route,
                     navCommandFlow = _navCommandFlow,
                     result = LearningUnitSelection(
-                        learningUnitManifestUrl = resolvePublicationManifestUrl(publication),
-                        selectedPublication = publication,
+                        url = route.opdsFeedUrl,
+                        selectedPublications = listOf(publication),
                     )
                 )
-                return
             }
-            if (!_uiState.value.isMultiSelectMode) {
-                _uiState.update { it.copy(isMultiSelectMode = true) }
-            }
-            toggleSelection(publication)
-            return
-        }
-        if (route.resultDest?.resultKey == PlaylistEditViewModel.KEY_PLAYLIST) {
-            val learningUnitManifestUrl = resolvePublicationManifestUrl(publication)
-            _navCommandFlow.tryEmit(
-                value = NavCommand.Navigate(
-                    LearningUnitDetail.create(
-                        learningUnitManifestUrl = learningUnitManifestUrl,
-                        refererUrl = Url(learningUnitManifestUrl.toString()),
-                        expectedIdentifier = publication.metadata.identifier.toString()
+
+            else -> {
+                val manifestUrl = publication.findSelfLinks().firstOrNull()?.href?.let {
+                    route.opdsFeedUrl.resolve(it)
+                } ?: return run {
+                    snackBarDispatcher.showSnackBar(Snack(Res.string.not_found.asUiText()))
+                }
+
+                //Needs to handle external link.
+                _navCommandFlow.tryEmit(
+                    value = NavCommand.Navigate(
+                        LearningUnitDetail.create(
+                            learningUnitManifestUrl = manifestUrl,
+                            refererUrl = route.opdsFeedUrl,
+                            expectedIdentifier = publication.metadata.identifier?.toString(),
+                            title = uiState.value.feed.dataOrNull()?.metadata?.title?.let {
+                                LangMapStringValue(it)
+                            }
+                        )
                     )
                 )
-            )
-            return
-        }
-
-        if (_uiState.value.isMultiSelectMode) {
-            toggleSelection(publication)
-            return
-        }
-
-        val selfLink = publicationSelfLink(publication)
-        val learningUnitManifestUrl = route.opdsFeedUrl.resolve(selfLink.href)
-
-        val resultSent = resultReturner.sendResultIfResultExpected(
-            route = route,
-            navCommandFlow = _navCommandFlow,
-            result = LearningUnitSelection(
-                learningUnitManifestUrl = learningUnitManifestUrl,
-                selectedPublication = publication,
-            )
-        )
-        if (resultSent) return
-
-        /*
-         * The type of the publication's self link determines how the item opens: an OPDS
-         * publication is handled by the learning unit detail screen, anything else (e.g. a plain
-         * web link added to a playlist) is opened outside the app.
-         */
-        if (selfLink.type == MIME_TYPE_HTML) {
-            viewModelScope.launch {
-                openExternalLinkUseCase(url = learningUnitManifestUrl)
             }
-            return
         }
-
-        _navCommandFlow.tryEmit(
-            value = NavCommand.Navigate(
-                LearningUnitDetail.create(
-                    learningUnitManifestUrl = learningUnitManifestUrl,
-                    refererUrl = route.opdsFeedUrl,
-                    expectedIdentifier = publication.metadata.identifier?.toString(),
-                    title = publication.metadata.title,
-                )
-            )
-        )
     }
 
     fun onLongPressPublication(publication: OpdsPublication) {
@@ -280,8 +219,10 @@ class LearningUnitListViewModel(
 
     fun onClickConfirmSelection() {
         val currentState = _uiState.value
+
         if (currentState.selectedPublications.isEmpty()) return
 
+        /*
         val allPublications = currentState.publications +
                 currentState.group.flatMap { it.publications ?: emptyList() }
 
@@ -301,6 +242,7 @@ class LearningUnitListViewModel(
             navCommandFlow = _navCommandFlow,
             result = selections,
         )
+         */
     }
 
     fun onClickNavigation(navigation: ReadiumLink) {
@@ -351,14 +293,13 @@ class LearningUnitListViewModel(
     }
 
     fun onClickShare() {
-        val feedUrl = _uiState.value.feed?.selfUrl()
-            ?: throw IllegalStateException("Cannot share: feed has no self URL")
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(PlaylistShare.create(playlistUrl = feedUrl))
+            NavCommand.Navigate(PlaylistShare.create(playlistUrl = route.opdsFeedUrl))
         )
     }
 
     fun onClickCopy() {
+        /*
         val feed = _uiState.value.feed
             ?: throw IllegalStateException("onClickCopy called but feed is null")
         _uiState.update {
@@ -366,7 +307,7 @@ class LearningUnitListViewModel(
                 showCopyDialog = true,
                 copyDialogName = feed.metadata.title,
             )
-        }
+        }*/
     }
 
     fun onCopyDialogDismiss() {
@@ -378,6 +319,7 @@ class LearningUnitListViewModel(
     }
 
     fun onCopyDialogConfirm() {
+        /*
         val feed = _uiState.value.feed
             ?: throw IllegalStateException("onCopyDialogConfirm called but feed is null")
         val newName = _uiState.value.copyDialogName.trim()
@@ -416,7 +358,7 @@ class LearningUnitListViewModel(
                     )
                 )
             )
-        }
+        }*/
     }
 
     fun onClickDelete() {
@@ -428,6 +370,7 @@ class LearningUnitListViewModel(
     }
 
     fun onDeleteDialogConfirm() {
+        /*
         viewModelScope.launch {
             val feed = _uiState.value.feed
                 ?: throw IllegalStateException("onDeleteDialogConfirm called but feed is null")
@@ -442,10 +385,34 @@ class LearningUnitListViewModel(
                     destination = RespectAppLauncher.create()
                 )
             )
+        }*/
+    }
+
+    fun onClickAssignQuickActionButton() {
+        try {
+            _navCommandFlow.tryEmit(
+                NavCommand.Navigate(
+                    AssignmentEdit.create(
+                        assignmentActivityId = null,
+                        learningUnitSelected = LearningUnitSelection(
+                            url = route.opdsFeedUrl,
+                            selectedPublications = uiState.value.feed.dataOrNull()?.let { feed ->
+                                feed.publications.orEmpty() + feed.groups.orEmpty().flatMap {
+                                    it.publications.orEmpty()
+                                }
+                            }.orEmpty().take(AssignmentEditViewModel.MAX_UNITS_TO_ADD)
+                        )
+                    )
+                )
+            )
+        }catch(e: Throwable) {
+            Napier.w("Exception on click assign items", e)
+            snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
         }
     }
 
     fun onClickAssignSection(sectionIndex: Int) {
+        /*
         val feed = _uiState.value.feed
             ?: throw IllegalStateException("Cannot assign: no feed loaded")
         val feedUrl = feed.selfUrl()
@@ -479,13 +446,14 @@ class LearningUnitListViewModel(
                 )
             )
         )
+
+         */
     }
 
+
     fun onClickEdit() {
-        val feedUrl = _uiState.value.feed?.selfUrl()
-            ?: throw IllegalStateException("Cannot edit: feed has no self URL")
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(PlaylistEdit.create(playlistUrl = feedUrl))
+            NavCommand.Navigate(PlaylistEdit.create(playlistUrl = route.opdsFeedUrl))
         )
     }
 

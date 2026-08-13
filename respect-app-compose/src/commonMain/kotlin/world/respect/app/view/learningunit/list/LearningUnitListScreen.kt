@@ -17,11 +17,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Task
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -45,9 +43,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
-import world.respect.app.components.RespectQuickActionButton
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.langMapString
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.generated.resources.Res
@@ -55,7 +53,6 @@ import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.copy
 import world.respect.shared.generated.resources.copy_of_playlist
-import world.respect.shared.generated.resources.copy_playlist
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.duration
 import world.respect.shared.generated.resources.make_a_copy
@@ -64,7 +61,6 @@ import world.respect.shared.generated.resources.permanently_delete
 import world.respect.shared.generated.resources.permanently_delete_description
 import world.respect.shared.generated.resources.select_count_items
 import world.respect.shared.generated.resources.select_playlist
-import world.respect.shared.generated.resources.share
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListUiState
 import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
@@ -95,7 +91,8 @@ fun LearningUnitListScreen(
         onClickShare = viewModel::onClickShare,
         onClickCopy = viewModel::onClickCopy,
         onClickDelete = viewModel::onClickDelete,
-        onClickAssignSection = viewModel::onClickAssignSection,
+        onClickAssignSection = { /* TODO */ },
+        onClickAssignQuickActionButton = viewModel::onClickAssignQuickActionButton,
         onCopyDialogDismiss = viewModel::onCopyDialogDismiss,
         onCopyDialogNameChanged = viewModel::onCopyDialogNameChanged,
         onCopyDialogConfirm = viewModel::onCopyDialogConfirm,
@@ -118,12 +115,15 @@ fun LearningUnitListScreen(
     onClickCopy: () -> Unit = {},
     onClickDelete: () -> Unit = {},
     onClickAssignSection: (Int) -> Unit = {},
+    onClickAssignQuickActionButton: () -> Unit = {},
     onCopyDialogDismiss: () -> Unit = {},
     onCopyDialogNameChanged: (String) -> Unit = {},
     onCopyDialogConfirm: () -> Unit = {},
     onDeleteDialogDismiss: () -> Unit = {},
     onDeleteDialogConfirm: () -> Unit = {},
 ) {
+    val catalog = uiState.feed.dataOrNull()
+
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -142,55 +142,55 @@ fun LearningUnitListScreen(
                     onClickShare = onClickShare,
                     onClickCopy = onClickCopy,
                     onClickDelete = onClickDelete,
-                    onClickAssign = {
-                        onClickAssignSection(
-                            LearningUnitListViewModel.ASSIGN_HEADER_SECTION_INDEX
-                        )
-                    },
+                    onClickAssign = onClickAssignQuickActionButton,
                 )
                 HorizontalDivider()
             }
 
-            itemsIndexed(
-                items = uiState.navigation,
-                key = { index, _ -> "top_nav_$index" }
-            ) { _, navigation ->
-                NavigationListItem(
-                    navigation = navigation,
-                    isMultiSelectMode = uiState.isMultiSelectMode,
-                    isSelected = uiState.isNavigationSelected(navigation),
-                    onClickNavigation = { onClickNavigation(navigation) },
-                )
+            catalog?.navigation?.also { navigation ->
+                itemsIndexed(
+                    items = navigation,
+                    key = { index, _ -> "top_nav_$index" }
+                ) { _, navigationItem ->
+                    NavigationListItem(
+                        navigation = navigationItem,
+                        isMultiSelectMode = uiState.isMultiSelectMode,
+                        isSelected = uiState.isNavigationSelected(navigationItem),
+                        onClickNavigation = { onClickNavigation(navigationItem) },
+                    )
+                }
             }
 
-            itemsIndexed(
-                items = uiState.publications,
-                key = { index, _ -> "top_pub_$index" }
-            ) { _, publication ->
-                PublicationListItem(
-                    publication = publication,
-                    isMultiSelectMode = uiState.isMultiSelectMode,
-                    isSelected = uiState.isPublicationSelected(publication),
-                    onClickPublication = { onClickPublication(publication) },
-                    onLongPressPublication = { onLongPressPublication(publication) },
-                )
+            catalog?.publications?.also { publications ->
+                itemsIndexed(
+                    items = publications,
+                    key = { index, _ -> "top_pub_$index" }
+                ) { _, publication ->
+                    PublicationListItem(
+                        publication = publication,
+                        isMultiSelectMode = uiState.isMultiSelectMode,
+                        isSelected = uiState.isPublicationSelected(publication),
+                        onClickPublication = { onClickPublication(publication) },
+                        onLongPressPublication = { onLongPressPublication(publication) },
+                    )
+                }
             }
 
-            uiState.group.forEachIndexed { sectionIndex, group ->
-                item(key = "section_$sectionIndex") {
+            catalog?.groups?.forEachIndexed { groupIndex, group ->
+                item(key = "section_$groupIndex") {
                     FeedSectionHeader(
                         title = group.metadata.title,
-                        isCollapsed = uiState.isSectionCollapsed(sectionIndex.toString()),
+                        isCollapsed = uiState.isSectionCollapsed(groupIndex.toString()),
                         showAssignButton = group.publications?.isNotEmpty() == true,
-                        onClickToggle = { onClickToggleSection(sectionIndex.toString()) },
-                        onClickAssign = { onClickAssignSection(sectionIndex) },
+                        onClickToggle = { onClickToggleSection(groupIndex.toString()) },
+                        onClickAssign = { onClickAssignSection(groupIndex) },
                     )
                 }
 
-                if (!uiState.isSectionCollapsed(sectionIndex.toString())) {
+                if (!uiState.isSectionCollapsed(groupIndex.toString())) {
                     itemsIndexed(
                         items = group.navigation ?: emptyList(),
-                        key = { itemIndex, _ -> "nav_${sectionIndex}_$itemIndex" }
+                        key = { itemIndex, _ -> "nav_${groupIndex}_$itemIndex" }
                     ) { _, navigation ->
                         NavigationListItem(
                             navigation = navigation,
@@ -202,7 +202,7 @@ fun LearningUnitListScreen(
 
                     itemsIndexed(
                         items = group.publications ?: emptyList(),
-                        key = { itemIndex, _ -> "pub_${sectionIndex}_$itemIndex" }
+                        key = { itemIndex, _ -> "pub_${groupIndex}_$itemIndex" }
                     ) { _, publication ->
                         PublicationListItem(
                             publication = publication,
@@ -247,6 +247,8 @@ fun LearningUnitListScreen(
         }
     }
 
+
+
     if (uiState.showCopyDialog) {
         CopyFeedDialog(
             name = uiState.copyDialogName,
@@ -264,90 +266,6 @@ fun LearningUnitListScreen(
     }
 }
 
-@Composable
-private fun FeedHeader(
-    uiState: LearningUnitListUiState,
-    onClickShare: () -> Unit,
-    onClickCopy: () -> Unit,
-    onClickDelete: () -> Unit,
-    onClickAssign: () -> Unit,
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        ListItem(
-            leadingContent = {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(48.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    RespectAsyncImage(
-                        uri = uiState.group
-                            .flatMap { it.publications ?: emptyList() }
-                            .firstOrNull()
-                            ?.images?.firstOrNull()?.href,
-                        contentDescription = "",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(36.dp),
-                    )
-                }
-            },
-            headlineContent = {
-                Text(text = uiState.feed?.metadata?.description ?: "")
-            },
-            supportingContent = {
-                uiState.feed?.metadata?.subtitle?.let { subtitle ->
-                    Text(text = subtitle)
-                }
-            },
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding(),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-        ) {
-            RespectQuickActionButton(
-                modifier = Modifier.testTag("share_btn"),
-                labelText = stringResource(Res.string.share),
-                iconContent = {
-                    Icon(Icons.Filled.Share, null)
-                },
-                onClick = onClickShare
-            )
-
-            RespectQuickActionButton(
-                modifier = Modifier.testTag("copy_btn"),
-                labelText = stringResource(Res.string.copy_playlist),
-                iconContent = {
-                    Icon(Icons.Filled.ContentCopy, null)
-                },
-                onClick = onClickCopy
-            )
-
-            RespectQuickActionButton(
-                modifier = Modifier.testTag("header_assign_btn"),
-                labelText = stringResource(Res.string.assign),
-                iconContent = {
-                    Icon(Icons.Filled.Task, null)
-                },
-                onClick = onClickAssign
-            )
-
-            if (uiState.isTeacherOrAdmin) {
-                RespectQuickActionButton(
-                    modifier = Modifier.testTag("delete_btn"),
-                    labelText = stringResource(Res.string.delete),
-                    iconContent = {
-                        Icon(Icons.Filled.Delete, null)
-                    },
-                    onClick = onClickDelete,
-                )
-            }
-        }
-    }
-}
 
 @Composable
 private fun FeedSectionHeader(

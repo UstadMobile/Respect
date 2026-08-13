@@ -261,8 +261,8 @@ class LearningUnitDetailViewModel(
                 destination = AssignmentEdit.create(
                     assignmentActivityId = null,
                     learningUnitSelected = LearningUnitSelection(
-                        learningUnitManifestUrl = route.learningUnitManifestUrl,
-                        selectedPublication = publicationVal,
+                        url = route.learningUnitManifestUrl,
+                        selectedPublications = listOf(publicationVal),
                     )
                 )
             )

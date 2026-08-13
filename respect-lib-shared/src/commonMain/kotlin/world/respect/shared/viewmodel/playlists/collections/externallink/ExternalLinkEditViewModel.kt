@@ -181,8 +181,8 @@ class ExternalLinkViewModel(
             NavResult(
                 key = resultDest.resultKey,
                 result = LearningUnitSelection(
-                    learningUnitManifestUrl = Url(state.url),
-                    selectedPublication = publication,
+                    url = Url(state.url),
+                    selectedPublications = listOf(publication),
                 ),
             )
         )

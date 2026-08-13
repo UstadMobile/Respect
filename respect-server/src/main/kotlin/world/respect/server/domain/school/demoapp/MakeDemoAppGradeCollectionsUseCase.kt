@@ -21,7 +21,8 @@ class MakeDemoAppGradeCollectionsUseCase {
     ) : OpdsFeed {
         return OpdsFeed(
             metadata = OpdsFeedMetadata(
-                title = "Grade $gradeNum"
+                title = "Grade $gradeNum",
+                description = "Example grade collection",
             ),
             links = listOf(
                 ReadiumLink(

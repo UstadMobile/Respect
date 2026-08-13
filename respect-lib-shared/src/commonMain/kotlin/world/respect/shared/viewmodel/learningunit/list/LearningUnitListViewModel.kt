@@ -26,6 +26,7 @@ import world.respect.lib.opds.model.OpdsFacet
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
+import world.respect.lib.opds.model.ext.allPublications
 import world.respect.lib.opds.model.findSelfLinks
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
@@ -84,6 +85,9 @@ data class LearningUnitListUiState(
 
     val selectedCount: Int
         get() = selectedPublications.size
+
+    val showAssignButton: Boolean
+        get() = isTeacherOrAdmin && !feed.dataOrNull()?.allPublications().isNullOrEmpty()
 }
 
 class LearningUnitListViewModel(

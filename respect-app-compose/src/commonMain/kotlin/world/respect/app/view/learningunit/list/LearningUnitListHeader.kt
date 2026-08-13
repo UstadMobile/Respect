@@ -66,8 +66,7 @@ fun FeedHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .defaultItemPadding(),
+                .horizontalScroll(rememberScrollState()),
         ) {
             RespectQuickActionButton(
                 modifier = Modifier.testTag("share_btn"),
@@ -87,14 +86,16 @@ fun FeedHeader(
                 onClick = onClickCopy
             )
 
-            RespectQuickActionButton(
-                modifier = Modifier.testTag("header_assign_btn"),
-                labelText = stringResource(Res.string.assign),
-                iconContent = {
-                    Icon(Icons.Filled.Task, null)
-                },
-                onClick = onClickAssign
-            )
+            if(uiState.showAssignButton) {
+                RespectQuickActionButton(
+                    modifier = Modifier.testTag("header_assign_btn"),
+                    labelText = stringResource(Res.string.assign),
+                    iconContent = {
+                        Icon(Icons.Filled.Task, null)
+                    },
+                    onClick = onClickAssign
+                )
+            }
 
             if (uiState.isTeacherOrAdmin) {
                 RespectQuickActionButton(

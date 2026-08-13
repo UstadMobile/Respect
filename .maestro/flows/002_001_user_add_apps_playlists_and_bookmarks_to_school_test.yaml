@@ -357,6 +357,18 @@ onFlowComplete:
 - tapOn: "Playlists"
 - tapOn: "Playlist - Grade 1"
 
+# This Share Playlist - section is commented since the flow is not clear
+
+#- runFlow:
+#    file: "subflows/admin_add_new_teacher_to_class.yaml"
+#    env:
+#      CLASSNAME: "TestClass"
+#      FIRSTNAME: TeacherA
+#      LASTNAME: User
+#- tapOn:
+#    id: "nav_home"
+#- tapOn: "Playlists"
+#- tapOn: "Playlist - Grade 1"
 #- tapOn: "Share"
 #- assertVisible:
 #    id: "app_title"
@@ -375,6 +387,19 @@ onFlowComplete:
 #- assertVisible: "Send link via email"
 #- tapOn:
 #    id: "copy_link_button"
+
+#- clearState: world.respect.app
+#- runFlow:
+#    file: "subflows/school_user_login_flow.yaml"
+#    env:
+#      USERNAME: "teacherauser"
+#      PASSWORD: "test123"
+#- tapOn:
+#    id: "nav_home"
+#- tapOn: "Playlists"
+#- tapOn:
+#    id: "ExpandableFab"
+#- tapOn: "Add from a link"
 #- assertVisible:
 #    id: "app_title"
 #    text: "Enter link"
@@ -384,6 +409,22 @@ onFlowComplete:
 #- assertVisible:
 #    id: "app_title"
 #    text: "Playlist - Grade 1"
+#- assertVisible:
+#    id: "app_title"
+#    text: "Edit playlist"
+#- tapOn: "Playlist - Grade 1"
+#- runFlow:
+#    file: "subflows/erase_text.yaml"
+#    env:
+#      TEXT: "Playlist - Grade 1"
+#- inputText: "New Playlist"
+#- hideKeyboard
+#- assertVisible: "Playlist section day 1"
+#- assertVisible: "Learning item section day 2"
+#- tapOn: "Save"
+#- assertVisible:
+#    id: "app_title"
+#    text: "New Playlist"
 
 - tapOn:
     id: "copy_btn"

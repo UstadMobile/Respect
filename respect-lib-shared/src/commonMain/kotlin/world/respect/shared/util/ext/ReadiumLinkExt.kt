@@ -2,8 +2,8 @@ package world.respect.shared.util.ext
 
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
-import world.respect.datalayer.school.opds.ext.hasRel
 import world.respect.lib.opds.model.ReadiumLink
+import world.respect.lib.opds.model.ext.hasRel
 import world.respect.libutil.ext.resolve
 
 fun ReadiumLink.resolve(

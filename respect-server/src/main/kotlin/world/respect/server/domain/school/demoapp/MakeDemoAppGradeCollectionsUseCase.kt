@@ -28,7 +28,12 @@ class MakeDemoAppGradeCollectionsUseCase {
                     href = baseUrl.resolve("$GRADES_DIR_NAME/$gradeNum/$COLLECTION_FILE_NAME").toString(),
                     rel = listOf("self"),
                     type = "application/json"
-                )
+                ),
+                ReadiumLink(
+                    rel = listOf("icon"),
+                    href = baseUrl.resolve("static/grade.jpg").toString(),
+                    type = "image/png",
+                ),
             ),
             publications = (1..DemoConstants.NUM_LESSONS).map { lessonNum ->
                 val lessonBase = baseUrl.resolve("$GRADES_DIR_NAME/$gradeNum/$LEARNING_UNITS_DIR_NAME/$lessonNum/")

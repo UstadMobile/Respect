@@ -36,7 +36,7 @@ import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttp
 import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttp
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
-import world.respect.datalayer.school.opds.ext.hasRel
+import world.respect.lib.opds.model.ext.hasRel
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator

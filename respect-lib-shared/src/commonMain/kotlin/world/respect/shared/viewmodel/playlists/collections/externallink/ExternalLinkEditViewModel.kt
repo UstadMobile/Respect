@@ -28,7 +28,7 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
-import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
 
 data class ExternalLinkUiState(
     val url: String = "",
@@ -180,7 +180,7 @@ class ExternalLinkViewModel(
         resultReturner.sendResult(
             NavResult(
                 key = resultDest.resultKey,
-                result = LearningUnitSelection(
+                result = OpdsPublicationsSelection(
                     url = Url(state.url),
                     selectedPublications = listOf(publication),
                 ),

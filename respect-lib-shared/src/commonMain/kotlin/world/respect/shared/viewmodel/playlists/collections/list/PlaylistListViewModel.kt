@@ -23,7 +23,7 @@ import world.respect.shared.generated.resources.add_new
 import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.playlist
 import world.respect.shared.navigation.EnterLink
-import world.respect.shared.navigation.LearningUnitList
+import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistList
@@ -153,7 +153,7 @@ class PlaylistListViewModel(
             )
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                LearningUnitList.create(
+                OpdsFeedDetail.create(
                     opdsFeedUrl = playlistUrl,
                     resultDest = route.resultDest,
                 )

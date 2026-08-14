@@ -62,13 +62,13 @@ import world.respect.shared.generated.resources.permanently_delete_description
 import world.respect.shared.generated.resources.select_count_items
 import world.respect.shared.generated.resources.select_playlist
 import world.respect.shared.util.SortOrderOption
-import world.respect.shared.viewmodel.learningunit.list.LearningUnitListUiState
-import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
-import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel.Companion.ICON
+import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailUiState
+import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailViewModel
+import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailViewModel.Companion.ICON
 
 @Composable
-fun LearningUnitListScreen(
-    viewModel: LearningUnitListViewModel,
+fun OpdsFeedDetailScreen(
+    viewModel: OpdsFeedDetailViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val copyOfTemplate = stringResource(Res.string.copy_of_playlist)
@@ -79,7 +79,7 @@ fun LearningUnitListScreen(
         }
     }
 
-    LearningUnitListScreen(
+    OpdsFeedDetailScreen(
         uiState = uiState,
         onSortOrderChanged = viewModel::onSortOrderChanged,
         onClickPublication = viewModel::onClickPublication,
@@ -102,8 +102,8 @@ fun LearningUnitListScreen(
 }
 
 @Composable
-fun LearningUnitListScreen(
-    uiState: LearningUnitListUiState = LearningUnitListUiState(),
+fun OpdsFeedDetailScreen(
+    uiState: OpdsFeedDetailUiState = OpdsFeedDetailUiState(),
     @Suppress("unused") onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onClickPublication: (OpdsPublication) -> Unit = {},
     onLongPressPublication: (OpdsPublication) -> Unit = {},

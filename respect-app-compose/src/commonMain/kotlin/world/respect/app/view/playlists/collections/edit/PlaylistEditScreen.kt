@@ -78,10 +78,10 @@ import world.respect.shared.generated.resources.title
 import world.respect.shared.generated.resources.use_link
 import world.respect.shared.generated.resources.use_link_description
 import world.respect.shared.util.ext.asUiText
-import world.respect.shared.viewmodel.playlists.collections.edit.MovingItemState
-import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistEditUiState
-import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistEditViewModel
-import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistSectionType
+import world.respect.shared.viewmodel.learningunit.editfeed.MovingItemState
+import world.respect.shared.viewmodel.learningunit.editfeed.PlaylistEditUiState
+import world.respect.shared.viewmodel.learningunit.editfeed.PlaylistEditViewModel
+import world.respect.shared.viewmodel.learningunit.editfeed.PlaylistSectionType
 
 @Composable
 fun PlaylistEditScreen(

@@ -20,7 +20,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.enter_link
 import world.respect.shared.generated.resources.invalid_url
 import world.respect.shared.navigation.AppsDetail
-import world.respect.shared.navigation.LearningUnitList
+import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.UiText
@@ -71,7 +71,7 @@ class EnterLinkViewModel(
                 if (playlistUrl != null) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            LearningUnitList.create(opdsFeedUrl = playlistUrl)
+                            OpdsFeedDetail.create(opdsFeedUrl = playlistUrl)
                         )
                     )
                     return@launchWithLoadingIndicator

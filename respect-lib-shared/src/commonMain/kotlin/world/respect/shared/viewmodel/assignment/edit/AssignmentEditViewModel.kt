@@ -63,7 +63,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
-import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -203,7 +203,7 @@ class AssignmentEditViewModel(
 
             viewModelScope.launch {
                 resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
-                    val learningUnit = result.result as? LearningUnitSelection ?: return@collect
+                    val learningUnit = result.result as? OpdsPublicationsSelection ?: return@collect
                     val activities = getXapiActivityForPublicationUseCase(learningUnit.selectedPublications)
 
                     _uiState.update { prev ->

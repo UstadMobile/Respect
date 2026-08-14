@@ -15,7 +15,7 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.shared.ext.NextAfterScan
-import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
 import world.respect.shared.viewmodel.manageuser.signup.SignupScreenModeEnum
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryMode
 import world.respect.lib.opds.model.LangMap
@@ -121,18 +121,18 @@ data class AssignmentEdit(
 ) : RespectAppRoute {
 
     @Transient
-    val learningUnitSelected: LearningUnitSelection? = learningUnitStr?.let {
-        Json.decodeFromString(LearningUnitSelection.serializer(), it)
+    val learningUnitSelected: OpdsPublicationsSelection? = learningUnitStr?.let {
+        Json.decodeFromString(OpdsPublicationsSelection.serializer(), it)
     }
 
     companion object {
         fun create(
             assignmentActivityId: String?,
-            learningUnitSelected: LearningUnitSelection? = null,
+            learningUnitSelected: OpdsPublicationsSelection? = null,
         ) = AssignmentEdit(
             assignmentActivityId = assignmentActivityId,
             learningUnitStr = learningUnitSelected?.let {
-                Json.encodeToString(LearningUnitSelection.serializer(), it)
+                Json.encodeToString(OpdsPublicationsSelection.serializer(), it)
             },
         )
     }
@@ -322,7 +322,7 @@ class AppsDetail private constructor(
     }
 }
 @Serializable
-class LearningUnitList(
+class OpdsFeedDetail(
     private val opdsFeedUrlStr: String,
     private val resultDestStr: String? = null,
 ) : RespectAppRoute, RouteWithResultDest {
@@ -337,7 +337,7 @@ class LearningUnitList(
         fun create(
             opdsFeedUrl: Url,
             resultDest: ResultDest? = null,
-        ) = LearningUnitList(
+        ) = OpdsFeedDetail(
             opdsFeedUrlStr = opdsFeedUrl.toString(),
             resultDestStr = resultDest.encodeToJsonStringOrNull(),
         )

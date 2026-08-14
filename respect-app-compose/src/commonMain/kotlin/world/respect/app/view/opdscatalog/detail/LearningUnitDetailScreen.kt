@@ -1,4 +1,4 @@
-package world.respect.app.view.learningunit.detail
+package world.respect.app.view.opdscatalog.detail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

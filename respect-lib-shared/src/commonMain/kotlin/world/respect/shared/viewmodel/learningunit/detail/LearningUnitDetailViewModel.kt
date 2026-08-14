@@ -56,7 +56,7 @@ import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
-import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
+import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
 
 data class LearningUnitDetailUiState(
     val learningUnit: DataLoadState<OpdsPublication> = DataLoadingState(),
@@ -260,7 +260,7 @@ class LearningUnitDetailViewModel(
             NavCommand.Navigate(
                 destination = AssignmentEdit.create(
                     assignmentActivityId = null,
-                    learningUnitSelected = LearningUnitSelection(
+                    learningUnitSelected = OpdsPublicationsSelection(
                         url = route.learningUnitManifestUrl,
                         selectedPublications = listOf(publicationVal),
                     )

@@ -27,7 +27,7 @@ import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.empty_list_description_admin
 import world.respect.shared.generated.resources.empty_list_description_non_admin
 import world.respect.shared.navigation.AppsDetail
-import world.respect.shared.navigation.LearningUnitList
+import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.RespectAppLauncher
@@ -39,7 +39,6 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.findCollection
-import world.respect.lib.opds.model.respectAppManifestDefaultLessonList
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
 import world.respect.lib.xapi.model.XapiStatement
@@ -162,7 +161,7 @@ class AppLauncherViewModel(
                         ?: return
                     val defaultLessonUrl = url.resolve(defaultLessonListHref)
 
-                    LearningUnitList.create(
+                    OpdsFeedDetail.create(
                         opdsFeedUrl = defaultLessonUrl,
                         resultDest = route.resultDest,
                     )

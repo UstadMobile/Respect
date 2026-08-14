@@ -20,8 +20,8 @@ import world.respect.app.view.clazz.list.ClazzListScreen
 import world.respect.app.view.enrollment.edit.EnrollmentEditScreen
 import world.respect.app.view.enrollment.list.EnrollmentListScreen
 import world.respect.app.view.home.HomeScreen
-import world.respect.app.view.learningunit.detail.LearningUnitDetailScreen
-import world.respect.app.view.learningunit.list.LearningUnitListScreen
+import world.respect.app.view.opdscatalog.detail.LearningUnitDetailScreen
+import world.respect.app.view.learningunit.list.OpdsFeedDetailScreen
 import world.respect.app.view.manageuser.accountlist.AccountListScreen
 import world.respect.app.view.manageuser.acceptinvite.AcceptInviteScreen
 import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
@@ -98,7 +98,7 @@ import world.respect.shared.navigation.EnterInviteCode
 import world.respect.shared.navigation.ExternalLinkEdit
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.LearningUnitDetail
-import world.respect.shared.navigation.LearningUnitList
+import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.Onboarding
@@ -142,7 +142,6 @@ import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.enrollment.edit.EnrollmentEditViewModel
 import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
-import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
@@ -442,12 +441,13 @@ fun AppNavHost(
             OtherOptionsScreen(viewModel = viewModel)
         }
 
-        composable<LearningUnitList> {
-            val viewModel: LearningUnitListViewModel = respectViewModel(
-                onSetAppUiState = onSetAppUiState,
-                navController = respectNavController
+        composable<OpdsFeedDetail> {
+            OpdsFeedDetailScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController
+                )
             )
-            LearningUnitListScreen(viewModel = viewModel)
         }
 
         composable<OtherOptionsSignup> {

@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.playlists.collections.edit
+package world.respect.shared.viewmodel.learningunit.editfeed
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -32,7 +32,7 @@ import world.respect.shared.generated.resources.playlist_section
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.ExternalLinkEdit
-import world.respect.shared.navigation.LearningUnitList
+import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PlaylistEdit
@@ -530,7 +530,7 @@ class PlaylistEditViewModel(
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    destination = LearningUnitList.create(opdsFeedUrl = savedPlaylistUrl),
+                    destination = OpdsFeedDetail.create(opdsFeedUrl = savedPlaylistUrl),
                     popUpTo = PlaylistEdit.create(),
                     popUpToInclusive = true,
                 )

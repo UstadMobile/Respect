@@ -38,7 +38,7 @@ import world.respect.shared.generated.resources.language
 import world.respect.shared.generated.resources.not_found
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.LearningUnitDetail
-import world.respect.shared.navigation.LearningUnitList
+import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.PlaylistEdit
@@ -53,10 +53,10 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
-import world.respect.shared.viewmodel.learningunit.LearningUnitSelection
-import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
+import world.respect.shared.viewmodel.learningunit.editfeed.PlaylistEditViewModel
 
-data class LearningUnitListUiState(
+data class OpdsFeedDetailUiState(
     val feed: DataLoadState<OpdsFeed> = DataLoadingState(),
     val facetOptions: List<OpdsFacet> = emptyList(),
     val selectedFilterTitle: String? = null,
@@ -90,7 +90,10 @@ data class LearningUnitListUiState(
         get() = isTeacherOrAdmin && !feed.dataOrNull()?.allPublications().isNullOrEmpty()
 }
 
-class LearningUnitListViewModel(
+/**
+ * Show a list of learning units as provided by an OpdsFeed
+ */
+class OpdsFeedDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val resultReturner: NavResultReturner,
@@ -104,11 +107,11 @@ class LearningUnitListViewModel(
 
     private val makePlaylistOpdsFeedUseCase: MakePlaylistOpdsFeedUseCase by inject()
 
-    private val _uiState = MutableStateFlow(LearningUnitListUiState())
+    private val _uiState = MutableStateFlow(OpdsFeedDetailUiState())
 
     val uiState = _uiState.asStateFlow()
 
-    private val route: LearningUnitList = savedStateHandle.toRoute()
+    private val route: OpdsFeedDetail = savedStateHandle.toRoute()
 
     init {
         _uiState.update {
@@ -167,7 +170,7 @@ class LearningUnitListViewModel(
                 resultReturner.sendResultIfResultExpected(
                     route = route,
                     navCommandFlow = _navCommandFlow,
-                    result = LearningUnitSelection(
+                    result = OpdsPublicationsSelection(
                         url = route.opdsFeedUrl,
                         selectedPublications = listOf(publication),
                     )
@@ -269,7 +272,7 @@ class LearningUnitListViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                LearningUnitList.create(
+                OpdsFeedDetail.create(
                     opdsFeedUrl = resolvedUrl,
                     resultDest = route.resultDest,
                 )
@@ -398,7 +401,7 @@ class LearningUnitListViewModel(
                 NavCommand.Navigate(
                     AssignmentEdit.create(
                         assignmentActivityId = null,
-                        learningUnitSelected = LearningUnitSelection(
+                        learningUnitSelected = OpdsPublicationsSelection(
                             url = route.opdsFeedUrl,
                             selectedPublications = uiState.value.feed.dataOrNull()?.let { feed ->
                                 feed.publications.orEmpty() + feed.groups.orEmpty().flatMap {

@@ -16,7 +16,7 @@ import world.respect.lib.opds.model.OpdsPublication
  * @param selectedPublications the selected publications.
  */
 @Serializable
-data class LearningUnitSelection(
+data class OpdsPublicationsSelection(
     val url: Url,
     val selectedPublications: List<OpdsPublication>,
 )

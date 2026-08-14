@@ -16,7 +16,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.LearningUnitDetail
-import world.respect.shared.navigation.LearningUnitList
+import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
@@ -182,7 +182,7 @@ class AppsDetailViewModel(
         appManifest?.findCollection()?.also { defaultLessonListLink ->
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    LearningUnitList.create(
+                    OpdsFeedDetail.create(
                         opdsFeedUrl = route.manifestUrl.resolve(defaultLessonListLink.href),
                         resultDest = route.resultDest,
                     )
@@ -220,7 +220,7 @@ class AppsDetailViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                LearningUnitList.create(
+                OpdsFeedDetail.create(
                     opdsFeedUrl = route.manifestUrl.resolve(navigationHref),
                 )
             )

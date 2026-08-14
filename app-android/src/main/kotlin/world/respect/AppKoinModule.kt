@@ -217,7 +217,7 @@ import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
-import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
+import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailViewModel
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
@@ -265,7 +265,7 @@ import java.io.File
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
-import world.respect.shared.viewmodel.playlists.collections.edit.PlaylistEditViewModel
+import world.respect.shared.viewmodel.learningunit.editfeed.PlaylistEditViewModel
 import world.respect.shared.viewmodel.playlists.collections.externallink.ExternalLinkViewModel
 import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListViewModel
 import world.respect.shared.viewmodel.playlists.collections.share.PlaylistShareViewModel
@@ -396,7 +396,7 @@ val appKoinModule = module {
     viewModelOf(::ClazzListViewModel)
     viewModelOf(::ClazzEditViewModel)
     viewModelOf(::ClazzDetailViewModel)
-    viewModelOf(::LearningUnitListViewModel)
+    viewModelOf(::OpdsFeedDetailViewModel)
     viewModelOf(::LearningUnitDetailViewModel)
     viewModelOf(::ReportViewModel)
     viewModelOf(::AcknowledgementViewModel)

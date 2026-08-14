@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Task
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectQuickActionButton
-import world.respect.app.components.defaultItemPadding
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.ext.feedIconLinkOrNull
 import world.respect.shared.generated.resources.Res
@@ -32,24 +32,27 @@ import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.copy_playlist
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.share
-import world.respect.shared.viewmodel.learningunit.list.LearningUnitListUiState
+import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailUiState
 
 
 @Composable
 fun FeedHeader(
-    uiState: LearningUnitListUiState,
+    uiState: OpdsFeedDetailUiState,
     onClickShare: () -> Unit,
     onClickCopy: () -> Unit,
     onClickDelete: () -> Unit,
     onClickAssign: () -> Unit,
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
+        val feedIconLink = uiState.feed.dataOrNull()?.feedIconLinkOrNull()
+        val description = uiState.feed.dataOrNull()?.metadata?.description
+
         Row(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.Top,
         ) {
-            uiState.feed.dataOrNull()?.feedIconLinkOrNull()?.also {
+            feedIconLink?.also {
                 RespectAsyncImage(
                     uri = it.href,
                     contentDescription = "",
@@ -58,9 +61,13 @@ fun FeedHeader(
                 )
             }
 
-            uiState.feed.dataOrNull()?.metadata?.description?.also {
+            description?.also {
                 Text(it)
             }
+        }
+
+        if(feedIconLink != null || description != null) {
+            HorizontalDivider()
         }
 
         Row(

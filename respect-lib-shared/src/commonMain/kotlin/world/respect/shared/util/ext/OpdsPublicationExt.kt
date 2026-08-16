@@ -12,3 +12,9 @@ fun OpdsPublication.resolve(baseUrl: Url) : OpdsPublication {
         toc = toc?.resolveAll(baseUrl),
     )
 }
+
+fun OpdsPublication.key(
+    indexInFeed: Int,
+) : String {
+    return metadata.identifier?.toString() ?: indexInFeed.toString()
+}

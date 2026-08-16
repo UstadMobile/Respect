@@ -636,7 +636,7 @@
     <string name="add_playlist">Add playlist</string>
     <string name="add_section">Section</string>
     <string name="sections">Sections</string>
-    <string name="choose_section_type">Choose Section Type:</string>
+    <string name="choose_section_type">Choose section type</string>
     <string name="playlist_section_description">Links to other playlists.</string>
     <string name="learning_item_section">Learning item section</string>
     <string name="learning_item_section_description">Links direct to items e.g. lessons, assessments, videos, etc</string>
@@ -669,14 +669,11 @@
     <string name="choose_item_type">Choose Item Type:</string>
     <string name="browse">Browse</string>
     <string name="browse_description">Add from RESPECT apps, lessons, playlists</string>
-    <string name="use_link">Use Link</string>
+    <string name="use_link">Use link</string>
     <string name="use_link_description">Add from an external link</string>
     <string name="external_link">External Link</string>
     <string name="add_thumbnail">Add Thumbnail</string>
     <string name="could_not_load_link">Could not load this link. Please check the address.</string>
-
-
-
 
     <string name="invalid_link">Invalid link</string>
     <!-- developer note key has suffix to avoid conflict with extension functions -->

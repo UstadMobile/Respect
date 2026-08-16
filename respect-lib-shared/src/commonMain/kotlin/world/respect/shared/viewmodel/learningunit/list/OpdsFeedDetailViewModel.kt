@@ -13,7 +13,6 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdmin
-import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
@@ -24,9 +23,12 @@ import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
+import world.respect.lib.opds.model.ext.OpdsFeedItemIndex
 import world.respect.lib.opds.model.ext.allPublications
+import world.respect.lib.opds.model.ext.getPublicationByIndex
 import world.respect.lib.opds.model.findSelfLinks
 import world.respect.libutil.ext.resolve
+import world.respect.libutil.ext.toggle
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.openexternallink.OpenExternalLinkUseCase
 import world.respect.shared.ext.resultExpected
@@ -64,20 +66,19 @@ data class OpdsFeedDetailUiState(
     val isTeacherOrAdmin: Boolean = false,
     val collapsedGroupKeys: Set<String> = emptySet(),
     val isMultiSelectMode: Boolean = false,
-    val selectedPublications: Set<String> = emptySet(),
+    val selectedPublications: Set<OpdsFeedItemIndex> = emptySet(),
+    val selectedNavigationLinks: Set<OpdsFeedItemIndex> = emptySet(),
     val showCopyDialog: Boolean = false,
     val copyDialogName: String = "",
     val showDeleteDialog: Boolean = false,
     val showSelectPlaylistButton: Boolean = false,
-    val selectedNavigation: ReadiumLink? = null,
 ) {
     fun isSectionCollapsed(sectionKey: String) = sectionKey in collapsedGroupKeys
 
-    fun isPublicationSelected(publication: OpdsPublication): Boolean =
-        publication.metadata.identifier?.toString() in selectedPublications
+    fun isPublicationSelected(index: OpdsFeedItemIndex): Boolean = index in selectedPublications
 
-    fun isNavigationSelected(navigation: ReadiumLink): Boolean =
-        navigation.href == selectedNavigation?.href
+    fun isNavigationSelected(index: OpdsFeedItemIndex): Boolean =
+        index in selectedNavigationLinks
 
     val selectedCount: Int
         get() = selectedPublications.size
@@ -101,8 +102,6 @@ class OpdsFeedDetailViewModel(
 
     private val schoolDataSource: SchoolDataSource by inject()
 
-    private val makePlaylistOpdsFeedUseCase: MakePlaylistOpdsFeedUseCase by inject()
-
     private val _uiState = MutableStateFlow(OpdsFeedDetailUiState())
 
     val uiState = _uiState.asStateFlow()
@@ -115,6 +114,12 @@ class OpdsFeedDetailViewModel(
                 quickActionsVisible = route.resultDest == null,
                 showSelectPlaylistButton =
                     route.resultDest?.resultKey == OpdsFeedEditViewModel.KEY_PLAYLIST
+            )
+        }
+
+        _appUiState.update { prev ->
+            prev.copy(
+                hideBottomNavigation = route.resultDest != null,
             )
         }
 
@@ -157,10 +162,14 @@ class OpdsFeedDetailViewModel(
         _uiState.update { it.copy(activeSortOrderOption = sortOption) }
     }
 
-    fun onClickPublication(publication: OpdsPublication) {
+    fun onClickPublication(index: OpdsFeedItemIndex) {
+        val publication = uiState.value.feed.dataOrNull()
+            ?.getPublicationByIndex(index)
+            ?: return
+
         when {
             uiState.value.isMultiSelectMode -> {
-
+                togglePublicationSelection(index)
             }
 
             route.resultExpected -> {
@@ -198,25 +207,20 @@ class OpdsFeedDetailViewModel(
         }
     }
 
-    fun onLongPressPublication(publication: OpdsPublication) {
-        _uiState.update { it.copy(isMultiSelectMode = true) }
-        toggleSelection(publication)
+    fun onLongPressPublication(
+        opdsFeedItemIndex: OpdsFeedItemIndex
+    ) {
+        togglePublicationSelection(opdsFeedItemIndex)
     }
 
-    private fun toggleSelection(publication: OpdsPublication) {
-        val id = publication.metadata.identifier?.toString()
-            ?: throw IllegalStateException(
-                "Publication has no identifier: ${publication.metadata.title}"
-            )
+    private fun togglePublicationSelection(
+        index: OpdsFeedItemIndex
+    ) {
         _uiState.update { prev ->
-            val updated = if (id in prev.selectedPublications) {
-                prev.selectedPublications - id
-            } else {
-                prev.selectedPublications + id
-            }
+            val publicationSelections = prev.selectedPublications.toggle(index)
             prev.copy(
-                selectedPublications = updated,
-                isMultiSelectMode = updated.isNotEmpty(),
+                selectedPublications = publicationSelections,
+                isMultiSelectMode = publicationSelections.isNotEmpty(),
             )
         }
     }
@@ -252,21 +256,22 @@ class OpdsFeedDetailViewModel(
     fun onClickNavigation(navigation: ReadiumLink) {
         val resolvedUrl = route.opdsFeedUrl.resolve(navigation.href)
 
-        if (route.resultDest?.resultKey == OpdsFeedEditViewModel.KEY_PLAYLIST) {
-            _uiState.update { prev ->
-                val isDeselecting = prev.selectedNavigation?.href == resolvedUrl.toString()
-                prev.copy(
-                    isMultiSelectMode = !isDeselecting,
-                    selectedNavigation = if (isDeselecting) {
-                        null
-                    } else {
-                        navigation.copy(href = resolvedUrl.toString())
-                    }
-                )
-            }
-            return
-        }
 
+//        if (route.resultDest?.resultKey == OpdsFeedEditViewModel.KEY_PLAYLIST) {
+//            _uiState.update { prev ->
+//                val isDeselecting = prev.selectedNavigation?.href == resolvedUrl.toString()
+//                prev.copy(
+//                    isMultiSelectMode = !isDeselecting,
+//                    selectedNavigation = if (isDeselecting) {
+//                        null
+//                    } else {
+//                        navigation.copy(href = resolvedUrl.toString())
+//                    }
+//                )
+//            }
+//            return
+//        }
+//
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 OpdsFeedDetail.create(
@@ -278,11 +283,11 @@ class OpdsFeedDetailViewModel(
     }
 
     fun onClickSelectPlaylist() {
-        resultReturner.sendResultIfResultExpected(
-            route = route,
-            navCommandFlow = _navCommandFlow,
-            result = _uiState.value.selectedNavigation ?: return
-        )
+//        resultReturner.sendResultIfResultExpected(
+//            route = route,
+//            navCommandFlow = _navCommandFlow,
+//            result = _uiState.value.selectedNavigation ?: return
+//        )
     }
 
     fun onClickToggleSection(sectionKey: String) {

@@ -38,11 +38,6 @@ fun OpdsFeedEditAddItemBottomSheet(
     val sheetState = rememberModalBottomSheetState()
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
-        Text(
-            text = stringResource(Res.string.choose_item_type),
-            modifier = Modifier.defaultItemPadding(),
-        )
-        HorizontalDivider()
         ListItem(
             leadingContent = {
                 Icon(

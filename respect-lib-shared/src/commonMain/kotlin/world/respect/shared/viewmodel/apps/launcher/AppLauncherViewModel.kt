@@ -132,7 +132,7 @@ class AppLauncherViewModel(
                 _appUiState.update {
                     it.copy(
                         fabState = it.fabState.copy(
-                            visible = isAdmin
+                            visible = isAdmin && route.resultDest == null
                         ),
                         settingsIconVisible = isAdmin && devModeEnabled,
                     )

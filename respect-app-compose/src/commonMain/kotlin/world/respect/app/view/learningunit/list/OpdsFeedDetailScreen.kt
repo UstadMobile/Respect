@@ -48,6 +48,7 @@ import world.respect.app.components.langMapString
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
+import world.respect.lib.opds.model.ext.OpdsFeedItemIndex
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.cancel
@@ -60,7 +61,6 @@ import world.respect.shared.generated.resources.name
 import world.respect.shared.generated.resources.permanently_delete
 import world.respect.shared.generated.resources.permanently_delete_description
 import world.respect.shared.generated.resources.select_count_items
-import world.respect.shared.generated.resources.select_playlist
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailUiState
 import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailViewModel
@@ -104,9 +104,10 @@ fun OpdsFeedDetailScreen(
 @Composable
 fun OpdsFeedDetailScreen(
     uiState: OpdsFeedDetailUiState = OpdsFeedDetailUiState(),
-    @Suppress("unused") onSortOrderChanged: (SortOrderOption) -> Unit = { },
-    onClickPublication: (OpdsPublication) -> Unit = {},
-    onLongPressPublication: (OpdsPublication) -> Unit = {},
+    @Suppress("unused")
+    onSortOrderChanged: (SortOrderOption) -> Unit = { },
+    onClickPublication: (OpdsFeedItemIndex) -> Unit = {},
+    onLongPressPublication: (OpdsFeedItemIndex) -> Unit = {},
     onClickNavigation: (ReadiumLink) -> Unit = {},
     onClickConfirmSelection: () -> Unit = {},
     onClickSelectPlaylist: () -> Unit = {},
@@ -153,11 +154,13 @@ fun OpdsFeedDetailScreen(
                 itemsIndexed(
                     items = navigation,
                     key = { index, _ -> "top_nav_$index" }
-                ) { _, navigationItem ->
+                ) { index, navigationItem ->
                     NavigationListItem(
                         navigation = navigationItem,
                         isMultiSelectMode = uiState.isMultiSelectMode,
-                        isSelected = uiState.isNavigationSelected(navigationItem),
+                        isSelected = uiState.isNavigationSelected(
+                            OpdsFeedItemIndex(groupIndex = -1, index)
+                        ),
                         onClickNavigation = { onClickNavigation(navigationItem) },
                     )
                 }
@@ -167,13 +170,14 @@ fun OpdsFeedDetailScreen(
                 itemsIndexed(
                     items = publications,
                     key = { index, _ -> "top_pub_$index" }
-                ) { _, publication ->
+                ) { index, publication ->
+                    val feedItemIndex = OpdsFeedItemIndex(groupIndex = -1, index)
                     PublicationListItem(
                         publication = publication,
                         isMultiSelectMode = uiState.isMultiSelectMode,
-                        isSelected = uiState.isPublicationSelected(publication),
-                        onClickPublication = { onClickPublication(publication) },
-                        onLongPressPublication = { onLongPressPublication(publication) },
+                        isSelected = uiState.isPublicationSelected(feedItemIndex),
+                        onClickPublication = { onClickPublication(feedItemIndex) },
+                        onLongPressPublication = { onLongPressPublication(feedItemIndex) },
                     )
                 }
             }
@@ -193,11 +197,13 @@ fun OpdsFeedDetailScreen(
                     itemsIndexed(
                         items = group.navigation ?: emptyList(),
                         key = { itemIndex, _ -> "nav_${groupIndex}_$itemIndex" }
-                    ) { _, navigation ->
+                    ) { itemIndex, navigation ->
                         NavigationListItem(
                             navigation = navigation,
                             isMultiSelectMode = uiState.isMultiSelectMode,
-                            isSelected = uiState.isNavigationSelected(navigation),
+                            isSelected = uiState.isNavigationSelected(
+                                OpdsFeedItemIndex(groupIndex = groupIndex, index = itemIndex)
+                            ),
                             onClickNavigation = { onClickNavigation(navigation) },
                         )
                     }
@@ -205,32 +211,21 @@ fun OpdsFeedDetailScreen(
                     itemsIndexed(
                         items = group.publications ?: emptyList(),
                         key = { itemIndex, _ -> "pub_${groupIndex}_$itemIndex" }
-                    ) { _, publication ->
+                    ) { itemIndex, publication ->
+                        val feedItemIndex = OpdsFeedItemIndex(groupIndex = groupIndex, index = itemIndex)
                         PublicationListItem(
                             publication = publication,
                             isMultiSelectMode = uiState.isMultiSelectMode,
-                            isSelected = uiState.isPublicationSelected(publication),
-                            onClickPublication = { onClickPublication(publication) },
-                            onLongPressPublication = { onLongPressPublication(publication) },
+                            isSelected = uiState.isPublicationSelected(feedItemIndex),
+                            onClickPublication = { onClickPublication(feedItemIndex) },
+                            onLongPressPublication = { onLongPressPublication(feedItemIndex) },
                         )
                     }
                 }
             }
         }
 
-        if (uiState.showSelectPlaylistButton) {
-            Button(
-                onClick = onClickSelectPlaylist,
-                enabled = uiState.selectedNavigation != null,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .defaultItemPadding()
-                    .testTag("select_playlist_button"),
-            ) {
-                Text(text = stringResource(Res.string.select_playlist))
-            }
-        } else if (uiState.isMultiSelectMode && uiState.selectedCount > 0) {
+        if (uiState.isMultiSelectMode && uiState.selectedCount > 0) {
             Button(
                 onClick = onClickConfirmSelection,
                 modifier = Modifier
@@ -247,6 +242,21 @@ fun OpdsFeedDetailScreen(
                 )
             }
         }
+
+        //Rework in progress 16/8 MD
+//        if (uiState.showSelectPlaylistButton) {
+//            Button(
+//                onClick = onClickSelectPlaylist,
+//                enabled = uiState.selectedNavigation != null,
+//                modifier = Modifier
+//                    .align(Alignment.BottomCenter)
+//                    .fillMaxWidth()
+//                    .defaultItemPadding()
+//                    .testTag("select_playlist_button"),
+//            ) {
+//                Text(text = stringResource(Res.string.select_playlist))
+//            }
+//        } else
     }
 
 

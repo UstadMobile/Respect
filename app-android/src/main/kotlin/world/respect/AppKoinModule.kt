@@ -265,7 +265,7 @@ import java.io.File
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
-import world.respect.shared.viewmodel.learningunit.editfeed.PlaylistEditViewModel
+import world.respect.shared.viewmodel.learningunit.editfeed.OpdsFeedEditViewModel
 import world.respect.shared.viewmodel.playlists.collections.externallink.ExternalLinkViewModel
 import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListViewModel
 import world.respect.shared.viewmodel.playlists.collections.share.PlaylistShareViewModel
@@ -443,7 +443,7 @@ val appKoinModule = module {
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
     viewModelOf(::PlaylistListViewModel)
-    viewModelOf(::PlaylistEditViewModel)
+    viewModelOf(::OpdsFeedEditViewModel)
     viewModelOf(::ExternalLinkViewModel)
     viewModelOf(::PlaylistShareViewModel)
 

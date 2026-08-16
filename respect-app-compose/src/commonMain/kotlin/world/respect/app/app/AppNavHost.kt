@@ -49,7 +49,7 @@ import world.respect.app.view.person.qrcode.InviteQrScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetPasswordScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetUsernameScreen
 import world.respect.app.view.playlists.collections.externallink.ExternalLinkScreen
-import world.respect.app.view.playlists.collections.edit.PlaylistEditScreen
+import world.respect.app.view.learningunit.editfeed.OpdsFeedEditScreen
 import world.respect.app.view.playlists.collections.list.PlaylistListScreen
 import world.respect.app.view.playlists.collections.share.PlaylistShareScreen
 import world.respect.app.view.report.detail.ReportDetailScreen
@@ -603,7 +603,7 @@ fun AppNavHost(
             )
         }
         composable<PlaylistEdit> {
-            PlaylistEditScreen(
+            OpdsFeedEditScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,

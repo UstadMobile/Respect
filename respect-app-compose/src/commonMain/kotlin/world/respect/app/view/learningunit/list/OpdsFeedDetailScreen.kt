@@ -136,15 +136,17 @@ fun OpdsFeedDetailScreen(
                 PaddingValues()
             },
         ) {
-            item(key = "feed_header") {
-                FeedHeader(
-                    uiState = uiState,
-                    onClickShare = onClickShare,
-                    onClickCopy = onClickCopy,
-                    onClickDelete = onClickDelete,
-                    onClickAssign = onClickAssignQuickActionButton,
-                )
-                HorizontalDivider()
+            if(uiState.quickActionsVisible) {
+                item(key = "feed_header") {
+                    FeedHeader(
+                        uiState = uiState,
+                        onClickShare = onClickShare,
+                        onClickCopy = onClickCopy,
+                        onClickDelete = onClickDelete,
+                        onClickAssign = onClickAssignQuickActionButton,
+                    )
+                    HorizontalDivider()
+                }
             }
 
             catalog?.navigation?.also { navigation ->

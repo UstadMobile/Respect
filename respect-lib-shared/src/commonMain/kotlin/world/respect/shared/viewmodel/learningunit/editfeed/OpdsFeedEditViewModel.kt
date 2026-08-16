@@ -22,6 +22,7 @@ import world.respect.lib.opds.model.OpdsFeedMetadata
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
+import world.respect.libutil.ext.moveItem
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_playlist
@@ -40,13 +41,24 @@ import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
+import world.respect.shared.util.ext.groupType
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
+import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
 import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListUiState
+import kotlin.uuid.Uuid
 
-enum class PlaylistSectionType {
+/**
+ * As per the OPDS spec:
+ * https://specs.opds.io/opds-2.0.html#25-groups
+ * "Groups are meant to contain:
+ *
+ *     either a single navigation collection
+ *     or a single publications collection"
+ */
+enum class OpdsGroupType {
     NAVIGATION,
     PUBLICATION,
 }
@@ -61,9 +73,9 @@ data class MovingItemState(
     )
 }
 
-data class PlaylistEditUiState(
+data class OpdsFeedEditUiState(
     val feed: OpdsFeed? = null,
-    val isSectionTypeDialogVisible: Boolean = false,
+    val addGroupTypeDialogVisible: Boolean = false,
     val titleError: UiText? = null,
     val movingItem: MovingItemState? = null,
     val addItemTypeSectionIndex: Int? = null,
@@ -74,7 +86,7 @@ data class PlaylistEditUiState(
     val description: String
         get() = feed?.metadata?.description ?: ""
 
-    val sections: List<OpdsGroup>
+    val groups: List<OpdsGroup>
         get() = feed?.groups ?: emptyList()
 
     val hasErrors: Boolean
@@ -84,7 +96,7 @@ data class PlaylistEditUiState(
         get() = addItemTypeSectionIndex != null
 }
 
-class PlaylistEditViewModel(
+class OpdsFeedEditViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val resultReturner: NavResultReturner,
@@ -97,16 +109,15 @@ class PlaylistEditViewModel(
     private val schoolDataSource: SchoolDataSource by inject()
     private val makePlaylistOpdsFeedUseCase: MakePlaylistOpdsFeedUseCase by inject()
 
-
     private val route: PlaylistEdit = savedStateHandle.toRoute()
 
-    private val _uiState = MutableStateFlow(PlaylistEditUiState())
+    private val _uiState = MutableStateFlow(OpdsFeedEditUiState())
 
     val uiState = _uiState.asStateFlow()
 
-    private var pendingAddItemSectionIndex: Int?
-        get() = savedStateHandle.get<Int>(KEY_PENDING_ADD_ITEM_SECTION_INDEX)
-        set(value) { savedStateHandle[KEY_PENDING_ADD_ITEM_SECTION_INDEX] = value }
+    private var pendingAddItemGroupIndex: Int?
+        get() = savedStateHandle.get<Int>(KEY_PENDING_ADD_ITEM_GROUP_INDEX)
+        set(value) { savedStateHandle[KEY_PENDING_ADD_ITEM_GROUP_INDEX] = value }
 
     private var pendingAddPlaylistSectionIndex: Int?
         get() = savedStateHandle.get<Int>(KEY_PENDING_ADD_PLAYLIST_SECTION_INDEX)
@@ -162,42 +173,26 @@ class PlaylistEditViewModel(
 
             launch {
                 resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
-                    val sectionIndex = pendingAddItemSectionIndex
-                    if (sectionIndex == null) {
-                        _navCommandFlow.tryEmit(NavCommand.PopUp())
-                        return@collect
-                    }
-                    pendingAddItemSectionIndex = null
+                    val sectionIndex = pendingAddItemGroupIndex ?: return@collect
+                    val publicationSelection = result.result as? OpdsPublicationsSelection ?: return@collect
 
-                    /*
-                     * A learning-unit pick returns either a single LearningUnitSelection (single-select
-                     * mode) or a List<LearningUnitSelection> (multi-select mode). The list is matched as
-                     * List<*> because generic type arguments are erased at runtime; filterIsInstance
-                     * recovers the element type.
-                     */
-                    /*
-                    val publications: List<OpdsPublication> = when (val r = result.result) {
-                        is LearningUnitSelection -> listOf(r.selectedPublications)
-                        is List<*> -> r.filterIsInstance<LearningUnitSelection>()
-                            .map { it.selectedPublications }
-                        else -> throw IllegalStateException(
-                            "Expected LearningUnitSelection or List but got: ${result.result}"
-                        )
-                    }
-
-                    _uiState.first { it.feed != null }
+                    pendingAddItemGroupIndex = null
 
                     _uiState.update { prev ->
-                        val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
-                        val section = sections.getOrNull(sectionIndex)
-                            ?: throw IllegalStateException("No section at index $sectionIndex")
-                        sections[sectionIndex] = section.copy(
-                            publications = (section.publications ?: emptyList()) + publications
+                        prev.copy(
+                            feed = prev.feed?.copy(
+                                groups = prev.feed.groups.orEmpty().toMutableList().also { groupList ->
+                                    val groupToAddTo = groupList[sectionIndex]
+                                    groupList[sectionIndex] = groupToAddTo.copy(
+                                        publications = buildList {
+                                            addAll(groupToAddTo.publications.orEmpty())
+                                            addAll(publicationSelection.selectedPublications)
+                                        }
+                                    )
+                                }
+                            )
                         )
-                        prev.copy(feed = prev.feed?.copy(groups = sections))
                     }
-                    restoreAppBarState()
-                     */
                 }
             }
 
@@ -263,10 +258,6 @@ class PlaylistEditViewModel(
         }
     }
 
-    fun restoreAppBarState() {
-        //Should not have been here
-    }
-
     fun onTitleChanged(title: String) {
         _uiState.update { prev ->
             prev.copy(
@@ -300,31 +291,38 @@ class PlaylistEditViewModel(
         }
     }
 
-    fun onClickAddSection() {
-        _uiState.update { it.copy(isSectionTypeDialogVisible = true) }
+    fun onClickAddGroup() {
+        _uiState.update { it.copy(addGroupTypeDialogVisible = true) }
     }
 
-    fun onDismissSectionTypeDialog() {
-        _uiState.update { it.copy(isSectionTypeDialogVisible = false) }
+    fun onDismissAddGroupTypeDialog() {
+        _uiState.update { it.copy(addGroupTypeDialogVisible = false) }
     }
 
-    fun onClickSectionType(sectionType: PlaylistSectionType) {
+    fun onClickAddGroupType(groupType: OpdsGroupType) {
         viewModelScope.launch {
-            val sectionTitle = when (sectionType) {
-                PlaylistSectionType.NAVIGATION -> getString(Res.string.playlist_section)
-                PlaylistSectionType.PUBLICATION -> getString(Res.string.learning_item_section)
+            val sectionTitle = when (groupType) {
+                OpdsGroupType.NAVIGATION -> getString(Res.string.playlist_section)
+                OpdsGroupType.PUBLICATION -> getString(Res.string.learning_item_section)
             }
+
             _uiState.update { prev ->
-                val newSection = OpdsGroup(
-                    metadata = OpdsFeedMetadata(title = sectionTitle),
-                    navigation = if (sectionType == PlaylistSectionType.NAVIGATION) emptyList() else null,
-                    publications = if (sectionType == PlaylistSectionType.PUBLICATION) emptyList() else null,
+                val newGroup = OpdsGroup(
+                    metadata = OpdsFeedMetadata(
+                        title = sectionTitle,
+                        identifier = prev.feed?.metadata?.identifier?.buildUpon()
+                            ?.appendPath("/group/${Uuid.random()}")
+                            ?.build()
+                    ),
+                    navigation = if (groupType == OpdsGroupType.NAVIGATION) emptyList() else null,
+                    publications = if (groupType == OpdsGroupType.PUBLICATION) emptyList() else null,
                 )
+
                 prev.copy(
                     feed = prev.feed?.copy(
-                        groups = (prev.feed.groups ?: emptyList()) + newSection
+                        groups = prev.feed.groups.orEmpty() + newGroup
                     ),
-                    isSectionTypeDialogVisible = false,
+                    addGroupTypeDialogVisible = false,
                 )
             }
         }
@@ -338,23 +336,42 @@ class PlaylistEditViewModel(
         }
     }
 
-    fun onSectionsReordered(sections: List<OpdsGroup>) {
+    fun onGroupMoved(fromIndex: Int, toIndex: Int) {
         _uiState.update { prev ->
-            prev.copy(feed = prev.feed?.copy(groups = sections))
+            prev.copy(
+                feed = prev.feed?.copy(
+                    groups = prev.feed.groups?.moveItem(fromIndex, toIndex)
+                )
+            )
         }
     }
 
-    fun onItemsReordered(sectionIndex: Int, items: List<Any>) {
+    fun onGroupItemsReordered(
+        groupIndex: Int,
+        fromIndex: Int,
+        toIndex: Int,
+    ) {
         _uiState.update { prev ->
-            val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
-            val section = sections.getOrNull(sectionIndex)
-                ?: throw IllegalStateException("No section at index $sectionIndex")
-            sections[sectionIndex] = if (section.navigation != null) {
-                section.copy(navigation = items.filterIsInstance<ReadiumLink>())
-            } else {
-                section.copy(publications = items.filterIsInstance<OpdsPublication>())
-            }
-            prev.copy(feed = prev.feed?.copy(groups = sections))
+            prev.copy(
+                feed = prev.feed?.copy(
+                    groups = prev.feed.groups?.toMutableList()?.also { groupList ->
+                        val group = groupList[groupIndex]
+
+                        groupList[groupIndex] = group.copy(
+                            navigation = if(group.groupType == OpdsGroupType.NAVIGATION) {
+                                group.navigation?.moveItem(fromIndex, toIndex)
+                            }else {
+                                group.navigation
+                            },
+                            publications = if(group.groupType == OpdsGroupType.PUBLICATION) {
+                                group.publications?.moveItem(fromIndex, toIndex)
+                            }else {
+                                group.publications
+                            }
+                        )
+                    }
+                )
+            )
         }
     }
 
@@ -463,7 +480,7 @@ class PlaylistEditViewModel(
                 "onClickAddItemBrowse called but addItemTypeSectionIndex is null"
             )
         _uiState.update { it.copy(addItemTypeSectionIndex = null) }
-        pendingAddItemSectionIndex = sectionIndex
+        pendingAddItemGroupIndex = sectionIndex
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 destination = RespectAppLauncher.create(
@@ -482,7 +499,7 @@ class PlaylistEditViewModel(
                 "onClickAddItemUseLink called but addItemTypeSectionIndex is null"
             )
         _uiState.update { it.copy(addItemTypeSectionIndex = null) }
-        pendingAddItemSectionIndex = sectionIndex
+        pendingAddItemGroupIndex = sectionIndex
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 destination = ExternalLinkEdit.create(
@@ -541,7 +558,7 @@ class PlaylistEditViewModel(
     companion object {
         const val KEY_LEARNING_UNIT = "result_learning_unit"
         const val KEY_PLAYLIST = "result_playlist"
-        private const val KEY_PENDING_ADD_ITEM_SECTION_INDEX = "pending_add_item_section_index"
+        private const val KEY_PENDING_ADD_ITEM_GROUP_INDEX = "pending_add_item_section_index"
         private const val KEY_PENDING_ADD_PLAYLIST_SECTION_INDEX =
             "pending_add_playlist_section_index"
     }

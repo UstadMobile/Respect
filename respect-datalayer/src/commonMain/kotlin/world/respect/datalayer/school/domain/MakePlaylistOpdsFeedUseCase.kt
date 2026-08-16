@@ -6,8 +6,7 @@ import world.respect.datalayer.school.opds.ext.withAbsoluteSelfUrl
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.libutil.ext.appendEndpointSegments
-import world.respect.libutil.util.time.systemTimeInMillis
-import kotlin.time.Instant
+import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -38,7 +37,7 @@ class MakePlaylistOpdsFeedUseCase(
         return base.copy(
             metadata = base.metadata.copy(
                 identifier = Uri.parseOrNull(feedUrl.toString()),
-                modified = Instant.fromEpochMilliseconds(systemTimeInMillis()),
+                modified = Clock.System.now(),
             ),
             links = base.links + ownerLink,
         ).withAbsoluteSelfUrl(feedUrl)

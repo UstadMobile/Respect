@@ -94,6 +94,13 @@ data class OpdsFeedEditUiState(
 
     val isAddItemTypeBottomSheetVisible: Boolean
         get() = addItemTypeSectionIndex != null
+
+    val canMovePublicationItemToOtherGroup: Boolean
+        get() = (feed?.groups?.count { it.groupType == OpdsGroupType.PUBLICATION } ?: 0) > 1
+
+    val canMoveNavigationItemToOtherGroup: Boolean
+        get() = (feed?.groups?.count { it.groupType == OpdsGroupType.NAVIGATION } ?: 0) > 1
+
 }
 
 class OpdsFeedEditViewModel(

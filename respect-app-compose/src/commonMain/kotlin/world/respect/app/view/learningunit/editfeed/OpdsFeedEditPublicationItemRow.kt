@@ -15,17 +15,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableListItemScope
-import world.respect.lib.opds.model.ReadiumLink
+import world.respect.app.components.langMapString
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.move
 
 
 @Composable
-fun ReorderableListItemScope.OpdsFeedEditNavigationItemRow(
-    navItem: ReadiumLink,
+fun ReorderableListItemScope.PlaylistPublicationItemRow(
+    publication: OpdsPublication,
     itemIndex: Int,
     groupIndex: Int,
-    hasMoveOption: Boolean,
+    hasMovableSections: Boolean,
     onClickDelete: () -> Unit,
     onClickMove: () -> Unit,
 ) {
@@ -33,13 +34,13 @@ fun ReorderableListItemScope.OpdsFeedEditNavigationItemRow(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .testTag("nav_item_${groupIndex}_$itemIndex"),
+            .testTag("pub_item_${groupIndex}_$itemIndex"),
     ) {
         IconButton(
-            onClick = {},
+            onClick = { },
             modifier = Modifier
                 .draggableHandle()
-                .testTag("nav_drag_handle_${groupIndex}_$itemIndex")
+                .testTag("pub_drag_handle_${groupIndex}_$itemIndex")
         ) {
             Icon(
                 imageVector = Icons.Filled.DragHandle,
@@ -47,10 +48,9 @@ fun ReorderableListItemScope.OpdsFeedEditNavigationItemRow(
             )
         }
         ListItem(
-            headlineContent = {
-                Text(
-                    text = navItem.title?.takeIf { it.isNotBlank() } ?: navItem.href,
-                )
+            headlineContent = { Text(text = langMapString(publication.metadata.title)) },
+            supportingContent = {
+                publication.metadata.description?.let { Text(text = it) }
             },
             modifier = Modifier.weight(1f),
         )
@@ -58,7 +58,7 @@ fun ReorderableListItemScope.OpdsFeedEditNavigationItemRow(
             OpdsGroupItemMenuButton(
                 groupIndex = groupIndex,
                 itemIndex = itemIndex,
-                hasMoveOption = hasMoveOption,
+                hasMoveOption = hasMovableSections,
                 onClickDelete = onClickDelete,
                 onClickMove = onClickMove,
             )

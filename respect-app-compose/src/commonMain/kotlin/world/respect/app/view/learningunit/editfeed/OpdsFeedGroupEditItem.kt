@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableColumn
+import sh.calvin.reorderable.ReorderableListItemScope
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_item
@@ -30,11 +31,10 @@ import world.respect.shared.generated.resources.section_title
 
 
 @Composable
-fun OpdsFeedGroupEditItem(
+fun ReorderableListItemScope.OpdsFeedGroupEditItem(
     group: OpdsGroup,
     groupIndex: Int,
-    allGroups: List<OpdsGroup>,
-    dragHandleModifier: Modifier,
+    showMoveItemOption: Boolean,
     onGroupTitleChanged: (String) -> Unit,
     onClickDeleteGroup: () -> Unit,
     onClickAddItem: () -> Unit,
@@ -56,7 +56,8 @@ fun OpdsFeedGroupEditItem(
         ) {
             IconButton(
                 onClick = { },
-                modifier = dragHandleModifier,
+                modifier = Modifier.draggableHandle()
+                    .testTag("section_drag_handle_$groupIndex"),
             ) {
                 Icon(
                     imageVector = Icons.Filled.DragHandle,
@@ -100,12 +101,7 @@ fun OpdsFeedGroupEditItem(
                             itemIndex = itemIndex,
                             navItem = navLink,
                             groupIndex = groupIndex,
-                            hasMoveOption = allGroups.any { s ->
-                                s != group && s.navigation != null
-                            },
-                            dragHandleModifier = Modifier
-                                .draggableHandle()
-                                .testTag("nav_drag_handle_${groupIndex}_$itemIndex"),
+                            hasMoveOption = showMoveItemOption,
                             onClickDelete = { onClickDeleteItem(itemIndex) },
                             onClickMove = { onClickMoveItem(itemIndex) },
                         )
@@ -136,13 +132,8 @@ fun OpdsFeedGroupEditItem(
                         PlaylistPublicationItemRow(
                             itemIndex = itemIndex,
                             publication = publication,
-                            sectionIndex = groupIndex,
-                            hasMovableSections = allGroups.any { s ->
-                                s != group && s.publications != null
-                            },
-                            dragHandleModifier = Modifier
-                                .draggableHandle()
-                                .testTag("pub_drag_handle_${groupIndex}_$itemIndex"),
+                            groupIndex = groupIndex,
+                            hasMovableSections = showMoveItemOption,
                             onClickDelete = { onClickDeleteItem(itemIndex) },
                             onClickMove = { onClickMoveItem(itemIndex) },
                         )

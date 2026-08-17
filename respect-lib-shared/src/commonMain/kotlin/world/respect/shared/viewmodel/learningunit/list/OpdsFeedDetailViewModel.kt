@@ -23,6 +23,7 @@ import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.ext.OpdsFeedItemIndex
 import world.respect.lib.opds.model.ext.allPublications
 import world.respect.lib.opds.model.ext.getNavigationLinkByIndex
+import world.respect.lib.opds.model.ext.getNavigationLinksByIndexes
 import world.respect.lib.opds.model.ext.getPublicationByIndex
 import world.respect.lib.opds.model.ext.getPublicationsByIndexes
 import world.respect.lib.opds.model.findSelfLinks
@@ -89,7 +90,7 @@ data class OpdsFeedDetailUiState(
 
 
     val selectedCount: Int
-        get() = selectedPublications.size
+        get() = (selectedPublications.size + selectedNavigationLinks.size)
 
     val showAssignButton: Boolean
         get() = isTeacherOrAdmin && !feed.dataOrNull()?.allPublications().isNullOrEmpty()
@@ -259,11 +260,20 @@ class OpdsFeedDetailViewModel(
             }
 
             OpdsPickType.CATALOG_FEED -> {
-
+                resultReturner.sendResultIfResultExpected(
+                    route = route,
+                    navCommandFlow = _navCommandFlow,
+                    result = OpdsFeedSelection(
+                        url = route.opdsFeedUrl,
+                        selectedFeeds = uiState.value.feed.dataOrNull()?.getNavigationLinksByIndexes(
+                            currentState.selectedNavigationLinks
+                        ).orEmpty()
+                    ),
+                )
             }
 
             else -> {
-                //do nothing
+                //do nothing - not in select mode
             }
         }
     }

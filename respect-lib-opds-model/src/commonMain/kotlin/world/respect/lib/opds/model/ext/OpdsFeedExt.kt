@@ -43,3 +43,15 @@ fun OpdsFeed.getNavigationLinkByIndex(opdsFeedItemIndex: OpdsFeedItemIndex): Rea
         this.navigation?.get(opdsFeedItemIndex.index) ?: throw IllegalArgumentException("No navigation at $opdsFeedItemIndex")
     }
 }
+
+fun OpdsFeed.getNavigationLinksByIndexes(
+    indexes: Collection<OpdsFeedItemIndex>
+): List<ReadiumLink> {
+    return navigation?.filterIndexed { index, _ ->
+        OpdsFeedItemIndex(-1, index) in indexes
+    }.orEmpty() + groups?.flatMapIndexed { groupIndex: Int, group ->
+        group.navigation?.filterIndexed { index, _ ->
+            OpdsFeedItemIndex(groupIndex, index) in indexes
+        }.orEmpty()
+    }.orEmpty()
+}

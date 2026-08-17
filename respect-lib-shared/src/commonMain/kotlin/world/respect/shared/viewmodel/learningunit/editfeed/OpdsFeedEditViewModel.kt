@@ -170,6 +170,7 @@ class OpdsFeedEditViewModel(
                 _uiState.update { it.copy(feed = newFeed) }
             }
 
+            //Note: these SHOULD resolve to absolute URLs on selection
             launch {
                 resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
                     val sectionIndex = pendingAddItemGroupIndex ?: return@collect

@@ -164,6 +164,7 @@ class AppLauncherViewModel(
                     OpdsFeedDetail.create(
                         opdsFeedUrl = defaultLessonUrl,
                         resultDest = route.resultDest,
+                        opdsPickType = route.opdsPickType,
                     )
                 }else {
                     AppsDetail.create(

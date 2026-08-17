@@ -665,7 +665,7 @@
     <string name="send_link_via_sms">Send link via SMS</string>
     <string name="send_link_via_email">Send link via email</string>
     <string name="share_link">Share link</string>
-    <string name="select_playlist">Select playlist</string>
+    <string name="select_this_collection">Select this collection</string>
     <string name="choose_item_type">Choose Item Type:</string>
     <string name="browse">Browse</string>
     <string name="browse_description">Add from RESPECT apps, lessons, playlists</string>

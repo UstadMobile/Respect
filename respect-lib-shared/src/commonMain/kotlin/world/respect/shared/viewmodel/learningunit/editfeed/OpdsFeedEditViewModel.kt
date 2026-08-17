@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -20,8 +19,6 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsFeedMetadata
 import world.respect.lib.opds.model.OpdsGroup
-import world.respect.lib.opds.model.OpdsPublication
-import world.respect.lib.opds.model.ReadiumLink
 import world.respect.libutil.ext.moveItem
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
@@ -33,9 +30,9 @@ import world.respect.shared.generated.resources.playlist_section
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.ExternalLinkEdit
-import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RouteResultDest
@@ -46,8 +43,9 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
+import world.respect.shared.viewmodel.learningunit.OpdsFeedSelection
+import world.respect.shared.viewmodel.learningunit.OpdsPickType
 import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
-import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListUiState
 import kotlin.uuid.Uuid
 
 /**
@@ -78,7 +76,7 @@ data class OpdsFeedEditUiState(
     val addGroupTypeDialogVisible: Boolean = false,
     val titleError: UiText? = null,
     val movingItem: MovingItemState? = null,
-    val addItemTypeSectionIndex: Int? = null,
+    val isAddItemTypeBottomSheetVisible: Boolean = false,
 ) {
     val title: String
         get() = feed?.metadata?.title ?: ""
@@ -91,9 +89,6 @@ data class OpdsFeedEditUiState(
 
     val hasErrors: Boolean
         get() = titleError != null
-
-    val isAddItemTypeBottomSheetVisible: Boolean
-        get() = addItemTypeSectionIndex != null
 
     val canMovePublicationItemToOtherGroup: Boolean
         get() = (feed?.groups?.count { it.groupType == OpdsGroupType.PUBLICATION } ?: 0) > 1
@@ -126,9 +121,6 @@ class OpdsFeedEditViewModel(
         get() = savedStateHandle.get<Int>(KEY_PENDING_ADD_ITEM_GROUP_INDEX)
         set(value) { savedStateHandle[KEY_PENDING_ADD_ITEM_GROUP_INDEX] = value }
 
-    private var pendingAddPlaylistSectionIndex: Int?
-        get() = savedStateHandle.get<Int>(KEY_PENDING_ADD_PLAYLIST_SECTION_INDEX)
-        set(value) { savedStateHandle[KEY_PENDING_ADD_PLAYLIST_SECTION_INDEX] = value }
 
     init {
         _appUiState.update { prev ->
@@ -205,59 +197,23 @@ class OpdsFeedEditViewModel(
 
             launch {
                 resultReturner.filteredResultFlowForKey(KEY_PLAYLIST).collect { result ->
-                    val sectionIndex = pendingAddPlaylistSectionIndex
-                    if (sectionIndex == null) {
-                        _navCommandFlow.tryEmit(NavCommand.PopUp())
-                        return@collect
-                    }
-                    pendingAddPlaylistSectionIndex = null
-
-                    val navLink = when (val data = result.result) {
-                        is OpdsPublication -> {
-                            val selfLink = data.links.firstOrNull {
-                                it.rel?.contains(PlaylistListUiState.REL_SELF) == true
-                            } ?: data.links.firstOrNull()
-
-                            ReadiumLink(
-                                href = selfLink?.href
-                                    ?: throw IllegalStateException("No href for playlist"),
-                                title = data.metadata.title.toString().takeIf { it.isNotBlank() }
-                                    ?: selfLink.title,
-                                rel = listOf(PlaylistListUiState.REL_SELF),
-                                type = OpdsFeed.MEDIA_TYPE,
-                            )
-                        }
-                        is ReadiumLink -> {
-                            if (data.title.isNullOrBlank()) {
-                                throw IllegalStateException(
-                                    "ReadiumLink result has no title"
-                                )
-                            }
-                            data
-                        }
-                        else -> throw IllegalStateException(
-                            "Expected OpdsPublication or ReadiumLink but got: ${result.result}"
-                        )
-                    }
-
-                    require(!navLink.title.isNullOrBlank()) {
-                        "Playlist navigation must have a title"
-                    }
-
-                    _uiState.first { it.feed != null }
+                    val groupIndex = pendingAddItemGroupIndex ?: return@collect
+                    val feedSelection = result.result as? OpdsFeedSelection ?: return@collect
+                    pendingAddItemGroupIndex = null
 
                     _uiState.update { prev ->
-                        val sections = (prev.feed?.groups ?: emptyList()).toMutableList()
-
-                        val section = sections.getOrNull(sectionIndex)
-                            ?: throw IllegalStateException("No section at index $sectionIndex")
-
-                        sections[sectionIndex] = section.copy(
-                            navigation = (section.navigation ?: emptyList()) + navLink
-                        )
-
                         prev.copy(
-                            feed = prev.feed?.copy(groups = sections)
+                            feed = prev.feed?.copy(
+                                groups = prev.feed.groups.orEmpty().toMutableList().also { groupList ->
+                                    val groupToAddTo = groupList[groupIndex]
+                                    groupList[groupIndex] = groupToAddTo.copy(
+                                        navigation = buildList {
+                                            addAll(groupToAddTo.navigation.orEmpty())
+                                            addAll(feedSelection.selectedFeeds)
+                                        }
+                                    )
+                                }
+                            )
                         )
                     }
                 }
@@ -473,61 +429,57 @@ class OpdsFeedEditViewModel(
         }
     }
 
-    fun onClickAddItem(sectionIndex: Int) {
-        _uiState.update { it.copy(addItemTypeSectionIndex = sectionIndex) }
+    fun onClickAddItem(groupIndex: Int) {
+        pendingAddItemGroupIndex = groupIndex
+        _uiState.update { it.copy(isAddItemTypeBottomSheetVisible = true) }
     }
 
     fun onDismissAddItemTypeBottomSheet() {
-        _uiState.update { it.copy(addItemTypeSectionIndex = null) }
+        _uiState.update { it.copy(isAddItemTypeBottomSheetVisible = false) }
     }
 
     fun onClickAddItemBrowse() {
-        val sectionIndex = _uiState.value.addItemTypeSectionIndex
-            ?: throw IllegalStateException(
-                "onClickAddItemBrowse called but addItemTypeSectionIndex is null"
-            )
-        _uiState.update { it.copy(addItemTypeSectionIndex = null) }
-        pendingAddItemGroupIndex = sectionIndex
+        onDismissAddItemTypeBottomSheet()
+
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 destination = RespectAppLauncher.create(
                     resultDest = RouteResultDest(
                         resultPopUpTo = route,
                         resultKey = KEY_LEARNING_UNIT,
-                    )
+                    ),
+                    opdsPickType = OpdsPickType.PUBLICATION,
                 ),
             )
         )
     }
 
     fun onClickAddItemUseLink() {
-        val sectionIndex = _uiState.value.addItemTypeSectionIndex
-            ?: throw IllegalStateException(
-                "onClickAddItemUseLink called but addItemTypeSectionIndex is null"
-            )
-        _uiState.update { it.copy(addItemTypeSectionIndex = null) }
-        pendingAddItemGroupIndex = sectionIndex
+        onDismissAddItemTypeBottomSheet()
+        
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 destination = ExternalLinkEdit.create(
                     resultDest = RouteResultDest(
                         resultPopUpTo = route,
                         resultKey = KEY_LEARNING_UNIT,
-                    )
+                    ),
+
                 ),
             )
         )
     }
 
     fun onClickAddPlaylist(sectionIndex: Int) {
-        pendingAddPlaylistSectionIndex = sectionIndex
+        pendingAddItemGroupIndex = sectionIndex
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 destination = RespectAppLauncher.create(
                     resultDest = RouteResultDest(
                         resultPopUpTo = route,
                         resultKey = KEY_PLAYLIST,
-                    )
+                    ),
+                    opdsPickType = OpdsPickType.CATALOG_FEED,
                 ),
             )
         )

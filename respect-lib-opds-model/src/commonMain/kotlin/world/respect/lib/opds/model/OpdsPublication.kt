@@ -26,7 +26,7 @@ data class OpdsPublication(
     val readingOrder: List<ReadiumLink>? = null,
     val resources: List<ReadiumLink>? = null,
     val toc: List<ReadiumLink>? = null,
-) {
+): OpdsDocument {
     companion object {
         const val MEDIA_TYPE = "application/opds-publication+json"
 

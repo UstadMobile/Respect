@@ -45,7 +45,7 @@ import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.exception.withUiText
 import world.respect.shared.util.ext.resolve
-import world.respect.shared.util.ext.selfPublicationLinkOrNull
+import world.respect.shared.util.ext.firstSelfLinkOrNull
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.domain.xapi.createBlankAppListingStatement
@@ -193,7 +193,7 @@ class AppsDetailViewModel(
 
     fun onClickPublication(publication: OpdsPublication) {
         try {
-            val publicationHref = publication.links.selfPublicationLinkOrNull()?.href
+            val publicationHref = publication.links.firstSelfLinkOrNull()?.href
                 ?: throw IllegalArgumentException().withUiText(Res.string.invalid_link.asUiText())
 
             val refererUrl = uiState.value.appDetail?.dataOrNull()

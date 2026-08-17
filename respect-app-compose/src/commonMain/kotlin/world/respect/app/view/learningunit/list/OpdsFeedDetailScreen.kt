@@ -1,19 +1,10 @@
 package world.respect.app.view.learningunit.list
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
@@ -23,7 +14,6 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Task
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,11 +28,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.langMapString
 import world.respect.lib.dataloadstate.ext.dataOrNull
@@ -55,12 +43,12 @@ import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.copy
 import world.respect.shared.generated.resources.copy_of_playlist
 import world.respect.shared.generated.resources.delete
-import world.respect.shared.generated.resources.duration
 import world.respect.shared.generated.resources.make_a_copy
 import world.respect.shared.generated.resources.name
 import world.respect.shared.generated.resources.permanently_delete
 import world.respect.shared.generated.resources.permanently_delete_description
 import world.respect.shared.generated.resources.select_count_items
+import world.respect.shared.generated.resources.select_this_collection
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailUiState
 import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailViewModel
@@ -85,9 +73,10 @@ fun OpdsFeedDetailScreen(
         onClickPublication = viewModel::onClickPublication,
         onLongPressPublication = viewModel::onLongPressPublication,
         onClickNavigation = viewModel::onClickNavigation,
-        onClickConfirmSelection = viewModel::onClickConfirmSelection,
-        onClickSelectPlaylist = viewModel::onClickSelectPlaylist,
-        onClickToggleSection = viewModel::onClickToggleSection,
+        onLongPressNavigation = viewModel::onLongPressNavigation,
+        onClickConfirmSelection = viewModel::onClickSelectBottomButton,
+        onClickSelectPlaylist = viewModel::onClickSelectThisFeed,
+        onClickToggleGroup = viewModel::onClickToggleGroup,
         onClickShare = viewModel::onClickShare,
         onClickCopy = viewModel::onClickCopy,
         onClickDelete = viewModel::onClickDelete,
@@ -108,10 +97,11 @@ fun OpdsFeedDetailScreen(
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onClickPublication: (OpdsFeedItemIndex) -> Unit = {},
     onLongPressPublication: (OpdsFeedItemIndex) -> Unit = {},
-    onClickNavigation: (ReadiumLink) -> Unit = {},
+    onClickNavigation: (OpdsFeedItemIndex) -> Unit = {},
+    onLongPressNavigation: (OpdsFeedItemIndex) -> Unit = {},
     onClickConfirmSelection: () -> Unit = {},
     onClickSelectPlaylist: () -> Unit = {},
-    onClickToggleSection: (String) -> Unit = {},
+    onClickToggleGroup: (Int) -> Unit = {},
     onClickShare: () -> Unit = {},
     onClickCopy: () -> Unit = {},
     onClickDelete: () -> Unit = {},
@@ -155,13 +145,15 @@ fun OpdsFeedDetailScreen(
                     items = navigation,
                     key = { index, _ -> "top_nav_$index" }
                 ) { index, navigationItem ->
+                    val feedIndex = OpdsFeedItemIndex(groupIndex = -1, index)
                     NavigationListItem(
                         navigation = navigationItem,
-                        isMultiSelectMode = uiState.isMultiSelectMode,
-                        isSelected = uiState.isNavigationSelected(
-                            OpdsFeedItemIndex(groupIndex = -1, index)
-                        ),
-                        onClickNavigation = { onClickNavigation(navigationItem) },
+                        showCheckbox = uiState.showNavigationCheckboxes,
+                        isSelected = uiState.isNavigationSelected(feedIndex),
+                        onClickNavigation = { onClickNavigation(feedIndex) },
+                        onLongPress = {
+                            onLongPressNavigation(feedIndex)
+                        }
                     )
                 }
             }
@@ -174,7 +166,7 @@ fun OpdsFeedDetailScreen(
                     val feedItemIndex = OpdsFeedItemIndex(groupIndex = -1, index)
                     PublicationListItem(
                         publication = publication,
-                        isMultiSelectMode = uiState.isMultiSelectMode,
+                        showCheckbox = uiState.showPublicationCheckboxes,
                         isSelected = uiState.isPublicationSelected(feedItemIndex),
                         onClickPublication = { onClickPublication(feedItemIndex) },
                         onLongPressPublication = { onLongPressPublication(feedItemIndex) },
@@ -186,25 +178,25 @@ fun OpdsFeedDetailScreen(
                 item(key = "section_$groupIndex") {
                     FeedSectionHeader(
                         title = group.metadata.title,
-                        isCollapsed = uiState.isSectionCollapsed(groupIndex.toString()),
+                        isCollapsed = uiState.isGroupCollapsed(groupIndex),
                         showAssignButton = group.publications?.isNotEmpty() == true,
-                        onClickToggle = { onClickToggleSection(groupIndex.toString()) },
+                        onClickToggle = { onClickToggleGroup(groupIndex) },
                         onClickAssign = { onClickAssignSection(groupIndex) },
                     )
                 }
 
-                if (!uiState.isSectionCollapsed(groupIndex.toString())) {
+                if (!uiState.isGroupCollapsed(groupIndex)) {
                     itemsIndexed(
                         items = group.navigation ?: emptyList(),
                         key = { itemIndex, _ -> "nav_${groupIndex}_$itemIndex" }
                     ) { itemIndex, navigation ->
+                        val feedIndex = OpdsFeedItemIndex(groupIndex = groupIndex, index = itemIndex)
                         NavigationListItem(
                             navigation = navigation,
-                            isMultiSelectMode = uiState.isMultiSelectMode,
-                            isSelected = uiState.isNavigationSelected(
-                                OpdsFeedItemIndex(groupIndex = groupIndex, index = itemIndex)
-                            ),
-                            onClickNavigation = { onClickNavigation(navigation) },
+                            showCheckbox = uiState.showNavigationCheckboxes,
+                            isSelected = uiState.isNavigationSelected(feedIndex),
+                            onClickNavigation = { onClickNavigation(feedIndex) },
+                            onLongPress = { onLongPressNavigation(feedIndex) },
                         )
                     }
 
@@ -215,7 +207,7 @@ fun OpdsFeedDetailScreen(
                         val feedItemIndex = OpdsFeedItemIndex(groupIndex = groupIndex, index = itemIndex)
                         PublicationListItem(
                             publication = publication,
-                            isMultiSelectMode = uiState.isMultiSelectMode,
+                            showCheckbox = uiState.showPublicationCheckboxes,
                             isSelected = uiState.isPublicationSelected(feedItemIndex),
                             onClickPublication = { onClickPublication(feedItemIndex) },
                             onLongPressPublication = { onLongPressPublication(feedItemIndex) },
@@ -225,7 +217,7 @@ fun OpdsFeedDetailScreen(
             }
         }
 
-        if (uiState.isMultiSelectMode && uiState.selectedCount > 0) {
+        if (uiState.showSelectionBottomButton) {
             Button(
                 onClick = onClickConfirmSelection,
                 modifier = Modifier
@@ -243,20 +235,18 @@ fun OpdsFeedDetailScreen(
             }
         }
 
-        //Rework in progress 16/8 MD
-//        if (uiState.showSelectPlaylistButton) {
-//            Button(
-//                onClick = onClickSelectPlaylist,
-//                enabled = uiState.selectedNavigation != null,
-//                modifier = Modifier
-//                    .align(Alignment.BottomCenter)
-//                    .fillMaxWidth()
-//                    .defaultItemPadding()
-//                    .testTag("select_playlist_button"),
-//            ) {
-//                Text(text = stringResource(Res.string.select_playlist))
-//            }
-//        } else
+        if (uiState.showSelectPlaylistButton) {
+            Button(
+                onClick = onClickSelectPlaylist,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .defaultItemPadding()
+                    .testTag("select_playlist_button"),
+            ) {
+                Text(text = stringResource(Res.string.select_this_collection))
+            }
+        }
     }
 
 
@@ -391,78 +381,15 @@ private fun DeleteFeedDialog(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun FeedListItem(
-    title: String,
-    iconUrl: String?,
-    description: String?,
-    language: List<String>?,
-    duration: Double?,
-    isMultiSelectMode: Boolean,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    onLongPress: () -> Unit,
-) {
-    ListItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Max)
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongPress,
-            ),
-        leadingContent = {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(48.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                RespectAsyncImage(
-                    uri = iconUrl,
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(36.dp),
-                )
-            }
-        },
-        headlineContent = {
-            Text(text = title)
-        },
-        supportingContent = {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                description?.takeIf { it.isNotBlank() }?.let {
-                    Text(text = it)
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    language?.let { Text(text = it.joinToString(", ")) }
-                    duration?.let {
-                        Text(text = "${stringResource(Res.string.duration)} - $it")
-                    }
-                }
-            }
-        },
-        trailingContent = if (isMultiSelectMode) {
-            {
-                Checkbox(
-                    checked = isSelected,
-                    onCheckedChange = null,
-                    modifier = Modifier.testTag("check_box"),
-                )
-            }
-        } else {
-            null
-        },
-    )
-}
+
 
 @Composable
 fun NavigationListItem(
     navigation: ReadiumLink,
-    isMultiSelectMode: Boolean = false,
+    showCheckbox: Boolean = false,
     isSelected: Boolean = false,
     onClickNavigation: (ReadiumLink) -> Unit,
+    onLongPress: () -> Unit,
 ) {
     FeedListItem(
         title = navigation.title
@@ -474,17 +401,17 @@ fun NavigationListItem(
         description = null,
         language = navigation.language,
         duration = navigation.duration,
-        isMultiSelectMode = isMultiSelectMode,
+        showCheckbox = showCheckbox,
         isSelected = isSelected,
         onClick = { onClickNavigation(navigation) },
-        onLongPress = {},
+        onLongPress = onLongPress,
     )
 }
 
 @Composable
 fun PublicationListItem(
     publication: OpdsPublication,
-    isMultiSelectMode: Boolean,
+    showCheckbox: Boolean,
     isSelected: Boolean,
     onClickPublication: (OpdsPublication) -> Unit,
     onLongPressPublication: (OpdsPublication) -> Unit,
@@ -495,7 +422,7 @@ fun PublicationListItem(
         language = publication.metadata.language,
         duration = publication.metadata.duration,
         description = publication.metadata.description,
-        isMultiSelectMode = isMultiSelectMode,
+        showCheckbox = showCheckbox,
         isSelected = isSelected,
         onClick = { onClickPublication(publication) },
         onLongPress = { onLongPressPublication(publication) },

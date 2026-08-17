@@ -22,3 +22,24 @@ fun OpdsFeed.getPublicationByIndex(opdsFeedItemIndex: OpdsFeedItemIndex): OpdsPu
         this.publications?.get(opdsFeedItemIndex.index) ?: throw IllegalArgumentException("No publications")
     }
 }
+
+fun OpdsFeed.getPublicationsByIndexes(
+    indexes: Collection<OpdsFeedItemIndex>
+) : List<OpdsPublication>{
+    return publications?.filterIndexed { index, _ ->
+        OpdsFeedItemIndex(-1, index) in indexes
+    }.orEmpty() + groups?.flatMapIndexed { groupIndex: Int, group ->
+        group.publications?.filterIndexed { index, _ ->
+            OpdsFeedItemIndex(groupIndex, index) in indexes
+        }.orEmpty()
+    }.orEmpty()
+}
+
+fun OpdsFeed.getNavigationLinkByIndex(opdsFeedItemIndex: OpdsFeedItemIndex): ReadiumLink {
+    return if(opdsFeedItemIndex.groupIndex >= 0){
+        this.groups?.get(opdsFeedItemIndex.groupIndex)?.navigation?.get(opdsFeedItemIndex.index)
+            ?: throw IllegalArgumentException("No navigation link at $opdsFeedItemIndex")
+    }else {
+        this.navigation?.get(opdsFeedItemIndex.index) ?: throw IllegalArgumentException("No navigation at $opdsFeedItemIndex")
+    }
+}

@@ -20,7 +20,7 @@ data class OpdsFeed(
     val facets: List<OpdsFacet>? = null,
     val groups: List<OpdsGroup>? = null,
     val status: String = DEFAULT_STATUS,
-) {
+): OpdsDocument {
     companion object {
         const val MEDIA_TYPE = "application/opds+json"
         

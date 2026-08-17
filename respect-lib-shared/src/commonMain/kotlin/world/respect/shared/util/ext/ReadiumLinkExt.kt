@@ -28,7 +28,7 @@ fun List<ReadiumLink>.resolveAll(
     baseUrl: Url
 ) = this.map { it.resolve(baseUrl) }
 
-fun List<ReadiumLink>.selfPublicationLinkOrNull(): ReadiumLink? {
+fun List<ReadiumLink>.firstSelfLinkOrNull(): ReadiumLink? {
     return firstOrNull { link ->
         link.hasRel("self")
     }

@@ -19,6 +19,7 @@ import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
 import world.respect.shared.viewmodel.manageuser.signup.SignupScreenModeEnum
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryMode
 import world.respect.lib.opds.model.LangMap
+import world.respect.shared.viewmodel.learningunit.OpdsPickType
 import kotlin.uuid.Uuid
 
 @Serializable
@@ -92,16 +93,26 @@ object Home : RespectAppRoute
 @Serializable
 data class RespectAppLauncher(
     val resultDestStr: String? = null,
+    private val opdsPickTypeStr: String? = null,
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
     override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
 
+    @Transient
+    val opdsPickType: OpdsPickType? = opdsPickTypeStr?.let {
+        Json.decodeFromString(OpdsPickType.serializer(), it)
+    }
+
     companion object {
         fun create(
             resultDest: ResultDest? = null,
+            opdsPickType: OpdsPickType? = null,
         ) = RespectAppLauncher(
-            resultDestStr = resultDest.encodeToJsonStringOrNull()
+            resultDestStr = resultDest.encodeToJsonStringOrNull(),
+            opdsPickTypeStr = opdsPickType?.let {
+                Json.encodeToString(OpdsPickType.serializer(), it)
+            }
         )
     }
 }
@@ -321,10 +332,12 @@ class AppsDetail private constructor(
         }
     }
 }
+
 @Serializable
 class OpdsFeedDetail(
     private val opdsFeedUrlStr: String,
     private val resultDestStr: String? = null,
+    private val opdsPickTypeStr: String? = null,
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
@@ -333,13 +346,25 @@ class OpdsFeedDetail(
     @Transient
     override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
 
+    @Transient
+    val opdsPickType = opdsPickTypeStr?.let { jsonStr ->
+        Json.decodeFromString(
+            OpdsPickType.serializer(),
+            jsonStr,
+        )
+    }
+
     companion object {
         fun create(
             opdsFeedUrl: Url,
             resultDest: ResultDest? = null,
+            opdsPickType: OpdsPickType? = null,
         ) = OpdsFeedDetail(
             opdsFeedUrlStr = opdsFeedUrl.toString(),
             resultDestStr = resultDest.encodeToJsonStringOrNull(),
+            opdsPickTypeStr = opdsPickType?.let {
+                Json.encodeToString(OpdsPickType.serializer(), it)
+            },
         )
     }
 }

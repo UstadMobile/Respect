@@ -1,6 +1,9 @@
 package world.respect.lib.xapi.ext
 
 import io.ktor.http.Url
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
@@ -35,4 +38,34 @@ fun XapiActivityDefinition.extensionDeadlineAsInstantOrNull(): Instant? {
             catch (_: Throwable) { null }
         }
 }
+
+/**
+ * Get the JsonObject for the given extension iri if present and a JsonObject
+ */
+fun XapiActivityDefinition.extensionAsJsonObjectOrNull(
+    extensionIri: String,
+): JsonObject? {
+    return (extensions?.get(extensionIri) as? JsonObject)
+}
+
+/**
+ * Deserialize (using kotlinx serialization) from an extension property
+ *
+ * @param json Json to use
+ * @param extensionIri extension iri
+ * @param deserializer kotlinx serialization deserializer
+ *
+ * @return the decoded object, or null if the extension is not present or the property is not a
+ *         json object.
+ */
+fun <T> XapiActivityDefinition.decodeFromExtensionOrNull(
+    json: Json,
+    extensionIri: String,
+    deserializer: DeserializationStrategy<T>,
+): T? {
+    return extensionAsJsonObjectOrNull(extensionIri)?.let {
+        json.decodeFromJsonElement(deserializer, it)
+    }
+}
+
 

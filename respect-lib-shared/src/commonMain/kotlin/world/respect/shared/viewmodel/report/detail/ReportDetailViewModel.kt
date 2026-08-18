@@ -104,22 +104,18 @@ class ReportDetailViewModel(
                     statementResult.dataOrNull()?.statements?.mostRecentByTimestampOrNull()
                         ?: return@collect
 
-                val reportOptions = statement.objectActivityOrNull()?.definition?.decodeFromExtensionOrNull(
-                    json = json,
-                    extensionIri = OpenEelXapiConstants.EXTENSION_REPORT_OPTIONS,
-                    deserializer = ReportOptions.serializer()
-                ) ?: ReportOptions()
+                val reportOptions =
+                    statement.objectActivityOrNull()?.definition?.decodeFromExtensionOrNull(
+                        json = json,
+                        extensionIri = OpenEelXapiConstants.EXTENSION_REPORT_OPTIONS,
+                        deserializer = ReportOptions.serializer()
+                    ) ?: ReportOptions()
 
                 _appUiState.update { prev ->
                     prev.copy(
                         title = statement.objectActivityNameOrNull()?.let { LangMapUiText(it) }
                     )
                 }
-
-                if (reportOptions.series.isEmpty()) {
-                    return@collect
-                }
-
                 val request = RunReportUseCase.RunReportRequest(
                     reportUid = reportUid.toLong(),
                     reportOptions = reportOptions,

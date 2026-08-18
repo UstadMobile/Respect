@@ -29,10 +29,9 @@ class MockRunReportUseCaseClientImpl(
         request: RunReportUseCase.RunReportRequest
     ): Flow<RunReportUseCase.RunReportResult> = flow {
 
-        // 1. Build dummy query-result JSON — simulates server response data
+        // 1. Dummy query-result JSON — simulates server response data
         val queryResultJson = buildJsonObject {
             put("columnNames", buildJsonArray {
-                // Shuffle column order to verify that toStatementReportRows discovers indices programmatically
                 add(COLUMN_NAME_SUBGROUP)
                 add(COLUMN_NAME_X_AXIS)
                 add(COLUMN_NAME_Y_AXIS)
@@ -45,7 +44,7 @@ class MockRunReportUseCaseClientImpl(
             })
         }
 
-        // 2. Build the response statement — matches Appendix B format exactly
+        // 2. Response statement
         val actor = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent ?: return@flow
         val responseStatement = XapiStatement(
             id = Uuid.random(),

@@ -180,9 +180,7 @@ class ReportListViewModel(
 
     fun onRemoveReport(statement: XapiStatement) {
         val statementId = statement.id ?: return
-        launchWithLoadingIndicator(
-            runIfAlreadyLoading = true
-        ) {
+        launchWithLoadingIndicator {
             val actor = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent ?: return@launchWithLoadingIndicator
             val voidingStatement = XapiStatement(
                 actor = actor,

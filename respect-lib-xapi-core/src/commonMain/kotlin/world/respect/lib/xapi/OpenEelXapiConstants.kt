@@ -35,8 +35,6 @@ object OpenEelXapiConstants {
 
     const val CATEGORY_ASSIGNMENT_RECIPE = "https://id.ustadmobile.com/xapi/activities/assignment-recipe"
 
-    const val CATEGORY_REPORT_QUERY_RECIPE ="https://id.openeel.org/xapi/recipes/xapi-sql-query"
-
     const val CATEGORY_APP_LISTING_RECIPE = "https://id.openeel.org/recipes/applisting"
 
     const val CATEGORY_BOOKMARK_RECIPE = "https://id.openeel.org/recipes/bookmark"
@@ -47,5 +45,6 @@ object OpenEelXapiConstants {
 
     const val EXTENSION_REPORT_QUERY_RESULT = "https://id.openeel.org/xapi/extension/query-result"
 
+    const val CATEGORY_REPORT_QUERY_RECIPE ="https://id.openeel.org/xapi/recipes/xapi-sql-query"
 
 }

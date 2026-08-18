@@ -40,7 +40,6 @@ data class ReportTemplateListUiState(
 
 class ReportTemplateListViewModel(
     savedStateHandle: SavedStateHandle,
-    private val runReportUseCase: RunReportUseCase,
     private val createGraphFormatterUseCase: CreateGraphFormatterUseCase,
     accountManager: RespectAccountManager
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
@@ -50,6 +49,7 @@ class ReportTemplateListViewModel(
     val uiState = _uiState.asStateFlow()
     private val activeUserPersonUid: Long = 0
     private val schoolDataSource: SchoolDataSource by inject()
+    private val runReportUseCase: RunReportUseCase by inject()
 
 
     init {

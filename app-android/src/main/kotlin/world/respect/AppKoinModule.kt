@@ -1196,9 +1196,10 @@ val appKoinModule = module {
                 opdsPublicationDataSource = get<SchoolDataSource>().opdsPublicationDataSource,
             )
         }
-    }
-    single<RunReportUseCase> {
-        MockRunReportUseCaseClientImpl()
+
+        scoped<RunReportUseCase> {
+            MockRunReportUseCaseClientImpl(accountManager = get())
+        }
     }
     single<ValidateEmailUseCase>{
         ValidateEmailUseCase()

@@ -30,10 +30,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.langMapString
 import world.respect.app.view.report.graph.CombinedGraph
-import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.report.ReportOptions
-import world.respect.datalayer.school.model.Report
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.xapi.ext.objectActivityNameOrNull
+import world.respect.lib.xapi.ext.objectActivityOrNull
+import world.respect.lib.xapi.model.XapiStatement
 import world.respect.shared.domain.report.model.RunReportResultAndFormatters
 import world.respect.shared.domain.report.query.RunReportUseCase
 import world.respect.shared.generated.resources.No_data_available
@@ -53,7 +56,7 @@ fun ReportListScreen(
             .fillMaxSize()
             .padding(4.dp)
     ) {
-        items(uiState.reportList.dataOrNull() ?: emptyList<Report>()) { report ->
+        items(uiState.reportList.dataOrNull() ?: emptyList<XapiStatement>()) { report ->
             ReportGridCard(
                 report = report,
                 viewModel = viewModel,
@@ -65,11 +68,12 @@ fun ReportListScreen(
 
 @Composable
 private fun ReportGridCard(
-    report: Report,
+    report: XapiStatement,
     viewModel: ReportListViewModel,
     activeUserPersonUid: Long
 ) {
-    val reportDataFlow = remember(report.guid) {
+    val activityId = report.objectActivityOrNull()?.id ?: ""
+    val reportDataFlow = remember(activityId) {
         viewModel.runReport(report)
     }
     val reportResultWithFormatters by reportDataFlow.collectAsState(
@@ -77,7 +81,7 @@ private fun ReportGridCard(
             reportResult = RunReportUseCase.RunReportResult(
                 timestamp = 0,
                 request = RunReportUseCase.RunReportRequest(
-                    reportUid = report.guid.toLong(),
+                    reportUid = activityId.toLong(),
                     reportOptions = ReportOptions(),
                     accountPersonUid = activeUserPersonUid,
                     timeZoneId = TimeZone.currentSystemDefault().id,
@@ -107,7 +111,7 @@ private fun ReportGridCard(
             ) {
                 // Title above the chart
                 Text(
-                    report.title,
+                    text = report.objectActivityNameOrNull()?.let { langMapString(it) } ?: "",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -148,7 +152,7 @@ private fun ReportGridCard(
                 modifier = Modifier
                     .size(32.dp)
                     .padding(8.dp)
-                    .clickable { viewModel.onRemoveReport(report.guid) }
+                    .clickable { viewModel.onRemoveReport(report) }
                     .align(Alignment.TopEnd)
             )
         }

@@ -6,6 +6,7 @@ import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -14,17 +15,34 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
-import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.datalayer.school.model.Indicator
+import world.respect.datalayer.school.model.Report
 import world.respect.datalayer.school.model.report.DefaultIndicators
 import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.datalayer.school.model.report.ReportOptions
 import world.respect.datalayer.school.model.report.ReportSeries
 import world.respect.datalayer.school.model.report.ReportSeriesVisualType
-import world.respect.datalayer.school.model.Indicator
-import world.respect.datalayer.school.model.Report
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
+import world.respect.lib.dataloadstate.ext.map
+import world.respect.lib.opds.model.toStringMap
+import world.respect.lib.xapi.OpenEelXapiConstants
+import world.respect.lib.xapi.ext.decodeFromExtensionOrNull
+import world.respect.lib.xapi.ext.encodeWithExtension
+import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.ext.objectActivityOrNull
+import world.respect.lib.xapi.model.XapiActivityDefinition
+import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
+import world.respect.libutil.ext.isNullOrAllBlank
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
+import world.respect.shared.domain.xapi.createBlankReportStatement
 import world.respect.shared.ext.replace
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_a_new_report
@@ -46,33 +64,45 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.app.appstate.AppUiState
 import world.respect.shared.viewmodel.app.appstate.LoadingUiState
+import world.respect.shared.viewmodel.app.appstate.Snack
+import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import kotlin.time.Clock
+import kotlin.uuid.Uuid
 
 data class ReportEditUiState(
+    val statementData: DataLoadState<XapiStatement> = DataLoadingState(),
     val reportOptions: ReportOptions = ReportOptions(),
     val reportTitleError: UiText? = null,
     val submitted: Boolean = false,
     val availableIndicators: List<Indicator> = emptyList(),
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
 ) {
     val hasSingleSeries: Boolean
         get() = reportOptions.series.size == 1
+
+    val hasErrors: Boolean
+        get() {
+            if (!submitted) return false
+            return reportTitleError != null
+        }
 }
 
 class ReportEditViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
     private val json: Json,
-    private val navResultReturner: NavResultReturner
+    private val navResultReturner: NavResultReturner,
+    private val snackBarDispatcher: SnackBarDispatcher
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
     private val schoolDataSource: SchoolDataSource by inject()
     private val route: ReportEdit = savedStateHandle.toRoute()
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
-    private val entityUid = route.reportUid ?: schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-        Report.TABLE_ID
-    ).toString()
+    private val entityUid =
+        route.reportActivityUid ?: schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
+            Report.TABLE_ID
+        ).toString()
     private val _uiState: MutableStateFlow<ReportEditUiState> =
         MutableStateFlow(ReportEditUiState())
     val uiState: Flow<ReportEditUiState> = _uiState.asStateFlow()
@@ -97,7 +127,7 @@ class ReportEditViewModel(
             }
 
             loadingState = LoadingUiState.INDETERMINATE
-            val title = if (route.reportUid == null) {
+            val title = if (route.reportActivityUid == null) {
                 getString(resource = Res.string.add_a_new_report)
             } else {
                 getString(resource = Res.string.edit_report)
@@ -123,35 +153,64 @@ class ReportEditViewModel(
             }
         }
 
-        viewModelScope.launch {
-            if (route.reportUid != null) {
+        launchWithLoadingIndicator(
+            onShowError = { snackBarDispatcher.showSnackBar(Snack(it)) }
+        ) {
+            if (route.reportActivityUid != null) {
                 loadEntity(
                     json = json,
-                    serializer = Report.serializer(),
+                    serializer = XapiStatement.serializer(),
                     loadFn = { params ->
-                        schoolDataSource.reportDataSource.getReportAsync(
-                            loadParams = params,
-                            reportId = route.reportUid
-                        )
+                        schoolDataSource.xapiResource.statements.get(
+                            listParams = GetStatementParams(
+                                activity = route.reportActivityUid,
+                                verb = XapiVerb.ID_REPORT_QUERY_REQUEST,
+                            ),
+                            dataLoadParams = params
+                        ).map { result ->
+                            result.statements.mostRecentByTimestampOrNull()?.let {
+                                listOf(it)
+                            } ?: emptyList()
+                        }.firstOrNotLoaded()
                     },
-                    uiUpdateFn = { reportOptions ->
+                    uiUpdateFn = { entity ->
                         _uiState.update { prev ->
                             prev.copy(
-                                reportOptions = reportOptions.dataOrNull()?.reportOptions
-                                    ?: ReportOptions()
+                                statementData = entity,
+                                reportOptions = entity.dataOrNull()
+                                    ?.objectActivityOrNull()?.definition?.decodeFromExtensionOrNull(
+                                    json = json,
+                                    extensionIri = OpenEelXapiConstants.EXTENSION_REPORT_OPTIONS,
+                                    deserializer = ReportOptions.serializer()
+                                ) ?: ReportOptions(
+                                    series = listOf(
+                                        ReportSeries()
+                                    )
+                                )
                             )
                         }
                     }
                 )
             } else {
-                val newReport = ReportOptions(
+                val initialOptions = ReportOptions(
                     series = listOf(
                         ReportSeries()
                     )
                 )
+                val actor = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent
+                    ?: return@launchWithLoadingIndicator
+
+                val baseStmt = createBlankReportStatement(
+                    reportActivityId = entityUid,
+                    actor = actor,
+                    reportOptions = initialOptions,
+                    json = json
+                )
+
                 _uiState.update { prev ->
                     prev.copy(
-                        reportOptions = newReport
+                        statementData = DataReadyState(baseStmt),
+                        reportOptions = initialOptions
                     )
                 }
             }
@@ -185,131 +244,125 @@ class ReportEditViewModel(
     }
 
     fun onClickSave() {
-        viewModelScope.launch {
-            loadingState = LoadingUiState.INDETERMINATE
-            val newState = validateCurrentState()
-            _uiState.value = newState
+        _uiState.update { prev ->
+            prev.validate()
+        }
 
-            if (newState.hasErrors() || newState.reportOptions.series.isEmpty()) {
-                loadingState = LoadingUiState.NOT_LOADING
-                return@launch
-            }
+        val currentOptions = _uiState.value.reportOptions
+        if (_uiState.value.hasErrors || currentOptions.series.isEmpty()) {
+            return
+        }
 
-            try {
-                val report = Report(
-                    guid = entityUid,
-                    title = newState.reportOptions.title,
-                    reportOptions = newState.reportOptions,
-                    ownerGuid = "",
-                    lastModified = Clock.System.now(),
+        val reportStatement = _uiState.value.statementData.dataOrNull() ?: return
+        launchWithLoadingIndicator {
+            schoolDataSource.xapiResource.statements.post(
+                listOf(
+                    reportStatement.copy(
+                        id = Uuid.random(),
+                        timestamp = Clock.System.now(),
+                    )
                 )
-
-                schoolDataSource.reportDataSource.putReport(report)
-
-                if (route.reportUid == null) {
-                    _navCommandFlow.tryEmit(
-                        NavCommand.Navigate(
-                            ReportDetail(entityUid), popUpTo = route, popUpToInclusive = true
-                        )
+            )
+            if (route.reportActivityUid == null) {
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        ReportDetail(entityUid), popUpTo = route, popUpToInclusive = true
                     )
-                } else {
-                    _navCommandFlow.tryEmit(NavCommand.PopUp())
-                }
-
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        errorMessage = e.message ?: "Error updating report options"
-                    )
-                }
+                )
+            } else {
+                _navCommandFlow.tryEmit(NavCommand.PopUp())
             }
         }
     }
 
-    fun onEntityChanged(newOptions: ReportOptions) {
-        viewModelScope.launch {
-            _uiState.update { currentState ->
-                val baseUpdate = currentState.copy(
-                    reportOptions = newOptions
+    fun onEntityChanged(options: ReportOptions) {
+        val currentStmt = _uiState.value.statementData.dataOrNull() ?: return
+        val updatedActivity = currentStmt.objectActivityOrNull()?.let { activity ->
+            activity.copy(
+                definition = (activity.definition ?: XapiActivityDefinition()).encodeWithExtension(
+                    json = json,
+                    extensionIri = OpenEelXapiConstants.EXTENSION_REPORT_OPTIONS,
+                    serializer = ReportOptions.serializer(),
+                    value = options
+                ).copy(
+                    name = options.title.toStringMap()
                 )
+            )
+        } ?: currentStmt.`object`
 
-                if (!baseUpdate.submitted) {
-                    baseUpdate
-                } else {
-                    validateCurrentState().copy(
-                        reportOptions = newOptions
-                    )
-                }
+        val updatedStmt = currentStmt.copy(`object` = updatedActivity)
+
+        _uiState.update { currentState ->
+            currentState.copy(
+                reportOptions = options,
+                statementData = DataReadyState(updatedStmt)
+            ).let { state ->
+                if (state.submitted) state.validate() else state
             }
         }
+
         debouncer.launch(DEFAULT_SAVED_STATE_KEY) {
-            savedStateHandle[DEFAULT_SAVED_STATE_KEY] = json.encodeToString(newOptions)
+            savedStateHandle[DEFAULT_SAVED_STATE_KEY] =
+                json.encodeToString(XapiStatement.serializer(), updatedStmt)
         }
     }
 
-    private fun validateCurrentState(): ReportEditUiState {
-        val currentReport = _uiState.value.reportOptions
+    private fun ReportEditUiState.validate(): ReportEditUiState {
         val requiredFieldMessage = StringResourceUiText(resource = Res.string.field_required_prompt)
-        return ReportEditUiState(
+        return copy(
             submitted = true,
-            reportOptions = currentReport,
-            reportTitleError = if (currentReport.title.isEmpty()) requiredFieldMessage else null,
+            reportTitleError = if (reportOptions.title.toStringMap()
+                    .isNullOrAllBlank()
+            ) requiredFieldMessage else null,
         )
     }
 
     fun onSeriesChanged(updatedSeries: ReportSeries) {
-        onEntityChanged(
-            _uiState.value.reportOptions.let { reportOptions ->
-                reportOptions.copy(
-                    series = reportOptions.series.replace(updatedSeries) {
-                        it.reportSeriesUid == updatedSeries.reportSeriesUid
-                    }
-                )
+        val currentOptions = _uiState.value.reportOptions
+        val newOptions = currentOptions.copy(
+            series = currentOptions.series.replace(updatedSeries) {
+                it.reportSeriesUid == updatedSeries.reportSeriesUid
             }
         )
+        onEntityChanged(newOptions)
     }
 
     fun onAddSeries() {
         viewModelScope.launch {
-            _uiState.update { prev ->
-                val newUid = (prev.reportOptions.series.maxOfOrNull { it.reportSeriesUid } ?: 0) + 1
+            val currentOptions = _uiState.value.reportOptions
+            val newUid = (currentOptions.series.maxOfOrNull { it.reportSeriesUid } ?: 0) + 1
 
-                // Determine the required type based on existing series
-                val requiredType = prev.reportOptions.series.firstOrNull()?.reportSeriesYAxis?.type
+            // Determine the required type based on existing series
+            val requiredType = currentOptions.series.firstOrNull()?.reportSeriesYAxis?.type
 
-                // Find a default indicator that matches the required type (or first available if no type restriction)
-                val defaultIndicator = if (requiredType != null) {
-                    DefaultIndicators.list.firstOrNull { it.type == requiredType }
-                        ?: DefaultIndicators.list.first()
-                } else {
-                    DefaultIndicators.list.first()
-                }
-
-                prev.copy(
-                    reportOptions = prev.reportOptions.copy(
-                        series = prev.reportOptions.series + ReportSeries(
-                            reportSeriesUid = newUid,
-                            reportSeriesTitle = getString(resource = Res.string.series) + newUid,
-                            reportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
-                            reportSeriesSubGroup = null,
-                            reportSeriesYAxis = defaultIndicator // Use the type-matched default
-                        ),
-                    )
-                )
+            // Find a default indicator that matches the required type (or first available if no type restriction)
+            val defaultIndicator = if (requiredType != null) {
+                DefaultIndicators.list.firstOrNull { it.type == requiredType }
+                    ?: DefaultIndicators.list.first()
+            } else {
+                DefaultIndicators.list.first()
             }
+
+            val newOptions = currentOptions.copy(
+                series = currentOptions.series + ReportSeries(
+                    reportSeriesUid = newUid,
+                    reportSeriesTitle = getString(resource = Res.string.series) + newUid,
+                    reportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
+                    reportSeriesYAxis = defaultIndicator
+                ),
+            )
+            onEntityChanged(newOptions)
         }
     }
 
     fun onRemoveSeries(seriesId: Int) {
-        _uiState.update { prev ->
-            val updatedSeriesList =
-                prev.reportOptions.series.filterNot { it.reportSeriesUid == seriesId }
-            prev.copy(
-                reportOptions = prev.reportOptions.copy(
-                    series = updatedSeriesList
-                )
-            )
-        }
+        val currentOptions = _uiState.value.reportOptions
+        val updatedSeriesList =
+            currentOptions.series.filterNot { it.reportSeriesUid == seriesId }
+        val newOptions = currentOptions.copy(
+            series = updatedSeriesList
+        )
+        onEntityChanged(newOptions)
     }
 
     fun onAddFilter(seriesId: Int) {
@@ -331,51 +384,41 @@ class ReportEditViewModel(
     }
 
     private fun onFilterChanged(newFilter: ReportFilter?) {
-        _uiState.update { prevState ->
-            val updatedSeries = prevState.reportOptions.series.map { series ->
-                if (series.reportSeriesUid == newFilter?.reportFilterSeriesUid) {
-                    val currentFilters = series.reportSeriesFilters.orEmpty()
-                    val updatedFilters = currentFilters.replaceOrAppend(
-                        element = newFilter,
-                        replacePredicate = { it.reportFilterUid == newFilter.reportFilterUid }
-                    )
-                    series.copy(reportSeriesFilters = updatedFilters)
-                } else {
-                    series
-                }
+        val currentOptions = _uiState.value.reportOptions
+        val updatedSeries = currentOptions.series.map { series ->
+            if (series.reportSeriesUid == newFilter?.reportFilterSeriesUid) {
+                val currentFilters = series.reportSeriesFilters.orEmpty()
+                val updatedFilters = currentFilters.replaceOrAppend(
+                    element = newFilter,
+                    replacePredicate = { it.reportFilterUid == newFilter.reportFilterUid }
+                )
+                series.copy(reportSeriesFilters = updatedFilters)
+            } else {
+                series
             }
-
-            prevState.copy(
-                reportOptions = prevState.reportOptions.copy(series = updatedSeries)
-            )
         }
-        onEntityChanged(_uiState.value.reportOptions)
+
+        val newOptions = currentOptions.copy(series = updatedSeries)
+        onEntityChanged(newOptions)
     }
 
     fun onRemoveFilter(index: Int, seriesId: Int) {
-        _uiState.update { prev ->
-            val updatedSeriesList = prev.reportOptions.series.map { series ->
-                if (series.reportSeriesUid == seriesId) {
-                    val updatedFilters = series.reportSeriesFilters?.toMutableList()?.apply {
-                        removeAt(index)
-                    }
-                    series.copy(reportSeriesFilters = updatedFilters)
-                } else {
-                    series
+        val currentOptions = _uiState.value.reportOptions
+        val updatedSeriesList = currentOptions.series.map { series ->
+            if (series.reportSeriesUid == seriesId) {
+                val updatedFilters = series.reportSeriesFilters?.toMutableList()?.apply {
+                    removeAt(index)
                 }
+                series.copy(reportSeriesFilters = updatedFilters)
+            } else {
+                series
             }
-
-            prev.copy(
-                reportOptions = prev.reportOptions.copy(
-                    series = updatedSeriesList
-                )
-            )
         }
-    }
 
-    fun ReportEditUiState.hasErrors(): Boolean {
-        if (!submitted) return false
-        return reportTitleError != null
+        val newOptions = currentOptions.copy(
+            series = updatedSeriesList
+        )
+        onEntityChanged(newOptions)
     }
 
     companion object {

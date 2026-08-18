@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import kotlin.Boolean
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.rememberNavController
@@ -58,12 +59,14 @@ import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.continue_using_fingerprint_or
 import world.respect.shared.generated.resources.people
+import world.respect.shared.generated.resources.reports
 import world.respect.shared.navigation.AccountList
 import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.ClazzList
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonList
+import world.respect.shared.navigation.Report
 import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.resources.getUiTextString
 import world.respect.shared.viewmodel.app.appstate.AppUiState
@@ -113,6 +116,13 @@ val APP_TOP_LEVEL_NAV_ITEMS = listOf(
         label = Res.string.people,
         routeName = "$routeNamePrefix.PersonList",
         testTag = "nav_people",
+    ),
+    TopNavigationItem(
+        destRoute = Report,
+        icon = Icons.Filled.BarChart,
+        label = Res.string.reports,
+        routeName = "$routeNamePrefix.Report",
+        testTag = "nav_reports",
     ),
 )
 val APP_TOP_LEVEL_NAV_ITEMS_FOR_CHILD = listOf(

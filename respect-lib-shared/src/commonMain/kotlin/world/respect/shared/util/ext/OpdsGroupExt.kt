@@ -1,7 +1,7 @@
 package world.respect.shared.util.ext
 
 import world.respect.lib.opds.model.OpdsGroup
-import world.respect.shared.viewmodel.catalog.feededit.OpdsGroupType
+import world.respect.shared.viewmodel.catalog.opdsfeededit.OpdsGroupType
 
 val OpdsGroup.idOrNull: String?
     get() = this.metadata.identifier?.toString()

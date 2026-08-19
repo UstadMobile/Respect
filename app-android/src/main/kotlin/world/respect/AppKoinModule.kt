@@ -217,7 +217,7 @@ import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.catalog.publicationdetail.PublicationDetailViewModel
-import world.respect.shared.viewmodel.catalog.feeddetail.OpdsFeedDetailViewModel
+import world.respect.shared.viewmodel.catalog.opdsfeeddetail.OpdsFeedDetailViewModel
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
@@ -265,10 +265,10 @@ import java.io.File
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
-import world.respect.shared.viewmodel.catalog.feededit.OpdsFeedEditViewModel
-import world.respect.shared.viewmodel.playlists.collections.externallink.ExternalLinkViewModel
-import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListViewModel
-import world.respect.shared.viewmodel.playlists.collections.share.PlaylistShareViewModel
+import world.respect.shared.viewmodel.catalog.opdsfeededit.OpdsFeedEditViewModel
+import world.respect.shared.viewmodel.catalog.opdsfeededitaddlink.OpdsFeedEditAddLinkViewModel
+import world.respect.shared.viewmodel.catalog.opdsfeedlist.OpdsFeedListViewModel
+import world.respect.shared.viewmodel.catalog.opdsfeedshare.OpdsFeedShareViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
@@ -288,7 +288,7 @@ import world.respect.shared.viewmodel.statement.detail.RawStatementViewModel
 import world.respect.shared.viewmodel.statement.detail.StatementDetailViewModel
 import world.respect.shared.viewmodel.statement.list.StatementListViewModel
 import world.respect.shared.domain.xapi.xapinanohttpd.XapiResourceProviderAndroid
-import world.respect.shared.viewmodel.bookmark.BookmarkListViewModel
+import world.respect.shared.viewmodel.catalog.bookmark.BookmarkListViewModel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -442,10 +442,10 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
-    viewModelOf(::PlaylistListViewModel)
+    viewModelOf(::OpdsFeedListViewModel)
     viewModelOf(::OpdsFeedEditViewModel)
-    viewModelOf(::ExternalLinkViewModel)
-    viewModelOf(::PlaylistShareViewModel)
+    viewModelOf(::OpdsFeedEditAddLinkViewModel)
+    viewModelOf(::OpdsFeedShareViewModel)
 
     viewModelOf(::StatementListViewModel)
     viewModelOf(::StatementDetailViewModel)

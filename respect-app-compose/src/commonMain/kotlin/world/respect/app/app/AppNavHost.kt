@@ -13,7 +13,7 @@ import world.respect.app.view.apps.list.AppListScreen
 import world.respect.app.view.assignment.detail.AssignmentDetailScreen
 import world.respect.app.view.assignment.edit.AssignmentEditScreen
 import world.respect.app.view.assignment.list.AssignmentListScreen
-import world.respect.app.view.bookmark.BookmarkListScreen
+import world.respect.app.view.catalog.bookmark.BookmarkListScreen
 import world.respect.app.view.clazz.detail.ClazzDetailScreen
 import world.respect.app.view.clazz.edit.ClazzEditScreen
 import world.respect.app.view.clazz.list.ClazzListScreen
@@ -21,7 +21,7 @@ import world.respect.app.view.enrollment.edit.EnrollmentEditScreen
 import world.respect.app.view.enrollment.list.EnrollmentListScreen
 import world.respect.app.view.home.HomeScreen
 import world.respect.app.view.catalog.publicationdetail.PublicationDetailScreen
-import world.respect.app.view.catalog.feeddetail.OpdsFeedDetailScreen
+import world.respect.app.view.catalog.opdsfeeddetail.OpdsFeedDetailScreen
 import world.respect.app.view.manageuser.accountlist.AccountListScreen
 import world.respect.app.view.manageuser.acceptinvite.AcceptInviteScreen
 import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
@@ -48,10 +48,10 @@ import world.respect.app.view.person.passkeyList.PasskeyListScreen
 import world.respect.app.view.person.qrcode.InviteQrScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetPasswordScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetUsernameScreen
-import world.respect.app.view.playlists.collections.externallink.ExternalLinkScreen
-import world.respect.app.view.catalog.feededit.OpdsFeedEditScreen
-import world.respect.app.view.playlists.collections.list.PlaylistListScreen
-import world.respect.app.view.playlists.collections.share.PlaylistShareScreen
+import world.respect.app.view.catalog.opdsfeededitaddlink.OpdsFeedEditAddLinkScreen
+import world.respect.app.view.catalog.opdsfeededit.OpdsFeedEditScreen
+import world.respect.app.view.catalog.opdsfeedlist.OpdsFeedListScreen
+import world.respect.app.view.catalog.opdsfeedshare.PlaylistShareScreen
 import world.respect.app.view.report.detail.ReportDetailScreen
 import world.respect.app.view.report.edit.ReportEditScreen
 import world.respect.app.view.report.filteredit.ReportFilterEditScreen
@@ -595,7 +595,7 @@ fun AppNavHost(
         }
 
         composable<PlaylistList> {
-            PlaylistListScreen(
+            OpdsFeedListScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,
@@ -619,7 +619,7 @@ fun AppNavHost(
             )
         }
         composable<ExternalLinkEdit> {
-            ExternalLinkScreen(
+            OpdsFeedEditAddLinkScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,
                     navController = respectNavController,

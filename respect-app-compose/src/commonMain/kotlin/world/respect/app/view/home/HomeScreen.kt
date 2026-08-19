@@ -15,8 +15,8 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.view.apps.launcher.AppLauncherScreen
-import world.respect.app.view.bookmark.BookmarkListScreen
-import world.respect.app.view.playlists.collections.list.PlaylistListScreen
+import world.respect.app.view.catalog.bookmark.BookmarkListScreen
+import world.respect.app.view.catalog.opdsfeedlist.OpdsFeedListScreen
 import world.respect.app.viewmodel.respectViewModel
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.apps
@@ -24,7 +24,6 @@ import world.respect.shared.generated.resources.bookmarks
 import world.respect.shared.generated.resources.playlists
 import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.viewmodel.app.appstate.AppUiState
-import world.respect.shared.viewmodel.playlists.collections.list.PlaylistListViewModel
 
 enum class HomeScreenTabs(val label: StringResource) {
     APPS(Res.string.apps),
@@ -87,7 +86,7 @@ fun HomeScreen(
                 }
 
                 HomeScreenTabs.PLAYLISTS -> {
-                    PlaylistListScreen(
+                    OpdsFeedListScreen(
                         viewModel = respectViewModel(
                             onSetAppUiState = onSetAppUiState,
                             navController = respectNavController

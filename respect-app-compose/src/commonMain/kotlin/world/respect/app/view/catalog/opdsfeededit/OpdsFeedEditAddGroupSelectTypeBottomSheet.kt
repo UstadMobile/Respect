@@ -23,8 +23,8 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.choose_section_type
 import world.respect.shared.generated.resources.learning_item_section
 import world.respect.shared.generated.resources.learning_item_section_description
-import world.respect.shared.generated.resources.playlist_section
-import world.respect.shared.generated.resources.playlist_section_description
+import world.respect.shared.generated.resources.collections_section
+import world.respect.shared.generated.resources.collection_section_description
 import world.respect.shared.viewmodel.catalog.opdsfeededit.OpdsGroupType
 
 
@@ -44,12 +44,12 @@ fun OpdsFeedEditAddGroupSelectTypeBottomSheet(
         HorizontalDivider()
 
         ListItem(
-            headlineContent = { Text(stringResource(Res.string.playlist_section)) },
-            supportingContent = { Text(stringResource(Res.string.playlist_section_description)) },
+            headlineContent = { Text(stringResource(Res.string.collections_section)) },
+            supportingContent = { Text(stringResource(Res.string.collection_section_description)) },
             leadingContent = {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.PlaylistPlay,
-                    contentDescription = stringResource(Res.string.playlist_section),
+                    contentDescription = stringResource(Res.string.collections_section),
                 )
             },
             modifier = Modifier

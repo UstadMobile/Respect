@@ -21,7 +21,7 @@ import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
 import world.respect.shared.domain.sharelink.LaunchSendSmsUseCase
 import world.respect.shared.domain.sharelink.LaunchShareLinkUseCase
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.share_playlist
+import world.respect.shared.generated.resources.share_collection
 import world.respect.shared.navigation.EnterLink
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PlaylistShare
@@ -63,7 +63,7 @@ class OpdsFeedShareViewModel(
     init {
         _appUiState.update {
             it.copy(
-                title = Res.string.share_playlist.asUiText(),
+                title = Res.string.share_collection.asUiText(),
                 searchState = AppBarSearchUiState(visible = false),
                 showBackButton = true,
                 hideBottomNavigation = true,
@@ -129,7 +129,7 @@ class OpdsFeedShareViewModel(
         viewModelScope.launch {
             launchSendEmailUseCase(
                 LaunchSendEmailUseCase.LaunchSendEmailRequest(
-                    subject = getString(Res.string.share_playlist),
+                    subject = getString(Res.string.share_collection),
                     body = _uiState.value.shareUrl,
                     to = null,
                 )

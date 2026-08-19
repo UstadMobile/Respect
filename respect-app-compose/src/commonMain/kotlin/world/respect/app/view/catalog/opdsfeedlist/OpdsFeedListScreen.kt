@@ -34,9 +34,9 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.all
 import world.respect.shared.generated.resources.created_by
 import world.respect.shared.generated.resources.empty
-import world.respect.shared.generated.resources.my_playlists
-import world.respect.shared.generated.resources.no_playlist_yet
-import world.respect.shared.generated.resources.no_playlist_yet_description
+import world.respect.shared.generated.resources.my_collections
+import world.respect.shared.generated.resources.no_collections_yet
+import world.respect.shared.generated.resources.no_collections_yet_description
 import world.respect.shared.generated.resources.sections_and_items
 import world.respect.shared.viewmodel.catalog.opdsfeedlist.OpdsFeedListFilter
 import world.respect.shared.viewmodel.catalog.opdsfeedlist.OpdsFeedListUiState
@@ -79,7 +79,7 @@ fun OpdsFeedListScreen(
                 FilterChip(
                     selected = uiState.activeFilter == OpdsFeedListFilter.MY_PLAYLISTS,
                     onClick = { onClickFilter(OpdsFeedListFilter.MY_PLAYLISTS) },
-                    label = { Text(stringResource(Res.string.my_playlists)) },
+                    label = { Text(stringResource(Res.string.my_collections)) },
                 )
             }
         }
@@ -92,13 +92,13 @@ fun OpdsFeedListScreen(
             ) {
                 Image(
                     painter = painterResource(Res.drawable.empty),
-                    contentDescription = stringResource(Res.string.no_playlist_yet),
+                    contentDescription = stringResource(Res.string.no_collections_yet),
                     modifier = Modifier.size(200.dp),
                     contentScale = ContentScale.Fit,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(stringResource(Res.string.no_playlist_yet))
-                Text(stringResource(Res.string.no_playlist_yet_description))
+                Text(stringResource(Res.string.no_collections_yet))
+                Text(stringResource(Res.string.no_collections_yet_description))
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {

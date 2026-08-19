@@ -31,7 +31,7 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.ext.feedIconLinkOrNull
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign
-import world.respect.shared.generated.resources.copy_playlist
+import world.respect.shared.generated.resources.remix_collection
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.share
 import world.respect.shared.viewmodel.catalog.opdsfeeddetail.OpdsFeedDetailUiState
@@ -97,7 +97,7 @@ fun OpdsFeedDetailHeader(
 
                 RespectQuickActionButton(
                     modifier = Modifier.testTag("copy_btn"),
-                    labelText = stringResource(Res.string.copy_playlist),
+                    labelText = stringResource(Res.string.remix_collection),
                     iconContent = {
                         Icon(Icons.Filled.ContentCopy, null)
                     },

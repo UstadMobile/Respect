@@ -23,7 +23,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_from_a_link
 import world.respect.shared.generated.resources.add_new
 import world.respect.shared.generated.resources.home
-import world.respect.shared.generated.resources.playlist
+import world.respect.shared.generated.resources.collection
 import world.respect.shared.navigation.EnterLink
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.OpdsFeedDetail
@@ -112,7 +112,7 @@ class OpdsFeedListViewModel(
                         title = Res.string.home.asUiText(),
                         expandableFabState = ExpandableFabUiState(
                             visible = isTeacherOrAdmin && !route.resultExpected,
-                            text = Res.string.playlist.asUiText(),
+                            text = Res.string.collection.asUiText(),
                             items = listOf(
                                 ExpandableFabItem(
                                     icon = ExpandableFabIcon.ADD,

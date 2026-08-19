@@ -22,11 +22,11 @@ import world.respect.lib.opds.model.OpdsGroup
 import world.respect.libutil.ext.moveItem
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.add_playlist
-import world.respect.shared.generated.resources.copy_playlist
-import world.respect.shared.generated.resources.edit_playlist
+import world.respect.shared.generated.resources.add_collection
+import world.respect.shared.generated.resources.remix_collection
+import world.respect.shared.generated.resources.edit_collection
 import world.respect.shared.generated.resources.learning_item_section
-import world.respect.shared.generated.resources.playlist_section
+import world.respect.shared.generated.resources.collections_section
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.ExternalLinkEdit
@@ -126,9 +126,9 @@ class OpdsFeedEditViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 title = when {
-                    route.isCopy -> Res.string.copy_playlist.asUiText()
-                    route.url == null -> Res.string.add_playlist.asUiText()
-                    else -> Res.string.edit_playlist.asUiText()
+                    route.isCopy -> Res.string.remix_collection.asUiText()
+                    route.url == null -> Res.string.add_collection.asUiText()
+                    else -> Res.string.edit_collection.asUiText()
                 },
                 userAccountIconVisible = false,
                 actionBarButtonState = ActionBarButtonUiState(
@@ -266,7 +266,7 @@ class OpdsFeedEditViewModel(
     fun onClickAddGroupType(groupType: OpdsGroupType) {
         viewModelScope.launch {
             val sectionTitle = when (groupType) {
-                OpdsGroupType.NAVIGATION -> getString(Res.string.playlist_section)
+                OpdsGroupType.NAVIGATION -> getString(Res.string.collections_section)
                 OpdsGroupType.PUBLICATION -> getString(Res.string.learning_item_section)
             }
 

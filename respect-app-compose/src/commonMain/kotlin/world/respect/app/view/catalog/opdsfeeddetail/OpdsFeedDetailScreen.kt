@@ -40,7 +40,7 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.copy
-import world.respect.shared.generated.resources.copy_of_playlist
+import world.respect.shared.generated.resources.copy_of
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.make_a_copy
 import world.respect.shared.generated.resources.name
@@ -58,7 +58,7 @@ fun OpdsFeedDetailScreen(
     viewModel: OpdsFeedDetailViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val copyOfTemplate = stringResource(Res.string.copy_of_playlist)
+    val copyOfTemplate = stringResource(Res.string.copy_of)
 
     LaunchedEffect(uiState.showCopyDialog) {
         if (uiState.showCopyDialog) {

@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.learningunit.detail
+package world.respect.shared.viewmodel.catalog.publicationdetail
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -30,7 +30,7 @@ import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.isReadyAndSettled
 import world.respect.lib.dataloadstate.ext.map
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.findLaunchableAppLink
 import world.respect.lib.opds.model.findLicenseLink
 import world.respect.lib.opds.model.findSelfLinks
@@ -48,7 +48,7 @@ import world.respect.shared.domain.school.LaunchCustomTabUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.AssignmentEdit
-import world.respect.shared.navigation.LearningUnitDetail
+import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.exception.getUiTextOrGeneric
 import world.respect.shared.util.ext.asUiText
@@ -56,11 +56,11 @@ import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
-import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
+import world.respect.shared.viewmodel.catalog.PublicationsSelection
 
-data class LearningUnitDetailUiState(
-    val learningUnit: DataLoadState<OpdsPublication> = DataLoadingState(),
-    val appDetail: DataLoadState<OpdsPublication> = DataLoadingState(),
+data class PublicationDetailUiState(
+    val learningUnit: DataLoadState<Publication> = DataLoadingState(),
+    val appDetail: DataLoadState<Publication> = DataLoadingState(),
     val pinState: PublicationPinState = PublicationPinState(
         PublicationPinState.Status.NOT_PINNED, 0, 0
     ),
@@ -79,7 +79,7 @@ data class LearningUnitDetailUiState(
         get() = bookmarks.dataOrNull()?.statements?.isNotEmpty() == true
 }
 
-class LearningUnitDetailViewModel(
+class PublicationDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val ustadCache: UstadCache,
     val accountManager: RespectAccountManager,
@@ -89,11 +89,11 @@ class LearningUnitDetailViewModel(
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
-    private val _uiState = MutableStateFlow(LearningUnitDetailUiState())
+    private val _uiState = MutableStateFlow(PublicationDetailUiState())
 
     val uiState = _uiState.asStateFlow()
 
-    private val route: LearningUnitDetail = savedStateHandle.toRoute()
+    private val route: PublicationDetail = savedStateHandle.toRoute()
 
     private val schoolDataSource: SchoolDataSource by inject()
 
@@ -260,7 +260,7 @@ class LearningUnitDetailViewModel(
             NavCommand.Navigate(
                 destination = AssignmentEdit.create(
                     assignmentActivityId = null,
-                    learningUnitSelected = OpdsPublicationsSelection(
+                    learningUnitSelected = PublicationsSelection(
                         url = route.learningUnitManifestUrl,
                         selectedPublications = listOf(publicationVal),
                     )
@@ -269,7 +269,7 @@ class LearningUnitDetailViewModel(
         )
     }
 
-    fun onClickApp(app: OpdsPublication) {
+    fun onClickApp(app: Publication) {
         val url = app.findSelfLinks().firstOrNull()?.href ?: return
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
@@ -278,7 +278,7 @@ class LearningUnitDetailViewModel(
         )
     }
 
-    fun onClickLicense(app: OpdsPublication) {
+    fun onClickLicense(app: Publication) {
         val licenseHref = app.findLicenseLink()?.href ?: return
 
         try {

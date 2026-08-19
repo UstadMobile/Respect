@@ -5,14 +5,14 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.opds.adapters.asEntities
 import world.respect.datalayer.db.school.opds.adapters.asModel
 import world.respect.datalayer.shared.XXHashUidNumberMapper
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class TestOpdsPublicationEntityAdapter {
+class TestPublicationEntityAdapter {
 
     @Test
     fun givenConvertedToFromEntitiesWillBeEqual() {
@@ -21,7 +21,7 @@ class TestOpdsPublicationEntityAdapter {
         }
 
         val publication = json.decodeFromString(
-            OpdsPublication.serializer(),
+            Publication.serializer(),
             this::class.java.getResourceAsStream(
                 "/world/respect/datalayer/db/opds/adapters/lesson001.json"
             )!!.bufferedReader().use { it.readText() }

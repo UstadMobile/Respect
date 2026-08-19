@@ -45,7 +45,7 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.findIcons
 import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.shared.generated.resources.Res
@@ -71,8 +71,8 @@ fun AppLauncherScreen(
 @Composable
 fun AppLauncherScreen(
     uiState: AppLauncherUiState,
-    onClickApp: (DataLoadState<OpdsPublication>) -> Unit,
-    onClickRemove: (DataLoadState<OpdsPublication>) -> Unit,
+    onClickApp: (DataLoadState<Publication>) -> Unit,
+    onClickRemove: (DataLoadState<Publication>) -> Unit,
 ) {
     val apps = uiState.apps.dataOrNull() ?: emptyList()
 
@@ -153,7 +153,7 @@ fun AppLauncherScreen(
 
 @Composable
 fun AppGridItem(
-    app: DataLoadState<OpdsPublication>,
+    app: DataLoadState<Publication>,
     clickEnabled: Boolean,
     onClickApp: () -> Unit,
     onClickRemove: () -> Unit,

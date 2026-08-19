@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.learningunit.editfeed
+package world.respect.shared.viewmodel.catalog.feededit
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -33,7 +33,7 @@ import world.respect.shared.navigation.ExternalLinkEdit
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.OpdsFeedDetail
-import world.respect.shared.navigation.PlaylistEdit
+import world.respect.shared.navigation.OpdsFeedEdit
 import world.respect.shared.navigation.RespectAppLauncher
 import world.respect.shared.navigation.RouteResultDest
 import world.respect.shared.resources.UiText
@@ -43,9 +43,9 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
-import world.respect.shared.viewmodel.learningunit.OpdsFeedSelection
-import world.respect.shared.viewmodel.learningunit.OpdsPickType
-import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
+import world.respect.shared.viewmodel.catalog.OpdsFeedSelection
+import world.respect.shared.viewmodel.catalog.OpdsPickType
+import world.respect.shared.viewmodel.catalog.PublicationsSelection
 import kotlin.uuid.Uuid
 
 /**
@@ -111,7 +111,7 @@ class OpdsFeedEditViewModel(
     private val schoolDataSource: SchoolDataSource by inject()
     private val makePlaylistOpdsFeedUseCase: MakePlaylistOpdsFeedUseCase by inject()
 
-    private val route: PlaylistEdit = savedStateHandle.toRoute()
+    private val route: OpdsFeedEdit = savedStateHandle.toRoute()
 
     private val _uiState = MutableStateFlow(OpdsFeedEditUiState())
 
@@ -127,7 +127,7 @@ class OpdsFeedEditViewModel(
             prev.copy(
                 title = when {
                     route.isCopy -> Res.string.copy_playlist.asUiText()
-                    route.playlistUrl == null -> Res.string.add_playlist.asUiText()
+                    route.url == null -> Res.string.add_playlist.asUiText()
                     else -> Res.string.edit_playlist.asUiText()
                 },
                 userAccountIconVisible = false,
@@ -143,13 +143,13 @@ class OpdsFeedEditViewModel(
         launchWithLoadingIndicator(
             onShowError = { snackBarDispatcher.showSnackBar(Snack(it)) }
         ) {
-            if(route.playlistUrl != null) {
+            if(route.url != null) {
                 loadEntity(
                     json = json,
                     serializer = OpdsFeed.serializer(),
                     loadFn = { params ->
                         schoolDataSource.opdsFeedDataSource.getByUrl(
-                            url = route.playlistUrl,
+                            url = route.url,
                             params = params,
                         )
                     },
@@ -174,7 +174,7 @@ class OpdsFeedEditViewModel(
             launch {
                 resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
                     val sectionIndex = pendingAddItemGroupIndex ?: return@collect
-                    val publicationSelection = result.result as? OpdsPublicationsSelection ?: return@collect
+                    val publicationSelection = result.result as? PublicationsSelection ?: return@collect
 
                     pendingAddItemGroupIndex = null
 
@@ -508,7 +508,7 @@ class OpdsFeedEditViewModel(
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
                     destination = OpdsFeedDetail.create(opdsFeedUrl = savedPlaylistUrl),
-                    popUpTo = PlaylistEdit.create(),
+                    popUpTo = OpdsFeedEdit.create(),
                     popUpToInclusive = true,
                 )
             )

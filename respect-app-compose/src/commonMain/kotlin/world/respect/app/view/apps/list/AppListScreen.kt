@@ -27,7 +27,7 @@ import world.respect.app.components.langMapString
 import world.respect.shared.viewmodel.apps.list.AppListUiState
 import world.respect.shared.viewmodel.apps.list.AppListViewModel
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.findIcons
 
 @Composable
@@ -46,7 +46,7 @@ fun AppListScreen(
 fun AppListScreen(
     uiState: AppListUiState,
     onClickAddLink: () -> Unit,
-    onClickApp: (OpdsPublication) -> Unit
+    onClickApp: (Publication) -> Unit
 ) {
     val appPublications = uiState.appList.dataOrNull() ?: emptyList()
     LazyColumn(

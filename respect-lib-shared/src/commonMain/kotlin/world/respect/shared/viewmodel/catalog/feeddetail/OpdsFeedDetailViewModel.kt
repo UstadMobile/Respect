@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.learningunit.list
+package world.respect.shared.viewmodel.catalog.feeddetail
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -37,11 +37,11 @@ import world.respect.shared.generated.resources.language
 import world.respect.shared.generated.resources.not_found
 import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.AssignmentEdit
-import world.respect.shared.navigation.LearningUnitDetail
+import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.OpdsFeedDetail
-import world.respect.shared.navigation.PlaylistEdit
+import world.respect.shared.navigation.OpdsFeedEdit
 import world.respect.shared.navigation.PlaylistShare
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.SortOrderOption
@@ -54,9 +54,9 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
 import world.respect.shared.viewmodel.assignment.edit.AssignmentEditViewModel
-import world.respect.shared.viewmodel.learningunit.OpdsFeedSelection
-import world.respect.shared.viewmodel.learningunit.OpdsPickType
-import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
+import world.respect.shared.viewmodel.catalog.OpdsFeedSelection
+import world.respect.shared.viewmodel.catalog.OpdsPickType
+import world.respect.shared.viewmodel.catalog.PublicationsSelection
 
 data class OpdsFeedDetailUiState(
     val feed: DataLoadState<OpdsFeed> = DataLoadingState(),
@@ -204,7 +204,7 @@ class OpdsFeedDetailViewModel(
                 resultReturner.sendResultIfResultExpected(
                     route = route,
                     navCommandFlow = _navCommandFlow,
-                    result = OpdsPublicationsSelection(
+                    result = PublicationsSelection(
                         url = route.opdsFeedUrl,
                         selectedPublications = listOf(publication),
                     )
@@ -221,7 +221,7 @@ class OpdsFeedDetailViewModel(
                 //Needs to handle external link.
                 _navCommandFlow.tryEmit(
                     value = NavCommand.Navigate(
-                        LearningUnitDetail.create(
+                        PublicationDetail.create(
                             learningUnitManifestUrl = manifestUrl,
                             refererUrl = route.opdsFeedUrl,
                             expectedIdentifier = publication.metadata.identifier?.toString(),
@@ -264,7 +264,7 @@ class OpdsFeedDetailViewModel(
                 resultReturner.sendResultIfResultExpected(
                     route = route,
                     navCommandFlow = _navCommandFlow,
-                    result = OpdsPublicationsSelection(
+                    result = PublicationsSelection(
                         url = route.opdsFeedUrl,
                         selectedPublications = uiState.value.feed.dataOrNull()?.getPublicationsByIndexes(
                             currentState.selectedPublications
@@ -467,7 +467,7 @@ class OpdsFeedDetailViewModel(
             NavCommand.Navigate(
                 AssignmentEdit.create(
                     assignmentActivityId = null,
-                    learningUnitSelected = OpdsPublicationsSelection(
+                    learningUnitSelected = PublicationsSelection(
                         url = route.opdsFeedUrl,
                         selectedPublications = uiState.value.feed.dataOrNull()?.let { feed ->
                             feed.publications.orEmpty() + feed.groups.orEmpty().flatMap {
@@ -522,7 +522,7 @@ class OpdsFeedDetailViewModel(
 
     fun onClickEdit() {
         _navCommandFlow.tryEmit(
-            NavCommand.Navigate(PlaylistEdit.create(playlistUrl = route.opdsFeedUrl))
+            NavCommand.Navigate(OpdsFeedEdit.create(playlistUrl = route.opdsFeedUrl))
         )
     }
 

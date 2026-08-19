@@ -1,4 +1,4 @@
-package world.respect.app.view.learningunit.editfeed
+package world.respect.app.view.catalog.feededit
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert

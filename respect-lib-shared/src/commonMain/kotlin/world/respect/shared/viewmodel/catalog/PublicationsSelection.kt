@@ -1,8 +1,8 @@
-package world.respect.shared.viewmodel.learningunit
+package world.respect.shared.viewmodel.catalog
 
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 
 /**
  * Represents learning unit(s) (OpdsPublication(s)) that have been selected on one screen to be
@@ -16,7 +16,7 @@ import world.respect.lib.opds.model.OpdsPublication
  * @param selectedPublications the selected publications.
  */
 @Serializable
-data class OpdsPublicationsSelection(
+data class PublicationsSelection(
     val url: Url,
-    val selectedPublications: List<OpdsPublication>,
+    val selectedPublications: List<Publication>,
 )

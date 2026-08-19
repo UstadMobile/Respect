@@ -1,4 +1,4 @@
-package world.respect.app.view.learningunit.list
+package world.respect.app.view.catalog.feeddetail
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable

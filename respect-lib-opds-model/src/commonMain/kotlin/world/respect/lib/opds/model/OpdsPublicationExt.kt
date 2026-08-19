@@ -17,7 +17,7 @@ const val REL_LAUNCHABLE_APP = "https://id.openeel.org/rel/launchable-app"
  */
 const val REL_TINCAN_XML = "https://id.openeel.org/rel/tincanxml"
 
-fun OpdsPublication.findLearningUnitAcquisitionLinks(): List<ReadiumLink> {
+fun Publication.findLearningUnitAcquisitionLinks(): List<ReadiumLink> {
     return links.filter { link ->
         link.rel?.any {
             it.startsWith("http://opds-spec.org/acquisition") } == true &&
@@ -26,44 +26,44 @@ fun OpdsPublication.findLearningUnitAcquisitionLinks(): List<ReadiumLink> {
     }
 }
 
-fun OpdsPublication.findSelfLinks(): List<ReadiumLink> {
+fun Publication.findSelfLinks(): List<ReadiumLink> {
     return links.filter {
         it.rel?.contains("self") == true
     }
 }
 
-fun OpdsPublication.findHighlightCardLinks(): List<ReadiumLink> {
+fun Publication.findHighlightCardLinks(): List<ReadiumLink> {
     return links.filter {
         it.rel?.contains("https://id.openeel.org/rel/app-highlight-card") == true
     }
 }
 
-fun OpdsPublication.findLicenseLink(): ReadiumLink? =
+fun Publication.findLicenseLink(): ReadiumLink? =
     links.firstOrNull { it.rel?.contains("license") == true }
 
-fun OpdsPublication.findTermsOfServiceLink(): ReadiumLink? =
+fun Publication.findTermsOfServiceLink(): ReadiumLink? =
     links.firstOrNull { it.rel?.contains("terms-of-service") == true }
 
-fun OpdsPublication.findGooglePlayLink(): ReadiumLink? =
+fun Publication.findGooglePlayLink(): ReadiumLink? =
     links.firstOrNull { it.rel?.contains("https://id.openeel.org/rel/appstore-android") == true }
 
-fun OpdsPublication.findCollection(): ReadiumLink? =
+fun Publication.findCollection(): ReadiumLink? =
     links.firstOrNull {
         it.rel?.contains("collection") == true
     } ?: respectAppManifestDefaultLessonList()
 
 
-fun OpdsPublication.findLaunchableAppLink(): ReadiumLink? =
+fun Publication.findLaunchableAppLink(): ReadiumLink? =
     links.firstOrNull { it.rel?.contains(REL_LAUNCHABLE_APP) == true }
 
-fun OpdsPublication.findTinCanXmlLink(): ReadiumLink? =
+fun Publication.findTinCanXmlLink(): ReadiumLink? =
     links.firstOrNull { it.rel?.contains(REL_TINCAN_XML) == true }
 
-fun OpdsPublication.findIcons(): List<ReadiumLink> {
+fun Publication.findIcons(): List<ReadiumLink> {
     return images ?: emptyList()
 }
 
-fun OpdsPublication.respectAppManifestDefaultLessonList(): ReadiumLink? {
+fun Publication.respectAppManifestDefaultLessonList(): ReadiumLink? {
     return links.firstOrNull {
         REL_RESPECT_DEFAULT_CATALOG in (it.rel ?: emptyList())
     }

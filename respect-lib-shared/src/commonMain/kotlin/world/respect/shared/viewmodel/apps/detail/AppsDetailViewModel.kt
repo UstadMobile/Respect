@@ -15,7 +15,7 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.shared.navigation.AppsDetail
-import world.respect.shared.navigation.LearningUnitDetail
+import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.lib.dataloadstate.DataLoadParams
@@ -23,7 +23,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.opds.model.OpdsGroup
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.libutil.ext.resolve
@@ -57,8 +57,8 @@ import world.respect.shared.domain.license.GetLicenseLabelUseCase.LicenseLabelRe
 import world.respect.shared.domain.school.LaunchCustomTabUseCase
 
 data class AppsDetailUiState(
-    val appDetail: DataLoadState<OpdsPublication>? = null,
-    val publications: List<OpdsPublication> = emptyList(),
+    val appDetail: DataLoadState<Publication>? = null,
+    val publications: List<Publication> = emptyList(),
     val navigation: List<ReadiumLink> = emptyList(),
     val group: List<OpdsGroup> = emptyList(),
     val highlightCards: List<ReadiumLink> = emptyList(),
@@ -191,7 +191,7 @@ class AppsDetailViewModel(
         }
     }
 
-    fun onClickPublication(publication: OpdsPublication) {
+    fun onClickPublication(publication: Publication) {
         try {
             val publicationHref = publication.links.firstSelfLinkOrNull()?.href
                 ?: throw IllegalArgumentException().withUiText(Res.string.invalid_link.asUiText())
@@ -201,7 +201,7 @@ class AppsDetailViewModel(
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    LearningUnitDetail.create(
+                    PublicationDetail.create(
                         learningUnitManifestUrl = route.manifestUrl.resolve(publicationHref),
                         refererUrl = refererUrl?.let { Url(it) },
                         expectedIdentifier = publication.metadata.identifier?.toString()

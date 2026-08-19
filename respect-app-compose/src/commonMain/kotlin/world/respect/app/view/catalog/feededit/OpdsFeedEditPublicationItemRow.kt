@@ -1,5 +1,6 @@
-package world.respect.app.view.learningunit.editfeed
+package world.respect.app.view.catalog.feededit
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DragHandle
@@ -13,30 +14,30 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableListItemScope
-import world.respect.lib.opds.model.ReadiumLink
+import world.respect.app.components.langMapString
+import world.respect.lib.opds.model.Publication
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.move
 
 
 @Composable
-fun ReorderableListItemScope.OpdsFeedEditNavigationItemRow(
-    navItem: ReadiumLink,
+fun ReorderableListItemScope.PlaylistPublicationItemRow(
+    publication: Publication,
     itemIndex: Int,
     groupIndex: Int,
-    hasMoveOption: Boolean,
+    hasMovableSections: Boolean,
     onClickDelete: () -> Unit,
     onClickMove: () -> Unit,
 ) {
     ListItem(
-        modifier = Modifier.testTag("nav_item_${groupIndex}_$itemIndex")
-            ,
+        modifier = Modifier.fillMaxWidth().testTag("pub_item_${groupIndex}_$itemIndex"),
         leadingContent = {
             IconButton(
-                onClick = {},
+                onClick = { },
                 modifier = Modifier
                     .padding(start = ICON_BUTTON_DEFAULT_WIDTH.dp)
                     .draggableHandle()
-                    .testTag("nav_drag_handle_${groupIndex}_$itemIndex")
+                    .testTag("pub_drag_handle_${groupIndex}_$itemIndex")
             ) {
                 Icon(
                     imageVector = Icons.Filled.DragHandle,
@@ -44,16 +45,15 @@ fun ReorderableListItemScope.OpdsFeedEditNavigationItemRow(
                 )
             }
         },
-        headlineContent = {
-            Text(
-                text = navItem.title?.takeIf { it.isNotBlank() } ?: navItem.href,
-            )
+        headlineContent = { Text(text = langMapString(publication.metadata.title)) },
+        supportingContent = {
+            publication.metadata.description?.let { Text(text = it) }
         },
         trailingContent = {
             OpdsGroupItemMenuButton(
                 groupIndex = groupIndex,
                 itemIndex = itemIndex,
-                hasMoveOption = hasMoveOption,
+                hasMoveOption = hasMovableSections,
                 onClickDelete = onClickDelete,
                 onClickMove = onClickMove,
             )

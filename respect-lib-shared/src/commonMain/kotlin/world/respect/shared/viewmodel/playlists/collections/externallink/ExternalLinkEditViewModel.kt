@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import world.respect.lib.opds.model.LangMapStringValue
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
 import world.respect.shared.domain.externallink.ExtractWebPageMetadataUseCase
@@ -28,7 +28,7 @@ import world.respect.shared.resources.UiText
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
-import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
+import world.respect.shared.viewmodel.catalog.PublicationsSelection
 
 data class ExternalLinkUiState(
     val url: String = "",
@@ -157,7 +157,7 @@ class ExternalLinkViewModel(
             }
             return
         }
-        val publication = OpdsPublication(
+        val publication = Publication(
             metadata = ReadiumMetadata(
                 title = LangMapStringValue(state.title.trim()),
                 description = state.description.trim().takeIf { it.isNotBlank() },
@@ -180,7 +180,7 @@ class ExternalLinkViewModel(
         resultReturner.sendResult(
             NavResult(
                 key = resultDest.resultKey,
-                result = OpdsPublicationsSelection(
+                result = PublicationsSelection(
                     url = Url(state.url),
                     selectedPublications = listOf(publication),
                 ),

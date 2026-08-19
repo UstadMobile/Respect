@@ -1,9 +1,9 @@
 package world.respect.shared.util.ext
 
 import io.ktor.http.Url
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 
-fun OpdsPublication.resolve(baseUrl: Url) : OpdsPublication {
+fun Publication.resolve(baseUrl: Url) : Publication {
     return copy(
         links = links.resolveAll(baseUrl),
         images = images?.resolveAll(baseUrl),
@@ -13,7 +13,7 @@ fun OpdsPublication.resolve(baseUrl: Url) : OpdsPublication {
     )
 }
 
-fun OpdsPublication.key(
+fun Publication.key(
     indexInFeed: Int,
 ) : String {
     return metadata.identifier?.toString() ?: indexInFeed.toString()

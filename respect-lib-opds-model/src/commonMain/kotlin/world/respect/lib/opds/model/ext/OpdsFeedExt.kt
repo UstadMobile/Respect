@@ -1,20 +1,20 @@
 package world.respect.lib.opds.model.ext
 
 import world.respect.lib.opds.model.OpdsFeed
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 
 fun OpdsFeed.feedIconLinkOrNull(): ReadiumLink? {
     return links.filterByHasRel("icon").firstOrNull()
 }
 
-fun OpdsFeed.allPublications(): List<OpdsPublication> {
+fun OpdsFeed.allPublications(): List<Publication> {
     return publications.orEmpty() + groups.orEmpty().flatMap {
         it.publications.orEmpty()
     }
 }
 
-fun OpdsFeed.getPublicationByIndex(opdsFeedItemIndex: OpdsFeedItemIndex): OpdsPublication {
+fun OpdsFeed.getPublicationByIndex(opdsFeedItemIndex: OpdsFeedItemIndex): Publication {
     return if(opdsFeedItemIndex.groupIndex >= 0) {
         this.groups?.get(opdsFeedItemIndex.index)?.publications?.get(opdsFeedItemIndex.index)
             ?: throw IllegalArgumentException("No publication at index:${opdsFeedItemIndex.groupIndex}/index:${opdsFeedItemIndex.index}")
@@ -25,7 +25,7 @@ fun OpdsFeed.getPublicationByIndex(opdsFeedItemIndex: OpdsFeedItemIndex): OpdsPu
 
 fun OpdsFeed.getPublicationsByIndexes(
     indexes: Collection<OpdsFeedItemIndex>
-) : List<OpdsPublication>{
+) : List<Publication>{
     return publications?.filterIndexed { index, _ ->
         OpdsFeedItemIndex(-1, index) in indexes
     }.orEmpty() + groups?.flatMapIndexed { groupIndex: Int, group ->

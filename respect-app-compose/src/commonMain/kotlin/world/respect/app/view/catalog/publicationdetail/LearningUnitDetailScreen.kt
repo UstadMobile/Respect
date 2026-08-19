@@ -1,4 +1,4 @@
-package world.respect.app.view.opdscatalog.detail
+package world.respect.app.view.catalog.publicationdetail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -47,7 +47,7 @@ import world.respect.app.components.defaultScreenPadding
 import world.respect.app.components.langMapString
 import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.name
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign
@@ -58,17 +58,17 @@ import world.respect.shared.generated.resources.downloaded
 import world.respect.shared.generated.resources.license
 import world.respect.shared.generated.resources.open
 import world.respect.shared.generated.resources.subject
-import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailUiState
-import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
+import world.respect.shared.viewmodel.catalog.publicationdetail.PublicationDetailUiState
+import world.respect.shared.viewmodel.catalog.publicationdetail.PublicationDetailViewModel
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun LearningUnitDetailScreen(
-    viewModel: LearningUnitDetailViewModel
+fun PublicationDetailScreen(
+    viewModel: PublicationDetailViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LearningUnitDetailScreen(
+    PublicationDetailScreen(
         uiState = uiState,
         onClickOpen = viewModel::onClickOpen,
         onClickDownload = viewModel::onClickDownload,
@@ -80,14 +80,14 @@ fun LearningUnitDetailScreen(
 }
 
 @Composable
-fun LearningUnitDetailScreen(
-    uiState: LearningUnitDetailUiState,
+fun PublicationDetailScreen(
+    uiState: PublicationDetailUiState,
     onClickOpen: () -> Unit,
     onClickDownload: () -> Unit,
     onClickAssign: () -> Unit,
-    onClickApp: (OpdsPublication) -> Unit,
+    onClickApp: (Publication) -> Unit,
     onClickBookmark: () -> Unit,
-    onClickLicense: (OpdsPublication) -> Unit,
+    onClickLicense: (Publication) -> Unit,
 ) {
     RespectDataLoadHost(
         uiState.learningUnit,

@@ -1,4 +1,4 @@
-package world.respect.app.view.learningunit.list
+package world.respect.app.view.catalog.feeddetail
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.langMapString
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.classes
 import world.respect.shared.generated.resources.duration
@@ -29,8 +29,8 @@ import world.respect.shared.generated.resources.duration
 
 @Composable
 fun PublicationListItem(
-    publication: OpdsPublication,
-    onClickPublication: (OpdsPublication) -> Unit,
+    publication: Publication,
+    onClickPublication: (Publication) -> Unit,
     trailingContent: (@Composable () -> Unit)? = null,
 ) {
     ListItem(

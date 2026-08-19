@@ -8,13 +8,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
+import org.koin.core.component.getScopeId
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
-import world.respect.datalayer.school.opds.ext.selfUrl
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.shared.domain.account.RespectAccountManager
@@ -25,10 +25,11 @@ import world.respect.shared.generated.resources.add_new
 import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.playlist
 import world.respect.shared.navigation.EnterLink
-import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.PlaylistEdit
+import world.respect.shared.navigation.OpdsFeedDetail
+import world.respect.shared.navigation.OpdsFeedEdit
 import world.respect.shared.navigation.PlaylistList
+import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.ext.appbarTitleString
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
@@ -84,10 +85,7 @@ class PlaylistListViewModel(
             )
         }
 
-        val activeAccount = accountManager.activeAccount
-            ?: throw IllegalStateException(
-                "No active account when initializing PlaylistListViewModel"
-            )
+        val schoolUrl = RespectAccountScopeId.parse(scope.getScopeId()).schoolUrl
 
         viewModelScope.launch {
             accountManager.selectedAccountAndPersonFlow.collect { sessionAndPerson ->
@@ -135,7 +133,7 @@ class PlaylistListViewModel(
 
         viewModelScope.launch {
             schoolDataSource.opdsFeedDataSource.getPlaylistsAsFlow(
-                schoolUrl = activeAccount.school.self
+                schoolUrl = schoolUrl,
             ).collect { result ->
                 when (result) {
                     is DataReadyState -> _uiState.update { it.copy(playlists = result.data) }
@@ -164,7 +162,7 @@ class PlaylistListViewModel(
     }
 
     fun onClickAddNew() {
-        _navCommandFlow.tryEmit(NavCommand.Navigate(PlaylistEdit.create()))
+        _navCommandFlow.tryEmit(NavCommand.Navigate(OpdsFeedEdit.create()))
     }
 
     fun onClickAddFromLink() {

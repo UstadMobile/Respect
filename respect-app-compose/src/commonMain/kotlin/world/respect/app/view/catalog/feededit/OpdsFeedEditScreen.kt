@@ -1,4 +1,4 @@
-package world.respect.app.view.learningunit.editfeed
+package world.respect.app.view.catalog.feededit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -35,9 +35,9 @@ import world.respect.shared.generated.resources.sections
 import world.respect.shared.generated.resources.title
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.groupType
-import world.respect.shared.viewmodel.learningunit.editfeed.OpdsFeedEditUiState
-import world.respect.shared.viewmodel.learningunit.editfeed.OpdsFeedEditViewModel
-import world.respect.shared.viewmodel.learningunit.editfeed.OpdsGroupType
+import world.respect.shared.viewmodel.catalog.feededit.OpdsFeedEditUiState
+import world.respect.shared.viewmodel.catalog.feededit.OpdsFeedEditViewModel
+import world.respect.shared.viewmodel.catalog.feededit.OpdsGroupType
 
 /**
  * The width of one IconButton as per

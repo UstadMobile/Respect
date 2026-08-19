@@ -1,4 +1,4 @@
-package world.respect.app.view.learningunit.editfeed
+package world.respect.app.view.catalog.feededit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column

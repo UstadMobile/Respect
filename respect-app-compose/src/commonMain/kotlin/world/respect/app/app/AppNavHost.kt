@@ -20,8 +20,8 @@ import world.respect.app.view.clazz.list.ClazzListScreen
 import world.respect.app.view.enrollment.edit.EnrollmentEditScreen
 import world.respect.app.view.enrollment.list.EnrollmentListScreen
 import world.respect.app.view.home.HomeScreen
-import world.respect.app.view.opdscatalog.detail.LearningUnitDetailScreen
-import world.respect.app.view.learningunit.list.OpdsFeedDetailScreen
+import world.respect.app.view.catalog.publicationdetail.PublicationDetailScreen
+import world.respect.app.view.catalog.feeddetail.OpdsFeedDetailScreen
 import world.respect.app.view.manageuser.accountlist.AccountListScreen
 import world.respect.app.view.manageuser.acceptinvite.AcceptInviteScreen
 import world.respect.app.view.manageuser.createaccount.CreateAccountScreen
@@ -49,7 +49,7 @@ import world.respect.app.view.person.qrcode.InviteQrScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetPasswordScreen
 import world.respect.app.view.person.setusernameandpassword.CreateAccountSetUsernameScreen
 import world.respect.app.view.playlists.collections.externallink.ExternalLinkScreen
-import world.respect.app.view.learningunit.editfeed.OpdsFeedEditScreen
+import world.respect.app.view.catalog.feededit.OpdsFeedEditScreen
 import world.respect.app.view.playlists.collections.list.PlaylistListScreen
 import world.respect.app.view.playlists.collections.share.PlaylistShareScreen
 import world.respect.app.view.report.detail.ReportDetailScreen
@@ -97,7 +97,7 @@ import world.respect.shared.navigation.InvitePerson
 import world.respect.shared.navigation.EnterInviteCode
 import world.respect.shared.navigation.ExternalLinkEdit
 import world.respect.shared.navigation.Home
-import world.respect.shared.navigation.LearningUnitDetail
+import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.ManageAccount
@@ -108,7 +108,7 @@ import world.respect.shared.navigation.PasskeyList
 import world.respect.shared.navigation.PersonDetail
 import world.respect.shared.navigation.PersonEdit
 import world.respect.shared.navigation.PersonList
-import world.respect.shared.navigation.PlaylistEdit
+import world.respect.shared.navigation.OpdsFeedEdit
 import world.respect.shared.navigation.PlaylistList
 import world.respect.shared.navigation.PlaylistShare
 import world.respect.shared.navigation.QrCode
@@ -141,7 +141,7 @@ import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
 import world.respect.shared.viewmodel.enrollment.edit.EnrollmentEditViewModel
 import world.respect.shared.viewmodel.enrollment.list.EnrollmentListViewModel
-import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
+import world.respect.shared.viewmodel.catalog.publicationdetail.PublicationDetailViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
 import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswordSignupViewModel
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
@@ -466,12 +466,12 @@ fun AppNavHost(
             EnterPasswordSignupScreen(viewModel = viewModel)
         }
 
-        composable<LearningUnitDetail> {
-            val viewModel: LearningUnitDetailViewModel = respectViewModel(
+        composable<PublicationDetail> {
+            val viewModel: PublicationDetailViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            LearningUnitDetailScreen(viewModel = viewModel)
+            PublicationDetailScreen(viewModel = viewModel)
         }
 
         composable<SignupScreen> {
@@ -602,7 +602,7 @@ fun AppNavHost(
                 )
             )
         }
-        composable<PlaylistEdit> {
+        composable<OpdsFeedEdit> {
             OpdsFeedEditScreen(
                 viewModel = respectViewModel(
                     onSetAppUiState = onSetAppUiState,

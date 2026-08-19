@@ -9,7 +9,7 @@ import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.combineWithRemote
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 
 class OpdsPublicationDataSourceRepository(
     private val local: OpdsPublicationDataSourceLocal,
@@ -21,7 +21,7 @@ class OpdsPublicationDataSourceRepository(
         params: DataLoadParams,
         referrerUrl: Url?,
         expectedPublicationId: String?
-    ): Flow<DataLoadState<OpdsPublication>> {
+    ): Flow<DataLoadState<Publication>> {
         return local.getByUrlAsFlow(
             url = url,
             params = params,
@@ -46,7 +46,7 @@ class OpdsPublicationDataSourceRepository(
         params: DataLoadParams,
         referrerUrl: Url?,
         expectedPublicationId: String?
-    ): DataLoadState<OpdsPublication> {
+    ): DataLoadState<Publication> {
         val remoteData = remote.getByUrl(url, params, referrerUrl, expectedPublicationId)
         if(remoteData is DataReadyState)
             local.updateOpdsPublication(remoteData)

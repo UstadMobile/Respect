@@ -1,4 +1,4 @@
-package world.respect.app.view.learningunit.editfeed
+package world.respect.app.view.catalog.feededit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +25,7 @@ import world.respect.shared.generated.resources.learning_item_section
 import world.respect.shared.generated.resources.learning_item_section_description
 import world.respect.shared.generated.resources.playlist_section
 import world.respect.shared.generated.resources.playlist_section_description
-import world.respect.shared.viewmodel.learningunit.editfeed.OpdsGroupType
+import world.respect.shared.viewmodel.catalog.feededit.OpdsGroupType
 
 
 @OptIn(ExperimentalMaterial3Api::class)

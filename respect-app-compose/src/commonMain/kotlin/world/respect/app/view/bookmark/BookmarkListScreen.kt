@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectListSortHeader
-import world.respect.app.view.learningunit.list.PublicationListItem
+import world.respect.app.view.catalog.feeddetail.PublicationListItem
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.flowOf
 import world.respect.lib.dataloadstate.DataLoadingState

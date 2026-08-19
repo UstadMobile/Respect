@@ -37,7 +37,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.map
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.findCollection
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
@@ -53,7 +53,7 @@ import world.respect.shared.viewmodel.app.appstate.FabUiState
 
 data class AppLauncherUiState(
     val apps: DataLoadState<List<XapiStatement>> = DataLoadingState(),
-    val respectPublicationForXapiStatement: (XapiStatement) -> Flow<DataLoadState<OpdsPublication>> = {
+    val respectPublicationForXapiStatement: (XapiStatement) -> Flow<DataLoadState<Publication>> = {
         emptyFlow()
     },
     val canRemove: Boolean = false,
@@ -61,7 +61,7 @@ data class AppLauncherUiState(
     val appMustLoadToBeClickable: Boolean = false,
 ) {
 
-    fun isAppClickable(appState: DataLoadState<OpdsPublication>): Boolean {
+    fun isAppClickable(appState: DataLoadState<Publication>): Boolean {
         return !appMustLoadToBeClickable || appState.dataOrNull() != null
     }
 
@@ -152,7 +152,7 @@ class AppLauncherViewModel(
     }
 
 
-    fun onClickApp(app: DataLoadState<OpdsPublication>) {
+    fun onClickApp(app: DataLoadState<Publication>) {
         val url = app.metaInfo.url ?: return
 
         _navCommandFlow.tryEmit(
@@ -182,7 +182,7 @@ class AppLauncherViewModel(
         )
     }
 
-    fun onClickRemove(app: DataLoadState<OpdsPublication>) {
+    fun onClickRemove(app: DataLoadState<Publication>) {
         val manifestUrl = app.metaInfo.url ?: run {
             Napier.w("app has no manifest url, cannot remove")
             return

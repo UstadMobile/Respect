@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.learningunit
+package world.respect.shared.viewmodel.catalog
 
 import io.ktor.http.Url
 import kotlinx.serialization.Serializable

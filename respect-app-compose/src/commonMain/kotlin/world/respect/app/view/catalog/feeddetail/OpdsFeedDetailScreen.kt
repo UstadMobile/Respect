@@ -1,4 +1,4 @@
-package world.respect.app.view.learningunit.list
+package world.respect.app.view.catalog.feeddetail
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Task
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -34,7 +33,7 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.langMapString
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ext.OpdsFeedItemIndex
 import world.respect.shared.generated.resources.Res
@@ -50,9 +49,9 @@ import world.respect.shared.generated.resources.permanently_delete_description
 import world.respect.shared.generated.resources.select_count_items
 import world.respect.shared.generated.resources.select_this_collection
 import world.respect.shared.util.SortOrderOption
-import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailUiState
-import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailViewModel
-import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailViewModel.Companion.ICON
+import world.respect.shared.viewmodel.catalog.feeddetail.OpdsFeedDetailUiState
+import world.respect.shared.viewmodel.catalog.feeddetail.OpdsFeedDetailViewModel
+import world.respect.shared.viewmodel.catalog.feeddetail.OpdsFeedDetailViewModel.Companion.ICON
 
 @Composable
 fun OpdsFeedDetailScreen(
@@ -129,7 +128,7 @@ fun OpdsFeedDetailScreen(
         ) {
 
             item(key = "feed_header") {
-                OpdsFeedHeader(
+                OpdsFeedDetailHeader(
                     uiState = uiState,
                     onClickShare = onClickShare,
                     onClickCopy = onClickCopy,
@@ -408,11 +407,11 @@ fun NavigationListItem(
 
 @Composable
 fun PublicationListItem(
-    publication: OpdsPublication,
+    publication: Publication,
     showCheckbox: Boolean,
     isSelected: Boolean,
-    onClickPublication: (OpdsPublication) -> Unit,
-    onLongPressPublication: (OpdsPublication) -> Unit,
+    onClickPublication: (Publication) -> Unit,
+    onLongPressPublication: (Publication) -> Unit,
 ) {
     FeedListItem(
         title = langMapString(publication.metadata.title),

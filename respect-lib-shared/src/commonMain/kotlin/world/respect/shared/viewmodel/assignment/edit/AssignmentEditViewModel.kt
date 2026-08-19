@@ -28,7 +28,7 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
 import world.respect.lib.dataloadstate.ext.isReadyAndSettled
 import world.respect.lib.dataloadstate.ext.map
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.xapi.ext.addActivitiesToContextActivitiesGrouping
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
 import world.respect.lib.xapi.ext.objectActivityNameOrNull
@@ -63,7 +63,7 @@ import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ActionBarButtonUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
-import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
+import world.respect.shared.viewmodel.catalog.PublicationsSelection
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -74,7 +74,7 @@ data class AssignmentEditUiState(
     val nameError: UiText? = null,
     val classOptions: List<Clazz> = emptyList(),
     val classError: UiText? = null,
-    val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { flowOf(DataLoadingState()) },
+    val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<Publication>> = { flowOf(DataLoadingState()) },
 ) {
     val fieldsEnabled: Boolean
         get() = statementData.isReadyAndSettled()
@@ -203,7 +203,7 @@ class AssignmentEditViewModel(
 
             viewModelScope.launch {
                 resultReturner.filteredResultFlowForKey(KEY_LEARNING_UNIT).collect { result ->
-                    val learningUnit = result.result as? OpdsPublicationsSelection ?: return@collect
+                    val learningUnit = result.result as? PublicationsSelection ?: return@collect
                     val activities = getXapiActivityForPublicationUseCase(learningUnit.selectedPublications)
 
                     _uiState.update { prev ->
@@ -222,7 +222,7 @@ class AssignmentEditViewModel(
         }
     }
 
-    fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
+    fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<Publication>> {
         return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = url, params = DataLoadParams(), null, null
         )

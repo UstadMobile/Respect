@@ -26,7 +26,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.map
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.objectActivityNameOrNull
 import world.respect.lib.xapi.ext.objectActivityOrNull
@@ -42,7 +42,7 @@ import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.remove_bookmark
 import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.BookmarkList
-import world.respect.shared.navigation.LearningUnitDetail
+import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.sendResultIfResultExpected
@@ -53,12 +53,12 @@ import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
-import world.respect.shared.viewmodel.learningunit.OpdsPickType
-import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
+import world.respect.shared.viewmodel.catalog.OpdsPickType
+import world.respect.shared.viewmodel.catalog.PublicationsSelection
 
 data class BookmarkListUiState(
     val statements: List<XapiStatement> = emptyList(),
-    val taskInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
+    val taskInfoFlow: (Url) -> Flow<DataLoadState<Publication>> = {
         flowOf(DataLoadingState())
     },
     val activeSortOrderOption: SortOrderOption = CommonSortOptions.DEFAULT,
@@ -139,7 +139,7 @@ class BookmarkListViewModel(
         }
     }
 
-    fun taskInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
+    fun taskInfoFlowFor(url: Url): Flow<DataLoadState<Publication>> {
         return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = url, params = DataLoadParams(), null, null
         ).map { dataLoadState ->
@@ -194,7 +194,7 @@ class BookmarkListViewModel(
                         resultReturner.sendResultIfResultExpected(
                             route = route,
                             navCommandFlow = _navCommandFlow,
-                            result = OpdsPublicationsSelection(
+                            result = PublicationsSelection(
                                 url = manifestUrl,
                                 selectedPublications = listOf(opdsPub),
                             )
@@ -217,7 +217,7 @@ class BookmarkListViewModel(
             else -> {
                 _navCommandFlow.tryEmit(
                     value = NavCommand.Navigate(
-                        LearningUnitDetail.create(
+                        PublicationDetail.create(
                             learningUnitManifestUrl = Url(activityId)
                         )
                     )

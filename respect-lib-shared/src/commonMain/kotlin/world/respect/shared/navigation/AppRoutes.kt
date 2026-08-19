@@ -15,11 +15,11 @@ import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.report.ReportFilter
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.shared.ext.NextAfterScan
-import world.respect.shared.viewmodel.learningunit.OpdsPublicationsSelection
+import world.respect.shared.viewmodel.catalog.PublicationsSelection
 import world.respect.shared.viewmodel.manageuser.signup.SignupScreenModeEnum
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryMode
 import world.respect.lib.opds.model.LangMap
-import world.respect.shared.viewmodel.learningunit.OpdsPickType
+import world.respect.shared.viewmodel.catalog.OpdsPickType
 import kotlin.uuid.Uuid
 
 @Serializable
@@ -132,18 +132,18 @@ data class AssignmentEdit(
 ) : RespectAppRoute {
 
     @Transient
-    val learningUnitSelected: OpdsPublicationsSelection? = learningUnitStr?.let {
-        Json.decodeFromString(OpdsPublicationsSelection.serializer(), it)
+    val learningUnitSelected: PublicationsSelection? = learningUnitStr?.let {
+        Json.decodeFromString(PublicationsSelection.serializer(), it)
     }
 
     companion object {
         fun create(
             assignmentActivityId: String?,
-            learningUnitSelected: OpdsPublicationsSelection? = null,
+            learningUnitSelected: PublicationsSelection? = null,
         ) = AssignmentEdit(
             assignmentActivityId = assignmentActivityId,
             learningUnitStr = learningUnitSelected?.let {
-                Json.encodeToString(OpdsPublicationsSelection.serializer(), it)
+                Json.encodeToString(PublicationsSelection.serializer(), it)
             },
         )
     }
@@ -558,7 +558,7 @@ class CreateAccount(
 }
 
 @Serializable
-class LearningUnitDetail(
+class PublicationDetail(
     private val learningUnitManifestUrlStr: String,
     private val refererUrlStr: String? = null,
     val expectedIdentifier: String? = null,
@@ -582,7 +582,7 @@ class LearningUnitDetail(
             expectedIdentifier: String? = null,
             assignmentActivityId: String? = null,
             title: LangMap? = null,
-        ) = LearningUnitDetail(
+        ) = PublicationDetail(
             learningUnitManifestUrlStr = learningUnitManifestUrl.toString(),
             refererUrlStr = refererUrl?.toString(),
             expectedIdentifier = expectedIdentifier,
@@ -799,20 +799,20 @@ class PlaylistList private constructor(
     }
 }
 @Serializable
-class PlaylistEdit private constructor(
-    private val playlistUrlStr: String? = null,
+class OpdsFeedEdit private constructor(
+    private val urlStr: String? = null,
     val isCopy: Boolean = false,
 ) : RespectAppRoute {
 
     @Transient
-    val playlistUrl: Url? = playlistUrlStr?.let { Url(it) }
+    val url: Url? = urlStr?.let { Url(it) }
 
     companion object {
         fun create(
             playlistUrl: Url? = null,
             isCopy: Boolean = false,
-        ) = PlaylistEdit(
-            playlistUrlStr = playlistUrl?.toString(),
+        ) = OpdsFeedEdit(
+            urlStr = playlistUrl?.toString(),
             isCopy = isCopy,
         )
     }

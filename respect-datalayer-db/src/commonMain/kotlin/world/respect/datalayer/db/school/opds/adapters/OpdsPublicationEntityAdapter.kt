@@ -13,7 +13,7 @@ import world.respect.datalayer.db.shared.adapters.toModel
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.db.shared.ext.takeIfNotEmpty
 import world.respect.lib.opds.model.LangMap
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
@@ -25,7 +25,7 @@ data class OpdsPublicationEntities(
     val subjectEntities: List<ReadiumSubjectEntity>,
 )
 
-fun OpdsPublication.asEntities(
+fun Publication.asEntities(
     dataLoadResult: DataReadyState<*>?,
     primaryKeyGenerator: PrimaryKeyGenerator,
     json: Json,
@@ -112,7 +112,7 @@ fun OpdsPublication.asEntities(
  */
 fun OpdsPublicationEntities.asModel(
     json: Json,
-): DataReadyState<OpdsPublication> {
+): DataReadyState<Publication> {
     fun List<LangMapEntity>.toModelSub(
         propType: LangMapEntity.PropType
     ): LangMap {
@@ -140,7 +140,7 @@ fun OpdsPublicationEntities.asModel(
     }
 
     return DataReadyState(
-        data = OpdsPublication(
+        data = Publication(
             metadata = ReadiumMetadata(
                 type = opdsPublicationEntity.opeMdType,
                 title = langMapEntities.toModelSub(

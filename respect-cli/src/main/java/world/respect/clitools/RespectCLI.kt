@@ -10,7 +10,7 @@ import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.lib.opds.model.OpdsFeed
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.di.jvmKoinAppModule
 import world.respect.domain.validator.ListAndPrintlnValidatorReporter
@@ -87,7 +87,7 @@ class RespectCLI : KoinComponent {
                                 type = when (validateType) {
                                     "manifest" -> RespectAppManifest.MIME_TYPE
                                     "opds-feed" -> OpdsFeed.MEDIA_TYPE
-                                    "opds-publication" -> OpdsPublication.MEDIA_TYPE
+                                    "opds-publication" -> Publication.MEDIA_TYPE
                                     else -> throw IllegalArgumentException("Invalid type: $validateType")
                                 },
                             ),

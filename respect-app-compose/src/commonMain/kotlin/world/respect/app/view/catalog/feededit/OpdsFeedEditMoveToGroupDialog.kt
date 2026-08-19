@@ -1,4 +1,4 @@
-package world.respect.app.view.learningunit.editfeed
+package world.respect.app.view.catalog.feededit
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +15,7 @@ import world.respect.shared.generated.resources.cancel
 import world.respect.shared.generated.resources.move_to_section
 import world.respect.shared.generated.resources.n_items
 import world.respect.shared.generated.resources.section_title
-import world.respect.shared.viewmodel.learningunit.editfeed.MovingItemState
+import world.respect.shared.viewmodel.catalog.feededit.MovingItemState
 import kotlin.collections.forEach
 
 

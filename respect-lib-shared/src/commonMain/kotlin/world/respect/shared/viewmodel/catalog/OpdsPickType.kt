@@ -1,4 +1,4 @@
-package world.respect.shared.viewmodel.learningunit
+package world.respect.shared.viewmodel.catalog
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable

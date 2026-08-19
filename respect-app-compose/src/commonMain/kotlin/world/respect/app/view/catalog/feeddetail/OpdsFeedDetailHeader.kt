@@ -1,4 +1,4 @@
-package world.respect.app.view.learningunit.list
+package world.respect.app.view.catalog.feeddetail
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -34,11 +34,11 @@ import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.copy_playlist
 import world.respect.shared.generated.resources.delete
 import world.respect.shared.generated.resources.share
-import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailUiState
+import world.respect.shared.viewmodel.catalog.feeddetail.OpdsFeedDetailUiState
 
 
 @Composable
-fun OpdsFeedHeader(
+fun OpdsFeedDetailHeader(
     uiState: OpdsFeedDetailUiState,
     onClickShare: () -> Unit,
     onClickCopy: () -> Unit,

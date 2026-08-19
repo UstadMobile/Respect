@@ -1,4 +1,4 @@
-package world.respect.datalayer.school.model.report
+package world.respect.lib.xapi.extensions.reportoptions
 
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
@@ -13,10 +13,23 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.ext.UNSET_DISTANT_FUTURE
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+
+/**
+ * Unix timestamp for maximum date we will recognize as being a set date: 1/Jan/2200
+ */
+const val MAX_VALID_DATE = 7258118400000
+
+const val MS_PER_HOUR = (60 * 60 * 1000)
+
+/**
+ * Unix timestamp 24hours beyond the maximum date that we will recognize. We must not use Long.MAX_VALUE,
+ * because adding anything (e.g. timezone offset) to MAX_VALUE will wrap to the most negative possible
+ * value, leading to unpredictable behavior.
+ */
+const val UNSET_DISTANT_FUTURE = MAX_VALID_DATE + (24 * MS_PER_HOUR)
 
 /**
  * Enum of the relative units that can be selected for a report e.g. last x days, last x months, etc.

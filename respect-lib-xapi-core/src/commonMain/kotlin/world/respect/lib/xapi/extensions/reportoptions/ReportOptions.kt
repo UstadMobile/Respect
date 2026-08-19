@@ -1,4 +1,4 @@
-package world.respect.datalayer.school.model.report
+package world.respect.lib.xapi.extensions.reportoptions
 
 import kotlinx.serialization.Serializable
 import world.respect.lib.opds.model.LangMap

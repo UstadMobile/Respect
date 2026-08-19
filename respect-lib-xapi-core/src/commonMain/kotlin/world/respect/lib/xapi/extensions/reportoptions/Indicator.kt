@@ -1,4 +1,4 @@
-package world.respect.datalayer.school.model
+package world.respect.lib.xapi.extensions.reportoptions
 
 import kotlinx.serialization.Serializable
 

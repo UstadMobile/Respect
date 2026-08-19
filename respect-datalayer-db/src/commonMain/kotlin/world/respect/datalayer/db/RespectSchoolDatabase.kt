@@ -83,7 +83,7 @@ import world.respect.datalayer.db.school.xapi.entities.XapiVerbEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiVerbLangMapEntry
 import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.school.model.Enrollment
-import world.respect.datalayer.school.model.Indicator
+import world.respect.lib.xapi.extensions.reportoptions.Indicator
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.Report

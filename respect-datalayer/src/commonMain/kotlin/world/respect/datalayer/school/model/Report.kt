@@ -1,7 +1,7 @@
 package world.respect.datalayer.school.model
 
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.school.model.report.ReportOptions
+import world.respect.lib.xapi.extensions.reportoptions.ReportOptions
 import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.lib.serializers.InstantAsISO8601
 import kotlin.time.Clock

@@ -38,13 +38,14 @@ import world.respect.shared.generated.resources.not_found
 import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.LearningUnitDetail
-import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistShare
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.SortOrderOption
+import world.respect.shared.util.ext.appbarTitleString
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.firstSelfLinkOrNull
 import world.respect.shared.util.ext.resolve
@@ -101,6 +102,14 @@ data class OpdsFeedDetailUiState(
     val showSelectionBottomButton: Boolean
         get() = isMultiSelectMode && feed.dataOrNull() != null
 
+    /**
+     * When the user is in pick mode the appbar title will be select unit(s) or selection
+     * collection(s) to make it clear what they need to select, so we need to show the title in the
+     * content.
+     */
+    val showFeedTitleInContent: Boolean
+        get() = pickType != null
+
 }
 
 /**
@@ -134,6 +143,7 @@ class OpdsFeedDetailViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 hideBottomNavigation = route.resultDest != null,
+                title = route.opdsPickType?.appbarTitleString?.asUiText() ?: prev.title
             )
         }
 
@@ -165,7 +175,7 @@ class OpdsFeedDetailViewModel(
                     )
                 }
 
-                if(result is DataReadyState) {
+                if(result is DataReadyState && route.opdsPickType == null) {
                     _appUiState.update { it.copy(title = result.data.metadata.title.asUiText()) }
                 }
             }
@@ -182,7 +192,11 @@ class OpdsFeedDetailViewModel(
             ?: return
 
         when {
-            uiState.value.isMultiSelectMode -> {
+            route.opdsPickType == OpdsPickType.CATALOG_FEED -> {
+                //do nothing: the user is expected to pick a catalog.
+            }
+
+            route.opdsPickType == OpdsPickType.PUBLICATION && uiState.value.isMultiSelectMode -> {
                 togglePublicationSelection(index)
             }
 

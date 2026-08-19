@@ -13,10 +13,12 @@ import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
+import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.datalayer.school.opds.ext.selfUrl
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.ext.resultExpected
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_from_a_link
 import world.respect.shared.generated.resources.add_new
@@ -27,6 +29,7 @@ import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PlaylistEdit
 import world.respect.shared.navigation.PlaylistList
+import world.respect.shared.util.ext.appbarTitleString
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.ExpandableFabIcon
@@ -56,9 +59,6 @@ data class PlaylistListUiState(
             }
         }
 
-    companion object {
-        const val REL_SELF = "self"
-    }
 }
 
 class PlaylistListViewModel(
@@ -78,7 +78,10 @@ class PlaylistListViewModel(
 
     init {
         _appUiState.update {
-            it.copy(title = Res.string.home.asUiText())
+            it.copy(
+                title = route.opdsPickType?.appbarTitleString?.asUiText() ?: Res.string.home.asUiText(),
+                hideBottomNavigation = route.resultExpected,
+            )
         }
 
         val activeAccount = accountManager.activeAccount
@@ -110,7 +113,7 @@ class PlaylistListViewModel(
                     it.copy(
                         title = Res.string.home.asUiText(),
                         expandableFabState = ExpandableFabUiState(
-                            visible = isTeacherOrAdmin,
+                            visible = isTeacherOrAdmin && !route.resultExpected,
                             text = Res.string.playlist.asUiText(),
                             items = listOf(
                                 ExpandableFabItem(
@@ -147,15 +150,14 @@ class PlaylistListViewModel(
     }
 
     fun onClickPlaylist(feed: OpdsFeed) {
-        val playlistUrl = feed.selfUrl()
-            ?: throw IllegalStateException(
-                "Playlist feed has no self URL: ${feed.metadata.title}"
-            )
+        val playlistUrl = feed.requireSelfUrl()
+
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 OpdsFeedDetail.create(
                     opdsFeedUrl = playlistUrl,
                     resultDest = route.resultDest,
+                    opdsPickType = route.opdsPickType,
                 )
             )
         )

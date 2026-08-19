@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Task
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectQuickActionButton
+import world.respect.app.components.defaultItemPadding
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.ext.feedIconLinkOrNull
 import world.respect.shared.generated.resources.Res
@@ -36,7 +38,7 @@ import world.respect.shared.viewmodel.learningunit.list.OpdsFeedDetailUiState
 
 
 @Composable
-fun FeedHeader(
+fun OpdsFeedHeader(
     uiState: OpdsFeedDetailUiState,
     onClickShare: () -> Unit,
     onClickCopy: () -> Unit,
@@ -46,6 +48,14 @@ fun FeedHeader(
     Column(modifier = Modifier.fillMaxWidth()) {
         val feedIconLink = uiState.feed.dataOrNull()?.feedIconLinkOrNull()
         val description = uiState.feed.dataOrNull()?.metadata?.description
+
+        if(uiState.showFeedTitleInContent) {
+            Text(
+                modifier = Modifier.defaultItemPadding(),
+                text = uiState.feed.dataOrNull()?.metadata?.title ?: "",
+                style = MaterialTheme.typography.titleLarge,
+            )
+        }
 
         Row(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 16.dp),
@@ -66,54 +76,58 @@ fun FeedHeader(
             }
         }
 
-        if(feedIconLink != null || description != null) {
+        if(feedIconLink != null || description != null || uiState.showFeedTitleInContent) {
             HorizontalDivider()
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-        ) {
-            RespectQuickActionButton(
-                modifier = Modifier.testTag("share_btn"),
-                labelText = stringResource(Res.string.share),
-                iconContent = {
-                    Icon(Icons.Filled.Share, null)
-                },
-                onClick = onClickShare
-            )
-
-            RespectQuickActionButton(
-                modifier = Modifier.testTag("copy_btn"),
-                labelText = stringResource(Res.string.copy_playlist),
-                iconContent = {
-                    Icon(Icons.Filled.ContentCopy, null)
-                },
-                onClick = onClickCopy
-            )
-
-            if(uiState.showAssignButton) {
+        if(uiState.quickActionsVisible) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+            ) {
                 RespectQuickActionButton(
-                    modifier = Modifier.testTag("header_assign_btn"),
-                    labelText = stringResource(Res.string.assign),
+                    modifier = Modifier.testTag("share_btn"),
+                    labelText = stringResource(Res.string.share),
                     iconContent = {
-                        Icon(Icons.Filled.Task, null)
+                        Icon(Icons.Filled.Share, null)
                     },
-                    onClick = onClickAssign
+                    onClick = onClickShare
                 )
+
+                RespectQuickActionButton(
+                    modifier = Modifier.testTag("copy_btn"),
+                    labelText = stringResource(Res.string.copy_playlist),
+                    iconContent = {
+                        Icon(Icons.Filled.ContentCopy, null)
+                    },
+                    onClick = onClickCopy
+                )
+
+                if(uiState.showAssignButton) {
+                    RespectQuickActionButton(
+                        modifier = Modifier.testTag("header_assign_btn"),
+                        labelText = stringResource(Res.string.assign),
+                        iconContent = {
+                            Icon(Icons.Filled.Task, null)
+                        },
+                        onClick = onClickAssign
+                    )
+                }
+
+                if (uiState.isTeacherOrAdmin) {
+                    RespectQuickActionButton(
+                        modifier = Modifier.testTag("delete_btn"),
+                        labelText = stringResource(Res.string.delete),
+                        iconContent = {
+                            Icon(Icons.Filled.Delete, null)
+                        },
+                        onClick = onClickDelete,
+                    )
+                }
             }
 
-            if (uiState.isTeacherOrAdmin) {
-                RespectQuickActionButton(
-                    modifier = Modifier.testTag("delete_btn"),
-                    labelText = stringResource(Res.string.delete),
-                    iconContent = {
-                        Icon(Icons.Filled.Delete, null)
-                    },
-                    onClick = onClickDelete,
-                )
-            }
+            HorizontalDivider()
         }
     }
 }

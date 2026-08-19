@@ -736,4 +736,7 @@
 
     <string name="could_not_load_unit_to_assign">Could not load unit to assign</string>
 
+    <string name="select_units">Select unit(s)</string>
+    <string name="select_collections">Select collection(s)</string>
+
 </resources>

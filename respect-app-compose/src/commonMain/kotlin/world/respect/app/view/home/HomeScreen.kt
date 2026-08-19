@@ -87,11 +87,12 @@ fun HomeScreen(
                 }
 
                 HomeScreenTabs.PLAYLISTS -> {
-                    val viewModel: PlaylistListViewModel = respectViewModel(
-                        onSetAppUiState = onSetAppUiState,
-                        navController = respectNavController,
+                    PlaylistListScreen(
+                        viewModel = respectViewModel(
+                            onSetAppUiState = onSetAppUiState,
+                            navController = respectNavController
+                        )
                     )
-                    PlaylistListScreen(viewModel = viewModel)
                 }
             }
         }

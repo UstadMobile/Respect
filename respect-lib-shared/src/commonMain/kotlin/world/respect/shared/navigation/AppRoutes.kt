@@ -150,7 +150,21 @@ data class AssignmentEdit(
 }
 
 @Serializable
-object BookmarkList : RespectAppRoute
+data class BookmarkList(
+    val resultDestStr: String? = null,
+    val opdsPickTypeStr: String? = null,
+) : RespectAppRoute, RouteWithResultDest {
+
+    @Transient
+    override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
+
+    @Transient
+    val opdsPickType: OpdsPickType? = opdsPickTypeStr?.let {
+        Json.decodeFromString(OpdsPickType.serializer(), it)
+    }
+
+
+}
 
 @Serializable
 data class StatementList(
@@ -761,16 +775,26 @@ data class ScanQRCode(
 @Serializable
 class PlaylistList private constructor(
     private val resultDestStr: String? = null,
+    val opdsPickTypeStr: String? = null,
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
     override val resultDest: ResultDest? = ResultDest.fromStringOrNull(resultDestStr)
 
+    @Transient
+    val opdsPickType: OpdsPickType? = opdsPickTypeStr?.let {
+        Json.decodeFromString(OpdsPickType.serializer(), it)
+    }
+
     companion object {
         fun create(
             resultDest: ResultDest? = null,
+            opdsPickType: OpdsPickType? = null,
         ) = PlaylistList(
-            resultDestStr = resultDest.encodeToJsonStringOrNull()
+            resultDestStr = resultDest.encodeToJsonStringOrNull(),
+            opdsPickTypeStr = opdsPickType?.let {
+                Json.encodeToString(OpdsPickType.serializer(), it)
+            }
         )
     }
 }

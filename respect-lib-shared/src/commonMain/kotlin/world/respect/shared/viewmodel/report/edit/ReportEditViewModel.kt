@@ -15,12 +15,12 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.datalayer.school.model.report.DefaultIndicators
-import world.respect.datalayer.school.model.report.ReportFilter
-import world.respect.datalayer.school.model.report.ReportOptions
-import world.respect.datalayer.school.model.report.ReportSeries
-import world.respect.datalayer.school.model.report.ReportSeriesVisualType
-import world.respect.datalayer.school.model.Indicator
+import world.respect.lib.xapi.extensions.reportoptions.DefaultIndicators
+import world.respect.lib.xapi.extensions.reportoptions.ReportFilter
+import world.respect.lib.xapi.extensions.reportoptions.ReportOptions
+import world.respect.lib.xapi.extensions.reportoptions.ReportSeries
+import world.respect.lib.xapi.extensions.reportoptions.ReportSeriesVisualType
+import world.respect.lib.xapi.extensions.reportoptions.Indicator
 import world.respect.datalayer.school.model.Report
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccountManager
@@ -258,6 +258,7 @@ class ReportEditViewModel(
     }
 
     fun onSeriesChanged(updatedSeries: ReportSeries) {
+        /*
         onEntityChanged(
             _uiState.value.reportOptions.let { reportOptions ->
                 reportOptions.copy(
@@ -267,9 +268,11 @@ class ReportEditViewModel(
                 )
             }
         )
+         */
     }
 
     fun onAddSeries() {
+        /*
         viewModelScope.launch {
             _uiState.update { prev ->
                 val newUid = (prev.reportOptions.series.maxOfOrNull { it.reportSeriesUid } ?: 0) + 1
@@ -298,9 +301,11 @@ class ReportEditViewModel(
                 )
             }
         }
+         */
     }
 
     fun onRemoveSeries(seriesId: Int) {
+        /*
         _uiState.update { prev ->
             val updatedSeriesList =
                 prev.reportOptions.series.filterNot { it.reportSeriesUid == seriesId }
@@ -309,10 +314,11 @@ class ReportEditViewModel(
                     series = updatedSeriesList
                 )
             )
-        }
+        }*/
     }
 
     fun onAddFilter(seriesId: Int) {
+        /*
         val tempFilterUid = nextTempFilterUid++
         val newFilter = ReportFilter(
             reportFilterUid = tempFilterUid,
@@ -321,16 +327,19 @@ class ReportEditViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(ReportEditFilter.create(newFilter))
-        )
+        )*/
     }
 
     fun onEditFilter(reportFilter: ReportFilter) {
+        /*
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(ReportEditFilter.create(reportFilter))
         )
+         */
     }
 
     private fun onFilterChanged(newFilter: ReportFilter?) {
+        /*
         _uiState.update { prevState ->
             val updatedSeries = prevState.reportOptions.series.map { series ->
                 if (series.reportSeriesUid == newFilter?.reportFilterSeriesUid) {
@@ -350,9 +359,11 @@ class ReportEditViewModel(
             )
         }
         onEntityChanged(_uiState.value.reportOptions)
+         */
     }
 
     fun onRemoveFilter(index: Int, seriesId: Int) {
+        /*
         _uiState.update { prev ->
             val updatedSeriesList = prev.reportOptions.series.map { series ->
                 if (series.reportSeriesUid == seriesId) {
@@ -371,6 +382,7 @@ class ReportEditViewModel(
                 )
             )
         }
+         */
     }
 
     fun ReportEditUiState.hasErrors(): Boolean {

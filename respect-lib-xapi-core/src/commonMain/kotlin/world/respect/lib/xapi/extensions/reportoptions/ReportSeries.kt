@@ -1,12 +1,10 @@
-package world.respect.datalayer.school.model.report
+package world.respect.lib.xapi.extensions.reportoptions
 
 import kotlinx.datetime.DatePeriod
 import kotlinx.serialization.Serializable
-import world.respect.datalayer.school.model.Indicator
 
 @Serializable
 data class ReportSeries(
-    val reportSeriesUid: Int = 0,
     val reportSeriesTitle: String = "Series 1",
     val reportSeriesYAxis: Indicator = DefaultIndicators.list.first(),
     val reportSeriesVisualType: ReportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,

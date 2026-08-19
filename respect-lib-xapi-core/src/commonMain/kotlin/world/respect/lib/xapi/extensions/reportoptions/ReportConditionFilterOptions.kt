@@ -1,4 +1,4 @@
-package world.respect.datalayer.school.model.report
+package world.respect.lib.xapi.extensions.reportoptions
 
 import kotlinx.serialization.Serializable
 
@@ -37,9 +37,7 @@ sealed class ReportConditionFilterOptions(
 
 @Serializable
 data class ReportFilter(
-    var reportFilterUid: Int = 0,
-    var reportFilterSeriesUid: Int = 0,
-    var reportFilterField: FilterType? = null,
-    var reportFilterCondition: Comparisons? = null,
-    var reportFilterValue: String? = ""
+    val reportFilterField: FilterType? = null,
+    val reportFilterCondition: Comparisons? = null,
+    val reportFilterValue: String? = ""
 )

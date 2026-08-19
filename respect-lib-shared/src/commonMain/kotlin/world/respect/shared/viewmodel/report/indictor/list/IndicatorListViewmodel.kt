@@ -11,7 +11,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.datalayer.school.model.Indicator
+import world.respect.lib.xapi.extensions.reportoptions.Indicator
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.indicator

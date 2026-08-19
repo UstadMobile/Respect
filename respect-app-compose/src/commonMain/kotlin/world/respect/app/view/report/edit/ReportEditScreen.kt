@@ -37,18 +37,18 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectDateField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.datalayer.school.model.report.Comparisons
-import world.respect.datalayer.school.model.report.FilterType
-import world.respect.datalayer.school.model.report.FixedReportTimeRange
-import world.respect.datalayer.school.model.report.RelativeRangeReportPeriod
-import world.respect.datalayer.school.model.report.ReportFilter
-import world.respect.datalayer.school.model.report.ReportOptions
-import world.respect.datalayer.school.model.report.ReportPeriodOption
-import world.respect.datalayer.school.model.report.ReportSeries
-import world.respect.datalayer.school.model.report.ReportSeriesVisualType
-import world.respect.datalayer.school.model.report.ReportTimeRangeUnit
-import world.respect.datalayer.school.model.report.ReportXAxis
-import world.respect.datalayer.school.model.Indicator
+import world.respect.lib.xapi.extensions.reportoptions.Comparisons
+import world.respect.lib.xapi.extensions.reportoptions.FilterType
+import world.respect.lib.xapi.extensions.reportoptions.FixedReportTimeRange
+import world.respect.lib.xapi.extensions.reportoptions.RelativeRangeReportPeriod
+import world.respect.lib.xapi.extensions.reportoptions.ReportFilter
+import world.respect.lib.xapi.extensions.reportoptions.ReportOptions
+import world.respect.lib.xapi.extensions.reportoptions.ReportPeriodOption
+import world.respect.lib.xapi.extensions.reportoptions.ReportSeries
+import world.respect.lib.xapi.extensions.reportoptions.ReportSeriesVisualType
+import world.respect.lib.xapi.extensions.reportoptions.ReportTimeRangeUnit
+import world.respect.lib.xapi.extensions.reportoptions.ReportXAxis
+import world.respect.lib.xapi.extensions.reportoptions.Indicator
 import world.respect.shared.ext.label
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_filter
@@ -255,7 +255,7 @@ private fun ReportEditScreen(
                                 contentDescription = stringResource(Res.string.remove),
                                 modifier = Modifier
                                     .clickable {
-                                        onRemoveSeries(seriesItem.reportSeriesUid)
+                                        //onRemoveSeries(seriesItem.reportSeriesUid)
                                     }
                                     .align(Alignment.CenterVertically)
                             )
@@ -339,7 +339,7 @@ private fun ReportEditScreen(
                                 contentDescription = stringResource(Res.string.remove),
                                 modifier = Modifier
                                     .clickable {
-                                        onRemoveFilter(index, seriesItem.reportSeriesUid)
+                                        //onRemoveFilter(index, seriesItem.reportSeriesUid)
                                     }
                             )
                         }
@@ -348,7 +348,9 @@ private fun ReportEditScreen(
             }
             item {
                 OutlinedButton(
-                    onClick = { onAddFilter(seriesItem.reportSeriesUid) },
+                    onClick = {
+                        //onAddFilter(seriesItem.reportSeriesUid)
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(

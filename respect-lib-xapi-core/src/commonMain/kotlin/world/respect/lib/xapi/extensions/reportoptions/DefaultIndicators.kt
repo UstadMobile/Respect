@@ -1,6 +1,4 @@
-package world.respect.datalayer.school.model.report
-
-import world.respect.datalayer.school.model.Indicator
+package world.respect.lib.xapi.extensions.reportoptions
 
 //TODO Need to change with string resource
 

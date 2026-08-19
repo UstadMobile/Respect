@@ -3,7 +3,7 @@ package world.respect.datalayer.school
 import kotlinx.coroutines.flow.Flow
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.datalayer.school.model.Indicator
+import world.respect.lib.xapi.extensions.reportoptions.Indicator
 
 interface IndicatorDataSource {
 

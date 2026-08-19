@@ -9,9 +9,9 @@ import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toIndicator
 import world.respect.datalayer.db.school.adapters.toIndicatorEntity
-import world.respect.datalayer.school.model.Indicator
+import world.respect.lib.xapi.extensions.reportoptions.Indicator
 import world.respect.datalayer.school.IndicatorDataSource
-import world.respect.datalayer.school.model.report.DefaultIndicators
+import world.respect.lib.xapi.extensions.reportoptions.DefaultIndicators
 
 class IndicatorDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,

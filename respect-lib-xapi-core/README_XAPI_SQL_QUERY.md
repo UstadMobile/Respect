@@ -12,14 +12,15 @@ users.
 
 This recipe operates as follows:
 
-* **Query request** a statement requesting a specific SQL query to run (see example queries). This is
+* **Query request** a statement requesting specific SQL queries to run (see example queries). This is
   normally made by a user (eg a manager).
-* **Query response** a statement containing the results of the SQL query that was just run. This is 
+* **Query response** a statement containing the results of the SQL queries that were run. This is 
   normally made by the server.
 
 Running the query and generating a query response relies on the statement data being available using
 a given schema, e.g. the [SQL LRS](https://github.com/yetanalytics/lrsql) schema. This can be done
-by using SQL LRS itself, using another LRS that uses the same database schema, or  
+by using SQL LRS itself, using another LRS that uses the same database schema, or by forwarding xAPI 
+statements. Each request can have one or more queries.
 
 Query results can be used to draw charts etc. This does have some parallels to the [ADL xAPI Dashboard](https://github.com/adlnet/xAPI-Dashboard).
 The xAPI Dashboard is no longer maintained. It also required access to each statement that was going
@@ -67,7 +68,9 @@ LRS/implementer. Potential appraoches include:
       },
       "type": "https://id.openeel.org/xapi/activity-type/query-request",
       "extensions": {
-        "https://id.openeel.org/xapi/extension/query": "SELECT MAX(jsonb(xapi_statement.payload, '$.result.score')))\nFROM xapi_statement\n     JOIN actor ON actor.ifi = \n          (SELECT statement_to_actor.actor_ifi\n             FROM statement_to_actor\n            WHERE statement_to_actor.statement_id = xapi_statement.id\n              AND statement_to_actor.usage = 'Actor') \nWHERE EXISTS(\n      SELECT 1\n        FROM statement_to_activity\n       WHERE statement_to_activity.statement_id = xapi_statement.id\n         AND statement_to_activity.activity_iri = 'http://example.org/activity-id')  \nGROUP BY actor.actor_ifi\n",
+        "https://id.openeel.org/xapi/extension/queries": [
+          "SELECT MAX(jsonb(xapi_statement.payload, '$.result.score')))\nFROM xapi_statement\n     JOIN actor ON actor.ifi = \n          (SELECT statement_to_actor.actor_ifi\n             FROM statement_to_actor\n            WHERE statement_to_actor.statement_id = xapi_statement.id\n              AND statement_to_actor.usage = 'Actor') \nWHERE EXISTS(\n      SELECT 1\n        FROM statement_to_activity\n       WHERE statement_to_activity.statement_id = xapi_statement.id\n         AND statement_to_activity.activity_iri = 'http://example.org/activity-id')  \nGROUP BY actor.actor_ifi\n"
+        ],
         "https://id.openeel.org/xapi/extension/report-options": { }
       }
     },
@@ -106,13 +109,15 @@ LRS/implementer. Potential appraoches include:
   },
   "result": {
     "extensions": {
-      "https://id.openeel.org/xapi/extension/query-result": {
-        "columnNames": ["maxScore", "actorIfi"],
-        "rows": [
-          [0.9, "ifi1"],
-          [0.1, "ifi2"]
-        ]
-      }
+      "https://id.openeel.org/xapi/extension/query-result": [
+        {
+          "columnNames": ["maxScore", "actorIfi"],
+          "rows": [
+            [0.9, "ifi1"],
+            [0.1, "ifi2"]
+          ]
+        }
+      ]
     }
   }
 }

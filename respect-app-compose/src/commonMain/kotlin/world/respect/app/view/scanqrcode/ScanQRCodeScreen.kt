@@ -108,7 +108,10 @@ fun ScanQRCodeScreen(
                         )
 
                         Button(
-                            onClick = viewModel::onClickTryAgain,
+                            onClick = {
+                                viewModel.onClickTryAgain()
+                                showScanner = true
+                            },
                             modifier = Modifier.fillMaxWidth(0.7f),
                         ) {
                             Text(
@@ -135,8 +138,8 @@ fun ScanQRCodeScreen(
                                 }
 
                                 is BarcodeResult.OnFailed -> {
-                                    showScanner = false
                                     viewModel.onQrCodeScanError(result.exception)
+                                    showScanner = false
                                 }
 
                                 BarcodeResult.OnCanceled -> {

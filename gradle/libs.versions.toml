@@ -78,6 +78,7 @@ junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 rules = "1.7.0"
 cache4k = "0.14.0"
+robolectric = "4.13"
 
 [libraries]
 argparse4j = { module = "net.sourceforge.argparse4j:argparse4j", version.ref = "argparse4j" }
@@ -193,6 +194,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules" }
 cache4k = { group = "io.github.reactivecircus.cache4k", name = "cache4k", version.ref = "cache4k" }
 xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil"}
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

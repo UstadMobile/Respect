@@ -17,6 +17,10 @@ kotlin {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         namespace = "${rootProject.group}.test.resources"
         minSdk = libs.versions.android.minSdk.get().toInt()
+
+        androidResources {
+            enable = true
+        }
     }
 
     jvm()

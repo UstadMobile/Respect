@@ -1,7 +1,7 @@
-package world.respect.xapi.ipc.shared.messages.ext
+package org.openeel.lib.ipc.messagebridge.ext
 
 import android.os.Message
-import world.respect.xapi.ipc.shared.messages.MessageData
+import org.openeel.lib.ipc.messagebridge.MessageData
 
 fun Message.setFromMessageData(
     messageData: MessageData

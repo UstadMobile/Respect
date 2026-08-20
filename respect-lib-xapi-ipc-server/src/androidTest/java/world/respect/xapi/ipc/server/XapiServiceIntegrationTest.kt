@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.IBinder
 import android.os.Messenger
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ServiceTestRule
 import io.ktor.http.Url
 import kotlinx.coroutines.CompletableDeferred
@@ -20,7 +21,7 @@ import world.respect.lib.test.res.xapiSampleStatements
 import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource
-import world.respect.xapi.ipc.client.XapiMessageBridgeMessengerImpl
+import org.openeel.lib.ipc.messagebridge.XapiMessageBridgeMessengerImpl
 import world.respect.xapi.ipc.client.XapiResourceIpcClient
 import world.respect.xapi.ipc.shared.messages.XapiIpcIntent
 import kotlin.test.assertEquals
@@ -60,12 +61,15 @@ class XapiServiceIntegrationTest {
             json,
             Url("http://localhost/"),
             "secret",
+            ipcTestApplication.packageName
         )
     }
 
     @Test
     fun givenServiceBound_whenRequestSent_thenResponseReceived() {
-        val statement: XapiStatement = xapiSampleStatements(ipcTestApplication).first().let {
+        val statement: XapiStatement = xapiSampleStatements(
+            InstrumentationRegistry.getInstrumentation().context
+        ).first().let {
             json.decodeFromJsonElement(it.jsonObject)
         }
 

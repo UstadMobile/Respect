@@ -2,6 +2,7 @@ package world.respect.xapi.ipc.client
 
 import io.ktor.http.Url
 import kotlinx.serialization.json.Json
+import org.openeel.lib.ipc.messagebridge.XapiMessageBridge
 import world.respect.lib.xapi.resources.XapiActivitiesResource
 import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiResource

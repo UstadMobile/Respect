@@ -8,14 +8,12 @@ plugins {
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.fromTarget("17")
-        optIn.add("kotlin.time.ExperimentalTime")
-        optIn.add("kotlin.uuid.ExperimentalUuidApi")
-        optIn.add("kotlinx.serialization.ExperimentalSerializationApi")
     }
 }
 
+
 android {
-    namespace = "world.respect.xapi.ipc.client"
+    namespace = "org.openeel.lib.ipc.messagebridge"
     compileSdk {
         version = release(libs.versions.android.compileSdk.get().toInt())
     }
@@ -24,12 +22,11 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-
     }
 
     publishing {
@@ -37,7 +34,6 @@ android {
             withSourcesJar()
         }
     }
-
 }
 
 publishing {
@@ -55,9 +51,6 @@ publishing {
 }
 
 dependencies {
-    api(projects.respectLibXapiIpcShared)
-    api(projects.libIpcMessagebridge)
-
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     testImplementation(libs.junit)

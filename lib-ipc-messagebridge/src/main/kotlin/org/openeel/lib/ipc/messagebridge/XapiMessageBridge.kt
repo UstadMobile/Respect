@@ -1,7 +1,6 @@
-package world.respect.xapi.ipc.client
+package org.openeel.lib.ipc.messagebridge
 
 import kotlinx.coroutines.flow.Flow
-import world.respect.xapi.ipc.shared.messages.MessageData
 
 interface XapiMessageBridge {
 

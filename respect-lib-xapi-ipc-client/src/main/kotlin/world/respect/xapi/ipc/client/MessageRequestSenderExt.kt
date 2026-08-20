@@ -4,7 +4,8 @@ import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.xapi.ipc.shared.messages.MessageData
+import org.openeel.lib.ipc.messagebridge.MessageData
+import org.openeel.lib.ipc.messagebridge.XapiMessageBridge
 import world.respect.xapi.ipc.shared.messages.ext.toDataLoadState
 
 suspend fun <T:Any> XapiMessageBridge.executeRequestAsDataLoadState(

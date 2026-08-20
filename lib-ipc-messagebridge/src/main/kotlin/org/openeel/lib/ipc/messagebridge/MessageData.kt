@@ -1,11 +1,11 @@
-package world.respect.xapi.ipc.shared.messages
+package org.openeel.lib.ipc.messagebridge
 
 import android.os.Bundle
 import android.os.Message
 
 /**
  * Immutable data class to store a message: Message objects are obtained from an object pool as per
- * the Android documentation.
+ * the Android documentation. This makes them unsafe to use after the a handler is done.
  *
  * @param what as per XapiIpcWhatFlags
  * @param arg1 the message id used to match up requests and responses

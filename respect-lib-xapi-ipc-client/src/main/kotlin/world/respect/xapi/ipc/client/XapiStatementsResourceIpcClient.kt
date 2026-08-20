@@ -17,11 +17,12 @@ import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
-import world.respect.xapi.ipc.shared.messages.MessageData
+import org.openeel.lib.ipc.messagebridge.MessageData
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
-import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
+import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeWhatFlags
+import org.openeel.lib.ipc.messagebridge.XapiMessageBridge
 import world.respect.xapi.ipc.shared.messages.ext.putAllFromStringMap
 import world.respect.xapi.ipc.shared.messages.ext.putStringValues
 import world.respect.xapi.ipc.shared.messages.ext.toDataLoadState
@@ -55,7 +56,7 @@ class XapiStatementsResourceIpcClient(
                         json.encodeToString(ListSerializer(XapiStatement.serializer()), list)
                     )
                 },
-                what = XapiIpcWhatFlags.WHAT_REQUEST,
+                what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceFlags.POST_STATEMENTS,
             ),
             json = json,
@@ -85,7 +86,7 @@ class XapiStatementsResourceIpcClient(
                         value = listParams.toParameters(json)
                     )
                 },
-                what = XapiIpcWhatFlags.WHAT_REQUEST,
+                what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceFlags.GET_STATEMENTS,
             ),
             json = json,
@@ -115,7 +116,7 @@ class XapiStatementsResourceIpcClient(
                         value = listParams.toParameters(json)
                     )
                 },
-                what = XapiIpcWhatFlags.WHAT_REQUEST,
+                what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceFlags.GET_STATEMENTS_FLOW,
             )
         ).map { msg ->

@@ -1,4 +1,4 @@
-package world.respect.xapi.ipc.client
+package org.openeel.lib.ipc.messagebridge
 
 import android.content.ComponentName
 import android.content.Context
@@ -12,8 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import world.respect.xapi.ipc.shared.messages.MessageData
-import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -21,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean
  * not always, be available when a request comes in. This wrapper takes care of waiting
  * if/when required.
  */
-class XapiIpcMessageBridgeServiceConnectionImpl(
+class IpcMessageBridgeServiceConnectionImpl(
     private val context: Context,
     private val intent: Intent,
 ) : XapiMessageBridge {
@@ -37,7 +35,7 @@ class XapiIpcMessageBridgeServiceConnectionImpl(
             name: ComponentName,
             service: IBinder
         ) {
-            Log.i(XapiIpcTags.LOGTAG, "XapiIpcMessageBridgeServiceConnectionImpl: service connected: $name")
+            Log.i(IpcMessageBridgeTags.LOGTAG, "IpcMessageBridgeServiceConnectionImpl: service connected: $name")
             mMessenger = Messenger(service).also {
                 messengerBridgeFlow.value = XapiMessageBridgeMessengerImpl(it)
             }
@@ -45,7 +43,7 @@ class XapiIpcMessageBridgeServiceConnectionImpl(
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            Log.i(XapiIpcTags.LOGTAG, "XapiIpcMessageBridgeServiceConnectionImpl: service disconnected: $name")
+            Log.i(IpcMessageBridgeTags.LOGTAG, "IpcMessageBridgeServiceConnectionImpl: service disconnected: $name")
             mMessenger = null
             messengerBridgeFlow.value = null
         }
@@ -57,23 +55,23 @@ class XapiIpcMessageBridgeServiceConnectionImpl(
 
     override suspend fun executeForResponse(messageData: MessageData): MessageData {
         val currentBridgeVal = messengerBridgeFlow.value
-        val logPrefix = "XapiIpcMessageBridgeServiceConnectionImpl: executeForResponse server=${intent.`package`} "
+        val logPrefix = "IpcMessageBridgeServiceConnectionImpl: executeForResponse server=${intent.`package`} "
         return currentBridgeVal?.also {
-            Log.d(XapiIpcTags.LOGTAG, "$logPrefix send direct")
+            Log.d(IpcMessageBridgeTags.LOGTAG, "$logPrefix send direct")
         }?.executeForResponse(messageData)
             ?: messengerBridgeFlow.also {
-                Log.d(XapiIpcTags.LOGTAG, "$logPrefix queue to send")
+                Log.d(IpcMessageBridgeTags.LOGTAG, "$logPrefix queue to send")
             }.filterNotNull().first().executeForResponse(messageData)
     }
 
     override fun executeForFlow(messageData: MessageData): Flow<MessageData> {
         val currentBridgeVal = messengerBridgeFlow.value
-        val logPrefix = "XapiIpcMessageBridgeServiceConnectionImpl: executeForFlow server=${intent.`package`} "
+        val logPrefix = "IpcMessageBridgeServiceConnectionImpl: executeForFlow server=${intent.`package`} "
         return currentBridgeVal?.also {
-            Log.d(XapiIpcTags.LOGTAG, "$logPrefix send direct")
+            Log.d(IpcMessageBridgeTags.LOGTAG, "$logPrefix send direct")
         }?.executeForFlow(messageData)
             ?: flow {
-                Log.d(XapiIpcTags.LOGTAG, "$logPrefix queue to send")
+                Log.d(IpcMessageBridgeTags.LOGTAG, "$logPrefix queue to send")
                 messengerBridgeFlow.filterNotNull().first().executeForFlow(messageData).collect {
                     emit(it)
                 }
@@ -81,11 +79,11 @@ class XapiIpcMessageBridgeServiceConnectionImpl(
     }
 
     override fun close() {
-        Log.d(XapiIpcTags.LOGTAG, "XapiMessageBridgeBinderImpl: close")
+        Log.d(IpcMessageBridgeTags.LOGTAG, "IpcMessageBridgeServiceConnectionImpl: close")
         if(!closed.getAndSet(true)) {
-            Log.d(XapiIpcTags.LOGTAG, "XapiMessageBridgeBinderImpl: close: cleanup")
+            Log.d(IpcMessageBridgeTags.LOGTAG, "IpcMessageBridgeServiceConnectionImpl: close: cleanup")
             if(mMessenger != null) {
-                Log.d(XapiIpcTags.LOGTAG, "XapiMessageBridgeBinderImpl: close: unbind")
+                Log.d(IpcMessageBridgeTags.LOGTAG, "IpcMessageBridgeServiceConnectionImpl: close: unbind")
                 context.unbindService(mConnection)
                 mMessenger = null
             }

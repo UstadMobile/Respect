@@ -32,7 +32,6 @@ fun IHttpResponse.asOkHttpResponse(): Response {
                     body(responseBody)
             }
             .code(responseCode)
-            .protocol(Protocol.HTTP_1_1)
             .message(
                 when(responseCode) {
                     206 -> "Partial Content"

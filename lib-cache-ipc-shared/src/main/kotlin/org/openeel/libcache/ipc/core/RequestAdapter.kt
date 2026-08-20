@@ -21,8 +21,6 @@ import okio.sink
 fun Request.toBundle(): Bundle {
     val bundle = Bundle()
 
-    this.tag()
-
     bundle.putBundle(IpcHttpKeys.KEY_HEADERS, headers.toBundle())
     bundle.putString(IpcHttpKeys.KEY_URL, url.toString())
     bundle.putString(IpcHttpKeys.KEY_METHOD, method)
@@ -35,6 +33,7 @@ fun Request.toBundle(): Bundle {
         val readSide = pipe[0]
         val writeSide = pipe[1]
 
+        //This should be replaced with using an executor instead of creating a new thread each time
         Thread {
             ParcelFileDescriptor.AutoCloseOutputStream(writeSide).use { out ->
                 val sink = out.sink().buffer()

@@ -297,7 +297,7 @@ onFlowComplete:
 - assertVisible: "Statement Maker"
 - assertVisible: "Share"
 - assertVisible:
-    text: "Copy Collection"
+    text: "Remix Collection"
     index: 1
 - assertVisible: "Assign"
 - assertVisible: "Delete"
@@ -389,7 +389,7 @@ onFlowComplete:
 #- assertVisible: "Send link via SMS"
 #- assertVisible: "Send link via email"
 #- tapOn:
-#    id: "copy_link_button"
+#    id: "copy_link"
 
 #- clearState: world.respect.app
 #- runFlow:
@@ -430,18 +430,18 @@ onFlowComplete:
 #    text: "New Collection"
 
 - tapOn:
-    id: "copy_btn"
-- assertVisible: "Make a copy"
-- assertVisible: "copy the Collection - Grade 1"
-- tapOn: "Copy"
+    id: "Remix_btn"
+- assertVisible: "Make a Remix"
+- assertVisible: "Remix the Collection - Grade 1"
+- tapOn: "Remix"
 - assertVisible:
     id: "app_title"
-    text: "Copy Collection"
-- tapOn: "copy the Collection - Grade 1"
+    text: "Remix Collection"
+- tapOn: "Remix the Collection - Grade 1"
 - runFlow:
     file: "subflows/erase_text.yaml"
     env:
-      TEXT: "copy the Collection - Grade 1"
+      TEXT: "Remix the Collection - Grade 1"
 - inputText: "Collection 2"
 - hideKeyboard
 - assertVisible: "Collection section day 1"

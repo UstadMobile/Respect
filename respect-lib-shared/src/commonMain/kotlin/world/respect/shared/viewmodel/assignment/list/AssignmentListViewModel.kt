@@ -23,7 +23,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.xapi.model.AssignmentSummary
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
@@ -40,7 +40,7 @@ import kotlin.uuid.ExperimentalUuidApi
 
 data class AssignmentListUiState(
     val assignments: DataLoadState<List<AssignmentSummary>> = DataLoadingState(),
-    val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = { emptyFlow() },
+    val learningUnitInfoFlow: (Url) -> Flow<DataLoadState<Publication>> = { emptyFlow() },
     val selectedFilter: AssignmentListScreenFilter = AssignmentListScreenFilter.ALL,
     val isStudent: Boolean = false,
     val personName: String = "",
@@ -152,7 +152,7 @@ class AssignmentListViewModel(
         )
     }
 
-    fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
+    fun learningUnitInfoFlowFor(url: Url): Flow<DataLoadState<Publication>> {
         return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = url, params = DataLoadParams(), null, null
         )

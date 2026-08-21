@@ -23,7 +23,7 @@ import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
 class OpdsPublicationDataSourceDb(
@@ -44,7 +44,7 @@ class OpdsPublicationDataSourceDb(
         }
     }
 
-    override suspend fun updateOpdsPublication(publication: DataReadyState<OpdsPublication>) {
+    override suspend fun updateOpdsPublication(publication: DataReadyState<Publication>) {
         val pubData = publication.data
         val url = publication.metaInfo.requireUrl()
 
@@ -104,7 +104,7 @@ class OpdsPublicationDataSourceDb(
         params: DataLoadParams,
         referrerUrl: Url?,
         expectedPublicationId: String?
-    ): Flow<DataLoadState<OpdsPublication>> {
+    ): Flow<DataLoadState<Publication>> {
         val urlHash = uidNumberMapper(url.toString())
 
         return respectSchoolDatabase.getOpdsPublicationEntityDao().findByUrlHashAsFlow(urlHash).map { entity ->
@@ -119,7 +119,7 @@ class OpdsPublicationDataSourceDb(
         params: DataLoadParams,
         referrerUrl: Url?,
         expectedPublicationId: String?
-    ) : DataLoadState<OpdsPublication> {
+    ) : DataLoadState<Publication> {
     return respectSchoolDatabase.useReaderConnection {
             respectSchoolDatabase.getOpdsPublicationEntityDao().findByUrlHash(
                 uidNumberMapper(url.toString())

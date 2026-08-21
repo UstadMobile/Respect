@@ -23,7 +23,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.coroutineScope
 import nl.adaptivity.xmlutil.serialization.XML
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.findLearningUnitAcquisitionLinks
 import world.respect.lib.opds.model.findTinCanXmlLink
@@ -75,7 +75,7 @@ class PinPublicationPrepareUseCase(
         val manifestUrl = downloadJob.djPubManifestUrl
             ?: throw IllegalArgumentException("no manifest url")
 
-        val publication: OpdsPublication = httpClient.get(manifestUrl).body()
+        val publication: Publication = httpClient.get(manifestUrl).body()
         val tinCanXmlLink = publication.findTinCanXmlLink()
         val tinCanXmlUrl = tinCanXmlLink?.href?.let { manifestUrl.resolve(it) }
         val tinCanXmlDocument = tinCanXmlUrl?.let {

@@ -54,5 +54,5 @@ onFlowComplete:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
 - assertVisible:
-       id: "nav_home"
+    id: "nav_home"
 

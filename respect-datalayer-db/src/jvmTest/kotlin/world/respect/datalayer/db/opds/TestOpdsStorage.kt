@@ -12,7 +12,7 @@ import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -28,7 +28,7 @@ class TestOpdsStorage {
         val json = Json { encodeDefaults = false }
         val pubUrl = Url("http://localhost:8098/lesson001.json")
         val publication = json.decodeFromString(
-            OpdsPublication.serializer(),
+            Publication.serializer(),
             this::class.java.getResourceAsStream(
                 "/world/respect/datalayer/db/opds/adapters/lesson001.json"
             )!!.bufferedReader().use { it.readText() }

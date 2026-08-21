@@ -1,7 +1,7 @@
 package world.respect.shared.domain.launchapp
 
 import io.ktor.http.Url
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 
 /**
  * Interface to launch a RESPECT compatible app.
@@ -18,7 +18,7 @@ interface LaunchAppUseCase {
      */
     data class LaunchRequest(
         val publicationUrl: Url,
-        val publication: OpdsPublication,
+        val publication: Publication,
         val assignmentActivityId: String? = null,
     )
 

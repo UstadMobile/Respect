@@ -13,7 +13,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.LangMap
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.findIcons
 import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
 import world.respect.lib.xapi.model.XapiActivity
@@ -22,7 +22,7 @@ import world.respect.libutil.ext.resolve
 @Composable
 fun AssignmentDetailTaskHeader(
     activity: XapiActivity,
-    taskInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>>,
+    taskInfoFlow: (Url) -> Flow<DataLoadState<Publication>>,
     taskColWidth: Dp,
     headerHeight: Dp,
 ) {

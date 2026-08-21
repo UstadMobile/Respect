@@ -23,7 +23,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.findSelfLinks
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.navigation.NavCommand
@@ -31,7 +31,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
 
 data class AppListUiState(
-    val appList: DataLoadState<List<OpdsPublication>> = DataReadyState(emptyList())
+    val appList: DataLoadState<List<Publication>> = DataReadyState(emptyList())
 )
 
 class AppListViewModel(
@@ -83,7 +83,7 @@ class AppListViewModel(
         )
     }
 
-    fun onClickApp(app: OpdsPublication) {
+    fun onClickApp(app: Publication) {
         val url = app.findSelfLinks().firstOrNull()?.href ?: return
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(

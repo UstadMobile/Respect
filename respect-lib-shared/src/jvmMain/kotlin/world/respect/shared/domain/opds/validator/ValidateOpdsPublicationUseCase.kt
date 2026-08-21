@@ -3,7 +3,7 @@ package world.respect.shared.domain.opds.validator
 import io.ktor.http.Url
 import io.ktor.util.toMap
 import org.jsoup.Jsoup
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.toStringMap
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
@@ -40,7 +40,7 @@ class ValidateOpdsPublicationUseCase(
      * @return ValidateOpdsPublicationUseCaseResult contains a list of discovered manifests to validate
      */
     suspend operator fun invoke(
-        publication: OpdsPublication,
+        publication: Publication,
         url: String,
         reporter: ValidatorReporter,
     ): ValidateOpdsPublicationUseCaseResult {

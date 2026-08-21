@@ -17,7 +17,7 @@ import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.opds.ext.asOpdsPublication
 import world.respect.datalayer.school.opds.ext.withAbsoluteSelfUrl
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 
 class OpdsPublicationDataSourceHttp(
     private val httpClient: HttpClient,
@@ -30,14 +30,14 @@ class OpdsPublicationDataSourceHttp(
      */
     private fun DataLoadState<JsonElement>.asPublicationIfRespectAppManifest(
 
-    ): DataLoadState<OpdsPublication> {
+    ): DataLoadState<Publication> {
         return this.map { element ->
             if(element is JsonObject && element.containsKey("defaultLaunchUri")) {
                 json.decodeFromJsonElement(
                     RespectAppManifest.serializer(), element
                 ).asOpdsPublication()
             }else {
-                json.decodeFromJsonElement(OpdsPublication.serializer(), element)
+                json.decodeFromJsonElement(Publication.serializer(), element)
             }
         }
     }
@@ -47,7 +47,7 @@ class OpdsPublicationDataSourceHttp(
         params: DataLoadParams,
         referrerUrl: Url?,
         expectedPublicationId: String?
-    ): Flow<DataLoadState<OpdsPublication>> {
+    ): Flow<DataLoadState<Publication>> {
         return httpClient.getDataLoadResultAsFlow<JsonElement>(
             urlFn = { url },
             dataLoadParams = params,
@@ -64,7 +64,7 @@ class OpdsPublicationDataSourceHttp(
         params: DataLoadParams,
         referrerUrl: Url?,
         expectedPublicationId: String?
-    ): DataLoadState<OpdsPublication> {
+    ): DataLoadState<Publication> {
         return httpClient.getAsDataLoadState<JsonElement>(
             url = url,
             validationHelper = publicationValidationHelper,

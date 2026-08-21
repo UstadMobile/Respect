@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -211,7 +212,7 @@ abstract class RespectViewModel(
     fun launchWithLoadingIndicator(
         runIfAlreadyLoading: Boolean = false,
         onShowError: ((UiText) -> Unit)? = null,
-        block: suspend () -> Unit,
+        block: suspend CoroutineScope.() -> Unit,
     ) {
         if(!runIfAlreadyLoading && loadingState == LoadingUiState.INDETERMINATE) {
             Napier.d("launchWithLoadingIndicator: already loading")

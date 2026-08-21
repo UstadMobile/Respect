@@ -69,4 +69,22 @@ class OpdsFeedDataSourceRepository(
             }
         )
     }
+
+    override fun getPlaylistsAsFlow(schoolUrl: Url): Flow<DataLoadState<List<OpdsFeed>>> {
+        return local.getPlaylistsAsFlow(schoolUrl)
+    }
+
+    override suspend fun deleteByUrl(url: Url) {
+        local.deleteByUrl(url)
+        val timeNow = systemTimeInMillis()
+        remoteWriteQueue.add(
+            listOf(
+                WriteQueueItem(
+                    model = WriteQueueItem.Model.OPDS_FEED,
+                    uid = url.toString(),
+                    timeQueued = timeNow,
+                )
+            )
+        )
+    }
 }

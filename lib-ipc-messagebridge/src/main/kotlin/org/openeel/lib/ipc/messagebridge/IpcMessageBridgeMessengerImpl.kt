@@ -17,9 +17,9 @@ import java.util.concurrent.atomic.AtomicInteger
 /**
  * @param outgoingMessenger the outgoing messenger e.g. the one that is connected to the service binder
  */
-class XapiMessageBridgeMessengerImpl(
+class IpcMessageBridgeMessengerImpl(
     private val outgoingMessenger: Messenger,
-): XapiMessageBridge {
+): IpcMessageBridge {
 
     private val requestIdAtomic = AtomicInteger(1)
 

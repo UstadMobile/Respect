@@ -5,10 +5,10 @@ import kotlinx.serialization.json.Json
 import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadState
 import org.openeel.lib.ipc.messagebridge.MessageData
-import org.openeel.lib.ipc.messagebridge.XapiMessageBridge
+import org.openeel.lib.ipc.messagebridge.IpcMessageBridge
 import world.respect.xapi.ipc.shared.messages.ext.toDataLoadState
 
-suspend fun <T:Any> XapiMessageBridge.executeRequestAsDataLoadState(
+suspend fun <T:Any> IpcMessageBridge.executeRequestAsDataLoadState(
     request: MessageData,
     json: Json,
     deserializer: DeserializationStrategy<T>,

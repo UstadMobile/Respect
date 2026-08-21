@@ -22,14 +22,14 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeWhatFlags
-import org.openeel.lib.ipc.messagebridge.XapiMessageBridge
+import org.openeel.lib.ipc.messagebridge.IpcMessageBridge
 import world.respect.xapi.ipc.shared.messages.ext.putAllFromStringMap
 import world.respect.xapi.ipc.shared.messages.ext.putStringValues
 import world.respect.xapi.ipc.shared.messages.ext.toDataLoadState
 import kotlin.uuid.Uuid
 
 class XapiStatementsResourceIpcClient(
-    private val requestSender: XapiMessageBridge,
+    private val requestSender: IpcMessageBridge,
     private val json: Json,
     private val endpoint: Url,
     private val auth: String,

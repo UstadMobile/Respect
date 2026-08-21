@@ -27,18 +27,18 @@ fun Response.toBundle(): Bundle {
         val readSide = pipe[0]
         val writeSide = pipe[1]
 
+        bundle.putParcelable(IpcHttpKeys.KEY_BODY_FD, readSide)
 
         Thread {
-            ParcelFileDescriptor.AutoCloseOutputStream(writeSide).use { out ->
-                val sink = out.sink().buffer()
+            ParcelFileDescriptor.AutoCloseOutputStream(writeSide).use { parcelOut ->
                 body.source().use { source ->
+                    val sink = parcelOut.sink().buffer()
                     source.readAll(sink)
+                    sink.flush()
                 }
-                sink.flush()
             }
         }.start()
 
-        bundle.putParcelable(IpcHttpKeys.KEY_BODY_FD, writeSide)
     }
 
     return bundle

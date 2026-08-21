@@ -21,7 +21,7 @@ import world.respect.lib.test.res.xapiSampleStatements
 import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource
-import org.openeel.lib.ipc.messagebridge.XapiMessageBridgeMessengerImpl
+import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeMessengerImpl
 import world.respect.xapi.ipc.client.XapiResourceIpcClient
 import world.respect.xapi.ipc.shared.messages.XapiIpcIntent
 import kotlin.test.assertEquals
@@ -57,7 +57,7 @@ class XapiServiceIntegrationTest {
         val serviceMessenger = Messenger(binder)
 
         client = XapiResourceIpcClient(
-            XapiMessageBridgeMessengerImpl(serviceMessenger),
+            IpcMessageBridgeMessengerImpl(serviceMessenger),
             json,
             Url("http://localhost/"),
             "secret",

@@ -1,10 +1,12 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 plugins {
     alias(libs.plugins.androidLibrary)
     id("maven-publish")
 }
 
 android {
-    namespace = "org.openeel.libcache.ipc.core"
+    namespace = "org.openeel.libcache.ipc.server"
     compileSdk {
         version = release(libs.versions.android.compileSdk.get().toInt())
     }
@@ -12,8 +14,10 @@ android {
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "org.openeel.libcache.ipc.server.InstrumentationTestRunner"
+
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -23,6 +27,14 @@ android {
         singleVariant("release") {
             withSourcesJar()
         }
+    }
+
+}
+
+tasks.withType<Test> {
+    testLogging {
+        exceptionFormat = TestExceptionFormat.FULL
+        showStackTraces = true
     }
 }
 
@@ -41,15 +53,17 @@ publishing {
 }
 
 dependencies {
+    api(projects.libCacheIpcShared)
+    api(libs.okhttp)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
-    api(libs.okhttp)
 
     testImplementation(libs.junit)
-    testImplementation(libs.androidx.junit)
-    testImplementation(libs.robolectric)
 
+    androidTestImplementation(projects.libCacheIpcClient)
+    androidTestImplementation(projects.libIpcMessagebridge)
+    androidTestImplementation(libs.mockwebserver)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.rules)
 }

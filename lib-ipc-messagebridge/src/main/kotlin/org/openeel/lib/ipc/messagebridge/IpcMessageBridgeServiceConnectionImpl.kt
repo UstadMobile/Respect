@@ -22,11 +22,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 class IpcMessageBridgeServiceConnectionImpl(
     private val context: Context,
     private val intent: Intent,
-) : XapiMessageBridge {
+) : IpcMessageBridge {
 
     private var mMessenger: Messenger? = null
 
-    private val messengerBridgeFlow = MutableStateFlow<XapiMessageBridgeMessengerImpl?>(null)
+    private val messengerBridgeFlow = MutableStateFlow<IpcMessageBridgeMessengerImpl?>(null)
 
     private val closed = AtomicBoolean(false)
 
@@ -37,7 +37,7 @@ class IpcMessageBridgeServiceConnectionImpl(
         ) {
             Log.i(IpcMessageBridgeTags.LOGTAG, "IpcMessageBridgeServiceConnectionImpl: service connected: $name")
             mMessenger = Messenger(service).also {
-                messengerBridgeFlow.value = XapiMessageBridgeMessengerImpl(it)
+                messengerBridgeFlow.value = IpcMessageBridgeMessengerImpl(it)
             }
 
         }

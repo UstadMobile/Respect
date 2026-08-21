@@ -1,0 +1,19 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+    Clear text traffic is required for testing using mockwebserver
+    -->
+    <application android:usesCleartextTraffic="true">
+        <service
+            android:name="org.openeel.libcache.ipc.server.IpcHttpService"
+            android:exported="true"
+            tools:ignore="ExportedService">
+
+            <intent-filter>
+                <action android:name="org.openeel.action.httpoveripc.connect" />
+            </intent-filter>
+        </service>
+
+    </application>
+</manifest>

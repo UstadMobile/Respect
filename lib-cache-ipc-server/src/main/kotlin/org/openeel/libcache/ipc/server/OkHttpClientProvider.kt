@@ -3,6 +3,6 @@ import okhttp3.OkHttpClient
 
 interface OkHttpClientProvider {
 
-    operator fun invoke(): OkHttpClient
+    fun provideOkHttpClient(): OkHttpClient
 
 }

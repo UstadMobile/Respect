@@ -11,7 +11,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * This might look like a JVM unit test would be fine, however the
+ * This might look like a JVM unit test would be fine, however Robolectric's ParcelFileDescriptor
+ * implementation is much more lenient than the real one leading to tests that pass on Robolectric
+ * which fail on Android itself
  */
 @RunWith(AndroidJUnit4::class)
 class ResponseAdapterTest {
@@ -23,12 +25,14 @@ class ResponseAdapterTest {
             .build()
 
         val message = "Gateway Timeout: only-if-cached if true, but not available in cache"
+        val contentType = "text/plain"
         val response = Response.Builder()
             .request(request)
             .protocol(Protocol.HTTP_1_1)
             .message("Gateway Timeout")
+            .header("content-type", contentType)
             .code(504)
-            .body(message.toResponseBody(contentType = "text/plain".toMediaTypeOrNull()))
+            .body(message.toResponseBody(contentType = contentType.toMediaTypeOrNull()))
             .build()
 
         val responseBundle = response.toBundle()
@@ -36,7 +40,7 @@ class ResponseAdapterTest {
 
         val responseFromBundleBody = responseFromBundle.body.string()
         Assert.assertEquals(message,responseFromBundleBody)
-
+        Assert.assertEquals(response.headers, responseFromBundle.headers)
         Assert.assertEquals(response.code, responseFromBundle.code)
         Assert.assertEquals(response.protocol, responseFromBundle.protocol)
     }

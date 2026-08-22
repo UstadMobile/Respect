@@ -57,6 +57,7 @@ kotlin {
         implementation(projects.respectLibXapiIpcServer)
         implementation(projects.respectDatalayerRepository)
         implementation(projects.respectLibPrimarykeygen)
+        implementation(projects.libCacheIpcServer)
 
         implementation(libs.multiplatformsettings)
         implementation(libs.androidx.credentials)

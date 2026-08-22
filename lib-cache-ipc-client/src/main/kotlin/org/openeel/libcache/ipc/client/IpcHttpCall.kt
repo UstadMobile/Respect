@@ -1,6 +1,7 @@
 package org.openeel.libcache.ipc.client
 
 import android.os.Message
+import android.util.Log
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.EventListener
@@ -8,6 +9,7 @@ import okhttp3.Request
 import okhttp3.Response
 import okio.IOException
 import okio.Timeout
+import org.openeel.libcache.ipc.core.HttpIpcTags
 import org.openeel.libcache.ipc.core.toBundle
 import org.openeel.libcache.ipc.core.toResponse
 import java.util.concurrent.CompletableFuture
@@ -25,6 +27,8 @@ class IpcHttpCall(
     private val getMessenger: () -> IpcHttpClientImpl.Messengers,
 ): Call {
 
+    private val logPrefix: String = "Call #$callId ${request.method} ${request.url}"
+
     private val executorFuture = AtomicReference<Future<*>?>(null)
 
     private val completeableFuture = CompletableFuture<Response>()
@@ -38,7 +42,9 @@ class IpcHttpCall(
     }
 
     override fun cancel() {
+        Log.d(HttpIpcTags.LOGTAG, "$logPrefix: cancel")
         executorFuture.load()?.cancel(true)
+        completeableFuture.cancel(true)
     }
 
     override fun clone(): Call {
@@ -47,6 +53,7 @@ class IpcHttpCall(
     }
 
     override fun enqueue(responseCallback: Callback) {
+        Log.d(HttpIpcTags.LOGTAG, "$logPrefix: enqueue")
         executorService.submit {
             try {
                 val response = execute()
@@ -64,15 +71,20 @@ class IpcHttpCall(
 
     override fun execute(): Response {
         //send on the messenger.
+        Log.d(HttpIpcTags.LOGTAG, "$logPrefix: request messengers")
         val messengers = getMessenger()
+        Log.d(HttpIpcTags.LOGTAG, "$logPrefix: execute on messenger")
 
         val message = Message.obtain()
         message.replyTo = messengers.incoming
         message.data = request.toBundle()
         message.arg1 = callId
         messengers.outgoing.send(message)
+        Log.d(HttpIpcTags.LOGTAG, "$logPrefix: sent message")
 
-        return completeableFuture.join()
+        return completeableFuture.join().also {
+            Log.d(HttpIpcTags.LOGTAG, "$logPrefix: received response message")
+        }
     }
 
     override fun isCanceled(): Boolean {

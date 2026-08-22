@@ -7,7 +7,7 @@ class IpcTestApplication: Application(), OkHttpClientProvider {
 
     private val httpClient = OkHttpClient.Builder().build()
 
-    override fun invoke(): OkHttpClient {
+    override fun provideOkHttpClient(): OkHttpClient {
         return httpClient
     }
 

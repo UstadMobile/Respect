@@ -15,31 +15,29 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.school.model.Indicator
 import world.respect.datalayer.school.model.Report
-import world.respect.datalayer.school.model.report.DefaultIndicators
-import world.respect.datalayer.school.model.report.ReportFilter
-import world.respect.datalayer.school.model.report.ReportOptions
-import world.respect.datalayer.school.model.report.ReportSeries
-import world.respect.datalayer.school.model.report.ReportSeriesVisualType
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
 import world.respect.lib.dataloadstate.ext.map
-import world.respect.lib.opds.model.toStringMap
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.decodeFromExtensionOrNull
 import world.respect.lib.xapi.ext.encodeWithExtension
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
 import world.respect.lib.xapi.ext.objectActivityOrNull
+import world.respect.lib.xapi.extensions.reportoptions.DefaultIndicators
+import world.respect.lib.xapi.extensions.reportoptions.Indicator
+import world.respect.lib.xapi.extensions.reportoptions.ReportFilter
+import world.respect.lib.xapi.extensions.reportoptions.ReportOptions
+import world.respect.lib.xapi.extensions.reportoptions.ReportSeries
+import world.respect.lib.xapi.extensions.reportoptions.ReportSeriesVisualType
 import world.respect.lib.xapi.model.XapiActivityDefinition
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.libutil.ext.isNullOrAllBlank
-import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.domain.xapi.createBlankReportStatement
@@ -106,7 +104,6 @@ class ReportEditViewModel(
     private val _uiState: MutableStateFlow<ReportEditUiState> =
         MutableStateFlow(ReportEditUiState())
     val uiState: Flow<ReportEditUiState> = _uiState.asStateFlow()
-    private var nextTempFilterUid = 0
     private val debouncer = LaunchDebouncer(viewModelScope)
 
 
@@ -229,7 +226,7 @@ class ReportEditViewModel(
                 .collect { result ->
                     val filter = result.result as? ReportFilter
                     filter?.let {
-                        onFilterChanged(filter)
+                        onFilterChanged(it)
                     }
                 }
         }
@@ -285,7 +282,7 @@ class ReportEditViewModel(
                     serializer = ReportOptions.serializer(),
                     value = options
                 ).copy(
-                    name = options.title.toStringMap()
+                    name = mapOf("en" to options.title)
                 )
             )
         } ?: currentStmt.`object`
@@ -311,17 +308,16 @@ class ReportEditViewModel(
         val requiredFieldMessage = StringResourceUiText(resource = Res.string.field_required_prompt)
         return copy(
             submitted = true,
-            reportTitleError = if (reportOptions.title.toStringMap()
-                    .isNullOrAllBlank()
+            reportTitleError = if (reportOptions.title.isBlank()
             ) requiredFieldMessage else null,
         )
     }
 
-    fun onSeriesChanged(updatedSeries: ReportSeries) {
+    fun onSeriesChanged(index: Int, updatedSeries: ReportSeries) {
         val currentOptions = _uiState.value.reportOptions
         val newOptions = currentOptions.copy(
-            series = currentOptions.series.replace(updatedSeries) {
-                it.reportSeriesUid == updatedSeries.reportSeriesUid
+            series = currentOptions.series.toMutableList().apply {
+                set(index, updatedSeries)
             }
         )
         onEntityChanged(newOptions)
@@ -330,7 +326,7 @@ class ReportEditViewModel(
     fun onAddSeries() {
         viewModelScope.launch {
             val currentOptions = _uiState.value.reportOptions
-            val newUid = (currentOptions.series.maxOfOrNull { it.reportSeriesUid } ?: 0) + 1
+            val nextSeriesNum = currentOptions.series.size + 1
 
             // Determine the required type based on existing series
             val requiredType = currentOptions.series.firstOrNull()?.reportSeriesYAxis?.type
@@ -345,8 +341,7 @@ class ReportEditViewModel(
 
             val newOptions = currentOptions.copy(
                 series = currentOptions.series + ReportSeries(
-                    reportSeriesUid = newUid,
-                    reportSeriesTitle = getString(resource = Res.string.series) + newUid,
+                    reportSeriesTitle = getString(resource = Res.string.series) + nextSeriesNum,
                     reportSeriesVisualType = ReportSeriesVisualType.BAR_CHART,
                     reportSeriesYAxis = defaultIndicator
                 ),
@@ -355,73 +350,74 @@ class ReportEditViewModel(
         }
     }
 
-    fun onRemoveSeries(seriesId: Int) {
+    fun onRemoveSeries(index: Int) {
         val currentOptions = _uiState.value.reportOptions
         val updatedSeriesList =
-            currentOptions.series.filterNot { it.reportSeriesUid == seriesId }
+            currentOptions.series.toMutableList().apply {
+                removeAt(index)
+            }
         val newOptions = currentOptions.copy(
             series = updatedSeriesList
         )
         onEntityChanged(newOptions)
     }
 
-    fun onAddFilter(seriesId: Int) {
-        val tempFilterUid = nextTempFilterUid++
-        val newFilter = ReportFilter(
-            reportFilterUid = tempFilterUid,
-            reportFilterSeriesUid = seriesId
-        )
-
+    fun onAddFilter(seriesIndex: Int) {
+        savedStateHandle[SAVED_STATE_SERIES_INDEX] = seriesIndex
+        savedStateHandle[SAVED_STATE_FILTER_INDEX] = -1
+        val newFilter = ReportFilter()
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(ReportEditFilter.create(newFilter))
         )
     }
 
-    fun onEditFilter(reportFilter: ReportFilter) {
+    fun onEditFilter(seriesIndex: Int, filterIndex: Int, reportFilter: ReportFilter) {
+        savedStateHandle[SAVED_STATE_SERIES_INDEX] = seriesIndex
+        savedStateHandle[SAVED_STATE_FILTER_INDEX] = filterIndex
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(ReportEditFilter.create(reportFilter))
         )
     }
 
-    private fun onFilterChanged(newFilter: ReportFilter?) {
+    private fun onFilterChanged(filter: ReportFilter) {
+        val seriesIndex = savedStateHandle.get<Int>(SAVED_STATE_SERIES_INDEX) ?: return
+        val filterIndex = savedStateHandle.get<Int>(SAVED_STATE_FILTER_INDEX) ?: -1
+
         val currentOptions = _uiState.value.reportOptions
-        val updatedSeries = currentOptions.series.map { series ->
-            if (series.reportSeriesUid == newFilter?.reportFilterSeriesUid) {
-                val currentFilters = series.reportSeriesFilters.orEmpty()
-                val updatedFilters = currentFilters.replaceOrAppend(
-                    element = newFilter,
-                    replacePredicate = { it.reportFilterUid == newFilter.reportFilterUid }
-                )
-                series.copy(reportSeriesFilters = updatedFilters)
-            } else {
-                series
-            }
+        val updatedSeriesList = currentOptions.series.toMutableList()
+        val series = updatedSeriesList.getOrNull(seriesIndex) ?: return
+
+        val currentFilters = series.reportSeriesFilters.orEmpty().toMutableList()
+        if (filterIndex >= 0 && filterIndex < currentFilters.size) {
+            currentFilters[filterIndex] = filter
+        } else {
+            currentFilters.add(filter)
         }
 
-        val newOptions = currentOptions.copy(series = updatedSeries)
+        updatedSeriesList[seriesIndex] = series.copy(reportSeriesFilters = currentFilters)
+        val newOptions = currentOptions.copy(series = updatedSeriesList)
         onEntityChanged(newOptions)
     }
 
-    fun onRemoveFilter(index: Int, seriesId: Int) {
+    fun onRemoveFilter(seriesIndex: Int, filterIndex: Int) {
         val currentOptions = _uiState.value.reportOptions
-        val updatedSeriesList = currentOptions.series.map { series ->
-            if (series.reportSeriesUid == seriesId) {
-                val updatedFilters = series.reportSeriesFilters?.toMutableList()?.apply {
-                    removeAt(index)
-                }
-                series.copy(reportSeriesFilters = updatedFilters)
-            } else {
-                series
-            }
+        val updatedSeries = currentOptions.series.toMutableList()
+        val series = updatedSeries.getOrNull(seriesIndex) ?: return
+
+        val updatedFilters = series.reportSeriesFilters?.toMutableList()?.apply {
+            removeAt(filterIndex)
         }
+        updatedSeries[seriesIndex] = series.copy(reportSeriesFilters = updatedFilters)
 
         val newOptions = currentOptions.copy(
-            series = updatedSeriesList
+            series = updatedSeries
         )
         onEntityChanged(newOptions)
     }
 
     companion object {
         const val REPORT_EDIT_FILTER_RESULT = "report_filter_result"
+        private const val SAVED_STATE_SERIES_INDEX = "seriesIndex"
+        private const val SAVED_STATE_FILTER_INDEX = "filterIndex"
     }
 }

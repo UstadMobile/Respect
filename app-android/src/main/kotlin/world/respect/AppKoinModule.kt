@@ -1198,7 +1198,7 @@ val appKoinModule = module {
         }
 
         scoped<RunReportUseCase> {
-            MockRunReportUseCaseClientImpl(accountManager = get())
+            MockRunReportUseCaseClientImpl(accountManager = get(), json = get())
         }
     }
     single<ValidateEmailUseCase>{

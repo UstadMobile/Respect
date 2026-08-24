@@ -3,6 +3,7 @@ package world.respect.shared.domain.report.query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
@@ -23,6 +24,7 @@ import kotlin.uuid.Uuid
 
 class MockRunReportUseCaseClientImpl(
     private val accountManager: RespectAccountManager,
+    private val json: Json,
 ) : RunReportUseCase {
 
     override fun invoke(
@@ -30,7 +32,7 @@ class MockRunReportUseCaseClientImpl(
     ): Flow<RunReportUseCase.RunReportResult> = flow {
 
         // 1. Dummy query-result JSON — simulates server response data
-        val queryResultJson = buildJsonObject {
+        val seriesResult = buildJsonObject {
             put("columnNames", buildJsonArray {
                 add(COLUMN_NAME_SUBGROUP)
                 add(COLUMN_NAME_X_AXIS)
@@ -42,6 +44,12 @@ class MockRunReportUseCaseClientImpl(
                 add(buildJsonArray { add(JsonPrimitive("male")); add(JsonPrimitive("2025-01-02")); add(JsonPrimitive(1223220.0)) })
                 add(buildJsonArray { add(JsonPrimitive("female")); add(JsonPrimitive("2025-01-02")); add(JsonPrimitive(922220.0)) })
             })
+        }
+
+        val queryResultJson = buildJsonArray {
+            repeat(request.reportOptions.series.size) {
+                add(seriesResult)
+            }
         }
 
         // 2. Response statement
@@ -63,15 +71,14 @@ class MockRunReportUseCaseClientImpl(
             version = "1.0.0"
         )
 
-        // 3. Map to StatementReportRow discovery indices from column names
-        val resultRows = responseStatement.toStatementReportRows()
-
-        // 4. Emit result — one list per series (mocking same data for all series)
+        // 3. Emit result — one list per series
         emit(
             RunReportUseCase.RunReportResult(
                 timestamp = Clock.System.now().toEpochMilliseconds(),
                 request = request,
-                results = request.reportOptions.series.map { resultRows },
+                results = request.reportOptions.series.mapIndexed { index, _ ->
+                    responseStatement.toStatementReportRows(index, json)
+                },
                 age = 0
             )
         )

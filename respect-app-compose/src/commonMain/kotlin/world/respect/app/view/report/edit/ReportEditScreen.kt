@@ -33,10 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.TimeZone
-import world.respect.lib.opds.model.LangMap
-import world.respect.lib.opds.model.toStringMap
 import org.jetbrains.compose.resources.stringResource
-import world.respect.app.components.LangMapTextField
 import world.respect.app.components.RespectDateField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
@@ -99,11 +96,11 @@ private fun ReportEditScreen(
     onReportOptionsChanged: (ReportOptions) -> Unit = {},
     onAddSeries: () -> Unit = { },
     onAddFilter: (Int) -> Unit = { },
-    onSeriesChanged: (ReportSeries) -> Unit = {},
+    onSeriesChanged: (Int, ReportSeries) -> Unit = { _, _ -> },
     onRemoveSeries: (Int) -> Unit = { },
     onRemoveFilter: (Int, Int) -> Unit = { _, _ -> },
     manageIndicator: () -> Unit = { },
-    onEditFilter: (ReportFilter) -> Unit = { },
+    onEditFilter: (Int, Int, ReportFilter) -> Unit = { _, _, _ -> },
 ) {
     val reportOptions = uiState.reportOptions
     val firstIndicatorType = reportOptions.series.firstOrNull()?.reportSeriesYAxis?.type
@@ -123,20 +120,21 @@ private fun ReportEditScreen(
 
     ) {
         item {
-            LangMapTextField(
+            OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = reportOptions.title.toStringMap(),
+                value = reportOptions.title,
                 label = { Text(stringResource(Res.string.title) + "*") },
-                onValueChange = { newTitleMap ->
-                    onReportOptionsChanged(reportOptions.copy(title = LangMap.fromMap(newTitleMap)))
+                onValueChange = { newTitle ->
+                    onReportOptionsChanged(reportOptions.copy(title = newTitle))
                 },
                 supportingText = {
                     uiState.reportTitleError?.let {
                         Text(uiTextStringResource(it))
                     }
-                }
+                },
+                isError = uiState.hasErrors,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             )
-
         }
         item {
             // Determine selected option based on TIME RANGE TYPE
@@ -206,7 +204,7 @@ private fun ReportEditScreen(
         }
 
         // Dynamically iterate over the series
-        reportOptions.series.forEach { seriesItem ->
+        reportOptions.series.forEachIndexed { seriesIndex, seriesItem ->
             item {
                 HorizontalDivider(
                     modifier = Modifier
@@ -237,7 +235,7 @@ private fun ReportEditScreen(
                             singleLine = true,
                             onValueChange = { newTitle ->
                                 val updatedSeries = seriesItem.copy(reportSeriesTitle = newTitle)
-                                onSeriesChanged(updatedSeries)
+                                onSeriesChanged(seriesIndex, updatedSeries)
                             }
                         )
                         if (!uiState.hasSingleSeries) {
@@ -246,7 +244,7 @@ private fun ReportEditScreen(
                                 contentDescription = stringResource(Res.string.remove),
                                 modifier = Modifier
                                     .clickable {
-                                        //onRemoveSeries(seriesItem.reportSeriesUid)
+                                        onRemoveSeries(seriesIndex)
                                     }
                                     .align(Alignment.CenterVertically)
                             )
@@ -260,7 +258,7 @@ private fun ReportEditScreen(
                         options = uiState.availableIndicators,
                         onOptionSelected = { selectedYAxis ->
                             val updatedSeries = seriesItem.copy(reportSeriesYAxis = selectedYAxis)
-                            onSeriesChanged(updatedSeries)
+                            onSeriesChanged(seriesIndex, updatedSeries)
                         },
                         disabledOptions = disabledIndicators,
                         additionalMenuItems = {
@@ -295,7 +293,7 @@ private fun ReportEditScreen(
                         onOptionSelected = { selectedXAxis ->
                             val updatedSeries =
                                 seriesItem.copy(reportSeriesSubGroup = selectedXAxis)
-                            onSeriesChanged(updatedSeries)
+                            onSeriesChanged(seriesIndex, updatedSeries)
                         }
                     )
 
@@ -308,18 +306,18 @@ private fun ReportEditScreen(
                         onOptionSelected = { selectedVisualType ->
                             val updatedSeries =
                                 seriesItem.copy(reportSeriesVisualType = selectedVisualType)
-                            onSeriesChanged(updatedSeries)
+                            onSeriesChanged(seriesIndex, updatedSeries)
                         },
                     )
                     if (!seriesItem.reportSeriesFilters.isNullOrEmpty()) {
                         Text(stringResource(Res.string.filters))
                     }
 
-                    seriesItem.reportSeriesFilters?.forEachIndexed { index, value ->
+                    seriesItem.reportSeriesFilters?.forEachIndexed { filterIndex, value ->
                         Row(
                             modifier = Modifier
                                 .clickable {
-                                    onEditFilter(value)
+                                    onEditFilter(seriesIndex, filterIndex, value)
                                 }
                                 .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -330,7 +328,7 @@ private fun ReportEditScreen(
                                 contentDescription = stringResource(Res.string.remove),
                                 modifier = Modifier
                                     .clickable {
-                                        //onRemoveFilter(index, seriesItem.reportSeriesUid)
+                                        onRemoveFilter(seriesIndex, filterIndex)
                                     }
                             )
                         }
@@ -340,7 +338,7 @@ private fun ReportEditScreen(
             item {
                 OutlinedButton(
                     onClick = {
-                        //onAddFilter(seriesItem.reportSeriesUid)
+                        onAddFilter(seriesIndex)
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {

@@ -174,26 +174,26 @@ onFlowComplete:
 #- tapOn: "English"
 #- tapOn: "Grade"
 #- tapOn: "Grade 1"
-- tapOn: "+ Section"
-- assertVisible: "Choose Section Type:"
+- tapOn: "Section"
+- assertVisible: "Choose section type"
 - assertVisible:
-    text: "Collection section"
+    text: "Collections section"
     index: 0
-- assertVisible: "Links to other Collections."
+- assertVisible: "Links to other collections."
 - assertVisible:
     text: "Learning item section"
     index: 1
 - assertVisible: "Links direct to items e.g. lessons, assessments, videos, etc"
 - tapOn:
-    text: "Collection section"
+    text: "Collections section"
     index: 0
-- assertVisible: "Collection section"
-- tapOn: "Collection section"
+- assertVisible: "Collections section"
+- tapOn: "Collections section"
 - runFlow:
     file: "subflows/erase_text.yaml"
     env:
-      TEXT: "Collection section"
-- inputText: "Day 1-Collection section"
+      TEXT: "Collections section"
+- inputText: "Day 1-Collections section"
 - hideKeyboard
 - tapOn: "Link to collection here"
 - tapOn: "Bookmarks"
@@ -213,12 +213,12 @@ onFlowComplete:
     id: "app_title"
     text: "Add Collection"
 - assertVisible: "Examples"
-- tapOn: "+ Section"
+- tapOn: "Section"
 - tapOn:
     text: "Learning item section"
     index: 1
 - assertVisible: "Learning item section"
-- tapOn: "+ Item"
+- tapOn: "Learning item here"
 - assertVisible:
     "Choose Item Type:"
 - assertVisible: "Browse"
@@ -238,13 +238,13 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Add Collection"
-- assertVisible: "Collection section day 1"
+- assertVisible: "Day 1-Collections section"
 - assertVisible: "Learning item section"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Collection - Grade 1"
-- assertVisible: "Collection section day 1"
+- assertVisible: "Day 1-Collections section"
 - tapOn: "Examples"
 - assertVisible: "Lesson 001"
 - assertVisible: "Statement Maker"
@@ -271,7 +271,7 @@ onFlowComplete:
       TEXT: "Learning item section"
 - inputText: "Learning item section day 2"
 - hideKeyboard
-- tapOn: "+ Item"
+- tapOn: "Learning item here"
 - tapOn: "Use Link"
 - assertVisible:
     id: "app_title"

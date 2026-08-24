@@ -196,23 +196,15 @@ onFlowComplete:
 - inputText: "Day 1-Collections section"
 - hideKeyboard
 - tapOn: "Link to collection here"
+- assertVisible:
+    id: "app_title"
+    text: "Select collection(s)"
 - tapOn: "Bookmarks"
 - tapOn: "Statement Maker"
-
-- assertVisible:
-    id: "app_title"
-    text: "Home"
-- tapOn: "Example Web App"
-- assertVisible:
-    id: "app_title"
-    text: "Main Menu"
-- assertVisible: "Examples"
-- tapOn: "Examples"
 - tapOn: "Select Collection"
 - assertVisible:
     id: "app_title"
     text: "Add Collection"
-- assertVisible: "Examples"
 - tapOn: "Section"
 - tapOn:
     text: "Learning item section"

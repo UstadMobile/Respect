@@ -8,6 +8,9 @@ import android.os.IBinder
 import android.os.Message
 import android.os.Messenger
 import android.util.Log
+import okhttp3.Call
+import okhttp3.Response
+import okio.IOException
 import org.openeel.libcache.ipc.core.HttpIpcTags
 import org.openeel.libcache.ipc.core.toBundle
 import org.openeel.libcache.ipc.core.toRequest
@@ -22,24 +25,41 @@ class IpcHttpService: Service() {
     }
 
     val incomingHandler = object: Handler(handlerThread.looper) {
+
         override fun handleMessage(msg: Message) {
             Log.d(HttpIpcTags.LOGTAG, "$logPrefix: Received message")
             val request = msg.data.toRequest()
+            val replyToVal = msg.replyTo
+
             Log.d(HttpIpcTags.LOGTAG, "$logPrefix: request ${request.method} ${request.url}")
 
             val client = (this@IpcHttpService.applicationContext as? OkHttpClientProvider)
                 ?.provideOkHttpClient()
                 ?: throw IllegalArgumentException("Context provides no request handler")
 
-            val response = client.newCall(request).execute()
-            Log.d(HttpIpcTags.LOGTAG, "$logPrefix: received response: ${response.code}")
+            fun post(runnable: Runnable) = super.post(runnable)
 
-            val responseMessage = Message.obtain()
+            client.newCall(request).enqueue(
+                object : okhttp3.Callback {
+                    override fun onFailure(call: Call, e: IOException) {
 
-            responseMessage.arg1 = msg.arg1
-            responseMessage.data = response.toBundle()
-            msg.replyTo.send(responseMessage)
-            Log.d(HttpIpcTags.LOGTAG, "$logPrefix: sent response message: ${response.code}")
+                    }
+
+                    override fun onResponse(call: Call, response: Response) {
+                        Log.d(HttpIpcTags.LOGTAG, "$logPrefix: received response: ${response.code}")
+                        val responseBundle = response.toBundle()
+
+                        post {
+                            val responseMessage = Message.obtain()
+
+                            responseMessage.arg1 = msg.arg1
+                            responseMessage.data = responseBundle
+                            replyToVal.send(responseMessage)
+                            Log.d(HttpIpcTags.LOGTAG, "$logPrefix: ${response.code} ${response.message}")
+                        }
+                    }
+                }
+            )
         }
     }
 
@@ -50,5 +70,11 @@ class IpcHttpService: Service() {
     override fun onBind(intent: Intent): IBinder? {
         Log.i(HttpIpcTags.LOGTAG, "$logPrefix: onBind")
         return messenger.binder
+    }
+
+    override fun onDestroy() {
+        //Cancel all requests
+
+        super.onDestroy()
     }
 }

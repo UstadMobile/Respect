@@ -71,9 +71,7 @@ class IpcHttpCall(
 
     override fun execute(): Response {
         //send on the messenger.
-        Log.d(HttpIpcTags.LOGTAG, "$logPrefix: request messengers")
         val messengers = getMessenger()
-        Log.d(HttpIpcTags.LOGTAG, "$logPrefix: execute on messenger")
 
         val message = Message.obtain()
         message.replyTo = messengers.incoming

@@ -73,7 +73,6 @@ fun Bundle.toRequest() : Request {
     var requestBody: RequestBody? = null
     val fd = getParcelable<ParcelFileDescriptor>(IpcHttpKeys.KEY_BODY_FD)
 
-    //val bodyFd = getParcelable(IpcHttpKeys.KEY_BODY_FD, ParcelFileDescriptor::class.java)
     if (fd != null) {
         requestBody = fd.fileDescriptor.toRequestBody(headers.get("content-type")
             ?.toMediaTypeOrNull())

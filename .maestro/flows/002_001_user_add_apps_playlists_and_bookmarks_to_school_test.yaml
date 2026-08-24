@@ -154,7 +154,7 @@ onFlowComplete:
 - tapOn: "Collections"
 - assertVisible: "All"
 - assertVisible: "My Collections"
-- assertVisible: "No collection yet"
+- assertVisible: "No collections yet"
 - assertVisible: "Add a collection by clicking on the + collection"
 - tapOn:
     id: "ExpandableFab"

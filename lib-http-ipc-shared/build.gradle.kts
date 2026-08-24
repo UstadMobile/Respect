@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "org.openeel.libcache.ipc.core"
+    namespace = "org.openeel.httpipc.core"
     compileSdk {
         version = release(libs.versions.android.compileSdk.get().toInt())
     }
@@ -14,6 +14,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17

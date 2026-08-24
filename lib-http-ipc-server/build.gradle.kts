@@ -1,10 +1,12 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 plugins {
     alias(libs.plugins.androidLibrary)
     id("maven-publish")
 }
 
 android {
-    namespace = "org.openeel.libcache.ipc.client"
+    namespace = "org.openeel.httpipc.server"
     compileSdk {
         version = release(libs.versions.android.compileSdk.get().toInt())
     }
@@ -12,7 +14,8 @@ android {
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "org.openeel.libcache.ipc.server.InstrumentationTestRunner"
+
     }
 
     compileOptions {
@@ -24,6 +27,14 @@ android {
         singleVariant("release") {
             withSourcesJar()
         }
+    }
+
+}
+
+tasks.withType<Test> {
+    testLogging {
+        exceptionFormat = TestExceptionFormat.FULL
+        showStackTraces = true
     }
 }
 
@@ -42,14 +53,17 @@ publishing {
 }
 
 dependencies {
-    api(projects.libCacheIpcShared)
-    implementation(projects.libIpcMessagebridge)
-
+    api(projects.libHttpIpcShared)
+    api(libs.okhttp)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
 
     testImplementation(libs.junit)
 
+    //androidTestImplementation(projects.libCacheIpcClient)
+    androidTestImplementation(projects.libIpcMessagebridge)
+    androidTestImplementation(libs.mockwebserver)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.rules)
 }

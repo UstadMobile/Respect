@@ -60,7 +60,7 @@ dependencies {
 
     testImplementation(libs.junit)
 
-    //androidTestImplementation(projects.libCacheIpcClient)
+    androidTestImplementation(projects.libHttpIpcClient)
     androidTestImplementation(projects.libIpcMessagebridge)
     androidTestImplementation(libs.mockwebserver)
     androidTestImplementation(libs.androidx.espresso.core)

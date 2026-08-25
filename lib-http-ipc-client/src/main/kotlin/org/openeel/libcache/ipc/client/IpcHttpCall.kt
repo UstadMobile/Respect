@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
 
 @OptIn(ExperimentalAtomicApi::class)
 class IpcHttpCall(
-    private val callId: Int,
+    internal val callId: Int,
     private val request: Request,
     private val executorService: ExecutorService,
     private val getMessenger: () -> IpcHttpClientImpl.Messengers,
@@ -78,6 +78,7 @@ class IpcHttpCall(
         message.data = request.toBundle()
         message.arg1 = callId
         messengers.outgoing.send(message)
+
         Log.d(HttpIpcTags.LOGTAG, "$logPrefix: sent message")
 
         return completeableFuture.join().also {

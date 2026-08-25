@@ -4,13 +4,13 @@ import android.content.Intent
 import android.os.IBinder
 import android.os.Messenger
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.ServiceTestRule
 import mockwebserver3.MockWebServer
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
 import okhttp3.Request
+import okio.use
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,12 +54,7 @@ class HttpIpcIntegrationTest {
     }
 
     @Test
-    fun useAppContext() {
-        // Context of the app under test.
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("org.openeel.libcache.ipc.server.test", appContext.packageName)
-
-        val mockWebServer = MockWebServer()
+    fun givenValidRequest_whenMadeViaIpcClient_thenResponseMatches() {
         val bodyStr = "Hello, world"
 
         val dispatcher : Dispatcher = object: Dispatcher() {
@@ -71,16 +66,18 @@ class HttpIpcIntegrationTest {
             }
         }
 
-        mockWebServer.dispatcher = dispatcher
-        mockWebServer.start()
+        MockWebServer().use { mockWebServer ->
+            mockWebServer.dispatcher = dispatcher
+            mockWebServer.start()
 
-        val response = ipcHttpClient.newCall(
-            Request.Builder()
-                .url(mockWebServer.url("/"))
-                .build()
-        ).execute()
+            val response = ipcHttpClient.newCall(
+                Request.Builder()
+                    .url(mockWebServer.url("/"))
+                    .build()
+            ).execute()
 
-        val bodyFromResponse = response.body.string()
-        assertEquals(bodyStr, bodyFromResponse)
+            val bodyFromResponse = response.body.string()
+            assertEquals(bodyStr, bodyFromResponse)
+        }
     }
 }

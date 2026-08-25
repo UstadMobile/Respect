@@ -14,6 +14,7 @@ import okio.IOException
 import org.openeel.libcache.ipc.core.HttpIpcTags
 import org.openeel.libcache.ipc.core.toBundle
 import org.openeel.libcache.ipc.core.toRequest
+import org.openeel.libcache.ipc.server.ext.setErrorResponse
 
 class IpcHttpService: Service() {
 
@@ -27,11 +28,10 @@ class IpcHttpService: Service() {
     val incomingHandler = object: Handler(handlerThread.looper) {
 
         override fun handleMessage(msg: Message) {
-            Log.d(HttpIpcTags.LOGTAG, "$logPrefix: Received message")
             val request = msg.data.toRequest()
             val replyToVal = msg.replyTo
-
-            Log.d(HttpIpcTags.LOGTAG, "$logPrefix: request ${request.method} ${request.url}")
+            val callIdVal = msg.arg1
+            val methodAndUrlStr = "${request.method} ${request.url}"
 
             val client = (this@IpcHttpService.applicationContext as? OkHttpClientProvider)
                 ?.provideOkHttpClient()
@@ -42,20 +42,33 @@ class IpcHttpService: Service() {
             client.newCall(request).enqueue(
                 object : okhttp3.Callback {
                     override fun onFailure(call: Call, e: IOException) {
+                        Log.w(HttpIpcTags.LOGTAG, "ERROR: $logPrefix $methodAndUrlStr : onFailure", e)
+                        val responseBundle = Response.Builder().setErrorResponse(
+                            request = request,
+                            exception = e,
+                        ).build().toBundle()
 
+                        post {
+                            replyToVal.send(
+                                Message.obtain().also {
+                                    it.arg1 = callIdVal
+                                    it.data = responseBundle
+                                }
+                            )
+                        }
                     }
 
                     override fun onResponse(call: Call, response: Response) {
-                        Log.d(HttpIpcTags.LOGTAG, "$logPrefix: received response: ${response.code}")
                         val responseBundle = response.toBundle()
 
                         post {
-                            val responseMessage = Message.obtain()
-
-                            responseMessage.arg1 = msg.arg1
-                            responseMessage.data = responseBundle
-                            replyToVal.send(responseMessage)
-                            Log.d(HttpIpcTags.LOGTAG, "$logPrefix: ${response.code} ${response.message}")
+                            Log.d(HttpIpcTags.LOGTAG, "$logPrefix:${response.code} ${response.message} $methodAndUrlStr ")
+                            replyToVal.send(
+                                Message.obtain().also {
+                                    it.arg1 = callIdVal
+                                    it.data = responseBundle
+                                }
+                            )
                         }
                     }
                 }
@@ -73,8 +86,14 @@ class IpcHttpService: Service() {
     }
 
     override fun onDestroy() {
-        //Cancel all requests
+        Log.i(HttpIpcTags.LOGTAG, "$logPrefix: onDestroy")
 
+        // Remove all pending messages as per
+        // https://developer.android.com/reference/android/os/Handler#removeCallbacksAndMessages(java.lang.Object)
+        incomingHandler.removeCallbacksAndMessages(null)
+
+        handlerThread.quitSafely()
         super.onDestroy()
     }
+
 }

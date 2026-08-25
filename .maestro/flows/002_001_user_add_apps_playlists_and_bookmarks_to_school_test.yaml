@@ -428,7 +428,7 @@ onFlowComplete:
 - tapOn: "Remix"
 - assertVisible:
     id: "app_title"
-    text: "Remix Collection"
+    text: "Edit collection"
 - tapOn: "Remix the Collection - Grade 1"
 - runFlow:
     file: "subflows/erase_text.yaml"

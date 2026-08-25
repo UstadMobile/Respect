@@ -12,8 +12,11 @@ import okhttp3.internal.http.promisesBody
 import okio.buffer
 import okio.source
 import okio.sink
+import java.util.concurrent.ExecutorService
 
-fun Response.toBundle(): Bundle {
+fun Response.toBundle(
+    executor: ExecutorService
+): Bundle {
     val bundle = Bundle()
     bundle.putInt(IpcHttpKeys.KEY_STATUS_CODE, code)
     bundle.putString(IpcHttpKeys.KEY_STATUS_MESSAGE, message)
@@ -29,7 +32,7 @@ fun Response.toBundle(): Bundle {
 
         bundle.putParcelable(IpcHttpKeys.KEY_BODY_FD, readSide)
 
-        Thread {
+        executor.submit {
             ParcelFileDescriptor.AutoCloseOutputStream(writeSide).use { parcelOut ->
                 body.source().use { source ->
                     val sink = parcelOut.sink().buffer()
@@ -37,7 +40,7 @@ fun Response.toBundle(): Bundle {
                     sink.flush()
                 }
             }
-        }.start()
+        }
 
     }
 

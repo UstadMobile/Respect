@@ -75,7 +75,7 @@ class IpcHttpCall(
 
         val message = Message.obtain()
         message.replyTo = messengers.incoming
-        message.data = request.toBundle()
+        message.data = request.toBundle(executor = executorService)
         message.arg1 = callId
         messengers.outgoing.send(message)
 

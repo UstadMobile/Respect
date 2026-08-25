@@ -78,8 +78,8 @@ class IpcHttpClientImpl(
         if(!closed.getAndSet(true)) {
             //As per https://developer.android.com/reference/android/os/Handler#removeCallbacksAndMessages(java.lang.Object)
             incomingHandler.removeCallbacksAndMessages(null)
-
             handlerThread.quitSafely()
+            executor.shutdown()
         }
     }
 

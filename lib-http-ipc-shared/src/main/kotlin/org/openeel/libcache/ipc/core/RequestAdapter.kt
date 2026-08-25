@@ -9,6 +9,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.buffer
 import okio.sink
+import java.util.concurrent.ExecutorService
 
 /**
  * Convert an OKHttp request into an Android bundle that can be passed over a bound service using
@@ -18,7 +19,9 @@ import okio.sink
  *
  * @receiver The OKHttp request to convert.
  */
-fun Request.toBundle(): Bundle {
+fun Request.toBundle(
+    executor: ExecutorService
+): Bundle {
     val bundle = Bundle()
 
     bundle.putBundle(IpcHttpKeys.KEY_HEADERS, headers.toBundle())
@@ -33,14 +36,13 @@ fun Request.toBundle(): Bundle {
         val readSide = pipe[0]
         val writeSide = pipe[1]
 
-        //This should be replaced with using an executor instead of creating a new thread each time
-        Thread {
+        executor.submit {
             ParcelFileDescriptor.AutoCloseOutputStream(writeSide).use { out ->
                 val sink = out.sink().buffer()
                 bodyVal.writeTo(sink)
                 sink.flush()
             }
-        }.start()
+        }
 
         bundle.putParcelable(IpcHttpKeys.KEY_BODY_FD, writeSide)
     }

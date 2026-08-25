@@ -46,7 +46,7 @@ class IpcHttpService: Service() {
                         val responseBundle = Response.Builder().setErrorResponse(
                             request = request,
                             exception = e,
-                        ).build().toBundle()
+                        ).build().toBundle(client.dispatcher.executorService)
 
                         post {
                             replyToVal.send(
@@ -59,7 +59,9 @@ class IpcHttpService: Service() {
                     }
 
                     override fun onResponse(call: Call, response: Response) {
-                        val responseBundle = response.toBundle()
+                        val responseBundle = response.toBundle(
+                            client.dispatcher.executorService
+                        )
 
                         post {
                             Log.d(HttpIpcTags.LOGTAG, "$logPrefix:${response.code} ${response.message} $methodAndUrlStr ")

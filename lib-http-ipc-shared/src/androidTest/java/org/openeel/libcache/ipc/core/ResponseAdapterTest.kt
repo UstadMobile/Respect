@@ -6,9 +6,13 @@ import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
+import org.junit.After
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 /**
  * This might look like a JVM unit test would be fine, however Robolectric's ParcelFileDescriptor
@@ -17,6 +21,19 @@ import org.junit.runner.RunWith
  */
 @RunWith(AndroidJUnit4::class)
 class ResponseAdapterTest {
+
+    private lateinit var executorService: ExecutorService
+
+    @Before
+    fun setup() {
+        executorService = Executors.newCachedThreadPool()
+    }
+
+    @After
+    fun tearDown() {
+        executorService.shutdown()
+    }
+
 
     @Test
     fun givenConvertedToFromBundleThenShouldMatch() {
@@ -35,7 +52,7 @@ class ResponseAdapterTest {
             .body(message.toResponseBody(contentType = contentType.toMediaTypeOrNull()))
             .build()
 
-        val responseBundle = response.toBundle()
+        val responseBundle = response.toBundle(executorService)
         val responseFromBundle = responseBundle.toResponse(request)
 
         val responseFromBundleBody = responseFromBundle.body.string()

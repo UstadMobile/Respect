@@ -11,6 +11,8 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.openeel.libcache.ipc.core.adapters.toBundle
+import org.openeel.libcache.ipc.core.adapters.toResponse
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 

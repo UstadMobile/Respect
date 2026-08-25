@@ -1,6 +1,6 @@
 package org.openeel.libcache.ipc.core
 
-object IpcHttpKeys {
+object HttpIpcKeys {
 
     const val KEY_HEADERS = "header"
 
@@ -15,5 +15,8 @@ object IpcHttpKeys {
     const val KEY_STATUS_MESSAGE = "status_message"
 
     const val KEY_RESPONSE_PROTOCOL = "response_protocol"
+
+    const val KEY_TIMEOUT_NANOS = "timeout_nanos"
+
 
 }

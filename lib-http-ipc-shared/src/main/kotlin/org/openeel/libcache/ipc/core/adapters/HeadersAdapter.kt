@@ -1,4 +1,4 @@
-package org.openeel.libcache.ipc.core
+package org.openeel.libcache.ipc.core.adapters
 
 import android.os.Bundle
 import okhttp3.Headers

@@ -11,10 +11,13 @@ import android.util.Log
 import okhttp3.Call
 import okhttp3.Response
 import okio.IOException
+import okio.Timeout
 import org.openeel.libcache.ipc.core.HttpIpcTags
-import org.openeel.libcache.ipc.core.toBundle
-import org.openeel.libcache.ipc.core.toRequest
+import org.openeel.libcache.ipc.core.HttpIpcWhat
+import org.openeel.libcache.ipc.core.adapters.toBundle
+import org.openeel.libcache.ipc.core.adapters.toRequest
 import org.openeel.libcache.ipc.server.ext.setErrorResponse
+import java.util.concurrent.TimeUnit
 
 class IpcHttpService: Service() {
 
@@ -28,10 +31,8 @@ class IpcHttpService: Service() {
     val incomingHandler = object: Handler(handlerThread.looper) {
 
         override fun handleMessage(msg: Message) {
-            val request = msg.data.toRequest()
             val replyToVal = msg.replyTo
             val callIdVal = msg.arg1
-            val methodAndUrlStr = "${request.method} ${request.url}"
 
             val client = (this@IpcHttpService.applicationContext as? OkHttpClientProvider)
                 ?.provideOkHttpClient()
@@ -39,42 +40,67 @@ class IpcHttpService: Service() {
 
             fun post(runnable: Runnable) = super.post(runnable)
 
-            client.newCall(request).enqueue(
-                object : okhttp3.Callback {
-                    override fun onFailure(call: Call, e: IOException) {
-                        Log.w(HttpIpcTags.LOGTAG, "ERROR: $logPrefix $methodAndUrlStr : onFailure", e)
-                        val responseBundle = Response.Builder().setErrorResponse(
-                            request = request,
-                            exception = e,
-                        ).build().toBundle(client.dispatcher.executorService)
+            when(msg.what) {
+                HttpIpcWhat.WHAT_REQUEST -> {
+                    val request = msg.data.toRequest()
+                    val methodAndUrlStr = "${request.method} ${request.url}"
 
-                        post {
-                            replyToVal.send(
-                                Message.obtain().also {
-                                    it.arg1 = callIdVal
-                                    it.data = responseBundle
+                    client.newCall(request).enqueue(
+                        object : okhttp3.Callback {
+                            override fun onFailure(call: Call, e: IOException) {
+                                Log.w(HttpIpcTags.LOGTAG, "ERROR: $logPrefix $methodAndUrlStr : onFailure", e)
+                                val responseBundle = Response.Builder().setErrorResponse(
+                                    request = request,
+                                    exception = e,
+                                ).build().toBundle(client.dispatcher.executorService)
+
+                                post {
+                                    replyToVal.send(
+                                        Message.obtain().also {
+                                            it.what = HttpIpcWhat.WHAT_RESPONSE
+                                            it.arg1 = callIdVal
+                                            it.data = responseBundle
+                                        }
+                                    )
                                 }
-                            )
-                        }
-                    }
+                            }
 
-                    override fun onResponse(call: Call, response: Response) {
-                        val responseBundle = response.toBundle(
-                            client.dispatcher.executorService
-                        )
+                            override fun onResponse(call: Call, response: Response) {
+                                val responseBundle = response.toBundle(
+                                    client.dispatcher.executorService
+                                )
 
-                        post {
-                            Log.d(HttpIpcTags.LOGTAG, "$logPrefix:${response.code} ${response.message} $methodAndUrlStr ")
-                            replyToVal.send(
-                                Message.obtain().also {
-                                    it.arg1 = callIdVal
-                                    it.data = responseBundle
+                                post {
+                                    Log.d(
+                                        HttpIpcTags.LOGTAG,
+                                        "$logPrefix:${response.code} ${response.message} $methodAndUrlStr "
+                                    )
+                                    replyToVal.send(
+                                        Message.obtain().also {
+                                            it.what = HttpIpcWhat.WHAT_RESPONSE
+                                            it.arg1 = callIdVal
+                                            it.data = responseBundle
+                                        }
+                                    )
                                 }
-                            )
+                            }
                         }
-                    }
+                    )
                 }
-            )
+
+                HttpIpcWhat.WHAT_REQUEST_TIMEOUT -> {
+                    replyToVal.send(
+                        Message.obtain().also {
+                            it.what = HttpIpcWhat.WHAT_RESPONSE_TIMEOUT
+                            it.arg1 = callIdVal
+                            it.data = Timeout().timeout(
+                                timeout = client.callTimeoutMillis.toLong(),
+                                unit = TimeUnit.MILLISECONDS
+                            ).toBundle()
+                        }
+                    )
+                }
+            }
         }
     }
 

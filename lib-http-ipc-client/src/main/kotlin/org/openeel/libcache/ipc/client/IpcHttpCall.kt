@@ -10,8 +10,10 @@ import okhttp3.Response
 import okio.IOException
 import okio.Timeout
 import org.openeel.libcache.ipc.core.HttpIpcTags
-import org.openeel.libcache.ipc.core.toBundle
-import org.openeel.libcache.ipc.core.toResponse
+import org.openeel.libcache.ipc.core.HttpIpcWhat
+import org.openeel.libcache.ipc.core.adapters.toBundle
+import org.openeel.libcache.ipc.core.adapters.toResponse
+import org.openeel.libcache.ipc.core.adapters.toTimeout
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Future
@@ -33,8 +35,21 @@ class IpcHttpCall(
 
     private val completeableFuture = CompletableFuture<Response>()
 
-    internal fun onResponse(message: Message) {
-        completeableFuture.complete(message.data.toResponse(request))
+    private val timeoutFuture by lazy {
+        CompletableFuture<Timeout>()
+    }
+
+    internal fun onMessage(message: Message) {
+        when(message.what) {
+            HttpIpcWhat.WHAT_RESPONSE -> {
+                completeableFuture.complete(message.data.toResponse(request))
+            }
+
+            HttpIpcWhat.WHAT_RESPONSE_TIMEOUT -> {
+                timeoutFuture.complete(message.data.toTimeout())
+            }
+        }
+
     }
 
     override fun addEventListener(eventListener: EventListener) {
@@ -74,6 +89,7 @@ class IpcHttpCall(
         val messengers = getMessenger()
 
         val message = Message.obtain()
+        message.what = HttpIpcWhat.WHAT_REQUEST
         message.replyTo = messengers.incoming
         message.data = request.toBundle(executor = executorService)
         message.arg1 = callId
@@ -115,6 +131,19 @@ class IpcHttpCall(
     }
 
     override fun timeout(): Timeout {
-        TODO("Not yet implemented")
+        if(timeoutFuture.isDone) {
+            return timeoutFuture.get()
+        }
+
+        val messengers = getMessenger()
+        messengers.outgoing.send(
+            Message.obtain().also {
+                it.what = HttpIpcWhat.WHAT_REQUEST_TIMEOUT
+                it.arg1 = callId
+                it.replyTo = messengers.incoming
+            }
+        )
+
+        return timeoutFuture.join()
     }
 }

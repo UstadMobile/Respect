@@ -5,6 +5,8 @@ import okhttp3.Headers
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.openeel.libcache.ipc.core.adapters.toBundle
+import org.openeel.libcache.ipc.core.adapters.toHeaders
 
 @RunWith(AndroidJUnit4::class)
 class HeadersAdapterUnitTest {

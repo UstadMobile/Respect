@@ -6,6 +6,7 @@ import android.os.Messenger
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.ServiceTestRule
+import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import okhttp3.Request
 import okio.use
@@ -20,6 +21,7 @@ import org.junit.runner.RunWith
 import org.openeel.libcache.ipc.client.IpcHttpClient
 import org.openeel.libcache.ipc.client.IpcHttpClientImpl
 import org.openeel.libcache.ipc.core.HttpIpcIntent
+import java.util.concurrent.TimeUnit
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -113,6 +115,40 @@ class HttpIpcIntegrationTest {
 
         assertEquals(502, response.code)
     }
+
+    @Test
+    fun givenMockServerHeadersTimeOut_whenRequestMade_thenReceivesGatewayError() {
+        mockWebServer.start()
+
+        mockWebServer.enqueue(MockResponse.Builder()
+            .headersDelay(50_000, TimeUnit.MILLISECONDS)
+            .body("Hello World")
+            .code(200)
+            .build()
+        )
+
+        val call = ipcHttpClient.newCall(
+            Request.Builder()
+                .url(mockWebServer.url("xapistatements/group-statement.json"))
+                .build()
+        )
+
+        val timeout = call.timeout()
+        val response = call.execute()
+
+        assertEquals(502, response.code)
+
+        assertEquals(
+            IpcTestApplication.TIMEOUT_DURATION_SECS * 1_000_000_000,
+            timeout.timeoutNanos()
+        )
+    }
+
+    @Test
+    fun givenBodyDelayed_whenBodyRead_thenTimesOut() {
+
+    }
+
 
 
 }

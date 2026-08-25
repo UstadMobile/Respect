@@ -1,4 +1,4 @@
-package org.openeel.libcache.ipc.core
+package org.openeel.libcache.ipc.core.adapters
 
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
@@ -9,6 +9,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.buffer
 import okio.sink
+import org.openeel.libcache.ipc.core.HttpIpcKeys
 import java.util.concurrent.ExecutorService
 
 /**
@@ -24,9 +25,9 @@ fun Request.toBundle(
 ): Bundle {
     val bundle = Bundle()
 
-    bundle.putBundle(IpcHttpKeys.KEY_HEADERS, headers.toBundle())
-    bundle.putString(IpcHttpKeys.KEY_URL, url.toString())
-    bundle.putString(IpcHttpKeys.KEY_METHOD, method)
+    bundle.putBundle(HttpIpcKeys.KEY_HEADERS, headers.toBundle())
+    bundle.putString(HttpIpcKeys.KEY_URL, url.toString())
+    bundle.putString(HttpIpcKeys.KEY_METHOD, method)
 
     val bodyVal = body
     if(bodyVal != null) {
@@ -44,7 +45,7 @@ fun Request.toBundle(
             }
         }
 
-        bundle.putParcelable(IpcHttpKeys.KEY_BODY_FD, writeSide)
+        bundle.putParcelable(HttpIpcKeys.KEY_BODY_FD, writeSide)
     }
 
     return bundle
@@ -59,11 +60,11 @@ fun Request.toBundle(
 fun Bundle.toRequest() : Request {
     val builder = Request.Builder()
 
-    val url = getString(IpcHttpKeys.KEY_URL)
+    val url = getString(HttpIpcKeys.KEY_URL)
         ?: throw IllegalArgumentException("Missing URL in Bundle")
-    val method = getString(IpcHttpKeys.KEY_METHOD)
+    val method = getString(HttpIpcKeys.KEY_METHOD)
         ?: throw IllegalArgumentException("Missing Method in Bundle")
-    val headerBundle = getBundle(IpcHttpKeys.KEY_HEADERS)
+    val headerBundle = getBundle(HttpIpcKeys.KEY_HEADERS)
 
     builder.url(url)
 
@@ -73,7 +74,7 @@ fun Bundle.toRequest() : Request {
 
 
     var requestBody: RequestBody? = null
-    val fd = getParcelable<ParcelFileDescriptor>(IpcHttpKeys.KEY_BODY_FD)
+    val fd = getParcelable<ParcelFileDescriptor>(HttpIpcKeys.KEY_BODY_FD)
 
     if (fd != null) {
         requestBody = fd.fileDescriptor.toRequestBody(headers.get("content-type")

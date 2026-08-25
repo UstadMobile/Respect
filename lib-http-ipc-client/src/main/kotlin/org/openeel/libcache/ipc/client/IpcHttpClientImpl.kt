@@ -45,7 +45,7 @@ class IpcHttpClientImpl(
 
         override fun handleMessage(msg: Message) {
             val callId = msg.arg1
-            calls.firstOrNull { it.callId == callId }?.onResponse(msg)
+            calls.firstOrNull { it.callId == callId }?.onMessage(msg)
         }
 
     }

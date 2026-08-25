@@ -1,4 +1,4 @@
-package org.openeel.libcache.ipc.core
+package org.openeel.libcache.ipc.core.adapters
 
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
@@ -12,16 +12,17 @@ import okhttp3.internal.http.promisesBody
 import okio.buffer
 import okio.source
 import okio.sink
+import org.openeel.libcache.ipc.core.HttpIpcKeys
 import java.util.concurrent.ExecutorService
 
 fun Response.toBundle(
     executor: ExecutorService
 ): Bundle {
     val bundle = Bundle()
-    bundle.putInt(IpcHttpKeys.KEY_STATUS_CODE, code)
-    bundle.putString(IpcHttpKeys.KEY_STATUS_MESSAGE, message)
-    bundle.putBundle(IpcHttpKeys.KEY_HEADERS, headers.toBundle())
-    bundle.putString(IpcHttpKeys.KEY_RESPONSE_PROTOCOL, protocol.name)
+    bundle.putInt(HttpIpcKeys.KEY_STATUS_CODE, code)
+    bundle.putString(HttpIpcKeys.KEY_STATUS_MESSAGE, message)
+    bundle.putBundle(HttpIpcKeys.KEY_HEADERS, headers.toBundle())
+    bundle.putString(HttpIpcKeys.KEY_RESPONSE_PROTOCOL, protocol.name)
 
     if(promisesBody()) {
         val pipe = ParcelFileDescriptor.createPipe()
@@ -30,7 +31,7 @@ fun Response.toBundle(
         val readSide = pipe[0]
         val writeSide = pipe[1]
 
-        bundle.putParcelable(IpcHttpKeys.KEY_BODY_FD, readSide)
+        bundle.putParcelable(HttpIpcKeys.KEY_BODY_FD, readSide)
 
         executor.submit {
             ParcelFileDescriptor.AutoCloseOutputStream(writeSide).use { parcelOut ->
@@ -50,9 +51,9 @@ fun Response.toBundle(
 fun Bundle.toResponse(
     request: Request,
 ) : Response {
-    val bodyFd = getParcelable<ParcelFileDescriptor>(IpcHttpKeys.KEY_BODY_FD)
-    val headers = getBundle(IpcHttpKeys.KEY_HEADERS)?.toHeaders() ?: Headers.EMPTY
-    val protocolName = getString(IpcHttpKeys.KEY_RESPONSE_PROTOCOL)
+    val bodyFd = getParcelable<ParcelFileDescriptor>(HttpIpcKeys.KEY_BODY_FD)
+    val headers = getBundle(HttpIpcKeys.KEY_HEADERS)?.toHeaders() ?: Headers.EMPTY
+    val protocolName = getString(HttpIpcKeys.KEY_RESPONSE_PROTOCOL)
         ?: throw IllegalArgumentException("Missing protocol name")
 
     val responseBody = bodyFd?.let { fd ->
@@ -65,9 +66,9 @@ fun Bundle.toResponse(
     return Response.Builder()
         .headers(headers)
         .request(request)
-        .code(getInt(IpcHttpKeys.KEY_STATUS_CODE))
+        .code(getInt(HttpIpcKeys.KEY_STATUS_CODE))
         .message(
-            getString(IpcHttpKeys.KEY_STATUS_MESSAGE)
+            getString(HttpIpcKeys.KEY_STATUS_MESSAGE)
                 ?: throw IllegalArgumentException("Missing status message")
         )
         .protocol(Protocol.entries.first { it.name == protocolName })

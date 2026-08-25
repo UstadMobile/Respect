@@ -88,4 +88,31 @@ class HttpIpcIntegrationTest {
         assertResponseMatches("xapistatements/group-statement.json")
         assertResponseMatches("media/video.mp4")
     }
+
+    @Test
+    fun givenUriNotFound_whenRequestMade_thenReceives404Response() {
+        mockWebServer.dispatcher = MockWebServerAssetDispatcher(ipcTestApplication)
+        mockWebServer.start()
+
+        val response = ipcHttpClient.newCall(
+            Request.Builder()
+                .url(mockWebServer.url("/doesnotexist"))
+                .build()
+        ).execute()
+
+        assertEquals(404, response.code)
+    }
+
+    @Test
+    fun givenMockServerNotRunning_whenRequestMade_thenReceivesGatewayError() {
+        val response = ipcHttpClient.newCall(
+            Request.Builder()
+                .url("http://localhost:8080/servernotrunning")
+                .build()
+        ).execute()
+
+        assertEquals(502, response.code)
+    }
+
+
 }

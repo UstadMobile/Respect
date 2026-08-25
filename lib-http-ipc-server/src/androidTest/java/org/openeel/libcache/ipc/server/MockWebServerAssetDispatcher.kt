@@ -15,6 +15,7 @@ import okio.source
 import org.openeel.libcache.ipc.core.HttpIpcTags
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.io.FileNotFoundException
 
 class MockWebServerAssetDispatcher(
     private val context: Context,
@@ -45,7 +46,9 @@ class MockWebServerAssetDispatcher(
             Log.w(HttpIpcTags.LOGTAG, "Exception retrieving ${request.url}", e)
             MockResponse.Builder()
                 .body("Error retrieving $requestPath : ${e.message}")
-                .code(500)
+                .code(
+                    if(e is FileNotFoundException) 404 else 500
+                )
                 .build()
         }
 

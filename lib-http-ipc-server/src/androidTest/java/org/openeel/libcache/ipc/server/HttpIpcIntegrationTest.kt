@@ -7,17 +7,16 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.ServiceTestRule
 import mockwebserver3.MockWebServer
-import mockwebserver3.Dispatcher
-import mockwebserver3.MockResponse
 import okhttp3.Request
 import okio.use
-
-import org.junit.Test
-import org.junit.runner.RunWith
-
-import org.junit.Assert.*
+import org.junit.After
+import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
 import org.openeel.libcache.ipc.client.IpcHttpClient
 import org.openeel.libcache.ipc.client.IpcHttpClientImpl
 import org.openeel.libcache.ipc.core.HttpIpcIntent
@@ -37,6 +36,8 @@ class HttpIpcIntegrationTest {
 
     private lateinit var ipcHttpClient: IpcHttpClient
 
+    private lateinit var mockWebServer: MockWebServer
+
     @Before
     fun setup() {
         ipcTestApplication = ApplicationProvider.getApplicationContext()
@@ -51,33 +52,40 @@ class HttpIpcIntegrationTest {
         ipcHttpClient = IpcHttpClientImpl(
             outgoingMessengerProvider = { messenger }
         )
+
+        mockWebServer = MockWebServer()
     }
+
+    @After
+    fun teardown() {
+        mockWebServer.close()
+        ipcHttpClient.close()
+    }
+
+    private fun assertResponseMatches(
+        path: String
+    ) {
+        val bodyBytes = ipcTestApplication.assets.open(path).use {
+            it.readAllBytes()
+        }
+
+        mockWebServer.dispatcher = MockWebServerAssetDispatcher(ipcTestApplication)
+        mockWebServer.start()
+
+        val response = ipcHttpClient.newCall(
+            Request.Builder()
+                .url(mockWebServer.url("/$path"))
+                .build()
+        ).execute()
+
+        val bodyFromResponse = response.body.source().readByteArray()
+        Assert.assertArrayEquals(bodyBytes, bodyFromResponse)
+    }
+
 
     @Test
     fun givenValidRequest_whenMadeViaIpcClient_thenResponseMatches() {
-        val bodyStr = "Hello, world"
-
-        val dispatcher : Dispatcher = object: Dispatcher() {
-            override fun dispatch(request: mockwebserver3.RecordedRequest): MockResponse {
-                return MockResponse.Builder()
-                    .code(200)
-                    .body(bodyStr)
-                    .build()
-            }
-        }
-
-        MockWebServer().use { mockWebServer ->
-            mockWebServer.dispatcher = dispatcher
-            mockWebServer.start()
-
-            val response = ipcHttpClient.newCall(
-                Request.Builder()
-                    .url(mockWebServer.url("/"))
-                    .build()
-            ).execute()
-
-            val bodyFromResponse = response.body.string()
-            assertEquals(bodyStr, bodyFromResponse)
-        }
+        assertResponseMatches("xapistatements/group-statement.json")
+        assertResponseMatches("media/video.mp4")
     }
 }

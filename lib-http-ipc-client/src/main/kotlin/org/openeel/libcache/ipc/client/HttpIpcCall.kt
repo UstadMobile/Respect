@@ -22,11 +22,11 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.reflect.KClass
 
 @OptIn(ExperimentalAtomicApi::class)
-class IpcHttpCall(
+class HttpIpcCall(
     internal val callId: Int,
     private val request: Request,
     private val executorService: ExecutorService,
-    private val getMessenger: () -> IpcHttpClientImpl.Messengers,
+    private val getMessenger: () -> HttpIpcClientImpl.Messengers,
 ): Call {
 
     private val logPrefix: String = "Call #$callId ${request.method} ${request.url}"

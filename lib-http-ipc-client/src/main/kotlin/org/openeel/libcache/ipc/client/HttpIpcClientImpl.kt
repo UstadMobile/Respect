@@ -15,9 +15,9 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
-class IpcHttpClientImpl(
+class HttpIpcClientImpl(
     private val outgoingMessengerProvider: MessengerProvider,
-) : IpcHttpClient, Closeable {
+) : HttpIpcClient, Closeable {
 
     private val handlerThread = HandlerThread("HttpIpcServiceThread").also {
         if(!it.isAlive)
@@ -37,7 +37,7 @@ class IpcHttpClientImpl(
 
     private val calls = Collections.synchronizedSet(
         Collections.newSetFromMap(
-            WeakHashMap<IpcHttpCall, Boolean>()
+            WeakHashMap<HttpIpcCall, Boolean>()
         )
     )
 
@@ -61,7 +61,7 @@ class IpcHttpClientImpl(
         assertNotClosed()
         val callId = callIdAtomic.getAndIncrement()
 
-        return IpcHttpCall(
+        return HttpIpcCall(
             callId = callId,
             request = request,
             executorService = executor,

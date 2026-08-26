@@ -4,7 +4,7 @@ import okhttp3.Call
 import okhttp3.Request
 import java.io.Closeable
 
-interface IpcHttpClient: Closeable {
+interface HttpIpcClient: Closeable {
 
     fun newCall(request: Request): Call
 

@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.ServiceTestRule
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
+import mockwebserver3.SocketEffect
 import okhttp3.Request
 import okio.use
 import org.junit.After
@@ -18,15 +19,14 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.openeel.libcache.ipc.client.IpcHttpClient
-import org.openeel.libcache.ipc.client.IpcHttpClientImpl
+import org.openeel.libcache.ipc.client.HttpIpcClient
+import org.openeel.libcache.ipc.client.HttpIpcClientImpl
 import org.openeel.libcache.ipc.core.HttpIpcIntent
 import java.util.concurrent.TimeUnit
 
 /**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
+ * Test the HttpIpc service and client using a real web server (MockWebServer) to make real HTTP
+ * requests with various scenarios.
  */
 @RunWith(AndroidJUnit4::class)
 class HttpIpcIntegrationTest {
@@ -36,7 +36,7 @@ class HttpIpcIntegrationTest {
 
     private lateinit var ipcTestApplication: IpcTestApplication
 
-    private lateinit var ipcHttpClient: IpcHttpClient
+    private lateinit var ipcHttpClient: HttpIpcClient
 
     private lateinit var mockWebServer: MockWebServer
 
@@ -51,7 +51,7 @@ class HttpIpcIntegrationTest {
         assertNotNull(binder)
         val messenger = Messenger(binder)
 
-        ipcHttpClient = IpcHttpClientImpl(
+        ipcHttpClient = HttpIpcClientImpl(
             outgoingMessengerProvider = { messenger }
         )
 
@@ -145,8 +145,26 @@ class HttpIpcIntegrationTest {
     }
 
     @Test
-    fun givenBodyDelayed_whenBodyRead_thenTimesOut() {
+    fun givenServerDisconnects_whenRequestMade_thenReceivesGatewayError() {
+        mockWebServer.start()
+        val bodyContent = "Can't get this, hammer time"
 
+        mockWebServer.enqueue(
+            MockResponse.Builder()
+                .body(bodyContent)
+                .onResponseStart(SocketEffect.CloseSocket())
+            .build()
+        )
+
+        val response = ipcHttpClient.newCall(
+            Request.Builder()
+                .url(mockWebServer.url("/"))
+                .build()
+        ).execute()
+
+        val bodyAsString = response.body.string()
+        Assert.assertNotEquals(bodyContent, bodyAsString)
+        assertEquals(502, response.code)
     }
 
 

@@ -7,15 +7,19 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.Messenger
 import android.util.Log
+import java.io.Closeable
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 class ServiceConnectionMessengerProvider(
     private val context: Context,
     private val intent: Intent,
-) : MessengerProvider {
+) : MessengerProvider, Closeable {
 
     private var mMessenger: Messenger? = null
+
+    private val closed = AtomicBoolean(false)
 
     private val messengerFuture = AtomicReference<CompletableFuture<Messenger>>(
         CompletableFuture()
@@ -35,6 +39,7 @@ class ServiceConnectionMessengerProvider(
 
         override fun onServiceDisconnected(p0: ComponentName?) {
             Log.i(LOGTAG, "ServiceConnectionMessengerProvider: onServiceDisconnected")
+            mMessenger = null
             messengerFuture.set(CompletableFuture())
         }
     }
@@ -47,8 +52,19 @@ class ServiceConnectionMessengerProvider(
 
     override fun invoke(): Messenger {
         Log.i(LOGTAG, "ServiceConnectionMessengerProvider: invoke to get messenger")
+
+        if(closed.get()) {
+            throw IllegalStateException("ServiceConnectionMessengerProvider: already closed")
+        }
+
         return messengerFuture.get().join().also {
             Log.i(LOGTAG, "ServiceConnectionMessengerProvider: return messenger")
+        }
+    }
+
+    override fun close() {
+        if(!closed.getAndSet(true)) {
+            context.takeIf { messengerFuture.get().isDone }?.unbindService(mConnection)
         }
     }
 

@@ -51,15 +51,11 @@ class ServiceConnectionMessengerProvider(
     }
 
     override fun invoke(): Messenger {
-        Log.i(LOGTAG, "ServiceConnectionMessengerProvider: invoke to get messenger")
-
         if(closed.get()) {
             throw IllegalStateException("ServiceConnectionMessengerProvider: already closed")
         }
 
-        return messengerFuture.get().join().also {
-            Log.i(LOGTAG, "ServiceConnectionMessengerProvider: return messenger")
-        }
+        return messengerFuture.get().join()
     }
 
     override fun close() {

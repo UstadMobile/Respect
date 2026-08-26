@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class HttpIpcClientImpl(
     private val outgoingMessengerProvider: MessengerProvider,
+    val closeOutgoingProvider: Boolean = true,
 ) : HttpIpcClient, Closeable {
 
     private val handlerThread = HandlerThread("HttpIpcServiceThread").also {
@@ -80,6 +81,7 @@ class HttpIpcClientImpl(
             incomingHandler.removeCallbacksAndMessages(null)
             handlerThread.quitSafely()
             executor.shutdown()
+            (outgoingMessengerProvider as? Closeable)?.takeIf { closeOutgoingProvider }?.close()
         }
     }
 

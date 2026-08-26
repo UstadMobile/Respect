@@ -29,7 +29,7 @@ class HttpIpcCall(
     private val getMessenger: () -> HttpIpcClientImpl.Messengers,
 ): Call {
 
-    private val logPrefix: String = "Call #$callId ${request.method} ${request.url}"
+    private val logPrefix: String = "HttpIpcCall #$callId ${request.method} ${request.url}"
 
     private val executorFuture = AtomicReference<Future<*>?>(null)
 
@@ -68,7 +68,6 @@ class HttpIpcCall(
     }
 
     override fun enqueue(responseCallback: Callback) {
-        Log.d(HttpIpcTags.LOGTAG, "$logPrefix: enqueue")
         executorService.submit {
             try {
                 val response = execute()
@@ -88,17 +87,24 @@ class HttpIpcCall(
         //send on the messenger.
         val messengers = getMessenger()
 
-        val message = Message.obtain()
-        message.what = HttpIpcWhat.WHAT_REQUEST
-        message.replyTo = messengers.incoming
-        message.data = request.toBundle(executor = executorService)
-        message.arg1 = callId
-        messengers.outgoing.send(message)
+        return try {
+            val message = Message.obtain()
+            message.what = HttpIpcWhat.WHAT_REQUEST
+            message.replyTo = messengers.incoming
+            message.data = request.toBundle(executor = executorService)
+            message.arg1 = callId
+            messengers.outgoing.send(message)
+            Log.d(HttpIpcTags.LOGTAG, "HttpIpcCall: #$callId: ${request.method} ${request.url} : sent via IPC messenger")
 
-        Log.d(HttpIpcTags.LOGTAG, "$logPrefix: sent message")
 
-        return completeableFuture.join().also {
-            Log.d(HttpIpcTags.LOGTAG, "$logPrefix: received response message")
+            completeableFuture.join().also {
+                Log.d(HttpIpcTags.LOGTAG,
+                    "HttpIpcCall: #$callId Response: ${it.code} ${it.message} ${it.request.url}"
+                )
+            }
+        }catch(e: Throwable) {
+            Log.w(HttpIpcTags.LOGTAG, "HttpIpcCall #$callId: ${request.method} ${request.url} Exception", e)
+            throw e
         }
     }
 

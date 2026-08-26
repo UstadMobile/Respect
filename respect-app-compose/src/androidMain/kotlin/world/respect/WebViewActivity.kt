@@ -72,15 +72,23 @@ class WebViewActivity : AppCompatActivity() {
         }
     }
 
-    /*
-     * Uncomment to test running web based publications through HttpIpc
-    private val httpIpcClient by lazy {
-        HttpIpcClientBuilder(this)
-            .setIpcServicePackageName(this.packageName)
-            .build()
-    }
-     */
+//    private val httpIpcClient by lazy {
+//        HttpIpcClientBuilder(this)
+//            .setIpcServicePackageName(this.packageName)
+//            .build()
+//    }
+
     private val okHttpClient: OkHttpClient by inject()
+
+    //Uncomment below to test sending requests through Http-Ipc
+//    private val okHttpClient: OkHttpClient by lazy {
+//        val appOkHttpClient: OkHttpClient by inject<OkHttpClient>()
+//        val builder = appOkHttpClient.newBuilder()
+//
+//        //Uncomment to test using Http-Ipc
+//        builder.interceptors().add(0, HttpIpcInterceptor(httpIpcClient))
+//        builder.build()
+//    }
 
     private val webViewClient by lazy {
         OkHttpWebViewClient(okHttpClient = okHttpClient)
@@ -146,7 +154,7 @@ class WebViewActivity : AppCompatActivity() {
         super.onDestroy()
 
         //Uncomment to test using HttpIpc
-        //httpIpcClient.close()
+//        httpIpcClient.close()
     }
 
     companion object {

@@ -36,7 +36,7 @@ class HttpIpcIntegrationTest {
 
     private lateinit var ipcTestApplication: IpcTestApplication
 
-    private lateinit var ipcHttpClient: HttpIpcClient
+    private lateinit var httpIpcClient: HttpIpcClient
 
     private lateinit var mockWebServer: MockWebServer
 
@@ -51,7 +51,7 @@ class HttpIpcIntegrationTest {
         assertNotNull(binder)
         val messenger = Messenger(binder)
 
-        ipcHttpClient = HttpIpcClientImpl(
+        httpIpcClient = HttpIpcClientImpl(
             outgoingMessengerProvider = { messenger }
         )
 
@@ -61,7 +61,7 @@ class HttpIpcIntegrationTest {
     @After
     fun teardown() {
         mockWebServer.close()
-        ipcHttpClient.close()
+        httpIpcClient.close()
     }
 
     private fun assertResponseMatches(
@@ -74,7 +74,7 @@ class HttpIpcIntegrationTest {
         mockWebServer.dispatcher = MockWebServerAssetDispatcher(ipcTestApplication)
         mockWebServer.start()
 
-        val response = ipcHttpClient.newCall(
+        val response = httpIpcClient.newCall(
             Request.Builder()
                 .url(mockWebServer.url("/$path"))
                 .build()
@@ -96,7 +96,7 @@ class HttpIpcIntegrationTest {
         mockWebServer.dispatcher = MockWebServerAssetDispatcher(ipcTestApplication)
         mockWebServer.start()
 
-        val response = ipcHttpClient.newCall(
+        val response = httpIpcClient.newCall(
             Request.Builder()
                 .url(mockWebServer.url("/doesnotexist"))
                 .build()
@@ -107,7 +107,7 @@ class HttpIpcIntegrationTest {
 
     @Test
     fun givenMockServerNotRunning_whenRequestMade_thenReceivesGatewayError() {
-        val response = ipcHttpClient.newCall(
+        val response = httpIpcClient.newCall(
             Request.Builder()
                 .url("http://localhost:8080/servernotrunning")
                 .build()
@@ -127,7 +127,7 @@ class HttpIpcIntegrationTest {
             .build()
         )
 
-        val call = ipcHttpClient.newCall(
+        val call = httpIpcClient.newCall(
             Request.Builder()
                 .url(mockWebServer.url("xapistatements/group-statement.json"))
                 .build()
@@ -156,7 +156,7 @@ class HttpIpcIntegrationTest {
             .build()
         )
 
-        val response = ipcHttpClient.newCall(
+        val response = httpIpcClient.newCall(
             Request.Builder()
                 .url(mockWebServer.url("/"))
                 .build()

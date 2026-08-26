@@ -19,9 +19,9 @@ import org.openeel.libcache.ipc.core.adapters.toRequest
 import org.openeel.libcache.ipc.server.ext.setErrorResponse
 import java.util.concurrent.TimeUnit
 
-class IpcHttpService: Service() {
+class HttpIpcService: Service() {
 
-    private val logPrefix = "IpcHttpService"
+    private val logPrefix = "HttpIpcService"
 
     private val handlerThread = HandlerThread("HttpIpcServiceThread").also {
         if(!it.isAlive)
@@ -34,7 +34,7 @@ class IpcHttpService: Service() {
             val replyToVal = msg.replyTo
             val callIdVal = msg.arg1
 
-            val client = (this@IpcHttpService.applicationContext as? OkHttpClientProvider)
+            val client = (this@HttpIpcService.applicationContext as? OkHttpClientProvider)
                 ?.provideOkHttpClient()
                 ?: throw IllegalArgumentException("Context provides no request handler")
 

@@ -11,7 +11,7 @@ val client = HttpIpcClientBuilder(context)
     .setAuth(auth) //optional: use if required by other app
     .build()
 
-//Now use it the same as OKHTTP Client
+//Now use it the same as OkHttp Client.
 val response = client.newCall(
     Request.Builder()
         .url("http://example.org/")

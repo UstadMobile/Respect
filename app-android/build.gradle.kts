@@ -58,6 +58,7 @@ kotlin {
         implementation(projects.respectDatalayerRepository)
         implementation(projects.respectLibPrimarykeygen)
         implementation(projects.libHttpIpcServer)
+        implementation(projects.libHttpIpcClient)
 
         implementation(libs.multiplatformsettings)
         implementation(libs.androidx.credentials)

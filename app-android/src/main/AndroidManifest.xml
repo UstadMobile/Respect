@@ -132,7 +132,7 @@
         HTTP IPC service
         -->
         <service
-            android:name="org.openeel.libcache.ipc.server.IpcHttpService"
+            android:name="org.openeel.libcache.ipc.server.HttpIpcService"
             android:exported="true"
             tools:ignore="ExportedService">
 

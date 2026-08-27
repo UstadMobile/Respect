@@ -3,11 +3,14 @@ package world.respect.shared.domain.opds.getxapiactivityid
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import nl.adaptivity.xmlutil.serialization.XML
 import world.respect.datalayer.school.opds.ext.requireAbsoluteSelfUrl
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.findLearningUnitAcquisitionLinks
 import world.respect.lib.opds.model.findTinCanXmlLink
 import world.respect.lib.opds.model.toStringMap
@@ -28,7 +31,7 @@ class GetXapiActivityForPublicationUseCase(
 ) {
 
     suspend operator fun invoke(
-        publication: OpdsPublication
+        publication: Publication
     ) : XapiActivity {
         val publicationUrl = publication.requireAbsoluteSelfUrl()
 
@@ -70,6 +73,16 @@ class GetXapiActivityForPublicationUseCase(
                     )
                 )
             )
+        }
+    }
+
+    suspend operator fun invoke(
+        publications: List<Publication>
+    ): List<XapiActivity> {
+        return coroutineScope {
+            publications.map { publication ->
+                async { invoke(publication) }
+            }.awaitAll()
         }
     }
 

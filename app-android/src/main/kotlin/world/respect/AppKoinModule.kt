@@ -33,7 +33,6 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.Url
 import io.ktor.serialization.kotlinx.json.json
 import io.michaelrocks.libphonenumber.android.PhoneNumberUtil
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -96,6 +95,7 @@ import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
 import world.respect.datalayer.school.domain.GetWritableRolesListUseCaseImpl
+import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
@@ -171,6 +171,8 @@ import world.respect.shared.domain.launchers.LaunchSendWhatsAppUseCase
 import world.respect.shared.domain.launchers.LaunchSendWhatsAppUseCaseAndroid
 import world.respect.shared.domain.openexternallink.OpenExternalLinkUseCase
 import world.respect.shared.domain.launchers.OpenExternalLinkUseCaseAndroid
+import world.respect.shared.domain.externallink.ExtractWebPageMetadataUseCase
+import world.respect.shared.domain.externallink.ExtractWebPageMetadataUseCaseAndroid
 import world.respect.shared.domain.navigation.deeplink.CustomDeepLinkToUrlUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
@@ -214,8 +216,8 @@ import world.respect.shared.viewmodel.enrollment.edit.EnrollmentEditViewModel
 import world.respect.shared.viewmodel.clazz.detail.ClazzDetailViewModel
 import world.respect.shared.viewmodel.clazz.edit.ClazzEditViewModel
 import world.respect.shared.viewmodel.clazz.list.ClazzListViewModel
-import world.respect.shared.viewmodel.learningunit.detail.LearningUnitDetailViewModel
-import world.respect.shared.viewmodel.learningunit.list.LearningUnitListViewModel
+import world.respect.shared.viewmodel.catalog.publicationdetail.PublicationDetailViewModel
+import world.respect.shared.viewmodel.catalog.opdsfeeddetail.OpdsFeedDetailViewModel
 import world.respect.shared.viewmodel.manageuser.accountlist.AccountListViewModel
 import world.respect.shared.viewmodel.manageuser.sharefeedback.ShareFeedbackViewModel
 import world.respect.shared.viewmodel.manageuser.acceptinvite.AcceptInviteViewModel
@@ -261,10 +263,12 @@ import world.respect.shared.viewmodel.report.list.ReportTemplateListViewModel
 import world.respect.sharedse.domain.account.authenticatepassword.AuthenticatePasswordUseCaseDbImpl
 import java.io.File
 import world.respect.shared.viewmodel.settings.SettingsViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.list.CurriculumMappingListViewModel
-import world.respect.shared.viewmodel.curriculum.mapping.edit.CurriculumMappingEditViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetPasswordViewModel
 import world.respect.shared.viewmodel.person.setusernameandpassword.CreateAccountSetUserNameViewModel
+import world.respect.shared.viewmodel.catalog.opdsfeededit.OpdsFeedEditViewModel
+import world.respect.shared.viewmodel.catalog.opdsfeededitaddlink.OpdsFeedEditAddLinkViewModel
+import world.respect.shared.viewmodel.catalog.opdsfeedlist.OpdsFeedListViewModel
+import world.respect.shared.viewmodel.catalog.opdsfeedshare.OpdsFeedShareViewModel
 import world.respect.shared.viewmodel.schooldirectory.edit.SchoolDirectoryEditViewModel
 import world.respect.shared.viewmodel.schooldirectory.list.SchoolDirectoryListViewModel
 import world.respect.shared.domain.sharelink.LaunchSendEmailUseCase
@@ -284,13 +288,12 @@ import world.respect.shared.viewmodel.statement.detail.RawStatementViewModel
 import world.respect.shared.viewmodel.statement.detail.StatementDetailViewModel
 import world.respect.shared.viewmodel.statement.list.StatementListViewModel
 import world.respect.shared.domain.xapi.xapinanohttpd.XapiResourceProviderAndroid
-import world.respect.shared.viewmodel.bookmark.BookmarkListViewModel
+import world.respect.shared.viewmodel.catalog.bookmark.BookmarkListViewModel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
 const val TAG_TMP_DIR = "tmpDir"
 
-@DelicateCoroutinesApi
 val appKoinModule = module {
     single<Json> {
         Json {
@@ -370,6 +373,11 @@ val appKoinModule = module {
             }
         }
     }
+    single<ExtractWebPageMetadataUseCase> {
+        ExtractWebPageMetadataUseCaseAndroid(
+            httpClient = get()
+        )
+    }
 
     BuildConfig.GEOLOCATION_API_ENDPOINT.takeIf { it.isNotEmpty() }?.also { geoIpEndpoint ->
         single<GetCountryForUrlUseCase> {
@@ -388,8 +396,8 @@ val appKoinModule = module {
     viewModelOf(::ClazzListViewModel)
     viewModelOf(::ClazzEditViewModel)
     viewModelOf(::ClazzDetailViewModel)
-    viewModelOf(::LearningUnitListViewModel)
-    viewModelOf(::LearningUnitDetailViewModel)
+    viewModelOf(::OpdsFeedDetailViewModel)
+    viewModelOf(::PublicationDetailViewModel)
     viewModelOf(::ReportViewModel)
     viewModelOf(::AcknowledgementViewModel)
     viewModelOf(::EnterInviteCodeViewModel)
@@ -423,8 +431,6 @@ val appKoinModule = module {
     viewModelOf(::IndicatorDetailViewModel)
     viewModelOf(::SettingsViewModel)
     viewModelOf(::ScanQRCodeViewModel)
-    viewModelOf(::CurriculumMappingListViewModel)
-    viewModelOf(::CurriculumMappingEditViewModel)
     viewModelOf(::CreateAccountSetUserNameViewModel)
     viewModelOf(::ChangePasswordViewModel)
     viewModelOf(::SchoolDirectoryListViewModel)
@@ -436,6 +442,11 @@ val appKoinModule = module {
     viewModelOf(::EnrollmentEditViewModel)
     viewModelOf(::InviteQrViewModel)
     viewModelOf(::CreateAccountSetPasswordViewModel)
+    viewModelOf(::OpdsFeedListViewModel)
+    viewModelOf(::OpdsFeedEditViewModel)
+    viewModelOf(::OpdsFeedEditAddLinkViewModel)
+    viewModelOf(::OpdsFeedShareViewModel)
+
     viewModelOf(::StatementListViewModel)
     viewModelOf(::StatementDetailViewModel)
     viewModelOf(::RawStatementViewModel)
@@ -872,8 +883,6 @@ val appKoinModule = module {
                 httpClient = get(),
             )
         }
-
-
         scoped<GetInviteInfoUseCase> {
             GetInviteInfoUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
@@ -949,20 +958,13 @@ val appKoinModule = module {
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl
             )
         }
-
     }
-
     /**
      * ScopeId is set as per RespectAccountScopeId
      *
      * The RespectAccount scope will be linked to SchoolDirectoryEntry (the parent) scope.
      */
     scope<RespectAccount> {
-        /* Koin doesn't have an onScopeCreated kind of function or event listener. The
-         * RespectAccount scope is linked ot the SchoolDirectoryEntry scope when
-         * RespectAccountSchoolScopeLink is retrieved. RespectAccountSchoolScopeLink is a root
-         * dependency that all dependencies on RespectAccountScope require.
-         */
         scoped<RespectAccountSchoolScopeLink> {
             val accountScopeId = RespectAccountScopeId.parse(id)
             val schoolDirectoryScope = SchoolDirectoryEntryScopeId(
@@ -978,8 +980,6 @@ val appKoinModule = module {
 
             RespectAccountSchoolScopeLink(accountScopeId.schoolUrl)
         }
-
-
         scoped<AuthTokenProvider> {
             get<RespectTokenManager>().providerFor(id)
         }
@@ -1180,22 +1180,29 @@ val appKoinModule = module {
         }
 
         scoped<AddBookmarkUseCase> {
-            AddBookmarkUseCase(
-                schoolDataSource = get(),
-            )
-        }
+             AddBookmarkUseCase(
+                 schoolDataSource = get(),
+             )
+         }
 
-        scoped<RemoveBookmarkUseCase> {
-            RemoveBookmarkUseCase(
-                schoolDataSource = get(),
-            )
-        }
+         scoped<RemoveBookmarkUseCase> {
+             RemoveBookmarkUseCase(
+                 schoolDataSource = get(),
+             )
+         }
 
-        scoped<GetPublicationForXapiActivityUseCase> {
-            GetPublicationForXapiActivityUseCase(
-                opdsPublicationDataSource = get<SchoolDataSource>().opdsPublicationDataSource,
-            )
-        }
+         scoped<GetPublicationForXapiActivityUseCase> {
+             GetPublicationForXapiActivityUseCase(
+                 opdsPublicationDataSource = get<SchoolDataSource>().opdsPublicationDataSource,
+             )
+         }
+
+         scoped<MakePlaylistOpdsFeedUseCase> {
+             val accountScopeId = RespectAccountScopeId.parse(id)
+             MakePlaylistOpdsFeedUseCase(
+                 schoolUrl = accountScopeId.schoolUrl
+             )
+         }
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()

@@ -4,7 +4,7 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 
 interface OpdsPublicationDataSource {
 
@@ -24,7 +24,7 @@ interface OpdsPublicationDataSource {
         params: DataLoadParams,
         referrerUrl: Url?,
         expectedPublicationId: String?,
-    ): Flow<DataLoadState<OpdsPublication>>
+    ): Flow<DataLoadState<Publication>>
 
 
     /**
@@ -43,7 +43,7 @@ interface OpdsPublicationDataSource {
         params: DataLoadParams,
         referrerUrl: Url? = null,
         expectedPublicationId: String? = null,
-    ): DataLoadState<OpdsPublication>
+    ): DataLoadState<Publication>
 
 
 }

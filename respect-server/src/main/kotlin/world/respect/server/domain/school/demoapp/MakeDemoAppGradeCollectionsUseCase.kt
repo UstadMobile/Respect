@@ -6,7 +6,7 @@ import org.openeel.demo.demolaunchableappserver.DemoConstants
 import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsFeedMetadata
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumContributorStringValue
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
@@ -21,18 +21,24 @@ class MakeDemoAppGradeCollectionsUseCase {
     ) : OpdsFeed {
         return OpdsFeed(
             metadata = OpdsFeedMetadata(
-                title = "Grade $gradeNum"
+                title = "Grade $gradeNum",
+                description = "Example grade collection",
             ),
             links = listOf(
                 ReadiumLink(
                     href = baseUrl.resolve("$GRADES_DIR_NAME/$gradeNum/$COLLECTION_FILE_NAME").toString(),
                     rel = listOf("self"),
                     type = "application/json"
-                )
+                ),
+                ReadiumLink(
+                    rel = listOf("icon"),
+                    href = baseUrl.resolve("static/grade.jpg").toString(),
+                    type = "image/png",
+                ),
             ),
             publications = (1..DemoConstants.NUM_LESSONS).map { lessonNum ->
                 val lessonBase = baseUrl.resolve("$GRADES_DIR_NAME/$gradeNum/$LEARNING_UNITS_DIR_NAME/$lessonNum/")
-                OpdsPublication(
+                Publication(
                     metadata = ReadiumMetadata(
                         title = LangMapStringValue("Lesson $lessonNum - Grade $gradeNum"),
                         type = Uri.parse("http://schema.org/Game"),

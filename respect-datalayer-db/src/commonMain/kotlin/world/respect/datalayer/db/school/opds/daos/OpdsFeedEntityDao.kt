@@ -6,6 +6,9 @@ import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.db.school.opds.entities.OpdsFeedEntity
 import world.respect.datalayer.db.shared.LastModifiedAndETagDb
+import world.respect.datalayer.school.model.StatusEnum
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Dao
 abstract class OpdsFeedEntityDao {
@@ -40,6 +43,18 @@ abstract class OpdsFeedEntityDao {
     """)
     abstract suspend fun deleteByFeedUid(feedUid: Long)
 
+    @Query("""
+        UPDATE OpdsFeedEntity 
+           SET ofeStatus = :status,
+               ofeLastModified = :lastModified
+         WHERE ofeUid = :feedUid
+    """)
+    abstract suspend fun updateStatusByFeedUid(
+        feedUid: Long,
+        status: StatusEnum,
+        lastModified: Instant = Clock.System.now()
+    )
+
     @Insert
     abstract suspend fun insertList(entities: List<OpdsFeedEntity>)
 
@@ -64,6 +79,17 @@ abstract class OpdsFeedEntityDao {
         urlHashes: List<Long>
     ): List<OpdsFeedEntity>
 
-
-
+    @Query(
+        """
+         SELECT OpdsFeedEntity.*
+           FROM OpdsFeedEntity
+         WHERE ofeUrl LIKE :urlPrefix || '%' ESCAPE '\'
+           AND (:includeDeleted OR ofeStatus = ${StatusEnum.ACTIVE_INT})
+          ORDER BY ofeStored DESC
+     """
+    )
+    abstract fun findByUrlPrefixAsFlow(
+        urlPrefix: String,
+        includeDeleted: Boolean = false
+    ): Flow<List<OpdsFeedEntity>>
 }

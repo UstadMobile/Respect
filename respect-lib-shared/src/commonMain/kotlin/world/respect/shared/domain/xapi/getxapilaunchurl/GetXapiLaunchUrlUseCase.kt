@@ -1,7 +1,7 @@
 package world.respect.shared.domain.xapi.getxapilaunchurl
 
 import io.ktor.http.Url
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 
 /**
  * Get the Url to launch a specific learning unit. This should include Xapi Launch parameters (
@@ -17,7 +17,7 @@ interface GetXapiLaunchUrlUseCase {
     }
 
     suspend operator fun invoke(
-        publication: OpdsPublication,
+        publication: Publication,
         publicationUrl: Url,
         assignmentActivityId: String?,
         type: LaunchType,

@@ -6,6 +6,7 @@ import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsFeedMetadata
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.libutil.ext.resolve
+import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase.Companion.APP_MANIFEST_ICON_NAME
 
 class MakeDemoAppCollectionUseCase {
 
@@ -14,14 +15,20 @@ class MakeDemoAppCollectionUseCase {
     ): OpdsFeed {
         return OpdsFeed(
             metadata = OpdsFeedMetadata(
-                title = "Demo Launchable App Lessons"
+                title = "Demo Launchable App Lessons",
+                description = "List of app lessons",
             ),
             links = listOf(
                 ReadiumLink(
                     href = baseUrl.resolve("default-collection.json").toString(),
                     rel = listOf("self"),
                     type = "application/json"
-                )
+                ),
+                ReadiumLink(
+                    rel = listOf("icon"),
+                    href = baseUrl.resolve(APP_MANIFEST_ICON_NAME).toString(),
+                    type = "image/png",
+                ),
             ),
             navigation = (1..DemoConstants.NUM_GRADES).map {
                 ReadiumLink(

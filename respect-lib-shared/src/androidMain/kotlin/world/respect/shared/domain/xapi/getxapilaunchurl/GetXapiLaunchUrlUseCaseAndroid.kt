@@ -17,7 +17,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.identifierHash
 import world.respect.datalayer.db.school.xapi.entities.XapiSessionEntity
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.findLearningUnitAcquisitionLinks
 import world.respect.lib.opds.model.findTinCanXmlLink
 import world.respect.lib.xapi.model.XapiAgent
@@ -45,7 +45,7 @@ class GetXapiLaunchUrlUseCaseAndroid(
 ): GetXapiLaunchUrlUseCase {
 
     override suspend fun invoke(
-        publication: OpdsPublication,
+        publication: Publication,
         publicationUrl: Url,
         assignmentActivityId: String?,
         type: GetXapiLaunchUrlUseCase.LaunchType,

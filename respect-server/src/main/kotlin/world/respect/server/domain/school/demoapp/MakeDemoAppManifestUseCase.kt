@@ -3,7 +3,7 @@ package world.respect.server.domain.school.demoapp
 import com.eygraber.uri.Uri
 import io.ktor.http.Url
 import world.respect.lib.opds.model.LangMapStringValue
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumContributorObject
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
@@ -13,8 +13,8 @@ class MakeDemoAppManifestUseCase {
 
     operator fun invoke(
         baseUrl: Url
-    ) : OpdsPublication {
-        return OpdsPublication(
+    ) : Publication {
+        return Publication(
             metadata = ReadiumMetadata(
                 title = LangMapStringValue("Demo Launchable App"),
                 author = listOf(

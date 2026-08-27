@@ -3,7 +3,7 @@ package world.respect.server.domain.school.demoapp
 import com.eygraber.uri.Uri
 import io.ktor.http.Url
 import world.respect.lib.opds.model.LangMapStringValue
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumContributorStringValue
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
@@ -22,10 +22,10 @@ class MakeDemoAppLearningUnitManifestUseCase {
         demoBase: Url,
         grade: Int,
         lessonNum: Int,
-    ): OpdsPublication {
+    ): Publication {
         val lessonBase = demoBase.resolve("$GRADES_DIR_NAME/$grade/$LEARNING_UNITS_DIR_NAME/$lessonNum/")
 
-        return OpdsPublication(
+        return Publication(
             metadata = ReadiumMetadata(
                 title = LangMapStringValue("Lesson $lessonNum - Grade $grade"),
                 type = Uri.parse("http://schema.org/Game"),

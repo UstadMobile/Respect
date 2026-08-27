@@ -36,6 +36,8 @@ android {
 
 dependencies {
     api(projects.respectLibXapiIpcShared)
+    api(projects.libIpcMessagebridge)
+
     implementation(projects.respectLibUtil)
 
     implementation(libs.androidx.appcompat)

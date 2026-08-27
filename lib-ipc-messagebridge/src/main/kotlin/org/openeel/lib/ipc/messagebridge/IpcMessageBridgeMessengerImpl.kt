@@ -1,4 +1,4 @@
-package world.respect.xapi.ipc.client
+package org.openeel.lib.ipc.messagebridge
 
 import android.os.Handler
 import android.os.Looper
@@ -10,19 +10,16 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.receiveAsFlow
-import world.respect.xapi.ipc.shared.messages.MessageData
-import world.respect.xapi.ipc.shared.messages.XapiIpcTags
-import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
-import world.respect.xapi.ipc.shared.messages.ext.setFromMessageData
+import org.openeel.lib.ipc.messagebridge.ext.setFromMessageData
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * @param outgoingMessenger the outgoing messenger e.g. the one that is connected to the service binder
  */
-class XapiMessageBridgeMessengerImpl(
+class IpcMessageBridgeMessengerImpl(
     private val outgoingMessenger: Messenger,
-): XapiMessageBridge {
+): IpcMessageBridge {
 
     private val requestIdAtomic = AtomicInteger(1)
 
@@ -33,33 +30,33 @@ class XapiMessageBridgeMessengerImpl(
     val incomingHandler: Handler = object: Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             when {
-                msg.what == XapiIpcWhatFlags.WHAT_RESPONSE -> {
+                msg.what == IpcMessageBridgeWhatFlags.WHAT_RESPONSE -> {
                     val replyToRequestId = msg.arg1
                     val completeable = pendingMessages[replyToRequestId]
                     if(completeable != null) {
                         Log.d(
-                            XapiIpcTags.LOGTAG,
+                            IpcMessageBridgeTags.LOGTAG,
                             "XapiMessageBridgeBinderImpl: receive repsonse #$replyToRequestId"
                         )
                         pendingMessages.remove(replyToRequestId)
                         val messageReply = MessageData(msg)
                         completeable.complete(messageReply)
                     }else {
-                        Log.w(XapiIpcTags.LOGTAG, "XapiMessageBridgeBinderImpl: WARN: No pending message for id $replyToRequestId")
+                        Log.w(IpcMessageBridgeTags.LOGTAG, "XapiMessageBridgeBinderImpl: WARN: No pending message for id $replyToRequestId")
                     }
                 }
 
-                msg.what == XapiIpcWhatFlags.WHAT_FLOW_EMISSION -> {
+                msg.what == IpcMessageBridgeWhatFlags.WHAT_FLOW_EMISSION -> {
                     val replyToRequestId = msg.arg1
                     val receiveChannel = activeFlowChannels[replyToRequestId]
                     if(receiveChannel != null) {
                         Log.d(
-                            XapiIpcTags.LOGTAG,
+                            IpcMessageBridgeTags.LOGTAG,
                             "XapiMessageBridgeBinderImpl: receive flow emission for #$replyToRequestId"
                         )
                         receiveChannel.trySend(MessageData(msg))
                     }else{
-                        Log.w(XapiIpcTags.LOGTAG,"XapiMessageBridgeBinderImpl: WARN: No channel for id $replyToRequestId")
+                        Log.w(IpcMessageBridgeTags.LOGTAG,"XapiMessageBridgeBinderImpl: WARN: No channel for id $replyToRequestId")
                     }
                 }
 
@@ -83,11 +80,11 @@ class XapiMessageBridgeMessengerImpl(
             pendingMessages[messageId] = it
         }
 
-        Log.d(XapiIpcTags.LOGTAG, "XapiMessageBridgeBinderImpl: executeForResponse: send #$messageId")
+        Log.d(IpcMessageBridgeTags.LOGTAG, "XapiMessageBridgeBinderImpl: executeForResponse: send #$messageId")
         outgoingMessenger.send(message)
 
         val response = completeable.await()
-        Log.d(XapiIpcTags.LOGTAG, "XapiMessageBridgeBinderImpl: executeForResponse: receive response #$messageId")
+        Log.d(IpcMessageBridgeTags.LOGTAG, "XapiMessageBridgeBinderImpl: executeForResponse: receive response #$messageId")
         return response
     }
 
@@ -101,15 +98,15 @@ class XapiMessageBridgeMessengerImpl(
         val receiveChannel = Channel<MessageData>(capacity = Channel.BUFFERED)
         activeFlowChannels[messageId] = receiveChannel
 
-        Log.d(XapiIpcTags.LOGTAG, "XapiMessageBridgeBinderImpl: executeForFlow: send #$messageId")
+        Log.d(IpcMessageBridgeTags.LOGTAG, "XapiMessageBridgeBinderImpl: executeForFlow: send #$messageId")
         outgoingMessenger.send(message)
 
         return receiveChannel.receiveAsFlow().onCompletion {
-            Log.d(XapiIpcTags.LOGTAG, "XapiMessageBridgeBinderImpl: executeForFlow: Flow #$messageId completed")
+            Log.d(IpcMessageBridgeTags.LOGTAG, "XapiMessageBridgeBinderImpl: executeForFlow: Flow #$messageId completed")
 
             outgoingMessenger.send(
                 Message.obtain().also {
-                    it.what = XapiIpcWhatFlags.WHAT_FLOW_COMPLETION
+                    it.what = IpcMessageBridgeWhatFlags.WHAT_FLOW_COMPLETION
                     it.arg1 = messageId
                 }
             )

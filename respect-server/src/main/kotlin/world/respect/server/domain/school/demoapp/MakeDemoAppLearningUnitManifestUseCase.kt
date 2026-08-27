@@ -61,6 +61,7 @@ class MakeDemoAppLearningUnitManifestUseCase {
                 ReadiumLink(href = lessonBase.resolve(LEARNING_UNIT_HTML_FILENAME).toString()),
                 ReadiumLink(href = demoBase.resolve("static/$LEARNING_UNIT_JS_FILENAME").toString()),
                 ReadiumLink(href = demoBase.resolve("static/$XAPI_MODULE_FILENAME").toString()),
+                ReadiumLink(href = demoBase.resolve("static/$LEARNING_UNIT_ICON_NAME").toString()),
             ),
         )
     }

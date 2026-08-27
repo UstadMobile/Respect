@@ -1,6 +1,6 @@
-package world.respect.xapi.ipc.shared.messages
+package org.openeel.lib.ipc.messagebridge
 
-object XapiIpcWhatFlags {
+object IpcMessageBridgeWhatFlags {
 
     const val WHAT_REQUEST = 1
 

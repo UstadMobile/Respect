@@ -1,9 +1,8 @@
-package world.respect.xapi.ipc.client
+package org.openeel.lib.ipc.messagebridge
 
 import kotlinx.coroutines.flow.Flow
-import world.respect.xapi.ipc.shared.messages.MessageData
 
-interface XapiMessageBridge {
+interface IpcMessageBridge {
 
     /**
      * Send MessageData over a Messenger and then wait for a single response: used to run a single

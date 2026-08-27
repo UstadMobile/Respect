@@ -9,6 +9,7 @@ import com.ustadmobile.libcache.okhttp.headersContentLength
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.charset
+import okhttp3.Call
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.internal.http.promisesBody
@@ -20,12 +21,34 @@ import java.io.ByteArrayInputStream
  */
 class OkHttpWebViewClient(
     private val shouldInterceptRequestFilter: ShouldInterceptRequestFilter = DefaultShouldInterceptRequestFilter(),
-    private val okHttpClient: OkHttpClient,
+    private val requestCaller: RequestCaller,
 ) : WebViewClient() {
+
+    fun interface RequestCaller {
+
+        operator fun invoke(request: Request): Call
+
+    }
+
+    class OkHttpClientRequestCaller(
+        private val client: OkHttpClient,
+    ): RequestCaller {
+        override fun invoke(request: Request): Call {
+            return client.newCall(request)
+        }
+    }
 
     fun interface ShouldInterceptRequestFilter {
         fun shouldIntercept(request: WebResourceRequest): Boolean
     }
+
+    constructor(
+        shouldInterceptRequestFilter: ShouldInterceptRequestFilter = DefaultShouldInterceptRequestFilter(),
+        okHttpClient: OkHttpClient,
+    ): this(
+        shouldInterceptRequestFilter = shouldInterceptRequestFilter,
+        requestCaller = OkHttpClientRequestCaller(okHttpClient),
+    )
 
     class DefaultShouldInterceptRequestFilter: ShouldInterceptRequestFilter {
         override fun shouldIntercept(request: WebResourceRequest): Boolean {
@@ -51,7 +74,7 @@ class OkHttpWebViewClient(
     ): WebResourceResponse? {
         if(request != null && shouldInterceptRequestFilter.shouldIntercept(request)) {
             return try {
-                val response = okHttpClient.newCall(
+                val response = requestCaller(
                     Request.Builder()
                         .url(request.url.toString())
                         .apply {

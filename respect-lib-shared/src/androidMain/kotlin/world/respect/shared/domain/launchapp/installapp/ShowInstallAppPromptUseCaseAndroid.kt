@@ -33,6 +33,9 @@ class ShowInstallAppPromptUseCaseAndroid(
             /*
              * As per
              * https://developer.android.com/distribute/marketing-tools/inline-installs
+             *
+             * Probably won't work because:
+             * https://developer.android.com/quality/core-value/app-eligibility
              */
             val intent = Intent(Intent.ACTION_VIEW).also {
                 it.data = "https://play.google.com/d?id=$packageId&referrer=${UrlEncoderUtil.encode(request.referrer)}".toUri()

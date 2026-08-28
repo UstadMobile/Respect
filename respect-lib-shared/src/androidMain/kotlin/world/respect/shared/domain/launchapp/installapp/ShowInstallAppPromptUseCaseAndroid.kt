@@ -5,12 +5,12 @@ import android.content.Intent
 import android.content.Intent.CATEGORY_BROWSABLE
 import android.util.Log
 import androidx.core.net.toUri
+import io.ktor.http.URLBuilder
+import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import world.respect.lib.opds.model.findAppStoreAndroidLinks
 import world.respect.shared.domain.activitycontextjobprocessor.SubmitActivityContextJobUseCase
 
 /**
- * As per
- * https://developer.android.com/distribute/marketing-tools/inline-installs
  *
  * Which will only work when:
  * https://developer.android.com/quality/core-value/app-eligibility
@@ -30,8 +30,12 @@ class ShowInstallAppPromptUseCaseAndroid(
         if(googlePlayLink != null) {
             val packageId = googlePlayLink.href.toUri().getQueryParameter("id")
 
+            /*
+             * As per
+             * https://developer.android.com/distribute/marketing-tools/inline-installs
+             */
             val intent = Intent(Intent.ACTION_VIEW).also {
-                it.data = "https://play.google.com/d?id=$packageId".toUri()
+                it.data = "https://play.google.com/d?id=$packageId&referrer=${UrlEncoderUtil.encode(request.referrer)}".toUri()
                 it.setPackage("com.android.vending")
                 it.putExtra("overlay", true)
                 it.putExtra("callerId", appContext.packageName)
@@ -50,7 +54,9 @@ class ShowInstallAppPromptUseCaseAndroid(
 
         if(appStoreLinks.isNotEmpty()){
             val intent = Intent(Intent.ACTION_VIEW).also {
-                it.data = appStoreLinks.first().href.toUri()
+                it.data = URLBuilder(appStoreLinks.first().href).apply {
+                    encodedParameters["referrer"] = UrlEncoderUtil.encode(request.referrer)
+                }.build().toString().toUri()
                 it.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 it.addCategory(CATEGORY_BROWSABLE)
             }

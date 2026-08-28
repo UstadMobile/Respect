@@ -6,6 +6,7 @@ interface ShowInstallAppPromptUseCase {
 
     data class Request(
         val launchableApp: OpdsPublication,
+        val referrer: String,
     )
 
     suspend operator fun invoke(

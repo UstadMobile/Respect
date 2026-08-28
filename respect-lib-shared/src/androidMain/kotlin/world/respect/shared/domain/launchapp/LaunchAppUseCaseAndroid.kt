@@ -14,6 +14,7 @@ import com.ustadmobile.libcache.novarysearch.removeLaunchSearchParams
 import com.ustadmobile.libcache.util.LaunchNoVarySearchConstants
 import io.github.aakira.napier.Napier
 import io.ktor.http.URLBuilder
+import io.ktor.http.Url
 import io.ktor.http.headersOf
 import kotlinx.serialization.json.Json
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
@@ -50,6 +51,12 @@ class LaunchAppUseCaseAndroid(
     }
 
 
+
+    private data class LaunchableAppNotInstalled(
+        val launchableApp: OpdsPublication,
+        val launchUrl: Url,
+    )
+
     /**
      * Launch a compatible app for the given LaunchRequest. Tries to launch a publication as follows:
      *
@@ -76,7 +83,8 @@ class LaunchAppUseCaseAndroid(
     override suspend fun invoke(
         request: LaunchAppRequest
     ): LaunchAppUseCase.LaunchAppResult {
-        val launchableAppsNotInstalled = mutableListOf<OpdsPublication>()
+        //
+        val launchableAppsNotInstalled = mutableListOf<LaunchableAppNotInstalled>()
 
         try {
             val optionsResult = getLaunchOptionsForPublicationUseCase(
@@ -126,7 +134,11 @@ class LaunchAppUseCaseAndroid(
                             Log.i(LaunchAppTags.LOGTAG, "LaunchAppUseCase: launched native app using intent uri: ${intent.toUri(Intent.URI_INTENT_SCHEME)}")
                             return LaunchAppUseCase.LaunchAppSuccess
                         }else {
-                            optionsResult.launchableApp?.also { launchableAppsNotInstalled.add(it) }
+                            optionsResult.launchableApp?.also {
+                                launchableAppsNotInstalled.add(
+                                    LaunchableAppNotInstalled(it, urlWithNativeParams)
+                                )
+                            }
                         }
                     }
 
@@ -226,11 +238,13 @@ class LaunchAppUseCaseAndroid(
             return LaunchAppUseCase.LaunchAppFailed(e)
         }
 
-        return if(launchableAppsNotInstalled.isNotEmpty()) {
-            LaunchAppUseCase.LaunchAppInstallRequired(launchableAppsNotInstalled.first())
-        }else {
-            LaunchAppUseCase.LaunchAppFailed(null)
-        }
+        return launchableAppsNotInstalled.firstOrNull()?.let {
+            LaunchAppUseCase.LaunchAppInstallRequired(
+                launchableApp = it.launchableApp,
+                referrerUrl = it.launchUrl,
+            )
+        } ?: LaunchAppUseCase.LaunchAppFailed(null)
+
     }
 
     companion object {

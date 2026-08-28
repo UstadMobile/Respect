@@ -27,7 +27,8 @@ interface LaunchAppUseCase {
     object LaunchAppSuccess: LaunchAppResult()
 
     class LaunchAppInstallRequired(
-        val launchableApp: OpdsPublication?
+        val launchableApp: OpdsPublication?,
+        val referrerUrl: Url,
     ): LaunchAppResult()
 
     class LaunchAppFailed(

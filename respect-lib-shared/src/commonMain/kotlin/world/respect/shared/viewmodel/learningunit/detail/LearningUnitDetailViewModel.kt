@@ -235,7 +235,10 @@ class LearningUnitDetailViewModel(
                     val launchableAppToInstall = result.launchableApp
                     if(launchableAppToInstall != null) {
                         showInstallAppPromptUseCase(
-                            ShowInstallAppPromptUseCase.Request(launchableAppToInstall)
+                            ShowInstallAppPromptUseCase.Request(
+                                launchableApp = launchableAppToInstall,
+                                referrer = result.referrerUrl.toString(),
+                            )
                         )
                     }else {
                         snackBarDispatcher.showSnackBar(Snack(Res.string.app_not_found.asUiText()))

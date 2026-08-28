@@ -16,6 +16,7 @@ import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiActivityDefinition
 import world.respect.lib.xapi.rusticilaunch.model.TinCanXmlDocument
 import world.respect.libutil.ext.resolve
+import world.respect.shared.util.ext.legacyActivityIdForLink
 
 /**
  * Get an XapiActivity (including definition) for a given publication. If the publication includes
@@ -56,10 +57,10 @@ class GetXapiActivityForPublicationUseCase(
                 )
             )
         }else {
-            val activityId = publication.metadata.identifier?.toString()
-                ?: publication.findLearningUnitAcquisitionLinks().firstOrNull()?.let {
-                    publicationUrl.resolve(it.href)
-                }?.toString() ?: throw IllegalArgumentException("Cannot determine xAPI activityId for publication")
+            val activityId = publication.findLearningUnitAcquisitionLinks().firstOrNull()?.let {
+                publication.legacyActivityIdForLink(it, publicationUrl)
+            } ?: throw IllegalArgumentException("Cannot determine xAPI activityId for publication")
+
 
             XapiActivity(
                 id = activityId,

@@ -13,104 +13,211 @@ import com.ustadmobile.libcache.UstadCache
 import com.ustadmobile.libcache.novarysearch.removeLaunchSearchParams
 import com.ustadmobile.libcache.util.LaunchNoVarySearchConstants
 import io.github.aakira.napier.Napier
+import io.ktor.http.URLBuilder
 import io.ktor.http.headersOf
+import kotlinx.serialization.json.Json
+import net.thauvin.erik.urlencoder.UrlEncoderUtil
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.LaunchRequest
+import world.respect.shared.domain.launchapp.getlaunchoptionsforpublication.GetLaunchOptionsForPublicationUseCase
+import world.respect.shared.domain.launchapp.getxapilaunchparams.GetXapiLaunchParamsUseCase
+import world.respect.shared.domain.launchapp.getxapilaunchparams.XapiLaunchParams
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
+import world.respect.xapi.ipc.shared.messages.XapiIpcIntent
 
 /**
  * Implementation of LaunchAppUseCase for Android.
  */
 class LaunchAppUseCaseAndroid(
     private val appContext: Context,
-    private val getXapiLaunchUrlUseCase: GetXapiLaunchUrlUseCase,
     private val ustadCache: UstadCache,
+    private val getLaunchOptionsForPublicationUseCase: GetLaunchOptionsForPublicationUseCase,
+    private val getXapiLaunchParamsUseCase: GetXapiLaunchParamsUseCase,
+    private val json: Json,
 ): LaunchAppUseCase {
 
+    private fun URLBuilder.setXapiLaunchParams(
+        params: XapiLaunchParams
+    ): URLBuilder {
+        encodedParameters["endpoint"] = UrlEncoderUtil.encode(params.endpoint.toString())
+        encodedParameters["activity_id"] = UrlEncoderUtil.encode(params.activityId)
+        encodedParameters["auth"] = UrlEncoderUtil.encode(params.auth)
+        encodedParameters["actor"] = UrlEncoderUtil.encode(
+            json.encodeToString(XapiActor.serializer(), params.actor)
+        )
+        return this
+    }
+
+
     /**
-     * Launch a compatible app for the given LaunchRequest: if a native app with verified app links
-     * for the requested URL is installed, launch it. Otherwise, launch the requested URL in the
-     * WebView Activity (where it is possible to intercept/cache resources etc).
+     * Launch a compatible app for the given LaunchRequest. Tries to launch a publication as follows:
      *
-     * On Android SDK30 and above:
-     *  Attempts to launch the url using an intent with FLAG_ACTIVITY_REQUIRE_NON_BROWSER as per
-     *  https://developer.android.com/training/package-visibility/use-cases#let-non-browser-apps-handle-urls
+     * 1) When the Url to launch uses the intent scheme, check if the intent resolves. If the intent
+     * resolves, proceed to launch the intent.
      *
-     * On Pre-SDK30 devices:
-     *  Use the package manager to look for installed apps that can handle the intent (Pre-SDK30
-     *  restrictions on querying packages are not enforced, so this technique works).
+     * 2) If the Url uses a normal https Url try and see if the intent can be resolved using the url
+     * as data with the action OpenEelIntent.ACTION_LAUNCH, if so, launch that intent (this supports
+     * apps which allow a server to specify their own url to support dynamic Urls that are not
+     * included in the AndroidManifest for verification).
+     *
+     * 3) Try launching an intent with only the deep link and the default action view.
+     *
+     *   On Android SDK30 and above:
+     *    Attempts to launch the url using an intent with FLAG_ACTIVITY_REQUIRE_NON_BROWSER as per
+     *    https://developer.android.com/training/package-visibility/use-cases#let-non-browser-apps-handle-urls
+     *
+     *   On Pre-SDK30 devices:
+     *    Use the package manager to look for installed apps that can handle the intent (Pre-SDK30
+     *    restrictions on querying packages are not enforced, so this technique works).
+     *
+     * 4) Open the URL using the webview activity for web-based content
      */
     override suspend fun invoke(
         request: LaunchRequest
     ) {
-        suspend fun getXapiLaunchUrl(type: GetXapiLaunchUrlUseCase.LaunchType) = getXapiLaunchUrlUseCase(
-            publication = request.publication,
-            publicationUrl = request.publicationUrl,
-            assignmentActivityId = request.assignmentActivityId,
-            type = type,
-        )
-
         try {
-            val nativeLaunchUrl = getXapiLaunchUrl(GetXapiLaunchUrlUseCase.LaunchType.NATIVE)
+            val optionsResult = getLaunchOptionsForPublicationUseCase(
+                request.publication, request.publicationUrl
+            )
 
-            val intent = Intent(
-                Intent.ACTION_VIEW, nativeLaunchUrl.toString().toUri()
-            ).apply {
-                addCategory(CATEGORY_BROWSABLE)
-            }
-
-            if(Build.VERSION.SDK_INT >= 30) {
-                intent.flags = FLAG_ACTIVITY_REQUIRE_NON_BROWSER or FLAG_ACTIVITY_NEW_TASK
-                Napier.d(
-                    "LaunchAppUseCaseAndroid: attempting to launch $nativeLaunchUrl with RequireNonBrowser"
-                )
-                appContext.startActivity(intent)
-                return
-            }else {
-                intent.flags = FLAG_ACTIVITY_NEW_TASK
-                val resolvedInfo = appContext.packageManager.queryIntentActivities(
-                    intent, PackageManager.MATCH_ALL
+            for(launchOption in optionsResult.options) {
+                val nativeLaunchParams = getXapiLaunchParamsUseCase(
+                    activityId = launchOption.activityId,
+                    assignmentActivityId = request.assignmentActivityId,
+                    type = GetXapiLaunchUrlUseCase.LaunchType.NATIVE,
                 )
 
-                val availableNativePackages = resolvedInfo.mapNotNull {
-                    it.activityInfo.packageName
-                }.filterNot { it in KNOWN_BROWSER_PACKAGES }
+                val urlWithNativeParams = URLBuilder(launchOption.url).apply {
+                    setXapiLaunchParams(nativeLaunchParams)
+                    parameters[XapiIpcIntent.PARAM_NAME_IPC_SERVICE_PACKAGE] = appContext.packageName
+                }.build()
 
-                Napier.d("LaunchAppUseCaseAndroid: available native packages: $availableNativePackages")
+                when {
+                    /*
+                     * If the URL specified uses an intent protocol URL, check if the intent can be
+                     * resolved (e.g. the app is installed). If yes, then launch it.
+                    */
+                    launchOption.url.protocol.name == "intent" -> {
+                        val intent = Intent.parseUri(
+                            urlWithNativeParams.toString(), Intent.URI_INTENT_SCHEME
+                        ).also {
+                            it.action = OpenEelIntent.ACTION_LAUNCH
+                            it.flags = it.flags.or(FLAG_ACTIVITY_NEW_TASK)
+                        }
 
-                if(availableNativePackages.isNotEmpty()) {
-                    appContext.startActivity(intent)
-                    return
+                        val resolvedInfo = appContext.packageManager.queryIntentActivities(
+                            intent, PackageManager.MATCH_DEFAULT_ONLY
+                        )
+
+                        if(resolvedInfo.isNotEmpty()) {
+                            appContext.startActivity(intent)
+                            Log.i(LaunchAppTags.LOGTAG, "LaunchAppUseCase: launched native app using intent uri: ${intent.toUri(Intent.URI_INTENT_SCHEME)}")
+                            return
+                        }
+                    }
+
+                    /**
+                     * Not using the intent protocol
+                     */
+                    else -> {
+                        /*
+                         * If the app supports using the OpenEelIntent.ACTION_LAUNCH action, use that.
+                         * This allows apps to support URLs that are not directly declared in their
+                         * manifest for verified app links (e.g. needed when an app supports
+                         * connecting to a server specified by the user).
+                         */
+                        val launchActionIntent = Intent(OpenEelIntent.ACTION_LAUNCH).also {
+                            it.flags = FLAG_ACTIVITY_NEW_TASK
+                            it.data = urlWithNativeParams.toString().toUri()
+                            it.addCategory(CATEGORY_BROWSABLE)
+                        }
+
+                        if(
+                            appContext.packageManager.queryIntentActivities(
+                                launchActionIntent, PackageManager.MATCH_DEFAULT_ONLY
+                            ).isNotEmpty()
+                        ) {
+                            appContext.startActivity(launchActionIntent)
+                            Log.i(LaunchAppTags.LOGTAG, "LaunchAppUseCase: launched native app using intent: ${launchActionIntent.toUri(Intent.URI_INTENT_SCHEME)}")
+                            return
+                        }
+
+                        //Try launching as a normal deep link for a native app
+                        val deepLinkIntent = Intent(
+                            Intent.ACTION_VIEW, urlWithNativeParams.toString().toUri()
+                        ).apply {
+                            addCategory(CATEGORY_BROWSABLE)
+                        }
+
+                        try {
+                            if(Build.VERSION.SDK_INT >= 30) {
+                                deepLinkIntent.flags = FLAG_ACTIVITY_REQUIRE_NON_BROWSER or FLAG_ACTIVITY_NEW_TASK
+                                appContext.startActivity(deepLinkIntent)
+                                Log.i(
+                                    LaunchAppTags.LOGTAG, "LaunchAppUseCaseAndroid: launched $urlWithNativeParams with RequireNonBrowser"
+                                )
+                                return
+                            }else {
+                                deepLinkIntent.flags = FLAG_ACTIVITY_NEW_TASK
+                                val resolvedInfo = appContext.packageManager.queryIntentActivities(
+                                    deepLinkIntent, PackageManager.MATCH_ALL
+                                )
+
+                                val availableNativePackages = resolvedInfo.mapNotNull {
+                                    it.activityInfo.packageName
+                                }.filterNot { it in KNOWN_BROWSER_PACKAGES }
+
+                                if(availableNativePackages.isNotEmpty()) {
+                                    appContext.startActivity(deepLinkIntent)
+                                    Log.i(
+                                        LaunchAppTags.LOGTAG, "LaunchAppUseCaseAndroid: launched $urlWithNativeParams using resolved native app"
+                                    )
+                                    return
+                                }
+                            }
+                        }catch (_: Throwable) {
+                            Log.d(LaunchAppTags.LOGTAG, "Unable to launch native app for $urlWithNativeParams will fallback to WebView")
+                        }
+
+                        val webViewLaunchUrl = URLBuilder(launchOption.url).apply {
+                            setXapiLaunchParams(
+                                getXapiLaunchParamsUseCase(
+                                    activityId = launchOption.activityId,
+                                    assignmentActivityId = request.assignmentActivityId,
+                                    type = GetXapiLaunchUrlUseCase.LaunchType.WEBVIEW,
+                                )
+                            )
+                        }.build()
+
+                        ustadCache.setExtraResponseHeaders(
+                            url = webViewLaunchUrl.removeLaunchSearchParams(),
+                            extraResponseHeaders = headersOf(
+                                "No-Vary-Search" to listOf(
+                                    LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER
+                                )
+                            )
+                        )
+
+                        /*
+                         * The ActivityClass, because it's UI, is contained within the respect-app-compose module,
+                         * and is referenced using reflection. Activity names are not obfuscated by R8, so this is
+                         * safe.
+                         */
+                        val intent = Intent(
+                            appContext,
+                            Class.forName(WEBVIEW_ACTIVITY_NAME)
+                        )
+                        intent.flags = FLAG_ACTIVITY_NEW_TASK
+                        val launchUrlStr = webViewLaunchUrl.toString()
+                        intent.putExtra(EXTRA_URL, launchUrlStr)
+                        appContext.startActivity(intent)
+                        Napier.i("LaunchAppUseCaseAndroid: launching WebViewActivity for url $launchUrlStr")
+                    }
                 }
             }
         }catch(e: Throwable) {
-            Napier.w("Something wrong opening learning unit through native app, fallback", e)
+            e.printStackTrace()
         }
-
-        val webViewLaunchUrl = getXapiLaunchUrl(GetXapiLaunchUrlUseCase.LaunchType.WEBVIEW).also {
-            ustadCache.setExtraResponseHeaders(
-                url = it.removeLaunchSearchParams(),
-                extraResponseHeaders = headersOf(
-                    "No-Vary-Search" to listOf(LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER)
-                )
-            )
-        }
-
-        Log.i("LaunchUseCase", "Launching URL: $webViewLaunchUrl")
-
-        /*
-         * The ActivityClass, because it's UI, is contained within the respect-app-compose module,
-         * and is referenced using reflection. Activity names are not obfuscated by R8, so this is
-         * safe.
-         */
-        val intent = Intent(
-            appContext,
-            Class.forName(WEBVIEW_ACTIVITY_NAME)
-        )
-        intent.flags = FLAG_ACTIVITY_NEW_TASK
-        val launchUrlStr = webViewLaunchUrl.toString()
-        intent.putExtra(EXTRA_URL, launchUrlStr)
-        Napier.i("LaunchAppUseCaseAndroid: launching WebViewActivity for url $launchUrlStr")
-        appContext.startActivity(intent)
     }
 
     companion object {

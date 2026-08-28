@@ -239,6 +239,9 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
+import world.respect.shared.domain.launchapp.getlaunchoptionsforpublication.GetLaunchOptionsForPublicationUseCase
+import world.respect.shared.domain.launchapp.getxapilaunchparams.GetXapiLaunchParamsUseCase
+import world.respect.shared.domain.launchapp.getxapilaunchparams.GetXapiLaunchParamsUseCaseAndroid
 import world.respect.shared.domain.license.GetLicenseLabelUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
@@ -278,8 +281,6 @@ import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
 import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
-import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
-import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCaseAndroid
 import world.respect.shared.viewmodel.statement.detail.RawStatementViewModel
 import world.respect.shared.viewmodel.statement.detail.StatementDetailViewModel
 import world.respect.shared.viewmodel.statement.list.StatementListViewModel
@@ -1143,29 +1144,33 @@ val appKoinModule = module {
             CreateClassUseCase(dataSource = get())
         }
 
-        scoped<GetXapiLaunchUrlUseCase> {
-            val accountScopeId = RespectAccountScopeId.parse(id)
-
-            GetXapiLaunchUrlUseCaseAndroid(
-                nanoHttpdApp = get(),
-                schoolUrl = accountScopeId.schoolUrl,
-                authenticatedUser = accountScopeId.accountPrincipalId,
+        scoped<LaunchAppUseCase> {
+            LaunchAppUseCaseAndroid(
+                appContext = androidContext().applicationContext,
+                ustadCache = get(),
+                getLaunchOptionsForPublicationUseCase = get(),
+                getXapiLaunchParamsUseCase = get(),
                 json = get(),
-                accountManager = get(),
-                getXapiActivityForPublicationUseCase = get(),
-                schoolDb = get(),
-                uidNumberMapper = get(),
-                applicationContext = androidApplication(),
+            )
+        }
+
+        scoped<GetLaunchOptionsForPublicationUseCase> {
+            GetLaunchOptionsForPublicationUseCase(
                 httpClient = get(),
                 xml = get(),
             )
         }
 
-        scoped<LaunchAppUseCase> {
-            LaunchAppUseCaseAndroid(
-                appContext = androidContext().applicationContext,
-                getXapiLaunchUrlUseCase = get(),
-                ustadCache = get(),
+        scoped<GetXapiLaunchParamsUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            GetXapiLaunchParamsUseCaseAndroid(
+                nanoHttpdApp = get(),
+                schoolUrl = accountScopeId.schoolUrl,
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                accountManager = get(),
+                uidNumberMapper = get(),
+                schoolDb = get(),
             )
         }
 

@@ -36,6 +36,11 @@
             <data android:scheme="http" />
         </intent>
 
+        <!--
+        Possibly required to check if Google Play is available
+        -->
+        <package android:name="com.android.vending"/>
+
     </queries>
 
     <application

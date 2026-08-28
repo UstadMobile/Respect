@@ -17,8 +17,9 @@ import io.ktor.http.URLBuilder
 import io.ktor.http.headersOf
 import kotlinx.serialization.json.Json
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
+import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.xapi.model.XapiActor
-import world.respect.shared.domain.launchapp.LaunchAppUseCase.LaunchRequest
+import world.respect.shared.domain.launchapp.LaunchAppUseCase.LaunchAppRequest
 import world.respect.shared.domain.launchapp.getlaunchoptionsforpublication.GetLaunchOptionsForPublicationUseCase
 import world.respect.shared.domain.launchapp.getxapilaunchparams.GetXapiLaunchParamsUseCase
 import world.respect.shared.domain.launchapp.getxapilaunchparams.XapiLaunchParams
@@ -73,8 +74,10 @@ class LaunchAppUseCaseAndroid(
      * 4) Open the URL using the webview activity for web-based content
      */
     override suspend fun invoke(
-        request: LaunchRequest
-    ) {
+        request: LaunchAppRequest
+    ): LaunchAppUseCase.LaunchAppResult {
+        val launchableAppsNotInstalled = mutableListOf<OpdsPublication>()
+
         try {
             val optionsResult = getLaunchOptionsForPublicationUseCase(
                 request.publication, request.publicationUrl
@@ -91,6 +94,15 @@ class LaunchAppUseCaseAndroid(
                     setXapiLaunchParams(nativeLaunchParams)
                     parameters[XapiIpcIntent.PARAM_NAME_IPC_SERVICE_PACKAGE] = appContext.packageName
                 }.build()
+
+                ustadCache.setExtraResponseHeaders(
+                    url = launchOption.url.removeLaunchSearchParams(),
+                    extraResponseHeaders = headersOf(
+                        "No-Vary-Search" to listOf(
+                            LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER
+                        )
+                    )
+                )
 
                 when {
                     /*
@@ -112,7 +124,9 @@ class LaunchAppUseCaseAndroid(
                         if(resolvedInfo.isNotEmpty()) {
                             appContext.startActivity(intent)
                             Log.i(LaunchAppTags.LOGTAG, "LaunchAppUseCase: launched native app using intent uri: ${intent.toUri(Intent.URI_INTENT_SCHEME)}")
-                            return
+                            return LaunchAppUseCase.LaunchAppSuccess
+                        }else {
+                            optionsResult.launchableApp?.also { launchableAppsNotInstalled.add(it) }
                         }
                     }
 
@@ -139,7 +153,7 @@ class LaunchAppUseCaseAndroid(
                         ) {
                             appContext.startActivity(launchActionIntent)
                             Log.i(LaunchAppTags.LOGTAG, "LaunchAppUseCase: launched native app using intent: ${launchActionIntent.toUri(Intent.URI_INTENT_SCHEME)}")
-                            return
+                            return LaunchAppUseCase.LaunchAppSuccess
                         }
 
                         //Try launching as a normal deep link for a native app
@@ -156,7 +170,7 @@ class LaunchAppUseCaseAndroid(
                                 Log.i(
                                     LaunchAppTags.LOGTAG, "LaunchAppUseCaseAndroid: launched $urlWithNativeParams with RequireNonBrowser"
                                 )
-                                return
+                                return LaunchAppUseCase.LaunchAppSuccess
                             }else {
                                 deepLinkIntent.flags = FLAG_ACTIVITY_NEW_TASK
                                 val resolvedInfo = appContext.packageManager.queryIntentActivities(
@@ -172,7 +186,7 @@ class LaunchAppUseCaseAndroid(
                                     Log.i(
                                         LaunchAppTags.LOGTAG, "LaunchAppUseCaseAndroid: launched $urlWithNativeParams using resolved native app"
                                     )
-                                    return
+                                    return LaunchAppUseCase.LaunchAppSuccess
                                 }
                             }
                         }catch (_: Throwable) {
@@ -189,15 +203,6 @@ class LaunchAppUseCaseAndroid(
                             )
                         }.build()
 
-                        ustadCache.setExtraResponseHeaders(
-                            url = webViewLaunchUrl.removeLaunchSearchParams(),
-                            extraResponseHeaders = headersOf(
-                                "No-Vary-Search" to listOf(
-                                    LaunchNoVarySearchConstants.LAUNCH_LINK_NO_VARY_HEADER
-                                )
-                            )
-                        )
-
                         /*
                          * The ActivityClass, because it's UI, is contained within the respect-app-compose module,
                          * and is referenced using reflection. Activity names are not obfuscated by R8, so this is
@@ -212,11 +217,19 @@ class LaunchAppUseCaseAndroid(
                         intent.putExtra(EXTRA_URL, launchUrlStr)
                         appContext.startActivity(intent)
                         Napier.i("LaunchAppUseCaseAndroid: launching WebViewActivity for url $launchUrlStr")
+                        return LaunchAppUseCase.LaunchAppSuccess
                     }
                 }
             }
         }catch(e: Throwable) {
-            e.printStackTrace()
+            Log.e(LaunchAppTags.LOGTAG, "Exception launching ${request.publicationUrl}", e)
+            return LaunchAppUseCase.LaunchAppFailed(e)
+        }
+
+        return if(launchableAppsNotInstalled.isNotEmpty()) {
+            LaunchAppUseCase.LaunchAppInstallRequired(launchableAppsNotInstalled.first())
+        }else {
+            LaunchAppUseCase.LaunchAppFailed(null)
         }
     }
 

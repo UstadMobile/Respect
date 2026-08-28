@@ -16,15 +16,27 @@ interface LaunchAppUseCase {
      *        statements received to follow the assignment recipe (add assignmentActivityId to
      *        contextActivities).
      */
-    data class LaunchRequest(
+    data class LaunchAppRequest(
         val publicationUrl: Url,
         val publication: OpdsPublication,
         val assignmentActivityId: String? = null,
     )
 
+    sealed class LaunchAppResult
+
+    object LaunchAppSuccess: LaunchAppResult()
+
+    class LaunchAppInstallRequired(
+        val launchableApp: OpdsPublication?
+    ): LaunchAppResult()
+
+    class LaunchAppFailed(
+        val cause: Throwable?
+    ): LaunchAppResult()
+
     suspend operator fun invoke(
-        request: LaunchRequest
-    )
+        request: LaunchAppRequest
+    ): LaunchAppResult
 
     companion object {
 

@@ -5,7 +5,11 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Url
 import nl.adaptivity.xmlutil.serialization.XML
+import world.respect.datalayer.school.opds.OpdsPublicationDataSource
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.findLaunchableAppLink
 import world.respect.lib.opds.model.findLearningUnitAcquisitionLinks
 import world.respect.lib.opds.model.findTinCanXmlLink
 import world.respect.lib.xapi.rusticilaunch.model.TinCanXmlDocument
@@ -19,6 +23,7 @@ import world.respect.shared.util.ext.legacyActivityIdForLink
 class GetLaunchOptionsForPublicationUseCase(
     private val httpClient: HttpClient,
     private val xml: XML,
+    private val opdsPublicationDataSource: OpdsPublicationDataSource,
 ) {
 
     enum class LaunchType {
@@ -44,6 +49,13 @@ class GetLaunchOptionsForPublicationUseCase(
     ): GetLaunchOptionsResult {
         val launchOptions = mutableListOf<LaunchOption>()
         val tinCanLink = publication.findTinCanXmlLink()
+        val launchableAppLink = publication.findLaunchableAppLink()?.let { link ->
+            opdsPublicationDataSource.getByUrl(
+                url = publicationUrl.resolve(link.href),
+                params = DataLoadParams(),
+            )
+        }
+
         val tinCanXmlUrl = tinCanLink?.let { publicationUrl.resolve(it.href) }
 
         tinCanXmlUrl?.also {
@@ -77,7 +89,7 @@ class GetLaunchOptionsForPublicationUseCase(
 
         return GetLaunchOptionsResult(
             options = launchOptions.toList(),
-            launchableApp = null,
+            launchableApp = launchableAppLink?.dataOrNull(),
         )
     }
 

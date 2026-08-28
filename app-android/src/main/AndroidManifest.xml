@@ -27,7 +27,13 @@
             <category android:name="android.intent.category.BROWSABLE" />
 
             <data android:scheme="https" />
+        </intent>
 
+        <intent>
+            <action android:name="org.openeel.action.LAUNCH" />
+            <category android:name="android.intent.category.BROWSABLE" />
+
+            <data android:scheme="http" />
         </intent>
 
     </queries>

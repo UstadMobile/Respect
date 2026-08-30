@@ -11,6 +11,8 @@ import world.respect.lib.opds.model.ReadiumContributorStringValue
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
 import world.respect.libutil.ext.resolve
+import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase.Companion.DEMO_GRADE_TITLE_FN
+import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitManifestUseCase.Companion.LEARNING_UNIT_TITLE_FN
 import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitManifestUseCase.Companion.LESSON_MANIFEST_FILENAME
 
 class MakeDemoAppGradeCollectionsUseCase {
@@ -18,11 +20,11 @@ class MakeDemoAppGradeCollectionsUseCase {
     operator fun invoke(
         baseUrl: Url,
         gradeNum: Int,
+        titleFn: (Int) -> String = DEMO_GRADE_TITLE_FN,
+        publicationTitle: (gradeNum: Int, lessonNum: Int) -> String = LEARNING_UNIT_TITLE_FN,
     ) : OpdsFeed {
         return OpdsFeed(
-            metadata = OpdsFeedMetadata(
-                title = "Grade $gradeNum"
-            ),
+            metadata = OpdsFeedMetadata(title = titleFn(gradeNum)),
             links = listOf(
                 ReadiumLink(
                     href = baseUrl.resolve("$GRADES_DIR_NAME/$gradeNum/$COLLECTION_FILE_NAME").toString(),
@@ -31,10 +33,14 @@ class MakeDemoAppGradeCollectionsUseCase {
                 )
             ),
             publications = (1..DemoConstants.NUM_LESSONS).map { lessonNum ->
-                val lessonBase = baseUrl.resolve("$GRADES_DIR_NAME/$gradeNum/$LEARNING_UNITS_DIR_NAME/$lessonNum/")
+                val lessonBase = baseUrl.resolve(
+                    "$GRADES_DIR_NAME/$gradeNum/$LEARNING_UNITS_DIR_NAME/$lessonNum/"
+                )
                 OpdsPublication(
                     metadata = ReadiumMetadata(
-                        title = LangMapStringValue("Lesson $lessonNum - Grade $gradeNum"),
+                        title = LangMapStringValue(
+                            publicationTitle(gradeNum, lessonNum)
+                        ),
                         type = Uri.parse("http://schema.org/Game"),
                         author = listOf(
                             ReadiumContributorStringValue("Mullah Nasruddin")

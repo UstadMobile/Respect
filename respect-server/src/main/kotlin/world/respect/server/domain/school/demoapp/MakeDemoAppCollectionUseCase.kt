@@ -26,7 +26,7 @@ class MakeDemoAppCollectionUseCase {
             navigation = (1..DemoConstants.NUM_GRADES).map {
                 ReadiumLink(
                     href = baseUrl.resolve("grade/$it/index.json").toString(),
-                    title = "Grade $it",
+                    title = DEMO_GRADE_TITLE_FN(it),
                     type = "application/json",
                     alternate = listOf(
                         ReadiumLink(
@@ -45,6 +45,14 @@ class MakeDemoAppCollectionUseCase {
         const val DEFAULT_COLLECTION_NAME = "default-collection.json"
 
         const val GRADE_ICON_NAME = "grade.jpg"
+
+        val DEMO_GRADE_TITLE_FN: (gradeNum: Int) -> String = { gradeNum ->
+            if(gradeNum == DemoConstants.APP_ONLY_GRADE) {
+                "Mobile app only demo lessons"
+            }else {
+                "Grade $gradeNum"
+            }
+        }
 
     }
 

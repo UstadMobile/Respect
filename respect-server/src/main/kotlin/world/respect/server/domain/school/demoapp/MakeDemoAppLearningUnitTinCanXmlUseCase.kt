@@ -2,6 +2,7 @@ package world.respect.server.domain.school.demoapp
 
 import io.ktor.http.Url
 import io.ktor.http.hostWithPortIfSpecified
+import org.openeel.demo.demolaunchableappserver.DemoConstants
 import world.respect.lib.xapi.rusticilaunch.model.TinCanXmlActivities
 import world.respect.lib.xapi.rusticilaunch.model.TinCanXmlActivity
 import world.respect.lib.xapi.rusticilaunch.model.TinCanXmlDocument
@@ -18,7 +19,8 @@ class MakeDemoAppLearningUnitTinCanXmlUseCase {
         gradeNum: Int,
         lessonNum: Int,
         demoAppPackage: String = DEMO_APP_PACKAGE,
-        useIntentUrl: Boolean = lessonNum.mod(2) == 0,
+        useIntentUrl: Boolean = gradeNum == DemoConstants.APP_ONLY_GRADE,
+        titleFn: (Int, Int) -> String = MakeDemoAppLearningUnitManifestUseCase.LEARNING_UNIT_TITLE_FN,
     ): TinCanXmlDocument {
         val lessonPath = "$GRADES_DIR_NAME/$gradeNum/$LEARNING_UNITS_DIR_NAME/$lessonNum/"
 
@@ -28,7 +30,7 @@ class MakeDemoAppLearningUnitTinCanXmlUseCase {
                     TinCanXmlActivity(
                         id = baseUrl.resolve(lessonPath).toString(),
                         type = "http://activitystrea.ms/schema/1.0/game",
-                        name = "Grade $gradeNum Lesson $lessonNum",
+                        name = titleFn(gradeNum, lessonNum),
                         launch = TinCanXmlLaunch(
                             lang = "en-US",
                             value = if(useIntentUrl) {

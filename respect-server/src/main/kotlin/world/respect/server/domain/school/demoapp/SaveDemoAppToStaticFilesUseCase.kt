@@ -76,6 +76,7 @@ class SaveDemoAppToStaticFilesUseCase(
                     )
                 )
             )
+
             val lessonsDir = File(gradeDir, LEARNING_UNITS_DIR_NAME).also { it.mkdirs() }
             (1..DemoConstants.NUM_LESSONS).forEach { lessonNum ->
                 val lessonDir = File(lessonsDir, lessonNum.toString()).also { it.mkdirs() }

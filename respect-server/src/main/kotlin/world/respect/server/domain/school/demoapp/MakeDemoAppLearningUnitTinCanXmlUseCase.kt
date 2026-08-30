@@ -34,7 +34,7 @@ class MakeDemoAppLearningUnitTinCanXmlUseCase {
                         launch = TinCanXmlLaunch(
                             lang = "en-US",
                             value = if(useIntentUrl) {
-                                "intent://${baseUrl.hostWithPortIfSpecified}/$lessonPath$LEARNING_UNIT_HTML_FILENAME#Intent;scheme=https;category=android.intent.category.BROWSABLE;package=$demoAppPackage;end"
+                                "intent://demo.openeel.org/grade/$gradeNum/learningunits/$lessonNum/learningunit.html#Intent;scheme=https;category=android.intent.category.BROWSABLE;package=$DEMO_APP_PACKAGE;end"
                             }else {
                                 LEARNING_UNIT_HTML_FILENAME
                             }

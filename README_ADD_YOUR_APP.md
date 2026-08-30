@@ -201,7 +201,16 @@ Example:
 </tincan>
 ```
 The tincan.xml file is used as per the [Rustici Launch Method](https://github.com/RusticiSoftware/launch/blob/master/lms_lrs.md)
-so learning units can send xAPI usage data back to the launcher.
+so learning units can send xAPI usage data back to the launcher. 
+
+> [!NOTE]
+> If the learning unit requires a native app to be installed and does not support usage via web
+> technologies then use an [Intent URI](https://developer.android.com/reference/android/content/Intent#toUri(int)) instead. If the required native app is not installed then
+> the launcher will take the user to an app store as per the launchable app manifest. e.g.
+> ```xml 
+> <launch lang="en-US">intent://demo.openeel.org/grade/1/learningunits/3/learningunit.html#Intent;scheme=https;category=android.intent.category.BROWSABLE;package=org.openeel.demolaunchableapp;end</launch>
+> ```
+
 
 ## Step 2: Send xAPI usage data back to the launcher (HTML/Javascript apps)
 

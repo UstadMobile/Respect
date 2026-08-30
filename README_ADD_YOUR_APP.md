@@ -77,6 +77,24 @@ Example:
 ```
 For a more options see [README_LAUNCHABLE_APP.md](../respect-lib-opds-model/README_LAUNCHABLE_APP.md).
 
+If you have a native Android app, it is recommended to add this intent filter to your AndroidManifest.xml file. Adding
+the intent filter below will allow the launcher app to detect if your app is installed. If your app uses 
+http(s) links that are not [verified app links](https://developer.android.com/training/app-links/about) 
+(e.g. because your app allows users to select their own server) you must add this intent filter for 
+the launcher app to be able to open it in your own app instead of the browser.
+
+AndroidManifest.xml intent filter:
+```xml
+<intent-filter>
+    <action android:name="org.openeel.action.LAUNCH" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+
+    <data android:scheme="https"/>
+    <data android:scheme="http"/>
+</intent-filter>
+```
+
 **B) Create a default collection of learning units:**
 
 Example (default-collection.json):

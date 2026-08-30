@@ -41,7 +41,7 @@ import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.bookmark.AddBookmarkUseCase
 import world.respect.shared.domain.bookmark.RemoveBookmarkUseCase
-import world.respect.shared.domain.launchapp.installapp.ShowInstallAppPromptUseCase
+import world.respect.shared.domain.launchapp.gotoappstore.GoToAppStoreUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.license.GetLicenseLabelUseCase
 import world.respect.shared.domain.license.GetLicenseLabelUseCase.LicenseLabelResult
@@ -88,7 +88,7 @@ class LearningUnitDetailViewModel(
     private val ustadCache: UstadCache,
     val accountManager: RespectAccountManager,
     private val snackBarDispatcher: SnackBarDispatcher,
-    private val showInstallAppPromptUseCase: ShowInstallAppPromptUseCase,
+    private val goToAppStoreUseCase: GoToAppStoreUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
 
@@ -234,8 +234,8 @@ class LearningUnitDetailViewModel(
                 if(result is LaunchAppUseCase.LaunchAppInstallRequired) {
                     val launchableAppToInstall = result.launchableApp
                     if(launchableAppToInstall != null) {
-                        showInstallAppPromptUseCase(
-                            ShowInstallAppPromptUseCase.Request(
+                        goToAppStoreUseCase(
+                            GoToAppStoreUseCase.Request(
                                 launchableApp = launchableAppToInstall,
                                 referrer = result.referrerUrl.toString(),
                             )

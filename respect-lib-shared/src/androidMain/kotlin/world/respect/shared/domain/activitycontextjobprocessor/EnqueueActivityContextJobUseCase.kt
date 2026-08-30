@@ -11,11 +11,11 @@ import kotlinx.coroutines.channels.Channel
  * The workaround here is for the application to host a channel of jobs that can then be processed
  * by the ActivityContextJobProcessor
  */
-class SubmitActivityContextJobUseCase {
+class EnqueueActivityContextJobUseCase {
 
-    val requestChannel = Channel<ActivityContextJob>(Channel.UNLIMITED)
+    val jobChannel = Channel<ActivityContextJob>(Channel.UNLIMITED)
 
     suspend operator fun invoke(request: ActivityContextJob) {
-        requestChannel.send(request)
+        jobChannel.send(request)
     }
 }

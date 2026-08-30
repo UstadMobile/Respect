@@ -4,6 +4,6 @@ import android.app.Activity
 
 fun interface ActivityContextJob {
 
-    fun doJob(activity: Activity)
+    suspend fun doJob(activity: Activity)
 
 }

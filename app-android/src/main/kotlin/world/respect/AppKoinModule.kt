@@ -155,7 +155,7 @@ import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCaseAndroid
 import world.respect.app.domain.e2eartifactupload.GetDbFilesForE2EArtifactUploadUseCaseAndroid
-import world.respect.shared.domain.activitycontextjobprocessor.SubmitActivityContextJobUseCase
+import world.respect.shared.domain.activitycontextjobprocessor.EnqueueActivityContextJobUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
 import world.respect.shared.domain.e2eartifactupload.GetDbFilesForE2EArtifactUploadUseCase
@@ -243,8 +243,8 @@ import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiA
 import world.respect.shared.domain.launchapp.getlaunchoptionsforpublication.GetLaunchOptionsForPublicationUseCase
 import world.respect.shared.domain.launchapp.getxapilaunchparams.GetXapiLaunchParamsUseCase
 import world.respect.shared.domain.launchapp.getxapilaunchparams.GetXapiLaunchParamsUseCaseAndroid
-import world.respect.shared.domain.launchapp.installapp.ShowInstallAppPromptUseCase
-import world.respect.shared.domain.launchapp.installapp.ShowInstallAppPromptUseCaseAndroid
+import world.respect.shared.domain.launchapp.gotoappstore.GoToAppStoreUseCase
+import world.respect.shared.domain.launchapp.gotoappstore.GoToAppStoreUseCaseAndroid
 import world.respect.shared.domain.license.GetLicenseLabelUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
@@ -560,8 +560,11 @@ val appKoinModule = module {
             context = androidApplication()
         )
     }
+
     single<SavePasswordUseCase> {
-        SavePasswordUseCaseAndroidImpl()
+        SavePasswordUseCaseAndroidImpl(
+            enqueueActivityContextJobUseCase = get(),
+        )
     }
 
     single<SchoolDirectoryDataSourceLocal> {
@@ -822,13 +825,12 @@ val appKoinModule = module {
         }
     }
 
-    single<SubmitActivityContextJobUseCase> {
-        SubmitActivityContextJobUseCase()
+    single<EnqueueActivityContextJobUseCase> {
+        EnqueueActivityContextJobUseCase()
     }
 
-    single<ShowInstallAppPromptUseCase> {
-        ShowInstallAppPromptUseCaseAndroid(
-            submitActivityContextJobUseCase = get(),
+    single<GoToAppStoreUseCase> {
+        GoToAppStoreUseCaseAndroid(
             appContext = androidApplication(),
         )
     }

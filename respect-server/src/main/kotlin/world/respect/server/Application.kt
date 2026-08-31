@@ -277,7 +277,9 @@ fun Application.module() {
             route("school") {
                 route("xapi") {
                     authenticate(AUTH_CONFIG_SCHOOL) {
-                        XapiStatementsResourceRoute(json = json)
+                        XapiStatementsResourceRoute(
+                            json = json,
+                            processStatementsUseCase = { it.getSchoolKoinScope().get() })
                     }
                 }
 

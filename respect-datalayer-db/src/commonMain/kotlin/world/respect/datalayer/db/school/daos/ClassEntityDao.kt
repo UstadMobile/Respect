@@ -11,6 +11,7 @@ import world.respect.datalayer.db.school.daos.PersonEntityDao.Companion.SELECT_A
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.ClassEntityWithPermissions
 import world.respect.datalayer.db.school.entities.LastModifiedAndPermission
+import world.respect.datalayer.school.model.ClazzUidAndName
 import world.respect.datalayer.school.model.PermissionFlags
 import world.respect.datalayer.school.model.StatusEnum
 
@@ -99,6 +100,13 @@ interface ClassEntityDao {
             OR ClassEntity.cTeacherInviteGuid = :code 
     """)
     suspend fun findByInviteCode(code: String): List<ClassEntityWithPermissions>
+
+    @Query("""
+        SELECT ClassEntity.cGuid, ClassEntity.cTitle
+          FROM ClassEntity
+         WHERE ClassEntity.cGuid IN (:uidList) 
+    """)
+    suspend fun findClazzNamesByUids(uidList: List<Long>): List<ClazzUidAndName>
 
     @Query("""
           WITH ${PersonEntityDao.AUTHENTICATED_PERMISSION_PERSON_UIDS_CTE_SQL},

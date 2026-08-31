@@ -30,6 +30,7 @@ kotlin {
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
             api(projects.respectDatalayer)
+            api(projects.respectDatalayerDb)
             implementation(libs.napier)
         }
 

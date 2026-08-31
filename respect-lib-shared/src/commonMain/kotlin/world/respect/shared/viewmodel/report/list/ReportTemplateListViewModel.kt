@@ -21,7 +21,7 @@ import world.respect.datalayer.school.model.Report
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.model.RunReportResultAndFormatters
-import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.select_template
 import world.respect.shared.navigation.NavCommand
@@ -81,7 +81,7 @@ class ReportTemplateListViewModel(
                                 reportUid = 0L,
                                 reportOptions = ReportOptions(),
                                 accountPersonUid = activeUserPersonUid,
-                                timeZoneId = TimeZone.currentSystemDefault().id
+                                timeZone = TimeZone.currentSystemDefault()
                             ),
                             results = emptyList()
                         ),
@@ -95,7 +95,7 @@ class ReportTemplateListViewModel(
                 reportUid = report.guid.toLong(),
                 reportOptions = report.reportOptions,
                 accountPersonUid = activeUserPersonUid,
-                timeZoneId = TimeZone.currentSystemDefault().id
+                timeZone = TimeZone.currentSystemDefault()
             )
 
             return runReportUseCase(request).map { reportResult ->

@@ -30,7 +30,7 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.extensions.reportoptions.ReportOptions
 import world.respect.datalayer.school.model.Report
 import world.respect.shared.domain.report.model.RunReportResultAndFormatters
-import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.shared.generated.resources.No_data_available
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.blank_template
@@ -85,7 +85,7 @@ private fun ReportTemplateCard(
                     reportUid = report.guid.toLong(),
                     reportOptions = ReportOptions(),
                     accountPersonUid = activeUserPersonUid,
-                    timeZoneId = TimeZone.currentSystemDefault().id,
+                    timeZone = TimeZone.currentSystemDefault(),
                 ),
                 results = emptyList()
             ),

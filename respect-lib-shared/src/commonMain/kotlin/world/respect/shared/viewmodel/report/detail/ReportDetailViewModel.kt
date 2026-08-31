@@ -28,7 +28,7 @@ import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParam
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.formatter.GraphFormatter
-import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
 import world.respect.shared.navigation.NavCommand
@@ -120,7 +120,7 @@ class ReportDetailViewModel(
                     reportUid = reportUid.toLong(),
                     reportOptions = reportOptions,
                     accountPersonUid = _uiState.value.activeUserPersonUid,
-                    timeZoneId = TimeZone.currentSystemDefault().id
+                    timeZone = TimeZone.currentSystemDefault()
                 )
                 runReportUseCase(request).collect { reportResult ->
                     val xAxisFormatter = createGraphFormatterUseCase(

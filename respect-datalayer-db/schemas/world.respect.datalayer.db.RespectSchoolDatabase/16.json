@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 15,
-    "identityHash": "5c52ccc0c3a85e0c4dea0700c62f8be7",
+    "version": 16,
+    "identityHash": "ffcd7e969454fa623d1d6438146e0d0e",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -2500,7 +2500,7 @@
         }
       },
       {
-        "tableName": "ReportQueryResult",
+        "tableName": "ReportQueryResultEntity",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rqrUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `rqrReportUid` INTEGER NOT NULL, `rqrLastModified` INTEGER NOT NULL, `rqrLastValidated` INTEGER NOT NULL, `rqrReportSeriesUid` INTEGER NOT NULL, `rqrXAxis` TEXT NOT NULL, `rqrYAxis` REAL NOT NULL, `rqrSubgroup` TEXT NOT NULL, `rqrTimeZone` TEXT NOT NULL)",
         "fields": [
           {
@@ -2580,7 +2580,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5c52ccc0c3a85e0c4dea0700c62f8be7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ffcd7e969454fa623d1d6438146e0d0e')"
     ]
   }
 }

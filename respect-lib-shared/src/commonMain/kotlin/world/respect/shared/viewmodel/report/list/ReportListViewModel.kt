@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
@@ -34,8 +34,9 @@ import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParam
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
 import world.respect.shared.domain.report.formatter.GraphFormatter
-import world.respect.shared.domain.report.model.RunReportResultAndFormatters
-import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
+import world.respect.shared.domain.xapi.asRunReportRequest
+import world.respect.shared.domain.xapi.toStatementReportRows
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.report
 import world.respect.shared.generated.resources.reports
@@ -45,14 +46,20 @@ import world.respect.shared.navigation.ReportTemplateList
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.FabUiState
-import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
-data class ReportListUiState(
-    val reportList: DataLoadState<List<XapiStatement>> = DataLoadingState(),
-    val reportOptionsMap: Map<String, ReportOptions> = emptyMap(),
-    val activeUserPersonUid: Long = 0L,
+data class ReportEntry(
+    val request: XapiStatement,
+    val latestResponse: XapiStatement?,
+    val reportResult: RunReportUseCase.RunReportResult? = null,
     val xAxisFormatter: GraphFormatter<String>? = null,
     val yAxisFormatter: GraphFormatter<Double>? = null,
+)
+
+data class ReportListUiState(
+    val reportList: DataLoadState<List<ReportEntry>> = DataLoadingState(),
+    val reportOptionsMap: Map<String, ReportOptions> = emptyMap(),
+    val activeUserPersonUid: Long = 0L,
 )
 
 
@@ -86,78 +93,105 @@ class ReportListViewModel(
                 )
             }
 
-            launch {
-                accountManager.selectedAccountAndPersonFlow.collect { sessionAndPerson ->
-                    val personUid = sessionAndPerson?.person?.guid?.let { uidNumberMapper(it) } ?: 0L
-                    _uiState.update { it.copy(activeUserPersonUid = personUid) }
-                }
-            }
-
-            schoolDataSource.xapiResource.statements.getAsFlow(
+            val queryRequestStatementsFlow = schoolDataSource.xapiResource.statements.getAsFlow(
                 listParams = GetStatementParams(
                     activity = CATEGORY_REPORT_QUERY_RECIPE,
                     relatedActivities = true,
                     verb = XapiVerb.ID_REPORT_QUERY_REQUEST,
                 ),
                 dataLoadParams = DataLoadParams(),
-            ).collect { dataLoadState ->
-                _uiState.update { state ->
-                    val statements = dataLoadState.dataOrNull()?.statements?.distinctByMostRecentTimestampForActivityId() ?: emptyList()
-                    val optionsMap = statements.associate { stmt ->
-                        val options = stmt.objectActivityOrNull()?.definition?.decodeFromExtensionOrNull(
-                            json = json,
-                            extensionIri = OpenEelXapiConstants.EXTENSION_REPORT_OPTIONS,
-                            deserializer = ReportOptions.serializer()
-                        ) ?: ReportOptions()
-                        stmt.id.toString() to options
+            )
+
+            val queryResponseStatementsFlow = schoolDataSource.xapiResource.statements.getAsFlow(
+                listParams = GetStatementParams(
+                    verb = XapiVerb.ID_REPORT_QUERY_RESPONSE,
+                ),
+                dataLoadParams = DataLoadParams(),
+            )
+
+            combine(
+                queryRequestStatementsFlow,
+                queryResponseStatementsFlow,
+                accountManager.selectedAccountAndPersonFlow
+            ) { requestsState, responsesState, sessionAndPerson ->
+                val requests = requestsState.dataOrNull()?.statements ?: emptyList()
+                val responses = responsesState.dataOrNull()?.statements ?: emptyList()
+                val activeUserPersonUid = sessionAndPerson?.person?.guid?.let { uidNumberMapper(it) } ?: 0L
+
+                val responsesByRequestId = responses
+                    .filter { it.`object` is XapiStatementRef }
+                    .groupBy { (it.`object` as XapiStatementRef).id }
+
+                val reportEntries = requests
+                    .distinctByMostRecentTimestampForActivityId()
+                    .map { request ->
+                        val requestId = request.id?.toString()
+                        val latestResponse = responsesByRequestId[requestId]
+                            ?.maxByOrNull { it.timestamp ?: it.stored ?: Instant.DISTANT_PAST }
+
+                        val reportResult = latestResponse?.let { response ->
+                            val reportOptions = request.objectActivityOrNull()?.definition?.decodeFromExtensionOrNull(
+                                json = json,
+                                extensionIri = OpenEelXapiConstants.EXTENSION_REPORT_OPTIONS,
+                                deserializer = ReportOptions.serializer()
+                            ) ?: ReportOptions()
+
+                            val results = reportOptions.series.indices.map { index ->
+                                response.toStatementReportRows(index, json)
+                            }
+
+                            RunReportUseCase.RunReportResult(
+                                timestamp = response.timestamp?.toEpochMilliseconds() ?: 0L,
+                                request = request.asRunReportRequest(
+                                    json = json,
+                                    accountPersonUid = activeUserPersonUid,
+                                    timeZone = TimeZone.currentSystemDefault()
+                                ),
+                                results = results
+                            )
+                        }
+
+                        val xAxisFormatter = reportResult?.let {
+                            createGraphFormatterUseCase(
+                                reportResult = it,
+                                options = CreateGraphFormatterUseCase.FormatterOptions(
+                                    paramType = String::class,
+                                    axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES
+                                )
+                            )
+                        }
+
+                        val yAxisFormatter = reportResult?.let {
+                            createGraphFormatterUseCase(
+                                reportResult = it,
+                                options = CreateGraphFormatterUseCase.FormatterOptions(
+                                    paramType = Double::class,
+                                    axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.Y_AXIS_VALUES
+                                )
+                            )
+                        }
+
+                        ReportEntry(request, latestResponse, reportResult, xAxisFormatter, yAxisFormatter)
                     }
-                    
+
+                val optionsMap = reportEntries.associate { entry ->
+                    val stmt = entry.request
+                    val options = stmt.objectActivityOrNull()?.definition?.decodeFromExtensionOrNull(
+                        json = json,
+                        extensionIri = OpenEelXapiConstants.EXTENSION_REPORT_OPTIONS,
+                        deserializer = ReportOptions.serializer()
+                    ) ?: ReportOptions()
+                    stmt.id.toString() to options
+                }
+
+                _uiState.update { state ->
                     state.copy(
-                        reportList = dataLoadState.map { statements },
-                        reportOptionsMap = optionsMap
+                        reportList = requestsState.map { reportEntries },
+                        reportOptionsMap = optionsMap,
+                        activeUserPersonUid = activeUserPersonUid
                     )
                 }
-            }
-        }
-    }
-
-    @OptIn(ExperimentalTime::class)
-    fun runReport(statement: XapiStatement): Flow<RunReportResultAndFormatters> {
-        val reportOptions = statement.objectActivityOrNull()?.definition?.decodeFromExtensionOrNull(
-            json = json,
-            extensionIri = OpenEelXapiConstants.EXTENSION_REPORT_OPTIONS,
-            deserializer = ReportOptions.serializer()
-        ) ?: ReportOptions()
-        val activityId = statement.objectActivityOrNull()?.id ?: "0"
-        val request = RunReportUseCase.RunReportRequest(
-            reportUid = activityId.toLong(),
-            reportOptions = reportOptions,
-            accountPersonUid = _uiState.value.activeUserPersonUid,
-            timeZoneId = TimeZone.currentSystemDefault().id
-        )
-
-        return runReportUseCase(request).map { reportResult ->
-            val xAxisFormatter = createGraphFormatterUseCase(
-                reportResult = reportResult,
-                options = CreateGraphFormatterUseCase.FormatterOptions(
-                    paramType = String::class,
-                    axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES
-                )
-            )
-
-            val yAxisFormatter = createGraphFormatterUseCase(
-                reportResult = reportResult,
-                options = CreateGraphFormatterUseCase.FormatterOptions(
-                    paramType = Double::class,
-                    axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.Y_AXIS_VALUES
-                )
-            )
-
-            RunReportResultAndFormatters(
-                reportResult = reportResult,
-                xAxisFormatter = xAxisFormatter,
-                yAxisFormatter = yAxisFormatter
-            )
+            }.collect {}
         }
     }
 
@@ -169,8 +203,8 @@ class ReportListViewModel(
         )
     }
 
-    fun onClickEntry(entry: XapiStatement) {
-        val activityId = entry.objectActivityOrNull()?.id ?: return
+    fun onClickEntry(entry: ReportEntry) {
+        val activityId = entry.request.objectActivityOrNull()?.id ?: return
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
                 ReportDetail(activityId)
@@ -178,7 +212,8 @@ class ReportListViewModel(
         )
     }
 
-    fun onRemoveReport(statement: XapiStatement) {
+    fun onRemoveReport(entry: ReportEntry) {
+        val statement = entry.request
         val statementId = statement.id ?: return
         launchWithLoadingIndicator {
             val actor = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent ?: return@launchWithLoadingIndicator

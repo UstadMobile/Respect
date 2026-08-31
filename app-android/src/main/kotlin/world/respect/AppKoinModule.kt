@@ -180,8 +180,7 @@ import world.respect.shared.domain.phonenumber.OnClickPhoneNumberUseCaseAndroid
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorAndroid
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase
-import world.respect.shared.domain.report.query.MockRunReportUseCaseClientImpl
-import world.respect.shared.domain.report.query.RunReportUseCase
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCase
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolDbPath
@@ -278,6 +277,8 @@ import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
 import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
+import world.respect.datalayer.db.school.domain.report.query.GenerateReportQueriesUseCase
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCaseDatabaseImpl
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
 import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCaseAndroid
 import world.respect.shared.viewmodel.statement.detail.RawStatementViewModel
@@ -1198,7 +1199,10 @@ val appKoinModule = module {
         }
 
         scoped<RunReportUseCase> {
-            MockRunReportUseCaseClientImpl(accountManager = get(), json = get())
+            RunReportUseCaseDatabaseImpl(
+                schoolDatabase = get(),
+                generateReportQueriesUseCase = get(),
+            )
         }
     }
     single<ValidateEmailUseCase>{
@@ -1206,5 +1210,8 @@ val appKoinModule = module {
     }
     single<CreateGraphFormatterUseCase> {
         CreateGraphFormatterUseCase()
+    }
+    single<GenerateReportQueriesUseCase> {
+        GenerateReportQueriesUseCase()
     }
 }

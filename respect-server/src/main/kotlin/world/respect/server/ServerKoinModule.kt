@@ -55,6 +55,7 @@ import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitTinCanXmlUseCase
 import world.respect.server.domain.school.verify.VerifySchoolUrlPointsToThisServerUseCase
 import world.respect.server.util.SchoolUrlVerificationManager
+import world.respect.server.domain.school.xapi.ProcessXapiStatementsUseCase
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
@@ -85,6 +86,9 @@ import world.respect.shared.domain.account.validateauth.ValidateAuthorizationUse
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.navigation.deeplink.UrlToCustomDeepLinkUseCase
+import world.respect.datalayer.db.school.domain.report.query.GenerateReportQueriesUseCase
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCaseDatabaseImpl
 import world.respect.shared.domain.school.RespectSchoolPath
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.domain.school.add.RegisterSchoolUseCase
@@ -218,6 +222,10 @@ fun serverKoinModule(
 
     single<EncryptPersonPasswordUseCase> {
         EncryptPersonPasswordUseCaseImpl()
+    }
+
+    single<GenerateReportQueriesUseCase> {
+        GenerateReportQueriesUseCase()
     }
 
 
@@ -472,6 +480,24 @@ fun serverKoinModule(
             )
         }
 
+        factory<RunReportUseCase> {
+            RunReportUseCaseDatabaseImpl(
+                schoolDatabase = get(),
+                generateReportQueriesUseCase = get()
+            )
+        }
+
+        factory<ProcessXapiStatementsUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            ProcessXapiStatementsUseCase(
+                statementResource = get<SchoolDataSource>().xapiResource.statements,
+                runReportUseCase = get(),
+                json = get(),
+                uidNumberMapper = get(),
+                accountPersonGuid = accountScopeId.accountPrincipalId.guid
+            )
+        }
     }
 
 

@@ -39,7 +39,13 @@ class MakeDemoAppManifestUseCase(
                 language = listOf(langCode),
                 modified = "2025-09-29T17:00:00Z"
             ),
-            links = listOf(
+            links = DemoConstants.LANGUAGE_CODES.filterNot { it == langCode }.map { otherLang ->
+                ReadiumLink(
+                    rel = listOf("alternate"),
+                    href = baseUrl.resolve("$otherLang/$APP_MANIFEST_FILENAME").toString(),
+                    language = listOf(otherLang),
+                )
+            } + listOf(
                 ReadiumLink(
                     href = baseUrl.resolve("$langCode/$APP_MANIFEST_FILENAME").toString(),
                     rel = listOf("self"),
@@ -67,13 +73,7 @@ class MakeDemoAppManifestUseCase(
                     rel = listOf("license"),
                     href = "https://opensource.org/license/mit"
                 )
-            ) + DemoConstants.LANGUAGE_CODES.filterNot { it == langCode }.map { otherLang ->
-                ReadiumLink(
-                    rel = listOf("alternate"),
-                    href = baseUrl.resolve("$otherLang/$APP_MANIFEST_FILENAME").toString(),
-                    language = listOf(otherLang),
-                )
-            },
+            ),
             images = listOf(
                 ReadiumLink(
                     href = baseUrl.resolve(APP_MANIFEST_ICON_NAME).toString(),
@@ -85,7 +85,7 @@ class MakeDemoAppManifestUseCase(
 
     companion object {
 
-        const val APP_MANIFEST_FILENAME = "appmanifest.json"
+        const val APP_MANIFEST_FILENAME = "launchable-app-manifest.json"
 
         const val APP_MANIFEST_ICON_NAME = "app_icon.png"
     }

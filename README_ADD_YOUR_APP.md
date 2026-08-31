@@ -34,19 +34,24 @@ Example:
         "href": "https://www.ustadmobile.com/"
       }
     },
-    "identifier": "https://demo.openeel.org/app",
+    "identifier": "https://demo.openeel.org/app/en-US",
     "language": "en",
     "modified": "2025-09-29T17:00:00Z"
   },
   "links": [
     {
       "rel": "self",
-      "href": "https://demo.openeel.org/launchable-app.json",
+      "href": "https://demo.openeel.org/en-US/launchable-app-manifest.json",
       "type": "application/opds-publication+json"
     },
     {
+      "href": "https://demo.openeel.org/fr-FR/launchable-app-manifest.json",
+      "rel": "alternate",
+      "language": "fr-FR"
+    },
+    {
       "rel": "collection",
-      "href": "https://demo.openeel.org/default-collection.json",
+      "href": "https://demo.openeel.org/en-US/default-collection.json",
       "type": "application/opds+json"
     },
     {
@@ -105,7 +110,11 @@ Example (default-collection.json):
   },
 
   "links": [
-    {"rel": "self", "href": "https://demo.openeel.org/default-collection.json", "type": "application/opds+json"}
+    {
+      "rel": "self", 
+      "href": "https://demo.openeel.org/en-US/default-collection.json", 
+      "type": "application/opds+json"
+    }
   ],
 
   "publications": [
@@ -114,7 +123,7 @@ Example (default-collection.json):
         "@type": "http://schema.org/Game",
         "title": "Native Demo 001",
         "author": "Mullah Nasruddin",
-        "identifier": "https://demo.openeel.org/grade/1/learningunits/1/",
+        "identifier": "https://demo.openeel.org/en-US/grade/1/learningunits/1/",
         "language": "en",
         "modified": "2015-09-29T17:00:00Z",
         "subject": [
@@ -134,7 +143,7 @@ Example (default-collection.json):
         },
         {
           "rel": "https://id.openeel.org/rel/launchable-app",
-          "href": "https://demo.openeel.org/launchable-app.json",
+          "href": "https://demo.openeel.org/en-US/launchable-app-manifest.json",
           "type": "application/opds-publication+json"
         }
       ],
@@ -155,14 +164,14 @@ Example (Lesson-manifest.json)
     "@type": "http://schema.org/Game",
     "title": "Lesson 001",
     "author": "Mullah Nasruddin",
-    "identifier": "https://demo.openeel.org/grade/1/learningunits/1/",
+    "identifier": "https://demo.openeel.org/en-US/grade/1/learningunits/1/",
     "language": "en",
     "modified": "2015-09-29T17:00:00Z"
   },
   "links": [
     {
       "rel": "self",
-      "href": "https://demo.openeel.org/grade/1/learningunits/1/manifest.json",
+      "href": "https://demo.openeel.org/en-US/grade/1/learningunits/1/manifest.json",
       "type": "application/opds-publication+json"
     },
     {
@@ -172,13 +181,13 @@ Example (Lesson-manifest.json)
     },
     {
       "rel": "https://id.openeel.org/rel/launchable-app",
-      "href": "https://demo.openeel.org/launchable-app.json",
+      "href": "https://demo.openeel.org/en-US/launchable-app-manifest.json",
       "type": "application/opds-publication+json"
     }
   ],
   "readingOrder": [
     {
-      "href": "https://demo.openeel.org/grade/1/learningunits/1/learningunit.html",
+      "href": "https://demo.openeel.org/en-US/grade/1/learningunits/1/learningunit.html",
       "type": "text/html"
     }
   ],
@@ -210,7 +219,7 @@ Example:
 ```xml
 <tincan xmlns="http://projecttincan.com/tincan.xsd">
     <activities>
-        <activity id="https://demo.openeel.org/grade/1/learningunits/1/" type="http://activitystrea.ms/schema/1.0/game">
+        <activity id="https://demo.openeel.org/en-US/grade/1/learningunits/1/" type="http://activitystrea.ms/schema/1.0/game">
             <name>Lesson 1</name>
             <description lang="en-US">A demo lesson</description>
             <launch lang="en-us">learningunit.html</launch>
@@ -226,7 +235,7 @@ so learning units can send xAPI usage data back to the launcher.
 > technologies then use an [Intent URI](https://developer.android.com/reference/android/content/Intent#toUri(int)) instead. If the required native app is not installed then
 > the launcher will take the user to an app store as per the launchable app manifest. e.g.
 > ```xml 
-> <launch lang="en-US">intent://demo.openeel.org/grade/1/learningunits/3/learningunit.html#Intent;scheme=https;category=android.intent.category.BROWSABLE;package=org.openeel.demolaunchableapp;end</launch>
+> <launch lang="en-US">intent://demo.openeel.org/en-US/grade/1/learningunits/3/learningunit.html#Intent;scheme=https;category=android.intent.category.BROWSABLE;package=org.openeel.demolaunchableapp;end</launch>
 > ```
 
 

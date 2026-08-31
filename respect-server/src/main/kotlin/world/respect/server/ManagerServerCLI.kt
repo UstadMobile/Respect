@@ -37,7 +37,10 @@ import kotlin.system.exitProcess
 import kotlin.time.Clock
 
 fun managerServerMain(ns: Namespace) {
-    val json = Json { encodeDefaults = false }
+    val json = Json {
+        encodeDefaults = false
+        prettyPrint = true
+    }
     val httpClient = HttpClient(OkHttp) {
         install(ContentNegotiation) {
             json(json = json)

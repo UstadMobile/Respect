@@ -23,6 +23,7 @@ import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT_ADMIN_USERNAME
+import world.respect.server.domain.school.demoapp.DemoStringMaps
 import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUseCase
@@ -113,9 +114,12 @@ fun managerServerMain(ns: Namespace) {
             CMD_MAKE_DEMO_APP -> {
                 val baseUrl = Url(ns.getString("url"))
                 val destDir = File(ns.getString("dir"))
+                val demoStrings = DemoStringMaps.initFromResources(json = json)
 
                 val saveDemoAppToStaticFilesUseCase = SaveDemoAppToStaticFilesUseCase(
-                    makeDemoAppManifestUseCase = MakeDemoAppManifestUseCase(),
+                    makeDemoAppManifestUseCase = MakeDemoAppManifestUseCase(
+                        demoStrings = demoStrings
+                    ),
                     makeDemoAppCollectionUseCase = MakeDemoAppCollectionUseCase(),
                     makeDemoAppGradeCollectionsUseCase = MakeDemoAppGradeCollectionsUseCase(),
                     makeDemoAppLearningUnitManifestUseCase = MakeDemoAppLearningUnitManifestUseCase(),

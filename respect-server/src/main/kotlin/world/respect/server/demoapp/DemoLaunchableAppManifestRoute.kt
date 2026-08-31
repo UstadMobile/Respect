@@ -12,11 +12,13 @@ import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
 class DemoRouteClass()
 
 fun Route.DemoLaunchableAppManifestRoute() {
-    get(MakeDemoAppManifestUseCase.APP_MANIFEST_FILENAME) {
+    get("{lang}/${MakeDemoAppManifestUseCase.APP_MANIFEST_FILENAME}") {
         val makeDemoAppUseCase: MakeDemoAppManifestUseCase = getKoin().get()
-
         call.respond(
-            makeDemoAppUseCase(baseUrl = call.demoAppBaseUrl())
+            makeDemoAppUseCase(
+                baseUrl = call.demoAppBaseUrl(),
+                language = call.parameters["lang"]!!
+            )
         )
     }
 

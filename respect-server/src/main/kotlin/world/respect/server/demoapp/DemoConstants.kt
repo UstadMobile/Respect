@@ -8,4 +8,6 @@ object DemoConstants {
 
     val APP_ONLY_GRADE = 7
 
+    val LANGUAGE_CODES = listOf("en-US", "fr-FR")
+
 }

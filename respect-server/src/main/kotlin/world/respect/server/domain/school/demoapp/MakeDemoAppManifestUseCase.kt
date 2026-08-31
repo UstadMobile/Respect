@@ -2,6 +2,9 @@ package world.respect.server.domain.school.demoapp
 
 import com.eygraber.uri.Uri
 import io.ktor.http.Url
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import org.openeel.demo.demolaunchableappserver.DemoConstants
 import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumContributorObject
@@ -9,14 +12,21 @@ import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
 import world.respect.libutil.ext.resolve
 
-class MakeDemoAppManifestUseCase {
+class MakeDemoAppManifestUseCase(
+    private val demoStrings: DemoStringMaps,
+) {
 
     operator fun invoke(
-        baseUrl: Url
+        baseUrl: Url,
+        language: String = "en-US",
     ) : OpdsPublication {
+        val strings = demoStrings.requireLangMap(language)
+
         return OpdsPublication(
             metadata = ReadiumMetadata(
-                title = LangMapStringValue("Demo Launchable App"),
+                title = LangMapStringValue(
+                    strings.requireString("app_name")
+                ),
                 author = listOf(
                     ReadiumContributorObject(
                         name = "UstadMobile FZ-LLC",
@@ -28,12 +38,12 @@ class MakeDemoAppManifestUseCase {
                     )
                 ),
                 identifier = Uri.parse("https://demo.openeel.org/app"),
-                language = listOf("en"),
+                language = listOf(language),
                 modified = "2025-09-29T17:00:00Z"
             ),
             links = listOf(
                 ReadiumLink(
-                    href = baseUrl.resolve(APP_MANIFEST_FILENAME).toString(),
+                    href = baseUrl.resolve("$language/$APP_MANIFEST_FILENAME").toString(),
                     rel = listOf("self"),
                     type = "application/opds-publication+json"
                 ),
@@ -59,7 +69,12 @@ class MakeDemoAppManifestUseCase {
                     rel = listOf("license"),
                     href = "https://opensource.org/license/mit"
                 )
-            ),
+            ) + DemoConstants.LANGUAGE_CODES.filterNot { it == language }.map { otherLang ->
+                ReadiumLink(
+                    rel = listOf("alternate"),
+                    href = baseUrl.resolve("$otherLang/$APP_MANIFEST_FILENAME").toString(),
+                )
+            },
             images = listOf(
                 ReadiumLink(
                     href = baseUrl.resolve(APP_MANIFEST_ICON_NAME).toString(),

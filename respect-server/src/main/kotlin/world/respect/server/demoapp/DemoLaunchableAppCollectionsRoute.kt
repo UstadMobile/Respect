@@ -14,11 +14,14 @@ fun Route.DemoLaunchableAppCollectionsRoute() {
 
     get("{lang}/${MakeDemoAppCollectionUseCase.DEFAULT_COLLECTION_NAME}") {
         call.respond(
-            koin.get<MakeDemoAppCollectionUseCase>().invoke(call.demoAppBaseUrl())
+            koin.get<MakeDemoAppCollectionUseCase>().invoke(
+                baseUrl = call.demoAppBaseUrl(),
+                langCode = call.parameters["lang"]!!
+            )
         )
     }
 
-    get("${MakeDemoAppGradeCollectionsUseCase.GRADES_DIR_NAME}/{grade}/${MakeDemoAppGradeCollectionsUseCase.COLLECTION_FILE_NAME}") {
+    get("{lang}/${MakeDemoAppGradeCollectionsUseCase.GRADES_DIR_NAME}/{grade}/${MakeDemoAppGradeCollectionsUseCase.COLLECTION_FILE_NAME}") {
         val baseUrl = call.demoAppBaseUrl()
         val grade = call.parameters["grade"]!!
 
@@ -26,6 +29,7 @@ fun Route.DemoLaunchableAppCollectionsRoute() {
             koin.get<MakeDemoAppGradeCollectionsUseCase>().invoke(
                 baseUrl = baseUrl,
                 gradeNum = grade.toInt(),
+                langCode = call.parameters["lang"]!!,
             )
         )
     }

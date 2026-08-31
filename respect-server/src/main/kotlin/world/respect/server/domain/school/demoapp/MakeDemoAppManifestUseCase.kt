@@ -2,8 +2,6 @@ package world.respect.server.domain.school.demoapp
 
 import com.eygraber.uri.Uri
 import io.ktor.http.Url
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import org.openeel.demo.demolaunchableappserver.DemoConstants
 import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.lib.opds.model.OpdsPublication
@@ -18,9 +16,9 @@ class MakeDemoAppManifestUseCase(
 
     operator fun invoke(
         baseUrl: Url,
-        language: String = "en-US",
+        langCode: String = "en-US",
     ) : OpdsPublication {
-        val strings = demoStrings.requireLangMap(language)
+        val strings = demoStrings.requireLangMap(langCode)
 
         return OpdsPublication(
             metadata = ReadiumMetadata(
@@ -38,19 +36,19 @@ class MakeDemoAppManifestUseCase(
                     )
                 ),
                 identifier = Uri.parse("https://demo.openeel.org/app"),
-                language = listOf(language),
+                language = listOf(langCode),
                 modified = "2025-09-29T17:00:00Z"
             ),
             links = listOf(
                 ReadiumLink(
-                    href = baseUrl.resolve("$language/$APP_MANIFEST_FILENAME").toString(),
+                    href = baseUrl.resolve("$langCode/$APP_MANIFEST_FILENAME").toString(),
                     rel = listOf("self"),
                     type = "application/opds-publication+json"
                 ),
                 ReadiumLink(
                     rel = listOf("collection"),
                     type = "application/opds+json",
-                    href = baseUrl.resolve("default-collection.json").toString()
+                    href = baseUrl.resolve("$langCode/default-collection.json").toString()
                 ),
                 ReadiumLink(
                     rel = listOf("https://id.openeel.org/rel/app-launch-uri"),
@@ -69,10 +67,11 @@ class MakeDemoAppManifestUseCase(
                     rel = listOf("license"),
                     href = "https://opensource.org/license/mit"
                 )
-            ) + DemoConstants.LANGUAGE_CODES.filterNot { it == language }.map { otherLang ->
+            ) + DemoConstants.LANGUAGE_CODES.filterNot { it == langCode }.map { otherLang ->
                 ReadiumLink(
                     rel = listOf("alternate"),
                     href = baseUrl.resolve("$otherLang/$APP_MANIFEST_FILENAME").toString(),
+                    language = listOf(otherLang),
                 )
             },
             images = listOf(

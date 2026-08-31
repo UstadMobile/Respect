@@ -17,19 +17,27 @@ import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUse
 import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUseCase.Companion.XAPI_MODULE_FILENAME
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase.Companion.APP_MANIFEST_FILENAME
 
-class MakeDemoAppLearningUnitManifestUseCase {
+class MakeDemoAppLearningUnitManifestUseCase(
+    private val demoStrings: DemoStringMaps,
+) {
 
     operator fun invoke(
         demoBase: Url,
         grade: Int,
         lessonNum: Int,
+        langCode: String,
         titleFn: (Int, Int) -> String = LEARNING_UNIT_TITLE_FN,
     ): OpdsPublication {
-        val lessonBase = demoBase.resolve("$GRADES_DIR_NAME/$grade/$LEARNING_UNITS_DIR_NAME/$lessonNum/")
+        val lessonBase = demoBase.resolve("$langCode/$GRADES_DIR_NAME/$grade/$LEARNING_UNITS_DIR_NAME/$lessonNum/")
 
         return OpdsPublication(
             metadata = ReadiumMetadata(
-                title = LangMapStringValue(titleFn(grade, lessonNum)),
+                title = LangMapStringValue(
+                    demoStrings.requireString(
+                        lang = langCode,
+                        key = titleFn(grade, lessonNum),
+                    ).replacePlaceholders(grade, lessonNum)
+                ),
                 type = Uri.parse("http://schema.org/Game"),
                 author = listOf(
                     ReadiumContributorStringValue("Mullah Nasruddin")
@@ -55,7 +63,7 @@ class MakeDemoAppLearningUnitManifestUseCase {
                 ),
                 ReadiumLink(
                     rel = listOf("https://id.openeel.org/rel/launchable-app"),
-                    href = demoBase.resolve(APP_MANIFEST_FILENAME).toString(),
+                    href = demoBase.resolve("$langCode/$APP_MANIFEST_FILENAME").toString(),
                     type = "application/opds-publication+json"
                 )
             ),
@@ -75,9 +83,9 @@ class MakeDemoAppLearningUnitManifestUseCase {
 
         val LEARNING_UNIT_TITLE_FN: (gradeNum: Int, lessonNum: Int) -> String = { gradeNum, lessonNum ->
             if(gradeNum == DemoConstants.APP_ONLY_GRADE) {
-                "Mobile app only lesson $lessonNum"
+                "mobile_app_only_lesson_num"
             }else {
-                "Lesson $lessonNum - Grade $gradeNum"
+                "lesson_grade"
             }
         }
 

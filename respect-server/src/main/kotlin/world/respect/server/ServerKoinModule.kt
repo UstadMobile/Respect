@@ -231,19 +231,19 @@ fun serverKoinModule(
     }
 
     single<MakeDemoAppCollectionUseCase> {
-        MakeDemoAppCollectionUseCase()
+        MakeDemoAppCollectionUseCase(demoStringMaps = get())
     }
 
     single<MakeDemoAppGradeCollectionsUseCase> {
-        MakeDemoAppGradeCollectionsUseCase()
+        MakeDemoAppGradeCollectionsUseCase(demoStrings = get())
     }
 
     single<MakeDemoAppLearningUnitManifestUseCase> {
-        MakeDemoAppLearningUnitManifestUseCase()
+        MakeDemoAppLearningUnitManifestUseCase(demoStrings = get())
     }
 
     single<MakeDemoAppLearningUnitTinCanXmlUseCase> {
-        MakeDemoAppLearningUnitTinCanXmlUseCase()
+        MakeDemoAppLearningUnitTinCanXmlUseCase(demoStrings = get())
     }
 
     /*

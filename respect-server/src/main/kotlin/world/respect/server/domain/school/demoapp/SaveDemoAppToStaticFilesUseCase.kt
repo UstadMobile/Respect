@@ -39,39 +39,43 @@ class SaveDemoAppToStaticFilesUseCase(
         val staticDir = File(destDir, "static")
         staticDir.mkdirs()
 
+        listOf(
+            GRADE_ICON_NAME, LEARNING_UNIT_ICON_NAME, LEARNING_UNIT_JS_FILENAME, XAPI_MODULE_FILENAME
+        ).forEach { resourceName ->
+            File(staticDir, resourceName).writeBytes(
+                this::class.java.getResourceAsStream("/demoapp/$resourceName")!!.readBytes()
+            )
+        }
+
+        File(destDir, MakeDemoAppManifestUseCase.APP_MANIFEST_ICON_NAME).writeBytes(
+            this::class.java.getResourceAsStream("/demoapp/app_icon.png")!!.readBytes()
+        )
+
+        File(destDir, "index.html").writeBytes(
+            this::class.java.getResourceAsStream("/demoapp/index.html")!!.readBytes()
+        )
+
         languages.forEach { lang ->
-            val langDir = File(staticDir, lang).also { it.mkdirs() }
+            val langDir = File(destDir, lang).also { it.mkdirs() }
 
             File(langDir, APP_MANIFEST_FILENAME).writeText(
                 json.encodeToString(
                     makeDemoAppManifestUseCase(
                         baseUrl = baseUrl,
-                        language = lang,
+                        langCode = lang,
                     )
                 )
             )
 
-            File(destDir, MakeDemoAppManifestUseCase.APP_MANIFEST_ICON_NAME).writeBytes(
-                this::class.java.getResourceAsStream("/demoapp/app_icon.png")!!.readBytes()
-            )
-
-            File(destDir, MakeDemoAppCollectionUseCase.DEFAULT_COLLECTION_NAME).writeText(
-                json.encodeToString(makeDemoAppCollectionUseCase(baseUrl))
-            )
-
-            listOf(
-                GRADE_ICON_NAME, LEARNING_UNIT_ICON_NAME, LEARNING_UNIT_JS_FILENAME, XAPI_MODULE_FILENAME
-            ).forEach { resourceName ->
-                File(staticDir, resourceName).writeBytes(
-                    this::class.java.getResourceAsStream("/demoapp/$resourceName")!!.readBytes()
+            File(langDir, MakeDemoAppCollectionUseCase.DEFAULT_COLLECTION_NAME).writeText(
+                json.encodeToString(
+                    makeDemoAppCollectionUseCase(
+                        baseUrl = baseUrl, langCode = lang
+                    )
                 )
-            }
-
-            File(destDir, "index.html").writeBytes(
-                this::class.java.getResourceAsStream("/demoapp/index.html")!!.readBytes()
             )
 
-            val gradesDir = File(destDir, GRADES_DIR_NAME).also { it.mkdirs() }
+            val gradesDir = File(langDir, GRADES_DIR_NAME).also { it.mkdirs() }
             (1..DemoConstants.NUM_LESSONS).forEach { gradeNum ->
                 val gradeDir = File(gradesDir, gradeNum.toString()).also {
                     it.mkdirs()
@@ -82,6 +86,7 @@ class SaveDemoAppToStaticFilesUseCase(
                         makeDemoAppGradeCollectionsUseCase(
                             baseUrl = baseUrl,
                             gradeNum = gradeNum,
+                            langCode = lang,
                         )
                     )
                 )
@@ -98,6 +103,7 @@ class SaveDemoAppToStaticFilesUseCase(
                                 demoBase = baseUrl,
                                 grade = gradeNum,
                                 lessonNum = lessonNum,
+                                langCode = lang,
                             )
                         )
                     )
@@ -109,6 +115,7 @@ class SaveDemoAppToStaticFilesUseCase(
                                 baseUrl = baseUrl,
                                 gradeNum = gradeNum,
                                 lessonNum = lessonNum,
+                                langCode = lang,
                             )
                         )
                     )
@@ -118,6 +125,7 @@ class SaveDemoAppToStaticFilesUseCase(
                             baseUrl = baseUrl,
                             gradeNum = gradeNum,
                             lessonNum = lessonNum,
+                            langCode = lang,
                         )
                     )
                 }

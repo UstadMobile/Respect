@@ -120,11 +120,21 @@ fun managerServerMain(ns: Namespace) {
                     makeDemoAppManifestUseCase = MakeDemoAppManifestUseCase(
                         demoStrings = demoStrings
                     ),
-                    makeDemoAppCollectionUseCase = MakeDemoAppCollectionUseCase(),
-                    makeDemoAppGradeCollectionsUseCase = MakeDemoAppGradeCollectionsUseCase(),
-                    makeDemoAppLearningUnitManifestUseCase = MakeDemoAppLearningUnitManifestUseCase(),
-                    makeDemoAppLearningUnitTinCanXmlUseCase = MakeDemoAppLearningUnitTinCanXmlUseCase(),
-                    makeDemoAppLearningUnitHtmlUseCase = MakeDemoAppLearningUnitHtmlUseCase(),
+                    makeDemoAppCollectionUseCase = MakeDemoAppCollectionUseCase(
+                        demoStringMaps = demoStrings
+                    ),
+                    makeDemoAppGradeCollectionsUseCase = MakeDemoAppGradeCollectionsUseCase(
+                        demoStrings = demoStrings
+                    ),
+                    makeDemoAppLearningUnitManifestUseCase = MakeDemoAppLearningUnitManifestUseCase(
+                        demoStrings = demoStrings
+                    ),
+                    makeDemoAppLearningUnitTinCanXmlUseCase = MakeDemoAppLearningUnitTinCanXmlUseCase(
+                        demoStrings = demoStrings
+                    ),
+                    makeDemoAppLearningUnitHtmlUseCase = MakeDemoAppLearningUnitHtmlUseCase(
+                        demoStrings = demoStrings
+                    ),
                     xml = xml,
                     json = json,
                 )

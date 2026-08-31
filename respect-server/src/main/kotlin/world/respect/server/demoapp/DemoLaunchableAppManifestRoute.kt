@@ -17,7 +17,7 @@ fun Route.DemoLaunchableAppManifestRoute() {
         call.respond(
             makeDemoAppUseCase(
                 baseUrl = call.demoAppBaseUrl(),
-                language = call.parameters["lang"]!!
+                langCode = call.parameters["lang"]!!
             )
         )
     }

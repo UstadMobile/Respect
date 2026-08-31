@@ -29,9 +29,14 @@ fun HTML.demoAppLearningUnitHtml(
     baseUrl: Url,
     gradeNum: Int,
     lessonNum: Int,
+    langCode: String,
+    demoStrings: DemoStringMaps,
 ) {
     head {
-        title { + "Grade $gradeNum learning unit #$lessonNum" }
+        title {
+            + demoStrings.requireString(langCode, "lesson_grade")
+                .replacePlaceholders(gradeNum, lessonNum)
+        }
 
         script {
             type = "module"
@@ -46,7 +51,8 @@ fun HTML.demoAppLearningUnitHtml(
 
     body {
         h1 {
-            + "Demo Learning Unit Grade $gradeNum Unit $lessonNum"
+            + demoStrings.requireString(langCode, "demo_learning_unit")
+                .replacePlaceholders(gradeNum, lessonNum)
         }
 
         pre {
@@ -143,18 +149,23 @@ fun HTML.demoAppLearningUnitHtml(
     }
 }
 
-class MakeDemoAppLearningUnitHtmlUseCase {
+class MakeDemoAppLearningUnitHtmlUseCase(
+    private val demoStrings: DemoStringMaps,
+) {
 
     operator fun invoke(
         baseUrl: Url,
         gradeNum: Int,
         lessonNum: Int,
+        langCode: String,
     ): String {
         return createHTML().html {
             demoAppLearningUnitHtml(
                 baseUrl = baseUrl,
                 gradeNum = gradeNum,
-                lessonNum = lessonNum
+                lessonNum = lessonNum,
+                langCode = langCode,
+                demoStrings = demoStrings,
             )
         }
     }

@@ -360,7 +360,44 @@ fun LessonScreen(
 ```
 See the full native demo app (including library dependencies to add) [on GitHub](https://www.github.com/UstadMobile/DemoLaunchableApp/).
 
-# Step 4: Try adding your app on the launcher
+# Step 4: Load offline resources when available (Native Android apps)
+
+If you need to load resources dynamically (e.g. images, videos, etc for a particular lesson) update
+your app to load resources from the Open Educational Launcher cache if available. When the user
+clicks to download a learning unit offline all the URLs as per the manifest resources section are
+downloaded.
+
+The provided interceptor will automatically load URLs from the launcher app cache when available
+and fallback to loading from the network as usual.
+
+```kotlin
+val httpIpcClient = HttpIpcClientBuilder(context)
+  .setIpcServicePackageName(ipcPackage)
+  .setAuth(auth)
+  .build()
+
+val learningUnitHttpClient = appHttpClient
+  .newBuilder()
+  .addInterceptor(HttpIpcInterceptor(httpIpcClient))
+  .build()
+
+/*
+ * Now use the OKHttpClient as normal: resources available in the launcher app cache will be loaded
+ * locally over IPC, otherwise it will automatically fall back to loading from the network as normal.
+ * 
+ * The http client can be used with any OKHTTP compatible libraries such as image loaders, media 
+ * players, etc.
+ */
+val httpResponse = learningUnitHttpClient.newCall(
+  Request.Builder()
+    .url("https://demo.openeel.org/static/books.png")
+    .build()
+).execute()
+```
+
+See the full native demo app (including library dependencies to add) [on GitHub](https://www.github.com/UstadMobile/DemoLaunchableApp/).
+
+# Step 5: Try adding your app on the launcher
 
 Login to the RESPECT launcher as an admin, go the Apps list, click add, then enter the URL for your
 launchable app manifest from step 1. You should now be able to browse learning units from the apps 

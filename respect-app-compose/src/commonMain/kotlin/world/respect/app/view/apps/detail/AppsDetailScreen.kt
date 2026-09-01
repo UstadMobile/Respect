@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
+import world.respect.app.components.AlternativeLangLinks
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.langMapString
 import world.respect.app.components.uiTextStringResource
@@ -51,6 +52,7 @@ import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.opds.model.OpdsPublication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.findIcons
+import world.respect.shared.ext.alternateLanguageLinks
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_app
 import world.respect.shared.generated.resources.google_play
@@ -73,7 +75,8 @@ fun AppsDetailScreen(
         onClickAdd = { viewModel.onClickAdd() },
         onClickHighlightCard = { viewModel.onClickHighlightCard(it) },
         onClickLicense = { viewModel.onClickLicense(it) },
-        onClickGooglePlay = { viewModel.onClickGooglePlay(it) }
+        onClickGooglePlay = { viewModel.onClickGooglePlay(it) },
+        onClickAlternativeLangVersion = viewModel::onClickAlternativeLangVersion,
     )
 }
 
@@ -86,7 +89,8 @@ fun AppsDetailScreen(
     onClickAdd: () -> Unit,
     onClickHighlightCard: (String) -> Unit,
     onClickLicense: (String) -> Unit,
-    onClickGooglePlay: (String) -> Unit
+    onClickGooglePlay: (String) -> Unit,
+    onClickAlternativeLangVersion: (ReadiumLink) -> Unit,
 ) {
 
     val appDetail = (uiState.appDetail as? DataReadyState)?.data
@@ -153,7 +157,7 @@ fun AppsDetailScreen(
             if (!uiState.isAdded && uiState.showAddRemoveButton) {
                 OutlinedButton(
                     onClick = onClickAdd,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).padding(vertical = 8.dp),
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Add,
@@ -164,9 +168,6 @@ fun AppsDetailScreen(
                 }
             }
         }
-
-
-
 
         if (uiState.highlightCards.isNotEmpty()) {
             val pagerState = rememberPagerState(pageCount = { uiState.highlightCards.size })
@@ -218,6 +219,14 @@ fun AppsDetailScreen(
             }
         }
 
+        appDetail?.links?.alternateLanguageLinks()?.takeIf { it.isNotEmpty() }?.also { altLangLinks ->
+            HorizontalDivider()
+            AlternativeLangLinks(
+                altLangLinks = altLangLinks,
+                onClickAlternativeLangVersion = onClickAlternativeLangVersion
+            )
+            HorizontalDivider()
+        }
 
         Text(
             text = appDetail?.metadata?.description.orEmpty(),

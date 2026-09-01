@@ -240,6 +240,7 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
+import world.respect.shared.domain.getlanguageendonym.GetLanguageEndonymUseCase
 import world.respect.shared.domain.launchapp.getlaunchoptionsforpublication.GetLaunchOptionsForPublicationUseCase
 import world.respect.shared.domain.launchapp.getxapilaunchparams.GetXapiLaunchParamsUseCase
 import world.respect.shared.domain.launchapp.getxapilaunchparams.GetXapiLaunchParamsUseCaseAndroid
@@ -833,6 +834,10 @@ val appKoinModule = module {
         GoToAppStoreUseCaseAndroid(
             appContext = androidApplication(),
         )
+    }
+
+    single<GetLanguageEndonymUseCase> {
+        GetLanguageEndonymUseCase()
     }
 
     /**

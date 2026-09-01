@@ -28,7 +28,9 @@ class MakeDemoAppLearningUnitManifestUseCase(
         langCode: String,
         titleFn: (Int, Int) -> String = LEARNING_UNIT_TITLE_FN,
     ): OpdsPublication {
-        val lessonBase = demoBase.resolve("$langCode/$GRADES_DIR_NAME/$grade/$LEARNING_UNITS_DIR_NAME/$lessonNum/")
+        val lessonBase = demoBase.resolve(
+            "$langCode/$GRADES_DIR_NAME/$grade/$LEARNING_UNITS_DIR_NAME/$lessonNum/"
+        )
 
         return OpdsPublication(
             metadata = ReadiumMetadata(
@@ -50,7 +52,16 @@ class MakeDemoAppLearningUnitManifestUseCase(
                     type = "image/png"
                 )
             ),
-            links = listOf(
+            links = DemoConstants.LANGUAGE_CODES.filter { it != langCode }.map { otherLang ->
+                ReadiumLink(
+                    rel = listOf("alternate"),
+                    href = demoBase.resolve(
+                        "$otherLang/$GRADES_DIR_NAME/$grade/$LEARNING_UNITS_DIR_NAME/$lessonNum/$LESSON_MANIFEST_FILENAME"
+                    ).toString(),
+                    type = "application/opds-publication+json",
+                    language = listOf(otherLang),
+                )
+            } + listOf(
                 ReadiumLink(
                     rel = listOf("self"),
                     href = lessonBase.resolve(LESSON_MANIFEST_FILENAME).toString(),

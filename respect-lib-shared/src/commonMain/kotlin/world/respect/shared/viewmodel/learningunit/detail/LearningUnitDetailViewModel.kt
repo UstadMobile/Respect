@@ -31,6 +31,7 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.isReadyAndSettled
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.findLaunchableAppLink
 import world.respect.lib.opds.model.findLicenseLink
 import world.respect.lib.opds.model.findSelfLinks
@@ -332,6 +333,18 @@ class LearningUnitDetailViewModel(
                 }
             }
         }
+    }
+
+    fun onClickAlternativeLangVersion(
+        link: ReadiumLink
+    ) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                destination = LearningUnitDetail.create(
+                    learningUnitManifestUrl = route.learningUnitManifestUrl.resolve(link.href)
+                )
+            )
+        )
     }
 
 }

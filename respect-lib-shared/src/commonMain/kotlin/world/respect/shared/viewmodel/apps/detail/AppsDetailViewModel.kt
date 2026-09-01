@@ -258,4 +258,14 @@ class AppsDetailViewModel(
     fun onClickGooglePlay(hrefLink: String) {
         launchCustomTabUseCase(Url(hrefLink))
     }
+
+    fun onClickAlternativeLangVersion(link: ReadiumLink) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                destination = AppsDetail.create(
+                    manifestUrl = route.manifestUrl.resolve(link.href)
+                )
+            )
+        )
+    }
 }

@@ -40,6 +40,7 @@ import com.ustadmobile.libuicompose.theme.black
 import com.ustadmobile.libuicompose.theme.white
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
+import world.respect.app.components.AlternativeLangLinks
 import world.respect.app.components.RespectDataLoadHost
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
@@ -48,7 +49,9 @@ import world.respect.app.components.langMapString
 import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.name
+import world.respect.shared.ext.alternateLanguageLinks
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.bookmark
@@ -76,6 +79,7 @@ fun LearningUnitDetailScreen(
         onClickApp = viewModel::onClickApp,
         onClickLicense = viewModel::onClickLicense,
         onClickBookmark = viewModel::onClickBookmark,
+        onClickAlternativeLangVersion = viewModel::onClickAlternativeLangVersion,
     )
 }
 
@@ -88,6 +92,7 @@ fun LearningUnitDetailScreen(
     onClickApp: (OpdsPublication) -> Unit,
     onClickBookmark: () -> Unit,
     onClickLicense: (OpdsPublication) -> Unit,
+    onClickAlternativeLangVersion: (ReadiumLink) -> Unit,
 ) {
     RespectDataLoadHost(
         uiState.learningUnit,
@@ -268,6 +273,15 @@ fun LearningUnitDetailScreen(
                     )
                 }
             }
+
+            lessonDetail?.links?.alternateLanguageLinks()?.takeIf { it.isNotEmpty() }?.also { altLangLinks ->
+                AlternativeLangLinks(
+                    altLangLinks = altLangLinks,
+                    onClickAlternativeLangVersion = onClickAlternativeLangVersion,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
         }
     }
 }

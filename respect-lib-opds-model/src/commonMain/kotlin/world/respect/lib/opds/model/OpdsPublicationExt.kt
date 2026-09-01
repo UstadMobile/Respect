@@ -1,5 +1,7 @@
 package world.respect.lib.opds.model
 
+import world.respect.lib.opds.model.ext.hasRel
+
 val LEARNING_UNIT_MIME_TYPES = listOf("text/html", "application/xml", "application/html+xml")
 
 /**
@@ -44,7 +46,13 @@ fun OpdsPublication.findLicenseLink(): ReadiumLink? =
 fun OpdsPublication.findTermsOfServiceLink(): ReadiumLink? =
     links.firstOrNull { it.rel?.contains("terms-of-service") == true }
 
-fun OpdsPublication.findGooglePlayLink(): ReadiumLink? =
+fun OpdsPublication.findAppStoreAndroidLinks() : List<ReadiumLink> {
+    return links.filter {
+        it.hasRel("https://id.openeel.org/rel/appstore-android")
+    }
+}
+
+fun OpdsPublication.findAppStoreAndroidLink(): ReadiumLink? =
     links.firstOrNull { it.rel?.contains("https://id.openeel.org/rel/appstore-android") == true }
 
 fun OpdsPublication.findCollection(): ReadiumLink? =

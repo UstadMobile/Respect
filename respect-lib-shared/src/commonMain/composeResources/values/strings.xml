@@ -684,4 +684,8 @@
 
     <string name="could_not_load_unit_to_assign">Could not load unit to assign</string>
 
+    <string name="app_not_found">App not found</string>
+
+    <string name="also_available_in">Also available in:</string>
+
 </resources>

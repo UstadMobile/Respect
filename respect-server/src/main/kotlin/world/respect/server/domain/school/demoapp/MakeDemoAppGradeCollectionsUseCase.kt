@@ -28,7 +28,10 @@ class MakeDemoAppGradeCollectionsUseCase(
     ) : OpdsFeed {
         return OpdsFeed(
             metadata = OpdsFeedMetadata(
-                title = titleFn(gradeNum).replacePlaceholders(gradeNum, -1)
+                title = demoStrings.requireString(
+                    lang = langCode,
+                    key = titleFn(gradeNum)
+                ).replacePlaceholders(gradeNum, -1)
             ),
             links = listOf(
                 ReadiumLink(

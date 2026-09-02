@@ -80,7 +80,7 @@ Example:
   ]
 }
 ```
-For a more options see [README_LAUNCHABLE_APP.md](../respect-lib-opds-model/README_LAUNCHABLE_APP.md).
+For a more options see [README_LAUNCHABLE_APP.md](respect-lib-opds-model/README_LAUNCHABLE_APP.md).
 
 If you have a native Android app, it is recommended to add this intent filter to your AndroidManifest.xml file. Adding
 the intent filter below will allow the launcher app to detect if your app is installed. If your app uses 

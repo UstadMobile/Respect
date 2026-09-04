@@ -81,6 +81,9 @@ kotlin {
             api(projects.respectCredentials)
             implementation(projects.respectLibSharedSe)
             implementation(projects.respectLibXapiIpcServer)
+            //Uncomment to test running web based publications through HttpIpc
+            // implementation(projects.libHttpIpcClient)
+
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.play.service.auth)
             implementation(compose.preview)

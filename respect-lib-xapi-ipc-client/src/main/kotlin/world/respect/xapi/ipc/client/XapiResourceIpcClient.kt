@@ -2,6 +2,7 @@ package world.respect.xapi.ipc.client
 
 import io.ktor.http.Url
 import kotlinx.serialization.json.Json
+import org.openeel.lib.ipc.messagebridge.IpcMessageBridge
 import world.respect.lib.xapi.resources.XapiActivitiesResource
 import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiResource
@@ -18,7 +19,7 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
  *
  */
 class XapiResourceIpcClient(
-    private val requestSender: XapiMessageBridge,
+    private val requestSender: IpcMessageBridge,
     private val json: Json,
     private val endpoint: Url,
     private val auth: String,

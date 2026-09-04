@@ -684,6 +684,10 @@
 
     <string name="could_not_load_unit_to_assign">Could not load unit to assign</string>
 
+    <string name="app_not_found">App not found</string>
+
+    <string name="also_available_in">Also available in:</string>
+
     <!-- Report Indicators -->
     <string name="indicator_total_content_usage_duration">Total content usage duration</string>
     <string name="indicator_total_content_usage_duration_desc">The cumulative amount of time spent by all users engaging with educational content, measured in hours and minutes</string>

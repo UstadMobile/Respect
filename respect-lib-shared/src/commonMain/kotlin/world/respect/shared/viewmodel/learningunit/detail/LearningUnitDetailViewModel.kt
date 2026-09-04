@@ -31,6 +31,7 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.isReadyAndSettled
 import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.findLaunchableAppLink
 import world.respect.lib.opds.model.findLicenseLink
 import world.respect.lib.opds.model.findSelfLinks
@@ -41,11 +42,15 @@ import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.bookmark.AddBookmarkUseCase
 import world.respect.shared.domain.bookmark.RemoveBookmarkUseCase
+import world.respect.shared.domain.launchapp.gotoappstore.GoToAppStoreUseCase
 import world.respect.shared.domain.launchapp.LaunchAppUseCase
 import world.respect.shared.domain.license.GetLicenseLabelUseCase
 import world.respect.shared.domain.license.GetLicenseLabelUseCase.LicenseLabelResult
 import world.respect.shared.domain.school.LaunchCustomTabUseCase
 import world.respect.shared.ext.tryOrShowSnackbarOnError
+import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.app_not_found
+import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.AssignmentEdit
 import world.respect.shared.navigation.LearningUnitDetail
@@ -84,6 +89,7 @@ class LearningUnitDetailViewModel(
     private val ustadCache: UstadCache,
     val accountManager: RespectAccountManager,
     private val snackBarDispatcher: SnackBarDispatcher,
+    private val goToAppStoreUseCase: GoToAppStoreUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
 
@@ -216,16 +222,35 @@ class LearningUnitDetailViewModel(
         viewModelScope.launch {
             try {
                 val lessonPublication =
-                    _uiState.value.learningUnit.dataOrNull()
-                        ?: throw IllegalStateException("Not ready")
+                    _uiState.value.learningUnit.dataOrNull() ?: throw IllegalStateException("Not ready")
 
-                launchAppUseCase(
-                    LaunchAppUseCase.LaunchRequest(
+                val result = launchAppUseCase(
+                    LaunchAppUseCase.LaunchAppRequest(
                         publicationUrl = route.learningUnitManifestUrl,
                         publication = lessonPublication,
                         assignmentActivityId = route.assignmentActivityId,
                     )
                 )
+
+                if(result is LaunchAppUseCase.LaunchAppInstallRequired) {
+                    val launchableAppToInstall = result.launchableApp
+                    if(launchableAppToInstall != null) {
+                        goToAppStoreUseCase(
+                            GoToAppStoreUseCase.Request(
+                                launchableApp = launchableAppToInstall,
+                                referrer = result.referrerUrl.toString(),
+                            )
+                        )
+                    }else {
+                        snackBarDispatcher.showSnackBar(Snack(Res.string.app_not_found.asUiText()))
+                    }
+                }else if(result is LaunchAppUseCase.LaunchAppFailed) {
+                    snackBarDispatcher.showSnackBar(
+                        Snack(
+                            result.cause?.getUiTextOrGeneric() ?: Res.string.something_went_wrong.asUiText()
+                        )
+                    )
+                }
             } catch (e: Throwable) {
                 Napier.w("Something wrong opening learning unit", e)
                 snackBarDispatcher.showSnackBar(Snack(e.getUiTextOrGeneric()))
@@ -308,6 +333,18 @@ class LearningUnitDetailViewModel(
                 }
             }
         }
+    }
+
+    fun onClickAlternativeLangVersion(
+        link: ReadiumLink
+    ) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                destination = LearningUnitDetail.create(
+                    learningUnitManifestUrl = route.learningUnitManifestUrl.resolve(link.href)
+                )
+            )
+        )
     }
 
 }

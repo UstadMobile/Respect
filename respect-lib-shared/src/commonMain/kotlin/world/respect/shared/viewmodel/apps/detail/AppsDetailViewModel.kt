@@ -35,7 +35,7 @@ import world.respect.lib.dataloadstate.ext.map
 import world.respect.lib.opds.model.findCollection
 import world.respect.lib.opds.model.findHighlightCardLinks
 import world.respect.lib.opds.model.findLicenseLink
-import world.respect.lib.opds.model.findGooglePlayLink
+import world.respect.lib.opds.model.findAppStoreAndroidLink
 import world.respect.lib.opds.model.findTermsOfServiceLink
 import world.respect.lib.opds.model.toStringMap
 import world.respect.lib.xapi.OpenEelXapiConstants
@@ -109,7 +109,7 @@ class AppsDetailViewModel(
                         appDetail = result.map { it.resolve(route.manifestUrl) },
                         highlightCards = result.dataOrNull()?.findHighlightCardLinks().orEmpty(),
                         licenseLink = result.dataOrNull()?.findLicenseLink(),
-                        googlePlayLink = result.dataOrNull()?.findGooglePlayLink(),
+                        googlePlayLink = result.dataOrNull()?.findAppStoreAndroidLink(),
                         termsOfServiceLink = result.dataOrNull()?.findTermsOfServiceLink(),
                     )
                 }
@@ -257,5 +257,15 @@ class AppsDetailViewModel(
 
     fun onClickGooglePlay(hrefLink: String) {
         launchCustomTabUseCase(Url(hrefLink))
+    }
+
+    fun onClickAlternativeLangVersion(link: ReadiumLink) {
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                destination = AppsDetail.create(
+                    manifestUrl = route.manifestUrl.resolve(link.href)
+                )
+            )
+        )
     }
 }

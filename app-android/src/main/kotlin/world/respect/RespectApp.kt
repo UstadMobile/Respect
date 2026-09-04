@@ -22,8 +22,9 @@ import org.koin.core.context.startKoin
 import world.respect.app.BuildConfig
 import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.resources.XapiResource
+import org.openeel.libcache.ipc.server.OkHttpClientProvider
 
-class RespectApp : Application(), SingletonImageLoader.Factory, XapiResourceProvider {
+class RespectApp : Application(), SingletonImageLoader.Factory, XapiResourceProvider, OkHttpClientProvider {
 
 
     override fun onCreate() {
@@ -78,4 +79,9 @@ class RespectApp : Application(), SingletonImageLoader.Factory, XapiResourceProv
     ): XapiResource {
         return getKoin().get<XapiResourceProvider>().provideXapiResource(endpoint, authentication)
     }
+
+    override fun provideOkHttpClient(): OkHttpClient {
+        return getKoin().get()
+    }
+
 }

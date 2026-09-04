@@ -37,7 +37,7 @@ import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
-import world.respect.xapi.ipc.shared.messages.XapiIpcWhatFlags
+import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeWhatFlags
 import world.respect.xapi.ipc.shared.messages.ext.getDeserialized
 import world.respect.xapi.ipc.shared.messages.ext.getStringValues
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
@@ -80,7 +80,7 @@ class XapiIpcService: Service() {
         private val scope = CoroutineScope(Dispatchers.Default + Job())
 
         override fun handleMessage(msg: Message) {
-            if(msg.what != XapiIpcWhatFlags.WHAT_REQUEST && msg.what != XapiIpcWhatFlags.WHAT_FLOW_COMPLETION) {
+            if(msg.what != IpcMessageBridgeWhatFlags.WHAT_REQUEST && msg.what != IpcMessageBridgeWhatFlags.WHAT_FLOW_COMPLETION) {
                 super.handleMessage(msg)
                 return
             }
@@ -91,7 +91,7 @@ class XapiIpcService: Service() {
 
             val logPrefix = "XapiIpcService (client=$callingPackage) msg #$incomingMessageId"
 
-            if(msg.what == XapiIpcWhatFlags.WHAT_FLOW_COMPLETION) {
+            if(msg.what == IpcMessageBridgeWhatFlags.WHAT_FLOW_COMPLETION) {
                 flowCollectors.remove(incomingMessageId)?.also {
                     it.cancel()
                     Log.d(XapiIpcTags.LOGTAG, "$logPrefix Flow cancelled")
@@ -101,7 +101,7 @@ class XapiIpcService: Service() {
             }
 
             val replyMessage = Message.obtain(
-                this@IncomingHandler, XapiIpcWhatFlags.WHAT_RESPONSE
+                this@IncomingHandler, IpcMessageBridgeWhatFlags.WHAT_RESPONSE
             )
 
             //Mark it as a response to the request id received.
@@ -209,7 +209,7 @@ class XapiIpcService: Service() {
                             ).collect {
                                 val message = Message.obtain()
                                 message.arg1 = incomingMessageId
-                                message.what = XapiIpcWhatFlags.WHAT_FLOW_EMISSION
+                                message.what = IpcMessageBridgeWhatFlags.WHAT_FLOW_EMISSION
                                 message.data = it.toBundle(XapiStatementResult.serializer(), json)
                                 Log.d(
                                     XapiIpcTags.LOGTAG,

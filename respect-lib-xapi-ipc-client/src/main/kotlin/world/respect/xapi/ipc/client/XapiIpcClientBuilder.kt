@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import io.ktor.http.Url
 import kotlinx.serialization.json.Json
+import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeServiceConnectionImpl
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.xapi.ipc.shared.messages.XapiIpcIntent
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
@@ -39,7 +40,7 @@ class XapiIpcClientBuilder(
 
     fun build(): XapiResource {
         return XapiResourceIpcClient(
-            requestSender =XapiIpcMessageBridgeServiceConnectionImpl(
+            requestSender = IpcMessageBridgeServiceConnectionImpl(
                 context = context,
                 intent = Intent(XapiIpcIntent.ACTION_XAPI_OVER_IPC).also {
                     it.`package` = ipcPackageServiceName

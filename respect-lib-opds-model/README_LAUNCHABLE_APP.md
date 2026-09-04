@@ -1,7 +1,17 @@
 # Launchable App Manifest
 
-The launchable app publication describes a specific app e.g. a math app, assessment app, etc. It is
-a [Readium Manifest](https://readium.org/webpub-manifest/) with a set of specific link relations.
+The launchable app manifest describes a specific app e.g. a math app, assessment app, etc. It is
+a [Readium Manifest](https://readium.org/webpub-manifest/) with a set of specific link relations include:
+
+* Self link to the manifest's own absolute url (highly recommended as per [Readium Manifest spec section 2.3](https://readium.org/webpub-manifest/#23-links))
+* Links to this app other languages (if applicable): where an app is available in multiple languages 
+  there should be one launchable app manifest per language.
+* Links to a default catalog of learning units: most learning apps will have a default catalog of
+  learning units, though some (e.g. utility apps, apps that depend on user generated content, etc)
+  might not.
+* Links to app stores for a native Android version (applicable when the app has a native version)
+* Links to license and terms of service.
+* Links for highlight cards (e.g. case studies) - optional.
 
 Example:
 ```json
@@ -16,23 +26,28 @@ Example:
       }
     },
     "identifier": "https://demo.openeel.org/app",
-    "language": "en",
+    "language": "en-US",
     "modified": "2025-09-29T17:00:00Z"
   },
   "links": [
     {
       "rel": "self",
-      "href": "https://demo.openeel.org/appmanifest.json",
+      "href": "https://demo.openeel.org/en-US/launchable-app-manifest.json",
       "type": "application/opds-publication+json"
     },
     {
+      "href": "https://demo.openeel.org/fr-FR/launchable-app-manifest.json",
+      "rel": "alternate",
+      "language": "fr-FR"
+    },
+    {
       "rel": "collection",
-      "href": "https://demo.openeel.org/default-collection.json",
+      "href": "https://demo.openeel.org/en-US/default-collection.json",
       "type": "application/opds+json"
     },
     {
       "rel": "https://id.openeel.org/rel/app-launch-uri",
-      "href": "https://demo.openeel.org/"
+      "href": "https://demo.openeel.org/en-US/"
     },
     {
       "rel": "https://id.openeel.org/rel/appstore-android",
@@ -73,8 +88,8 @@ Example:
 }
 ```
 Notes:
-* The ```rel=collection``` link SHOULD link to a default collection of learning units (e.g. lessons) 
-  - see below.
+* The ```rel=collection``` link SHOULD link to a default collection of learning units (e.g. lessons), 
+  see the collections section below.
 * The ```rel=https://id.openeel.org/rel/app-launch-uri``` href the link that will be opened when the
   user opens an app directly from the app detail screen.
 * The ```rel=https://id.openeel.org/rel/appstore-android``` href MUST be a link to an Android app
@@ -98,7 +113,11 @@ e.g.
   },
 
   "links": [
-    {"rel": "self", "href": "https://demo.openeel.org/default-collection.json", "type": "application/opds+json"}
+    {
+      "rel": "self", 
+      "href": "https://demo.openeel.org/en-US/default-collection.json", 
+      "type": "application/opds+json"
+    }
   ],
 
   "publications": [
@@ -131,7 +150,7 @@ e.g.
         },
         {
           "rel": "https://id.openeel.org/rel/launchable-app",
-          "href": "https://demo.openeel.org/appmanifest.json",
+          "href": "https://demo.openeel.org/en-US/launchable-app-manifest.json",
           "type": "application/opds-publication+json"
         }
       ],
@@ -171,7 +190,7 @@ launched.
     },
     {
       "rel": "https://id.openeel.org/rel/launchable-app",
-      "href": "https://demo.openeel.org/launchable-app.json",
+      "href": "https://demo.openeel.org/en-US/launchable-app-manifest.json",
       "type": "application/opds-publication+json"
     }
   ],

@@ -2,6 +2,7 @@ package world.respect.datalayer.school.opds.ext
 
 import io.ktor.http.Url
 import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.ext.hasRel
 
 fun OpdsPublication.withAbsoluteSelfUrl(urlLoaded: Url): OpdsPublication {
     return copy(links = links.withAbsoluteSelfLink(urlLoaded))

@@ -56,6 +56,7 @@ publishing {
 
 dependencies {
     api(projects.respectLibXapiIpcShared)
+    api(projects.libIpcMessagebridge)
 
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)

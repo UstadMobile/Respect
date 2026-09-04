@@ -63,3 +63,8 @@ include(":respect-lib-xapi-nanohttpd")
 include(":respect-lib-xapi-ipc-shared")
 include(":respect-lib-xapi-ipc-server")
 include(":respect-lib-xapi-ipc-client")
+include(":lib-ipc-messagebridge")
+
+include(":lib-http-ipc-shared")
+include(":lib-http-ipc-client")
+include(":lib-http-ipc-server")

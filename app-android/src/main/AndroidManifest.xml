@@ -19,7 +19,27 @@
             <action android:name="android.support.customtabs.action.CustomTabsService" />
         </intent>
 
+        <!--
+        Required to detect when compatible apps are installed (or not). See OpenEelIntent.
+        -->
+        <intent>
+            <action android:name="org.openeel.action.LAUNCH" />
+            <category android:name="android.intent.category.BROWSABLE" />
 
+            <data android:scheme="https" />
+        </intent>
+
+        <intent>
+            <action android:name="org.openeel.action.LAUNCH" />
+            <category android:name="android.intent.category.BROWSABLE" />
+
+            <data android:scheme="http" />
+        </intent>
+
+        <!--
+        Possibly required to check if Google Play is available
+        -->
+        <package android:name="com.android.vending"/>
 
     </queries>
 
@@ -124,6 +144,20 @@
 
             <intent-filter>
                 <action android:name="org.openeel.action.xapioveripc" />
+            </intent-filter>
+        </service>
+
+
+        <!--
+        HTTP IPC service
+        -->
+        <service
+            android:name="org.openeel.libcache.ipc.server.HttpIpcService"
+            android:exported="true"
+            tools:ignore="ExportedService">
+
+            <intent-filter>
+                <action android:name="org.openeel.action.httpoveripc.connect" />
             </intent-filter>
         </service>
 

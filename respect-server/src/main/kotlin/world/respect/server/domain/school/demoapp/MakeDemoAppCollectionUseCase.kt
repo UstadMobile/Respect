@@ -7,26 +7,32 @@ import world.respect.lib.opds.model.OpdsFeedMetadata
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.libutil.ext.resolve
 
-class MakeDemoAppCollectionUseCase {
+class MakeDemoAppCollectionUseCase(
+    private val demoStringMaps: DemoStringMaps,
+) {
 
     operator fun invoke(
-        baseUrl: Url
+        baseUrl: Url,
+        langCode: String,
     ): OpdsFeed {
         return OpdsFeed(
             metadata = OpdsFeedMetadata(
-                title = "Demo Launchable App Lessons"
+                title = demoStringMaps.requireString(langCode, "demo_app_lessons")
             ),
             links = listOf(
                 ReadiumLink(
-                    href = baseUrl.resolve("default-collection.json").toString(),
+                    href = baseUrl.resolve("$langCode/default-collection.json").toString(),
                     rel = listOf("self"),
                     type = "application/json"
                 )
             ),
             navigation = (1..DemoConstants.NUM_GRADES).map {
                 ReadiumLink(
-                    href = baseUrl.resolve("grade/$it/index.json").toString(),
-                    title = "Grade $it",
+                    href = baseUrl.resolve("$langCode/grade/$it/index.json").toString(),
+                    title = demoStringMaps.requireString(
+                        lang = langCode,
+                        key = DEMO_GRADE_TITLE_FN(it)
+                    ).replacePlaceholders(gradeNum = it, lessonNum = -1),
                     type = "application/json",
                     alternate = listOf(
                         ReadiumLink(
@@ -45,6 +51,14 @@ class MakeDemoAppCollectionUseCase {
         const val DEFAULT_COLLECTION_NAME = "default-collection.json"
 
         const val GRADE_ICON_NAME = "grade.jpg"
+
+        val DEMO_GRADE_TITLE_FN: (gradeNum: Int) -> String = { gradeNum ->
+            if(gradeNum == DemoConstants.APP_ONLY_GRADE) {
+                "mobile_app_only_demo_lessons"
+            }else {
+                "grade_gradenum"
+            }
+        }
 
     }
 

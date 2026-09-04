@@ -65,7 +65,7 @@ class RunReportUseCaseTest {
         val results = runBlocking {
             runReportUseCase(
                 request = RunReportUseCase.RunReportRequest(
-                    reportUid = 42L,
+                    reportUid = "42",
                     reportOptions = ReportOptions(
                         xAxis = ReportXAxis.DAY,
                         series = listOf(
@@ -110,7 +110,7 @@ class RunReportUseCaseTest {
         runBlocking { schoolDb.insertStatementsPerDay(numDays = numDaysStatements) }
 
         val request = RunReportUseCase.RunReportRequest(
-            reportUid = 42L,
+            reportUid = "42",
             reportOptions = ReportOptions(
                 xAxis = ReportXAxis.WEEK,
                 series = listOf(
@@ -157,7 +157,7 @@ class RunReportUseCaseTest {
 
         val reportNumMonths = 3
         val request = RunReportUseCase.RunReportRequest(
-            reportUid = 42L,
+            reportUid = "42",
             reportOptions = ReportOptions(
                 xAxis = ReportXAxis.MONTH,
                 series = listOf(
@@ -195,7 +195,7 @@ class RunReportUseCaseTest {
         runBlocking { schoolDb.insertStatementsPerDay(numDays = numDaysStatements) }
 
         val request = RunReportUseCase.RunReportRequest(
-            reportUid = 42L,
+            reportUid = "42",
             reportOptions = ReportOptions(
                 xAxis = ReportXAxis.YEAR,
                 series = listOf(
@@ -234,7 +234,7 @@ class RunReportUseCaseTest {
                     try {
                         runReportUseCase(
                             request = RunReportUseCase.RunReportRequest(
-                                reportUid = 42L,
+                                reportUid = "42",
                                 reportOptions = ReportOptions(
                                     xAxis = xAxis,
                                     series = listOf(
@@ -270,7 +270,7 @@ class RunReportUseCaseTest {
         val results = runBlocking {
             runReportUseCase(
                 request = RunReportUseCase.RunReportRequest(
-                    reportUid = 42L,
+                    reportUid = "42",
                     reportOptions = ReportOptions(
                         xAxis = ReportXAxis.DAY,
                         series = listOf(
@@ -311,7 +311,7 @@ class RunReportUseCaseTest {
     fun givenReportIsFresh_whenRunAgain_thenCacheResultReturned() {
         runBlocking { schoolDb.insertStatementsPerDay() }
         val runReportRequest = RunReportUseCase.RunReportRequest(
-            reportUid = 42L,
+            reportUid = "42",
             reportOptions = ReportOptions(
                 xAxis = ReportXAxis.DAY,
                 series = listOf(
@@ -359,7 +359,7 @@ class RunReportUseCaseTest {
         val results = runBlocking {
             runReportUseCase(
                 request = RunReportUseCase.RunReportRequest(
-                    reportUid = 42L,
+                    reportUid = "42",
                     reportOptions = ReportOptions(
                         xAxis = ReportXAxis.DAY,
                         series = listOf(

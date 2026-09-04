@@ -82,7 +82,7 @@ private fun ReportTemplateCard(
             reportResult = RunReportUseCase.RunReportResult(
                 timestamp = 0,
                 request = RunReportUseCase.RunReportRequest(
-                    reportUid = report.guid.toLong(),
+                    reportUid = report.guid,
                     reportOptions = ReportOptions(),
                     accountPersonUid = activeUserPersonUid,
                     timeZone = TimeZone.currentSystemDefault(),

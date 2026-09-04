@@ -77,9 +77,7 @@
 //            RunReportUseCase.RunReportResult(
 //                timestamp = Clock.System.now().toEpochMilliseconds(),
 //                request = request,
-//                results = request.reportOptions.series.mapIndexed { index, _ ->
-//                    responseStatement.toStatementReportRows(index, json)
-//                },
+//                results = responseStatement.toStatementReportRows(json),
 //                age = 0
 //            )
 //        )

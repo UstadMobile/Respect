@@ -279,7 +279,7 @@ fun Application.module() {
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         XapiStatementsResourceRoute(
                             json = json,
-                            processStatementsUseCase = { it.getSchoolKoinScope().get() })
+                            processStatementsUseCase = { it.requireAccountScope().get() })
                     }
                 }
 

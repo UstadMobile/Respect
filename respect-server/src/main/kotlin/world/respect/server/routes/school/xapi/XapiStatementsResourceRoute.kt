@@ -28,7 +28,6 @@ fun Route.XapiStatementsResourceRoute(
         it.requireAccountScope().get()
     }
 ) {
-    val logTag = "XapiStatementsResourceRoute"
 
     get(XapiStatementsResource.ENDPOINT_NAME) {
         call.response.header(HttpHeaders.Vary, HttpHeaders.Authorization)
@@ -60,7 +59,7 @@ fun Route.XapiStatementsResourceRoute(
             try {
                 useCase(statements)
             } catch (e: Exception) {
-                println("[$logTag] Error processing statements: ${e.message}")
+                println("XapiStatementsResourceRoute: Error processing statements: ${e.message}")
             }
         }
 

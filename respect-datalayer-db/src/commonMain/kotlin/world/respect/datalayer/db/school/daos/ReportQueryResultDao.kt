@@ -16,7 +16,7 @@ interface ReportQueryResultDao {
          WHERE rqrReportUid = :reportUid
            AND rqrTimeZone = :timeZone
     """)
-    suspend fun deleteByReportUidAndTimeZone(reportUid: Long, timeZone: String)
+    suspend fun deleteByReportUidAndTimeZone(reportUid: String, timeZone: String)
 
     @Insert
     suspend fun insertAllAsync(results: List<ReportQueryResultEntity>)
@@ -29,7 +29,7 @@ interface ReportQueryResultDao {
            AND ReportQueryResultEntity.rqrTimeZone = :timeZone
     """)
     suspend fun getAllByReportUidAndTimeZone(
-        reportUid: Long,
+        reportUid: String,
         timeZone: String
     ): List<ReportQueryResultEntity>
 
@@ -55,7 +55,7 @@ interface ReportQueryResultDao {
                                       WHERE ReportEntity.rGuid = :reportUid), 0))))
     """,)
     suspend fun isReportFresh(
-        reportUid: Long,
+        reportUid: String,
         timeZone: String,
         freshThresholdTime: Long,
     ): Boolean
@@ -64,6 +64,6 @@ interface ReportQueryResultDao {
     suspend fun executeRawQuery(query: RoomRawQuery): Long
 
     @Query("SELECT COUNT(*) FROM ReportQueryResultEntity WHERE rqrReportUid = :reportUid AND rqrTimeZone = :timeZone")
-    suspend fun getResultCount(reportUid: Long, timeZone: String): Int
+    suspend fun getResultCount(reportUid: String, timeZone: String): Int
 
 }

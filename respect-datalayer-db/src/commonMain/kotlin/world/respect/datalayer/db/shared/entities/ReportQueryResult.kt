@@ -41,7 +41,7 @@ import kotlinx.serialization.Serializable
 data class ReportQueryResultEntity(
     @PrimaryKey(autoGenerate = true)
     var rqrUid: Long = 0,
-    var rqrReportUid: Long = 0,
+    var rqrReportUid: String = "",
     var rqrLastModified: Long = 0,
     var rqrLastValidated: Long = 0,
     var rqrReportSeriesUid: Int = 0,

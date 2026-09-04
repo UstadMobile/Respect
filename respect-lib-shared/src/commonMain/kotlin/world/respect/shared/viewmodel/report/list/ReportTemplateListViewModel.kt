@@ -78,7 +78,7 @@ class ReportTemplateListViewModel(
                         reportResult = RunReportUseCase.RunReportResult(
                             timestamp = Clock.System.now().toEpochMilliseconds(),
                             request = RunReportUseCase.RunReportRequest(
-                                reportUid = 0L,
+                                reportUid = "0",
                                 reportOptions = ReportOptions(),
                                 accountPersonUid = activeUserPersonUid,
                                 timeZone = TimeZone.currentSystemDefault()
@@ -92,7 +92,7 @@ class ReportTemplateListViewModel(
             }
         } else {
             val request = RunReportUseCase.RunReportRequest(
-                reportUid = report.guid.toLong(),
+                reportUid = report.guid,
                 reportOptions = report.reportOptions,
                 accountPersonUid = activeUserPersonUid,
                 timeZone = TimeZone.currentSystemDefault()

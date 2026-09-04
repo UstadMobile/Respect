@@ -35,7 +35,7 @@ import world.respect.lib.xapi.ext.objectActivityNameOrNull
 import world.respect.shared.generated.resources.No_data_available
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.delete
-import world.respect.shared.viewmodel.report.list.ReportEntry
+import world.respect.lib.xapi.model.XapiStatement
 import world.respect.shared.viewmodel.report.list.ReportListUiState
 import world.respect.shared.viewmodel.report.list.ReportListViewModel
 
@@ -50,9 +50,10 @@ fun ReportListScreen(
             .fillMaxSize()
             .padding(4.dp)
     ) {
-        items(uiState.reportList.dataOrNull() ?: emptyList()) { entry ->
+        items(uiState.reportRequests.dataOrNull() ?: emptyList()) { request ->
             ReportGridCard(
-                entry = entry,
+                request = request,
+                uiState = uiState,
                 viewModel = viewModel
             )
         }
@@ -61,20 +62,21 @@ fun ReportListScreen(
 
 @Composable
 private fun ReportGridCard(
-    entry: ReportEntry,
+    request: XapiStatement,
+    uiState: ReportListUiState,
     viewModel: ReportListViewModel
 ) {
-    val report = entry.request
-    val reportResult = entry.reportResult
-    val xAxisFormatter = entry.xAxisFormatter
-    val yAxisFormatter = entry.yAxisFormatter
+    val requestId = request.id?.toString() ?: return
+    val reportResult = uiState.reportResults[requestId]
+    val xAxisFormatter = uiState.xAxisFormatters[requestId]
+    val yAxisFormatter = uiState.yAxisFormatters[requestId]
 
     Card(
         modifier = Modifier
             .padding(10.dp)
             .fillMaxWidth()
             .clickable {
-                viewModel.onClickEntry(entry)
+                viewModel.onClickEntry(request)
             }
             .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.12f)),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -87,7 +89,7 @@ private fun ReportGridCard(
             ) {
                 // Title above the chart
                 Text(
-                    text = report.objectActivityNameOrNull()?.let { langMapString(it) } ?: "",
+                    text = request.objectActivityNameOrNull()?.let { langMapString(it) } ?: "",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -129,7 +131,7 @@ private fun ReportGridCard(
                 modifier = Modifier
                     .size(32.dp)
                     .padding(8.dp)
-                    .clickable { viewModel.onRemoveReport(entry) }
+                    .clickable { viewModel.onRemoveReport(request) }
                     .align(Alignment.TopEnd)
             )
         }

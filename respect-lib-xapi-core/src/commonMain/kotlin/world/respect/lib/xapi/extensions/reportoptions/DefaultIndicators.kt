@@ -74,18 +74,24 @@ object DefaultIndicators {
 //        ),
 
         // Count Metrics
-//        Indicator(
-//            name = "Score (Average)",
-//            type = YAxisTypes.COUNT.name,
-//            description = "The mean performance score across all assessments, tests, or evaluations for a given student group or time period",
-//            sql = "AVG(ResultSource.resultScore)"
-//        ),
-//        Indicator(
-//            name = "Score (Total)",
-//            type = YAxisTypes.COUNT.name,
-//            description = "The sum of all points earned by students across multiple assessments or cumulative performance measurements",
-//            sql = "SUM(ResultSource.resultScore)"
-//        ),
+        Indicator(
+            name = "Score (Average)",
+            type = YAxisTypes.COUNT.name,
+            description = "The mean performance score across all assessments, tests, or evaluations for a given student group or time period",
+            sql = "AVG(ResultSource.resultScore)"
+        ),
+        Indicator(
+            name = "Score (Total)",
+            type = YAxisTypes.COUNT.name,
+            description = "The sum of all points earned by students across multiple assessments or cumulative performance measurements",
+            sql = "SUM(ResultSource.resultScore)"
+        ),
+        Indicator(
+            name = "Number of Unique Users",
+            type = YAxisTypes.COUNT.name,
+            description = "The count of distinct users who engaged with the learning content during the specified time period",
+            sql = "COUNT(DISTINCT ResultSource.statementActorUid)"
+        ),
 //        Indicator(
 //            name = "Number of activities",
 //            type = YAxisTypes.COUNT.name,

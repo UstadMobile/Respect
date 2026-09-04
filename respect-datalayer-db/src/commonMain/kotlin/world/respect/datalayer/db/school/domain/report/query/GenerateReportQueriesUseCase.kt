@@ -183,7 +183,7 @@ class GenerateReportQueriesUseCase {
                 if (reportOptions.xAxis.personJoinRequired ||
                     series.reportSeriesSubGroup?.personJoinRequired == true
                 ) {
-                    "LEFT JOIN PersonEntity ON PersonEntity.pGuidHash = ResultSource.statementActorPersonUid"
+                    "LEFT JOIN PersonEntity ON PersonEntity.pGuidHash = ResultSource.statementActorUid"
                 } else ""
             }
                 WHERE ResultSource.timestamp BETWEEN ? AND ?

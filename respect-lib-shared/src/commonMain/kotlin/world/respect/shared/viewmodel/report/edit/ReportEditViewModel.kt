@@ -15,7 +15,9 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.school.model.Report
+import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.school.domain.report.query.GenerateReportQueriesUseCase
+import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
@@ -37,11 +39,11 @@ import world.respect.lib.xapi.model.XapiActivityDefinition
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
-import world.respect.libutil.ext.isNullOrAllBlank
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.domain.xapi.createBlankReportStatement
-import world.respect.shared.ext.replace
+import world.respect.shared.domain.xapi.fillSqlParameters
+import world.respect.shared.domain.xapi.withReportQueries
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_a_new_report
 import world.respect.shared.generated.resources.done
@@ -87,20 +89,22 @@ data class ReportEditUiState(
 
 class ReportEditViewModel(
     savedStateHandle: SavedStateHandle,
-    accountManager: RespectAccountManager,
+    private val accountManager: RespectAccountManager,
     private val json: Json,
     private val navResultReturner: NavResultReturner,
     private val snackBarDispatcher: SnackBarDispatcher
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
+
     private val schoolDataSource: SchoolDataSource by inject()
+    private val generateReportQueriesUseCase: GenerateReportQueriesUseCase by inject()
+    private val uidNumberMapper: UidNumberMapper by inject()
     private val route: ReportEdit = savedStateHandle.toRoute()
     private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
-    private val entityUid =
-        route.reportActivityUid ?: schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-            Report.TABLE_ID
-        ).toString()
+
+    private val entityUid = route.reportActivityUid ?: Uuid.random().toString()
+
     private val _uiState: MutableStateFlow<ReportEditUiState> =
         MutableStateFlow(ReportEditUiState())
     val uiState: Flow<ReportEditUiState> = _uiState.asStateFlow()
@@ -252,12 +256,29 @@ class ReportEditViewModel(
 
         val reportStatement = _uiState.value.statementData.dataOrNull() ?: return
         launchWithLoadingIndicator {
+            val sessionAndPerson = accountManager.selectedAccountAndPersonFlow.first()
+            val queries = if (sessionAndPerson != null) {
+                val request = RunReportUseCase.RunReportRequest(
+                    reportUid = entityUid,
+                    reportOptions = currentOptions,
+                    accountPersonUid = uidNumberMapper(sessionAndPerson.person.guid),
+                    timeZone = kotlinx.datetime.TimeZone.currentSystemDefault()
+                )
+                val generated = generateReportQueriesUseCase(request)
+                generated.map { parts ->
+                    val sql = fillSqlParameters(parts.sql, parts.params)
+                    sql
+                }
+            } else {
+                emptyList()
+            }
+
             schoolDataSource.xapiResource.statements.post(
                 listOf(
                     reportStatement.copy(
                         id = Uuid.random(),
                         timestamp = Clock.System.now(),
-                    )
+                    ).withReportQueries(queries, json)
                 )
             )
             if (route.reportActivityUid == null) {
@@ -282,7 +303,7 @@ class ReportEditViewModel(
                     serializer = ReportOptions.serializer(),
                     value = options
                 ).copy(
-                    name = mapOf("en" to options.title)
+                    name = mapOf("en" to options.title) // TODO NEED TO CHANGE HARDCODED LANGUAGE
                 )
             )
         } ?: currentStmt.`object`

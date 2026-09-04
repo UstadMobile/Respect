@@ -130,7 +130,7 @@ interface RunReportUseCase {
      */
     @Serializable
     data class RunReportRequest(
-        val reportUid: Long,
+        val reportUid: String,
         val reportOptions: ReportOptions,
         val accountPersonUid: Long,
         val cacheControl: String? = null,

@@ -1,5 +1,7 @@
 package world.respect.shared.domain.xapi
 
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
@@ -43,7 +45,7 @@ fun createBlankReportStatement(
     reportOptions: ReportOptions,
     json: Json,
     reportDescription: Map<String, String> = emptyMap(),
-    query: String = "",
+    queries: List<String> = emptyList(),
 ): XapiStatement {
     val now = Clock.System.now()
     return XapiStatement(
@@ -61,8 +63,8 @@ fun createBlankReportStatement(
             ).encodeWithExtension(
                 json = json,
                 extensionIri = OpenEelXapiConstants.EXTENSION_REPORT_QUERY,
-                serializer = kotlinx.serialization.serializer(),
-                value = query
+                serializer = ListSerializer(String.serializer()),
+                value = queries
             ).encodeWithExtension(
                 json = json,
                 extensionIri = OpenEelXapiConstants.EXTENSION_REPORT_OPTIONS,
@@ -100,7 +102,7 @@ fun XapiStatement.asRunReportRequest(
     ) ?: ReportOptions()
 
     return RunReportUseCase.RunReportRequest(
-        reportUid = activity.id.substringAfterLast("/").toLongOrNull() ?: 0L,
+        reportUid = activity.id,
         reportOptions = reportOptions,
         accountPersonUid = accountPersonUid,
         timeZone = timeZone,
@@ -137,7 +139,7 @@ fun createReportResponseStatement(
         result = XapiResult(
             extensions = mapOf(
                 OpenEelXapiConstants.EXTENSION_REPORT_QUERY_RESULT to json.encodeToJsonElement(
-                    kotlinx.serialization.builtins.ListSerializer(XapiSqlQueryResponse.serializer()),
+                    ListSerializer(XapiSqlQueryResponse.serializer()),
                     queryResponses
                 )
             )
@@ -161,27 +163,53 @@ fun XapiStatement.getQueryResultResponses(json: Json): List<XapiSqlQueryResponse
     } ?: emptyList()
 }
 
-fun XapiStatement.toStatementReportRows(
-    seriesIndex: Int,
-    json: Json,
-    xAxisColumnName: String = COLUMN_NAME_X_AXIS,
-    yAxisColumnName: String = COLUMN_NAME_Y_AXIS,
-    subgroupColumnName: String = COLUMN_NAME_SUBGROUP
-): List<StatementReportRow> {
-    val response = getQueryResultResponses(json).getOrNull(seriesIndex) ?: return emptyList()
-    val columnNames = response.columnNames
-    val rows = response.rows
+fun XapiStatement.toStatementReportRows(json: Json): List<List<StatementReportRow>> {
+    return getQueryResultResponses(json).map { response ->
+        val columnNames = response.columnNames
+        val rows = response.rows
 
-    val xAxisIndex = columnNames.indexOf(xAxisColumnName)
-    val yAxisIndex = columnNames.indexOf(yAxisColumnName)
-    val subgroupIndex = columnNames.indexOf(subgroupColumnName)
+        val xAxisIndex = columnNames.indexOf(COLUMN_NAME_X_AXIS)
+        val yAxisIndex = columnNames.indexOf(COLUMN_NAME_Y_AXIS)
+        val subgroupIndex = columnNames.indexOf(COLUMN_NAME_SUBGROUP)
 
-    return rows.map { rowElement ->
-        val row = (rowElement as? JsonArray) ?: emptyList()
-        StatementReportRow(
-            yAxis = if (yAxisIndex in row.indices) (row[yAxisIndex] as? JsonPrimitive)?.doubleOrNull ?: 0.0 else 0.0,
-            xAxis = if (xAxisIndex in row.indices) (row[xAxisIndex] as? JsonPrimitive)?.content ?: "" else "",
-            subgroup = if (subgroupIndex in row.indices) (row[subgroupIndex] as? JsonPrimitive)?.content ?: "" else ""
-        )
+        rows.map { rowElement ->
+            val row = (rowElement as? JsonArray) ?: emptyList()
+            StatementReportRow(
+                yAxis = if (yAxisIndex in row.indices) (row[yAxisIndex] as? JsonPrimitive)?.doubleOrNull ?: 0.0 else 0.0,
+                xAxis = if (xAxisIndex in row.indices) (row[xAxisIndex] as? JsonPrimitive)?.content ?: "" else "",
+                subgroup = if (subgroupIndex in row.indices) (row[subgroupIndex] as? JsonPrimitive)?.content ?: "" else ""
+            )
+        }
     }
+}
+
+
+fun XapiStatement.withReportQueries(queries: List<String>, json: Json): XapiStatement {
+    val activity = objectActivityOrNull() ?: return this
+    val updatedActivity = activity.copy(
+        definition = (activity.definition ?: XapiActivityDefinition()).encodeWithExtension(
+            json = json,
+            extensionIri = OpenEelXapiConstants.EXTENSION_REPORT_QUERY,
+            serializer = ListSerializer(String.serializer()),
+            value = queries
+        )
+    )
+    return copy(`object` = updatedActivity)
+}
+
+/**
+ * Utility function to substitute '?' placeholders in a SQL string with provided parameters.
+ * This is used to create self-contained SQL queries that can be included in xAPI statements.
+ */
+fun fillSqlParameters(sql: String, params: Array<Any>): String {
+    var resultSql = sql
+    params.forEach { param ->
+        val replacement = when (param) {
+            is String -> "'${param.replace("'", "''")}'"
+            is Boolean -> if (param) "1" else "0"
+            else -> param.toString()
+        }
+        resultSql = resultSql.replaceFirst("\\?", replacement)
+    }
+    return resultSql
 }

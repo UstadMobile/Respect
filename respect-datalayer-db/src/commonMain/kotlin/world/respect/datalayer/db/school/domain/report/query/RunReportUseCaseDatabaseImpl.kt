@@ -90,7 +90,7 @@ class RunReportUseCaseDatabaseImpl(
             val isClazzUids = request.reportOptions.xAxis == ReportXAxis.CLASS
 
             val allClazzUids: List<Long> = if (isClazzUids) {
-                queryResults.map { it.rqrXAxis.toLong() }.distinct()
+                queryResults.mapNotNull { it.rqrXAxis.toLongOrNull() }.distinct()
             } else {
                 emptyList()
             }
@@ -110,7 +110,7 @@ class RunReportUseCaseDatabaseImpl(
                         request = request,
                         xAxisNameFn = { xAxis ->
                             if (isClazzUids)
-                                clazzNames[xAxis.toLong()] ?: xAxis
+                                clazzNames[xAxis.toLongOrNull()] ?: xAxis
                             else
                                 xAxis
                         }

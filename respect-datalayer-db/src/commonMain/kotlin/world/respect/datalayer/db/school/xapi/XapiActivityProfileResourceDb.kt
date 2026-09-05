@@ -23,7 +23,7 @@ class XapiActivityProfileResourceDb(
 ) : XapiActivityProfileResourceLocal {
 
     override suspend fun updateLocal(
-        params: XapiActivityProfileResource.DocumentParams,
+        params: XapiActivityProfileResource.SingleDocumentParams,
         document: XapiDocument
     ) {
         val existing = schoolDb.getActivityProfileDocumentDao().findByActivityIriAndProfileId(
@@ -49,7 +49,7 @@ class XapiActivityProfileResourceDb(
     }
 
     override suspend fun get(
-        params: XapiActivityProfileResource.DocumentParams,
+        params: XapiActivityProfileResource.SingleDocumentParams,
         dataLoadParams: DataLoadParams
     ): DataLoadState<XapiDocument> {
         val entity = schoolDb.getActivityProfileDocumentDao().findByActivityIriAndProfileId(
@@ -64,7 +64,7 @@ class XapiActivityProfileResourceDb(
     }
 
     override suspend fun post(
-        params: XapiActivityProfileResource.DocumentParams,
+        params: XapiActivityProfileResource.SingleDocumentParams,
         document: XapiDocument
     ) {
         if(!document.type.startsWith("application/json"))
@@ -104,7 +104,7 @@ class XapiActivityProfileResourceDb(
     }
 
     override suspend fun put(
-        params: XapiActivityProfileResource.DocumentParams,
+        params: XapiActivityProfileResource.SingleDocumentParams,
         document: XapiDocument
     ) {
         val existing = schoolDb.getActivityProfileDocumentDao().findByActivityIriAndProfileId(
@@ -118,7 +118,7 @@ class XapiActivityProfileResourceDb(
         schoolDb.getActivityProfileDocumentDao().upsert(entity)
     }
 
-    override suspend fun delete(params: XapiActivityProfileResource.DocumentParams) {
+    override suspend fun delete(params: XapiActivityProfileResource.SingleDocumentParams) {
         schoolDb.getActivityProfileDocumentDao().deleteByActivityIriAndProfileId(
             activityIri = params.activityId,
             profileId = params.profileId,

@@ -2,7 +2,7 @@ package world.respect.datalayer.school.xapi
 
 import world.respect.lib.xapi.model.XapiDocument
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
-import world.respect.lib.xapi.resources.XapiActivityProfileResource.DocumentParams
+import world.respect.lib.xapi.resources.XapiActivityProfileResource.SingleDocumentParams
 
 interface XapiActivityProfileResourceLocal : XapiActivityProfileResource {
 
@@ -11,7 +11,7 @@ interface XapiActivityProfileResourceLocal : XapiActivityProfileResource {
      * remote endpoint or perform permission checks. This is used by the repository layer.
      */
     suspend fun updateLocal(
-        params: DocumentParams,
+        params: SingleDocumentParams,
         document: XapiDocument,
     )
 

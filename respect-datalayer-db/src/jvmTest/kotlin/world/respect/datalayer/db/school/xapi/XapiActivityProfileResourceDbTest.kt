@@ -58,7 +58,7 @@ class XapiActivityProfileResourceDbTest {
         activityIds: List<String>,
         profileIds: List<String> = (1..2).map { "p$it" },
         updated: (Int) -> Instant = { Clock.System.now() },
-    ) : List<Pair<TestDocument, XapiActivityProfileResource.DocumentParams>> {
+    ) : List<Pair<TestDocument, XapiActivityProfileResource.SingleDocumentParams>> {
         return activityIds.flatMap { activityId ->
             profileIds.mapIndexed { index, profileId ->
                 Pair(
@@ -67,7 +67,7 @@ class XapiActivityProfileResourceDbTest {
                         updated = updated(index),
                         text = """{"p": $index}"""
                     ),
-                    second = XapiActivityProfileResource.DocumentParams(
+                    second = XapiActivityProfileResource.SingleDocumentParams(
                         activityId = activityId,
                         profileId = profileId,
                     )
@@ -102,7 +102,7 @@ class XapiActivityProfileResourceDbTest {
                 text = jsonContent,
             )
 
-            val params = XapiActivityProfileResource.DocumentParams(
+            val params = XapiActivityProfileResource.SingleDocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )
@@ -130,7 +130,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.DocumentParams(
+            val params = XapiActivityProfileResource.SingleDocumentParams(
                 activityId = activityId1,
                 profileId = "non-existent-profile",
             )
@@ -152,7 +152,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.DocumentParams(
+            val params = XapiActivityProfileResource.SingleDocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )
@@ -196,7 +196,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.DocumentParams(
+            val params = XapiActivityProfileResource.SingleDocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )
@@ -225,7 +225,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.DocumentParams(
+            val params = XapiActivityProfileResource.SingleDocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )
@@ -294,7 +294,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.DocumentParams(
+            val params = XapiActivityProfileResource.SingleDocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )
@@ -325,7 +325,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.DocumentParams(
+            val params = XapiActivityProfileResource.SingleDocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )
@@ -433,7 +433,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.DocumentParams(
+            val params = XapiActivityProfileResource.SingleDocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )

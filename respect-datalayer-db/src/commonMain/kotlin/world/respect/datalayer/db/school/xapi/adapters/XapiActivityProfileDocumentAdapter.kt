@@ -7,11 +7,11 @@ import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import kotlin.uuid.Uuid
 
 /**
- * Converts an [XapiDocument] and [XapiActivityProfileResource.DocumentParams]
+ * Converts an [XapiDocument] and [XapiActivityProfileResource.SingleDocumentParams]
  * to an [XapiActivityProfileDocumentEntity].
  */
 suspend fun XapiDocument.toXapiActivityProfileDocumentEntity(
-    params: XapiActivityProfileResource.DocumentParams,
+    params: XapiActivityProfileResource.SingleDocumentParams,
     id: String? = null,
 ): XapiActivityProfileDocumentEntity {
     return XapiActivityProfileDocumentEntity(

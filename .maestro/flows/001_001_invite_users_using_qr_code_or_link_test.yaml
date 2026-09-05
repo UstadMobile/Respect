@@ -202,12 +202,41 @@ onFlowComplete:
     file: "subflows/get_started_select_school_by_name.yaml"
     env:
       SCHOOL_NAME: ${SCHOOL_NAME}
+# Test login error when login credential is not valid - Invalid username
 - tapOn:
     id: "username"
-- inputText: "teacherauser"
+- inputText: "teacheruser"
 - tapOn:
     id : "password"
 - inputText: "test123"
+- tapOn: "Login"
+- assertVisible: "Invalid username/password"
+- runFlow:
+    file: "subflows/erase_text.yaml"
+    env:
+      TEXT: "teacheruser"
+
+# Test error when device internet is not connected
+- setAirplaneMode: enabled
+- extendedWaitUntil:
+    visible:
+      id: "internet_disconnected"
+    timeout: 10000
+- tapOn:
+    id : "username"
+- inputText: "teacherauser"
+- tapOn: "Login"
+- assertVisible: "Network error: check your connection and try again"
+
+# Device back to Online mode - Login success
+- setAirplaneMode: disabled
+- extendedWaitUntil:
+    visible:
+      id: "internet_connected"
+    timeout: 10000
+- assertVisible:
+    id: "app_title"
+    text: "Login"
 - tapOn: "Login"
 - assertVisible:
          id: "nav_home"

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -15,6 +16,7 @@ import androidx.compose.material.RadioButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
@@ -86,6 +88,9 @@ fun InvitePersonScreen(
         onApprovalRequiredChanged = viewModel::onApprovalEnabledChanged,
         onRoleChange = viewModel::onRoleChange,
         onClickResetCode = viewModel::onClickResetCode,
+        showSlider = viewModel::showSlider,
+        hideSlider = viewModel::hideSlider,
+        setSliderPage = viewModel::setSliderPage,
         onSetClassInviteMode = viewModel::onSetClassInviteMode,
     )
 }
@@ -102,6 +107,9 @@ fun InvitePersonScreen(
     onApprovalRequiredChanged: (Boolean) -> Unit,
     onRoleChange: (PersonRoleEnum) -> Unit,
     onClickResetCode: () -> Unit,
+    showSlider: () -> Unit,
+    hideSlider: () -> Unit,
+    setSliderPage: (Int) -> Unit,
     onSetClassInviteMode: (ClassInviteModeEnum) -> Unit = { },
 ) {
     val invite = uiState.invite.dataOrNull()
@@ -112,6 +120,13 @@ fun InvitePersonScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
+        if (uiState.showSlider){
+            InviteSliderBottomSheet(
+                uiState = uiState,
+                onPageChange = { setSliderPage(it) },
+                onDismiss = hideSlider
+            )
+        }
 
         if(uiState.showRoleSelection) {
             val selectedRole = uiState.selectedRole ?: uiState.roleOptions.firstOrNull()
@@ -166,21 +181,36 @@ fun InvitePersonScreen(
 
         invite?.also {
             Row(
-                modifier = Modifier.align(Alignment.CenterHorizontally).defaultItemPadding()
-                    .clickable(enabled = fieldsEnabled) {
-                        onClickInviteCode()
-                    },
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .defaultItemPadding(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(Res.string.invite_code_label) + ": ",
-                    textAlign = TextAlign.Center,
-                )
+                Row(
+                    modifier = Modifier
+                        .clickable(enabled = fieldsEnabled) {
+                            onClickInviteCode()
+                        }
+                ) {
+                    Text(
+                        text = stringResource(Res.string.invite_code_label) + ": ",
+                        textAlign = TextAlign.Center,
+                    )
 
-                //Separated out for easier automated testing.
-                Text(
-                    text = it.code,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.testTag("invite_code"),
+                    Text(
+                        text = it.code,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.testTag("invite_code"),
+                    )
+                }
+
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .size(18.dp)
+                        .clickable { showSlider() }
                 )
             }
         }

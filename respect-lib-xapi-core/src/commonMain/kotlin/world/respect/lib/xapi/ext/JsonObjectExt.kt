@@ -24,3 +24,20 @@ fun JsonObjectBuilder.putAll(
     }
 }
 
+/**
+ * Merge this JsonObject (the receiver) with another Json object (the parameter). Merge ONLY the
+ * top level as per xAPI spec on merging documents.
+ */
+fun JsonObject.mergeTopLevel(
+    other: JsonObject
+): JsonObject {
+    return JsonObject(
+        content = this.toMutableMap().also { map ->
+            other.forEach { (key, value) ->
+                map[key] = value
+            }
+        }.toMap()
+    )
+}
+
+

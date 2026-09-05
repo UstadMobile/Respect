@@ -9,6 +9,7 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.xapi.XapiActivitiesResourceLocal
+import world.respect.datalayer.school.xapi.XapiActivityProfileResourceLocal
 import world.respect.datalayer.school.xapi.XapiAgentsResourceLocal
 import world.respect.datalayer.school.xapi.XapiResourceLocal
 import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
@@ -54,6 +55,13 @@ class XapiResourceDb(
             schoolDb = schoolDb,
             authenticatedUser = authenticatedUser,
             uidNumberMapper = uidNumberMapper,
+            json = json,
+        )
+    }
+
+    override val activityProfile: XapiActivityProfileResourceLocal by lazy {
+        XapiActivityProfileResourceDb(
+            schoolDb = schoolDb,
             json = json,
         )
     }

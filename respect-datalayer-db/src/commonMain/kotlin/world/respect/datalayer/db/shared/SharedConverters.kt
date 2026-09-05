@@ -80,5 +80,14 @@ class SharedConverters {
         return value?.let { Instant.fromEpochMilliseconds(it) }
     }
 
+    @TypeConverter
+    fun fromInstantAsTimestampString(value: InstantAsTimestampString?): String? {
+        return value?.instant?.toString()
+    }
+
+    @TypeConverter
+    fun toInstantAsTimestampString(value: String?): InstantAsTimestampString? {
+        return value?.let { InstantAsTimestampString(Instant.parse(it)) }
+    }
 
 }

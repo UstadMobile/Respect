@@ -1,10 +1,20 @@
-* This datalayer is implemented using Room Database (Multiplatform)
+# RESPECT respect-datalayer-db guide
+
+This file provides guidance for AI agents working with code in this
+module. Always follow the repository guidelines in [../AGENTS.md](../AGENTS.md).
+
+## Module overview
+This is an implementation of the [respect-datalayer module](../respect-datalayer) 
+using Room Multiplatform (based on SQLite). This module is used by the mobile app implementations
+to provide a local offline-first data source and by the server module.
+
+You should read [respect-datalayer AGENTS.md](../respect-datalayer/AGENTS.md) before working with
+code in this module.
+
 * There are two databases: RespectSchoolDatabase for school-level data and RespectAppDatabase for
   app-wide data (as per respect-datalayer itself).
 * For each model there is an adapter file in the relevant adapters package that will convert the
-  model to/from entities.
-* Each entity class that directly represents a model class should have a uidNumber field to store a 
-  has of the string UID (or any other scheme implemented using the UidNumberMapper interface).
+  model to/from database entities.
 * Each Entity is named in the form of ModelNameEntity
 * Entity classes property names should be prefixed to avoid name clashes in queries e.g. 
   AssignmentEntity fields are prefixed ae so fieldnames are aeUid, aeLastModified, etc.
@@ -16,6 +26,4 @@
   Room's @Relation annotation. Joined entities (e.g. the main side) should use autoIncrement primary
   keys. When updated data is stored, old versions of the joined entity are deleted and new entities
   are inserted.
-* Each DAO must implement the Local DataSource interface (e.g. ModelNameDataSourceLocal).
-* Data that is given the status TO_BE_DELETED will be deleted by a cron job / timed WorkManager task. 
-  Do not generate delete queries for an entity that directly represents a model class.
+* Each DataSource in this module must implement ModelNameLocalDataSource.

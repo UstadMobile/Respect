@@ -264,7 +264,7 @@ data class ClazzEdit(
 object Report : RespectAppRoute
 
 @Serializable
-class ReportEdit(val reportUid: String?) : RespectAppRoute
+class ReportEdit(val reportActivityUid: String?) : RespectAppRoute
 
 @Serializable
 class ReportDetail(val reportUid: String) : RespectAppRoute

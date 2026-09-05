@@ -79,7 +79,7 @@ fun ReportEditScreen(
     )
     ReportEditScreen(
         uiState = uiState,
-        onReportChanged = viewModel::onEntityChanged,
+        onReportOptionsChanged = viewModel::onEntityChanged,
         onSeriesChanged = viewModel::onSeriesChanged,
         onAddSeries = viewModel::onAddSeries,
         onAddFilter = viewModel::onAddFilter,
@@ -93,20 +93,21 @@ fun ReportEditScreen(
 @Composable
 private fun ReportEditScreen(
     uiState: ReportEditUiState = ReportEditUiState(),
-    onReportChanged: (ReportOptions) -> Unit = {},
+    onReportOptionsChanged: (ReportOptions) -> Unit = {},
     onAddSeries: () -> Unit = { },
     onAddFilter: (Int) -> Unit = { },
-    onSeriesChanged: (ReportSeries) -> Unit = {},
+    onSeriesChanged: (Int, ReportSeries) -> Unit = { _, _ -> },
     onRemoveSeries: (Int) -> Unit = { },
     onRemoveFilter: (Int, Int) -> Unit = { _, _ -> },
     manageIndicator: () -> Unit = { },
-    onEditFilter: (ReportFilter) -> Unit = { },
+    onEditFilter: (Int, Int, ReportFilter) -> Unit = { _, _, _ -> },
 ) {
-    val firstIndicatorType = uiState.reportOptions.series.firstOrNull()?.reportSeriesYAxis?.type
+    val reportOptions = uiState.reportOptions
+    val firstIndicatorType = reportOptions.series.firstOrNull()?.reportSeriesYAxis?.type
 
     // Calculate disabled indicators (those with different types than the first series)
     val disabledIndicators =
-        if (uiState.reportOptions.series.size > 1 && firstIndicatorType != null) {
+        if (reportOptions.series.size > 1 && firstIndicatorType != null) {
             uiState.availableIndicators.filter { it.type != firstIndicatorType }
         } else {
             emptyList()
@@ -121,28 +122,25 @@ private fun ReportEditScreen(
         item {
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = uiState.reportOptions.title,
+                value = reportOptions.title,
                 label = { Text(stringResource(Res.string.title) + "*") },
-                singleLine = true,
                 onValueChange = { newTitle ->
-                    val updatedOptions = uiState.reportOptions.copy(title = newTitle)
-                    onReportChanged(updatedOptions)
+                    onReportOptionsChanged(reportOptions.copy(title = newTitle))
                 },
-                isError = uiState.submitted && uiState.reportTitleError != null,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 supportingText = {
                     uiState.reportTitleError?.let {
                         Text(uiTextStringResource(it))
                     }
-                }
+                },
+                isError = uiState.hasErrors,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             )
-
         }
         item {
             // Determine selected option based on TIME RANGE TYPE
-            val selected = remember(uiState.reportOptions.period) {
+            val selected = remember(reportOptions.period) {
                 ReportPeriodOption.entries.find { option ->
-                    when (val currentPeriod = uiState.reportOptions.period) {
+                    when (val currentPeriod = reportOptions.period) {
                         is RelativeRangeReportPeriod -> {
                             val optionPeriod = option.period as? RelativeRangeReportPeriod
                             optionPeriod?.rangeUnit == currentPeriod.rangeUnit &&
@@ -155,7 +153,7 @@ private fun ReportEditScreen(
 
                     }
                 } ?: run {
-                    when (uiState.reportOptions.period) {
+                    when (reportOptions.period) {
                         is RelativeRangeReportPeriod -> ReportPeriodOption.CUSTOM_PERIOD
                         is FixedReportTimeRange -> ReportPeriodOption.CUSTOM_DATE_RANGE
                     }
@@ -167,11 +165,7 @@ private fun ReportEditScreen(
                 options = ReportPeriodOption.entries,
                 selectedValue = selected,
                 onOptionSelected = { selectedOption ->
-                    handleTimeRangeSelection(
-                        selectedOption,
-                        uiState.reportOptions,
-                        onReportChanged
-                    )
+                    onReportOptionsChanged(reportOptions.copy(period = selectedOption.period))
                 },
             )
 
@@ -179,11 +173,9 @@ private fun ReportEditScreen(
             if (selected == ReportPeriodOption.CUSTOM_PERIOD) {
                 // When selected is CUSTOM_PERIOD
                 CustomPeriodInputs(
-                    currentRange = uiState.reportOptions.period as RelativeRangeReportPeriod,
+                    currentRange = reportOptions.period as RelativeRangeReportPeriod,
                     onCustomPeriodChanged = { qty, unit ->
-                        val newRange = RelativeRangeReportPeriod(unit, qty)
-                        val updatedOptions = uiState.reportOptions.copy(period = newRange)
-                        onReportChanged(updatedOptions)
+                        onReportOptionsChanged(reportOptions.copy(period = RelativeRangeReportPeriod(unit, qty)))
                     },
                     quantityError = null
                 )
@@ -192,11 +184,9 @@ private fun ReportEditScreen(
             // Show CustomDateRangeInputs only if selected is CUSTOM_DATE_RANGE
             if (selected == ReportPeriodOption.CUSTOM_DATE_RANGE) {
                 CustomDateRangeInputs(
-                    currentRange = uiState.reportOptions.period as FixedReportTimeRange,
+                    currentRange = reportOptions.period as FixedReportTimeRange,
                     onDateRangeChanged = { from, to ->
-                        val newRange = FixedReportTimeRange(from, to)
-                        val updatedOptions = uiState.reportOptions.copy(period = newRange)
-                        onReportChanged(updatedOptions)
+                        onReportOptionsChanged(reportOptions.copy(period = FixedReportTimeRange(from, to)))
                     }
                 )
             }
@@ -204,18 +194,17 @@ private fun ReportEditScreen(
 
         item {
             ExposedDropdownMenu(
-                selectedValue = uiState.reportOptions.xAxis,
+                selectedValue = reportOptions.xAxis,
                 label = { Text(stringResource(Res.string.x_axis) + "*") },
                 options = ReportXAxis.entries,
-                onOptionSelected = {
-                    val updatedOptions = uiState.reportOptions.copy(xAxis = it)
-                    onReportChanged(updatedOptions)
+                onOptionSelected = { xAxis ->
+                    onReportOptionsChanged(reportOptions.copy(xAxis = xAxis))
                 }
             )
         }
 
         // Dynamically iterate over the series
-        uiState.reportOptions.series.forEach { seriesItem ->
+        reportOptions.series.forEachIndexed { seriesIndex, seriesItem ->
             item {
                 HorizontalDivider(
                     modifier = Modifier
@@ -246,7 +235,7 @@ private fun ReportEditScreen(
                             singleLine = true,
                             onValueChange = { newTitle ->
                                 val updatedSeries = seriesItem.copy(reportSeriesTitle = newTitle)
-                                onSeriesChanged(updatedSeries)
+                                onSeriesChanged(seriesIndex, updatedSeries)
                             }
                         )
                         if (!uiState.hasSingleSeries) {
@@ -255,7 +244,7 @@ private fun ReportEditScreen(
                                 contentDescription = stringResource(Res.string.remove),
                                 modifier = Modifier
                                     .clickable {
-                                        //onRemoveSeries(seriesItem.reportSeriesUid)
+                                        onRemoveSeries(seriesIndex)
                                     }
                                     .align(Alignment.CenterVertically)
                             )
@@ -269,7 +258,7 @@ private fun ReportEditScreen(
                         options = uiState.availableIndicators,
                         onOptionSelected = { selectedYAxis ->
                             val updatedSeries = seriesItem.copy(reportSeriesYAxis = selectedYAxis)
-                            onSeriesChanged(updatedSeries)
+                            onSeriesChanged(seriesIndex, updatedSeries)
                         },
                         disabledOptions = disabledIndicators,
                         additionalMenuItems = {
@@ -290,21 +279,21 @@ private fun ReportEditScreen(
                     // Subgroup Dropdown
                     ExposedDropdownMenu(
                         label = { Text(stringResource(Res.string.subgroup_by)) },
-                        options = if (uiState.reportOptions.xAxis.datePeriod != null) {
+                        options = if (reportOptions.xAxis.datePeriod != null) {
                             // X-axis is date - only show non-date options
                             ReportXAxis.entries.filter { it.datePeriod == null }
                         } else {
                             // X-axis is non-date - show date options plus other non-date options
                             ReportXAxis.entries.filter {
                                 it.datePeriod != null ||  // Include all date options
-                                        (it != uiState.reportOptions.xAxis)
+                                        (it != reportOptions.xAxis)
                             }
                         },
                         selectedValue = seriesItem.reportSeriesSubGroup,
                         onOptionSelected = { selectedXAxis ->
                             val updatedSeries =
                                 seriesItem.copy(reportSeriesSubGroup = selectedXAxis)
-                            onSeriesChanged(updatedSeries)
+                            onSeriesChanged(seriesIndex, updatedSeries)
                         }
                     )
 
@@ -317,18 +306,18 @@ private fun ReportEditScreen(
                         onOptionSelected = { selectedVisualType ->
                             val updatedSeries =
                                 seriesItem.copy(reportSeriesVisualType = selectedVisualType)
-                            onSeriesChanged(updatedSeries)
+                            onSeriesChanged(seriesIndex, updatedSeries)
                         },
                     )
                     if (!seriesItem.reportSeriesFilters.isNullOrEmpty()) {
                         Text(stringResource(Res.string.filters))
                     }
 
-                    seriesItem.reportSeriesFilters?.forEachIndexed { index, value ->
+                    seriesItem.reportSeriesFilters?.forEachIndexed { filterIndex, value ->
                         Row(
                             modifier = Modifier
                                 .clickable {
-                                    onEditFilter(value)
+                                    onEditFilter(seriesIndex, filterIndex, value)
                                 }
                                 .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -339,7 +328,7 @@ private fun ReportEditScreen(
                                 contentDescription = stringResource(Res.string.remove),
                                 modifier = Modifier
                                     .clickable {
-                                        //onRemoveFilter(index, seriesItem.reportSeriesUid)
+                                        onRemoveFilter(seriesIndex, filterIndex)
                                     }
                             )
                         }
@@ -349,7 +338,7 @@ private fun ReportEditScreen(
             item {
                 OutlinedButton(
                     onClick = {
-                        //onAddFilter(seriesItem.reportSeriesUid)
+                        onAddFilter(seriesIndex)
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -455,17 +444,6 @@ fun <T> ExposedDropdownMenu(
     }
 }
 
-fun handleTimeRangeSelection(
-    selectedOption: ReportPeriodOption,
-    currentOptions: ReportOptions,
-    onReportChanged: (ReportOptions) -> Unit
-) {
-    val newOptions = currentOptions.copy(
-        period = selectedOption.period
-    )
-
-    onReportChanged(newOptions)
-}
 
 @Composable
 fun CustomPeriodInputs(

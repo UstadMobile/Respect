@@ -58,7 +58,7 @@ class XapiActivityProfileResourceDbTest {
         activityIds: List<String>,
         profileIds: List<String> = (1..2).map { "p$it" },
         updated: (Int) -> Instant = { Clock.System.now() },
-    ) : List<Pair<TestDocument, XapiActivityProfileResource.ActivityProfileDocumentParams>> {
+    ) : List<Pair<TestDocument, XapiActivityProfileResource.DocumentParams>> {
         return activityIds.flatMap { activityId ->
             profileIds.mapIndexed { index, profileId ->
                 Pair(
@@ -67,7 +67,7 @@ class XapiActivityProfileResourceDbTest {
                         updated = updated(index),
                         text = """{"p": $index}"""
                     ),
-                    second = XapiActivityProfileResource.ActivityProfileDocumentParams(
+                    second = XapiActivityProfileResource.DocumentParams(
                         activityId = activityId,
                         profileId = profileId,
                     )
@@ -102,7 +102,7 @@ class XapiActivityProfileResourceDbTest {
                 text = jsonContent,
             )
 
-            val params = XapiActivityProfileResource.ActivityProfileDocumentParams(
+            val params = XapiActivityProfileResource.DocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )
@@ -130,7 +130,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.ActivityProfileDocumentParams(
+            val params = XapiActivityProfileResource.DocumentParams(
                 activityId = activityId1,
                 profileId = "non-existent-profile",
             )
@@ -152,7 +152,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.ActivityProfileDocumentParams(
+            val params = XapiActivityProfileResource.DocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )
@@ -196,7 +196,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.ActivityProfileDocumentParams(
+            val params = XapiActivityProfileResource.DocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )
@@ -225,7 +225,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.ActivityProfileDocumentParams(
+            val params = XapiActivityProfileResource.DocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )
@@ -294,7 +294,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.ActivityProfileDocumentParams(
+            val params = XapiActivityProfileResource.DocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )
@@ -325,7 +325,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.ActivityProfileDocumentParams(
+            val params = XapiActivityProfileResource.DocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )
@@ -367,7 +367,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val profileIds = resource.getMultipleDocuments(
-                params = XapiActivityProfileResource.GetActivityProfilesParams(
+                params = XapiActivityProfileResource.MultiDocParams(
                     activityId = activityId1
                 )
             ).dataOrNull()
@@ -412,7 +412,7 @@ class XapiActivityProfileResourceDbTest {
                         it.first.updated > doc.first.updated
                     }.map { it.second.profileId }.toSet(),
                     actual = resource.getMultipleDocuments(
-                        params = XapiActivityProfileResource.GetActivityProfilesParams(
+                        params = XapiActivityProfileResource.MultiDocParams(
                             activityId = activityId1,
                             since = doc.first.updated,
                         ),
@@ -433,7 +433,7 @@ class XapiActivityProfileResourceDbTest {
             }
 
             val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.ActivityProfileDocumentParams(
+            val params = XapiActivityProfileResource.DocumentParams(
                 activityId = activityId1,
                 profileId = profileId1,
             )

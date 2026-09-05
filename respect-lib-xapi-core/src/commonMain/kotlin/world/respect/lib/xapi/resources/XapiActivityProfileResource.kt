@@ -13,12 +13,12 @@ import kotlin.time.Instant
  */
 interface XapiActivityProfileResource {
 
-    data class GetActivityProfilesParams(
+    data class MultiDocParams(
         val activityId: String,
         val since: Instant? = null,
     )
 
-    data class ActivityProfileDocumentParams(
+    data class DocumentParams(
         val activityId: String,
         val profileId: String,
     )
@@ -29,7 +29,7 @@ interface XapiActivityProfileResource {
      * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md#multiple-document-get-2
      */
     suspend fun getMultipleDocuments(
-        params: GetActivityProfilesParams,
+        params: MultiDocParams,
         dataLoadParams: DataLoadParams = DataLoadParams()
     ): DataLoadState<List<String>>
 
@@ -40,7 +40,7 @@ interface XapiActivityProfileResource {
      * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md#single-document-put--post--get--delete-1
      */
     suspend fun get(
-        params: ActivityProfileDocumentParams,
+        params: DocumentParams,
         dataLoadParams: DataLoadParams = DataLoadParams(),
     ): DataLoadState<XapiDocument>
 
@@ -55,7 +55,7 @@ interface XapiActivityProfileResource {
      * of each new property.
      */
     suspend fun post(
-        params: ActivityProfileDocumentParams,
+        params: DocumentParams,
         document: XapiDocument
     )
 
@@ -69,7 +69,7 @@ interface XapiActivityProfileResource {
      *
      */
     suspend fun put(
-        params: ActivityProfileDocumentParams,
+        params: DocumentParams,
         document: XapiDocument
     )
 
@@ -79,7 +79,7 @@ interface XapiActivityProfileResource {
      * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md#single-agent-or-profile-document-put--post--get--delete
      */
     suspend fun delete(
-        params: ActivityProfileDocumentParams
+        params: DocumentParams
     )
 
 }

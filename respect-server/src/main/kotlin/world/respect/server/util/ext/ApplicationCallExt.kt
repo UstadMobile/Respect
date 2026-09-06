@@ -12,6 +12,8 @@ import io.ktor.server.auth.principal
 import io.ktor.server.response.header
 import io.ktor.server.response.respond
 import io.ktor.util.date.GMTDate
+import io.ktor.util.reflect.TypeInfo
+import io.ktor.util.reflect.typeInfo
 import org.koin.core.scope.Scope
 import org.koin.ktor.ext.getKoin
 import world.respect.datalayer.AuthenticatedUserPrincipalId
@@ -128,15 +130,70 @@ suspend inline fun <reified T: Any> ApplicationCall.respondOffsetLimitPaging(
     }
 }
 
+/**
+ * Handles a response given a DataLoadState. This function will:
+ *
+ * a) Check incoming cache-validation headers: if-none-match and if-not-modified-since. If the
+ *    validation passes, then will respond 302 not modified.
+ * b) Add dataloadstate metadata headers to the response: Last-Modified, X-Consistent-Through,
+ *    and etag.
+ * c) If dataloadstate is NoDataLoaded with the reason not found, then will respond 404
+ * d) If dataloadstate is DataReadyState then will respond with the data.
+ *
+ * @param dataLoadState the dataloadstate
+ * @param typeInfo TypeInfo for the response as per ApplicationCall.respond
+ */
+suspend fun <T: Any> ApplicationCall.respondDataLoadState(
+    dataLoadState: DataLoadState<T>,
+    typeInfo: TypeInfo,
+) {
+    respondDataLoadState(
+        dataLoadState = dataLoadState,
+        onRespondWithData = { data ->
+            this.respond(data, typeInfo)
+        }
+    )
+}
 
 /**
- * Handles a response given a DataReadyState. Will automatically handle responding with 304 not
- * modified if the request has an If-Modified-Since header or If-None-Match header.
+ * Handles a response given a DataLoadState, uses the default TypeInfo as per type parameter T.
+ * This function will:
  *
- * It will also add the etag and last modified dates from the DataReadyState metainfo to the response.
+ * a) Check incoming cache-validation headers: if-none-match and if-not-modified-since. If the
+ *    validation passes, then will respond 302 not modified.
+ * b) Add dataloadstate metadata headers to the response: Last-Modified, X-Consistent-Through,
+ *    and etag.
+ * c) If dataloadstate is NoDataLoaded with the reason not found, then will respond 404
+ * d) If dataloadstate is DataReadyState then will respond with the data.
+ *
+ * @param dataLoadState the dataloadstate
+ * @param T TypeInfo for the response
  */
 suspend inline fun <reified T: Any> ApplicationCall.respondDataLoadState(
-    dataLoadState: DataLoadState<T>
+    dataLoadState: DataLoadState<T>,
+) {
+    respondDataLoadState(
+        dataLoadState = dataLoadState,
+        typeInfo = typeInfo<T>()
+    )
+}
+
+/**
+ * Handles a response given a DataLoadState. This function will:
+ * a) Check incoming cache-validation headers: if-none-match and if-not-modified-since. If the
+ *    validation passes, then will respond 302 not modified.
+ * b) Add dataloadstate metadata headers to the response: Last-Modified, X-Consistent-Through,
+ *    and etag.
+ * c) If dataloadstate is NoDataLoaded with the reason not found, then will respond 404
+ * d) If dataloadstate is DataReadyState then will respond with the data.
+ *
+ * @param dataLoadState the dataloadstate
+ * @param onRespondWithData function to respond with the data. By default use the typeInfo. A custom
+ *        onRespond function might not use the typeInfo at all.
+ */
+suspend fun <T: Any> ApplicationCall.respondDataLoadState(
+    dataLoadState: DataLoadState<T>,
+    onRespondWithData: suspend ApplicationCall.(T) -> Unit,
 ) {
     dataLoadState.metaInfo.etag?.also {
         response.header(HttpHeaders.ETag, it)
@@ -180,7 +237,7 @@ suspend inline fun <reified T: Any> ApplicationCall.respondDataLoadState(
 
     when {
         dataLoadState is DataReadyState -> {
-            respond(dataLoadState.data)
+            onRespondWithData(dataLoadState.data)
         }
 
         dataLoadState is NoDataLoadedState && dataLoadState.reason == NoDataLoadedState.Reason.NOT_FOUND -> {

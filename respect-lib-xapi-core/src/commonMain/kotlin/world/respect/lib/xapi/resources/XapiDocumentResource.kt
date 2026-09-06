@@ -41,6 +41,8 @@ interface XapiDocumentResource<MultiDocParams: Any, SingleDocParams: Any> {
      * it MUST merge the posted document with the existing document. Only top level properties are
      * merged. The entire contents of each original property are replaced with the entire contents
      * of each new property.
+     *
+     * ONLY application/JSON may be posted.
      */
     suspend fun post(
         params: SingleDocParams,

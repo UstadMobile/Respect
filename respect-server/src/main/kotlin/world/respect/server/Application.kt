@@ -62,6 +62,7 @@ import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.school.respect.SchoolValidationRoute
 import world.respect.server.routes.e2etestartifactsroute.ReceiveE2EArtifactUploadRoute
+import world.respect.server.routes.school.xapi.XapiActivityProfileRoute
 import world.respect.server.routes.school.xapi.XapiStatementsResourceRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.routes.username.checkusernameunique.CheckUsernameUniqueRoute
@@ -278,6 +279,9 @@ fun Application.module() {
                 route("xapi") {
                     authenticate(AUTH_CONFIG_SCHOOL) {
                         XapiStatementsResourceRoute(json = json)
+                        route("activities") {
+                            XapiActivityProfileRoute()
+                        }
                     }
                 }
 

@@ -83,6 +83,7 @@ dependencies {
     implementation(libs.ktor.server.html.builder)
 
     testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.ktor.server.test.host)
 
     swaggerUI(libs.swagger.ui)
     swaggerCodegen(libs.swagger.codegen.cli)

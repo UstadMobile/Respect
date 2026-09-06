@@ -7,6 +7,7 @@ import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.lib.xapi.resources.XapiActivitiesResource
+import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -34,6 +35,9 @@ class XapiResourceHttp(
         get() = TODO("Not yet implemented")
 
     override val activities: XapiActivitiesResource
+        get() = TODO("Not yet implemented")
+
+    override val activityProfile: XapiActivityProfileResource
         get() = TODO("Not yet implemented")
 
     override fun close() {

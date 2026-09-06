@@ -4,6 +4,7 @@ import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHel
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.xapi.XapiResourceLocal
 import world.respect.lib.xapi.resources.XapiActivitiesResource
+import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -26,6 +27,9 @@ class XapiResourceRepository(
     override val agents: XapiAgentsResource = local.agents
 
     override val activities: XapiActivitiesResource = local.activities
+
+    override val activityProfile: XapiActivityProfileResource
+        get() = TODO("Not yet implemented")
 
     override fun close() {
         remote.close()

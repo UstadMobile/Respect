@@ -100,6 +100,7 @@ libphonenumber-google = { module = "com.googlecode.libphonenumber:libphonenumber
 libphonenumber-android = { module = "io.michaelrocks:libphonenumber-android", version.ref = "libphonenumber-android"}
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 ktor-server-core = { module = "io.ktor:ktor-server-core-jvm", version.ref = "ktor" }
+ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 ktor-server-netty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "ktor" }
 multiplatformsettings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformsettings"}
 lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }

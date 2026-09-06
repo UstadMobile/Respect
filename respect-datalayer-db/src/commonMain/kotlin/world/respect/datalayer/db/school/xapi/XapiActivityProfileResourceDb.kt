@@ -7,6 +7,7 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.toXapiActivityProfileDocumentEntity
 import world.respect.datalayer.db.shared.InstantAsTimestampString
 import world.respect.datalayer.school.xapi.XapiActivityProfileResourceLocal
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
@@ -56,8 +57,14 @@ class XapiActivityProfileResourceDb(
             activityIri = params.activityId,
             profileId = params.profileId,
         )
+
         return if (entity != null) {
-            DataReadyState(entity)
+            DataReadyState(
+                data = entity,
+                metaInfo = DataLoadMetaInfo(
+                    lastModified = entity.updated.toEpochMilliseconds(),
+                )
+            )
         } else {
             NoDataLoadedState.notFound()
         }

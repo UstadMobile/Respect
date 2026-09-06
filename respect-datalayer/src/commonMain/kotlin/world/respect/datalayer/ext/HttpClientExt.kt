@@ -3,8 +3,10 @@ package world.respect.datalayer.ext
 import com.ustadmobile.ihttp.headers.asIHttpHeaders
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.request
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
@@ -26,6 +28,22 @@ suspend fun <T: Any> HttpClient.getAsDataLoadState(
     validationHelper: BaseDataSourceValidationHelper? = null,
     block: HttpRequestBuilder.() -> Unit = { },
 ): DataLoadState<T> {
+    return getAsDataLoadState(
+        url = url,
+        validationHelper = validationHelper,
+        bodyAdapter = {
+            it.body(typeInfo = typeInfo)
+        },
+        block = block
+    )
+}
+
+suspend fun <T: Any> HttpClient.getAsDataLoadState(
+    url: Url,
+    validationHelper: BaseDataSourceValidationHelper? = null,
+    bodyAdapter: suspend (HttpResponse) -> T,
+    block: HttpRequestBuilder.() -> Unit = { },
+): DataLoadState<T> {
     return try {
         val response = this.get(url) {
             block()
@@ -41,8 +59,8 @@ suspend fun <T: Any> HttpClient.getAsDataLoadState(
         )
 
         response.toDataLoadState(
-            typeInfo = typeInfo,
-            validationInfoKey = validationInfoKey
+            bodyAdapter = bodyAdapter,
+            validationInfoKey = validationInfoKey ?: 0,
         )
     }catch(t: Throwable) {
         Napier.d("Exception loading $url", t)

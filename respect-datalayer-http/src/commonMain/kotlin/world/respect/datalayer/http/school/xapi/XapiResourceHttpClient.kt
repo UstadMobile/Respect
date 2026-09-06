@@ -37,8 +37,15 @@ class XapiResourceHttpClient(
     override val activities: XapiActivitiesResource
         get() = TODO("Not yet implemented")
 
-    override val activityProfile: XapiActivityProfileResource
-        get() = TODO("Not yet implemented")
+    override val activityProfile: XapiActivityProfileResource by lazy {
+        XapiActivityProfileResourceHttpClient(
+            schoolUrl = schoolUrl,
+            schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
+            httpClient = httpClient,
+            tokenProvider = tokenProvider,
+            json = json,
+        )
+    }
 
     override fun close() {
         //Does nothing yet

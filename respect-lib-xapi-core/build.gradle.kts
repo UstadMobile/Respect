@@ -29,7 +29,7 @@ kotlin {
             api(projects.respectLibSerializers)
             api(projects.respectLibDataloadstate)
 
-            implementation(projects.respectLibUtil)
+            api(projects.respectLibUtil)
             api(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)

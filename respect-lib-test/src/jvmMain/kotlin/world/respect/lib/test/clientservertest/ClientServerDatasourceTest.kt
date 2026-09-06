@@ -34,7 +34,7 @@ import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidation
 import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
 import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
-import world.respect.datalayer.http.SchoolDataSourceHttp
+import world.respect.datalayer.http.SchoolDataSourceHttpClient
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.SchoolDataSourceRepository
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
@@ -238,7 +238,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
         )
 
         val token = "secret"
-        val schoolDataSourceRemote = SchoolDataSourceHttp(
+        val schoolDataSourceRemote = SchoolDataSourceHttpClient(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = clientAppDataSource.schoolDirectoryEntryDataSource,
             httpClient = httpClient,

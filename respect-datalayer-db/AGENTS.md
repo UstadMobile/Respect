@@ -24,7 +24,7 @@ data class FooEntity(
     @ColumnInfo(name = "first_name")
     val firstName: String,
 
-    @ColumnINfo(name = "last_name")
+    @ColumnInfo(name = "last_name")
     val lastName: String,
 )
 ```
@@ -77,6 +77,69 @@ data class FooPreviousKnownAliasJoinEntity(
 )
 ```
 
+## Datasource guidance
+
+The datasource implementation must implement the ModelNameDataSourceLocal interface. e.g.
+
+```kotlin
+class FooDataSourceDb(
+    val schoolDb: RespectSchoolDatabase,
+): FooDataSourceLocal {
+    
+    override suspend fun get(
+        listParams: GetListParams,
+        dataLoadParams: DataLoadParams = DataLoadParams(),
+    ): DataLoadState<List<Foo>> {
+        return schoolDb.fooEntityDao().list(
+           id = listParams.uid
+        ).let { entities ->
+            DataReadyState(
+                data = entities.map { entity ->
+                    entity.toModel()
+                }
+            )
+        }
+    }
+  
+    suspend fun getAsFlow(
+        listParams: GetListParams,
+        dataLoadParams: DataLoadParams = DataLoadParams(),
+    ): Flow<DataLoadState<List<Foo>>> {
+          return schoolDb.fooEntityDao().listAsFlow(
+            id = listParams.uid
+          ).map {
+              DataReadyState(
+                  data = entities.map { entity ->
+                      entity.toModel()
+                  }
+              )
+          }
+    }
+
+    /** 
+     * Write a list of items 
+     */
+    suspend fun post(
+        list: List<Foo>,
+    ): DataLoadState<List<String>> {
+        //If specified carry out authentication/permission checks here.
+        
+        schoolDb.fooEntityDao().upsert(
+            entities = list.map { foo ->
+                foo.toEntity()
+            }
+        )
+        
+        return DataReadyState(
+            data = list.map { foo ->
+                foo.uid
+            }
+        )
+    }
+}
+```
+
+
 ## General guidance
 * There are two databases: RespectSchoolDatabase for school-level data and RespectAppDatabase for
   app-wide data (as per respect-datalayer itself).
@@ -90,4 +153,3 @@ data class FooPreviousKnownAliasJoinEntity(
   autoIncrement primary
   keys. When updated data is stored, old versions of the joined entity are deleted and new entities
   are inserted.
-* Each DataSource in this module must implement ModelNameLocalDataSource.

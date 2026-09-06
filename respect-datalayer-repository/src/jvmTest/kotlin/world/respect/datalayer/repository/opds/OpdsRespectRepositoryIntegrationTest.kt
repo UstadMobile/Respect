@@ -32,8 +32,8 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.opds.OpdsFeedDataSourceDb
 import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttp
-import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttp
+import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttpClient
+import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttpClient
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.datalayer.shared.XXHashUidNumberMapper
@@ -64,10 +64,10 @@ class OpdsRespectRepositoryIntegrationTest {
         val httpClient: HttpClient,
         val xxStringHasher: XXStringHasherCommonJvm,
         val opdsFeedLocal: OpdsFeedDataSourceDb,
-        val opdsFeedRemote: OpdsFeedDataSourceHttp,
+        val opdsFeedRemote: OpdsFeedDataSourceHttpClient,
         val opdsFeedRepository: OpdsFeedDataSourceRepository,
         val opdsPubLocal: OpdsPublicationDataSourceLocal,
-        val opdsPubRemote: OpdsPublicationDataSourceHttp,
+        val opdsPubRemote: OpdsPublicationDataSourceHttpClient,
         val opdsPubRepository: OpdsPublicationDataSourceRepository,
     )
 
@@ -116,7 +116,7 @@ class OpdsRespectRepositoryIntegrationTest {
                 authenticatedUser = AuthenticatedUserPrincipalId("0"),
             )
 
-            val httpDataSource = OpdsFeedDataSourceHttp(
+            val httpDataSource = OpdsFeedDataSourceHttpClient(
                 httpClient = httpClient,
                 opdsFeedValidationHelper = localDataSource,
                 tokenProvider = {
@@ -137,7 +137,7 @@ class OpdsRespectRepositoryIntegrationTest {
                 primaryKeyGenerator = primaryKeyGenerator,
             )
 
-            val opdsPubRemote = OpdsPublicationDataSourceHttp(
+            val opdsPubRemote = OpdsPublicationDataSourceHttpClient(
                 httpClient = httpClient,
                 publicationValidationHelper = null,
                 json = json,

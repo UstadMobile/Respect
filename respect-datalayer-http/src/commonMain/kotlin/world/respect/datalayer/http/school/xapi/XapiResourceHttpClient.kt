@@ -12,7 +12,7 @@ import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
 
-class XapiResourceHttp(
+class XapiResourceHttpClient(
     private val schoolUrl: Url,
     private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,
@@ -22,7 +22,7 @@ class XapiResourceHttp(
 ): XapiResource {
 
     override val statements: XapiStatementsResource by lazy {
-        XapiStatementsResourceHttp(
+        XapiStatementsResourceHttpClient(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,

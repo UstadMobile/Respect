@@ -26,7 +26,7 @@ import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.resolve
 import kotlin.collections.map
 
-class SchoolDirectoryEntryDataSourceHttp(
+class SchoolDirectoryEntryDataSourceHttpClient(
     private val httpClient: HttpClient,
     private val local : RespectAppDataSourceLocal,
 ): SchoolDirectoryEntryDataSource {

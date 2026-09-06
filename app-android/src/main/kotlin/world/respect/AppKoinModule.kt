@@ -84,7 +84,7 @@ import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.db.shared.PullSyncTrackerDbImpl
 import world.respect.datalayer.http.RespectAppDataSourceHttp
-import world.respect.datalayer.http.SchoolDataSourceHttp
+import world.respect.datalayer.http.SchoolDataSourceHttpClient
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.RespectAppDataSourceRepository
 import world.respect.datalayer.repository.SchoolDataSourceRepository
@@ -1066,7 +1066,7 @@ val appKoinModule = module {
 
             SchoolDataSourceRepository(
                 local = localDs,
-                remote = SchoolDataSourceHttp(
+                remote = SchoolDataSourceHttpClient(
                     schoolUrl = schoolUrl.url,
                     schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
                     httpClient = get(),

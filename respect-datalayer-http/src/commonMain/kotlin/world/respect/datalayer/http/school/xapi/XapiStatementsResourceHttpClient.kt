@@ -1,7 +1,6 @@
 package world.respect.datalayer.http.school.xapi
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -30,7 +29,7 @@ import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import kotlin.uuid.Uuid
 
-class XapiStatementsResourceHttp(
+class XapiStatementsResourceHttpClient(
     override val schoolUrl: Url,
     override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,

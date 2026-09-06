@@ -21,7 +21,7 @@ import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.datalayer.school.opds.ext.withAbsoluteSelfUrl
 import world.respect.lib.opds.model.OpdsFeed
 
-class OpdsFeedDataSourceHttp(
+class OpdsFeedDataSourceHttpClient(
     private val httpClient: HttpClient,
     private val opdsFeedValidationHelper: BaseDataSourceValidationHelper? = null,
     private val tokenProvider: AuthTokenProvider,

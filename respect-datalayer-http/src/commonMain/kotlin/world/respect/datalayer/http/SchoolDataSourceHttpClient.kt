@@ -5,18 +5,18 @@ import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.http.school.ClassDataSourceHttp
-import world.respect.datalayer.http.school.EnrollmentDataSourceHttp
-import world.respect.datalayer.http.school.InviteDataSourceHttp
-import world.respect.datalayer.http.school.PersonDataSourceHttp
-import world.respect.datalayer.http.school.PersonPasskeyDataSourceHttp
-import world.respect.datalayer.http.school.PersonPasswordDataSourceHttp
-import world.respect.datalayer.http.school.PersonQrBadgeDataSourceHttp
-import world.respect.datalayer.http.school.SchoolAppDataSourceHttp
-import world.respect.datalayer.http.school.SchoolPermissionGrantDataSourceHttp
-import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttp
-import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttp
-import world.respect.datalayer.http.school.xapi.XapiResourceHttp
+import world.respect.datalayer.http.school.ClassDataSourceHttpClient
+import world.respect.datalayer.http.school.EnrollmentDataSourceHttpClient
+import world.respect.datalayer.http.school.InviteDataSourceHttpClient
+import world.respect.datalayer.http.school.PersonDataSourceHttpClient
+import world.respect.datalayer.http.school.PersonPasskeyDataSourceHttpClient
+import world.respect.datalayer.http.school.PersonPasswordDataSourceHttpClient
+import world.respect.datalayer.http.school.PersonQrBadgeDataSourceHttpClient
+import world.respect.datalayer.http.school.SchoolAppDataSourceHttpClient
+import world.respect.datalayer.http.school.SchoolPermissionGrantDataSourceHttpClient
+import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttpClient
+import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttpClient
+import world.respect.datalayer.http.school.xapi.XapiResourceHttpClient
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.ClassDataSource
@@ -37,7 +37,7 @@ import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.lib.xapi.resources.XapiResource
 
-class SchoolDataSourceHttp(
+class SchoolDataSourceHttpClient(
     private val schoolUrl: Url,
     private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,
@@ -50,7 +50,7 @@ class SchoolDataSourceHttp(
 ) : SchoolDataSource {
 
     override val schoolAppDataSource: SchoolAppDataSource by lazy {
-        SchoolAppDataSourceHttp(
+        SchoolAppDataSourceHttpClient(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,
@@ -60,7 +60,7 @@ class SchoolDataSourceHttp(
     }
 
     override val schoolPermissionGrantDataSource: SchoolPermissionGrantDataSource by lazy {
-        SchoolPermissionGrantDataSourceHttp(
+        SchoolPermissionGrantDataSourceHttpClient(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,
@@ -70,7 +70,7 @@ class SchoolDataSourceHttp(
     }
 
     override val personDataSource: PersonDataSource by lazy {
-        PersonDataSourceHttp(
+        PersonDataSourceHttpClient(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,
@@ -80,7 +80,7 @@ class SchoolDataSourceHttp(
     }
 
     override val personPasskeyDataSource: PersonPasskeyDataSource by lazy {
-        PersonPasskeyDataSourceHttp(
+        PersonPasskeyDataSourceHttpClient(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,
@@ -90,7 +90,7 @@ class SchoolDataSourceHttp(
     }
 
     override val personPasswordDataSource: PersonPasswordDataSource by lazy {
-        PersonPasswordDataSourceHttp(
+        PersonPasswordDataSourceHttpClient(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,
@@ -106,7 +106,7 @@ class SchoolDataSourceHttp(
         get() = TODO("Not yet implemented")
 
     override val classDataSource: ClassDataSource by lazy {
-        ClassDataSourceHttp(
+        ClassDataSourceHttpClient(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,
@@ -116,7 +116,7 @@ class SchoolDataSourceHttp(
     }
 
     override val personQrBadgeDataSource: PersonQrBadgeDataSource by lazy {
-        PersonQrBadgeDataSourceHttp(
+        PersonQrBadgeDataSourceHttpClient(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,
@@ -126,7 +126,7 @@ class SchoolDataSourceHttp(
     }
 
     override val enrollmentDataSource: EnrollmentDataSource by lazy {
-        EnrollmentDataSourceHttp(
+        EnrollmentDataSourceHttpClient(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,
@@ -136,7 +136,7 @@ class SchoolDataSourceHttp(
     }
 
     override val inviteDataSource: InviteDataSource by lazy {
-        InviteDataSourceHttp(
+        InviteDataSourceHttpClient(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,
@@ -146,7 +146,7 @@ class SchoolDataSourceHttp(
     }
 
     override val opdsPublicationDataSource: OpdsPublicationDataSource by lazy {
-        OpdsPublicationDataSourceHttp(
+        OpdsPublicationDataSourceHttpClient(
             httpClient = httpClient,
             json = json,
             publicationValidationHelper =  opdsPublicationValidationHelper,
@@ -154,7 +154,7 @@ class SchoolDataSourceHttp(
     }
 
     override val opdsFeedDataSource: OpdsFeedDataSource by lazy {
-        OpdsFeedDataSourceHttp(
+        OpdsFeedDataSourceHttpClient(
             httpClient = httpClient,
             opdsFeedValidationHelper = opdsFeedValidationHelper,
             tokenProvider = tokenProvider,
@@ -168,7 +168,7 @@ class SchoolDataSourceHttp(
     }
 
     override val xapiResource: XapiResource by lazy {
-        XapiResourceHttp(
+        XapiResourceHttpClient(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
             httpClient = httpClient,

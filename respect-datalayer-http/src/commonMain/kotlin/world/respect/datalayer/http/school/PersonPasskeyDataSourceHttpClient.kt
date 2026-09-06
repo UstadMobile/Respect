@@ -21,7 +21,7 @@ import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.model.PersonPasskey
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
-class PersonPasskeyDataSourceHttp(
+class PersonPasskeyDataSourceHttpClient(
     override val schoolUrl: Url,
     override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,

@@ -25,7 +25,7 @@ import world.respect.datalayer.school.model.SchoolApp
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 
-class SchoolAppDataSourceHttp(
+class SchoolAppDataSourceHttpClient(
     override val schoolUrl: Url,
     override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,

@@ -19,7 +19,7 @@ import world.respect.datalayer.school.opds.ext.asOpdsPublication
 import world.respect.datalayer.school.opds.ext.withAbsoluteSelfUrl
 import world.respect.lib.opds.model.OpdsPublication
 
-class OpdsPublicationDataSourceHttp(
+class OpdsPublicationDataSourceHttpClient(
     private val httpClient: HttpClient,
     private val publicationValidationHelper: BaseDataSourceValidationHelper? = null,
     private val json: Json,

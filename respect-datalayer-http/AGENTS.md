@@ -1,11 +1,74 @@
-* This module contains the http client implementation of the datalayer
-* Always follow the patterns as seen in other DataSource implementations found this module.
-* All implementations in the ```world.respect.datalayer.http.school``` package should take 
-  the school Url, SchoolDirectoryEntryDataSource, KTOR HttpClient, and ExtendedDataSourceValidationHelper
-  (nullable) as constructor parameters as per ```src/commonMain/kotlin/world/respect/datalayer/http/school/AssignmentDataSourceHttp.kt```.
-* The HTTP server module (in the respect-server module) has an HTTP GET and POST endpoint. The same
-  GET endpoint is used for all read operations. The POST endpoint is used to store/update data.
-* The HTTP get operation should always use the model datasource GetListParams function. Create a 
-  function ModelNameDataSource.GetListParams.urlWithParams as per
-  ```src/commonMain/kotlin/world/respect/datalayer/http/school/AssignmentDataSourceHttp.kt``` to 
-  generate the get URL.
+# RESPECT respect-datalayer-http guide
+
+This file provides guidance for AI agents working with code in this
+module. Always follow the repository guidelines in [../AGENTS.md](../AGENTS.md).
+
+## Module overview
+This is an implementation of the [respect-datalayer module](../respect-datalayer)
+as an HTTP Client.
+
+You should read [respect-datalayer AGENTS.md](../respect-datalayer/AGENTS.md) before working with
+code in this module.
+
+## Datasource Guidance
+
+Example DataSource:
+
+```
+class FooDataSourceHttpClient(
+    override val schoolUrl: Url,
+    override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
+    private val httpClient: HttpClient,
+    private val tokenProvider: AuthTokenProvider,
+    private val json: Json,
+): FooDataSource, SchoolUrlBasedDataSource {
+    
+    private suspend fun GetListParams.urlWithParams(): Url {
+        return URLBuilder(xapiEndpointUrl(FooDataSource.ENDPOINT_NAME)).also {
+            it.parameters.appendAll(this.toParameters())
+        }.build()
+    }
+    
+    override suspend fun get(
+        listParams: GetListParams,
+        dataLoadParams: DataLoadParams = DataLoadParams(),
+    ): DataLoadState<List<Foo>> {
+        return httpClient.getAsDataLoadState<List<Foo>>(
+            url = listParams.urlWithParams(),
+        ) {
+            useTokenProvider(tokenProvider)
+        }
+    }
+  
+    suspend fun getAsFlow(
+        listParams: GetListParams,
+        dataLoadParams: DataLoadParams = DataLoadParams(),
+    ): Flow<DataLoadState<List<Foo>>> {
+         return httpClient.getDataLoadResultAsFlow<List<Foo>>(
+            urlFn = {
+                listParams.urlWithParams()
+            },
+            dataLoadParams = dataLoadParams,
+         ) {
+            useTokenProvider(tokenProvider)
+         }
+    }
+
+    /** 
+     * Write a list of items 
+     */
+    suspend fun post(
+        list: List<Foo>,
+    ): DataLoadState<List<String>> {
+        return httpClient.post(
+            url = xapiEndpointUrl(FooDataSource.ENDPOINT_NAME)
+        ) {
+            useTokenProvider(tokenProvider)
+
+            contentType(ContentType.Application.Json)
+            setBody(list)
+        }.toDataLoadState(typeInfo<List<String>>)
+    }
+}
+```
+

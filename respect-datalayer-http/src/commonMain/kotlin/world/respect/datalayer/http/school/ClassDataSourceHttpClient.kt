@@ -23,51 +23,38 @@ import world.respect.datalayer.http.ext.appendIfNotNull
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.school.InviteDataSource
-import world.respect.datalayer.school.model.Invite2
+import world.respect.datalayer.school.ClassDataSource
+import world.respect.datalayer.school.ClassDataSource.Companion.PARAM_NAME_INVITE_CODE
+import world.respect.datalayer.school.model.Clazz
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
-class InviteDataSourceHttp(
+class ClassDataSourceHttpClient(
     override val schoolUrl: Url,
     override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
     private val validationHelper: ExtendedDataSourceValidationHelper?,
-) : InviteDataSource, SchoolUrlBasedDataSource {
+) : ClassDataSource, SchoolUrlBasedDataSource {
 
-    private suspend fun InviteDataSource.GetListParams.urlWithParams(): Url {
-        return URLBuilder(respectEndpointUrl(InviteDataSource.ENDPOINT_NAME))
+    private suspend fun ClassDataSource.GetListParams.urlWithParams(): Url {
+        return URLBuilder(respectEndpointUrl(ClassDataSource.ENDPOINT_NAME))
             .apply {
                 parameters.appendCommonListParams(common)
-                parameters.appendIfNotNull(InviteDataSource.PARAM_NAME_INVITE_CODE, inviteCode)
+                parameters.appendIfNotNull(PARAM_NAME_INVITE_CODE, inviteGuid)
             }
             .build()
     }
 
-    override suspend fun findByGuid(guid: String): DataLoadState<Invite2>{
-        return httpClient.getAsDataLoadState<List<Invite2>>(
-            InviteDataSource.GetListParams(
-                GetListCommonParams(guid = guid)
-            ).urlWithParams()
-        ) {
-            useTokenProvider(tokenProvider)
-            useValidationCacheControl(validationHelper)
-        }.firstOrNotLoaded()
-    }
-
-    override fun findByUidAsFlow(
-        uid: String,
-        loadParams: DataLoadParams
-    ): Flow<DataLoadState<Invite2>> {
-        return httpClient.getDataLoadResultAsFlow<List<Invite2>>(
+    override fun findByGuidAsFlow(guid: String): Flow<DataLoadState<Clazz>> {
+        return httpClient.getDataLoadResultAsFlow<List<Clazz>>(
             urlFn = {
-                InviteDataSource.GetListParams(
-                    GetListCommonParams(guid = uid)
+                ClassDataSource.GetListParams(
+                    GetListCommonParams(guid = guid)
                 ).urlWithParams()
             },
-            dataLoadParams = loadParams
+            dataLoadParams = DataLoadParams()
         ) {
             useTokenProvider(tokenProvider)
             useValidationCacheControl(validationHelper)
@@ -76,16 +63,30 @@ class InviteDataSourceHttp(
         }
     }
 
+    override suspend fun findByGuid(
+        params: DataLoadParams,
+        guid: String
+    ): DataLoadState<Clazz> {
+        return httpClient.getAsDataLoadState<List<Clazz>>(
+            ClassDataSource.GetListParams(
+                GetListCommonParams(guid = guid)
+            ).urlWithParams()
+        ) {
+            useTokenProvider(tokenProvider)
+            useValidationCacheControl(validationHelper)
+        }.firstOrNotLoaded()
+    }
+
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
-        params: InviteDataSource.GetListParams
-    ): IPagingSourceFactory<Int, Invite2> {
+        params: ClassDataSource.GetListParams
+    ): IPagingSourceFactory<Int, Clazz> {
         return IPagingSourceFactory {
             OffsetLimitHttpPagingSource(
                 baseUrlProvider = { params.urlWithParams() },
                 httpClient = httpClient,
                 validationHelper = validationHelper,
-                typeInfo = typeInfo<List<Invite2>>(),
+                typeInfo = typeInfo<List<Clazz>>(),
                 requestBuilder = {
                     useTokenProvider(tokenProvider)
                     useValidationCacheControl(validationHelper)
@@ -94,20 +95,21 @@ class InviteDataSourceHttp(
         }
     }
 
-    override suspend fun findByCode(code: String): DataLoadState<Invite2> {
-        return httpClient.getAsDataLoadState<List<Invite2>>(
-            InviteDataSource.GetListParams(
-                inviteCode = code
-            ).urlWithParams()
+    override suspend fun list(
+        loadParams: DataLoadParams,
+        params: ClassDataSource.GetListParams
+    ): DataLoadState<List<Clazz>> {
+        return httpClient.getAsDataLoadState(
+            url = params.urlWithParams()
         ) {
             useTokenProvider(tokenProvider)
             useValidationCacheControl(validationHelper)
-        }.firstOrNotLoaded()
+        }
     }
 
-    override suspend fun store(list: List<Invite2>) {
+    override suspend fun store(list: List<Clazz>) {
         httpClient.post(
-            url = respectEndpointUrl(InviteDataSource.ENDPOINT_NAME)
+            respectEndpointUrl(ClassDataSource.ENDPOINT_NAME)
         ) {
             useTokenProvider(tokenProvider)
             contentType(ContentType.Application.Json)

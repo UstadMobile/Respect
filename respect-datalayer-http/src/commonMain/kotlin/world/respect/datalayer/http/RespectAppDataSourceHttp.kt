@@ -3,7 +3,7 @@ package world.respect.datalayer.http
 import io.ktor.client.HttpClient
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.RespectAppDataSourceLocal
-import world.respect.datalayer.http.schooldirectory.SchoolDirectoryEntryDataSourceHttp
+import world.respect.datalayer.http.schooldirectory.SchoolDirectoryEntryDataSourceHttpClient
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSource
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
 
@@ -16,7 +16,7 @@ class RespectAppDataSourceHttp(
         get() = throw IllegalArgumentException("There is no http data source for directory list")
 
     override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource by lazy {
-        SchoolDirectoryEntryDataSourceHttp(
+        SchoolDirectoryEntryDataSourceHttpClient(
             httpClient = httpClient,
             local = local,
         )

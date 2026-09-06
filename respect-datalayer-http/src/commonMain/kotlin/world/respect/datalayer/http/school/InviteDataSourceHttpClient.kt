@@ -1,6 +1,5 @@
 package world.respect.datalayer.http.school
 
-import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -12,7 +11,6 @@ import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthTokenProvider
-import world.respect.lib.dataloadstate.DataLayerParams
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
@@ -25,42 +23,32 @@ import world.respect.datalayer.http.ext.appendIfNotNull
 import world.respect.datalayer.http.ext.respectEndpointUrl
 import world.respect.datalayer.http.shared.paging.OffsetLimitHttpPagingSource
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
-import world.respect.datalayer.school.EnrollmentDataSource
-import world.respect.datalayer.school.model.Enrollment
+import world.respect.datalayer.school.InviteDataSource
+import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
-import world.respect.datalayer.shared.DataLayerTags.TAG_DATALAYER
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.params.GetListCommonParams
 
-class EnrollmentDataSourceHttp(
+class InviteDataSourceHttpClient(
     override val schoolUrl: Url,
     override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
     private val validationHelper: ExtendedDataSourceValidationHelper?,
-): EnrollmentDataSource, SchoolUrlBasedDataSource {
+) : InviteDataSource, SchoolUrlBasedDataSource {
 
-    private suspend fun EnrollmentDataSource.GetListParams.urlWithParams(): Url {
-        return URLBuilder(respectEndpointUrl(EnrollmentDataSource.ENDPOINT_NAME))
+    private suspend fun InviteDataSource.GetListParams.urlWithParams(): Url {
+        return URLBuilder(respectEndpointUrl(InviteDataSource.ENDPOINT_NAME))
             .apply {
                 parameters.appendCommonListParams(common)
-                parameters.appendIfNotNull(DataLayerParams.FILTER_BY_CLASS_UID, classUid)
-                parameters.appendIfNotNull(DataLayerParams.FILTER_BY_ENROLLMENT_ROLE,
-                    role?.value)
-                parameters.appendIfNotNull(EnrollmentDataSource.FILTER_BY_PERSON_UID,
-                    personUid)
-                parameters.appendIfNotNull(DataLayerParams.ACTIVE_ON_DAY,
-                    activeOnDay?.toString())
-                parameters.append(DataLayerParams.ORDER_BY, orderBy.orderOption.name)
-            }.build()
+                parameters.appendIfNotNull(InviteDataSource.PARAM_NAME_INVITE_CODE, inviteCode)
+            }
+            .build()
     }
 
-    override suspend fun findByGuid(
-        loadParams: DataLoadParams,
-        guid: String
-    ): DataLoadState<Enrollment> {
-        return httpClient.getAsDataLoadState<List<Enrollment>>(
-            EnrollmentDataSource.GetListParams(
+    override suspend fun findByGuid(guid: String): DataLoadState<Invite2>{
+        return httpClient.getAsDataLoadState<List<Invite2>>(
+            InviteDataSource.GetListParams(
                 GetListCommonParams(guid = guid)
             ).urlWithParams()
         ) {
@@ -69,17 +57,17 @@ class EnrollmentDataSourceHttp(
         }.firstOrNotLoaded()
     }
 
-    override fun findByGuidAsFlow(
-        loadParams: DataLoadParams,
-        guid: String
-    ): Flow<DataLoadState<Enrollment>> {
-        return httpClient.getDataLoadResultAsFlow<List<Enrollment>>(
+    override fun findByUidAsFlow(
+        uid: String,
+        loadParams: DataLoadParams
+    ): Flow<DataLoadState<Invite2>> {
+        return httpClient.getDataLoadResultAsFlow<List<Invite2>>(
             urlFn = {
-                EnrollmentDataSource.GetListParams(
-                    GetListCommonParams(guid = guid)
+                InviteDataSource.GetListParams(
+                    GetListCommonParams(guid = uid)
                 ).urlWithParams()
             },
-            dataLoadParams = loadParams,
+            dataLoadParams = loadParams
         ) {
             useTokenProvider(tokenProvider)
             useValidationCacheControl(validationHelper)
@@ -90,46 +78,40 @@ class EnrollmentDataSourceHttp(
 
     override fun listAsPagingSource(
         loadParams: DataLoadParams,
-        listParams: EnrollmentDataSource.GetListParams
-    ): IPagingSourceFactory<Int, Enrollment> {
+        params: InviteDataSource.GetListParams
+    ): IPagingSourceFactory<Int, Invite2> {
         return IPagingSourceFactory {
             OffsetLimitHttpPagingSource(
-                baseUrlProvider = { listParams.urlWithParams() },
+                baseUrlProvider = { params.urlWithParams() },
                 httpClient = httpClient,
                 validationHelper = validationHelper,
-                typeInfo = typeInfo<List<Enrollment>>(),
+                typeInfo = typeInfo<List<Invite2>>(),
                 requestBuilder = {
                     useTokenProvider(tokenProvider)
                     useValidationCacheControl(validationHelper)
-                },
-                logPrefixExtra = { "EnrollmentDataSource params=$listParams"}
+                }
             )
         }
     }
 
-    override suspend fun list(
-        loadParams: DataLoadParams,
-        listParams: EnrollmentDataSource.GetListParams
-    ): DataLoadState<List<Enrollment>> {
-        return httpClient.getAsDataLoadState<List<Enrollment>>(
-            url = listParams.urlWithParams(),
-            validationHelper = validationHelper
+    override suspend fun findByCode(code: String): DataLoadState<Invite2> {
+        return httpClient.getAsDataLoadState<List<Invite2>>(
+            InviteDataSource.GetListParams(
+                inviteCode = code
+            ).urlWithParams()
         ) {
             useTokenProvider(tokenProvider)
             useValidationCacheControl(validationHelper)
-        }
+        }.firstOrNotLoaded()
     }
 
-    override suspend fun store(list: List<Enrollment>) {
-        val url = respectEndpointUrl(EnrollmentDataSource.ENDPOINT_NAME)
-        val response = httpClient.post(url) {
+    override suspend fun store(list: List<Invite2>) {
+        httpClient.post(
+            url = respectEndpointUrl(InviteDataSource.ENDPOINT_NAME)
+        ) {
             useTokenProvider(tokenProvider)
             contentType(ContentType.Application.Json)
             setBody(list)
-        }
-
-        Napier.d(tag = TAG_DATALAYER) {
-            "EnrollmentDataSourceHttp: posted ${list.size} items(${list.joinToString { it.uid }}) to $url (status=${response.status.value}"
         }
     }
 }

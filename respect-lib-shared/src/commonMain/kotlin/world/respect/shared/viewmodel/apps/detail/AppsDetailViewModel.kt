@@ -15,7 +15,6 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.shared.navigation.AppsDetail
-import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.LearningUnitDetail
 import world.respect.shared.navigation.LearningUnitList
 import world.respect.shared.viewmodel.RespectViewModel
@@ -245,17 +244,6 @@ class AppsDetailViewModel(
                 manifestUrl = route.manifestUrl.toString()
             )
             schoolDataSource.xapiResource.statements.post(listOf(statement))
-            _navCommandFlow.tryEmit(
-                NavCommand.Navigate(
-                    destination = AppsDetail.create(
-                        manifestUrl = route.manifestUrl,
-                        resultDest = route.resultDest,
-                    ),
-                    popUpTo = Home,
-                    popUpToInclusive = false,
-                )
-            )
-            _uiState.update { it.copy(isAdded = true) }
         }
     }
 

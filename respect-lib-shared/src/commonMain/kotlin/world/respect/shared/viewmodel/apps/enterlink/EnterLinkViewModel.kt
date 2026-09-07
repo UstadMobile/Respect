@@ -20,6 +20,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import kotlin.getValue
@@ -74,7 +75,9 @@ class EnterLinkViewModel(
                 if(appResult is DataReadyState) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
-                            AppsDetail.create(linkUrl)
+                            destination = AppsDetail.create(linkUrl),
+                            popUpTo = Home,
+                            popUpToInclusive = false
                         )
                     )
                 } else {
@@ -91,3 +94,4 @@ class EnterLinkViewModel(
     }
 
 }
+

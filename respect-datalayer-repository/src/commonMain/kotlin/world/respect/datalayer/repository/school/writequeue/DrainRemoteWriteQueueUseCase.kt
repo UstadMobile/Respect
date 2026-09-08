@@ -22,7 +22,7 @@ class DrainRemoteWriteQueueUseCase(
     ) {
         val data = local.findByUidList(writeQueueItems.map { it.uid })
         remote.store(data)
-        remoteWriteQueue.markSent(writeQueueItems.map { it.queueItemId })
+        remoteWriteQueue.markSent(writeQueueItems.map { it.queueItemId } )
     }
 
     suspend operator fun invoke() {

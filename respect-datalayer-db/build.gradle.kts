@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -50,14 +49,13 @@ kotlin {
         }
 
         jvmTest.dependencies {
+            implementation(projects.libXapiTest)
             implementation(libs.androidx.sqlite.bundled)
             implementation(projects.respectLibTestResources)
         }
 
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-            }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
 }

@@ -79,6 +79,8 @@ espressoCore = "3.7.0"
 rules = "1.7.0"
 cache4k = "0.14.0"
 robolectric = "4.13"
+kotlinStdlib = "2.4.10"
+kotlinTest = "2.4.10"
 
 [libraries]
 argparse4j = { module = "net.sourceforge.argparse4j:argparse4j", version.ref = "argparse4j" }
@@ -196,6 +198,8 @@ androidx-rules = { group = "androidx.test", name = "rules", version.ref = "rules
 cache4k = { group = "io.github.reactivecircus.cache4k", name = "cache4k", version.ref = "cache4k" }
 xmlutil-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xmlutil"}
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlinStdlib" }
+kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlinTest" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -212,3 +216,4 @@ atomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version.ref = "atomicfu" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 swagger-generator = { id= "org.hidetake.swagger.generator", version.ref = "swagger-generator" }
 buildconfigPlugin = { id = "com.github.gmazzo.buildconfig", version.ref = "buildconfig-plugin"}
+android-lint = { id = "com.android.lint", version.ref = "agp" }

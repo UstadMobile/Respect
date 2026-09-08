@@ -1,4 +1,4 @@
-# lib-xapi-model
+# lib-xapi-core
 
 This is a standalone module that contains only model classes for xAPI spec objects, resources, and
 Kotlinx serialization annotations and custom serializers as needed to serialize/deserialize them

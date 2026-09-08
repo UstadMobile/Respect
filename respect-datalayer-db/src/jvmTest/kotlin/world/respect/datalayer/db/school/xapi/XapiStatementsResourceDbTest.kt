@@ -8,6 +8,10 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.openeel.libxapi.test.assertCanVoidStatement
+import org.openeel.libxapi.test.assertDuplicateStatementWillThrowConflictError
+import org.openeel.libxapi.test.assertStatementCanBeStoredAndRetrieved
+import org.openeel.libxapi.test.assertXapiStatementCanonicallyEqual
 import world.respect.datalayer.db.school.insertAdmin
 import world.respect.datalayer.db.school.testSchoolDb
 import world.respect.datalayer.db.school.toDataSource
@@ -139,43 +143,9 @@ class XapiStatementsResourceDbTest {
                         stored = Clock.System.now(),
                     )
 
-                    dataSource.xapiResource.statements.post(listOf(statement))
-
-                    //check canonical match
-                    val canonicalStmtFromDb = dataSource.xapiResource.statements.get(
-
-                        listParams = XapiStatementsResource.GetStatementParams(
-                            format = GetStatementFormatEnum.CANONICAL,
-                            statementId = stmtUuid
-                        )
-                    ).dataOrNull()?.statements?.first()
-
-                    assertNotNull(canonicalStmtFromDb)
-                    assertXapiStatementCanonicallyEqual(
-                        expected = statement,
-                        actual = canonicalStmtFromDb,
-                    )
-
-                    val exactStmtFromDb = dataSource.xapiResource.statements.get(
-
-                        listParams = XapiStatementsResource.GetStatementParams(
-                            format = GetStatementFormatEnum.EXACT,
-                            statementId = stmtUuid
-                        )
-                    ).dataOrNull()?.statements?.first()
-                    assertEquals(statement, exactStmtFromDb)
-
-                    val idOnlyStmtFromDb = dataSource.xapiResource.statements.get(
-                        listParams = XapiStatementsResource.GetStatementParams(
-                            format = GetStatementFormatEnum.IDS,
-                            statementId = stmtUuid
-                        )
-                    ).dataOrNull()?.statements?.first()
-                    assertNotNull(idOnlyStmtFromDb)
-                    assertXapiStatementCanonicallyEqual(
-                        expected = statement,
-                        actual = idOnlyStmtFromDb,
-                        idOnlyFormat = true,
+                    assertStatementCanBeStoredAndRetrieved(
+                        statement = statement,
+                        resource = dataSource.xapiResource.statements
                     )
                 }
             }
@@ -183,7 +153,7 @@ class XapiStatementsResourceDbTest {
     }
 
     @Test
-    fun givenStatementInserted_whenVoided_thenShouldNotShowUp() {
+    fun givenStatementInserted_whenVoided_thenShouldNotBeInGetResults() {
         val sampleStmt = xapiSampleStatements().first()
         runBlocking {
             testSchoolDb(temporaryFolder.newFolder()) { db ->
@@ -199,50 +169,9 @@ class XapiStatementsResourceDbTest {
                     it.insertAdmin()
                 }
 
-                val getStmtParams = XapiStatementsResource.GetStatementParams(
-                    statementId = stmtUuid
-                )
-
-                dataSource.xapiResource.statements.post(listOf(statement))
-
-                assertXapiStatementCanonicallyEqual(
-                    expected = statement,
-                    actual = dataSource.xapiResource.statements.get(
-                        listParams = getStmtParams
-                    ).dataOrNull()?.statements?.firstOrNull()!!
-                )
-
-                val voidingStatement = XapiStatement(
-                    actor = statement.actor,
-                    verb = XapiVerb(id = XapiVerb.ID_VOIDED),
-                    `object` = XapiStatementRef(id = stmtUuid.toString())
-                )
-                dataSource.xapiResource.statements.post(listOf(voidingStatement))
-
-                GetStatementFormatEnum.entries.forEach { format ->
-                    assertNull(
-                        dataSource.xapiResource.statements.get(
-                            listParams = getStmtParams.copy(
-                                format = format
-                            )
-                        ).dataOrNull()?.statements?.firstOrNull()
-                    )
-                }
-
-                val getByVoidedParams = XapiStatementsResource.GetStatementParams(
-                    voidedStatementId = stmtUuid
-                )
-                assertEquals(
-                    expected = statement,
-                    actual = dataSource.xapiResource.statements.get(
-                        getByVoidedParams.copy(format = GetStatementFormatEnum.EXACT)
-                    ).dataOrNull()?.statements?.firstOrNull()
-                )
-                assertXapiStatementCanonicallyEqual(
-                    expected = statement,
-                    actual = dataSource.xapiResource.statements.get(
-                        getByVoidedParams.copy(format = GetStatementFormatEnum.CANONICAL)
-                    ).dataOrNull()?.statements?.firstOrNull()!!
+                assertCanVoidStatement(
+                    statement = statement,
+                    resource = dataSource.xapiResource.statements
                 )
             }
         }
@@ -475,15 +404,10 @@ class XapiStatementsResourceDbTest {
                     it.insertAdmin()
                 }
 
-                dataSource.xapiResource.statements.post(listOf(sampleStmt))
-
-                try {
-                    dataSource.xapiResource.statements.post(listOf(sampleStmt))
-
-                    throw IllegalStateException("Should have thrown exception by now")
-                }catch(e: XapiException) {
-                    assertEquals(409, e.httpStatusCode, "Expected status code 409 conflict, got $e")
-                }
+                assertDuplicateStatementWillThrowConflictError(
+                    statement = sampleStmt,
+                    resource = dataSource.xapiResource.statements,
+                )
             }
         }
     }

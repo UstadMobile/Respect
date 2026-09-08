@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.school.xapi
+package org.openeel.libxapi.test
 
 import world.respect.lib.xapi.ext.idStr
 import world.respect.lib.xapi.model.XapiActivityDefinition
@@ -11,13 +11,11 @@ import world.respect.lib.xapi.model.XapiObjectType
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.resources.XapiStatementsResource
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-
-
-
 
 /*
  * Exact equality checks as provided by the data classes don't make sense here: e.g. the member list
@@ -26,9 +24,6 @@ import kotlin.test.assertTrue
  * statement may include a useless Result object with no properties (as they are all optional).
  *
  * These assertion statements check for a canonical equality as per the xAPI spec.
- */
-
-/**
  */
 fun assertXapiStatementCanonicallyEqual(
     expected: XapiStatement,

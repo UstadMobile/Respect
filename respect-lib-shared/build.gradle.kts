@@ -41,7 +41,7 @@ kotlin {
             api(projects.respectLibUtil)
             api(projects.respectDatalayerDb)
             api(projects.respectDatalayerHttp)
-            api(projects.respectLibXapiCore)
+            api(projects.libXapiCore)
 
             implementation(projects.respectLibCache)
             implementation(projects.respectLibXxhash)
@@ -72,7 +72,7 @@ kotlin {
         }
 
         androidMain.dependencies {
-            api(projects.respectLibXapiNanohttpd)
+            api(projects.libXapiNanohttpd)
             implementation(libs.androidx.preference)
             implementation(libs.androidx.preference.ktx)
             implementation(libs.acra.core)
@@ -81,8 +81,8 @@ kotlin {
             implementation(libs.installreferrer)
 
             implementation(libs.androidx.browser)
-            implementation(projects.respectLibXapiCore)
-            implementation(projects.respectLibXapiIpcShared)
+            implementation(projects.libXapiCore)
+            implementation(projects.libXapiIpcShared)
         }
 
         jvmMain.dependencies {

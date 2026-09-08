@@ -55,7 +55,7 @@ publishing {
 }
 
 dependencies {
-    api(projects.respectLibXapiIpcShared)
+    api(projects.libXapiIpcShared)
     api(projects.libIpcMessagebridge)
 
     implementation(libs.androidx.appcompat)

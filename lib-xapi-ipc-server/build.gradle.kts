@@ -35,7 +35,7 @@ android {
 }
 
 dependencies {
-    api(projects.respectLibXapiIpcShared)
+    api(projects.libXapiIpcShared)
     api(projects.libIpcMessagebridge)
 
     implementation(projects.respectLibUtil)
@@ -48,7 +48,7 @@ dependencies {
 
     androidTestImplementation(libs.androidx.rules)
     testImplementation(libs.junit)
-    androidTestImplementation(projects.respectLibXapiIpcClient)
+    androidTestImplementation(projects.libXapiIpcClient)
     androidTestImplementation(projects.respectDatalayerDb)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(projects.respectLibTestResources)

@@ -27,7 +27,7 @@ kotlin {
             implementation(kotlin("stdlib-common"))
             api(projects.respectLibIhttpCore)
             implementation(projects.respectLibOpdsModel)
-            implementation(projects.respectLibXapiCore)
+            implementation(projects.libXapiCore)
             implementation(projects.respectLibIhttpIostreams)
             implementation(projects.respectLibXxhash)
             implementation(projects.respectLibUtil)

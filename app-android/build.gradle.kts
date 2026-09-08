@@ -54,7 +54,7 @@ kotlin {
 
         implementation(projects.respectAppCompose)
         implementation(projects.respectLibSharedSe)
-        implementation(projects.respectLibXapiIpcServer)
+        implementation(projects.libXapiIpcServer)
         implementation(projects.respectDatalayerRepository)
         implementation(projects.respectLibPrimarykeygen)
         implementation(projects.libHttpIpcServer)

@@ -80,7 +80,7 @@ kotlin {
         androidMain.dependencies {
             api(projects.respectCredentials)
             implementation(projects.respectLibSharedSe)
-            implementation(projects.respectLibXapiIpcServer)
+            implementation(projects.libXapiIpcServer)
             //Uncomment to test running web based publications through HttpIpc
             // implementation(projects.libHttpIpcClient)
 

@@ -24,7 +24,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(libs.nanohttpd)
-            api(projects.respectLibXapiCore)
+            api(projects.libXapiCore)
             api(projects.respectLibSerializers)
             api(projects.respectLibDataloadstate)
 

@@ -55,7 +55,7 @@ publishing {
 dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
-    api(projects.respectLibXapiCore)
+    api(projects.libXapiCore)
 
     testImplementation(libs.junit)
 

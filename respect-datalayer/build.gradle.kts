@@ -29,7 +29,7 @@ kotlin {
             api(projects.respectLibXxhash)
             api(projects.respectCredentials)
             api(projects.respectLibOpdsModel)
-            api(projects.respectLibXapiCore)
+            api(projects.libXapiCore)
             api(projects.respectLibSerializers)
             api(projects.respectLibUtil)
             implementation(libs.kotlinx.serialization.json)

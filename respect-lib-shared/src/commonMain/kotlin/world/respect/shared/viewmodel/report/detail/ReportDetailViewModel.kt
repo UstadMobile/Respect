@@ -96,94 +96,92 @@ class ReportDetailViewModel(
                 )
             }
         }
-        viewModelScope.launch {
-            val queryRequestStatementsFlow = schoolDataSource.xapiResource.statements.getAsFlow(
-                listParams = GetStatementParams(
-                    activity = reportUid,
-                    verb = XapiVerb.ID_REPORT_QUERY_REQUEST,
-                ),
-                dataLoadParams = DataLoadParams(),
-            )
+        val queryRequestStatementsFlow = schoolDataSource.xapiResource.statements.getAsFlow(
+            listParams = GetStatementParams(
+                activity = reportUid,
+                verb = XapiVerb.ID_REPORT_QUERY_REQUEST,
+            ),
+            dataLoadParams = DataLoadParams(),
+        )
 
-            val queryResponseStatementsFlow = schoolDataSource.xapiResource.statements.getAsFlow(
-                listParams = GetStatementParams(
-                    verb = XapiVerb.ID_REPORT_QUERY_RESPONSE,
-                ),
-                dataLoadParams = DataLoadParams(),
-            )
+        val queryResponseStatementsFlow = schoolDataSource.xapiResource.statements.getAsFlow(
+            listParams = GetStatementParams(
+                verb = XapiVerb.ID_REPORT_QUERY_RESPONSE,
+            ),
+            dataLoadParams = DataLoadParams(),
+        )
 
-            combine(
-                queryRequestStatementsFlow,
-                queryResponseStatementsFlow,
-            ) { requestsState, responsesState ->
-                val requests = requestsState.dataOrNull()?.statements ?: emptyList()
-                val responses = responsesState.dataOrNull()?.statements ?: emptyList()
+        combine(
+            queryRequestStatementsFlow,
+            queryResponseStatementsFlow,
+        ) { requestsState, responsesState ->
+            val requests = requestsState.dataOrNull()?.statements ?: emptyList()
+            val responses = responsesState.dataOrNull()?.statements ?: emptyList()
 
-                val statement = requests
-                    .distinctByMostRecentTimestampForActivityId()
-                    .firstOrNull() ?: return@combine ReportDetailUiState()
+            val statement = requests
+                .distinctByMostRecentTimestampForActivityId()
+                .firstOrNull() ?: return@combine ReportDetailUiState()
 
-                val requestId = statement.id.toString()
-                val latestResponse = responses
-                    .filter { it.objectStatementRefOrNull()?.id == requestId }
-                    .maxByOrNull { it.timestamp ?: it.stored ?: kotlin.time.Instant.DISTANT_PAST }
+            val requestId = statement.id.toString()
+            val latestResponse = responses
+                .filter { it.objectStatementRefOrNull()?.id == requestId }
+                .maxByOrNull { it.timestamp ?: it.stored ?: kotlin.time.Instant.DISTANT_PAST }
 
-                val reportResult = latestResponse?.let { response ->
-                    RunReportUseCase.RunReportResult(
-                        timestamp = response.timestamp?.toEpochMilliseconds() ?: 0L,
-                        request = statement.asRunReportRequest(
-                            json = json,
-                            accountPersonUid = _uiState.value.activeUserPersonUid,
-                            timeZone = TimeZone.currentSystemDefault()
-                        ),
-                        results = response.toStatementReportRows(json)
-                    )
-                }
-
-                val xAxisFormatter = reportResult?.let {
-                    createGraphFormatterUseCase(
-                        reportResult = it,
-                        options = CreateGraphFormatterUseCase.FormatterOptions(
-                            paramType = String::class,
-                            axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES
-                        )
-                    )
-                }
-                val subgroupFormatter = reportResult?.let {
-                    createGraphFormatterUseCase(
-                        reportResult = it,
-                        options = CreateGraphFormatterUseCase.FormatterOptions(
-                            paramType = String::class,
-                            axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES,
-                            forSubgroup = true
-                        )
-                    )
-                }
-                val yAxisFormatter = reportResult?.let {
-                    createGraphFormatterUseCase(
-                        reportResult = it,
-                        options = CreateGraphFormatterUseCase.FormatterOptions(
-                            paramType = Double::class,
-                            axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.Y_AXIS_VALUES
-                        )
-                    )
-                }
-
-                ReportDetailUiState(
-                    title = statement.objectActivityNameOrNull()?.let { LangMapUiText(it) },
-                    reportOptions = reportResult?.request?.reportOptions ?: ReportOptions(),
-                    reportResult = reportResult,
-                    xAxisFormatter = xAxisFormatter,
-                    yAxisFormatter = yAxisFormatter,
-                    subgroupFormatter = subgroupFormatter,
-                    activeUserPersonUid = _uiState.value.activeUserPersonUid
+            val reportResult = latestResponse?.let { response ->
+                RunReportUseCase.RunReportResult(
+                    timestamp = response.timestamp?.toEpochMilliseconds() ?: 0L,
+                    request = statement.asRunReportRequest(
+                        json = json,
+                        accountPersonUid = _uiState.value.activeUserPersonUid,
+                        timeZone = TimeZone.currentSystemDefault()
+                    ),
+                    results = response.toStatementReportRows(json)
                 )
-            }.onEach { newState ->
-                _uiState.update { newState }
-                _appUiState.update { prev ->
-                    prev.copy(title = newState.title)
-                }
-            }.launchIn(viewModelScope)
-        }
+            }
+
+            val xAxisFormatter = reportResult?.let {
+                createGraphFormatterUseCase(
+                    reportResult = it,
+                    options = CreateGraphFormatterUseCase.FormatterOptions(
+                        paramType = String::class,
+                        axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES
+                    )
+                )
+            }
+            val subgroupFormatter = reportResult?.let {
+                createGraphFormatterUseCase(
+                    reportResult = it,
+                    options = CreateGraphFormatterUseCase.FormatterOptions(
+                        paramType = String::class,
+                        axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES,
+                        forSubgroup = true
+                    )
+                )
+            }
+            val yAxisFormatter = reportResult?.let {
+                createGraphFormatterUseCase(
+                    reportResult = it,
+                    options = CreateGraphFormatterUseCase.FormatterOptions(
+                        paramType = Double::class,
+                        axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.Y_AXIS_VALUES
+                    )
+                )
+            }
+
+            ReportDetailUiState(
+                title = statement.objectActivityNameOrNull()?.let { LangMapUiText(it) },
+                reportOptions = reportResult?.request?.reportOptions ?: ReportOptions(),
+                reportResult = reportResult,
+                xAxisFormatter = xAxisFormatter,
+                yAxisFormatter = yAxisFormatter,
+                subgroupFormatter = subgroupFormatter,
+                activeUserPersonUid = _uiState.value.activeUserPersonUid
+            )
+        }.onEach { newState ->
+            _uiState.update { newState }
+            _appUiState.update { prev ->
+                prev.copy(title = newState.title)
+            }
+        }.launchIn(viewModelScope)
     }
 }

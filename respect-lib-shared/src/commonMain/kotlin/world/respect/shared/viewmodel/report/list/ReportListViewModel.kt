@@ -85,90 +85,91 @@ class ReportListViewModel(
                     showBackButton = false,
                 )
             }
-
-            val queryRequestStatementsFlow = schoolDataSource.xapiResource.statements.getAsFlow(
-                listParams = GetStatementParams(
-                    activity = CATEGORY_REPORT_QUERY_RECIPE,
-                    relatedActivities = true,
-                    verb = XapiVerb.ID_REPORT_QUERY_REQUEST,
-                ),
-                dataLoadParams = DataLoadParams(),
-            )
-
-            val queryResponseStatementsFlow = schoolDataSource.xapiResource.statements.getAsFlow(
-                listParams = GetStatementParams(
-                    verb = XapiVerb.ID_REPORT_QUERY_RESPONSE,
-                ),
-                dataLoadParams = DataLoadParams(),
-            )
-
-            combine(
-                queryRequestStatementsFlow,
-                queryResponseStatementsFlow,
-                accountManager.selectedAccountAndPersonFlow
-            ) { requestsState, responsesState, sessionAndPerson ->
-
-                val requests = requestsState.dataOrNull()?.statements ?: emptyList()
-                val responses = responsesState.dataOrNull()?.statements ?: emptyList()
-                val activeUserPersonUid = sessionAndPerson?.person?.guid?.let { uidNumberMapper(it) } ?: 0L
-
-                val responsesByRequestId = responses.groupBy {
-                    it.objectStatementRefOrNull()?.id
-                }
-
-                val reportResults = mutableMapOf<String, RunReportUseCase.RunReportResult>()
-                val xAxisFormatters = mutableMapOf<String, GraphFormatter<String>>()
-                val yAxisFormatters = mutableMapOf<String, GraphFormatter<Double>>()
-
-                val distinctRequests = requests.distinctByMostRecentTimestampForActivityId()
-                    .filter { it.id != null }
-
-                distinctRequests.forEach { request ->
-                    val requestId = request.id.toString()
-                    val latestResponse = responsesByRequestId[requestId]
-                        ?.maxByOrNull { it.timestamp ?: it.stored ?: Instant.DISTANT_PAST }
-
-                    latestResponse?.let { response ->
-                        val result = RunReportUseCase.RunReportResult(
-                            timestamp = response.timestamp?.toEpochMilliseconds() ?: 0L,
-                            request = request.asRunReportRequest(
-                                json = json,
-                                accountPersonUid = activeUserPersonUid,
-                                timeZone = TimeZone.currentSystemDefault()
-                            ),
-                            results = response.toStatementReportRows(json)
-                        )
-                        reportResults[requestId] = result
-
-                        createGraphFormatterUseCase(
-                            reportResult = result,
-                            options = CreateGraphFormatterUseCase.FormatterOptions(
-                                paramType = String::class,
-                                axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES
-                            )
-                        ).let { xAxisFormatters[requestId] = it }
-
-                        createGraphFormatterUseCase(
-                            reportResult = result,
-                            options = CreateGraphFormatterUseCase.FormatterOptions(
-                                paramType = Double::class,
-                                axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.Y_AXIS_VALUES
-                            )
-                        ).let { yAxisFormatters[requestId] = it }
-                    }
-                }
-
-                ReportListUiState(
-                    reportRequests = requestsState.map { distinctRequests },
-                    reportResults = reportResults,
-                    xAxisFormatters = xAxisFormatters,
-                    yAxisFormatters = yAxisFormatters,
-                    activeUserPersonUid = activeUserPersonUid
-                )
-            }.onEach { newState ->
-                _uiState.update { newState }
-            }.launchIn(viewModelScope)
         }
+
+        val queryRequestStatementsFlow = schoolDataSource.xapiResource.statements.getAsFlow(
+            listParams = GetStatementParams(
+                activity = CATEGORY_REPORT_QUERY_RECIPE,
+                relatedActivities = true,
+                verb = XapiVerb.ID_REPORT_QUERY_REQUEST,
+            ),
+            dataLoadParams = DataLoadParams(),
+        )
+
+        val queryResponseStatementsFlow = schoolDataSource.xapiResource.statements.getAsFlow(
+            listParams = GetStatementParams(
+                verb = XapiVerb.ID_REPORT_QUERY_RESPONSE,
+            ),
+            dataLoadParams = DataLoadParams(),
+        )
+
+        combine(
+            queryRequestStatementsFlow,
+            queryResponseStatementsFlow,
+            accountManager.selectedAccountAndPersonFlow
+        ) { requestsState, responsesState, sessionAndPerson ->
+
+            val requests = requestsState.dataOrNull()?.statements ?: emptyList()
+            val responses = responsesState.dataOrNull()?.statements ?: emptyList()
+            val activeUserPersonUid =
+                sessionAndPerson?.person?.guid?.let { uidNumberMapper(it) } ?: 0L
+
+            val responsesByRequestId = responses.groupBy {
+                it.objectStatementRefOrNull()?.id
+            }
+
+            val reportResults = mutableMapOf<String, RunReportUseCase.RunReportResult>()
+            val xAxisFormatters = mutableMapOf<String, GraphFormatter<String>>()
+            val yAxisFormatters = mutableMapOf<String, GraphFormatter<Double>>()
+
+            val distinctRequests = requests.distinctByMostRecentTimestampForActivityId()
+                .filter { it.id != null }
+
+            distinctRequests.forEach { request ->
+                val requestId = request.id.toString()
+                val latestResponse = responsesByRequestId[requestId]
+                    ?.maxByOrNull { it.timestamp ?: it.stored ?: Instant.DISTANT_PAST }
+
+                latestResponse?.let { response ->
+                    val result = RunReportUseCase.RunReportResult(
+                        timestamp = response.timestamp?.toEpochMilliseconds() ?: 0L,
+                        request = request.asRunReportRequest(
+                            json = json,
+                            accountPersonUid = activeUserPersonUid,
+                            timeZone = TimeZone.currentSystemDefault()
+                        ),
+                        results = response.toStatementReportRows(json)
+                    )
+                    reportResults[requestId] = result
+
+                    createGraphFormatterUseCase(
+                        reportResult = result,
+                        options = CreateGraphFormatterUseCase.FormatterOptions(
+                            paramType = String::class,
+                            axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.X_AXIS_VALUES
+                        )
+                    ).let { xAxisFormatters[requestId] = it }
+
+                    createGraphFormatterUseCase(
+                        reportResult = result,
+                        options = CreateGraphFormatterUseCase.FormatterOptions(
+                            paramType = Double::class,
+                            axis = CreateGraphFormatterUseCase.FormatterOptions.Axis.Y_AXIS_VALUES
+                        )
+                    ).let { yAxisFormatters[requestId] = it }
+                }
+            }
+
+            ReportListUiState(
+                reportRequests = requestsState.map { distinctRequests },
+                reportResults = reportResults,
+                xAxisFormatters = xAxisFormatters,
+                yAxisFormatters = yAxisFormatters,
+                activeUserPersonUid = activeUserPersonUid
+            )
+        }.onEach { newState ->
+            _uiState.update { newState }
+        }.launchIn(viewModelScope)
     }
 
     fun onClickAdd() {

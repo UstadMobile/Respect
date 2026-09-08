@@ -104,7 +104,7 @@ interface ClassEntityDao {
     @Query("""
         SELECT ClassEntity.cGuid, ClassEntity.cTitle
           FROM ClassEntity
-         WHERE ClassEntity.cGuid IN (:uidList) 
+         WHERE ClassEntity.cGuidHash IN (:uidList) 
     """)
     suspend fun findClazzNamesByUids(uidList: List<Long>): List<ClazzUidAndName>
 

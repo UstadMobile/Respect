@@ -11,4 +11,5 @@ data class IndicatorEntity(
     val description: String = "",
     val type: String = "",
     val sql: String = "",
+    val filterRealUsersOnly: Boolean = false,
 )

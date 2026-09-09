@@ -181,8 +181,17 @@ class GenerateReportQueriesUseCase {
                 FROM XapiStatementEntity ResultSource
                 ${
                 if (reportOptions.xAxis.personJoinRequired ||
-                    series.reportSeriesSubGroup?.personJoinRequired == true
+                    series.reportSeriesSubGroup?.personJoinRequired == true ||
+                    yAxis.filterRealUsersOnly
                 ) {
+                    /*
+                     * To resolve person-related data (like Gender) or filter for real users:
+                     * 1. Join XapiActorEntity to find the actor's account name and type.
+                     * 2. Join PersonEntity matching pGuid with actorAccountName (since we
+                     *    use the person's GUID as the xAPI account name).
+                     * 3. We use INNER JOIN to automatically exclude statements from non-person 
+                     *    actors (like classes/groups) which won't have a matching record in PersonEntity.
+                     */
                     """
                     JOIN XapiActorEntity ON XapiActorEntity.actorUid = ResultSource.statementActorUid
                     JOIN PersonEntity ON (PersonEntity.pGuid = XapiActorEntity.actorAccountName)
@@ -190,6 +199,7 @@ class GenerateReportQueriesUseCase {
                 } else ""
             }
                 WHERE ResultSource.timestamp BETWEEN ? AND ?
+                ${if (yAxis.filterRealUsersOnly) "AND XapiActorEntity.actorObjectType = 1" else ""}
                 GROUP BY xAxis${series.reportSeriesSubGroup?.let { ", subgroup" } ?: ""}
             )
         """.trimIndent())

@@ -66,8 +66,9 @@ val MIGRATION_14_15 = object: Migration(14, 15) {
 
 val MIGRATION_15_16 = object: Migration(15, 16) {
     override fun migrate(connection: SQLiteConnection) {
-        connection.execSQL("CREATE TABLE IF NOT EXISTS `ReportQueryResultEntity` (`rqrUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `rqrReportUid` INTEGER NOT NULL, `rqrLastModified` INTEGER NOT NULL, `rqrLastValidated` INTEGER NOT NULL, `rqrReportSeriesUid` INTEGER NOT NULL, `rqrXAxis` TEXT NOT NULL, `rqrYAxis` REAL NOT NULL, `rqrSubgroup` TEXT NOT NULL, `rqrTimeZone` TEXT NOT NULL)")
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `ReportQueryResultEntity` (`rqrUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `rqrReportUid` TEXT NOT NULL, `rqrLastModified` INTEGER NOT NULL, `rqrLastValidated` INTEGER NOT NULL, `rqrReportSeriesUid` INTEGER NOT NULL, `rqrXAxis` TEXT NOT NULL, `rqrYAxis` REAL NOT NULL, `rqrSubgroup` TEXT NOT NULL, `rqrTimeZone` TEXT NOT NULL)")
         connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_reportqueryresult_rqrreportuid_rqrtimezone` ON `ReportQueryResultEntity` (`rqrReportUid`, `rqrTimeZone`)")
+        connection.execSQL("ALTER TABLE `IndicatorEntity` ADD COLUMN `filterRealUsersOnly` INTEGER NOT NULL DEFAULT 0")
     }
 }
 

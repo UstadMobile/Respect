@@ -90,7 +90,8 @@ object DefaultIndicators {
             name = "Number of Unique Users",
             type = YAxisTypes.COUNT.name,
             description = "The count of distinct users who engaged with the learning content during the specified time period",
-            sql = "COUNT(DISTINCT ResultSource.statementActorUid)"
+            sql = "COUNT(DISTINCT ResultSource.statementActorUid)",
+            filterRealUsersOnly = true,
         ),
 //        Indicator(
 //            name = "Number of activities",

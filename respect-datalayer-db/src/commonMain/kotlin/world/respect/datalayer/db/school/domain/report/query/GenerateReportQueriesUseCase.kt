@@ -152,6 +152,9 @@ class GenerateReportQueriesUseCase {
         val reportToMs = reportOptions.period.periodEndMillis(request.timeZone)
         val timenow = systemTimeInMillis()
 
+        val offsetMillis = request.timeZone.offsetAt(reportOptions.period.periodStartInstant(request.timeZone))
+            .totalSeconds * 1000
+
         return reportOptions.series.mapIndexed { index, series ->
             val yAxis = series.reportSeriesYAxis
             val paramsList = mutableListOf<Any>()
@@ -164,7 +167,7 @@ class GenerateReportQueriesUseCase {
                     SELECT strftime('%w', ?, 'unixepoch') AS TimeRangeStartDayOfWeek
                 )
             """.trimIndent())
-                paramsList.add(reportFromMs / 1000)
+                paramsList.add((reportFromMs + offsetMillis) / 1000)
             }
 
             ctes.add("""

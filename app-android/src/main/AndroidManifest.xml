@@ -106,6 +106,9 @@
 
                 <data android:host="*.onrespectstaging.app" />
                 <data android:host="onrespectstaging.app" />
+
+                <data android:host="*.respect-testing.ustadmobile.com" />
+                <data android:host="respect-testing.ustadmobile.com" />
             </intent-filter>
         </activity>
 

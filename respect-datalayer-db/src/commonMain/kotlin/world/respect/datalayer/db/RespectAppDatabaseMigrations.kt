@@ -45,6 +45,20 @@ val APP_MIGRATION_5_6 = object: Migration(5, 6) {
     }
 }
 
+val APP_MIGRATION_8_9_CLIENT = object: Migration(8, 9) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("""
+            INSERT OR IGNORE INTO SchoolDirectoryEntity(rdUid, rdUrl, rdInvitePrefix, rdName)
+            VALUES(6401554181369316842, 'https://respect-testing.ustadmobile.com/', 'Demos and review', 'Demos and review')
+        """)
+    }
+}
+
+val APP_MIGRATION_8_9_SERVER = object: Migration(8, 9) {
+    override fun migrate(connection: SQLiteConnection) {
+        //Do nothing - directories are not tracked on server.
+    }
+}
 
 
 fun RoomDatabase.Builder<RespectAppDatabase>.addCommonMigrations(

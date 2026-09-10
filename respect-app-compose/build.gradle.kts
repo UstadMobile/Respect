@@ -27,9 +27,9 @@ acraProperties.takeIf { acraPropertiesFile.exists() }
     ?.load(FileInputStream(acraPropertiesFile))
 
 
-val ACRA_PROP_NAMES = listOf("uri", "basicAuthLogin", "basicAuthPassword")
+val acraPropNames = listOf("uri", "basicAuthLogin", "basicAuthPassword")
 
-ACRA_PROP_NAMES.forEach { propName ->
+acraPropNames.forEach { propName ->
     System.getenv("ACRA_${propName.uppercase()}")?.also {
         acraProperties.setProperty(propName, it)
     }
@@ -68,15 +68,9 @@ kotlin {
         }
     }
 
-    jvm("desktop")
+    jvm()
 
     sourceSets {
-        val desktopMain by getting
-        val commonMain by getting {
-            resources.srcDir("src/commonMain/resources")
-        }
-        val androidMain by getting
-
         androidMain.dependencies {
             api(projects.respectCredentials)
             implementation(projects.respectLibSharedSe)
@@ -149,7 +143,7 @@ kotlin {
             implementation(libs.qrose)
         }
 
-        desktopMain.dependencies {
+        jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(projects.respectLibSharedSe)

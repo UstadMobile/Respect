@@ -155,6 +155,7 @@ import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCaseAndroid
 import world.respect.app.domain.e2eartifactupload.GetDbFilesForE2EArtifactUploadUseCaseAndroid
+import world.respect.datalayer.db.APP_MIGRATION_8_9_CLIENT
 import world.respect.shared.domain.activitycontextjobprocessor.EnqueueActivityContextJobUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
@@ -589,6 +590,7 @@ val appKoinModule = module {
             .addCallback(AddSchoolDirectoryCallback(addDirectoriesFromPropertiesUseCase = get()))
             .addCommonMigrations()
             .addMigrations(migrate6to8AddDirectories(addDirectoriesFromPropertiesUseCase = get()))
+            .addMigrations(APP_MIGRATION_8_9_CLIENT)
             .build()
     }
 

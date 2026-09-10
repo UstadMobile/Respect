@@ -30,7 +30,6 @@ import world.respect.server.routes.RespectSchoolDirectoryRoute
 import world.respect.server.routes.getRespectSchoolJson
 import java.io.File
 import java.util.Properties
-import io.ktor.server.plugins.swagger.*
 import org.koin.ktor.ext.inject
 import org.openeel.demo.demolaunchableappserver.DemoLaunchableAppManifestRoute
 import org.openeel.demo.demolaunchableappserver.DemoLaunchableAppCollectionsRoute
@@ -221,10 +220,6 @@ fun Application.module() {
             SchoolValidationRoute()
         }
 
-        swaggerUI(
-            path = "swagger",
-            swaggerFile = "openapi/openapi.yaml",
-        )
 
         environment.config.filePropertyOrNull(
             propertyName = SERVER_CONFIG_KEY_STATICFILES

@@ -28,7 +28,7 @@ import world.respect.datalayer.db.shared.SharedConverters
         //Network validation
         NetworkValidationInfoEntity::class,
     ],
-    version = 8,
+    version = 9,
 )
 @TypeConverters(SharedConverters::class)
 @ConstructedBy(RespectAppDatabaseConstructor::class)

@@ -23,6 +23,7 @@ import world.respect.datalayer.RespectAppDataSourceLocal
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.UidNumberMapper
+import world.respect.datalayer.db.APP_MIGRATION_8_9_SERVER
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -116,6 +117,7 @@ fun serverKoinModule(
                     }
                 }
             )
+            .addMigrations(APP_MIGRATION_8_9_SERVER)
             .build()
     }
 

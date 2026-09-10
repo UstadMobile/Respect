@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.github.aakira.napier.Napier
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -48,6 +49,7 @@ data class LoginUiState(
     val errorText: UiText? = null,
     val usernameError: StringResourceUiText? = null,
     val passwordError: StringResourceUiText? = null,
+    val schoolUrl: Url,
 )
 
 class LoginViewModel(
@@ -59,11 +61,11 @@ class LoginViewModel(
     private val savePasswordUseCase: SavePasswordUseCase
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
-    private val _uiState = MutableStateFlow(LoginUiState())
+    private val route: LoginScreen = savedStateHandle.toRoute()
+
+    private val _uiState = MutableStateFlow(LoginUiState(schoolUrl = route.schoolUrl))
 
     val uiState = _uiState.asStateFlow()
-
-    private val route: LoginScreen = savedStateHandle.toRoute()
 
     override val scope: Scope
         get() = getKoin().getOrCreateScope<SchoolDirectoryEntry>(

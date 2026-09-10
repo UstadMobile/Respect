@@ -54,10 +54,8 @@ kotlin {
             implementation(projects.respectLibTestResources)
         }
 
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-            }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
 }

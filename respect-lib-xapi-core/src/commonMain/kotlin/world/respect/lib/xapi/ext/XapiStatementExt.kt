@@ -8,6 +8,7 @@ import world.respect.lib.xapi.model.XapiContext
 import world.respect.lib.xapi.model.XapiContextActivities
 import world.respect.lib.xapi.model.XapiObjectType
 import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatementRef
 import kotlin.time.Instant
 
 /**
@@ -165,6 +166,10 @@ fun XapiStatement.objectActivityNameOrNull(): Map<String, String>? {
 
 fun XapiStatement.objectSubstatementOrNull(): XapiStatement? {
     return `object` as? XapiStatement
+}
+
+fun XapiStatement.objectStatementRefOrNull(): XapiStatementRef? {
+    return `object` as? XapiStatementRef
 }
 
 /**

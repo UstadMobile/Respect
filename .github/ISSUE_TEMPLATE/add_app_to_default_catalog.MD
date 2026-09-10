@@ -2,7 +2,7 @@
 name: Request to add compatible app to default catalog
 about: Create a request to add
 title: ''
-labels: addtodefaultcatalog
+labels: add-app-to-catalog-request
 assignees: ''
 
 ---

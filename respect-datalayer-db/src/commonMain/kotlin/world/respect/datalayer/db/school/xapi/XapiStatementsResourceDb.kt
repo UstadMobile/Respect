@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -62,6 +63,7 @@ import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
 import world.respect.lib.xapi.composites.XapiAssignmentTaskProgress
 import world.respect.lib.xapi.exceptions.XapiException
+import world.respect.lib.xapi.ext.distinctByMostRecentTimestampForActivityId
 import world.respect.lib.xapi.ext.lastModifiedGMTStringForRetrievedStatements
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
 import world.respect.lib.xapi.ext.objectSubstatementOrNull
@@ -557,7 +559,7 @@ class XapiStatementsResourceDb(
             listParams = GetStatementParams(
                 activity = activityId,
                 relatedActivities = false,
-                format = XapiStatementsResource.GetStatementFormatEnum.CANONICAL,
+                format = XapiStatementsResource.GetStatementFormatEnum.EXACT,
             ),
             dataLoadParams = DataLoadParams(),
         ).map { statementResult ->
@@ -661,20 +663,28 @@ class XapiStatementsResourceDb(
         return flowIn.map { list ->
             DataReadyState(
                 data = list.map { summaryRow ->
-                    val manifestUrls = schoolDb.getActivityExtensionDao().findAllByActivityContextUids(
-                        activityUid = uidNumberMapper(summaryRow.activityId),
-                        filterByKeyHash = uidNumberMapper(ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK)
-                    ).mapNotNull {
-                        try {
-                            json.decodeFromString(
-                                JsonPrimitive.serializer(), it.aeeJson
-                            ).contentOrNull?.let { contentStr ->
-                                Url(contentStr)
-                            }
-                        }catch(_: Throwable) {
-                            null
-                        }
-                    }
+                    val assignmentStmt = get(
+                        listParams = GetStatementParams(
+                            activity = summaryRow.activityId,
+                            format = XapiStatementsResource.GetStatementFormatEnum.EXACT,
+                        )
+                    ).dataOrNull()?.statements?.distinctByMostRecentTimestampForActivityId()
+                        ?.sortedByDescending { it.timestamp }
+                        ?.firstOrNull()
+
+                    val manifestUrls = assignmentStmt?.context?.contextActivities?.grouping
+                        ?.mapNotNull {
+                            it.definition?.extensions?.get(ACTIVITY_EXTENSION_WEBPUB_MANIFEST_LINK)
+                                ?.jsonPrimitive?.contentOrNull
+                                ?.let {
+                                    try {
+                                        Url(it)
+                                    }catch(e: Throwable) {
+                                        Napier.w("Exception getting manifest url", e)
+                                        null
+                                    }
+                                }
+                        } ?: emptyList()
 
                     val deadline = try {
                         val jsonPrimitive = summaryRow.deadlineStr?.let {

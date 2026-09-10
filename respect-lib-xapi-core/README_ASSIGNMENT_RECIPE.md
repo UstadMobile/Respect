@@ -73,7 +73,7 @@ Use the following verb:
            "id": "https://id.ustadmobile.com/xapi/activities/assignment-recipe",
            "objectType": "Activity"
          }
-      ]
+      ],
       "grouping": [
         {
           "id": "https://app.provider.com/activities/math/algebra1",

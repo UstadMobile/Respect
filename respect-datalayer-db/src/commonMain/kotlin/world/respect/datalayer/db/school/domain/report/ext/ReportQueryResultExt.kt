@@ -9,8 +9,14 @@ fun ReportQueryResultEntity.asStatementReportRow() = StatementReportRow(
     subgroup = rqrSubgroup,
 )
 
+/**
+ * Determine the age of the report query results
+ *
+ * @param sinceTimestamp the timestamp to compare against (ms since epoch)
+ * @return the age (as per http) of the report (in seconds since timestamp)
+ */
 fun List<ReportQueryResultEntity>.age(sinceTimestamp: Long): Int {
-    if (isEmpty()) return 0
-    val lastModified = maxOf { it.rqrLastModified }
-    return ((sinceTimestamp - lastModified) / 1000).toInt().coerceAtLeast(0)
+    return (firstOrNull()?.rqrLastModified?.let {
+        sinceTimestamp - it
+    }?.toInt() ?: 0) / 1000
 }

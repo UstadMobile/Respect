@@ -127,32 +127,12 @@ class ClientServerDataSourceTestBuilder internal constructor(
         dir: File,
         stringHasher: XXStringHasher,
         localAuthenticatedUser: AuthenticatedUserPrincipalId,
-    ): Pair<RespectSchoolDatabase, SchoolDataSourceLocal> {
-        val schoolDb = Room.databaseBuilder<RespectSchoolDatabase>(
-            name = File(dir, "school.db").absolutePath
-        ).setDriver(BundledSQLiteDriver())
-            .build()
-
-        val uidMapper = XXHashUidNumberMapper(stringHasher)
-
-        val schoolDataSource = SchoolDataSourceDb(
-            schoolDb = schoolDb,
-            uidNumberMapper = uidMapper,
-            authenticatedUser = localAuthenticatedUser,
-            checkPersonPermissionUseCase = CheckPersonPermissionUseCaseDbImpl(
-                authenticatedUser = localAuthenticatedUser,
-                schoolDb = schoolDb,
-                uidNumberMapper = uidMapper,
-            ),
-            defaultAppCatalogUrl = null,
-            json = Json { ignoreUnknownKeys = true },
-            schoolUrl = schoolUrl,
-        )
-
-        return Pair(schoolDb, schoolDataSource)
-    }
-
-
+    ) = newLocalSchoolDatabase(
+        dir = dir,
+        stringHasher = stringHasher,
+        localAuthenticatedUser = localAuthenticatedUser,
+        schoolUrl = schoolUrl,
+    )
 
     val serverSchoolDataSource = serverSchoolSourceAndDb.also { (database, datasource) ->
         runBlocking {

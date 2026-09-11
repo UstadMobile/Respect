@@ -36,11 +36,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(projects.respectDatalayer)
+            api(projects.libDatalayer)
             api(projects.respectCredentials)
             api(projects.respectLibUtil)
-            api(projects.respectDatalayerDb)
-            api(projects.respectDatalayerHttp)
+            api(projects.libDatalayerDb)
+            api(projects.libDatalayerHttpClient)
             api(projects.libXapiCore)
 
             implementation(projects.respectLibCache)
@@ -86,7 +86,7 @@ kotlin {
         }
 
         jvmMain.dependencies {
-            implementation(projects.respectDatalayerDb)
+            implementation(projects.libDatalayerDb)
             implementation(libs.androidx.room.runtime)
             implementation(libs.json.schema.validator)
             implementation(libs.jsoup)

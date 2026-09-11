@@ -26,7 +26,7 @@ kotlin {
             api(libs.nanohttpd)
             api(projects.libXapiCore)
             api(projects.respectLibSerializers)
-            api(projects.respectLibDataloadstate)
+            api(projects.libDataloadstate)
 
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.urlencoder)

@@ -87,7 +87,7 @@ kotlin {
             implementation(libs.okhttp)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.compose.material3.window.size.clazz)
-            implementation(projects.respectDatalayerDb)
+            implementation(projects.libDatalayerDb)
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.androidx.webkit)
@@ -102,10 +102,10 @@ kotlin {
 
         commonMain.dependencies {
             implementation(projects.respectLibShared)
-            api(projects.respectDatalayer)
+            api(projects.libDatalayer)
             api(projects.respectLibXxhash)
-            implementation(projects.respectDatalayerRepository)
-            implementation(projects.respectDatalayerHttp)
+            implementation(projects.libDatalayerRepository)
+            implementation(projects.libDatalayerHttpClient)
             implementation(projects.respectLibPrimarykeygen)
             implementation(projects.respectLibCache)
 

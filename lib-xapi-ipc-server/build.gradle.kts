@@ -49,7 +49,7 @@ dependencies {
     androidTestImplementation(libs.androidx.rules)
     testImplementation(libs.junit)
     androidTestImplementation(projects.libXapiIpcClient)
-    androidTestImplementation(projects.respectDatalayerDb)
+    androidTestImplementation(projects.libDatalayerDb)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(projects.respectLibTestResources)
     androidTestImplementation(kotlin("test"))

@@ -27,7 +27,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.respectLibSerializers)
-            api(projects.respectLibDataloadstate)
+            api(projects.libDataloadstate)
 
             api(projects.respectLibUtil)
             api(libs.kotlinx.serialization.json)

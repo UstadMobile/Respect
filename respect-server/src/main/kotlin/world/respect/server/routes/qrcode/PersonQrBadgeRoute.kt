@@ -11,7 +11,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.PersonQrBadgeDataSource
 import world.respect.server.util.ext.requireAccountScope
-import world.respect.server.util.ext.respondDataLoadState
+import world.respect.lib.dataloadstate.ktorserver.respondDataLoadState
 
 fun Route.PersonQrBadgeRoute(
     schoolDataSource: (ApplicationCall) -> SchoolDataSource = { call ->

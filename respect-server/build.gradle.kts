@@ -37,8 +37,10 @@ buildConfig {
 
 dependencies {
     implementation(projects.respectLibShared)
-    implementation(projects.respectDatalayer)
-    implementation(projects.respectDatalayerDb)
+    implementation(projects.libDatalayer)
+    implementation(projects.libDatalayerDb)
+    implementation(projects.libDataloadstateKtorServer)
+    implementation(projects.libDatalayerHttpServer)
     implementation(projects.respectLibXxhash)
     implementation(projects.respectLibPrimarykeygen)
 

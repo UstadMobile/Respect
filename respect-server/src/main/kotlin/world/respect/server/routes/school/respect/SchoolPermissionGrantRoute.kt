@@ -9,7 +9,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.server.util.ext.requireAccountScope
-import world.respect.server.util.ext.respondDataLoadState
+import world.respect.lib.dataloadstate.ktorserver.respondDataLoadState
 
 fun Route.SchoolPermissionGrantRoute(
     schoolDataSource: (ApplicationCall) -> SchoolDataSource = { call ->

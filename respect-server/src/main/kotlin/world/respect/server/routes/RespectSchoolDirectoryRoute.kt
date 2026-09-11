@@ -16,7 +16,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.InvalidSchoolRegistrationRequestException
 import world.respect.server.domain.school.add.SchoolRegistrationDisabledException
-import world.respect.server.util.ext.respondDataLoadState
+import world.respect.lib.dataloadstate.ktorserver.respondDataLoadState
 import world.respect.server.util.ext.virtualHost
 
 const val AUTH_CONFIG_DIRECTORY_ADMIN_BASIC = "auth-directory-admin-basic"

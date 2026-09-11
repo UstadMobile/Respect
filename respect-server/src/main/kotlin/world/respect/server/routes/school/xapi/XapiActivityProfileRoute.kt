@@ -18,7 +18,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.xapi.model.XapiDocumentByteArrayImpl
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import world.respect.server.util.ext.requireAccountScope
-import world.respect.server.util.ext.respondDataLoadState
+import world.respect.lib.dataloadstate.ktorserver.respondDataLoadState
 import kotlin.time.Clock
 
 fun Route.XapiActivityProfileRoute(

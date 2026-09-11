@@ -125,6 +125,58 @@ fun <T: Any, R: Any> DataLoadState<T>.mapDataReadyState(
     }
 }
 
+/**
+ * Transform a DataReadyState with a suspending transformation that can act on the data. If not DataReadyState,
+ * then return the original DataLoadState.
+ */
+suspend fun <T: Any, R: Any> DataLoadState<T>.mapDataReadyStateAsync(
+    transform: suspend (DataReadyState<T>) -> DataLoadState<R>
+): DataLoadState<R> {
+    return when(this) {
+        is DataReadyState -> {
+            transform(this)
+        }
+
+        is DataLoadingState -> {
+            DataLoadingState(
+                metaInfo = metaInfo,
+                localState = localState?.mapDataReadyStateAsync(transform),
+                remoteState = remoteState,
+            )
+        }
+        is DataErrorResult -> {
+            DataErrorResult(
+                error = error,
+                metaInfo = metaInfo,
+                localState = localState?.mapDataReadyStateAsync(transform),
+                remoteState = remoteState,
+            )
+        }
+        is NoDataLoadedState -> {
+            NoDataLoadedState(
+                reason = reason,
+                metaInfo = metaInfo,
+                localState = localState?.mapDataReadyStateAsync(transform),
+                remoteState = remoteState,
+            )
+        }
+    }
+}
+
+suspend fun <T: Any, R: Any> DataLoadState<T>.mapAsync(
+    transform: suspend (T) -> R
+): DataLoadState<R> {
+    return mapDataReadyStateAsync {
+        DataReadyState(
+            data = transform(it.data),
+            metaInfo = metaInfo,
+            localState = localState?.mapAsync(transform),
+            remoteState = remoteState,
+        )
+    }
+}
+
+
 fun <T: Any, R: Any> DataLoadState<T>.map(
     transform: (T) -> R
 ): DataLoadState<R> {

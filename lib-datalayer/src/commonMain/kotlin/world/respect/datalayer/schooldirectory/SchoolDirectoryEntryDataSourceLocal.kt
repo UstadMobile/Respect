@@ -1,0 +1,6 @@
+package world.respect.datalayer.schooldirectory
+
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
+import world.respect.datalayer.shared.LocalModelDataSource
+
+interface SchoolDirectoryEntryDataSourceLocal: SchoolDirectoryEntryDataSource, LocalModelDataSource<SchoolDirectoryEntry>

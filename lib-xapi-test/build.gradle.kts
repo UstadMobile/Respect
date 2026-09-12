@@ -18,6 +18,10 @@ kotlin {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         namespace = "${rootProject.group}.lib.xapi.test"
         minSdk = libs.versions.android.minSdk.get().toInt()
+
+        androidResources {
+            enable = true
+        }
     }
 
     jvm()
@@ -34,11 +38,12 @@ kotlin {
             api(libs.ktor.client.core)
             api(libs.xmlutil.serialization)
 
-            implementation(kotlin("test"))
+            api(kotlin("test"))
+            implementation(libs.kotlin.test.junit)
         }
 
         jvmMain.dependencies {
-
+            implementation(libs.junit)
         }
 
         jvmTest.dependencies {

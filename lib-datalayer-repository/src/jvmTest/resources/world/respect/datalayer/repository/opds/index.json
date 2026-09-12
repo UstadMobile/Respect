@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "title": "Main Menu"
+  },
+
+  "links": [
+    { "rel": "self", "href": "index.json", "type": "application/opds+json" }
+  ],
+  "navigation": [
+    {
+      "href": "grade1/grade1.json",
+      "title": "Grade 1",
+      "type": "application/opds+json",
+      "alt": [
+        {
+          "href": "grade1/lesson001/cover.png",
+          "rel": "icon",
+          "type": "image/png",
+          "title": "Book"
+        }
+      ]
+    }
+  ]
+}

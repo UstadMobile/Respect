@@ -24,13 +24,12 @@ import world.respect.datalayer.http.server.XapiStatementsResourceRoute
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.lib.test.clientservertest.insertAdminAndDefaultGrants
 import world.respect.lib.test.clientservertest.newLocalSchoolDatabase
-import world.respect.lib.test.res.forXapiSampleStatements
+import org.openeel.libxapi.test.res.forXapiSampleStatements
 import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.resources.XapiResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.libutil.findFreePort
 import world.respect.libutil.util.time.systemTimeInMillis
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Clock
 import kotlin.uuid.Uuid
@@ -39,7 +38,6 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNe
 
 
 class XapiStatementResourceHttpClientTest {
-
 
     @Rule
     @JvmField
@@ -59,6 +57,16 @@ class XapiStatementResourceHttpClientTest {
         install(ContentNegotiationClient) {
             json(json = json)
         }
+    }
+
+    class XapiTestResource(
+        val xapiResource: XapiResource
+    ): XapiResource by xapiResource {
+
+        override fun close() {
+            xapiResource.close()
+        }
+
     }
 
     suspend fun clientServerTest(

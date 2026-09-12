@@ -48,6 +48,7 @@ kotlin {
 
         jvmTest.dependencies {
             implementation(projects.respectLibTestResources)
+            implementation(projects.libXapiTest)
         }
 
         commonTest.dependencies {

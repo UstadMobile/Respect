@@ -8,16 +8,16 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.decodeFromJsonElement
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.openeel.libxapi.test.res.xapiSampleStatements
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.test.clientservertest.clientServerDatasourceTest
-import world.respect.lib.test.res.xapiSampleStatements
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource
-import world.respect.server.routes.school.xapi.XapiStatementsResourceRoute
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.time.Duration.Companion.seconds
+import world.respect.datalayer.http.server.XapiStatementsResourceRoute
 
 class XapiStatementRepositoryIntegrationTest {
 

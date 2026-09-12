@@ -1,7 +1,7 @@
 package world.respect.datalayer.school.xapi.model
 
 import kotlinx.serialization.json.Json
-import world.respect.lib.test.res.forXapiSampleStatements
+import org.openeel.libxapi.test.res.forXapiSampleStatements
 import world.respect.lib.xapi.model.XapiStatement
 import kotlin.test.Test
 

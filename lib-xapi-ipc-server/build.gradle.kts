@@ -52,5 +52,6 @@ dependencies {
     androidTestImplementation(projects.libDatalayerDb)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(projects.respectLibTestResources)
+    androidTestImplementation(projects.libXapiTest)
     androidTestImplementation(kotlin("test"))
 }

@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -49,9 +48,11 @@ kotlin {
             implementation(projects.respectLibTest)
             implementation(kotlin("test"))
             implementation(projects.respectServer)
+            implementation(projects.libDatalayerHttpServer)
             implementation(projects.respectLibPrimarykeygen)
             implementation(projects.respectLibXxhash)
             implementation(projects.respectLibTestResources)
+            implementation(projects.libXapiTest)
 
             implementation(libs.turbine)
             implementation(projects.libDatalayerHttpClient)

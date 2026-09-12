@@ -14,7 +14,7 @@ import world.respect.datalayer.db.school.adapters.asModel
 import world.respect.datalayer.school.PersonPasskeyDataSource.GetListParams
 import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
 import world.respect.datalayer.school.model.PersonPasskey
-import world.respect.libutil.util.throwable.ForbiddenException
+import world.respect.lib.dataloadstate.throwable.ForbiddenException
 import kotlin.time.Clock
 
 class PersonPasskeyDataSourceDb(

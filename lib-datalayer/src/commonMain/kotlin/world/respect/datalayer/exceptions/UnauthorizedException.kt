@@ -1,6 +1,6 @@
 package world.respect.datalayer.exceptions
 
-import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
+import world.respect.lib.dataloadstate.throwable.ExceptionWithHttpStatusCode
 
 /**
  * As per http status 401: valid credentials not supplied. This will only happen in the datalayer

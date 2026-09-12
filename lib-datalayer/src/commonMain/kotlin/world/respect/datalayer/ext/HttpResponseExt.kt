@@ -15,6 +15,8 @@ import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.dataloadstate.throwable.HttpErrorResponseException
+import world.respect.lib.dataloadstate.throwable.withHttpStatus
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.model.XapiDocument
 import world.respect.lib.xapi.model.XapiDocumentByteArrayImpl
@@ -96,7 +98,7 @@ suspend fun <T: Any> HttpResponse.toDataLoadState(
 
         else -> {
             DataErrorResult(
-                error = IllegalStateException("HTTP ${status.value}: ${status.description}"),
+                error = HttpErrorResponseException(status.value, status.description),
                 metaInfo = metaInfo,
             )
         }

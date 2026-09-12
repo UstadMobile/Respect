@@ -32,7 +32,7 @@ import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.libutil.ext.randomString
-import world.respect.libutil.util.throwable.withHttpStatus
+import world.respect.lib.dataloadstate.throwable.withHttpStatus
 import world.respect.shared.domain.account.AuthResponse
 import world.respect.shared.domain.account.authwithpassword.GetTokenAndUserProfileWithCredentialDbImpl
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase

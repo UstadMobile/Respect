@@ -1,6 +1,6 @@
 package world.respect.datalayer.exceptions
 
-import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
+import world.respect.lib.dataloadstate.throwable.ExceptionWithHttpStatusCode
 
 /**
  * As per http 403: who the user is is understood, but they do not have permission to perform the

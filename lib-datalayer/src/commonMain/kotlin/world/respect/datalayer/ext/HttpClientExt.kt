@@ -10,6 +10,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.request
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
+import io.ktor.http.isSuccess
 import io.ktor.util.reflect.TypeInfo
 import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow

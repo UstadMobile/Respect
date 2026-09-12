@@ -15,7 +15,9 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.openeel.libxapi.test.AbstractXapiStatementResourceTest
 import org.openeel.libxapi.test.assertStatementCanBeStoredAndRetrieved
+import org.openeel.libxapi.test.res.SampleXapiStatement
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.db.RespectSchoolDatabase
@@ -25,6 +27,7 @@ import world.respect.datalayer.school.model.AuthToken
 import world.respect.lib.test.clientservertest.insertAdminAndDefaultGrants
 import world.respect.lib.test.clientservertest.newLocalSchoolDatabase
 import org.openeel.libxapi.test.res.forXapiSampleStatements
+import org.openeel.libxapi.test.res.xapiSampleStatements
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -37,13 +40,11 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNe
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationClient
 
 
-class XapiStatementResourceHttpClientTest {
+class XapiStatementResourceHttpClientTest: AbstractXapiStatementResourceTest() {
 
     @Rule
     @JvmField
     val temporaryFolder: TemporaryFolder = TemporaryFolder()
-
-    val json = Json
 
     lateinit var server: EmbeddedServer<NettyApplicationEngine, *>
 
@@ -59,19 +60,10 @@ class XapiStatementResourceHttpClientTest {
         }
     }
 
-    class XapiTestResource(
-        val xapiResource: XapiResource
-    ): XapiResource by xapiResource {
 
-        override fun close() {
-            xapiResource.close()
-        }
+    override fun loadXapiSampleStatements(): List<SampleXapiStatement> = xapiSampleStatements()
 
-    }
-
-    suspend fun clientServerTest(
-        block : suspend (XapiStatementsResource) -> Unit
-    ) {
+    override suspend fun withXapiStatementResource(block: suspend (XapiStatementsResource) -> Unit) {
         val port = findFreePort()
 
         newLocalSchoolDatabase(
@@ -118,28 +110,4 @@ class XapiStatementResourceHttpClientTest {
         }
     }
 
-    @Test
-    fun givenStatement_whenConvertedToEntitiesAndBack_thenShouldMatch() {
-        runBlocking {
-            forXapiSampleStatements { statement ->
-                clientServerTest {
-                    val stmtUuid = Uuid.random()
-                    val timeNow = Clock.System.now()
-
-                    val statement = Json.decodeFromJsonElement(
-                        XapiStatement.serializer(), statement.jsonObject
-                    ).copy(
-                        id = stmtUuid,
-                        timestamp = timeNow,
-                        stored = Clock.System.now(),
-                    )
-
-                    assertStatementCanBeStoredAndRetrieved(
-                        statement = statement,
-                        resource = statementResource
-                    )
-                }
-            }
-        }
-    }
 }

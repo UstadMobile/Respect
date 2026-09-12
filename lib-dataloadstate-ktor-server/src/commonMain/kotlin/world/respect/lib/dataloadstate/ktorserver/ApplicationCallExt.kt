@@ -11,11 +11,13 @@ import io.ktor.server.response.respond
 import io.ktor.util.date.GMTDate
 import io.ktor.util.reflect.TypeInfo
 import io.ktor.util.reflect.typeInfo
+import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLayerHeaders
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.ext.lastModifiedForHttpResponseHeader
+import world.respect.lib.dataloadstate.throwable.ExceptionWithHttpStatusCode
 import kotlin.time.Instant
 
 
@@ -131,6 +133,14 @@ suspend fun <T: Any> ApplicationCall.respondDataLoadState(
 
         dataLoadState is NoDataLoadedState && dataLoadState.reason == NoDataLoadedState.Reason.NOT_FOUND -> {
             respond(HttpStatusCode.NotFound)
+        }
+
+        dataLoadState is DataErrorResult -> {
+            respond(
+                HttpStatusCode.fromValue(
+                    (dataLoadState.error as? ExceptionWithHttpStatusCode)?.statusCode ?: 500
+                )
+            )
         }
 
         else -> {

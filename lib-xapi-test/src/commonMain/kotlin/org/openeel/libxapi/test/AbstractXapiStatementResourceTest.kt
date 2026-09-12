@@ -3,15 +3,18 @@ package org.openeel.libxapi.test
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.openeel.libxapi.test.res.SampleXapiStatement
+import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.xapi.exceptions.XapiException
+import world.respect.lib.dataloadstate.throwable.unwrapHttpStatusCode
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementRef
+import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementFormatEnum
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.time.Clock
@@ -144,7 +147,7 @@ abstract class AbstractXapiStatementResourceTest {
 
 
     @Test
-    fun givenStatementPosted_whenAnotherStatementPostedWithSameId_thenShouldThrowConflictError() = runBlocking{
+    fun givenStatementPosted_whenAnotherStatementPostedWithSameId_thenShouldReturnErrorState() = runBlocking {
         withXapiStatementResource { resource ->
             val stmtUuid = Uuid.random()
             val sampleStmt = json.decodeFromJsonElement(
@@ -154,13 +157,10 @@ abstract class AbstractXapiStatementResourceTest {
             )
 
             resource.post(listOf(sampleStmt))
-            try {
-                resource.post(listOf(sampleStmt))
-
-                throw IllegalStateException("Should not get here")
-            }catch(e: XapiException) {
-                assertEquals(409, e.httpStatusCode)
-            }
+            val loadStateAfterPost = resource.post(listOf(sampleStmt))
+            assertIs<DataErrorResult<XapiStatementResult>>(loadStateAfterPost)
+            val exception = loadStateAfterPost.error
+            assertEquals(409, exception.unwrapHttpStatusCode())
         }
     }
 

@@ -2,37 +2,27 @@ package world.respect.server.util.ext
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingSource.LoadResult.Page.Companion.COUNT_UNDEFINED
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Url
-import io.ktor.http.toHttpDate
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.response.header
 import io.ktor.server.response.respond
-import io.ktor.util.date.GMTDate
-import io.ktor.util.reflect.TypeInfo
-import io.ktor.util.reflect.typeInfo
 import org.koin.core.scope.Scope
 import org.koin.ktor.ext.getKoin
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.lib.dataloadstate.DataLayerHeaders
-import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.DataReadyState
-import world.respect.lib.dataloadstate.NoDataLoadedState
-import world.respect.lib.dataloadstate.ext.lastModifiedForHttpResponseHeader
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.domain.GetPermissionLastModifiedUseCase
 import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.lib.dataloadstate.ktorserver.validateIfNotModifiedSince
-import world.respect.libutil.util.throwable.ForbiddenException
+import world.respect.lib.dataloadstate.throwable.ForbiddenException
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.util.di.RespectAccountScopeId
 import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 /**
  * The virtual host being used. Used on the server to scope dependencies.

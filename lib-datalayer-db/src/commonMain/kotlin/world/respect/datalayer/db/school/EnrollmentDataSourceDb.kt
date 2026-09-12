@@ -23,7 +23,7 @@ import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.map
-import world.respect.libutil.util.throwable.ForbiddenException
+import world.respect.lib.dataloadstate.throwable.ForbiddenException
 import world.respect.libutil.util.time.atStartOfDayInMillisUtc
 import kotlin.collections.map
 import kotlin.time.Clock

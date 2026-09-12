@@ -5,7 +5,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.respect.model.invite.RespectInviteInfo
-import world.respect.libutil.util.throwable.withHttpStatus
+import world.respect.lib.dataloadstate.throwable.withHttpStatus
 import world.respect.shared.domain.account.invite.GetInviteInfoUseCase
 
 class GetInviteInfoUseCaseServer(

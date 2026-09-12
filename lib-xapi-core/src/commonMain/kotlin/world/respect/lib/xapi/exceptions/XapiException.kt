@@ -1,6 +1,6 @@
 package world.respect.lib.xapi.exceptions
 
-import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
+import world.respect.lib.dataloadstate.throwable.ExceptionWithHttpStatusCode
 
 class XapiException(
     val httpStatusCode: Int,

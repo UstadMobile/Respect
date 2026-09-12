@@ -1,4 +1,4 @@
-package world.respect.libutil.util.throwable
+package world.respect.lib.dataloadstate.throwable
 
 class ForbiddenException(
     message: String? = null, cause: Throwable? = null

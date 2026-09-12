@@ -50,6 +50,7 @@ import world.respect.datalayer.school.xapi.ext.allVerbs
 import world.respect.lib.xapi.ext.distinctMerged
 import world.respect.datalayer.school.xapi.ext.copyWithIdIfNotSet
 import world.respect.datalayer.school.xapi.ext.distinctMerged
+import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
@@ -266,99 +267,103 @@ class XapiStatementsResourceDb(
     }
 
     override suspend fun post(list: List<XapiStatement>): DataLoadState<List<Uuid>> {
-        val statementsWithIdsSet = list.map {
-            it.copyWithIdIfNotSet()
-        }
-
-        //Run basic validations
-        statementsWithIdsSet.forEach { stmt ->
-            if(stmt.`object` !is XapiActivity && stmt.`object`.objectType == null) {
-                throw XapiException(400, "When StatementObject is not Activity, objectType MUST be set")
+        return try {
+            val statementsWithIdsSet = list.map {
+                it.copyWithIdIfNotSet()
             }
 
-            stmt.allVerbs().forEach {
-                xapiRequireValidIRI(it.id, "Verb id must be a valid IRI")
-            }
+            //Run basic validations
+            statementsWithIdsSet.forEach { stmt ->
+                if(stmt.`object` !is XapiActivity && stmt.`object`.objectType == null) {
+                    throw XapiException(400, "When StatementObject is not Activity, objectType MUST be set")
+                }
 
-            stmt.allActivities().forEach { activity ->
-                xapiRequireValidIRI(activity.id, "Activity id must be a valid IRI")
-                activity.definition?.extensions?.keys?.forEach { extensionKey ->
-                    xapiRequireValidIRI(extensionKey, "Extension key must be a valid IRI")
+                stmt.allVerbs().forEach {
+                    xapiRequireValidIRI(it.id, "Verb id must be a valid IRI")
+                }
+
+                stmt.allActivities().forEach { activity ->
+                    xapiRequireValidIRI(activity.id, "Activity id must be a valid IRI")
+                    activity.definition?.extensions?.keys?.forEach { extensionKey ->
+                        xapiRequireValidIRI(extensionKey, "Extension key must be a valid IRI")
+                    }
+                }
+
+                buildList {
+                    add(stmt)
+                    stmt.objectSubstatementOrNull()?.also { add(it) }
+                }.forEach { stmtOrSubStmt ->
+                    stmtOrSubStmt.context?.extensions?.keys?.forEach { extensionKey ->
+                        xapiRequireValidIRI(extensionKey, "Extension key must be a valid IRI")
+                    }
+
+                    stmtOrSubStmt.result?.score?.scaled?.also {
+                        if(it < -1 || it > 1)
+                            throw XapiException(400, "Score scaled must be between -1 and 1")
+                    }
                 }
             }
 
-            buildList {
-                add(stmt)
-                stmt.objectSubstatementOrNull()?.also { add(it) }
-            }.forEach { stmtOrSubStmt ->
-                stmtOrSubStmt.context?.extensions?.keys?.forEach { extensionKey ->
-                    xapiRequireValidIRI(extensionKey, "Extension key must be a valid IRI")
-                }
+            val authenticatedPerson = getAuthenticatedPersonUseCase()
+                ?: throw XapiException(403, "Not authenticated")
 
-                stmtOrSubStmt.result?.score?.scaled?.also {
-                    if(it < -1 || it > 1)
-                        throw XapiException(400, "Score scaled must be between -1 and 1")
-                }
-            }
-        }
-
-        val authenticatedPerson = getAuthenticatedPersonUseCase()
-            ?: throw XapiException(403, "Not authenticated")
-
-        if(!authenticatedPerson.isAdminOrTeacher()) {
-            statementsWithIdsSet.forEach {
-                //Check all statements are for the authenticated user's actor only
-                if(it.actor.account?.homePage != schoolUrl.toString()
-                    || it.actor.account?.name != authenticatedUser.guid
-                ) {
-                    throw XapiException(403, "User does not have permission to post statement as any other actor")
-                }
-            }
-        }
-
-        schoolDb.useWriterConnection { con ->
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                statementsWithIdsSet.forEach { statement ->
-                    val stmtId = statement.id
-                        ?: throw IllegalStateException("Could not happen as per line 257")
-                    val (stmtIdHi, stmtIdLo) = stmtId.toLongPair()
-                    if(
-                        schoolDb.getStatementDao().getTimestampsByUuid(
-                            statementIdHi = stmtIdHi,
-                            statementIdLo = stmtIdLo,
-                        ) != null
+            if(!authenticatedPerson.isAdminOrTeacher()) {
+                statementsWithIdsSet.forEach {
+                    //Check all statements are for the authenticated user's actor only
+                    if(it.actor.account?.homePage != schoolUrl.toString()
+                        || it.actor.account?.name != authenticatedUser.guid
                     ) {
-                        throw XapiException(409, message = "Statement $stmtId already exists")
+                        throw XapiException(403, "User does not have permission to post statement as any other actor")
                     }
-
-                    //check if this is a voiding statement
-                    if(statement.verb.id == XapiVerb.ID_VOIDED) {
-                        //find the statement we are going to void
-                        val statementRef = statement.`object` as? XapiStatementRef
-                            ?: throw XapiException(400, "Voiding statement object not statementref")
-                        val (voidIdHi, voidIdLo) = Uuid.parse(statementRef.id).toLongPair()
-
-                        val verbUidToVoid = schoolDb.getStatementDao().getVerbUidNumToBeVoided(
-                            statementIdHi = voidIdHi,
-                            statementIdLo = voidIdLo,
-                        ) ?: throw XapiException(403, "Statement to void not found")
-
-                        if(uidNumberMapper(XapiVerb.ID_VOIDED) == verbUidToVoid)
-                            throw XapiException(403, "Cannot void a void statement")
-
-                        schoolDb.getStatementDao().updateSetStatementVoided(
-                            voidIdHi, voidIdLo
-                        )
-                    }
-
-                    doUpsertStatement(statement)
                 }
             }
-        }
 
-        return DataReadyState(
-            data = statementsWithIdsSet.mapNotNull { it.id }
-        )
+            schoolDb.useWriterConnection { con ->
+                con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                    statementsWithIdsSet.forEach { statement ->
+                        val stmtId = statement.id
+                            ?: throw IllegalStateException("Could not happen as per line 257")
+                        val (stmtIdHi, stmtIdLo) = stmtId.toLongPair()
+                        if(
+                            schoolDb.getStatementDao().getTimestampsByUuid(
+                                statementIdHi = stmtIdHi,
+                                statementIdLo = stmtIdLo,
+                            ) != null
+                        ) {
+                            throw XapiException(409, message = "Statement $stmtId already exists")
+                        }
+
+                        //check if this is a voiding statement
+                        if(statement.verb.id == XapiVerb.ID_VOIDED) {
+                            //find the statement we are going to void
+                            val statementRef = statement.`object` as? XapiStatementRef
+                                ?: throw XapiException(400, "Voiding statement object not statementref")
+                            val (voidIdHi, voidIdLo) = Uuid.parse(statementRef.id).toLongPair()
+
+                            val verbUidToVoid = schoolDb.getStatementDao().getVerbUidNumToBeVoided(
+                                statementIdHi = voidIdHi,
+                                statementIdLo = voidIdLo,
+                            ) ?: throw XapiException(403, "Statement to void not found")
+
+                            if(uidNumberMapper(XapiVerb.ID_VOIDED) == verbUidToVoid)
+                                throw XapiException(403, "Cannot void a void statement")
+
+                            schoolDb.getStatementDao().updateSetStatementVoided(
+                                voidIdHi, voidIdLo
+                            )
+                        }
+
+                        doUpsertStatement(statement)
+                    }
+                }
+            }
+
+            DataReadyState(
+                data = statementsWithIdsSet.mapNotNull { it.id }
+            )
+        }catch(e: Throwable) {
+            DataErrorResult(error = e)
+        }
     }
 
     override suspend fun updateLocal(

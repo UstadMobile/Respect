@@ -2,7 +2,7 @@ package world.respect.datalayer.shared.paging
 
 import androidx.paging.PagingSource
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
-import world.respect.libutil.util.throwable.ExceptionWithHttpStatusCode
+import world.respect.lib.dataloadstate.throwable.ExceptionWithHttpStatusCode
 
 /**
  * A Cacheable Http Paging Source is one that loads data over http that can be cached by a

@@ -40,7 +40,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.http.server.XapiStatementsResourceRoute
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
-import world.respect.libutil.util.throwable.unwrapHttpStatusCode
+import world.respect.lib.dataloadstate.throwable.unwrapHttpStatusCode
 import world.respect.server.demoapp.DemoLaunchableAppLessonRoute
 import world.respect.server.logging.LogbackAntiLog
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute

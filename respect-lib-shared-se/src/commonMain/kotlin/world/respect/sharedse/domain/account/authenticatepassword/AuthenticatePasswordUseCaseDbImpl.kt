@@ -9,7 +9,7 @@ import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseC
 import io.ktor.util.decodeBase64Bytes
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.adapters.toPersonEntities
-import world.respect.libutil.util.throwable.ForbiddenException
+import world.respect.lib.dataloadstate.throwable.ForbiddenException
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase.Companion.LOGTAG_AUTH
 
 class AuthenticatePasswordUseCaseDbImpl(

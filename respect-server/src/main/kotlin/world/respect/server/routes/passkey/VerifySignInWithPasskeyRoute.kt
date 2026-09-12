@@ -6,7 +6,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import world.respect.credentials.passkey.model.AuthenticationResponseJSON
-import world.respect.libutil.util.throwable.withHttpStatus
+import world.respect.lib.dataloadstate.throwable.withHttpStatus
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 
 fun Route.VerifySignInWithPasskeyRoute(

@@ -32,8 +32,6 @@ suspend fun withEmbeddedDataSourceServer(
     val port = findFreePort()
     val schoolUrl = Url("http://localhost:$port/")
 
-    val startTime = System.currentTimeMillis()
-
     withSchoolDbDataSource(
         dbDir = dbDir,
         schoolUrl = schoolUrl,
@@ -57,7 +55,6 @@ suspend fun withEmbeddedDataSourceServer(
                 it.start()
         }
 
-        println("Embedded data source server started in ${System.currentTimeMillis() - startTime}ms")
         try {
             block(context)
         }finally {

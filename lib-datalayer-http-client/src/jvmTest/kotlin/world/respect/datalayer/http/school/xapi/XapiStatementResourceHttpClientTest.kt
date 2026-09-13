@@ -46,14 +46,6 @@ class XapiStatementResourceHttpClientTest: AbstractXapiStatementResourceTest() {
     @JvmField
     val temporaryFolder: TemporaryFolder = TemporaryFolder()
 
-    lateinit var server: EmbeddedServer<NettyApplicationEngine, *>
-
-    lateinit var statementResource: XapiStatementsResource
-
-    lateinit var serverDs: SchoolDataSourceLocal
-
-    lateinit var serverDb: RespectSchoolDatabase
-
     val httpClient = HttpClient(OkHttp) {
         install(ContentNegotiationClient) {
             json(json = json)
@@ -64,50 +56,35 @@ class XapiStatementResourceHttpClientTest: AbstractXapiStatementResourceTest() {
     override fun loadXapiSampleStatements(): List<SampleXapiStatement> = xapiSampleStatements()
 
     override suspend fun withXapiStatementResource(block: suspend (XapiStatementsResource) -> Unit) {
-        val port = findFreePort()
-
-        newLocalSchoolDatabase(
-            dir = temporaryFolder.newFolder(),
-            schoolUrl = Url("http://localhost:$port/"),
-            localAuthenticatedUser = AuthenticatedUserPrincipalId("1"),
-        ).also { (db, ds) ->
-            serverDs = ds
-            serverDb = db
-        }
-
-        serverDs.insertAdminAndDefaultGrants(serverDb)
-
-        server = embeddedServer(Netty, port = port) {
-            install(ContentNegotiationServer) {
-                json(json = json, contentType = ContentType.Application.Json)
-            }
-
-            routing {
+        withEmbeddedDataSourceServer(
+            dbDir = temporaryFolder.newFolder(),
+            routingConfig = { context ->
                 XapiStatementsResourceRoute(
-                    statementResource = { serverDs.xapiResource.statements },
+                    statementResource = {
+                        context.datasourceContext.datasource.xapiResource.statements
+                    },
                     json = json,
                 )
             }
-        }
+        ) {
+            val statementResource = XapiStatementsResourceHttpClient(
+                xapiUrl = { schoolUrl },
+                httpClient = httpClient,
+                tokenProvider = {
+                    AuthToken("secret", systemTimeInMillis(), 3600)
+                },
+                json = json,
+            )
 
-        server.start()
-
-        statementResource = XapiStatementsResourceHttpClient(
-            xapiUrl = { Url("http://localhost:$port/") },
-            httpClient = httpClient,
-            tokenProvider = {
-                AuthToken("secret", systemTimeInMillis(), 3600)
-            },
-            json = json,
-        )
-
-        try {
             block(statementResource)
-        }catch(e: Throwable) {
-            server.stop()
-
-            throw e
         }
     }
+
+    /**
+     * This function exists just to tell Android Studio/IntelliJ that this is a test class,
+     * without at least one function annotated test it won't show the run test option
+     */
+    @Test
+    fun thisIsATestClass() {}
 
 }

@@ -61,13 +61,13 @@ abstract class AbstractXapiStatementResourceTest {
                     actual = canonicalStmtFromDb,
                 )
 
-                val exactStmtFromDb = resource.get(
+                val exactStmtFromResource = resource.get(
                     listParams = XapiStatementsResource.GetStatementParams(
                         format = GetStatementFormatEnum.EXACT,
                         statementId = stmtUuid
                     )
                 ).dataOrNull()?.statements?.first()
-                assertEquals(statement, exactStmtFromDb)
+                assertEquals(statement, exactStmtFromResource)
 
                 val idOnlyStmtFromDb = resource.get(
                     listParams = XapiStatementsResource.GetStatementParams(

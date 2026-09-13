@@ -1,0 +1,68 @@
+package world.respect.datalayer.http.school.xapi
+
+import io.ktor.http.ContentType
+import io.ktor.http.Url
+import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.install
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.routing.Routing
+import io.ktor.server.routing.routing
+import kotlinx.serialization.json.Json
+import world.respect.lib.test.clientservertest.SchoolDbDataSourceContext
+import world.respect.lib.test.clientservertest.insertAdminAndDefaultGrants
+import world.respect.lib.test.clientservertest.withSchoolDbDataSource
+import world.respect.libutil.findFreePort
+import java.io.File
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
+
+data class EmbeddedDataSourceServerContext(
+    val schoolUrl: Url,
+    val datasourceContext: SchoolDbDataSourceContext,
+)
+
+
+suspend fun withEmbeddedDataSourceServer(
+    dbDir: File,
+    start: Boolean = true,
+    json: Json = Json,
+    routingConfig: Routing.(EmbeddedDataSourceServerContext) -> Unit,
+    block: suspend EmbeddedDataSourceServerContext.() -> Unit
+) {
+    val port = findFreePort()
+    val schoolUrl = Url("http://localhost:$port/")
+
+    val startTime = System.currentTimeMillis()
+
+    withSchoolDbDataSource(
+        dbDir = dbDir,
+        schoolUrl = schoolUrl,
+    ) {
+        datasource.insertAdminAndDefaultGrants(db)
+        val context = EmbeddedDataSourceServerContext(
+            schoolUrl = schoolUrl,
+            datasourceContext = this
+        )
+
+        val server = embeddedServer(Netty, port = port) {
+            install(ContentNegotiationServer) {
+                json(json = json, contentType = ContentType.Application.Json)
+            }
+
+            routing {
+                routingConfig(context)
+            }
+        }.also {
+            if(start)
+                it.start()
+        }
+
+        println("Embedded data source server started in ${System.currentTimeMillis() - startTime}ms")
+        try {
+            block(context)
+        }finally {
+            server.stop(gracePeriodMillis = 100)
+        }
+
+    }
+}

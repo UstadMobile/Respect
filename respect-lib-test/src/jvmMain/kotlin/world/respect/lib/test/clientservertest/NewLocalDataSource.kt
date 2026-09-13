@@ -20,6 +20,42 @@ import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import java.io.File
 
+data class SchoolDbDataSourceContext(
+    val db: RespectSchoolDatabase,
+    val datasource: SchoolDataSourceLocal
+)
+
+suspend fun withSchoolDbDataSource(
+    dbDir: File,
+    dbFilename: String = "school.db",
+    schoolUrl: Url,
+    stringHasher: XXStringHasher = XXStringHasherCommonJvm(),
+    localAuthenticatedUser: AuthenticatedUserPrincipalId = AuthenticatedUserPrincipalId("1"),
+    uidMapper: UidNumberMapper = XXHashUidNumberMapper(stringHasher),
+    block: suspend SchoolDbDataSourceContext.() -> Unit,
+) {
+    val schoolDb = Room.databaseBuilder<RespectSchoolDatabase>(
+        name = File(dbDir, dbFilename).absolutePath
+    ).setDriver(BundledSQLiteDriver())
+        .build()
+
+    val schoolDataSource = SchoolDataSourceDb(
+        schoolDb = schoolDb,
+        uidNumberMapper = uidMapper,
+        authenticatedUser = localAuthenticatedUser,
+        checkPersonPermissionUseCase = CheckPersonPermissionUseCaseDbImpl(
+            authenticatedUser = localAuthenticatedUser,
+            schoolDb = schoolDb,
+            uidNumberMapper = uidMapper,
+        ),
+        defaultAppCatalogUrl = null,
+        json = Json { ignoreUnknownKeys = true },
+        schoolUrl = schoolUrl,
+    )
+
+    block(SchoolDbDataSourceContext(schoolDb, schoolDataSource))
+}
+
 /**
  *
  */

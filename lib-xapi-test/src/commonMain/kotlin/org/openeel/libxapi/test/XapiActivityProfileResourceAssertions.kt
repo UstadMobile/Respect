@@ -6,6 +6,8 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.dataloadstate.datetime.toGMTDate
+import world.respect.lib.dataloadstate.datetime.toInstant
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.getJson
@@ -46,7 +48,7 @@ object XapiActivityProfileTestParams {
 
     val DOC: XapiDocument = XapiDocumentByteArrayImpl(
         type = "application/json",
-        updated = Clock.System.now(),
+        updated = Clock.System.now().toGMTDate(),
         contents = """{"initialKey": "initialValue", "nested": {"a": 1}}""".encodeToByteArray(),
     )
 
@@ -59,7 +61,7 @@ object XapiActivityProfileTestParams {
 
     val DOC_UPDATED: XapiDocument = XapiDocumentByteArrayImpl(
         type = "application/json",
-        updated = Clock.System.now(),
+        updated = Clock.System.now().toGMTDate(),
         contents = """{"newKey": "newValue"}""".encodeToByteArray(),
     )
 
@@ -69,7 +71,7 @@ object XapiActivityProfileTestParams {
 
     val DOC_NON_JSON: XapiDocument = XapiDocumentByteArrayImpl(
         type = "text/plain",
-        updated = Clock.System.now(),
+        updated = Clock.System.now().toGMTDate(),
         contents = "plain text content".encodeToByteArray(),
     )
 }
@@ -103,7 +105,8 @@ suspend fun assertActivityProfileCanBePutAndRetrieved(
         document.contentsAsByteArray(),
         retrieved.contentsAsByteArray()
     )
-    assertEquals(document.updated.toEpochMilliseconds(), retrieved.updated.toEpochMilliseconds())
+
+    assertEquals(document.updated, retrieved.updated)
 }
 
 /**
@@ -300,7 +303,7 @@ suspend fun assertMultipleActivityProfileDocumentsReturnsAllProfileIdsForActivit
             Pair(
                 first = XapiDocumentByteArrayImpl(
                     type = "application/json",
-                    updated = Clock.System.now(),
+                    updated = Clock.System.now().toGMTDate(),
                     contents = """{"p": $index}""".encodeToByteArray(),
                 ),
                 second = XapiActivityProfileResource.SingleDocumentParams(
@@ -348,7 +351,7 @@ suspend fun assertMultipleActivityProfileDocumentsWithSinceReturnsOnlyNewerProfi
         Pair(
             first = XapiDocumentByteArrayImpl(
                 type = "application/json",
-                updated = updated,
+                updated = updated.toGMTDate(),
                 contents = """{"p": $profileNum}""".encodeToByteArray(),
             ),
             second = XapiActivityProfileResource.SingleDocumentParams(
@@ -372,7 +375,7 @@ suspend fun assertMultipleActivityProfileDocumentsWithSinceReturnsOnlyNewerProfi
             actual = resource.getMultipleDocuments(
                 params = XapiActivityProfileResource.MultiDocParams(
                     activityId = activityId,
-                    since = doc.first.updated,
+                    since = doc.first.updated.toInstant(),
                 ),
             ).dataOrNull()?.toSet()
         )

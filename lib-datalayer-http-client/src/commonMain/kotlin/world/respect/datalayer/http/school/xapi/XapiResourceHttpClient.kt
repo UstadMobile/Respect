@@ -37,7 +37,6 @@ class XapiResourceHttpClient(
             xapiUrl = xapiUrl,
             httpClient = httpClient,
             tokenProvider = tokenProvider,
-            json = json,
         )
     }
 

@@ -7,6 +7,7 @@ import io.ktor.client.statement.request
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.etag
+import io.ktor.http.fromHttpToGmtDate
 import io.ktor.http.isSuccess
 import io.ktor.http.lastModified
 import io.ktor.util.reflect.TypeInfo
@@ -59,10 +60,8 @@ suspend fun <T: Any> HttpResponse.toDataLoadState(
 suspend fun HttpResponse.bodyAsXapiDocument(): XapiDocument {
     return XapiDocumentByteArrayImpl(
         type = headers[HttpHeaders.ContentType] ?: "application/octet-stream",
-        updated = Instant.fromEpochMilliseconds(
-            lastModified()?.time ?:
-            throw XapiException(400, "Document respnose must have last-modified header")
-        ),
+        updated = headers[HttpHeaders.LastModified]?.fromHttpToGmtDate()
+            ?: throw IllegalArgumentException("bodyAsXapiDocument: No Last-Modified header found in response"),
         contents = bodyAsBytes()
     )
 }

@@ -63,7 +63,7 @@ import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.school.respect.SchoolValidationRoute
 import world.respect.server.routes.e2etestartifactsroute.ReceiveE2EArtifactUploadRoute
-import world.respect.server.routes.school.xapi.XapiActivityProfileRoute
+import world.respect.datalayer.http.server.XapiActivityProfileResourceRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.routes.username.checkusernameunique.CheckUsernameUniqueRoute
 import world.respect.server.util.ext.getSchoolKoinScope
@@ -281,7 +281,11 @@ fun Application.module() {
                             }
                         )
                         route("activities") {
-                            XapiActivityProfileRoute()
+                            XapiActivityProfileResourceRoute(
+                                activityProfileResource = { call ->
+                                    call.requireAccountScope().get<SchoolDataSource>().xapiResource.activityProfile
+                                }
+                            )
                         }
                     }
                 }

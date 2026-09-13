@@ -1,6 +1,6 @@
 package world.respect.lib.xapi.model
 
-import kotlin.time.Instant
+import io.ktor.util.date.GMTDate
 
 /**
  * Xapi Document: this interface can wrap different types: e.g. entities on the database that are
@@ -13,7 +13,12 @@ interface XapiDocument {
 
     val type: String
 
-    val updated: Instant
+    /**
+     * The updated property as per the specification "is HTTP header information". The HTTP
+     * Last-Modified header precision is limited to seconds (cannot include milliseconds/nanoseconds),
+     * hence this is of type GMTDate NOT Instant.
+     */
+    val updated: GMTDate
 
     suspend fun contentsAsByteArray(): ByteArray
 

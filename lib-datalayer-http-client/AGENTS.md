@@ -72,3 +72,13 @@ class FooDataSourceHttpClient(
 }
 ```
 
+## Http Client Datasource Anti-patterns: - Never generate these
+
+## 1 Custom headers for xAPI resources
+NEVER: headers["X-Updated"] = updated.toString()
+ALWAYS: headers["Last-Modified"] = GMTDate(updated.epochSeconds * 1000).toHttpDate()
+
+The HTTP-client/server implementation MUST adhere to the Experience API specification
+and should NOT introduce custom headers that are not part of the specification for xapi 
+resources.
+

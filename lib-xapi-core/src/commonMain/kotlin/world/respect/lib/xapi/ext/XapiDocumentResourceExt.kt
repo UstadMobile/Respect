@@ -1,20 +1,21 @@
 package world.respect.lib.xapi.ext
 
+import io.ktor.util.date.GMTDate
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.datetime.toGMTDate
 import world.respect.lib.dataloadstate.ext.mapAsync
 import world.respect.lib.xapi.resources.XapiDocumentResource
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 suspend fun <SingleDocParams: Any, T: Any> XapiDocumentResource<*, SingleDocParams>.putJson(
     docParams: SingleDocParams,
     document: T,
     json: Json,
     serializer: SerializationStrategy<T>,
-    updated: Instant = Clock.System.now(),
+    updated: GMTDate = Clock.System.now().toGMTDate(),
 ) {
     put(
         params = docParams,
@@ -31,7 +32,7 @@ suspend fun <SingleDocParams: Any, T: Any> XapiDocumentResource<*, SingleDocPara
     document: T,
     json: Json,
     serializer: SerializationStrategy<T>,
-    updated: Instant = Clock.System.now(),
+    updated: GMTDate = Clock.System.now().toGMTDate(),
 ) {
     post(
         params = docParams,

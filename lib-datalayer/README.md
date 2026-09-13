@@ -30,3 +30,8 @@ This helps maximize code reusage:
    primarily to serve REST API endpoints.
 
 Recommended reading: see the offline first conceptual note in the [Repository README.md](../respect-datalayer-repository/)
+
+## Conventions
+
+* Read functions DO NOT throw exceptions. They return a DataErrorState as the DataLoadState result.
+* Write functions WILL throw an Exception if the argument for the data being written is invalid.

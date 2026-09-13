@@ -4,16 +4,14 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.client.request.post
 import io.ktor.client.request.put
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
-import io.ktor.http.contentType
-import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.ext.bodyAsXapiDocument
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.useTokenProvider
+import world.respect.datalayer.http.school.xapi.ext.setXapiDocumentBody
+import world.respect.datalayer.http.school.xapi.ext.throwXapiExceptionIfNotSuccessful
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.xapi.model.XapiDocument
@@ -24,8 +22,6 @@ class XapiActivityProfileResourceHttpClient(
     private val xapiUrl: suspend () -> Url,
     private val httpClient: HttpClient,
     private val tokenProvider: AuthTokenProvider,
-    @Suppress("unused")
-    private val json: Json,
 ): XapiActivityProfileResource {
 
     private suspend fun XapiActivityProfileResource.MultiDocParams.urlWithParams(): Url {
@@ -71,9 +67,8 @@ class XapiActivityProfileResourceHttpClient(
     ) {
         httpClient.post(params.urlWithParams()) {
             useTokenProvider(tokenProvider)
-            contentType(ContentType.parse(document.type))
-            setBody(document.contentsAsByteArray())
-        }
+            setXapiDocumentBody(document)
+        }.throwXapiExceptionIfNotSuccessful()
     }
 
     override suspend fun put(
@@ -82,14 +77,13 @@ class XapiActivityProfileResourceHttpClient(
     ) {
         httpClient.put(params.urlWithParams()) {
             useTokenProvider(tokenProvider)
-            contentType(ContentType.parse(document.type))
-            setBody(document.contentsAsByteArray())
-        }
+            setXapiDocumentBody(document)
+        }.throwXapiExceptionIfNotSuccessful()
     }
 
     override suspend fun delete(params: XapiActivityProfileResource.SingleDocumentParams) {
         httpClient.delete(params.urlWithParams()) {
             useTokenProvider(tokenProvider)
-        }
+        }.throwXapiExceptionIfNotSuccessful()
     }
 }

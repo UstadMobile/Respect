@@ -1,17 +1,18 @@
 package world.respect.lib.xapi.ext
 
+import io.ktor.util.date.GMTDate
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
+import world.respect.lib.dataloadstate.datetime.toGMTDate
 import world.respect.lib.xapi.model.XapiDocument
 import world.respect.lib.xapi.model.XapiDocumentByteArrayImpl
 import kotlin.time.Clock
-import kotlin.time.Instant
 
 fun <T: Any> Json.encodeToXapiDocument(
     serializer: SerializationStrategy<T>,
     value: T,
-    updated: Instant = Clock.System.now(),
+    updated: GMTDate = Clock.System.now().toGMTDate(),
 ): XapiDocument {
     return XapiDocumentByteArrayImpl(
         type = "application/json",

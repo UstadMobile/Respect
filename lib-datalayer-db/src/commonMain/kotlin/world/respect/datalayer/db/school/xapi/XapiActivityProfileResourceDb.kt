@@ -62,7 +62,7 @@ class XapiActivityProfileResourceDb(
             DataReadyState(
                 data = entity,
                 metaInfo = DataLoadMetaInfo(
-                    lastModified = entity.updated.toEpochMilliseconds(),
+                    lastModified = entity.updated.timestamp,
                 )
             )
         } else {

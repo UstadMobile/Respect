@@ -3,9 +3,10 @@ package world.respect.datalayer.db.school.xapi.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import io.ktor.util.date.GMTDate
 import world.respect.datalayer.db.shared.InstantAsTimestampString
 import world.respect.lib.xapi.model.XapiDocument
-import kotlin.time.Instant
+import world.respect.lib.dataloadstate.datetime.toGMTDate
 import kotlin.uuid.Uuid
 
 /**
@@ -39,8 +40,10 @@ data class XapiActivityProfileDocumentEntity(
     override val type: String
         get() = contentType
 
-    override val updated: Instant
-        get() = lastModified.instant
+    override val updated: GMTDate by lazy {
+        lastModified.instant.toGMTDate()
+    }
+
 
     override suspend fun contentsAsByteArray(): ByteArray = contents
 
@@ -72,7 +75,4 @@ data class XapiActivityProfileDocumentEntity(
         return result
     }
 
-    companion object {
-        fun makeId(activityIri: String, profileId: String): String = "$activityIri/$profileId"
-    }
 }

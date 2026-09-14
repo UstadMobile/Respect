@@ -43,6 +43,7 @@ import world.respect.datalayer.db.school.daos.InviteEntityDao
 import world.respect.datalayer.db.school.daos.PersonQrBadgeEntityDao
 import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
 import world.respect.datalayer.db.school.daos.PullSyncStatusEntityDao
+import world.respect.datalayer.db.school.daos.ReportQueryResultDao
 import world.respect.datalayer.db.school.daos.SchoolAppEntityDao
 import world.respect.datalayer.db.school.daos.WriteQueueItemEntityDao
 import world.respect.datalayer.db.school.entities.ClassEntity
@@ -52,6 +53,7 @@ import world.respect.datalayer.db.school.entities.InviteEntity
 import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
+import world.respect.datalayer.db.shared.entities.ReportQueryResultEntity
 import world.respect.datalayer.db.school.entities.SchoolAppEntity
 import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 import world.respect.datalayer.db.school.daos.SchoolPermissionGrantDao
@@ -137,8 +139,9 @@ import world.respect.datalayer.school.model.Report
         XapiVerbEntity::class,
         XapiVerbLangMapEntry::class,
         XapiSessionEntity::class,
+        ReportQueryResultEntity::class,
     ],
-    version = 15,
+    version = 16,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)
@@ -215,6 +218,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getVerbLangMapEntryDao(): XapiVerbLangMapEntryDao
 
     abstract fun getXapiSessionEntityDao(): XapiSessionEntityDao
+
+    abstract fun reportQueryResultDao(): ReportQueryResultDao
 
 
     companion object {

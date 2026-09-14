@@ -30,6 +30,7 @@ kotlin {
             implementation(projects.respectLibPrimarykeygen)
             implementation(projects.respectLibXxhash)
             implementation(projects.respectLibUtil)
+            implementation(projects.respectLibCache)
             implementation(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)

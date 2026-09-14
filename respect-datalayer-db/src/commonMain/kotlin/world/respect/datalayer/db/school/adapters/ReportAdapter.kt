@@ -43,7 +43,8 @@ fun IndicatorEntity.toIndicator(): Indicator {
         name = this.name,
         description = this.description,
         type = this.type,
-        sql = this.sql
+        sql = this.sql,
+        filterRealUsersOnly = this.filterRealUsersOnly,
     )
 }
 
@@ -53,6 +54,7 @@ fun Indicator.toIndicatorEntity(): IndicatorEntity {
         name = this.name,
         description = this.description,
         type = this.type,
-        sql = this.sql
+        sql = this.sql,
+        filterRealUsersOnly = this.filterRealUsersOnly,
     )
 }

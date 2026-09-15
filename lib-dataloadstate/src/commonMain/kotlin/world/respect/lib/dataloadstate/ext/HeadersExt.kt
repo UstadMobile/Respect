@@ -25,18 +25,16 @@ fun Headers.isNotModified(
     /**
      * ETag takes precendence:
      */
-    return if(responseETagAndLastModified.etag != null
-        && responseETagAndLastModified.etag == this[HttpHeaders.IfNoneMatch]
-    ) {
-        true
-    }else if(responseETagAndLastModified.lastModified?.let {
-            it <= (this[HttpHeaders.IfModifiedSince]?.fromHttpToGmtDate()?.toInstant()
-                ?: Instant.DISTANT_FUTURE)
-        } == true
-    ) {
-        true
-    }else {
-        false
+    val ifNoneMatch = this[HttpHeaders.IfNoneMatch]
+    val ifModifiedSince = this[HttpHeaders.IfModifiedSince]
 
+    return if (ifNoneMatch != null) {
+        responseETagAndLastModified.etag != null && responseETagAndLastModified.etag == ifNoneMatch
+    } else if (ifModifiedSince != null) {
+        responseETagAndLastModified.lastModified?.let {
+            it <= (ifModifiedSince.fromHttpToGmtDate().toInstant())
+        } == true
+    } else {
+        false
     }
 }

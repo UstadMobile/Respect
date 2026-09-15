@@ -38,6 +38,12 @@ interface XapiDocumentResource<MultiDocParams: Any, SingleDocParams: Any> {
      *         If the document has not been modified as per If-Not-Modified-Since or If-None-Match
      *         headers, then NoDataLoadedState.notModified()
      *         Otherwise, DataReadyState with the document data.
+     *
+     *         The DataLoadMetaInfo of the returned DataLoadState will include:
+     *          a) The Last-Modified header
+     *          b) The ETag header, which will be the SHA-1 digest as a hexadecimal string of the
+     *             document contents as per:
+     *             https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md#part-three-data-processing-validation-and-security
      */
     suspend fun get(
         params: SingleDocParams,

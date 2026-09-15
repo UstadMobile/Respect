@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import world.respect.datalayer.db.school.xapi.composites.XapiActivityProfileDocumentAndShaEntities
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityProfileDocumentEntity
 import world.respect.datalayer.db.shared.ETagAndLastModifiedAsStrings
 import world.respect.datalayer.db.shared.InstantAsTimestampString
@@ -16,8 +17,11 @@ interface XapiActivityProfileDocumentDao {
 
     @Query(
         """
-        SELECT * 
+        SELECT xapi_activity_profile_document.*, 
+               xapi_activity_profile_document_sha.sha1_digest AS sha1
           FROM xapi_activity_profile_document 
+               JOIN xapi_activity_profile_document_sha
+                    ON xapi_activity_profile_document_sha.doc_id = xapi_activity_profile_document.id
          WHERE activity_iri = :activityIri 
            AND profile_id = :profileId
         """
@@ -25,12 +29,14 @@ interface XapiActivityProfileDocumentDao {
     suspend fun findByActivityIriAndProfileId(
         activityIri: String,
         profileId: String,
-    ): XapiActivityProfileDocumentEntity?
+    ): XapiActivityProfileDocumentAndShaEntities?
 
     @Query("""
         SELECT xapi_activity_profile_document.last_modified AS lastModified,
-               NULL AS etag
+               xapi_activity_profile_document_sha.sha1_digest AS etag
           FROM xapi_activity_profile_document 
+          LEFT JOIN xapi_activity_profile_document_sha
+            ON xapi_activity_profile_document.id = xapi_activity_profile_document_sha.doc_id
          WHERE activity_iri = :activityIri 
            AND profile_id = :profileId
     """)

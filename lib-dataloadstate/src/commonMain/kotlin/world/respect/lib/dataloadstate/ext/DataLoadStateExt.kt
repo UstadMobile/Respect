@@ -252,9 +252,13 @@ fun <T: Any> DataLoadState<List<T>>.firstOrNotLoaded(): DataLoadState<T> {
  * set header take precedence.
  */
 fun DataLoadState<*>.lastModifiedForHttpResponseHeader(): String? {
-    return metaInfo.headers?.get(HttpHeaders.LastModified)
+    return metaInfo.headers[HttpHeaders.LastModified]
         ?: metaInfo.lastStored.takeIf { it > 0 }?.let { GMTDate(it).toHttpDate() }
         ?: metaInfo.lastModified.takeIf { it > 0 }?.let { GMTDate(it).toHttpDate() }
+}
+
+fun DataLoadState<*>.etagForHttpResponseHeader(): String? {
+    return metaInfo.headers[HttpHeaders.ETag] ?: metaInfo.etag
 }
 
 fun DataLoadState<*>.toPrettyString(): String {

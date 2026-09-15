@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 16,
-    "identityHash": "3745a599274fad9d7c75304ca2cbcf04",
+    "identityHash": "df8dcd6747ef3f4752f5a14a3c3b0451",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -2552,11 +2552,35 @@
             "id"
           ]
         }
+      },
+      {
+        "tableName": "xapi_activity_profile_document_sha",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`doc_id` TEXT NOT NULL, `sha1_digest` TEXT NOT NULL, PRIMARY KEY(`doc_id`))",
+        "fields": [
+          {
+            "fieldPath": "docId",
+            "columnName": "doc_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sha1digest",
+            "columnName": "sha1_digest",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "doc_id"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3745a599274fad9d7c75304ca2cbcf04')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'df8dcd6747ef3f4752f5a14a3c3b0451')"
     ]
   }
 }

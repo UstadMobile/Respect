@@ -1,5 +1,7 @@
 package org.openeel.libxapi.test
 
+import io.ktor.http.HttpHeaders
+import io.ktor.util.sha1
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -10,6 +12,7 @@ import world.respect.lib.dataloadstate.datetime.toGMTDate
 import world.respect.lib.dataloadstate.datetime.toInstant
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.exceptions.XapiException
+import world.respect.lib.xapi.ext.decodeFromXapiDocument
 import world.respect.lib.xapi.ext.getJson
 import world.respect.lib.xapi.ext.mergeTopLevel
 import world.respect.lib.xapi.ext.postJson
@@ -107,6 +110,8 @@ suspend fun assertActivityProfileCanBePutAndRetrieved(
     )
 
     assertEquals(document.updated, retrieved.updated)
+    val expectedEtag = sha1(document.contentsAsByteArray()).toHexString()
+    assertEquals(expectedEtag, loadState.metaInfo.headers[HttpHeaders.ETag])
 }
 
 /**
@@ -181,6 +186,8 @@ suspend fun assertNonExistentActivityProfileWhenPostedCreatesNewDocument(
         document.contentsAsByteArray(),
         retrieved.contentsAsByteArray()
     )
+    val expectedEtag = sha1(document.contentsAsByteArray()).toHexString()
+    assertEquals(expectedEtag, loadState.metaInfo.headers[HttpHeaders.ETag])
 }
 
 /**
@@ -228,16 +235,23 @@ suspend fun assertExistingActivityProfileJsonDocumentWhenPostedMergesTopLevelPro
         serializer = JsonObject.serializer(),
     )
 
-    val jsonObjRetrieved = resource.getJson(
-        docParams = params,
-        json = json,
+    val getResult = resource.get(params = params)
+    val document = getResult.dataOrNull()
+    assertNotNull(document)
+
+    val jsonObjRetrieved = json.decodeFromXapiDocument(
         deserializer = JsonObject.serializer(),
-    ).dataOrNull()
-    assertNotNull(jsonObjRetrieved)
+        document = document,
+    )
 
     assertEquals(
         expected = initJsonObj.mergeTopLevel(updatedPosted),
         actual = jsonObjRetrieved,
+    )
+
+    assertEquals(
+        expected = sha1(document.contentsAsByteArray()).toHexString(),
+        actual = getResult.metaInfo.headers[HttpHeaders.ETag]
     )
 }
 

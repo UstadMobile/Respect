@@ -16,6 +16,7 @@ import world.respect.lib.dataloadstate.DataLayerHeaders
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.dataloadstate.ext.etagForHttpResponseHeader
 import world.respect.lib.dataloadstate.ext.lastModifiedForHttpResponseHeader
 import world.respect.lib.dataloadstate.throwable.ExceptionWithHttpStatusCode
 import kotlin.time.Instant
@@ -86,7 +87,7 @@ suspend fun <T: Any> ApplicationCall.respondDataLoadState(
     dataLoadState: DataLoadState<T>,
     onRespondWithData: suspend ApplicationCall.(T) -> Unit,
 ) {
-    dataLoadState.metaInfo.etag?.also {
+    dataLoadState.etagForHttpResponseHeader()?.also {
         response.header(HttpHeaders.ETag, it)
     }
 

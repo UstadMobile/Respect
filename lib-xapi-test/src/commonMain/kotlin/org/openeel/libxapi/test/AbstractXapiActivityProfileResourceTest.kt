@@ -36,7 +36,7 @@ abstract class AbstractXapiActivityProfileResourceTest {
      * it.
      */
     @Test
-    fun givenDocumentStoredAndNotModified_whenRetrievedWithIfNotModifiedHeader_thenReturnsNotModified() = runBlocking {
+    fun givenDocumentStoredAndNotModified_whenRetrievedWithValidationHeaders_thenReturnsNotModified() = runBlocking {
         withXapiActivityProfileResource { resource ->
             val document = XapiActivityProfileTestParams.DOC
             resource.put(
@@ -51,6 +51,9 @@ abstract class AbstractXapiActivityProfileResourceTest {
             val initResponseLastMod = initResponse.metaInfo.headers[HttpHeaders.LastModified]
             assertNotNull(initResponseLastMod)
 
+            val initResponseETag = initResponse.metaInfo.headers[HttpHeaders.ETag]
+            assertNotNull(initResponseETag)
+
             val response = resource.get(
                 params = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1,
                 dataLoadParams = DataLoadParams(
@@ -62,6 +65,18 @@ abstract class AbstractXapiActivityProfileResourceTest {
 
             assertIs<NoDataLoadedState<XapiDocument>>(response)
             assertEquals(NoDataLoadedState.Reason.NOT_MODIFIED, response.reason)
+
+            val responseWithIfNoneMatch = resource.get(
+                params = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1,
+                dataLoadParams = DataLoadParams(
+                    requestHeaders = headersOf(
+                        HttpHeaders.IfNoneMatch to listOf(initResponseETag)
+                    )
+                )
+            )
+
+            assertIs<NoDataLoadedState<XapiDocument>>(responseWithIfNoneMatch)
+            assertEquals(NoDataLoadedState.Reason.NOT_MODIFIED, responseWithIfNoneMatch.reason)
         }
     }
 

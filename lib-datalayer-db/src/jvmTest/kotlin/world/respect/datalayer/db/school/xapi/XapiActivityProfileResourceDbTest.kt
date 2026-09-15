@@ -1,6 +1,8 @@
 package world.respect.datalayer.db.school.xapi
 
+import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
+import io.ktor.util.sha1
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -14,6 +16,7 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.model.XapiDocumentByteArrayImpl
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.time.Clock
@@ -63,11 +66,19 @@ class XapiActivityProfileResourceDbTest : AbstractXapiActivityProfileResourceTes
 
             resource.updateLocal(params, doc)
 
-            val retrieved = resource.get(params).dataOrNull()
-            assertNotNull(retrieved)
-            assertEquals("""{"synced": true}""", retrieved.contentsAsByteArray().decodeToString())
-            assertEquals("application/json", retrieved.type)
-            assertEquals(timestamp.toGMTDate(), retrieved.updated)
+            val getResult = resource.get(params)
+            val retrievedDoc = getResult.dataOrNull()
+            assertNotNull(retrievedDoc)
+            assertContentEquals(
+                expected = doc.contentsAsByteArray(),
+                actual = retrievedDoc.contentsAsByteArray()
+            )
+            assertEquals(doc.type, retrievedDoc.type)
+            assertEquals(timestamp.toGMTDate(), retrievedDoc.updated)
+            assertEquals(
+                expected = sha1(doc.contentsAsByteArray()).toHexString(),
+                actual = getResult.metaInfo.headers[HttpHeaders.ETag]
+            )
         }
     }
 }

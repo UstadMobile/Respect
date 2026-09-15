@@ -62,6 +62,7 @@ import world.respect.datalayer.db.school.xapi.daos.XapiActivityEntityDao
 import world.respect.datalayer.db.school.xapi.daos.XapiActivityExtensionDao
 import world.respect.datalayer.db.school.xapi.daos.XapiActivityInteractionDao
 import world.respect.datalayer.db.school.xapi.daos.XapiActivityProfileDocumentDao
+import world.respect.datalayer.db.school.xapi.daos.XapiActivityProfileDocumentShaDao
 import world.respect.datalayer.db.school.xapi.daos.XapiActorDao
 import world.respect.datalayer.db.school.xapi.daos.XapiGroupMemberActorJoinDao
 import world.respect.datalayer.db.school.xapi.daos.XapiSessionEntityDao
@@ -75,6 +76,7 @@ import world.respect.datalayer.db.school.xapi.entities.XapiActivityExtensionEnti
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityInteractionEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntry
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityProfileDocumentEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiActivityProfileDocumentShaEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiActorEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiGroupMemberActorJoin
 import world.respect.datalayer.db.school.xapi.entities.XapiSessionEntity
@@ -140,6 +142,7 @@ import world.respect.datalayer.school.model.Report
         XapiVerbLangMapEntry::class,
         XapiSessionEntity::class,
         XapiActivityProfileDocumentEntity::class,
+        XapiActivityProfileDocumentShaEntity::class,
     ],
     version = 16,
 )
@@ -221,6 +224,7 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
 
     abstract fun getActivityProfileDocumentDao(): XapiActivityProfileDocumentDao
 
+    abstract fun getActivityProfileDocumentShaDao(): XapiActivityProfileDocumentShaDao
 
     companion object {
 

@@ -54,10 +54,17 @@ class XapiActivityProfileResourceRepository(
             dataLoadParams = dataLoadParams.copy(
                 requestHeaders = headers {
                     appendAll(dataLoadParams.requestHeaders)
-                    localState.metaInfo.headers?.get(HttpHeaders.LastModified)?.also {
+
+                    /**
+                     * Using the last-modified header here will prevent data just updated locally
+                     * from being overwritten. The last-modified header on the server will be the
+                     * time that data was actually stored on the server, NOT when it was actually
+                     * modified on the client. It is however close enough.
+                     */
+                    localState.metaInfo.headers[HttpHeaders.LastModified]?.also {
                         set(HttpHeaders.IfModifiedSince, it)
                     }
-                    localState.metaInfo.headers?.get(HttpHeaders.ETag)?.also {
+                    localState.metaInfo.headers[HttpHeaders.ETag]?.also {
                         set(HttpHeaders.IfNoneMatch, it)
                     }
                 }

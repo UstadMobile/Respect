@@ -8,6 +8,9 @@ import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.NoDataLoadedState
+import io.ktor.http.HttpHeaders
+import io.ktor.http.toHttpDate
+import io.ktor.util.date.GMTDate
 
 fun <T: Any> DataLoadState<T>.combineWithRemote(
     remote: DataLoadState<*>
@@ -245,20 +248,13 @@ fun <T: Any> DataLoadState<List<T>>.firstOrNotLoaded(): DataLoadState<T> {
 }
 
 /**
- * REST API HTTP server endpoints SHOULD use
+ * Return the Last-Modified header as it should be put on the HttpResponse, if any. An explicitly
+ * set header take precedence.
  */
-fun DataLoadState<*>.lastModifiedForHttpResponseHeader(): Long? {
-    return when {
-        metaInfo.lastStored > 0 -> {
-            metaInfo.lastStored
-        }
-
-        metaInfo.lastModified > 0 -> {
-            metaInfo.lastModified
-        }
-
-        else -> null
-    }
+fun DataLoadState<*>.lastModifiedForHttpResponseHeader(): String? {
+    return metaInfo.headers?.get(HttpHeaders.LastModified)
+        ?: metaInfo.lastStored.takeIf { it > 0 }?.let { GMTDate(it).toHttpDate() }
+        ?: metaInfo.lastModified.takeIf { it > 0 }?.let { GMTDate(it).toHttpDate() }
 }
 
 fun DataLoadState<*>.toPrettyString(): String {

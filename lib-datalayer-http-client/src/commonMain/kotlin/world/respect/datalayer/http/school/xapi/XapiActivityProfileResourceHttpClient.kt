@@ -44,6 +44,7 @@ class XapiActivityProfileResourceHttpClient(
             url = params.urlWithParams(),
         ) {
             useTokenProvider(tokenProvider)
+            headers.appendAll(dataLoadParams.requestHeaders)
         }
     }
 
@@ -58,6 +59,7 @@ class XapiActivityProfileResourceHttpClient(
             }
         ) {
             useTokenProvider(tokenProvider)
+            headers.appendAll(dataLoadParams.requestHeaders)
         }
     }
 

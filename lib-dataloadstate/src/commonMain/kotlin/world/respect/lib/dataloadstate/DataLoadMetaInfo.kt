@@ -52,7 +52,7 @@ data class DataLoadMetaInfo(
 
     val varyHeader: String? = null,
 
-    val headers: Headers? = null,
+    val headers: Headers = Headers.Empty,
 
     val permissionsLastModified: Instant? = null,
 

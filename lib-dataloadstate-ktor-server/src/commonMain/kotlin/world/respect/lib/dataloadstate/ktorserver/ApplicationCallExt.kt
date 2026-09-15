@@ -90,10 +90,8 @@ suspend fun <T: Any> ApplicationCall.respondDataLoadState(
         response.header(HttpHeaders.ETag, it)
     }
 
-    val lastModTimeStamp = dataLoadState.lastModifiedForHttpResponseHeader()
-
-    lastModTimeStamp?.also {
-        response.header(HttpHeaders.LastModified, GMTDate(it).toHttpDate())
+    dataLoadState.lastModifiedForHttpResponseHeader()?.also {
+        response.header(HttpHeaders.LastModified, it)
     }
 
     dataLoadState.metaInfo.consistentThrough?.also { consistentThrough ->
@@ -110,25 +108,13 @@ suspend fun <T: Any> ApplicationCall.respondDataLoadState(
         )
     }
 
-    if(lastModTimeStamp != null && request.validateIfNotModifiedSince(
-            Instant.fromEpochMilliseconds(lastModTimeStamp)
-        )) {
-        respond(HttpStatusCode.NotModified)
-        return
-    }
-
-    val ifNoneMatchRequestHeader = request.headers[HttpHeaders.IfNoneMatch]
-    if(ifNoneMatchRequestHeader != null &&
-        ifNoneMatchRequestHeader == dataLoadState.metaInfo.etag
-    ) {
-        respond(HttpStatusCode.NotModified)
-        return
-    }
-
-
     when {
         dataLoadState is DataReadyState -> {
             onRespondWithData(dataLoadState.data)
+        }
+
+        dataLoadState is NoDataLoadedState && dataLoadState.reason == NoDataLoadedState.Reason.NOT_MODIFIED -> {
+            respond(HttpStatusCode.NotModified)
         }
 
         dataLoadState is NoDataLoadedState && dataLoadState.reason == NoDataLoadedState.Reason.NOT_FOUND -> {
@@ -147,7 +133,6 @@ suspend fun <T: Any> ApplicationCall.respondDataLoadState(
             respond(HttpStatusCode.ServiceUnavailable)
         }
     }
-
 }
 
 

@@ -1,9 +1,14 @@
 package world.respect.datalayer.repository.school.xapi
 
+import io.ktor.http.HttpHeaders
+import io.ktor.http.headers
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
+import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.school.xapi.XapiActivityProfileResourceLocal
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.ext.copyLoadState
 import world.respect.lib.xapi.model.XapiDocument
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
 
@@ -35,21 +40,46 @@ class XapiActivityProfileResourceRepository(
         params: XapiActivityProfileResource.MultiDocParams,
         dataLoadParams: DataLoadParams
     ): DataLoadState<List<String>> {
-        TODO("Not yet implemented")
+        TODO()
     }
 
     override suspend fun get(
         params: XapiActivityProfileResource.SingleDocumentParams,
         dataLoadParams: DataLoadParams
     ): DataLoadState<XapiDocument> {
-        TODO("Not yet implemented")
+        val localState = local.get(params, dataLoadParams)
+
+        val remoteState = remote.get(
+            params = params,
+            dataLoadParams = dataLoadParams.copy(
+                requestHeaders = headers {
+                    appendAll(dataLoadParams.requestHeaders)
+                    localState.metaInfo.headers?.get(HttpHeaders.LastModified)?.also {
+                        set(HttpHeaders.IfModifiedSince, it)
+                    }
+                    localState.metaInfo.headers?.get(HttpHeaders.ETag)?.also {
+                        set(HttpHeaders.IfNoneMatch, it)
+                    }
+                }
+            )
+        )
+
+        if(remoteState is DataReadyState) {
+            local.updateLocal(params, remoteState.data)
+            return local.get(params, dataLoadParams).copyLoadState(
+                remoteState = remoteState
+            )
+        }
+
+        return localState.copyLoadState(remoteState = remoteState)
     }
 
     override suspend fun post(
         params: XapiActivityProfileResource.SingleDocumentParams,
         document: XapiDocument
     ) {
-        TODO("Not yet implemented")
+        local.post(params, document)
+        //Do remote write queue here
     }
 
     override suspend fun put(

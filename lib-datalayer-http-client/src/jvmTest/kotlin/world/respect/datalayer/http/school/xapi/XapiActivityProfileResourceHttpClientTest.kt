@@ -55,11 +55,4 @@ class XapiActivityProfileResourceHttpClientTest : AbstractXapiActivityProfileRes
         }
     }
 
-    /**
-     * This function exists just to tell Android Studio/IntelliJ that this is a test class,
-     * without at least one function annotated test it won't show the run test option
-     */
-    @Test
-    fun thisIsATestClass() {}
-
 }

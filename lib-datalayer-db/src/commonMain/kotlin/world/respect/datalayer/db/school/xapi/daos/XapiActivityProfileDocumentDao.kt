@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityProfileDocumentEntity
+import world.respect.datalayer.db.shared.ETagAndLastModifiedAsStrings
 import world.respect.datalayer.db.shared.InstantAsTimestampString
 
 @Dao
@@ -25,6 +26,18 @@ interface XapiActivityProfileDocumentDao {
         activityIri: String,
         profileId: String,
     ): XapiActivityProfileDocumentEntity?
+
+    @Query("""
+        SELECT xapi_activity_profile_document.last_modified AS lastModified,
+               NULL AS etag
+          FROM xapi_activity_profile_document 
+         WHERE activity_iri = :activityIri 
+           AND profile_id = :profileId
+    """)
+    suspend fun findETagAndLastModifiedByActivityIriAndProfileId(
+        activityIri: String,
+        profileId: String,
+    ): ETagAndLastModifiedAsStrings?
 
     @Query(
         """

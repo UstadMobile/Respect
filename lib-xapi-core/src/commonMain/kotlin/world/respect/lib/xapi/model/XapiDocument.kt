@@ -8,6 +8,10 @@ import io.ktor.util.date.GMTDate
  *
  * See
  * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md#22-document-resources
+ *
+ * As per:
+ * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Communication.md#part-three-data-processing-validation-and-security
+ * "An LRS responding to a GET request without using a transfer encoding or using the identity transfer encoding MUST calculate the value of the ETag header to be a hexadecimal string of the SHA-1 digest of the contents"
  */
 interface XapiDocument {
 

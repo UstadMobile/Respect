@@ -33,7 +33,9 @@ fun Route.XapiActivityProfileResourceRoute(
                     params = XapiActivityProfileResource.SingleDocumentParams.fromParams(
                         params = call.request.queryParameters
                     ),
-                    dataLoadParams = DataLoadParams(),
+                    dataLoadParams = DataLoadParams(
+                        requestHeaders = call.request.headers
+                    ),
                 )
             )
         } else {
@@ -42,7 +44,9 @@ fun Route.XapiActivityProfileResourceRoute(
                     params = XapiActivityProfileResource.MultiDocParams.fromParams(
                         params = call.request.queryParameters
                     ),
-                    dataLoadParams = DataLoadParams(),
+                    dataLoadParams = DataLoadParams(
+                        requestHeaders = call.request.headers
+                    ),
                 ),
             )
         }

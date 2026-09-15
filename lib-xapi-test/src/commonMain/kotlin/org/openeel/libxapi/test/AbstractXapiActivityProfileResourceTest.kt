@@ -1,8 +1,16 @@
 package org.openeel.libxapi.test
 
+import io.ktor.http.HttpHeaders
+import io.ktor.http.headersOf
 import kotlinx.coroutines.runBlocking
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.xapi.model.XapiDocument
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertNotNull
 
 abstract class AbstractXapiActivityProfileResourceTest {
 
@@ -16,6 +24,44 @@ abstract class AbstractXapiActivityProfileResourceTest {
             assertActivityProfileCanBePutAndRetrieved(
                 resource = resource
             )
+        }
+    }
+
+    /**
+     * Check if the resource supports validation using the If-Modified-Since header parameter.
+     *
+     * Important: The Last-Modified timestamp on the resource will be the time the resource actually
+     * stored it. When a mobile client stores a document, it's last-modified time will be when the
+     * mobile client stored it. The last-modified time on the server will be when the server stored
+     * it.
+     */
+    @Test
+    fun givenDocumentStoredAndNotModified_whenRetrievedWithIfNotModifiedHeader_thenReturnsNotModified() = runBlocking {
+        withXapiActivityProfileResource { resource ->
+            val document = XapiActivityProfileTestParams.DOC
+            resource.put(
+                params = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1,
+                document = document
+            )
+
+            val initResponse = resource.get(
+                params = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1,
+            )
+
+            val initResponseLastMod = initResponse.metaInfo.headers[HttpHeaders.LastModified]
+            assertNotNull(initResponseLastMod)
+
+            val response = resource.get(
+                params = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1,
+                dataLoadParams = DataLoadParams(
+                    requestHeaders = headersOf(
+                        HttpHeaders.IfModifiedSince to listOf(initResponseLastMod)
+                    )
+                )
+            )
+
+            assertIs<NoDataLoadedState<XapiDocument>>(response)
+            assertEquals(NoDataLoadedState.Reason.NOT_MODIFIED, response.reason)
         }
     }
 

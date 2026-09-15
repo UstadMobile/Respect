@@ -25,7 +25,19 @@ interface XapiDocumentResource<MultiDocParams: Any, SingleDocParams: Any> {
 
 
     /**
-     * Get a single document
+     * Get a single document.
+     *
+     * @param params the SingleDocParams that identify the document for this type of
+     *        resource e.g. Activity Profile API, State API, etc.
+     * @param dataLoadParams DataLoadParams for the request. The If-Not-Modified-Since and
+     *        If-None-Match headers will be checked and if the document has not been modified
+     *        then NoDataLoadedState.notModified() will be returned.
+     *
+     * @return the Document as a [DataLoadState].
+     *         If no document exists, then NoDataLoadedState.notFound()
+     *         If the document has not been modified as per If-Not-Modified-Since or If-None-Match
+     *         headers, then NoDataLoadedState.notModified()
+     *         Otherwise, DataReadyState with the document data.
      */
     suspend fun get(
         params: SingleDocParams,

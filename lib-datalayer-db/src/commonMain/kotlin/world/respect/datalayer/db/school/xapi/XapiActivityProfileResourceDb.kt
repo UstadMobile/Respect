@@ -1,17 +1,23 @@
 package world.respect.datalayer.db.school.xapi
 
+import io.ktor.http.HttpHeaders
+import io.ktor.http.headersOf
+import io.ktor.http.toHttpDate
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.toXapiActivityProfileDocumentEntity
 import world.respect.datalayer.db.shared.InstantAsTimestampString
+import world.respect.datalayer.db.shared.toModel
 import world.respect.datalayer.school.xapi.XapiActivityProfileResourceLocal
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.dataloadstate.ext.hasIfNotModifiedHeaders
+import world.respect.lib.dataloadstate.ext.isNotModified
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.mergeTopLevel
 import world.respect.lib.xapi.model.XapiDocument
@@ -53,6 +59,20 @@ class XapiActivityProfileResourceDb(
         params: XapiActivityProfileResource.SingleDocumentParams,
         dataLoadParams: DataLoadParams
     ): DataLoadState<XapiDocument> {
+        if(
+            schoolDb.takeIf {
+                dataLoadParams.requestHeaders.hasIfNotModifiedHeaders()
+            }?.getActivityProfileDocumentDao()
+                ?.findETagAndLastModifiedByActivityIriAndProfileId(
+                    activityIri = params.activityId,
+                    profileId = params.profileId
+                )?.let {
+                    dataLoadParams.requestHeaders.isNotModified(it.toModel())
+                } == true
+        ) {
+            return NoDataLoadedState.notModified()
+        }
+
         val entity = schoolDb.getActivityProfileDocumentDao().findByActivityIriAndProfileId(
             activityIri = params.activityId,
             profileId = params.profileId,
@@ -63,6 +83,9 @@ class XapiActivityProfileResourceDb(
                 data = entity,
                 metaInfo = DataLoadMetaInfo(
                     lastModified = entity.updated.timestamp,
+                    headers = headersOf(
+                        HttpHeaders.LastModified to listOf(entity.updated.toHttpDate())
+                    )
                 )
             )
         } else {

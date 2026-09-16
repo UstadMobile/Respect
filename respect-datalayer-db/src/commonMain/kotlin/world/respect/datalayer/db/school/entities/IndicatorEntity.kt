@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.realm.entities
+package world.respect.datalayer.db.school.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -11,5 +11,4 @@ data class IndicatorEntity(
     val description: String = "",
     val type: String = "",
     val sql: String = "",
-    val filterRealUsersOnly: Boolean = false,
 )

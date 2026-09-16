@@ -1,7 +1,7 @@
 package world.respect.datalayer.db.school.adapters
 
 import kotlinx.serialization.json.Json
-import world.respect.datalayer.db.realm.entities.IndicatorEntity
+import world.respect.datalayer.db.school.entities.IndicatorEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
 import world.respect.lib.xapi.extensions.reportoptions.ReportOptions
 import world.respect.lib.xapi.extensions.reportoptions.Indicator
@@ -44,7 +44,6 @@ fun IndicatorEntity.toIndicator(): Indicator {
         description = this.description,
         type = this.type,
         sql = this.sql,
-        filterRealUsersOnly = this.filterRealUsersOnly,
     )
 }
 
@@ -55,6 +54,5 @@ fun Indicator.toIndicatorEntity(): IndicatorEntity {
         description = this.description,
         type = this.type,
         sql = this.sql,
-        filterRealUsersOnly = this.filterRealUsersOnly,
     )
 }

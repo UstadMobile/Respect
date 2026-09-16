@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 16,
-    "identityHash": "4d846b35c88e0cb91ccdfa3f51de1ba6",
+    "identityHash": "9305e9baa3a7c92705cacb268e420716",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -551,7 +551,7 @@
       },
       {
         "tableName": "IndicatorEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`indicatorId` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `type` TEXT NOT NULL, `sql` TEXT NOT NULL, `filterRealUsersOnly` INTEGER NOT NULL, PRIMARY KEY(`indicatorId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`indicatorId` TEXT NOT NULL, `name` TEXT NOT NULL, `description` TEXT NOT NULL, `type` TEXT NOT NULL, `sql` TEXT NOT NULL, PRIMARY KEY(`indicatorId`))",
         "fields": [
           {
             "fieldPath": "indicatorId",
@@ -581,12 +581,6 @@
             "fieldPath": "sql",
             "columnName": "sql",
             "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "filterRealUsersOnly",
-            "columnName": "filterRealUsersOnly",
-            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -2586,7 +2580,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4d846b35c88e0cb91ccdfa3f51de1ba6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9305e9baa3a7c92705cacb268e420716')"
     ]
   }
 }

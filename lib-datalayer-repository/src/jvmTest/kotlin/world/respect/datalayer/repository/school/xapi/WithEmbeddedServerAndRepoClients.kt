@@ -18,6 +18,7 @@ import world.respect.datalayer.http.school.xapi.XapiResourceHttpClient
 import world.respect.datalayer.repository.util.mkdirsIfNotExists
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.lib.test.clientservertest.EmbeddedDataSourceServerContext
+import world.respect.lib.test.clientservertest.insertAdminAndDefaultGrants
 import world.respect.lib.test.clientservertest.newLocalSchoolDatabase
 import world.respect.lib.test.clientservertest.withEmbeddedDataSourceServer
 import world.respect.lib.xapi.remotewritequeue.DrainXapiRemoteWriteQueueUseCase
@@ -84,7 +85,7 @@ data class RepositoryTestContext(
     val clients: List<RepositoryTestClient>,
 )
 
-suspend fun withEmbeddedServerAndRepositoryResources(
+suspend fun withEmbeddedServerAndRepositoryClients(
     workDir: File,
     start: Boolean = true,
     routingConfig: Routing.(EmbeddedDataSourceServerContext) -> Unit,
@@ -112,7 +113,11 @@ suspend fun withEmbeddedServerAndRepositoryResources(
                 dir = clientDir,
                 schoolUrl = schoolUrlVal,
                 localAuthenticatedUser = localAuthenticatedUser,
-            )
+            ).also {
+                it.second.insertAdminAndDefaultGrants(
+                    schoolDb = it.first,
+                )
+            }
 
             RepositoryTestClient(
                 dir = clientDir,

@@ -1,23 +1,24 @@
 package world.respect.datalayer.repository.school.xapi
 
 import app.cash.turbine.test
-import io.ktor.server.routing.route
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.openeel.libxapi.test.res.xapiSampleStatements
+import world.respect.datalayer.http.server.XapiStatementsResourceRoute
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.test.clientservertest.clientServerDatasourceTest
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.time.Duration.Companion.seconds
-import world.respect.datalayer.http.server.XapiStatementsResourceRoute
+import kotlin.uuid.Uuid
 
 class XapiStatementRepositoryIntegrationTest {
 
@@ -26,50 +27,51 @@ class XapiStatementRepositoryIntegrationTest {
     @JvmField
     val temporaryFolder: TemporaryFolder = TemporaryFolder()
 
-    @Test
-    fun givenStatementCreatedOnClient_whenConnected_thenWillBeStoredOnServer() {
-        runBlocking {
-            clientServerDatasourceTest(temporaryFolder.newFolder("test")) {
-                serverRouting {
-                    route("api/school/xapi") {
-                        XapiStatementsResourceRoute(
-                            statementResource = { serverSchoolDataSource.xapiResource.statements },
-                            json = json,
-                        )
-                    }
-                }
+    private val json: Json = Json
 
-                server.start()
-
-                val client = clients.first()
-                client.insertServerAdminAndDefaultGrants()
-
-                val statement: XapiStatement = xapiSampleStatements().first().let {
-                    json.decodeFromJsonElement(it.jsonObject)
-                }
-
-
-                val stmtUuid = statement.id!!
-
-                client.schoolDataSource.xapiResource.statements.post(
-                    listOf(statement)
+    private suspend fun withXapiStatementServerAndRepositoryClients(
+        block: suspend RepositoryTestContext.() -> Unit
+    ) {
+        withEmbeddedServerAndRepositoryClients(
+            workDir = temporaryFolder.newFolder(),
+            start = true,
+            routingConfig = { serverContext ->
+                XapiStatementsResourceRoute(
+                    statementResource = {
+                        serverContext.datasourceContext.datasource.xapiResource.statements
+                    },
+                    json = json,
                 )
+            },
+            block = block,
+        )
+    }
 
-                serverDb.invalidationTracker.createFlow(
-                    "XapiStatementEntity"
-                ).map {
-                    serverSchoolDataSource.xapiResource.statements.get(
-                        listParams = XapiStatementsResource.GetStatementParams(
-                            statementId = stmtUuid,
-                        )
-                    ).dataOrNull()
-                }.filter {
-                    it?.statements?.firstOrNull()?.id == stmtUuid
-                }.test(timeout = 5.seconds) {
-                    val stmtFromServer = awaitItem()?.statements?.firstOrNull()
-                    assertNotNull(stmtFromServer)
-                    assertEquals(stmtUuid, stmtFromServer.id)
-                }
+    @Test
+    fun givenStatementCreatedOnClient_whenConnected_thenWillBeStoredOnServer() = runBlocking {
+        withXapiStatementServerAndRepositoryClients {
+            val client = clients.first()
+            val stmtUuid = Uuid.random()
+
+            val statement: XapiStatement = xapiSampleStatements().first().let {
+                json.decodeFromJsonElement(XapiStatement.serializer(), it.jsonObject)
+            }.copy(id = stmtUuid)
+
+            client.datasource.statements.post(listOf(statement))
+
+            serverContext.datasourceContext.datasource.xapiResource.statements.getAsFlow(
+                listParams = XapiStatementsResource.GetStatementParams(
+                    statementId = stmtUuid,
+                ),
+                dataLoadParams = DataLoadParams(),
+            ).mapNotNull {
+                it.dataOrNull()
+            }.filter {
+                it.statements.firstOrNull()?.id == stmtUuid
+            }.test(timeout = 5_000.seconds) {
+                val stmtFromServer = awaitItem().statements.firstOrNull()
+                assertNotNull(stmtFromServer)
+                assertEquals(stmtUuid, stmtFromServer.id)
             }
         }
     }
@@ -77,35 +79,22 @@ class XapiStatementRepositoryIntegrationTest {
     @Test
     fun givenStatementOnServer_whenGetOnRepoCalled_thenWillBeFetched() {
         runBlocking {
-            clientServerDatasourceTest(temporaryFolder.newFolder("test")) {
-                serverRouting {
-                    route("api/school/xapi") {
-                        XapiStatementsResourceRoute(
-                            statementResource = { serverSchoolDataSource.xapiResource.statements },
-                            json = json,
-                        )
-                    }
-                }
-
-                server.start()
-
-                val client = clients.first()
-                client.insertServerAdminAndDefaultGrants()
+            withXapiStatementServerAndRepositoryClients {
                 val statement: XapiStatement = xapiSampleStatements().first().let {
                     json.decodeFromJsonElement(it.jsonObject)
                 }
 
                 val stmtUuid = statement.id!!
+                val client = clients.first()
 
-                serverSchoolDataSource.xapiResource.statements.post(
+                serverContext.datasourceContext.datasource.xapiResource.statements.post(
                     listOf(statement)
                 )
 
-                val stmtFromClient = client.schoolDataSource.xapiResource.statements.get(
+                val stmtFromClient = client.datasource.statements.get(
                     listParams = XapiStatementsResource.GetStatementParams(
                         statementId = stmtUuid,
-                    ),
-
+                    )
                 ).dataOrNull()?.statements?.firstOrNull()
 
                 assertNotNull(stmtFromClient)
@@ -113,6 +102,4 @@ class XapiStatementRepositoryIntegrationTest {
             }
         }
     }
-
-
 }

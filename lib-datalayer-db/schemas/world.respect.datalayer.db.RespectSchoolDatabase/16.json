@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 16,
-    "identityHash": "df8dcd6747ef3f4752f5a14a3c3b0451",
+    "identityHash": "1ed6066c538d84dcf2c7f055462a099f",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -2576,11 +2576,71 @@
             "doc_id"
           ]
         }
+      },
+      {
+        "tableName": "XapiRemoteWriteQueueItemEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`xrqItemId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `xrqMethod` INTEGER NOT NULL, `xrqResource` INTEGER NOT NULL, `xrqEntityItemId` TEXT NOT NULL, `xrqTimeQueued` INTEGER NOT NULL, `xrqAttemptCount` INTEGER NOT NULL, `xrqTimeWritten` INTEGER NOT NULL, `xrqAccountGuid` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "xrqItemId",
+            "columnName": "xrqItemId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xrqMethod",
+            "columnName": "xrqMethod",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xrqResource",
+            "columnName": "xrqResource",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xrqEntityItemId",
+            "columnName": "xrqEntityItemId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xrqTimeQueued",
+            "columnName": "xrqTimeQueued",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xrqAttemptCount",
+            "columnName": "xrqAttemptCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xrqTimeWritten",
+            "columnName": "xrqTimeWritten",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "xrqAccountGuid",
+            "columnName": "xrqAccountGuid",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "xrqItemId"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'df8dcd6747ef3f4752f5a14a3c3b0451')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1ed6066c538d84dcf2c7f055462a099f')"
     ]
   }
 }

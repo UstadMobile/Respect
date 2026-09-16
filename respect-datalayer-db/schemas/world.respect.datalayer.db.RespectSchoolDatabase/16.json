@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 15,
-    "identityHash": "5c52ccc0c3a85e0c4dea0700c62f8be7",
+    "version": 16,
+    "identityHash": "9305e9baa3a7c92705cacb268e420716",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -2500,8 +2500,8 @@
         }
       },
       {
-        "tableName": "ReportQueryResult",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rqrUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `rqrReportUid` INTEGER NOT NULL, `rqrLastModified` INTEGER NOT NULL, `rqrLastValidated` INTEGER NOT NULL, `rqrReportSeriesUid` INTEGER NOT NULL, `rqrXAxis` TEXT NOT NULL, `rqrYAxis` REAL NOT NULL, `rqrSubgroup` TEXT NOT NULL, `rqrTimeZone` TEXT NOT NULL)",
+        "tableName": "ReportQueryResultEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`rqrUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `rqrReportUid` TEXT NOT NULL, `rqrLastModified` INTEGER NOT NULL, `rqrLastValidated` INTEGER NOT NULL, `rqrReportSeriesUid` INTEGER NOT NULL, `rqrXAxis` TEXT NOT NULL, `rqrYAxis` REAL NOT NULL, `rqrSubgroup` TEXT NOT NULL, `rqrTimeZone` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "rqrUid",
@@ -2512,7 +2512,7 @@
           {
             "fieldPath": "rqrReportUid",
             "columnName": "rqrReportUid",
-            "affinity": "INTEGER",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -2580,7 +2580,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '5c52ccc0c3a85e0c4dea0700c62f8be7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9305e9baa3a7c92705cacb268e420716')"
     ]
   }
 }

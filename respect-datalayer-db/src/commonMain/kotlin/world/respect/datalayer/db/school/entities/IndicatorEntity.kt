@@ -1,4 +1,4 @@
-package world.respect.datalayer.db.realm.entities
+package world.respect.datalayer.db.school.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

@@ -30,9 +30,9 @@ import world.respect.datalayer.db.school.xapi.adapters.toVerbEntities
 import world.respect.datalayer.db.school.xapi.adapters.toXapiAssignmentResult
 import world.respect.datalayer.db.school.xapi.composites.XapiStatementAndJsonEntities
 import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityDao
-import world.respect.datalayer.school.xapi.XapiActivitiesResourceLocal
+import world.respect.lib.xapi.resources.local.XapiActivitiesResourceLocal
 import world.respect.lib.xapi.resources.XapiStatementsResource
-import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
+import world.respect.lib.xapi.resources.local.XapiStatementsResourceLocal
 import world.respect.datalayer.school.xapi.ext.allDefinedActivities
 import world.respect.lib.xapi.model.XapiStatement
 import kotlin.time.Clock
@@ -42,7 +42,7 @@ import world.respect.datalayer.db.school.xapi.ext.allActivityUids
 import world.respect.datalayer.db.school.xapi.ext.allActorUids
 import world.respect.datalayer.ext.appendIfNotNull
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.datalayer.school.xapi.XapiAgentsResourceLocal
+import world.respect.lib.xapi.resources.local.XapiAgentsResourceLocal
 import world.respect.datalayer.school.xapi.ext.allActivities
 import world.respect.datalayer.school.xapi.ext.allActors
 import world.respect.datalayer.school.xapi.ext.allDefinedVerbs
@@ -368,7 +368,6 @@ class XapiStatementsResourceDb(
 
     override suspend fun updateLocal(
         list: List<XapiStatement>,
-        forceOverwrite: Boolean
     ) {
         //needs to check for existing statement, if existing, do nothing.
         schoolDb.useWriterConnection { con ->
@@ -549,10 +548,6 @@ class XapiStatementsResourceDb(
         return get(
             listParams = GetStatementParams(statementId = uuid)
         ).dataOrNull()?.statements?.firstOrNull()
-    }
-
-    override suspend fun findByUidList(uids: List<String>): List<XapiStatement> {
-        TODO()
     }
 
     override fun getAssignmentProgress(

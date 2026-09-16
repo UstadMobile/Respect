@@ -5,7 +5,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.toEntities
 import world.respect.datalayer.ext.EPOCH
-import world.respect.datalayer.school.xapi.XapiAgentsResourceLocal
+import world.respect.lib.xapi.resources.local.XapiAgentsResourceLocal
 import world.respect.lib.xapi.XapiRequestHeaders
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.model.XapiGroup

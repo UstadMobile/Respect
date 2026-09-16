@@ -10,9 +10,9 @@ import org.junit.rules.TemporaryFolder
 import org.openeel.libxapi.test.AbstractXapiActivityProfileResourceTest
 import world.respect.datalayer.http.server.XapiActivityProfileResourceRoute
 import world.respect.datalayer.school.model.AuthToken
+import world.respect.lib.test.clientservertest.withEmbeddedDataSourceServer
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import world.respect.libutil.util.time.systemTimeInMillis
-import kotlin.test.Test
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationClient
 
 class XapiActivityProfileResourceHttpClientTest : AbstractXapiActivityProfileResourceTest() {

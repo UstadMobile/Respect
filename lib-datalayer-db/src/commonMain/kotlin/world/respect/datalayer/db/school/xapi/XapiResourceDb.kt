@@ -8,11 +8,11 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
-import world.respect.datalayer.school.xapi.XapiActivitiesResourceLocal
-import world.respect.datalayer.school.xapi.XapiActivityProfileResourceLocal
-import world.respect.datalayer.school.xapi.XapiAgentsResourceLocal
-import world.respect.datalayer.school.xapi.XapiResourceLocal
-import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
+import world.respect.lib.xapi.resources.local.XapiActivitiesResourceLocal
+import world.respect.lib.xapi.resources.local.XapiActivityProfileResourceLocal
+import world.respect.lib.xapi.resources.local.XapiAgentsResourceLocal
+import world.respect.lib.xapi.resources.local.XapiResourceLocal
+import world.respect.lib.xapi.resources.local.XapiStatementsResourceLocal
 
 class XapiResourceDb(
     private val schoolDb: RespectSchoolDatabase,

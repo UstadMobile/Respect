@@ -1,5 +1,6 @@
 package world.respect.datalayer.repository
 
+import kotlinx.serialization.json.Json
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
@@ -28,6 +29,7 @@ class SchoolDataSourceRepository(
     internal val remote: SchoolDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
+    private val json: Json,
 ) : SchoolDataSource {
 
     override val reportDataSource: ReportDataSource by lazy {
@@ -135,8 +137,8 @@ class SchoolDataSourceRepository(
         XapiResourceRepository(
             local = local.xapiResource,
             remote = remote.xapiResource,
-            validationHelper = validationHelper,
             remoteWriteQueue = remoteWriteQueue,
+            json = json,
         )
     }
 

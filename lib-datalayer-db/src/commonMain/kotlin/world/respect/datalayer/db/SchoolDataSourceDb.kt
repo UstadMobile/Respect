@@ -36,7 +36,7 @@ import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
-import world.respect.datalayer.school.xapi.XapiResourceLocal
+import world.respect.lib.xapi.resources.local.XapiResourceLocal
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 
 /**

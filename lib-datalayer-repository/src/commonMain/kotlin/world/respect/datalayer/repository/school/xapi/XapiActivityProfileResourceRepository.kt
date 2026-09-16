@@ -3,14 +3,13 @@ package world.respect.datalayer.repository.school.xapi
 import io.ktor.http.HttpHeaders
 import io.ktor.http.headers
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
-import world.respect.datalayer.school.writequeue.WriteQueueItem
-import world.respect.datalayer.school.xapi.XapiActivityProfileResourceLocal
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.copyLoadState
 import world.respect.lib.xapi.model.XapiDocument
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
+import world.respect.lib.xapi.resources.local.XapiActivityProfileResourceLocal
 
 /**
  * An offline-first repository implementation for XapiActivityProfileResource.
@@ -40,7 +39,7 @@ class XapiActivityProfileResourceRepository(
         params: XapiActivityProfileResource.MultiDocParams,
         dataLoadParams: DataLoadParams
     ): DataLoadState<List<String>> {
-        TODO()
+        return local.getMultipleDocuments(params, dataLoadParams)
     }
 
     override suspend fun get(
@@ -86,14 +85,13 @@ class XapiActivityProfileResourceRepository(
         document: XapiDocument
     ) {
         local.post(params, document)
-        //Do remote write queue here
     }
 
     override suspend fun put(
         params: XapiActivityProfileResource.SingleDocumentParams,
         document: XapiDocument
     ) {
-        TODO("Not yet implemented")
+        local.put(params, document)
     }
 
     override suspend fun delete(params: XapiActivityProfileResource.SingleDocumentParams) {

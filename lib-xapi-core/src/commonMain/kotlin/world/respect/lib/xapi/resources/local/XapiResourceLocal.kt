@@ -1,6 +1,5 @@
-package world.respect.datalayer.school.xapi
+package world.respect.lib.xapi.resources.local
 
-import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import world.respect.lib.xapi.resources.XapiResource
 
 interface XapiResourceLocal: XapiResource {

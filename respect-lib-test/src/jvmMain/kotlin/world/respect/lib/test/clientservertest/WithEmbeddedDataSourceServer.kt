@@ -1,4 +1,4 @@
-package world.respect.datalayer.http.school.xapi
+package world.respect.lib.test.clientservertest
 
 import io.ktor.http.ContentType
 import io.ktor.http.Url
@@ -9,9 +9,6 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.routing
 import kotlinx.serialization.json.Json
-import world.respect.lib.test.clientservertest.SchoolDbDataSourceContext
-import world.respect.lib.test.clientservertest.insertAdminAndDefaultGrants
-import world.respect.lib.test.clientservertest.withSchoolDbDataSource
 import world.respect.libutil.findFreePort
 import java.io.File
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer

@@ -1,4 +1,4 @@
-package world.respect.datalayer.school.xapi
+package world.respect.lib.xapi.resources.local
 
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.resources.XapiActivitiesResource

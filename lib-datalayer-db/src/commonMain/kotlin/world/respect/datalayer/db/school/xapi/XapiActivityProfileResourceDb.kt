@@ -15,7 +15,7 @@ import world.respect.datalayer.db.school.xapi.adapters.toXapiActivityProfileDocu
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityProfileDocumentShaEntity
 import world.respect.datalayer.db.shared.InstantAsTimestampString
 import world.respect.datalayer.db.shared.toModel
-import world.respect.datalayer.school.xapi.XapiActivityProfileResourceLocal
+import world.respect.lib.xapi.resources.local.XapiActivityProfileResourceLocal
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
@@ -24,6 +24,7 @@ import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.ext.hasIfNotModifiedHeaders
 import world.respect.lib.dataloadstate.ext.isNotModified
 import world.respect.lib.xapi.exceptions.XapiException
+import world.respect.lib.xapi.ext.isJson
 import world.respect.lib.xapi.ext.mergeTopLevel
 import world.respect.lib.xapi.model.XapiDocument
 import world.respect.lib.xapi.model.XapiDocumentByteArrayImpl
@@ -123,7 +124,7 @@ class XapiActivityProfileResourceDb(
     ) {
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                if(!document.type.startsWith("application/json"))
+                if(!document.isJson())
                     throw XapiException(400, "Cannot post non-JSON document")
 
                 val existing = schoolDb.getActivityProfileDocumentDao().findByActivityIriAndProfileId(
@@ -132,7 +133,7 @@ class XapiActivityProfileResourceDb(
                 )
                 val existingDoc = existing?.document
 
-                if(existingDoc?.type?.startsWith("application/json") == false)
+                if(existingDoc?.isJson() == false)
                     throw XapiException(400, "Cannot post when there is an existing non-JSON document")
 
                 val entity = if(existingDoc != null) {

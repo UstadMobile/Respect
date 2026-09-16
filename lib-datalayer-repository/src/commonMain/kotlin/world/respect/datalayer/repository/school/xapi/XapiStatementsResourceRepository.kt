@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
-import world.respect.datalayer.school.xapi.XapiStatementsResourceLocal
+import world.respect.lib.xapi.resources.local.XapiStatementsResourceLocal
 import world.respect.lib.xapi.ext.idStr
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState

@@ -1,5 +1,7 @@
 package world.respect.datalayer.school.writequeue
 
+import world.respect.libutil.util.time.systemTimeInMillis
+
 /**
  * Represents an item in the write queue. The repository adds items into the the write queue
  * which are then drained by its send job.
@@ -13,7 +15,7 @@ class WriteQueueItem(
     val queueItemId: Int = 0,
     val model: Model,
     val uid: String,
-    val timeQueued: Long = 0,
+    val timeQueued: Long = systemTimeInMillis(),
     val attemptCount: Int = 0,
     val timeWritten: Long = 0,
 ) {
@@ -38,5 +40,4 @@ class WriteQueueItem(
 
         }
     }
-
 }

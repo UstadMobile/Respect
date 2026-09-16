@@ -29,10 +29,8 @@ import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
 import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
-import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
 import world.respect.datalayer.http.SchoolDataSourceHttpClient
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
@@ -53,12 +51,10 @@ import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXHasher64FactoryCommonJvm
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
-import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import java.io.File
 import kotlin.time.Clock
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationClient
-
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 
 
 class ClientServerDataSourceTestBuilder internal constructor(
@@ -145,9 +141,6 @@ class ClientServerDataSourceTestBuilder internal constructor(
             }
         }
     }.second
-
-    val serverSchoolPrimaryKeyGenerator = SchoolPrimaryKeyGenerator()
-
 
     val schoolDirectoryEntry = SchoolDirectoryEntry(
         name = LangMapStringValue("test school"),
@@ -247,11 +240,12 @@ class ClientServerDataSourceTestBuilder internal constructor(
             remote = schoolDataSourceRemote ,
             validationHelper = clientValidationHelper,
             remoteWriteQueue = remoteWriteQueue,
+            json = json,
         )
 
         val drainRemoteWriteQueueUseCase = DrainRemoteWriteQueueUseCase(
             remoteWriteQueue = remoteWriteQueue,
-            dataSource = clientDataSource
+            dataSource = clientDataSource,
         )
 
         clientScope.launch {

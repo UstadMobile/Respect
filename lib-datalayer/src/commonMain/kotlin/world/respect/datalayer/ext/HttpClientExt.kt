@@ -10,7 +10,6 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.request
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
-import io.ktor.http.isSuccess
 import io.ktor.util.reflect.TypeInfo
 import io.ktor.util.reflect.typeInfo
 import kotlinx.coroutines.flow.Flow
@@ -114,3 +113,14 @@ inline fun <reified T: Any> HttpClient.getDataLoadResultAsFlow(
     }
 }
 
+fun <T: Any> HttpClient.getDataLoadResultAsFlow(
+    urlFn: suspend () -> Url,
+    bodyAdapter: suspend (HttpResponse) -> T,
+    requestBuilder: HttpRequestBuilder.() -> Unit = { },
+): Flow<DataLoadState<T>> {
+    return flow {
+        val urlVal = urlFn()
+        emit(DataLoadingState(metaInfo = DataLoadMetaInfo(url = urlVal)))
+        emit(getAsDataLoadState(urlVal, bodyAdapter = bodyAdapter, block = requestBuilder))
+    }
+}

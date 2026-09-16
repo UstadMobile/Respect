@@ -22,6 +22,7 @@ import world.respect.datalayer.school.ReportDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
+import world.respect.lib.xapi.remotewritequeue.XapiRemoteWriteQueue
 import world.respect.lib.xapi.resources.XapiResource
 
 class SchoolDataSourceRepository(
@@ -29,6 +30,7 @@ class SchoolDataSourceRepository(
     internal val remote: SchoolDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
+    private val xapiRemoteWriteQueue: XapiRemoteWriteQueue,
     private val json: Json,
 ) : SchoolDataSource {
 
@@ -137,7 +139,7 @@ class SchoolDataSourceRepository(
         XapiResourceRepository(
             local = local.xapiResource,
             remote = remote.xapiResource,
-            remoteWriteQueue = remoteWriteQueue,
+            remoteWriteQueue = xapiRemoteWriteQueue,
             json = json,
         )
     }

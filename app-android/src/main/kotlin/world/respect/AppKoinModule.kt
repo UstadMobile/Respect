@@ -1082,6 +1082,7 @@ val appKoinModule = module {
                 ),
                 validationHelper = get(),
                 remoteWriteQueue = get(),
+                xapiRemoteWriteQueue = get(),
                 json = get(),
             )
         }

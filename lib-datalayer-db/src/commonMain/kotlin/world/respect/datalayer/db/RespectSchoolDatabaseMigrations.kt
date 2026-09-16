@@ -64,9 +64,17 @@ val MIGRATION_14_15 = object: Migration(14, 15) {
     }
 }
 
+val MIGRATION_15_16 = object: Migration(15, 16) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `XapiRemoteWriteQueueItemEntity` (`xrqItemId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `xrqMethod` INTEGER NOT NULL, `xrqResource` INTEGER NOT NULL, `xrqEntityItemId` TEXT NOT NULL, `xrqTimeQueued` INTEGER NOT NULL, `xrqAttemptCount` INTEGER NOT NULL, `xrqTimeWritten` INTEGER NOT NULL, `xrqAccountGuid` TEXT NOT NULL)")
+    }
+}
+
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectSchoolDatabase> {
-    return this.addMigrations(MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15)
+    return this.addMigrations(
+        MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16,
+    )
 }
 

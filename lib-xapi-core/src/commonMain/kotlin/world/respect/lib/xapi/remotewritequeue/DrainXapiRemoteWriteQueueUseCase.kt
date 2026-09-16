@@ -1,7 +1,10 @@
 package world.respect.lib.xapi.remotewritequeue
 
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.resources.XapiResource
+import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.resources.local.XapiResourceLocal
+import kotlin.uuid.Uuid
 
 /**
  *
@@ -16,7 +19,33 @@ class DrainXapiRemoteWriteQueueUseCase(
      * Drain the Xapi Remote Write queue.
      */
     suspend operator fun invoke() {
-        TODO("Not yet implemented")
+        val pendingItems = xapiRemoteWriteQueue.getPending(DEFAULT_BATCH_SIZE)
+
+        for(queueItem in pendingItems) {
+            when(queueItem.resource) {
+                XapiRemoteWriteQueueItem.Resource.STATEMENTS -> {
+                    val statement = localDataSource.statements.get(
+                        listParams = XapiStatementsResource.GetStatementParams(
+                            statementId = Uuid.parse(queueItem.itemId),
+                            format = XapiStatementsResource.GetStatementFormatEnum.EXACT,
+                        )
+                    ).dataOrNull()?.statements?.firstOrNull() ?: continue
+
+                    remoteDataSource.statements.post(listOf(statement))
+                    xapiRemoteWriteQueue.markSent(listOf(queueItem.xrqItemId))
+                }
+
+                XapiRemoteWriteQueueItem.Resource.ACTIVITY_PROFILE -> {
+
+                }
+            }
+
+        }
+    }
+
+    companion object {
+
+        const val DEFAULT_BATCH_SIZE = 10
     }
 
 }

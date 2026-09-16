@@ -1,5 +1,6 @@
 package world.respect.lib.xapi.resources
 
+import kotlinx.coroutines.flow.Flow
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.xapi.model.XapiDocument
@@ -49,6 +50,22 @@ interface XapiDocumentResource<MultiDocParams: Any, SingleDocParams: Any> {
         params: SingleDocParams,
         dataLoadParams: DataLoadParams = DataLoadParams(),
     ): DataLoadState<XapiDocument>
+
+    /**
+     * Get a single document as a flow. The same as [get] but returns a flow of [DataLoadState]
+     *
+     * @param params the SingleDocParams that identify the document for this type of
+     *        resource e.g. Activity Profile API, State API, etc.
+     * @param dataLoadParams DataLoadParams for the request. The If-Not-Modified-Since and
+     *        If-None-Match headers will be checked and if the document has not been modified
+     *        then NoDataLoadedState.notModified() will be returned.
+     *
+     * @return flow of the Document as a [DataLoadState].
+     */
+    fun getAsFlow(
+        params: SingleDocParams,
+        dataLoadParams: DataLoadParams = DataLoadParams(),
+    ): Flow<DataLoadState<XapiDocument>>
 
     /**
      * Post (e.g. update/insert) an xAPI activity profile document as per

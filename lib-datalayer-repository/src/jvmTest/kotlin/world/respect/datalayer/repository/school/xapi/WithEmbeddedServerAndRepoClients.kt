@@ -4,25 +4,80 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.routing.Routing
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
+import world.respect.datalayer.db.school.xapi.writequeue.XapiRemoteWriteQueueDbImpl
 import world.respect.datalayer.http.school.xapi.XapiResourceHttpClient
 import world.respect.datalayer.repository.util.mkdirsIfNotExists
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.lib.test.clientservertest.EmbeddedDataSourceServerContext
 import world.respect.lib.test.clientservertest.newLocalSchoolDatabase
 import world.respect.lib.test.clientservertest.withEmbeddedDataSourceServer
+import world.respect.lib.xapi.remotewritequeue.DrainXapiRemoteWriteQueueUseCase
+import world.respect.lib.xapi.remotewritequeue.EnqueueDrainXapiRemoteWriteQueueUseCase
+import world.respect.lib.xapi.resources.XapiResource
+import world.respect.lib.xapi.resources.local.XapiResourceLocal
 import world.respect.libutil.util.time.systemTimeInMillis
 import java.io.File
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationClient
 
-data class RepositoryTestClient(
+class RepositoryTestClient(
     val dir: File,
     val schoolDb: RespectSchoolDatabase,
-    val datasource: XapiResourceRepository,
-)
+    val localDataSource: XapiResourceLocal,
+    val remoteDataSource: XapiResource,
+    val authenticatedUser: AuthenticatedUserPrincipalId,
+    private val json: Json = Json,
+) {
+
+    private val drainRemoteWriteQueueChannel = Channel<Boolean>(capacity = Channel.UNLIMITED)
+
+    val enqueueDrainRemoteWriteQueueUseCase: EnqueueDrainXapiRemoteWriteQueueUseCase = {
+        drainRemoteWriteQueueChannel.send(true)
+    }
+
+    val xapiRemoteWriteQueue = XapiRemoteWriteQueueDbImpl(
+        schoolDb = schoolDb,
+        account = authenticatedUser,
+        enqueueDrainRemoteWriteQueueUseCase = enqueueDrainRemoteWriteQueueUseCase,
+    )
+
+    val drainRemoteWriteQueueUseCase = DrainXapiRemoteWriteQueueUseCase(
+        remoteDataSource = remoteDataSource,
+        localDataSource = localDataSource,
+        xapiRemoteWriteQueue = xapiRemoteWriteQueue,
+    )
+
+    val datasource = XapiResourceRepository(
+        local = localDataSource,
+        remote = remoteDataSource,
+        remoteWriteQueue = xapiRemoteWriteQueue,
+        json = json,
+    )
+
+    private val clientScope = CoroutineScope(Dispatchers.Default + Job())
+
+    init {
+        clientScope.launch {
+            while(true) {
+                drainRemoteWriteQueueChannel.receive()
+                drainRemoteWriteQueueUseCase()
+            }
+        }
+    }
+
+    fun close() {
+        clientScope.cancel()
+    }
+
+}
 
 data class RepositoryTestContext(
     val serverContext: EmbeddedDataSourceServerContext,
@@ -59,42 +114,33 @@ suspend fun withEmbeddedServerAndRepositoryResources(
                 localAuthenticatedUser = localAuthenticatedUser,
             )
 
-            val xapiResourceHttpClient = XapiResourceHttpClient(
-                xapiUrl = { schoolUrlVal },
-                httpClient = httpClient,
-                tokenProvider = {
-                    AuthToken("secret", systemTimeInMillis(), 3600)
-                },
-                json = json,
-            )
-
-            val enqueueDrainRemoteChannel = EnqueueDrainRemoteWriteQueueUseCaseChannel()
-
-            val remoteWriteQueue = RemoteWriteQueueDbImpl(
-                schoolDb = schoolDb,
-                account = localAuthenticatedUser,
-                enqueueDrainRemoteWriteQueueUseCase = enqueueDrainRemoteChannel,
-            )
-
-
             RepositoryTestClient(
                 dir = clientDir,
                 schoolDb = schoolDb,
-                datasource = XapiResourceRepository(
-                    local = schoolLocalDs.xapiResource,
-                    remote = xapiResourceHttpClient,
-                    remoteWriteQueue = remoteWriteQueue,
+                localDataSource = schoolLocalDs.xapiResource,
+                remoteDataSource = XapiResourceHttpClient(
+                    xapiUrl = { schoolUrlVal },
+                    httpClient = httpClient,
+                    tokenProvider = {
+                        AuthToken("secret", systemTimeInMillis(), 3600)
+                    },
                     json = json,
-                )
+                ),
+                authenticatedUser = localAuthenticatedUser,
+                json = json,
             )
         }
 
-        block(
-            RepositoryTestContext(
-                serverContext = serverContext,
-                clients = clients,
+        try {
+            block(
+                RepositoryTestContext(
+                    serverContext = serverContext,
+                    clients = clients,
+                )
             )
-        )
+        }finally {
+            clients.forEach { it.close() }
+        }
     }
 
 }

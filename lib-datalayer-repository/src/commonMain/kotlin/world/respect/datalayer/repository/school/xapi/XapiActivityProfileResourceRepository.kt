@@ -1,13 +1,24 @@
 package world.respect.datalayer.repository.school.xapi
 
-import io.ktor.http.HttpHeaders
-import io.ktor.http.headers
-import world.respect.datalayer.school.writequeue.RemoteWriteQueue
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import world.respect.datalayer.repository.ext.copyToValidateOnRemote
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.copyLoadState
+import world.respect.lib.xapi.ext.isJson
+import world.respect.lib.xapi.ext.jsonKeys
+import world.respect.lib.xapi.ext.toParametersFormUrlEncoded
 import world.respect.lib.xapi.model.XapiDocument
+import world.respect.lib.xapi.remotewritequeue.XapiRemoteWriteQueue
+import world.respect.lib.xapi.remotewritequeue.XapiRemoteWriteQueueItem
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import world.respect.lib.xapi.resources.local.XapiActivityProfileResourceLocal
 
@@ -17,7 +28,8 @@ import world.respect.lib.xapi.resources.local.XapiActivityProfileResourceLocal
 class XapiActivityProfileResourceRepository(
     private val local: XapiActivityProfileResourceLocal,
     private val remote: XapiActivityProfileResource,
-    private val remoteWriteQueue: RemoteWriteQueue,
+    private val remoteWriteQueue: XapiRemoteWriteQueue,
+    private val json: Json,
 ): XapiActivityProfileResource {
 
     /**
@@ -50,24 +62,7 @@ class XapiActivityProfileResourceRepository(
 
         val remoteState = remote.get(
             params = params,
-            dataLoadParams = dataLoadParams.copy(
-                requestHeaders = headers {
-                    appendAll(dataLoadParams.requestHeaders)
-
-                    /**
-                     * Using the last-modified header here will prevent data just updated locally
-                     * from being overwritten. The last-modified header on the server will be the
-                     * time that data was actually stored on the server, NOT when it was actually
-                     * modified on the client. It is however close enough.
-                     */
-                    localState.metaInfo.headers[HttpHeaders.LastModified]?.also {
-                        set(HttpHeaders.IfModifiedSince, it)
-                    }
-                    localState.metaInfo.headers[HttpHeaders.ETag]?.also {
-                        set(HttpHeaders.IfNoneMatch, it)
-                    }
-                }
-            )
+            dataLoadParams = dataLoadParams.copyToValidateOnRemote(localState.metaInfo)
         )
 
         if(remoteState is DataReadyState) {
@@ -80,11 +75,57 @@ class XapiActivityProfileResourceRepository(
         return localState.copyLoadState(remoteState = remoteState)
     }
 
+    override fun getAsFlow(
+        params: XapiActivityProfileResource.SingleDocumentParams,
+        dataLoadParams: DataLoadParams,
+    ): Flow<DataLoadState<XapiDocument>> {
+        return channelFlow {
+            //collect the local flow (use distinctBy to validate)
+            val localFlow = local.getAsFlow(params, dataLoadParams)
+                .distinctUntilChanged { old, new ->
+                    false
+                }
+                //Better would be to use etags/last-modified
+                .shareIn(scope = this, started = SharingStarted.Lazily)
+
+            launch {
+                localFlow.collect { send(it) }
+            }
+
+            launch {
+                //Could use a Stack type structure to avoid leak
+                val deck = ArrayDeque<String>(5)
+                localFlow.filter { localState ->
+                    true // localState validation params are not in deck.
+                }.collect {
+                    remote.getAsFlow(
+                        params, dataLoadParams.copyToValidateOnRemote(it.metaInfo)
+                    ).collect { remoteState ->
+                        if(remoteState is DataReadyState) {
+                            //AddFirst, removeLast on deck
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     override suspend fun post(
         params: XapiActivityProfileResource.SingleDocumentParams,
         document: XapiDocument
     ) {
         local.post(params, document)
+
+        remoteWriteQueue.add(
+            listOf(
+                XapiRemoteWriteQueueItem(
+                    method = XapiRemoteWriteQueueItem.Method.POST,
+                    resource = XapiRemoteWriteQueueItem.Resource.ACTIVITY_PROFILE,
+                    itemId = params.toParameters().toParametersFormUrlEncoded(),
+                    keysToPost = document.takeIf { it.isJson() }?.jsonKeys(json),
+                )
+            )
+        )
     }
 
     override suspend fun put(
@@ -92,9 +133,19 @@ class XapiActivityProfileResourceRepository(
         document: XapiDocument
     ) {
         local.put(params, document)
+
+        remoteWriteQueue.add(
+            listOf(
+                XapiRemoteWriteQueueItem(
+                    method = XapiRemoteWriteQueueItem.Method.PUT,
+                    resource = XapiRemoteWriteQueueItem.Resource.ACTIVITY_PROFILE,
+                    itemId = params.toParameters().toParametersFormUrlEncoded(),
+                )
+            )
+        )
     }
 
     override suspend fun delete(params: XapiActivityProfileResource.SingleDocumentParams) {
-        TODO("Not yet implemented")
+        local.delete(params)
     }
 }

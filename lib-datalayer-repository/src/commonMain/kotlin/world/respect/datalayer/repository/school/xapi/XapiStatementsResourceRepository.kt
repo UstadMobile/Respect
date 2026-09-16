@@ -25,15 +25,16 @@ import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiVerb
+import world.respect.lib.xapi.remotewritequeue.XapiRemoteWriteQueue
+import world.respect.lib.xapi.remotewritequeue.XapiRemoteWriteQueueItem
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
-import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 class XapiStatementsResourceRepository(
     private val local: XapiStatementsResourceLocal,
     private val remote: XapiStatementsResource,
-    private val remoteWriteQueue: RemoteWriteQueue,
+    private val remoteWriteQueue: XapiRemoteWriteQueue,
 ) : XapiStatementsResource{
 
     override suspend fun post(
@@ -41,15 +42,13 @@ class XapiStatementsResourceRepository(
     ): DataLoadState<List<Uuid>> {
         val localResult = local.post(list)
 
-        val timeNow = Clock.System.now().toEpochMilliseconds()
-
         localResult.dataOrNull()?.also { uuidsSaved ->
             remoteWriteQueue.add(
                 uuidsSaved.map {
-                    WriteQueueItem(
-                        model = WriteQueueItem.Model.XAPI_STATEMENT,
-                        uid = it.toString(),
-                        timeQueued = timeNow,
+                    XapiRemoteWriteQueueItem(
+                        method = XapiRemoteWriteQueueItem.Method.POST,
+                        resource = XapiRemoteWriteQueueItem.Resource.STATEMENTS,
+                        itemId = it.toString(),
                     )
                 }
             )

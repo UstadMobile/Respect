@@ -21,6 +21,7 @@ import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.lib.xapi.model.XapiInteractionTypeEnum
+import world.respect.lib.xapi.remotewritequeue.XapiRemoteWriteQueueItem
 import kotlin.time.Instant
 
 class SchoolTypeConverters {
@@ -192,6 +193,26 @@ class SchoolTypeConverters {
     @TypeConverter
     fun toStatementContextActivityJoinTypeEnum(value: Int): XapiStatementContextActivityJoinTypeEnum {
         return XapiStatementContextActivityJoinTypeEnum.fromDbFlag(value)
+    }
+
+    @TypeConverter
+    fun fromXapiRemoteWriteQueueItemMethod(value: XapiRemoteWriteQueueItem.Method): Int {
+        return value.flag
+    }
+
+    @TypeConverter
+    fun toXapiRemoteWriteQueueItemMethod(value: Int): XapiRemoteWriteQueueItem.Method {
+        return XapiRemoteWriteQueueItem.Method.fromFlag(value)
+    }
+
+    @TypeConverter
+    fun fromXapiRemoteWriteQueueItemResource(value: XapiRemoteWriteQueueItem.Resource): Int {
+        return value.flag
+    }
+
+    @TypeConverter
+    fun toXapiRemoteWriteQueueItemResource(value: Int): XapiRemoteWriteQueueItem.Resource {
+        return XapiRemoteWriteQueueItem.Resource.fromFlag(value)
     }
 
 

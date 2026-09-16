@@ -5,7 +5,7 @@ package world.respect.lib.xapi.remotewritequeue
  * datasource). On Android this is done using WorkManager. This follows the same patterns as
  * the main RemoteWriteQueue.
  */
-interface EnqueueDrainXapiRemoteWriteQueueUseCase {
+fun interface EnqueueDrainXapiRemoteWriteQueueUseCase {
 
     suspend operator fun invoke()
 

@@ -41,4 +41,5 @@ class XapiActivityProfileResourceRepositoryTest: AbstractXapiActivityProfileReso
         givenExistingJsonDocument_whenPosted_thenMergesTopLevelProperties()
     }
 
-}*/
+}
+*/

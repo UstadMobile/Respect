@@ -65,6 +65,7 @@ import world.respect.datalayer.db.school.xapi.daos.XapiActivityProfileDocumentDa
 import world.respect.datalayer.db.school.xapi.daos.XapiActivityProfileDocumentShaDao
 import world.respect.datalayer.db.school.xapi.daos.XapiActorDao
 import world.respect.datalayer.db.school.xapi.daos.XapiGroupMemberActorJoinDao
+import world.respect.datalayer.db.school.xapi.daos.XapiRemoteWriteQueueItemEntityDao
 import world.respect.datalayer.db.school.xapi.daos.XapiSessionEntityDao
 import world.respect.datalayer.db.school.xapi.daos.XapiStatementContextActivityJoinDao
 import world.respect.datalayer.db.school.xapi.daos.XapiStatementEntityDao
@@ -79,6 +80,7 @@ import world.respect.datalayer.db.school.xapi.entities.XapiActivityProfileDocume
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityProfileDocumentShaEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiActorEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiGroupMemberActorJoin
+import world.respect.datalayer.db.school.xapi.entities.XapiRemoteWriteQueueItemEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiSessionEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementContextActivityJoin
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
@@ -143,6 +145,7 @@ import world.respect.datalayer.school.model.Report
         XapiSessionEntity::class,
         XapiActivityProfileDocumentEntity::class,
         XapiActivityProfileDocumentShaEntity::class,
+        XapiRemoteWriteQueueItemEntity::class,
     ],
     version = 16,
 )
@@ -225,6 +228,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getActivityProfileDocumentDao(): XapiActivityProfileDocumentDao
 
     abstract fun getActivityProfileDocumentShaDao(): XapiActivityProfileDocumentShaDao
+
+    abstract fun getXapiRemoteWriteQueueItemEntityDao(): XapiRemoteWriteQueueItemEntityDao
 
     companion object {
 

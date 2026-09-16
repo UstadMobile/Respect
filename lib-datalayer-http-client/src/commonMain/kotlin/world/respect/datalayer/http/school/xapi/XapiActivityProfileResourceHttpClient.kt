@@ -6,9 +6,11 @@ import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.datalayer.ext.bodyAsXapiDocument
 import world.respect.datalayer.ext.getAsDataLoadState
+import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
 import world.respect.datalayer.http.school.xapi.ext.setXapiDocumentBody
 import world.respect.datalayer.http.school.xapi.ext.throwXapiExceptionIfNotSuccessful
@@ -57,6 +59,19 @@ class XapiActivityProfileResourceHttpClient(
             bodyAdapter = {
                 it.bodyAsXapiDocument()
             }
+        ) {
+            useTokenProvider(tokenProvider)
+            headers.appendAll(dataLoadParams.requestHeaders)
+        }
+    }
+
+    override fun getAsFlow(
+        params: XapiActivityProfileResource.SingleDocumentParams,
+        dataLoadParams: DataLoadParams
+    ): Flow<DataLoadState<XapiDocument>> {
+        return httpClient.getDataLoadResultAsFlow(
+            urlFn = { params.urlWithParams() },
+            bodyAdapter = { it.bodyAsXapiDocument() },
         ) {
             useTokenProvider(tokenProvider)
             headers.appendAll(dataLoadParams.requestHeaders)

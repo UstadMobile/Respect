@@ -7,6 +7,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.headersOf
 import io.ktor.http.toHttpDate
 import io.ktor.util.sha1
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
@@ -115,6 +117,17 @@ class XapiActivityProfileResourceDb(
                     NoDataLoadedState.notFound()
                 }
             }
+        }
+    }
+
+    override fun getAsFlow(
+        params: XapiActivityProfileResource.SingleDocumentParams,
+        dataLoadParams: DataLoadParams
+    ): Flow<DataLoadState<XapiDocument>> {
+        return schoolDb.invalidationTracker.createFlow(
+            "xapi_activity_profile_document", emitInitialState = true
+        ).map {
+            get(params, dataLoadParams)
         }
     }
 

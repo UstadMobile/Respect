@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSourceLocal
@@ -241,6 +242,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
             validationHelper = clientValidationHelper,
             remoteWriteQueue = remoteWriteQueue,
             json = json,
+            xapiRemoteWriteQueue = mock {  },
         )
 
         val drainRemoteWriteQueueUseCase = DrainRemoteWriteQueueUseCase(

@@ -81,6 +81,7 @@ import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidation
 import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
 import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
+import world.respect.datalayer.db.school.xapi.writequeue.XapiRemoteWriteQueueDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.db.shared.PullSyncTrackerDbImpl
 import world.respect.datalayer.http.RespectAppDataSourceHttp
@@ -92,6 +93,7 @@ import world.respect.datalayer.repository.school.pullsync.EnqueueRunPullSyncUseC
 import world.respect.datalayer.repository.school.pullsync.RunPullSyncUseCase
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
+import world.respect.datalayer.repository.school.writequeue.EnqueueDrainXapiRemoteWriteQueueUseCaseAndroidImpl
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
@@ -99,6 +101,9 @@ import world.respect.datalayer.school.domain.GetWritableRolesListUseCaseImpl
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
+import world.respect.lib.xapi.remotewritequeue.DrainXapiRemoteWriteQueueUseCase
+import world.respect.lib.xapi.remotewritequeue.EnqueueDrainXapiRemoteWriteQueueUseCase
+import world.respect.lib.xapi.remotewritequeue.XapiRemoteWriteQueue
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.XXHashUidNumberMapper
@@ -1019,6 +1024,17 @@ val appKoinModule = module {
             )
         }
 
+        scoped<XapiRemoteWriteQueue> {
+            get<RespectAccountSchoolScopeLink>()
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            XapiRemoteWriteQueueDbImpl(
+                schoolDb = get(),
+                account = AuthenticatedUserPrincipalId(accountScopeId.accountPrincipalId.guid),
+                enqueueDrainRemoteWriteQueueUseCase = get(),
+            )
+        }
+
         scoped<GetActivePersonPasskeysUseCase> {
             GetActivePersonPasskeysClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
@@ -1039,10 +1055,27 @@ val appKoinModule = module {
             )
         }
 
+        scoped<EnqueueDrainXapiRemoteWriteQueueUseCase> {
+            EnqueueDrainXapiRemoteWriteQueueUseCaseAndroidImpl(
+                context = androidContext().applicationContext,
+                scopeId = id,
+                scopeClass = RespectAccount::class,
+            )
+        }
+
         scoped<DrainRemoteWriteQueueUseCase> {
             DrainRemoteWriteQueueUseCase(
                 remoteWriteQueue = get(),
                 dataSource = get(),
+            )
+        }
+
+        scoped<DrainXapiRemoteWriteQueueUseCase> {
+            val repository = get<SchoolDataSource>() as SchoolDataSourceRepository
+            DrainXapiRemoteWriteQueueUseCase(
+                xapiRemoteWriteQueue = get(),
+                remoteDataSource = repository.remote.xapiResource,
+                localDataSource = repository.local.xapiResource,
             )
         }
 

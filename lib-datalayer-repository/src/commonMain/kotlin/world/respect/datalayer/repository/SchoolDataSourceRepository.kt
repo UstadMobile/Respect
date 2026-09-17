@@ -26,8 +26,8 @@ import world.respect.lib.xapi.remotewritequeue.XapiRemoteWriteQueue
 import world.respect.lib.xapi.resources.XapiResource
 
 class SchoolDataSourceRepository(
-    internal val local: SchoolDataSourceLocal,
-    internal val remote: SchoolDataSource,
+    val local: SchoolDataSourceLocal,
+    val remote: SchoolDataSource,
     private val validationHelper: ExtendedDataSourceValidationHelper,
     private val remoteWriteQueue: RemoteWriteQueue,
     private val xapiRemoteWriteQueue: XapiRemoteWriteQueue,

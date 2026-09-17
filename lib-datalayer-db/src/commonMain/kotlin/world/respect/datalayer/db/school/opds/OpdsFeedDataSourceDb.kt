@@ -1,7 +1,6 @@
 package world.respect.datalayer.db.school.opds
 
 import androidx.room.Transactor
-import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
 import com.ustadmobile.ihttp.headers.IHttpHeaders
 import io.ktor.http.Url
@@ -9,28 +8,27 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthenticatedUserPrincipalId
-import world.respect.lib.dataloadstate.DataLoadMetaInfo
-import world.respect.lib.dataloadstate.DataLoadParams
-import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.DataReadyState
-import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.opds.adapters.OpdsFeedEntities
 import world.respect.datalayer.db.school.opds.adapters.asEntities
 import world.respect.datalayer.db.school.opds.adapters.asModel
 import world.respect.datalayer.db.school.opds.entities.OpdsFeedEntity
+import world.respect.datalayer.db.school.opds.ext.etagAndLastModified
 import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
-import world.respect.datalayer.school.model.StatusEnum
-import world.respect.datalayer.school.opds.ext.requireSelfUrl
-import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
-import world.respect.datalayer.school.opds.ext.dataLoadMetaInfoForPlaylist
+import world.respect.datalayer.school.opds.ext.requireSelfUrl
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.dataloadstate.ext.isNotModified
+import world.respect.lib.dataloadstate.ext.toHeaders
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
-import world.respect.libutil.ext.appendEndpointSegments
 import kotlin.time.Clock
 
 class OpdsFeedDataSourceDb(
@@ -42,33 +40,55 @@ class OpdsFeedDataSourceDb(
     private val primaryKeyGenerator: PrimaryKeyGenerator,
 ) : OpdsFeedDataSourceLocal{
 
-    private suspend fun OpdsFeedEntity.loadModel(): OpdsFeed {
-        return OpdsFeedEntities(
-            opdsFeed = this,
-            feedMetaData = schoolDb.getOpdsFeedMetadataEntityDao().findByFeedUid(this.ofeUid),
-            langMapEntities = schoolDb.getLangMapEntityDao().findAllByFeedUid(this.ofeUid),
-            linkEntities =schoolDb.getReadiumLinkEntityDao().findAllByFeedUid(this.ofeUid),
-            publications = schoolDb.getOpdsPublicationEntityDao().findByFeedUid(
-                this.ofeUid),
-            groups = schoolDb.getOpdsGroupEntityDao().findByFeedUid(this.ofeUid),
-            subjects = schoolDb.getReadiumSubjectEntityDao().findAllByFeedUid(this.ofeUid),
-        ).asModel(json)
+    private suspend fun OpdsFeedEntity?.toDataLoadState(
+        url: Url,
+        params: DataLoadParams,
+    ): DataLoadState<OpdsFeed> {
+        return when {
+            this != null && params.requestHeaders.isNotModified(
+                etagAndLastModified()
+            ) -> {
+                NoDataLoadedState.notModified(
+                    metaInfo = DataLoadMetaInfo(
+                        url = url,
+                        headers = this.etagAndLastModified().toHeaders()
+                    )
+                )
+            }
+
+            this != null -> {
+                DataReadyState(
+                    data = OpdsFeedEntities(
+                        opdsFeed = this,
+                        feedMetaData = schoolDb.getOpdsFeedMetadataEntityDao().findByFeedUid(this.ofeUid),
+                        langMapEntities = schoolDb.getLangMapEntityDao().findAllByFeedUid(this.ofeUid),
+                        linkEntities =schoolDb.getReadiumLinkEntityDao().findAllByFeedUid(this.ofeUid),
+                        publications = schoolDb.getOpdsPublicationEntityDao().findByFeedUid(
+                            this.ofeUid),
+                        groups = schoolDb.getOpdsGroupEntityDao().findByFeedUid(this.ofeUid),
+                        subjects = schoolDb.getReadiumSubjectEntityDao().findAllByFeedUid(this.ofeUid),
+                    ).asModel(json),
+                    metaInfo = DataLoadMetaInfo(
+                        url = url,
+                        headers = this.etagAndLastModified().toHeaders()
+                    )
+                )
+            }
+
+            else -> {
+                NoDataLoadedState.notFound()
+            }
+        }
     }
 
     override fun getByUrlAsFlow(
         url: Url,
-        params: DataLoadParams
+        params: DataLoadParams,
     ): Flow<DataLoadState<OpdsFeed>> {
         return schoolDb.getOpdsFeedEntityDao().findByUrlHashAsFlow(
             uidNumberMapper(url.toString())
         ).map { feedEntity ->
-            schoolDb.takeIf { feedEntity != null }?.useReaderConnection {
-                feedEntity?.loadModel()?.let { opdsFeed ->
-                    DataReadyState(
-                        data = opdsFeed
-                    )
-                }
-            } ?: NoDataLoadedState.notFound()
+            feedEntity.toDataLoadState(url, params)
         }
     }
 
@@ -78,13 +98,7 @@ class OpdsFeedDataSourceDb(
     ): DataLoadState<OpdsFeed> {
         return schoolDb.getOpdsFeedEntityDao().findByUrlHash(
             urlHash = uidNumberMapper(url.toString())
-        )?.let { feedEntity ->
-            schoolDb.useReaderConnection {
-                DataReadyState(
-                    data = feedEntity.loadModel()
-                )
-            }
-        } ?: NoDataLoadedState.notFound()
+        ).toDataLoadState(url, params)
     }
 
     override suspend fun getValidationInfo(
@@ -134,46 +148,7 @@ class OpdsFeedDataSourceDb(
         schoolDb.getOpdsGroupEntityDao().insertList(feedEntities.groups)
     }
 
-    override suspend fun store(list: List<OpdsFeed>) {
-        //TODO: throw illegal argument exception if anything on list is not for this school url
-        //TODO: run permission check to see if user is allowed to save/write this feed
-        schoolDb.useWriterConnection { con ->
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                list.forEach { feed ->
-                    doUpsertOpdsFeed(
-                        opdsFeed = feed,
-                        dataLoadMetaInfo = feed.dataLoadMetaInfoForPlaylist()
-                    )
-                }
-            }
-        }
-    }
 
-    override fun getPlaylistsAsFlow(schoolUrl: Url): Flow<DataLoadState<List<OpdsFeed>>> {
-        val playlistPrefix =
-            schoolUrl.appendEndpointSegments(OpdsFeedDataSource.PLAYLIST_ENDPOINT_NAME)
-                .toString() + "/"
-        return schoolDb.getOpdsFeedEntityDao().findByUrlPrefixAsFlow(playlistPrefix, includeDeleted = false)
-            .map { feedEntities ->
-                schoolDb.useReaderConnection {
-                    DataReadyState(
-                        data = feedEntities.map { it.loadModel() }
-                    )
-                }
-            }
-    }
-    override suspend fun deleteByUrl(url: Url) {
-        val feedUid = uidNumberMapper(url.toString())
-        schoolDb.useWriterConnection { con ->
-            con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                schoolDb.getOpdsFeedEntityDao().updateStatusByFeedUid(
-                    feedUid = feedUid,
-                    status = StatusEnum.TO_BE_DELETED,
-                    lastModified = Clock.System.now()
-                )
-            }
-        }
-    }
     override suspend fun updateLocal(
         url: Url,
         dataLoadResult: DataReadyState<OpdsFeed>,

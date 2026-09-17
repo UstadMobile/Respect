@@ -500,7 +500,7 @@ class OpdsFeedEditViewModel(
         }
 
         viewModelScope.launch {
-            schoolDataSource.opdsFeedDataSource.store(listOf(feed))
+
 
             val savedPlaylistUrl = feed.selfUrl()
                 ?: throw IllegalStateException("Saved playlist has no self URL")

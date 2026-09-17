@@ -144,7 +144,7 @@ import world.respect.datalayer.school.model.Report
         XapiActivityProfileDocumentShaEntity::class,
         XapiRemoteWriteQueueItemEntity::class,
     ],
-    version = 17,
+    version = 18,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)

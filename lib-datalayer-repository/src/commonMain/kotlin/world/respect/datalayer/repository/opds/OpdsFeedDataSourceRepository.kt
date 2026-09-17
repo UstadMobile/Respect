@@ -3,22 +3,18 @@ package world.respect.datalayer.repository.opds
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
+import world.respect.datalayer.repository.ext.copyToValidateOnRemote
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.combineWithRemote
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
-import world.respect.datalayer.school.opds.ext.requireSelfUrl
-import world.respect.datalayer.school.writequeue.RemoteWriteQueue
-import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.lib.opds.model.OpdsFeed
-import world.respect.libutil.util.time.systemTimeInMillis
 
 class OpdsFeedDataSourceRepository(
     val local: OpdsFeedDataSourceLocal,
     val remote: OpdsFeedDataSource,
-    private val remoteWriteQueue: RemoteWriteQueue,
 ): OpdsFeedDataSource  {
 
     override fun getByUrlAsFlow(
@@ -44,47 +40,17 @@ class OpdsFeedDataSourceRepository(
         url: Url,
         params: DataLoadParams
     ): DataLoadState<OpdsFeed> {
+        val localData = local.getByUrl(url, params)
         val remoteData = remote.getByUrl(
             url = url,
-            params = params
+            params = params.copyToValidateOnRemote(localData.metaInfo)
         )
 
-        if(remoteData is DataReadyState) {
+        return if(remoteData is DataReadyState) {
             local.updateLocal(url, remoteData)
+            local.getByUrl(url = url, params = params)
+        }else {
+            localData
         }
-
-        return local.getByUrl(url = url, params = params)
-    }
-
-    override suspend fun store(list: List<OpdsFeed>) {
-        local.store(list)
-        val timeNow = systemTimeInMillis()
-        remoteWriteQueue.add(
-            list.map { feed  ->
-                WriteQueueItem(
-                    model = WriteQueueItem.Model.OPDS_FEED,
-                    uid = feed.requireSelfUrl().toString(),
-                    timeQueued = timeNow,
-                )
-            }
-        )
-    }
-
-    override fun getPlaylistsAsFlow(schoolUrl: Url): Flow<DataLoadState<List<OpdsFeed>>> {
-        return local.getPlaylistsAsFlow(schoolUrl)
-    }
-
-    override suspend fun deleteByUrl(url: Url) {
-        local.deleteByUrl(url)
-        val timeNow = systemTimeInMillis()
-        remoteWriteQueue.add(
-            listOf(
-                WriteQueueItem(
-                    model = WriteQueueItem.Model.OPDS_FEED,
-                    uid = url.toString(),
-                    timeQueued = timeNow,
-                )
-            )
-        )
     }
 }

@@ -23,7 +23,6 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import org.mockito.kotlin.mock
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataReadyState
@@ -34,15 +33,12 @@ import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttpClient
 import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttpClient
-import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.lib.opds.model.ext.hasRel
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.opds.model.LangMapStringValue
-import world.respect.lib.opds.model.ext.hasRel
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.findFreePort
-import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -118,17 +114,12 @@ class OpdsRespectRepositoryIntegrationTest {
             )
 
             val httpDataSource = OpdsFeedDataSourceHttpClient(
-                httpClient = httpClient,
-                opdsFeedValidationHelper = localDataSource,
-                tokenProvider = {
-                    AuthToken("secret", systemTimeInMillis(), 3600)
-                }
+                httpClient = httpClient
             )
 
             val repository = OpdsFeedDataSourceRepository(
                 local = localDataSource,
-                remote = httpDataSource,
-                remoteWriteQueue = mock {  }
+                remote = httpDataSource
             )
 
             val opdsPubLocal = OpdsPublicationDataSourceDb(

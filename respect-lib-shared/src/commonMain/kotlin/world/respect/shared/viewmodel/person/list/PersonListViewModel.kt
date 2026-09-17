@@ -205,14 +205,16 @@ class PersonListViewModel(
     fun onClickItem(person: PersonListDetails) {
         if(route.resultExpected) {
             viewModelScope.launch {
-                resultReturner.sendResultIfResultExpected(
-                    route = route,
-                    navCommandFlow = _navCommandFlow,
-                    result = schoolDataSource.personDataSource.findByGuid(
-                        loadParams = DataLoadParams(),
-                        guid = person.guid,
-                    ).dataOrNull(),
-                )
+                snackBarDispatcher.tryOrShowSnackbarOnError("person not loaded") {
+                    resultReturner.sendResultIfResultExpected(
+                        route = route,
+                        navCommandFlow = _navCommandFlow,
+                        result = schoolDataSource.personDataSource.findByGuid(
+                            loadParams = DataLoadParams(),
+                            guid = person.guid,
+                        ).dataOrNull(),
+                    )
+                }
             }
         }else {
             _navCommandFlow.tryEmit(

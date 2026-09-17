@@ -69,7 +69,7 @@ list (default or local)
 (e.g. http://10.1.2.3:8098/ as above) in [directories](respect-lib-shared/src/androidMain/resources/directories)
 
 * __Step 6: Build/run and Android app__: In Android Studio use the run/debug button to run the 
- ```respect-app-compose``` module. See [respect-app-compose](respect-app-compose/) for further
+ ```app-android``` module. See [app-android](app-android/) for further
  details on running via the command line etc. You can login to your school using the Android app
  by tapping ```Other options```, entering the school URL, then use the username admin and the
  password you set in step 5.

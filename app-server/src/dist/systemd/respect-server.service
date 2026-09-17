@@ -10,7 +10,7 @@ Group=respect
 
 Type=exec
 
-ExecStart=/home/respect/respect-server/bin/respect-server
+ExecStart=/home/respect/app-server/bin/app-server
 ExecStop=/bin/kill -15 $MAINPID
 
 Restart=always

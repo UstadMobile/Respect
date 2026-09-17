@@ -70,11 +70,18 @@ val MIGRATION_15_16 = object: Migration(15, 16) {
     }
 }
 
+val MIGRATION_16_17 = object: Migration(16, 17) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("DROP TABLE IF EXISTS `SchoolAppEntity`")
+    }
+}
+
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectSchoolDatabase> {
     return this.addMigrations(
         MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16,
+        MIGRATION_16_17,
     )
 }
 

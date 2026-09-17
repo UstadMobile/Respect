@@ -13,7 +13,6 @@ import world.respect.datalayer.repository.school.PersonDataSourceRepository
 import world.respect.datalayer.repository.school.PersonPasskeyDataSourceRepository
 import world.respect.datalayer.repository.school.PersonPasswordDataSourceRepository
 import world.respect.datalayer.repository.school.PersonQrCodeBadgeDataSourceRepository
-import world.respect.datalayer.repository.school.SchoolAppDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolPermissionGrantDataSourceRepository
 import world.respect.datalayer.repository.school.xapi.XapiResourceRepository
 import world.respect.datalayer.school.IndicatorDataSource
@@ -40,15 +39,6 @@ class SchoolDataSourceRepository(
 
     override val indicatorDataSource: IndicatorDataSource by lazy {
         local.indicatorDataSource
-    }
-
-    override val schoolAppDataSource: SchoolAppDataSourceRepository by lazy {
-        SchoolAppDataSourceRepository(
-            local = local.schoolAppDataSource,
-            remote = remote.schoolAppDataSource,
-            validationHelper = validationHelper,
-            remoteWriteQueue = remoteWriteQueue,
-        )
     }
 
     override val schoolPermissionGrantDataSource: SchoolPermissionGrantDataSourceRepository by lazy {

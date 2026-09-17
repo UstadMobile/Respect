@@ -43,7 +43,6 @@ import world.respect.datalayer.db.school.daos.InviteEntityDao
 import world.respect.datalayer.db.school.daos.PersonQrBadgeEntityDao
 import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
 import world.respect.datalayer.db.school.daos.PullSyncStatusEntityDao
-import world.respect.datalayer.db.school.daos.SchoolAppEntityDao
 import world.respect.datalayer.db.school.daos.WriteQueueItemEntityDao
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
@@ -52,7 +51,6 @@ import world.respect.datalayer.db.school.entities.InviteEntity
 import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
 import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.ReportEntity
-import world.respect.datalayer.db.school.entities.SchoolAppEntity
 import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 import world.respect.datalayer.db.school.daos.SchoolPermissionGrantDao
 import world.respect.datalayer.db.school.entities.ClassPermissionEntity
@@ -100,7 +98,6 @@ import world.respect.datalayer.school.model.Report
  */
 @Database(
     entities = [
-        SchoolAppEntity::class,
         PersonEntity::class,
         PersonRoleEntity::class,
         PersonRelatedPersonEntity::class,
@@ -147,13 +144,11 @@ import world.respect.datalayer.school.model.Report
         XapiActivityProfileDocumentShaEntity::class,
         XapiRemoteWriteQueueItemEntity::class,
     ],
-    version = 16,
+    version = 17,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)
 abstract class RespectSchoolDatabase: RoomDatabase() {
-
-    abstract fun getSchoolAppEntityDao(): SchoolAppEntityDao
 
     abstract fun getPersonEntityDao(): PersonEntityDao
 

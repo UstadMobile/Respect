@@ -13,7 +13,6 @@ import world.respect.datalayer.http.school.PersonDataSourceHttpClient
 import world.respect.datalayer.http.school.PersonPasskeyDataSourceHttpClient
 import world.respect.datalayer.http.school.PersonPasswordDataSourceHttpClient
 import world.respect.datalayer.http.school.PersonQrBadgeDataSourceHttpClient
-import world.respect.datalayer.http.school.SchoolAppDataSourceHttpClient
 import world.respect.datalayer.http.school.SchoolPermissionGrantDataSourceHttpClient
 import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttpClient
 import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttpClient
@@ -30,7 +29,6 @@ import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.PersonPasswordDataSource
 import world.respect.datalayer.school.PersonQrBadgeDataSource
 import world.respect.datalayer.school.ReportDataSource
-import world.respect.datalayer.school.SchoolAppDataSource
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
@@ -49,16 +47,6 @@ class SchoolDataSourceHttpClient(
     private val opdsFeedValidationHelper: BaseDataSourceValidationHelper? = null,
     private val opdsPublicationValidationHelper: BaseDataSourceValidationHelper? = null,
 ) : SchoolDataSource {
-
-    override val schoolAppDataSource: SchoolAppDataSource by lazy {
-        SchoolAppDataSourceHttpClient(
-            schoolUrl = schoolUrl,
-            schoolDirectoryEntryDataSource = schoolDirectoryEntryDataSource,
-            httpClient = httpClient,
-            tokenProvider = tokenProvider,
-            validationHelper = validationHelper,
-        )
-    }
 
     override val schoolPermissionGrantDataSource: SchoolPermissionGrantDataSource by lazy {
         SchoolPermissionGrantDataSourceHttpClient(

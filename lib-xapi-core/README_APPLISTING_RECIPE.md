@@ -44,7 +44,7 @@ teachers, students, etc).
 ```
 
 * The [webpub-manifest extension](README_EXTENSION_PUBLICATION.md) links to a
-[launchable app OPDS publication](../respect-lib-opds-model/README_LAUNCHABLE_APP.md).
+[launchable app OPDS publication](../lib-opds-model/README_LAUNCHABLE_APP.md).
 * An app is removed by [voiding](https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#232-voiding) 
   the statement that added it.
 * A listing of available apps can be retrieved using a get statements query with the following 

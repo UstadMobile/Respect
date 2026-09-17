@@ -49,14 +49,14 @@ kotlin {
     }
 
     dependencies {
-        api(projects.respectCredentials)
-        implementation(projects.respectLibCache)
+        api(projects.libCredentials)
+        implementation(projects.libCache)
 
-        implementation(projects.respectAppCompose)
-        implementation(projects.respectLibSharedSe)
+        implementation(projects.libAppuiCompose)
+        implementation(projects.libSharedSe)
         implementation(projects.libXapiIpcServer)
         implementation(projects.libDatalayerRepository)
-        implementation(projects.respectLibPrimarykeygen)
+        implementation(projects.libPrimarykeygen)
         implementation(projects.libHttpIpcServer)
         implementation(projects.libHttpIpcClient)
 

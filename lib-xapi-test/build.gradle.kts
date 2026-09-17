@@ -31,7 +31,7 @@ kotlin {
         commonMain.dependencies {
             api(projects.libXapiCore)
 
-            api(projects.respectLibUtil)
+            api(projects.libUtil)
             api(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
@@ -48,7 +48,7 @@ kotlin {
 
         jvmTest.dependencies {
             implementation(libs.androidx.sqlite.bundled)
-            implementation(projects.respectLibTestResources)
+            implementation(projects.libTestResources)
         }
 
         commonTest.dependencies {

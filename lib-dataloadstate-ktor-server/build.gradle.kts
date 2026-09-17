@@ -17,7 +17,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.libDataloadstate)
-            api(projects.respectLibUtil)
+            api(projects.libUtil)
             api(libs.ktor.server.core)
         }
 

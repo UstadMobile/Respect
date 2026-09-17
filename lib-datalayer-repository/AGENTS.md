@@ -1,12 +1,12 @@
-# RESPECT respect-datalayer-repository guide
+# RESPECT lib-datalayer-repository guide
 
 This file provides guidance for AI agents working with code in this
 module. Always follow the repository guidelines in [../AGENTS.md](../AGENTS.md).
 
 ## Module overview
-This is an implementation of the [respect-datalayer module](../respect-datalayer)
-that provides an offline-first repository combining a local datasource (respect-datalayer-db)
-and a remote datasource (e.g. respect-datalayer-http). It works as follows:
+This is an implementation of the [lib-datalayer module](../lib-datalayer)
+that provides an offline-first repository combining a local datasource (lib-datalayer-db)
+and a remote datasource (e.g. lib-datalayer-http). It works as follows:
 
 * **Offline-first read**: checks the local datasource first, and when used as a flow, immediately returns the
   local data without waiting for the remote data. The remote data is checked asynchronously if
@@ -17,7 +17,7 @@ and a remote datasource (e.g. respect-datalayer-http). It works as follows:
   handled using WorkManager on Android (using the connectivity constraint so it will run as soon
   as connectivity is available).
 
-You should read [respect-datalayer AGENTS.md](../respect-datalayer/AGENTS.md) before working with
+You should read [lib-datalayer AGENTS.md](../lib-datalayer/AGENTS.md) before working with
 code in this module.
 
 * Always follow the existing patterns used in this module unless explicitly told otherwise.

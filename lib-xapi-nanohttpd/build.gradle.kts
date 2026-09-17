@@ -25,7 +25,7 @@ kotlin {
         commonMain.dependencies {
             api(libs.nanohttpd)
             api(projects.libXapiCore)
-            api(projects.respectLibSerializers)
+            api(projects.libSerializers)
             api(projects.libDataloadstate)
 
             implementation(libs.kotlinx.serialization.json)

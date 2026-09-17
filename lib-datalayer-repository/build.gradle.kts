@@ -24,7 +24,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.libDatalayer)
-            implementation(projects.respectLibUtil)
+            implementation(projects.libUtil)
             implementation(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
@@ -45,13 +45,13 @@ kotlin {
         }
 
         jvmTest.dependencies {
-            implementation(projects.respectLibTest)
+            implementation(projects.libTest)
             implementation(kotlin("test"))
-            implementation(projects.respectServer)
+            implementation(projects.appServer)
             implementation(projects.libDatalayerHttpServer)
-            implementation(projects.respectLibPrimarykeygen)
-            implementation(projects.respectLibXxhash)
-            implementation(projects.respectLibTestResources)
+            implementation(projects.libPrimarykeygen)
+            implementation(projects.libXxhash)
+            implementation(projects.libTestResources)
             implementation(projects.libXapiTest)
 
             implementation(libs.turbine)

@@ -2,7 +2,7 @@
 
 This module builds the Android app. It is a separate module as per the 
 [Android Gradle Plugin AGP 9 structure](https://kotlinlang.org/docs/multiplatform/multiplatform-project-agp-9-migration.html)
-that uses respect-app-compose as a dependency.
+that uses lib-appui-compose as a dependency.
 
 Passkey Gotcha's (thank you Google)
 

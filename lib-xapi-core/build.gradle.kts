@@ -26,10 +26,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(projects.respectLibSerializers)
+            api(projects.libSerializers)
             api(projects.libDataloadstate)
 
-            api(projects.respectLibUtil)
+            api(projects.libUtil)
             api(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)

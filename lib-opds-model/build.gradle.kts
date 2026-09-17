@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
+    id("maven-publish")
 }
 
 kotlin {
@@ -15,27 +16,23 @@ kotlin {
 
     android {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
-        namespace = "${rootProject.group}.lib.xapi.nanohttpd"
+        namespace = "${rootProject.group}.lib.opds.model"
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
     jvm()
 
+    compilerOptions {
+        optIn.add("kotlin.time.ExperimentalTime")
+    }
+
     sourceSets {
         commonMain.dependencies {
-            api(libs.nanohttpd)
-            api(projects.libXapiCore)
             api(projects.libSerializers)
-            api(projects.libDataloadstate)
-
             implementation(libs.kotlinx.serialization.json)
-            implementation(libs.urlencoder)
-
-            implementation(libs.nanohttpd.nanolets)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
-            implementation(libs.napier)
         }
 
         jvmMain.dependencies {
@@ -46,10 +43,9 @@ kotlin {
 
         }
 
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-            }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
 }
+

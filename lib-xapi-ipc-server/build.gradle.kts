@@ -38,7 +38,7 @@ dependencies {
     api(projects.libXapiIpcShared)
     api(projects.libIpcMessagebridge)
 
-    implementation(projects.respectLibUtil)
+    implementation(projects.libUtil)
 
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
@@ -51,7 +51,7 @@ dependencies {
     androidTestImplementation(projects.libXapiIpcClient)
     androidTestImplementation(projects.libDatalayerDb)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(projects.respectLibTestResources)
+    androidTestImplementation(projects.libTestResources)
     androidTestImplementation(projects.libXapiTest)
     androidTestImplementation(kotlin("test"))
 }

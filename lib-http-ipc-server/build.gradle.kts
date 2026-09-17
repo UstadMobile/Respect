@@ -62,7 +62,7 @@ dependencies {
 
     androidTestImplementation(projects.libHttpIpcClient)
     androidTestImplementation(projects.libIpcMessagebridge)
-    androidTestImplementation(projects.respectLibTestResources)
+    androidTestImplementation(projects.libTestResources)
 
     androidTestImplementation(libs.mockwebserver)
     androidTestImplementation(libs.androidx.espresso.core)

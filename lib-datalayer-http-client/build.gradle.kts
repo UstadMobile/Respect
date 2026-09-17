@@ -23,7 +23,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.respectLibUtil)
+            implementation(projects.libUtil)
             implementation(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)
@@ -39,8 +39,8 @@ kotlin {
         jvmTest.dependencies {
             implementation(projects.libDatalayerHttpServer)
             implementation(projects.libDatalayerDb)
-            implementation(projects.respectLibTest)
-            implementation(projects.respectLibTestResources)
+            implementation(projects.libTest)
+            implementation(projects.libTestResources)
             implementation(projects.libXapiTest)
 
             implementation(libs.androidx.sqlite.bundled)

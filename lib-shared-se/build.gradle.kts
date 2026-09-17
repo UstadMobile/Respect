@@ -5,54 +5,53 @@ plugins {
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
 }
 
+
 kotlin {
     compilerOptions {
         jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
 
         optIn.add("kotlin.time.ExperimentalTime")
-        optIn.add("kotlin.uuid.ExperimentalUuidApi")
-        optIn.add("kotlinx.serialization.ExperimentalSerializationApi")
     }
 
     android {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
-        namespace = "${rootProject.group}.lib.xapi.test"
+        namespace = "${rootProject.group}.sharedse"
         minSdk = libs.versions.android.minSdk.get().toInt()
-
-        androidResources {
-            enable = true
-        }
     }
 
     jvm()
 
-
     sourceSets {
         commonMain.dependencies {
-            api(projects.libXapiCore)
-
+            api(projects.libShared)
+            api(projects.libDatalayer)
+            api(projects.libCredentials)
             api(projects.libUtil)
-            api(libs.kotlinx.serialization.json)
-            api(libs.uri.kmp)
-            api(libs.kotlinx.date.time)
-            api(libs.ktor.client.core)
-            api(libs.xmlutil.serialization)
+            api(projects.libDatalayerDb)
 
-            api(kotlin("test"))
-            implementation(libs.kotlin.test.junit)
+            implementation(libs.androidx.room.runtime)
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.core)
+
+            implementation(libs.multiplatformsettings)
+            implementation(libs.napier)
+        }
+
+        androidMain.dependencies {
+
         }
 
         jvmMain.dependencies {
-            implementation(libs.junit)
+            implementation(projects.libDatalayerDb)
         }
 
         jvmTest.dependencies {
+            implementation(projects.libTest)
             implementation(libs.androidx.sqlite.bundled)
-            implementation(projects.libTestResources)
         }
 
         commonTest.dependencies {
-
+            implementation(kotlin("test"))
         }
     }
 }

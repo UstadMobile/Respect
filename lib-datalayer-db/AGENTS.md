@@ -1,14 +1,14 @@
-# RESPECT respect-datalayer-db guide
+# RESPECT lib-datalayer-db guide
 
 This file provides guidance for AI agents working with code in this
 module. Always follow the repository guidelines in [../AGENTS.md](../AGENTS.md).
 
 ## Module overview
-This is an implementation of the [respect-datalayer module](../respect-datalayer) 
+This is an implementation of the [lib-datalayer module](../lib-datalayer) 
 using Room Multiplatform (based on SQLite). This module is used by the mobile app implementations
 to provide a local offline-first data source and by the server module.
 
-You should read [respect-datalayer AGENTS.md](../respect-datalayer/AGENTS.md) before working with
+You should read [lib-datalayer AGENTS.md](../lib-datalayer/AGENTS.md) before working with
 code in this module.
 
 ## Entity guidance
@@ -142,11 +142,11 @@ class FooDataSourceDb(
 
 ## General guidance
 * There are two databases: RespectSchoolDatabase for school-level data and RespectAppDatabase for
-  app-wide data (as per respect-datalayer itself).
+  app-wide data (as per lib-datalayer itself).
 * Each Entity is named in the form of ModelNameEntity
 * When a model class uses an enum type, then use the same enum type on the entity class. Room 
   TypeConverters to convert to/from database types (such as those found in ```src/commonMain/kotlin/world/respect/datalayer/db/schooldirectory```
-  ```respect-datalayer-db/src/commonMain/kotlin/world/respect/datalayer/db/shared/SharedConverters.kt```) 
+  ```lib-datalayer-db/src/commonMain/kotlin/world/respect/datalayer/db/shared/SharedConverters.kt```) 
   are used to convert Enum types to/from an Int.
 * Where a model has list fields create a 1:many join and use multiple entities. Create a class using
   Room's @Relation annotation where possible. Joined entities (e.g. the main side) should use 

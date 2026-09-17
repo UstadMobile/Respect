@@ -1,4 +1,4 @@
-# RESPECT respect-datalayer guide
+# lib-datalayer guide
 
 This file provides guidance for AI agents working with code in this
 module. Always follow the repository guidelines in [../AGENTS.md](../AGENTS.md).
@@ -6,7 +6,7 @@ module. Always follow the repository guidelines in [../AGENTS.md](../AGENTS.md).
 ## Module overview
 
 This module contains interfaces for the data layer of repository (used by ViewModels in the mobile
-app, Routes in KTOR http server, and domain layer use cases in the respect-lib-shared module).
+app, Routes in KTOR http server, and domain layer use cases in the lib-shared module).
 
 `SchoolDataSource` is used for school-level data including 
 [Experience API (xAPI)](https://github.com/adlnet/xAPI-Spec) experience data (e.g. scores, what content has been experienced, etc),

@@ -23,7 +23,7 @@ ROOTDIR=$(realpath $(dirname $BASH_SOURCE))
 
 echo $ROOTDIR
 
-unzip -q -d $TESTSERVER_WORKSPACE $ROOTDIR/respect-server/build/distributions/respect-server-$VERSION.zip
+unzip -q -d $TESTSERVER_WORKSPACE $ROOTDIR/app-server/build/distributions/app-server-$VERSION.zip
 
 DATADIR=$TESTSERVER_WORKSPACE/data
 mkdir -p $DATADIR
@@ -35,14 +35,14 @@ echo "ci-run-test-server.sh: saved admin auth to $DATADIR/dir-admin.txt"
 
 export JAVA_OPTS="-Dlogs_dir=$TESTSERVER_WORKSPACE/logs/"
 echo "ci-run-test-server.sh starting server :"
-echo $TESTSERVER_WORKSPACE/respect-server-$VERSION/bin/respect-server runserver \
+echo $TESTSERVER_WORKSPACE/app-server-$VERSION/bin/app-server runserver \
           -P:ktor.deployment.port=$TESTSERVER_PORT \
           -P:ktor.respect.datadir=$TESTSERVER_WORKSPACE/data \
           -P:ktor.e2eartifactupload.enabled=true \
           -P:ktor.pidfile=$SERVER_PIDFILE \
 
 # Could set the credentials required to create a new instance here.
-$TESTSERVER_WORKSPACE/respect-server-$VERSION/bin/respect-server runserver \
+$TESTSERVER_WORKSPACE/app-server-$VERSION/bin/app-server runserver \
      -P:ktor.deployment.port=$TESTSERVER_PORT \
      -P:ktor.respect.datadir=$TESTSERVER_WORKSPACE/data \
      -P:ktor.e2eartifactupload.enabled=true \

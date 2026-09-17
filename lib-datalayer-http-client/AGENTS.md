@@ -1,13 +1,13 @@
-# RESPECT respect-datalayer-http guide
+# RESPECT lib-datalayer-http-client guide
 
 This file provides guidance for AI agents working with code in this
 module. Always follow the repository guidelines in [../AGENTS.md](../AGENTS.md).
 
 ## Module overview
-This is an implementation of the [respect-datalayer module](../respect-datalayer)
+This is an implementation of the [lib-datalayer module](../lib-datalayer)
 as an HTTP Client.
 
-You should read [respect-datalayer AGENTS.md](../respect-datalayer/AGENTS.md) before working with
+You should read [lib-datalayer AGENTS.md](../lib-datalayer/AGENTS.md) before working with
 code in this module.
 
 ## Datasource Guidance

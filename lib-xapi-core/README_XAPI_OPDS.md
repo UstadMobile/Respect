@@ -21,7 +21,7 @@ collect data about a users experience, and support offline functionality.
 
 The launcher supports [app links](https://developer.android.com/training/app-links) to enable 
 launching a publication in a native app instead of a WebView and 
-[xAPI over interprocess communication](../respect-lib-xapi-ipc-shared/README.md) for
+[xAPI over interprocess communication](../lib-xapi-ipc-shared/README.md) for
 the native app to send xAPI data about the user's experience back to the launcher.
 
 ## Launching a publication using xAPI

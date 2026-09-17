@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -10,32 +11,31 @@ kotlin {
         jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
 
         optIn.add("kotlin.time.ExperimentalTime")
-        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
     android {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
-        namespace = "${rootProject.group}.lib.xapi.nanohttpd"
+        namespace = "${rootProject.group}.test.resources"
         minSdk = libs.versions.android.minSdk.get().toInt()
+
+        androidResources {
+            enable = true
+        }
     }
 
     jvm()
 
+    /*
+     * This module MUST NOT depend on any other module within this project to avoid circular
+     * dependencies. It provides utility functions that may be used in any other module.
+     */
     sourceSets {
         commonMain.dependencies {
-            api(libs.nanohttpd)
-            api(projects.libXapiCore)
-            api(projects.libSerializers)
-            api(projects.libDataloadstate)
-
-            implementation(libs.kotlinx.serialization.json)
-            implementation(libs.urlencoder)
-
-            implementation(libs.nanohttpd.nanolets)
+            implementation(projects.libUtil)
             api(libs.uri.kmp)
-            api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
-            implementation(libs.napier)
+            implementation(libs.kotlinx.date.time)
+            implementation(libs.kotlinx.serialization.json)
         }
 
         jvmMain.dependencies {
@@ -46,10 +46,8 @@ kotlin {
 
         }
 
-        val commonTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-            }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
         }
     }
 }

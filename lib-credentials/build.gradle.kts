@@ -1,22 +1,19 @@
 
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
-    id("maven-publish")
 }
 
 kotlin {
     compilerOptions {
         jvmToolchain(libs.versions.jvm.toolchain.get().toInt())
-
-        optIn.add("kotlin.time.ExperimentalTime")
-        optIn.add("kotlin.uuid.ExperimentalUuidApi")
     }
 
     android {
         compileSdk = libs.versions.android.compileSdk.get().toInt()
-        namespace = "${rootProject.group}.dataloadstate"
+        namespace = "${rootProject.group}.libcredentials"
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
@@ -24,21 +21,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.kotlinx.serialization.json)
-            api(projects.libIhttpCore)
+            api(libs.uri.kmp)
             api(libs.ktor.client.core)
-        }
-
-        jvmMain.dependencies {
-
-        }
-
-        jvmTest.dependencies {
-
-        }
-
-        commonTest.dependencies {
-            implementation(kotlin("test"))
+            implementation(projects.libUtil)
+            implementation(libs.kotlinx.serialization.json)
         }
     }
 }
+

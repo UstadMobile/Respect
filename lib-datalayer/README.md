@@ -5,9 +5,9 @@ and is derived from the implementation of [UstadMobile](https://www.github.com/U
 and to some extent [Door](https://www.github.com/UstadMobile/door/). 
 
 A data source implementation can be:
- * [Local](../respect-datalayer-db/) - e.g. using a Room database
- * [Network](../respect-datalayer-http/) - using HTTP over a REST API
- * [Repository](../respect-datalayer-repository/) - an offline-first combination of local and network data sources that mediates 
+ * [Local](../lib-datalayer-db/) - e.g. using a Room database
+ * [Network](../lib-datalayer-http/) - using HTTP over a REST API
+ * [Repository](../lib-datalayer-repository/) - an offline-first combination of local and network data sources that mediates 
    a local and network datasource such that when:
     * **Reading**: locally available data is loaded and can be displayed to the user immediately 
       whilst checking for updates in the background. Caching validation (etag, if-modified-since) 
@@ -29,7 +29,7 @@ This helps maximize code reusage:
  * Server app: uses only the local (database based) implementation on its own as the datasource, 
    primarily to serve REST API endpoints.
 
-Recommended reading: see the offline first conceptual note in the [Repository README.md](../respect-datalayer-repository/)
+Recommended reading: see the offline first conceptual note in the [Repository README.md](../lib-datalayer-repository/)
 
 ## Conventions
 

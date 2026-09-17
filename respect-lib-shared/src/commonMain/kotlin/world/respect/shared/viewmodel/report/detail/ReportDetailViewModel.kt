@@ -14,7 +14,7 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.datalayer.school.model.report.ReportOptions
+import world.respect.lib.xapi.extensions.reportoptions.ReportOptions
 import world.respect.datalayer.school.model.Report
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.report.formatter.CreateGraphFormatterUseCase

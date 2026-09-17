@@ -21,17 +21,18 @@ import world.respect.server.domain.school.demoapp.demoAppLearningUnitHtml
 fun Route.DemoLaunchableAppLessonRoute() {
     val koin = getKoin()
 
-    get("$GRADES_DIR_NAME/{grade}/$LEARNING_UNITS_DIR_NAME/{lesson}/$LESSON_MANIFEST_FILENAME") {
+    get("{lang}/$GRADES_DIR_NAME/{grade}/$LEARNING_UNITS_DIR_NAME/{lesson}/$LESSON_MANIFEST_FILENAME") {
         call.respond(
             koin.get<MakeDemoAppLearningUnitManifestUseCase>().invoke(
                 demoBase = call.demoAppBaseUrl(),
                 grade = call.parameters["grade"]!!.toInt(),
                 lessonNum = call.parameters["lesson"]!!.toInt(),
+                langCode = call.parameters["lang"]!!,
             )
         )
     }
 
-    get("$GRADES_DIR_NAME/{grade}/$LEARNING_UNITS_DIR_NAME/{lesson}/tincan.xml") {
+    get("{lang}/$GRADES_DIR_NAME/{grade}/$LEARNING_UNITS_DIR_NAME/{lesson}/tincan.xml") {
         val xml = koin.get<XML>()
 
         call.respondText(
@@ -42,17 +43,20 @@ fun Route.DemoLaunchableAppLessonRoute() {
                     baseUrl = call.demoAppBaseUrl(),
                     gradeNum = call.parameters["grade"]!!.toInt(),
                     lessonNum = call.parameters["lesson"]!!.toInt(),
+                    langCode = call.parameters["lang"]!!,
                 )
             )
         )
     }
 
-    get("$GRADES_DIR_NAME/{grade}/$LEARNING_UNITS_DIR_NAME/{lesson}/$LEARNING_UNIT_HTML_FILENAME") {
+    get("{lang}/$GRADES_DIR_NAME/{grade}/$LEARNING_UNITS_DIR_NAME/{lesson}/$LEARNING_UNIT_HTML_FILENAME") {
         call.respondHtml {
             demoAppLearningUnitHtml(
                 baseUrl = call.demoAppBaseUrl(),
                 gradeNum = call.parameters["grade"]!!.toInt(),
                 lessonNum = call.parameters["lesson"]!!.toInt(),
+                langCode = call.parameters["lang"]!!,
+                demoStrings = koin.get(),
             )
         }
     }

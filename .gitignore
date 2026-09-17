@@ -20,7 +20,7 @@ captures
 
 acra.properties
 respect-lib-shared/src/commonMain/composeResources/files/buildinfo.properties
-respect-server/log/
+*/log/
 .maestro/video-downloader/node_modules/
 .maestro/video-downloader/cypress/downloads/
 .maestro/video-downloader/cypress/videos/

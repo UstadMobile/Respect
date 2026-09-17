@@ -67,3 +67,10 @@
 -keep class world.respect.app.BuildConfig
 
 # End ACRA Rules.
+
+# MLKit QR Code scanner rules. Should not be needed, but they didn't bother to ship R8 rules
+# as per their own recommendations.
+# See https://github.com/googlesamples/mlkit/issues/1018
+-keep class com.google.mlkit.** { *; }
+-keep class com.google.android.gms.internal.mlkit_code_scanner.** { *; }
+# End MLKit QR Code scanner rules

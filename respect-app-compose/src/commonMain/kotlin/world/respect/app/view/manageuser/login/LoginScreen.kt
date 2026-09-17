@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
@@ -19,17 +20,21 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectPasswordField
 import world.respect.app.components.RespectShortVersionInfoText
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
+import world.respect.app.components.rememberCountryFlagEmoji
 import world.respect.app.components.uiTextStringResource
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.i_have_an_invite_code
 import world.respect.shared.generated.resources.login
 import world.respect.shared.generated.resources.password_label
+import world.respect.shared.generated.resources.school_server_url
+import world.respect.shared.generated.resources.server_location
 import world.respect.shared.generated.resources.username_label
 import world.respect.shared.util.ext.isLoading
 import world.respect.shared.viewmodel.app.appstate.AppUiState
@@ -123,6 +128,23 @@ fun LoginScreen(
                 uiTextStringResource(it),
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.defaultItemPadding(),
+            )
+        }
+
+        Text(
+            "${stringResource(Res.string.school_server_url)}: ${uiState.schoolUrl}",
+            modifier = Modifier.align(Alignment.CenterHorizontally).defaultItemPadding(),
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.Center,
+        )
+
+        val countryFlagEmoji = rememberCountryFlagEmoji(uiState.schoolUrl)
+        countryFlagEmoji?.takeIf { it.isNotEmpty() }?.also {
+            Text(
+                "${stringResource(Res.string.server_location)}: $countryFlagEmoji",
+                modifier = Modifier.align(Alignment.CenterHorizontally).defaultItemPadding(),
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
             )
         }
 

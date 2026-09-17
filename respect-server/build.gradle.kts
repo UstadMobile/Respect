@@ -7,7 +7,6 @@ plugins {
     alias(libs.plugins.ktor)
     kotlin("plugin.serialization") version libs.versions.kotlin.get()
     application
-    alias(libs.plugins.swagger.generator)
     alias(libs.plugins.buildconfigPlugin)
 }
 
@@ -36,18 +35,12 @@ buildConfig {
     buildConfigField<String>("RESPECT_DEFAULT_APPLIST", defaultAppList)
 }
 
-// As per https://swagger.io/docs/open-source-tools/swagger-codegen/codegen-v3/workflow-integration/
-swaggerSources {
-    create("respect") {
-        setInputFile(project.file("src/main/resources/openapi/openapi.yaml"))
-        code.language = "html2"
-    }
-}
-
 dependencies {
     implementation(projects.respectLibShared)
-    implementation(projects.respectDatalayer)
-    implementation(projects.respectDatalayerDb)
+    implementation(projects.libDatalayer)
+    implementation(projects.libDatalayerDb)
+    implementation(projects.libDataloadstateKtorServer)
+    implementation(projects.libDatalayerHttpServer)
     implementation(projects.respectLibXxhash)
     implementation(projects.respectLibPrimarykeygen)
 
@@ -72,7 +65,6 @@ dependencies {
     implementation(libs.ktor.client.json)
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.client.okhttp)
-    implementation(libs.ktor.server.swagger)
     implementation(libs.ktor.server.cors)
     implementation(libs.ktor.server.status.pages)
 
@@ -83,12 +75,9 @@ dependencies {
     implementation(libs.ktor.server.html.builder)
 
     testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.ktor.server.test.host)
 
-    swaggerUI(libs.swagger.ui)
-    swaggerCodegen(libs.swagger.codegen.cli)
 }
-
-tasks.named("build").dependsOn("generateSwaggerUI")
 
 tasks.withType<Tar>() {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

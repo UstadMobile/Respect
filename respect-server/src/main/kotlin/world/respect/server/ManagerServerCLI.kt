@@ -23,6 +23,7 @@ import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.sanitizedForFilename
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase.Companion.DEFAULT_ADMIN_USERNAME
+import world.respect.server.domain.school.demoapp.DemoStringMaps
 import world.respect.server.domain.school.demoapp.MakeDemoAppCollectionUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppGradeCollectionsUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitHtmlUseCase
@@ -36,7 +37,10 @@ import kotlin.system.exitProcess
 import kotlin.time.Clock
 
 fun managerServerMain(ns: Namespace) {
-    val json = Json { encodeDefaults = false }
+    val json = Json {
+        encodeDefaults = false
+        prettyPrint = true
+    }
     val httpClient = HttpClient(OkHttp) {
         install(ContentNegotiation) {
             json(json = json)
@@ -113,14 +117,27 @@ fun managerServerMain(ns: Namespace) {
             CMD_MAKE_DEMO_APP -> {
                 val baseUrl = Url(ns.getString("url"))
                 val destDir = File(ns.getString("dir"))
+                val demoStrings = DemoStringMaps.initFromResources(json = json)
 
                 val saveDemoAppToStaticFilesUseCase = SaveDemoAppToStaticFilesUseCase(
-                    makeDemoAppManifestUseCase = MakeDemoAppManifestUseCase(),
-                    makeDemoAppCollectionUseCase = MakeDemoAppCollectionUseCase(),
-                    makeDemoAppGradeCollectionsUseCase = MakeDemoAppGradeCollectionsUseCase(),
-                    makeDemoAppLearningUnitManifestUseCase = MakeDemoAppLearningUnitManifestUseCase(),
-                    makeDemoAppLearningUnitTinCanXmlUseCase = MakeDemoAppLearningUnitTinCanXmlUseCase(),
-                    makeDemoAppLearningUnitHtmlUseCase = MakeDemoAppLearningUnitHtmlUseCase(),
+                    makeDemoAppManifestUseCase = MakeDemoAppManifestUseCase(
+                        demoStrings = demoStrings
+                    ),
+                    makeDemoAppCollectionUseCase = MakeDemoAppCollectionUseCase(
+                        demoStringMaps = demoStrings
+                    ),
+                    makeDemoAppGradeCollectionsUseCase = MakeDemoAppGradeCollectionsUseCase(
+                        demoStrings = demoStrings
+                    ),
+                    makeDemoAppLearningUnitManifestUseCase = MakeDemoAppLearningUnitManifestUseCase(
+                        demoStrings = demoStrings
+                    ),
+                    makeDemoAppLearningUnitTinCanXmlUseCase = MakeDemoAppLearningUnitTinCanXmlUseCase(
+                        demoStrings = demoStrings
+                    ),
+                    makeDemoAppLearningUnitHtmlUseCase = MakeDemoAppLearningUnitHtmlUseCase(
+                        demoStrings = demoStrings
+                    ),
                     xml = xml,
                     json = json,
                 )

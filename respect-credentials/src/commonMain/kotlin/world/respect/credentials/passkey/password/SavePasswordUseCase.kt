@@ -8,4 +8,10 @@ interface SavePasswordUseCase {
 
     suspend operator fun invoke(username:String, password: String)
 
+    companion object {
+
+        const val LOGTAG = "SavePasswordUseCase"
+
+    }
+
 }

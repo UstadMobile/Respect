@@ -16,7 +16,7 @@ import io.ktor.http.takeFrom
 import world.respect.credentials.passkey.RespectCredential
 import world.respect.shared.domain.account.AuthResponse
 import world.respect.datalayer.school.model.DeviceInfo
-import world.respect.libutil.util.throwable.ForbiddenException
+import world.respect.lib.dataloadstate.throwable.ForbiddenException
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 
 class GetTokenAndUserProfileWithCredentialUseCaseClient(

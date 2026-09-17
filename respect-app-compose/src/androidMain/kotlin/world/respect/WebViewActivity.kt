@@ -15,6 +15,7 @@ import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import com.ustadmobile.libcache.webview.OkHttpWebViewClient
 import io.github.aakira.napier.Napier
+import okhttp3.OkHttpClient
 import org.koin.android.ext.android.inject
 import world.respect.appcompose.R
 import world.respect.shared.domain.launchapp.LaunchAppUseCaseAndroid
@@ -71,7 +72,28 @@ class WebViewActivity : AppCompatActivity() {
         }
     }
 
-    private val webViewClient: OkHttpWebViewClient by inject()
+//    private val httpIpcClient by lazy {
+//        HttpIpcClientBuilder(this)
+//            .setIpcServicePackageName(this.packageName)
+//            .build()
+//    }
+
+    private val okHttpClient: OkHttpClient by inject()
+
+    //Uncomment below to test sending requests through Http-Ipc
+//    private val okHttpClient: OkHttpClient by lazy {
+//        val appOkHttpClient: OkHttpClient by inject<OkHttpClient>()
+//        val builder = appOkHttpClient.newBuilder()
+//
+//        //Uncomment to test using Http-Ipc
+//        builder.interceptors().add(0, HttpIpcInterceptor(httpIpcClient))
+//        builder.build()
+//    }
+
+    private val webViewClient by lazy {
+        OkHttpWebViewClient(okHttpClient = okHttpClient)
+    }
+
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -126,6 +148,13 @@ class WebViewActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        //Uncomment to test using HttpIpc
+//        httpIpcClient.close()
     }
 
     companion object {

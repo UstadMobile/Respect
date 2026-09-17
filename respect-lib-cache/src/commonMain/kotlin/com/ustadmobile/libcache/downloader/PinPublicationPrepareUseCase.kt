@@ -7,6 +7,7 @@ import com.ustadmobile.libcache.db.entities.DownloadJobItem
 import com.ustadmobile.libcache.db.entities.PinnedPublication
 import com.ustadmobile.libcache.db.entities.TransferJobItemStatus
 import com.ustadmobile.libcache.util.LaunchNoVarySearchConstants
+import com.ustadmobile.libcache.util.isHttp
 import com.ustadmobile.libcache.util.withWriterTransaction
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -85,6 +86,8 @@ class PinPublicationPrepareUseCase(
 
         val tinCanLaunchUrls = tinCanXmlDocument?.activities?.activity?.mapNotNull { activity ->
             activity.launch?.value?.let { tinCanXmlUrl.resolve(it) }
+        }?.filter {
+            it.protocol.isHttp()
         } ?: emptyList()
 
         val resourceAndAcquireJobItems = buildList<DownloadJobItem> {

@@ -18,7 +18,7 @@ import world.respect.credentials.passkey.model.PasskeyVerifyResult
 import world.respect.credentials.passkey.request.DecodeUserHandleUseCase
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.entities.PersonPasskeyEntity
-import world.respect.libutil.util.throwable.withHttpStatus
+import world.respect.lib.dataloadstate.throwable.withHttpStatus
 import java.util.Base64
 
 /**

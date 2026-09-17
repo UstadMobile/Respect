@@ -27,9 +27,9 @@ acraProperties.takeIf { acraPropertiesFile.exists() }
     ?.load(FileInputStream(acraPropertiesFile))
 
 
-val ACRA_PROP_NAMES = listOf("uri", "basicAuthLogin", "basicAuthPassword")
+val acraPropNames = listOf("uri", "basicAuthLogin", "basicAuthPassword")
 
-ACRA_PROP_NAMES.forEach { propName ->
+acraPropNames.forEach { propName ->
     System.getenv("ACRA_${propName.uppercase()}")?.also {
         acraProperties.setProperty(propName, it)
     }
@@ -68,19 +68,16 @@ kotlin {
         }
     }
 
-    jvm("desktop")
+    jvm()
 
     sourceSets {
-        val desktopMain by getting
-        val commonMain by getting {
-            resources.srcDir("src/commonMain/resources")
-        }
-        val androidMain by getting
-
         androidMain.dependencies {
             api(projects.respectCredentials)
             implementation(projects.respectLibSharedSe)
-            implementation(projects.respectLibXapiIpcServer)
+            implementation(projects.libXapiIpcServer)
+            //Uncomment to test running web based publications through HttpIpc
+            // implementation(projects.libHttpIpcClient)
+
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.play.service.auth)
             implementation(compose.preview)
@@ -90,7 +87,7 @@ kotlin {
             implementation(libs.okhttp)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.compose.material3.window.size.clazz)
-            implementation(projects.respectDatalayerDb)
+            implementation(projects.libDatalayerDb)
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.androidx.webkit)
@@ -105,10 +102,10 @@ kotlin {
 
         commonMain.dependencies {
             implementation(projects.respectLibShared)
-            api(projects.respectDatalayer)
+            api(projects.libDatalayer)
             api(projects.respectLibXxhash)
-            implementation(projects.respectDatalayerRepository)
-            implementation(projects.respectDatalayerHttp)
+            implementation(projects.libDatalayerRepository)
+            implementation(projects.libDatalayerHttpClient)
             implementation(projects.respectLibPrimarykeygen)
             implementation(projects.respectLibCache)
 
@@ -146,7 +143,7 @@ kotlin {
             implementation(libs.qrose)
         }
 
-        desktopMain.dependencies {
+        jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(projects.respectLibSharedSe)

@@ -1,0 +1,9 @@
+{
+  "app_name": "Demo Launchable App",
+  "demo_app_lessons": "Demo Launchable App Lessons",
+  "grade_gradenum": "Grade (gradeNum)",
+  "mobile_app_only_demo_lessons": "Mobile app only demo lessons",
+  "mobile_app_only_lesson_num": "Mobile app only lesson (lessonNum)",
+  "lesson_grade": "Lesson (lessonNum) - Grade (gradeNum)",
+  "demo_learning_unit": "Demo Learning Unit Grade (gradeNum) Unit (lessonNum)"
+}

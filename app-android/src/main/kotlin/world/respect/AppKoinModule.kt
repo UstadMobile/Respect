@@ -80,10 +80,11 @@ import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidation
 import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
 import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
+import world.respect.datalayer.db.school.xapi.writequeue.XapiRemoteWriteQueueDbImpl
 import world.respect.datalayer.db.schooldirectory.SchoolDirectoryDataSourceDb
 import world.respect.datalayer.db.shared.PullSyncTrackerDbImpl
 import world.respect.datalayer.http.RespectAppDataSourceHttp
-import world.respect.datalayer.http.SchoolDataSourceHttp
+import world.respect.datalayer.http.SchoolDataSourceHttpClient
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.RespectAppDataSourceRepository
 import world.respect.datalayer.repository.SchoolDataSourceRepository
@@ -91,6 +92,7 @@ import world.respect.datalayer.repository.school.pullsync.EnqueueRunPullSyncUseC
 import world.respect.datalayer.repository.school.pullsync.RunPullSyncUseCase
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
 import world.respect.datalayer.repository.school.writequeue.EnqueueDrainRemoteWriteQueueUseCaseAndroidImpl
+import world.respect.datalayer.repository.school.writequeue.EnqueueDrainXapiRemoteWriteQueueUseCaseAndroidImpl
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
@@ -99,6 +101,9 @@ import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.school.writequeue.EnqueueRunPullSyncUseCase
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
+import world.respect.lib.xapi.remotewritequeue.DrainXapiRemoteWriteQueueUseCase
+import world.respect.lib.xapi.remotewritequeue.EnqueueDrainXapiRemoteWriteQueueUseCase
+import world.respect.lib.xapi.remotewritequeue.XapiRemoteWriteQueue
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.shared.pullsync.PullSyncTracker
 import world.respect.datalayer.shared.XXHashUidNumberMapper
@@ -155,6 +160,8 @@ import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCaseAndroid
 import world.respect.app.domain.e2eartifactupload.GetDbFilesForE2EArtifactUploadUseCaseAndroid
+import world.respect.datalayer.db.APP_MIGRATION_8_9_CLIENT
+import world.respect.shared.domain.activitycontextjobprocessor.EnqueueActivityContextJobUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
 import world.respect.shared.domain.e2eartifactupload.GetDbFilesForE2EArtifactUploadUseCase
@@ -241,6 +248,12 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
+import world.respect.shared.domain.getlanguageendonym.GetLanguageEndonymUseCase
+import world.respect.shared.domain.launchapp.getlaunchoptionsforpublication.GetLaunchOptionsForPublicationUseCase
+import world.respect.shared.domain.launchapp.getxapilaunchparams.GetXapiLaunchParamsUseCase
+import world.respect.shared.domain.launchapp.getxapilaunchparams.GetXapiLaunchParamsUseCaseAndroid
+import world.respect.shared.domain.launchapp.gotoappstore.GoToAppStoreUseCase
+import world.respect.shared.domain.launchapp.gotoappstore.GoToAppStoreUseCaseAndroid
 import world.respect.shared.domain.license.GetLicenseLabelUseCase
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCase
 import world.respect.shared.domain.navigation.deeplink.InitDeepLinkUriProviderUseCase
@@ -282,8 +295,6 @@ import world.respect.shared.viewmodel.scanqrcode.ScanQRCodeViewModel
 import world.respect.shared.domain.navigation.deferreddeeplink.GetDeferredDeepLinkUseCaseAndroid
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
 import world.respect.shared.domain.opds.getxapiactivityid.GetXapiActivityForPublicationUseCase
-import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCase
-import world.respect.shared.domain.xapi.getxapilaunchurl.GetXapiLaunchUrlUseCaseAndroid
 import world.respect.shared.viewmodel.statement.detail.RawStatementViewModel
 import world.respect.shared.viewmodel.statement.detail.StatementDetailViewModel
 import world.respect.shared.viewmodel.statement.list.StatementListViewModel
@@ -567,8 +578,11 @@ val appKoinModule = module {
             context = androidApplication()
         )
     }
+
     single<SavePasswordUseCase> {
-        SavePasswordUseCaseAndroidImpl()
+        SavePasswordUseCaseAndroidImpl(
+            enqueueActivityContextJobUseCase = get(),
+        )
     }
 
     single<SchoolDirectoryDataSourceLocal> {
@@ -592,6 +606,7 @@ val appKoinModule = module {
             .addCallback(AddSchoolDirectoryCallback(addDirectoriesFromPropertiesUseCase = get()))
             .addCommonMigrations()
             .addMigrations(migrate6to8AddDirectories(addDirectoriesFromPropertiesUseCase = get()))
+            .addMigrations(APP_MIGRATION_8_9_CLIENT)
             .build()
     }
 
@@ -829,6 +844,20 @@ val appKoinModule = module {
         }
     }
 
+    single<EnqueueActivityContextJobUseCase> {
+        EnqueueActivityContextJobUseCase()
+    }
+
+    single<GoToAppStoreUseCase> {
+        GoToAppStoreUseCaseAndroid(
+            appContext = androidApplication(),
+        )
+    }
+
+    single<GetLanguageEndonymUseCase> {
+        GetLanguageEndonymUseCase()
+    }
+
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -995,6 +1024,17 @@ val appKoinModule = module {
             )
         }
 
+        scoped<XapiRemoteWriteQueue> {
+            get<RespectAccountSchoolScopeLink>()
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            XapiRemoteWriteQueueDbImpl(
+                schoolDb = get(),
+                account = AuthenticatedUserPrincipalId(accountScopeId.accountPrincipalId.guid),
+                enqueueDrainRemoteWriteQueueUseCase = get(),
+            )
+        }
+
         scoped<GetActivePersonPasskeysUseCase> {
             GetActivePersonPasskeysClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
@@ -1015,10 +1055,27 @@ val appKoinModule = module {
             )
         }
 
+        scoped<EnqueueDrainXapiRemoteWriteQueueUseCase> {
+            EnqueueDrainXapiRemoteWriteQueueUseCaseAndroidImpl(
+                context = androidContext().applicationContext,
+                scopeId = id,
+                scopeClass = RespectAccount::class,
+            )
+        }
+
         scoped<DrainRemoteWriteQueueUseCase> {
             DrainRemoteWriteQueueUseCase(
                 remoteWriteQueue = get(),
                 dataSource = get(),
+            )
+        }
+
+        scoped<DrainXapiRemoteWriteQueueUseCase> {
+            val repository = get<SchoolDataSource>() as SchoolDataSourceRepository
+            DrainXapiRemoteWriteQueueUseCase(
+                xapiRemoteWriteQueue = get(),
+                remoteDataSource = repository.remote.xapiResource,
+                localDataSource = repository.local.xapiResource,
             )
         }
 
@@ -1044,7 +1101,7 @@ val appKoinModule = module {
 
             SchoolDataSourceRepository(
                 local = localDs,
-                remote = SchoolDataSourceHttp(
+                remote = SchoolDataSourceHttpClient(
                     schoolUrl = schoolUrl.url,
                     schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
                     httpClient = get(),
@@ -1058,6 +1115,8 @@ val appKoinModule = module {
                 ),
                 validationHelper = get(),
                 remoteWriteQueue = get(),
+                xapiRemoteWriteQueue = get(),
+                json = get(),
             )
         }
 
@@ -1143,29 +1202,34 @@ val appKoinModule = module {
             CreateClassUseCase(dataSource = get())
         }
 
-        scoped<GetXapiLaunchUrlUseCase> {
-            val accountScopeId = RespectAccountScopeId.parse(id)
-
-            GetXapiLaunchUrlUseCaseAndroid(
-                nanoHttpdApp = get(),
-                schoolUrl = accountScopeId.schoolUrl,
-                authenticatedUser = accountScopeId.accountPrincipalId,
-                json = get(),
-                accountManager = get(),
-                getXapiActivityForPublicationUseCase = get(),
-                schoolDb = get(),
-                uidNumberMapper = get(),
-                applicationContext = androidApplication(),
-                httpClient = get(),
-                xml = get(),
-            )
-        }
-
         scoped<LaunchAppUseCase> {
             LaunchAppUseCaseAndroid(
                 appContext = androidContext().applicationContext,
-                getXapiLaunchUrlUseCase = get(),
                 ustadCache = get(),
+                getLaunchOptionsForPublicationUseCase = get(),
+                getXapiLaunchParamsUseCase = get(),
+                json = get(),
+            )
+        }
+
+        scoped<GetLaunchOptionsForPublicationUseCase> {
+            GetLaunchOptionsForPublicationUseCase(
+                httpClient = get(),
+                xml = get(),
+                opdsPublicationDataSource = get<SchoolDataSource>().opdsPublicationDataSource,
+            )
+        }
+
+        scoped<GetXapiLaunchParamsUseCase> {
+            val accountScopeId = RespectAccountScopeId.parse(id)
+
+            GetXapiLaunchParamsUseCaseAndroid(
+                nanoHttpdApp = get(),
+                schoolUrl = accountScopeId.schoolUrl,
+                authenticatedUser = accountScopeId.accountPrincipalId,
+                accountManager = get(),
+                uidNumberMapper = get(),
+                schoolDb = get(),
             )
         }
 

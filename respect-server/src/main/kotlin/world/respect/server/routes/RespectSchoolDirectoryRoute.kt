@@ -7,14 +7,16 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.util.reflect.typeInfo
 import org.koin.ktor.ext.inject
-import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.server.domain.school.add.AddSchoolUseCase
 import world.respect.server.domain.school.add.InvalidSchoolRegistrationRequestException
 import world.respect.server.domain.school.add.SchoolRegistrationDisabledException
-import world.respect.server.util.ext.respondDataLoadState
+import world.respect.lib.dataloadstate.ktorserver.respondDataLoadState
 import world.respect.server.util.ext.virtualHost
 
 const val AUTH_CONFIG_DIRECTORY_ADMIN_BASIC = "auth-directory-admin-basic"
@@ -29,7 +31,7 @@ fun Route.RespectSchoolDirectoryRoute(
 ) {
     get("school") {
         call.respondDataLoadState(
-            respectAppDataSource.schoolDirectoryEntryDataSource.list(
+            dataLoadState = respectAppDataSource.schoolDirectoryEntryDataSource.list(
                 loadParams = DataLoadParams(),
                 listParams = SchoolDirectoryEntryDataSource.GetListParams.fromParams(
                     call.request.queryParameters
@@ -40,7 +42,8 @@ fun Route.RespectSchoolDirectoryRoute(
                         null
                     }
                 )
-            )
+            ),
+            typeInfo = typeInfo<List<SchoolDirectoryEntry>>()
         )
     }
 

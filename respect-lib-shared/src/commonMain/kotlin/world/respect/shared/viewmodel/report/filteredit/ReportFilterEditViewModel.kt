@@ -7,9 +7,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.datalayer.school.model.report.FilterType
-import world.respect.datalayer.school.model.report.ReportConditionFilterOptions
-import world.respect.datalayer.school.model.report.ReportFilter
+import world.respect.lib.xapi.extensions.reportoptions.FilterType
+import world.respect.lib.xapi.extensions.reportoptions.ReportConditionFilterOptions
+import world.respect.lib.xapi.extensions.reportoptions.ReportFilter
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.done
 import world.respect.shared.generated.resources.edit_filters
@@ -57,6 +57,7 @@ class ReportFilterEditViewModel(
     }
 
     fun onEntityChanged(value: ReportFilter?) {
+        /*
         val updatedFilter = value?.copy(
             reportFilterSeriesUid = _uiState.value.filters?.reportFilterSeriesUid ?: 0
         )
@@ -67,6 +68,7 @@ class ReportFilterEditViewModel(
                 filterConditionOptions = getConditionOptionsForField(updatedFilter?.reportFilterField)
             )
         }
+         */
     }
 
     fun onClickSave() {

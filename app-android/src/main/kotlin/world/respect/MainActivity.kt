@@ -15,11 +15,10 @@ import world.respect.credentials.passkey.CreatePasskeyUseCaseProcessor
 import world.respect.credentials.passkey.GetCredentialUseCase
 import world.respect.credentials.passkey.GetCredentialUseCaseAndroidImpl
 import world.respect.credentials.passkey.GetCredentialUseCaseProcessor
-import world.respect.credentials.passkey.password.SavePasswordUseCase
-import world.respect.credentials.password.SavePasswordUseCaseAndroidImpl
-import world.respect.credentials.password.SavePasswordUseCaseProcessor
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
+import world.respect.shared.domain.activitycontextjobprocessor.ActivityContextJobProcessor
+import world.respect.shared.domain.activitycontextjobprocessor.EnqueueActivityContextJobUseCase
 import world.respect.shared.domain.biometric.BiometricAuthProcessor
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.view.app.AbstractAppActivity
@@ -39,9 +38,8 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
         val createPasskeyChannelHost = koin.get<CreatePasskeyUseCaseAndroidChannelHost>()
         val getCredentialUseCase = koin.get<GetCredentialUseCase>()
                 as GetCredentialUseCaseAndroidImpl
-        val savePasswordUseCase = koin.get<SavePasswordUseCase>()
-                as SavePasswordUseCaseAndroidImpl
         val biometricUseCase = koin.get<BiometricAuthUseCaseAndroidImpl>()
+        val enqueueActivityContextJobUseCase = koin.get<EnqueueActivityContextJobUseCase>()
 
         val createPasskeyProcessor = CreatePasskeyUseCaseProcessor(
             activityContext = this,
@@ -55,16 +53,16 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
             processOnScope = lifecycleScope
         )
 
-        val savePasswordProcessor = SavePasswordUseCaseProcessor(
-            activityContext = this,
-            jobChannel = savePasswordUseCase.requestChannel,
-            processOnScope = lifecycleScope
-        )
-
         val biometricProcessor = BiometricAuthProcessor(
             activity = this,
             jobChannel = biometricUseCase.requestChannel,
             processOnScope = lifecycleScope
+        )
+
+        val activityJobProcessor = ActivityContextJobProcessor(
+            activityContext = this,
+            jobChannel = enqueueActivityContextJobUseCase.jobChannel,
+            processOnScope = lifecycleScope,
         )
 
         //Launch processors for jobs that need an activity context.
@@ -76,11 +74,13 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
                 launch {
                     getCredentialProcessor.receiveJobs()
                 }
-                launch {
-                    savePasswordProcessor.receiveJobs()
-                }
+
                 launch {
                     biometricProcessor.receiveJobs()
+                }
+
+                launch {
+                    activityJobProcessor.receiveJobs()
                 }
             }
         }

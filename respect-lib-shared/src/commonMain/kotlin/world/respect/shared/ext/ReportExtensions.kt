@@ -1,14 +1,14 @@
 package world.respect.shared.ext
 
 import org.jetbrains.compose.resources.StringResource
-import world.respect.datalayer.school.model.report.Comparisons
-import world.respect.datalayer.school.model.report.FilterType
-import world.respect.datalayer.school.model.report.GenderType
-import world.respect.datalayer.school.model.report.ReportPeriodOption
-import world.respect.datalayer.school.model.report.ReportSeriesVisualType
-import world.respect.datalayer.school.model.report.ReportTimeRangeUnit
-import world.respect.datalayer.school.model.report.ReportXAxis
-import world.respect.datalayer.school.model.report.YAxisTypes
+import world.respect.lib.xapi.extensions.reportoptions.Comparisons
+import world.respect.lib.xapi.extensions.reportoptions.FilterType
+import world.respect.lib.xapi.extensions.reportoptions.GenderType
+import world.respect.lib.xapi.extensions.reportoptions.ReportPeriodOption
+import world.respect.lib.xapi.extensions.reportoptions.ReportSeriesVisualType
+import world.respect.lib.xapi.extensions.reportoptions.ReportTimeRangeUnit
+import world.respect.lib.xapi.extensions.reportoptions.ReportXAxis
+import world.respect.lib.xapi.extensions.reportoptions.YAxisTypes
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.*
 

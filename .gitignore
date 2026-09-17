@@ -29,3 +29,4 @@ lib-shared/src/commonMain/composeResources/files/buildinfo.properties
 
 #Prevent accidental commit of old server data.
 respect-server/data
+respect-lib-shared/src/commonMain/composeResources/files/buildinfo.properties

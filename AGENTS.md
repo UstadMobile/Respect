@@ -49,3 +49,21 @@ ALWAYS: data class Foo(val x: Int)
 
 ALWAYS: use when{} as expression, NEVER as statement.
 
+## Repository Anti-Patterns: - Never Generate these:
+
+## 1. Json processing
+
+NEVER: class MyClass() {  
+  fun doSomething(str: String) {
+      Json.decodeFromString(Foo.serializer(), str)
+  }
+}
+
+ALWAYS: class MyClass(private val json: Json) {
+  fun doSomething(str: String) {
+      json.decodeFromString(Foo.serializer(), str)
+  }
+}
+
+Exception: ONLY in AppRoutes.kt (which does not have access to dependency injection) it is OK to
+use the global default Json.

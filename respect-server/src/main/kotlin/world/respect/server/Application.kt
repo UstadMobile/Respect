@@ -36,9 +36,11 @@ import org.openeel.demo.demolaunchableappserver.DemoLaunchableAppCollectionsRout
 import world.respect.Greeting
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.http.server.XapiStatementsResourceRoute
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.libutil.ext.RESPECT_SCHOOL_LINK_SEGMENT
-import world.respect.libutil.util.throwable.unwrapHttpStatusCode
+import world.respect.lib.dataloadstate.throwable.unwrapHttpStatusCode
 import world.respect.server.demoapp.DemoLaunchableAppLessonRoute
 import world.respect.server.logging.LogbackAntiLog
 import world.respect.server.routes.passkey.GetAllActivePasskeysRoute
@@ -61,7 +63,7 @@ import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
 import world.respect.server.routes.school.respect.SchoolValidationRoute
 import world.respect.server.routes.e2etestartifactsroute.ReceiveE2EArtifactUploadRoute
-import world.respect.server.routes.school.xapi.XapiStatementsResourceRoute
+import world.respect.datalayer.http.server.XapiActivityProfileResourceRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.routes.username.checkusernameunique.CheckUsernameUniqueRoute
 import world.respect.server.util.ext.getSchoolKoinScope
@@ -272,7 +274,19 @@ fun Application.module() {
             route("school") {
                 route("xapi") {
                     authenticate(AUTH_CONFIG_SCHOOL) {
-                        XapiStatementsResourceRoute(json = json)
+                        XapiStatementsResourceRoute(
+                            json = json,
+                            statementResource = { call ->
+                                call.requireAccountScope().get<SchoolDataSource>().xapiResource.statements
+                            }
+                        )
+                        route("activities") {
+                            XapiActivityProfileResourceRoute(
+                                activityProfileResource = { call ->
+                                    call.requireAccountScope().get<SchoolDataSource>().xapiResource.activityProfile
+                                }
+                            )
+                        }
                     }
                 }
 

@@ -5,7 +5,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.toModel
 import world.respect.datalayer.db.school.adapters.toPersonEntities
-import world.respect.libutil.util.throwable.ForbiddenException
+import world.respect.lib.dataloadstate.throwable.ForbiddenException
 import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
 
 class AuthenticateQrBadgeUseCaseDbImpl(

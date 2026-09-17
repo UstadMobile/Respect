@@ -21,7 +21,7 @@ import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.model.PersonStatusEnum
-import world.respect.libutil.util.throwable.unwrapHttpStatusCode
+import world.respect.lib.dataloadstate.throwable.unwrapHttpStatusCode
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.generated.resources.Res

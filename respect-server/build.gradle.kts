@@ -37,8 +37,10 @@ buildConfig {
 
 dependencies {
     implementation(projects.respectLibShared)
-    implementation(projects.respectDatalayer)
-    implementation(projects.respectDatalayerDb)
+    implementation(projects.libDatalayer)
+    implementation(projects.libDatalayerDb)
+    implementation(projects.libDataloadstateKtorServer)
+    implementation(projects.libDatalayerHttpServer)
     implementation(projects.respectLibXxhash)
     implementation(projects.respectLibPrimarykeygen)
 
@@ -73,6 +75,8 @@ dependencies {
     implementation(libs.ktor.server.html.builder)
 
     testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.ktor.server.test.host)
+
 }
 
 tasks.withType<Tar>() {

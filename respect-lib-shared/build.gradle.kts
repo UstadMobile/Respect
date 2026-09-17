@@ -36,12 +36,12 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(projects.respectDatalayer)
+            api(projects.libDatalayer)
             api(projects.respectCredentials)
             api(projects.respectLibUtil)
-            api(projects.respectDatalayerDb)
-            api(projects.respectDatalayerHttp)
-            api(projects.respectLibXapiCore)
+            api(projects.libDatalayerDb)
+            api(projects.libDatalayerHttpClient)
+            api(projects.libXapiCore)
 
             implementation(projects.respectLibCache)
             implementation(projects.respectLibXxhash)
@@ -72,7 +72,7 @@ kotlin {
         }
 
         androidMain.dependencies {
-            api(projects.respectLibXapiNanohttpd)
+            api(projects.libXapiNanohttpd)
             implementation(libs.androidx.preference)
             implementation(libs.androidx.preference.ktx)
             implementation(libs.acra.core)
@@ -81,12 +81,12 @@ kotlin {
             implementation(libs.installreferrer)
 
             implementation(libs.androidx.browser)
-            implementation(projects.respectLibXapiCore)
-            implementation(projects.respectLibXapiIpcShared)
+            implementation(projects.libXapiCore)
+            implementation(projects.libXapiIpcShared)
         }
 
         jvmMain.dependencies {
-            implementation(projects.respectDatalayerDb)
+            implementation(projects.libDatalayerDb)
             implementation(libs.androidx.room.runtime)
             implementation(libs.json.schema.validator)
             implementation(libs.jsoup)

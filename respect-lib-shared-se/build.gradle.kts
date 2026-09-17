@@ -24,10 +24,10 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.respectLibShared)
-            api(projects.respectDatalayer)
+            api(projects.libDatalayer)
             api(projects.respectCredentials)
             api(projects.respectLibUtil)
-            api(projects.respectDatalayerDb)
+            api(projects.libDatalayerDb)
 
             implementation(libs.androidx.room.runtime)
             implementation(project.dependencies.platform(libs.koin.bom))
@@ -42,7 +42,7 @@ kotlin {
         }
 
         jvmMain.dependencies {
-            implementation(projects.respectDatalayerDb)
+            implementation(projects.libDatalayerDb)
         }
 
         jvmTest.dependencies {

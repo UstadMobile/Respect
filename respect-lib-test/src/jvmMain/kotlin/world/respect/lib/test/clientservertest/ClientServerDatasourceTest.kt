@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.RespectAppDataSourceLocal
@@ -29,12 +30,10 @@ import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.db.RespectAppDataSourceDb
 import world.respect.datalayer.db.RespectAppDatabase
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.SchoolDataSourceDb
 import world.respect.datalayer.db.networkvalidation.ExtendedDataSourceValidationHelperImpl
 import world.respect.datalayer.db.school.domain.AddDefaultSchoolPermissionGrantsUseCase
-import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbImpl
 import world.respect.datalayer.db.school.writequeue.RemoteWriteQueueDbImpl
-import world.respect.datalayer.http.SchoolDataSourceHttp
+import world.respect.datalayer.http.SchoolDataSourceHttpClient
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.repository.SchoolDataSourceRepository
 import world.respect.datalayer.repository.school.writequeue.DrainRemoteWriteQueueUseCase
@@ -53,12 +52,10 @@ import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXHasher64FactoryCommonJvm
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
-import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import java.io.File
 import kotlin.time.Clock
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationClient
-
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
 
 
 class ClientServerDataSourceTestBuilder internal constructor(
@@ -127,32 +124,12 @@ class ClientServerDataSourceTestBuilder internal constructor(
         dir: File,
         stringHasher: XXStringHasher,
         localAuthenticatedUser: AuthenticatedUserPrincipalId,
-    ): Pair<RespectSchoolDatabase, SchoolDataSourceLocal> {
-        val schoolDb = Room.databaseBuilder<RespectSchoolDatabase>(
-            name = File(dir, "school.db").absolutePath
-        ).setDriver(BundledSQLiteDriver())
-            .build()
-
-        val uidMapper = XXHashUidNumberMapper(stringHasher)
-
-        val schoolDataSource = SchoolDataSourceDb(
-            schoolDb = schoolDb,
-            uidNumberMapper = uidMapper,
-            authenticatedUser = localAuthenticatedUser,
-            checkPersonPermissionUseCase = CheckPersonPermissionUseCaseDbImpl(
-                authenticatedUser = localAuthenticatedUser,
-                schoolDb = schoolDb,
-                uidNumberMapper = uidMapper,
-            ),
-            defaultAppCatalogUrl = null,
-            json = Json { ignoreUnknownKeys = true },
-            schoolUrl = schoolUrl,
-        )
-
-        return Pair(schoolDb, schoolDataSource)
-    }
-
-
+    ) = newLocalSchoolDatabase(
+        dir = dir,
+        stringHasher = stringHasher,
+        localAuthenticatedUser = localAuthenticatedUser,
+        schoolUrl = schoolUrl,
+    )
 
     val serverSchoolDataSource = serverSchoolSourceAndDb.also { (database, datasource) ->
         runBlocking {
@@ -165,9 +142,6 @@ class ClientServerDataSourceTestBuilder internal constructor(
             }
         }
     }.second
-
-    val serverSchoolPrimaryKeyGenerator = SchoolPrimaryKeyGenerator()
-
 
     val schoolDirectoryEntry = SchoolDirectoryEntry(
         name = LangMapStringValue("test school"),
@@ -238,7 +212,7 @@ class ClientServerDataSourceTestBuilder internal constructor(
         )
 
         val token = "secret"
-        val schoolDataSourceRemote = SchoolDataSourceHttp(
+        val schoolDataSourceRemote = SchoolDataSourceHttpClient(
             schoolUrl = schoolUrl,
             schoolDirectoryEntryDataSource = clientAppDataSource.schoolDirectoryEntryDataSource,
             httpClient = httpClient,
@@ -267,11 +241,13 @@ class ClientServerDataSourceTestBuilder internal constructor(
             remote = schoolDataSourceRemote ,
             validationHelper = clientValidationHelper,
             remoteWriteQueue = remoteWriteQueue,
+            json = json,
+            xapiRemoteWriteQueue = mock {  },
         )
 
         val drainRemoteWriteQueueUseCase = DrainRemoteWriteQueueUseCase(
             remoteWriteQueue = remoteWriteQueue,
-            dataSource = clientDataSource
+            dataSource = clientDataSource,
         )
 
         clientScope.launch {

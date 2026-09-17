@@ -42,8 +42,8 @@ kotlin {
             implementation(projects.respectLibXxhash)
 
             implementation(libs.turbine)
-            implementation(projects.respectDatalayerHttp)
-            implementation(projects.respectDatalayerDb)
+            implementation(projects.libDatalayerHttpClient)
+            implementation(projects.libDatalayerDb)
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
 
@@ -67,9 +67,9 @@ kotlin {
         jvmMain.dependencies {
             implementation(projects.respectServer)
             implementation(projects.respectLibShared)
-            implementation(projects.respectDatalayerRepository)
-            implementation(projects.respectDatalayerDb)
-            implementation(projects.respectDatalayerHttp)
+            implementation(projects.libDatalayerRepository)
+            implementation(projects.libDatalayerDb)
+            implementation(projects.libDatalayerHttpClient)
             implementation(libs.koin.ktor)
             implementation(libs.ktor.server.core)
             implementation(libs.ktor.server.netty)

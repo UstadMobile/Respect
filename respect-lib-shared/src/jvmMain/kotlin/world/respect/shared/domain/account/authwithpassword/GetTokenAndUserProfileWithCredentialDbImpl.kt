@@ -16,8 +16,8 @@ import world.respect.libxxhash.XXStringHasher
 import world.respect.shared.domain.account.AuthResponse
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.model.DeviceInfo
-import world.respect.libutil.util.throwable.ForbiddenException
-import world.respect.libutil.util.throwable.withHttpStatus
+import world.respect.lib.dataloadstate.throwable.ForbiddenException
+import world.respect.lib.dataloadstate.throwable.withHttpStatus
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticateQrBadgeUseCase
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCase

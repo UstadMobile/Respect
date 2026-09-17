@@ -14,7 +14,7 @@ import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.server.util.ext.requireAccountScope
-import world.respect.server.util.ext.respondDataLoadState
+import world.respect.lib.dataloadstate.ktorserver.respondDataLoadState
 import world.respect.server.util.ext.virtualHost
 
 fun Route.PlaylistRoute(

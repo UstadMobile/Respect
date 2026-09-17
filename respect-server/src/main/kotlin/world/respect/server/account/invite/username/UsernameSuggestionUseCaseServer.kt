@@ -2,7 +2,7 @@ package world.respect.server.account.invite.username
 
 import org.koin.core.component.KoinComponent
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.libutil.util.throwable.withHttpStatus
+import world.respect.lib.dataloadstate.throwable.withHttpStatus
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 

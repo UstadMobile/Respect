@@ -10,7 +10,7 @@ import io.ktor.server.routing.post
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.PersonPasswordDataSource
 import world.respect.server.util.ext.requireAccountScope
-import world.respect.server.util.ext.respondDataLoadState
+import world.respect.lib.dataloadstate.ktorserver.respondDataLoadState
 
 fun Route.PersonPasswordRoute(
     schoolDataSource: (ApplicationCall) -> SchoolDataSource = { call ->

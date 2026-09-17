@@ -6,15 +6,15 @@ This file provides guidance for AI agents working with code in this repository.
 
 This is the Kotlin programming language repository containing:
 * The Respect Android app: [app-android module](app-android/)
-* Compose Multiplatform UI: [respect-app-compose module](respect-app-compose/)
-* ViewModels and domain logic architecture: [respect-lib-shared module](respect-lib-shared/)
-* The datalayer is an offline-first datalayer in the modules [respect-datalayer (interfaces/abstract classes)](respect-datalayer/),
-  [respect-datalayer-db (local database layer)](respect-datalayer-db),
-  [respect-datalayer-http (http datasource implementation)](respect-datalayer-http),
-  [respect-datalayer-repository (offline-first repository implementation)](respect-datalayer-repository),
-* Server built using KTOR: [respect-server module](respect-server/)
+* Compose Multiplatform UI: [lib-appui-compose module](lib-appui-compose/)
+* ViewModels and domain logic architecture: [lib-shared module](lib-shared/)
+* The datalayer is an offline-first datalayer in the modules [lib-datalayer (interfaces/abstract classes)](lib-datalayer/),
+  [lib-datalayer-db (local database layer)](lib-datalayer-db),
+  [lib-datalayer-http (http datasource implementation)](lib-datalayer-http),
+  [lib-datalayer-repository (offline-first repository implementation)](lib-datalayer-repository),
+* Server built using KTOR: [app-server module](app-server/)
 * The main Android Activity is `app-android/src/main/kotlin/world/respect/MainActivity.kt`
-* The NavHost with composable routes in ```respect-app-compose/src/commonMain/kotlin/world/respect/app/app/AppNavHost.kt```
+* The NavHost with composable routes in ```lib-appui-compose/src/commonMain/kotlin/world/respect/app/app/AppNavHost.kt```
 
 BEFORE running tests, modifying, or investigating code - identify the module and READ the
 AGENTS.md file for that module.

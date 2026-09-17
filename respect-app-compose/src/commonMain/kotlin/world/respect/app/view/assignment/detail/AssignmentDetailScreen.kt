@@ -115,7 +115,9 @@ fun AssignmentDetailScreen(
         timeZoneId = TimeZone.currentSystemDefault().id,
     )
 
-    RespectDataLoadHost(uiState.assignmentProgress) {
+    RespectDataLoadHost(uiState.assignmentProgress,
+        modifier = Modifier.fillMaxSize().padding(vertical = 10.dp)
+    ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
                 if (!uiState.isFullscreen) {

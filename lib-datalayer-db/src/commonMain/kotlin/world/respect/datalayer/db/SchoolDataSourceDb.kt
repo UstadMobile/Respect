@@ -15,7 +15,6 @@ import world.respect.datalayer.db.school.PersonPasskeyDataSourceDb
 import world.respect.datalayer.db.school.PersonPasswordDataSourceDb
 import world.respect.datalayer.db.school.PersonQrBadgeDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
-import world.respect.datalayer.db.school.SchoolAppDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
 import world.respect.datalayer.db.school.opds.OpdsFeedDataSourceDb
 import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
@@ -30,7 +29,6 @@ import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
 import world.respect.datalayer.school.PersonPasswordDataSourceLocal
 import world.respect.datalayer.school.PersonQrCodeBadgeDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
-import world.respect.datalayer.school.SchoolAppDataSourceLocal
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
@@ -64,10 +62,6 @@ class SchoolDataSourceDb(
         GetAuthenticatedPersonUseCase(
             authenticatedUser, schoolDb, uidNumberMapper
         )
-    }
-
-    override val schoolAppDataSource: SchoolAppDataSourceLocal by lazy{
-        SchoolAppDataSourceDb(schoolDb, uidNumberMapper, authenticatedUser)
     }
 
     override val schoolPermissionGrantDataSource: SchoolPermissionGrantDataSourceLocal by lazy {

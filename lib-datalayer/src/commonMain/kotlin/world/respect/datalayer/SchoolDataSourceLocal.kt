@@ -9,7 +9,6 @@ import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
 import world.respect.datalayer.school.PersonPasswordDataSourceLocal
 import world.respect.datalayer.school.PersonQrCodeBadgeDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
-import world.respect.datalayer.school.SchoolAppDataSourceLocal
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
 import world.respect.lib.xapi.resources.local.XapiResourceLocal
@@ -20,8 +19,6 @@ import world.respect.lib.xapi.resources.local.XapiResourceLocal
  * checks (to run an offline-first cache).
  */
 interface SchoolDataSourceLocal: SchoolDataSource {
-
-    override val schoolAppDataSource: SchoolAppDataSourceLocal
 
     override val schoolPermissionGrantDataSource: SchoolPermissionGrantDataSourceLocal
 

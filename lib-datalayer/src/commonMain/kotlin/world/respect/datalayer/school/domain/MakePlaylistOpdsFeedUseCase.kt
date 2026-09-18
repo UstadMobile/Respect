@@ -1,10 +1,16 @@
 package world.respect.datalayer.school.domain
 
 import com.eygraber.uri.Uri
+import io.ktor.http.URLBuilder
 import io.ktor.http.Url
+import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import world.respect.datalayer.school.opds.ext.withAbsoluteSelfUrl
+import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.ReadiumLink
+import world.respect.lib.xapi.OpenEelXapiConstants
+import world.respect.libutil.ext.appendEndpointPathSegments
 import world.respect.libutil.ext.appendEndpointSegments
 import kotlin.time.Clock
 import kotlin.uuid.ExperimentalUuidApi
@@ -18,16 +24,29 @@ import kotlin.uuid.Uuid
  * 3) Add an owner link to identify the creator of the playlist.
  */
 class MakePlaylistOpdsFeedUseCase(
-    private val schoolUrl: Url
+    private val schoolUrl: Url,
+    private val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
 ) {
 
     @OptIn(ExperimentalUuidApi::class)
-    operator fun invoke(
+    suspend operator fun invoke(
         base: OpdsFeed,
         username: String,
         uuid: Uuid = Uuid.random(),
     ): OpdsFeed {
-        val feedUrl = schoolUrl.appendEndpointSegments("playlist/$uuid")
+        val xapiUrl = schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
+            schoolUrl
+        ).dataOrNull()?.xapi ?: throw IllegalStateException("No Xapi URL for $schoolUrl")
+
+        val feedUrl = URLBuilder(xapiUrl).apply {
+            appendEndpointPathSegments(listOf("activities", "profile"))
+            encodedParameters["activityId"] = UrlEncoderUtil.encode(
+                schoolUrl.appendEndpointSegments("collections", Uuid.random().toString()).toString()
+            )
+            encodedParameters["profileId"] = UrlEncoderUtil.encode(
+                OpenEelXapiConstants.ACTIVITY_PROFILEID_OPDS_COLLECTION
+            )
+        }.build()
 
         val ownerLink = ReadiumLink(
             href = getUserProfileUrl(schoolUrl, username),

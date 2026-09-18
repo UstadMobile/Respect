@@ -14,19 +14,20 @@ import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
-import world.respect.datalayer.school.opds.ext.selfUrl
+import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.OpdsFeedMetadata
 import world.respect.lib.opds.model.OpdsGroup
 import world.respect.libutil.ext.moveItem
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.catalog.saveopdsfeed.SaveOpdsFeedUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_collection
-import world.respect.shared.generated.resources.remix_collection
+import world.respect.shared.generated.resources.collections_section
 import world.respect.shared.generated.resources.edit_collection
 import world.respect.shared.generated.resources.learning_item_section
-import world.respect.shared.generated.resources.collections_section
+import world.respect.shared.generated.resources.remix_collection
 import world.respect.shared.generated.resources.required_field
 import world.respect.shared.generated.resources.save
 import world.respect.shared.navigation.ExternalLinkEdit
@@ -116,6 +117,8 @@ class OpdsFeedEditViewModel(
     private val _uiState = MutableStateFlow(OpdsFeedEditUiState())
 
     val uiState = _uiState.asStateFlow()
+
+    private val saveOpdsFeedUseCase: SaveOpdsFeedUseCase by inject()
 
     private var pendingAddItemGroupIndex: Int?
         get() = savedStateHandle.get<Int>(KEY_PENDING_ADD_ITEM_GROUP_INDEX)
@@ -500,14 +503,11 @@ class OpdsFeedEditViewModel(
         }
 
         viewModelScope.launch {
-
-
-            val savedPlaylistUrl = feed.selfUrl()
-                ?: throw IllegalStateException("Saved playlist has no self URL")
+            saveOpdsFeedUseCase(feed)
 
             _navCommandFlow.tryEmit(
                 NavCommand.Navigate(
-                    destination = OpdsFeedDetail.create(opdsFeedUrl = savedPlaylistUrl),
+                    destination = OpdsFeedDetail.create(opdsFeedUrl = feed.requireSelfUrl()),
                     popUpTo = OpdsFeedEdit.create(),
                     popUpToInclusive = true,
                 )

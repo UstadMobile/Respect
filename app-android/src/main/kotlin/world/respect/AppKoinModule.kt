@@ -245,6 +245,7 @@ import world.respect.shared.viewmodel.person.copycode.CopyInviteCodeViewModel
 import world.respect.shared.viewmodel.person.detail.PersonDetailViewModel
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
+import world.respect.shared.domain.catalog.saveopdsfeed.SaveOpdsFeedUseCase
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
@@ -1264,9 +1265,18 @@ val appKoinModule = module {
          scoped<MakePlaylistOpdsFeedUseCase> {
              val accountScopeId = RespectAccountScopeId.parse(id)
              MakePlaylistOpdsFeedUseCase(
-                 schoolUrl = accountScopeId.schoolUrl
+                 schoolUrl = accountScopeId.schoolUrl,
+                 schoolDirectoryEntryDataSource = get<RespectAppDataSource>().schoolDirectoryEntryDataSource,
              )
          }
+
+        scoped<SaveOpdsFeedUseCase> {
+            SaveOpdsFeedUseCase(
+                xapiActivityProfileResource = get<SchoolDataSource>().xapiResource.activityProfile,
+                opdsFeedDataSourceLocal = get<SchoolDataSourceLocal>().opdsFeedDataSource,
+                json = get(),
+            )
+        }
     }
     single<RunReportUseCase> {
         MockRunReportUseCaseClientImpl()

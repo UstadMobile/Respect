@@ -25,8 +25,9 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
-import world.respect.lib.dataloadstate.ext.isNotModified
-import world.respect.lib.dataloadstate.ext.toHeaders
+import world.respect.lib.dataloadstate.ext.requestEtagAndLastModified
+import world.respect.lib.dataloadstate.ext.isStillValid
+import world.respect.lib.dataloadstate.ext.toResponseHeaders
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import kotlin.time.Clock
@@ -45,13 +46,13 @@ class OpdsFeedDataSourceDb(
         params: DataLoadParams,
     ): DataLoadState<OpdsFeed> {
         return when {
-            this != null && params.requestHeaders.isNotModified(
-                etagAndLastModified()
+            this != null && params.requestHeaders.requestEtagAndLastModified().isStillValid(
+                other = this.etagAndLastModified()
             ) -> {
                 NoDataLoadedState.notModified(
                     metaInfo = DataLoadMetaInfo(
                         url = url,
-                        headers = this.etagAndLastModified().toHeaders()
+                        headers = this.etagAndLastModified().toResponseHeaders()
                     )
                 )
             }
@@ -70,8 +71,8 @@ class OpdsFeedDataSourceDb(
                     ).asModel(json),
                     metaInfo = DataLoadMetaInfo(
                         url = url,
-                        headers = this.etagAndLastModified().toHeaders()
-                    )
+                        headers = this.etagAndLastModified().toResponseHeaders()
+                    ),
                 )
             }
 

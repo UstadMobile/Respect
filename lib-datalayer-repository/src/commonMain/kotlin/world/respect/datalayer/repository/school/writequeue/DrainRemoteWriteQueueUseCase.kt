@@ -62,21 +62,6 @@ class DrainRemoteWriteQueueUseCase(
                         repository.inviteDataSource.sendToRemote(listOf(item))
                     }
 
-                    WriteQueueItem.Model.OPDS_FEED -> {
-                        val dataLoad = repository.opdsFeedDataSource.local.getByUrl(
-                            url = Url(item.uid),
-                            params = DataLoadParams()
-                        )
-
-                        if(dataLoad is DataReadyState) {
-                            repository.opdsFeedDataSource.remote.store(listOf(dataLoad.data))
-                        }else {
-                            Napier.w("WARN: No local data for ${item.uid}")
-                        }
-
-                        remoteWriteQueue.markSent(ids = listOf(item.queueItemId))
-                    }
-
                     WriteQueueItem.Model.XAPI_STATEMENT -> {
                         val statement = repository.local.xapiResource.statements.getByUuid(
                             Uuid.parse(item.uid)

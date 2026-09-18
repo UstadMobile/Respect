@@ -1,14 +1,9 @@
 package world.respect.datalayer.repository.school.xapi
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.repository.ext.copyToValidateOnRemote
+import world.respect.datalayer.repository.flow.asRepoFlow
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
@@ -79,35 +74,15 @@ class XapiActivityProfileResourceRepository(
         params: XapiActivityProfileResource.SingleDocumentParams,
         dataLoadParams: DataLoadParams,
     ): Flow<DataLoadState<XapiDocument>> {
-        return channelFlow {
-            //collect the local flow (use distinctBy to validate)
-            val localFlow = local.getAsFlow(params, dataLoadParams)
-                .distinctUntilChanged { old, new ->
-                    false
-                }
-                //Better would be to use etags/last-modified
-                .shareIn(scope = this, started = SharingStarted.Lazily)
-
-            launch {
-                localFlow.collect { send(it) }
+        return local.getAsFlow(params, dataLoadParams).asRepoFlow(
+            dataLoadParams = dataLoadParams,
+            remoteFlow = { remoteLoadParams ->
+                remote.getAsFlow(params, remoteLoadParams)
+            },
+            onRemoteUpdate = {
+                local.updateLocal(params, it.data)
             }
-
-            launch {
-                //Could use a Stack type structure to avoid leak
-                val deck = ArrayDeque<String>(5)
-                localFlow.filter { localState ->
-                    true // localState validation params are not in deck.
-                }.collect {
-                    remote.getAsFlow(
-                        params, dataLoadParams.copyToValidateOnRemote(it.metaInfo)
-                    ).collect { remoteState ->
-                        if(remoteState is DataReadyState) {
-                            //AddFirst, removeLast on deck
-                        }
-                    }
-                }
-            }
-        }
+        )
     }
 
     override suspend fun post(

@@ -24,7 +24,8 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.ext.hasIfNotModifiedHeaders
-import world.respect.lib.dataloadstate.ext.isNotModified
+import world.respect.lib.dataloadstate.ext.isStillValid
+import world.respect.lib.dataloadstate.ext.requestEtagAndLastModified
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.isJson
 import world.respect.lib.xapi.ext.mergeTopLevel
@@ -81,18 +82,18 @@ class XapiActivityProfileResourceDb(
     ): DataLoadState<XapiDocument> {
         return schoolDb.useReaderConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
-                if(
-                    schoolDb.takeIf {
-                        dataLoadParams.requestHeaders.hasIfNotModifiedHeaders()
-                    }?.getActivityProfileDocumentDao()
-                        ?.findETagAndLastModifiedByActivityIriAndProfileId(
-                            activityIri = params.activityId,
-                            profileId = params.profileId
-                        )?.let {
-                            dataLoadParams.requestHeaders.isNotModified(
-                                it.toModel()
-                            )
-                        } == true
+                val etagAndLastModifiedInDb = schoolDb.takeIf {
+                    dataLoadParams.requestHeaders.hasIfNotModifiedHeaders()
+                }?.getActivityProfileDocumentDao()
+                    ?.findETagAndLastModifiedByActivityIriAndProfileId(
+                        activityIri = params.activityId,
+                        profileId = params.profileId
+                    )?.toModel()
+
+                if(etagAndLastModifiedInDb != null &&
+                    dataLoadParams.requestHeaders.requestEtagAndLastModified().isStillValid(
+                        other = etagAndLastModifiedInDb
+                    )
                 ) {
                     return@withTransaction NoDataLoadedState.notModified()
                 }

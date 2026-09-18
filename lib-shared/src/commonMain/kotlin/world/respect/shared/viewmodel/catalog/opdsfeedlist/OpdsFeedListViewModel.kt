@@ -132,6 +132,8 @@ class OpdsFeedListViewModel(
         }
 
         viewModelScope.launch {
+            /*
+             * Disabled - to be replaced with using statements per recipe
             schoolDataSource.opdsFeedDataSource.getPlaylistsAsFlow(
                 schoolUrl = schoolUrl,
             ).collect { result ->
@@ -140,6 +142,7 @@ class OpdsFeedListViewModel(
                     else -> {}
                 }
             }
+            */
         }
     }
 

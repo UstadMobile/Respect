@@ -18,7 +18,7 @@ import io.ktor.http.Url
 import io.ktor.http.headersOf
 import kotlinx.serialization.json.Json
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.LaunchAppRequest
 import world.respect.shared.domain.launchapp.getlaunchoptionsforpublication.GetLaunchOptionsForPublicationUseCase
@@ -53,7 +53,7 @@ class LaunchAppUseCaseAndroid(
 
 
     private data class LaunchableAppNotInstalled(
-        val launchableApp: OpdsPublication,
+        val launchableApp: Publication,
         val launchUrl: Url,
     )
 

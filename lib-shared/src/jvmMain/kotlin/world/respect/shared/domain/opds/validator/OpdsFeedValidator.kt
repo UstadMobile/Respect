@@ -4,7 +4,7 @@ import com.networknt.schema.InputFormat
 import io.ktor.client.HttpClient
 import kotlinx.serialization.json.Json
 import world.respect.lib.opds.model.OpdsFeed
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.domain.opds.validator.verifyMimeTypeAndGetBodyAsText
 import world.respect.domain.validator.ValidateLinkUseCase
@@ -33,7 +33,7 @@ class OpdsFeedValidator(
         try {
             val text = httpClient.verifyMimeTypeAndGetBodyAsText(
                 url = url,
-                acceptableMimeTypes = listOf(OpdsPublication.MEDIA_TYPE, "application/json"),
+                acceptableMimeTypes = listOf(Publication.MEDIA_TYPE, "application/json"),
                 reporter = reporter
             )
 

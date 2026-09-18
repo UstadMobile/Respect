@@ -4,7 +4,7 @@ import com.eygraber.uri.Uri
 import io.ktor.http.Url
 import org.openeel.demo.demolaunchableappserver.DemoConstants
 import world.respect.lib.opds.model.LangMapStringValue
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumContributorStringValue
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
@@ -27,12 +27,12 @@ class MakeDemoAppLearningUnitManifestUseCase(
         lessonNum: Int,
         langCode: String,
         titleFn: (Int, Int) -> String = LEARNING_UNIT_TITLE_FN,
-    ): OpdsPublication {
+    ): Publication {
         val lessonBase = demoBase.resolve(
             "$langCode/$GRADES_DIR_NAME/$grade/$LEARNING_UNITS_DIR_NAME/$lessonNum/"
         )
 
-        return OpdsPublication(
+        return Publication(
             metadata = ReadiumMetadata(
                 title = LangMapStringValue(
                     demoStrings.requireString(

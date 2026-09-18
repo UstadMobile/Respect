@@ -17,7 +17,7 @@ import nl.adaptivity.xmlutil.core.XmlVersion
 import nl.adaptivity.xmlutil.serialization.XML
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyBlocking
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.libutil.ext.resolve
 import world.respect.libutil.findFreePort
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
@@ -93,7 +93,7 @@ class DownloadIntegrationTest : AbstractCacheInterceptorTest() {
                 )
 
                 val manifestUrl = baseUrl.resolve("lesson001/lesson001.json")
-                val publication: OpdsPublication = httpClient.get(manifestUrl).body()
+                val publication: Publication = httpClient.get(manifestUrl).body()
 
                 val downloadJob = enqueueUseCase(manifestUrl)
                 prepareUseCase(downloadJob.djUid)

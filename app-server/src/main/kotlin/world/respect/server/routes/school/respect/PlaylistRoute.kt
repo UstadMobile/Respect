@@ -43,12 +43,4 @@ fun Route.PlaylistRoute(
         )
     }
 
-
-    post(playlistEndpointPath) {
-        val schoolDataSource = schoolDataSource(call)
-
-        val opdsFeed: OpdsFeed = call.receive()
-        schoolDataSource.opdsFeedDataSource.store(listOf(opdsFeed))
-        call.respond(HttpStatusCode.NoContent)
-    }
 }

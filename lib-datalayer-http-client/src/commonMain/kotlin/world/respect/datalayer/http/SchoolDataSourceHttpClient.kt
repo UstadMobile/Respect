@@ -145,8 +145,6 @@ class SchoolDataSourceHttpClient(
     override val opdsFeedDataSource: OpdsFeedDataSource by lazy {
         OpdsFeedDataSourceHttpClient(
             httpClient = httpClient,
-            opdsFeedValidationHelper = opdsFeedValidationHelper,
-            tokenProvider = tokenProvider,
         )
     }
 

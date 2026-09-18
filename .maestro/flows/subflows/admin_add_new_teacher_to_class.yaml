@@ -1,7 +1,8 @@
 appId: world.respect.app
 
 ---
-- tapOn: "Classes"
+- tapOn:
+    id: "nav_classes"
 - tapOn: ${CLASSNAME}
 - tapOn: "Add Teacher"
 - tapOn: "Add person"

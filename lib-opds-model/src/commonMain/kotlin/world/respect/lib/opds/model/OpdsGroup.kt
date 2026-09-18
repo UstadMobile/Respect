@@ -13,5 +13,5 @@ data class OpdsGroup(
     val metadata: OpdsFeedMetadata,
     val links: List<ReadiumLink>? = null,
     val navigation: List<ReadiumLink>? = null,
-    val publications: List<OpdsPublication>? = null,
+    val publications: List<Publication>? = null,
 )

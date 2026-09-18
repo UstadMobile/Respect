@@ -137,6 +137,15 @@ fun XapiStatement.addActivityToContextActivitiesGrouping(
     )
 }
 
+fun XapiStatement.addActivitiesToContextActivitiesGrouping(
+    activitiesToAdd: List<XapiActivity>
+): XapiStatement {
+    return activitiesToAdd.fold(this) { stmt, activity ->
+        stmt.addActivityToContextActivitiesGrouping(activity)
+    }
+}
+
+
 fun XapiStatement.removeActivityFromContextActivitiesGrouping(
     idToRemove: String
 ) : XapiStatement {

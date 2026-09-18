@@ -15,12 +15,16 @@ import kotlinx.serialization.Serializable
 data class OpdsFeed(
     val metadata: OpdsFeedMetadata,
     val links: List<ReadiumLink>,
-    val publications: List<OpdsPublication>? = null,
+    val publications: List<Publication>? = null,
     val navigation: List<ReadiumLink>? = null,
     val facets: List<OpdsFacet>? = null,
     val groups: List<OpdsGroup>? = null,
-) {
+    val status: String = DEFAULT_STATUS,
+): OpdsDocument {
     companion object {
         const val MEDIA_TYPE = "application/opds+json"
+        
+        // Default status value. Matches StatusEnum.ACTIVE from respect-datalayer.school.model
+        const val DEFAULT_STATUS = "active"
     }
 }

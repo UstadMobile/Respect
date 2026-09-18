@@ -49,7 +49,7 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.langMapString
 import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.DataReadyState
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.findIcons
 import world.respect.shared.ext.alternateLanguageLinks
@@ -84,7 +84,7 @@ fun AppsDetailScreen(
 fun AppsDetailScreen(
     uiState: AppsDetailUiState,
     onClickLessonList: () -> Unit,
-    onClickPublication: (OpdsPublication) -> Unit,
+    onClickPublication: (Publication) -> Unit,
     onClickNavigation: (ReadiumLink) -> Unit,
     onClickAdd: () -> Unit,
     onClickHighlightCard: (String) -> Unit,
@@ -356,7 +356,7 @@ fun NavigationList(
 
 @Composable
 fun PublicationList(
-    publication: OpdsPublication, onClickPublication: (OpdsPublication) -> Unit
+    publication: Publication, onClickPublication: (Publication) -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,

@@ -16,6 +16,7 @@ import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.conditionalheaders.ConditionalHeaders
 import io.ktor.server.routing.routing
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -23,7 +24,6 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import org.mockito.kotlin.mock
 import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataReadyState
@@ -34,14 +34,14 @@ import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.http.school.opds.OpdsFeedDataSourceHttpClient
 import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttpClient
-import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
+import world.respect.lib.opds.model.ext.hasRel
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.opds.model.LangMapStringValue
-import world.respect.lib.opds.model.ext.hasRel
+import world.respect.lib.opds.model.OpdsFeed
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.libutil.findFreePort
-import world.respect.libutil.util.time.systemTimeInMillis
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -117,17 +117,12 @@ class OpdsRespectRepositoryIntegrationTest {
             )
 
             val httpDataSource = OpdsFeedDataSourceHttpClient(
-                httpClient = httpClient,
-                opdsFeedValidationHelper = localDataSource,
-                tokenProvider = {
-                    AuthToken("secret", systemTimeInMillis(), 3600)
-                }
+                httpClient = httpClient
             )
 
             val repository = OpdsFeedDataSourceRepository(
                 local = localDataSource,
-                remote = httpDataSource,
-                remoteWriteQueue = mock {  }
+                remote = httpDataSource
             )
 
             val opdsPubLocal = OpdsPublicationDataSourceDb(
@@ -174,9 +169,9 @@ class OpdsRespectRepositoryIntegrationTest {
             val url = Url("http://localhost:$port/resources/index.json")
             runBlocking {
                 val loadStart = Clock.System.now().toEpochMilliseconds()
-                opdsFeedRepository.getByUrlAsFlow(url, DataLoadParams()).filter {
-                    it is DataReadyState
-                }.test(timeout = 10.seconds) {
+                opdsFeedRepository.getByUrlAsFlow(
+                    url, DataLoadParams()
+                ).filterIsInstance<DataReadyState<OpdsFeed>>().test(timeout = 10.seconds) {
                     val data = awaitItem()
                     val waitTime = Clock.System.now().toEpochMilliseconds() - loadStart
                     println("Loaded in $waitTime ms")
@@ -204,9 +199,8 @@ class OpdsRespectRepositoryIntegrationTest {
             val url = Url("http://localhost:$port/resources/index.json")
             runBlocking {
                 withTimeout(15_000.milliseconds) {
-                    opdsFeedRepository.getByUrlAsFlow(url, DataLoadParams()).filter {
-                        it is DataReadyState
-                    }.first()
+                    opdsFeedRepository.getByUrlAsFlow(url, DataLoadParams())
+                        .filterIsInstance<DataReadyState<OpdsFeed>>().first()
 
                     opdsFeedRepository.getByUrlAsFlow(url, DataLoadParams()).filter {
                         it is DataReadyState && it.remoteState is NoDataLoadedState
@@ -233,9 +227,7 @@ class OpdsRespectRepositoryIntegrationTest {
                 val loadStart = Clock.System.now().toEpochMilliseconds()
                 opdsPubRepository.getByUrlAsFlow(
                     url, DataLoadParams(), null, null
-                ).filter {
-                    it is DataReadyState
-                }.test(timeout = 10.seconds) {
+                ).filterIsInstance<DataReadyState<Publication>>().test(timeout = 10.seconds) {
                     val data = awaitItem()
                     val waitTime = Clock.System.now().toEpochMilliseconds() - loadStart
                     println("Loaded in $waitTime ms")

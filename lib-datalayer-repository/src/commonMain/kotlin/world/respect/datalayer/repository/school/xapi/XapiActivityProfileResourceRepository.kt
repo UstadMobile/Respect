@@ -79,7 +79,7 @@ class XapiActivityProfileResourceRepository(
             remoteFlow = { remoteLoadParams ->
                 remote.getAsFlow(params, remoteLoadParams)
             },
-            onRemoteUpdate = {
+            onRemoteUpdated = {
                 local.updateLocal(params, it.data)
             }
         )

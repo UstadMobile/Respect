@@ -26,7 +26,7 @@ class OpdsFeedDataSourceRepository(
             remoteFlow = {
                 remote.getByUrlAsFlow(url, it)
             },
-            onRemoteUpdate = {
+            onRemoteUpdated = {
                 local.updateLocal(url, it)
             }
         )

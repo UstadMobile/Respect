@@ -20,15 +20,33 @@ import world.respect.lib.dataloadstate.ext.combineWithRemote
 import world.respect.lib.dataloadstate.ext.responseETagAndLastModified
 import world.respect.lib.dataloadstate.ext.isStillValid
 
-const val LOADED_DECK_SIZE = 4
+const val LOADED_DEQUE_SIZE = 4
 
-fun <T: Any> Flow<DataLoadState<T>>.asRepoFlow(
+/**
+ * Create an offline-first repository flow that will:
+ *
+ * a) Immediately emit the local data, if available.
+ * b) Asynchronously collects the remote data. The ETag and Last-Modified headers (if provided) from
+ *    the local data are used to set the request headers on the DataLoadParams passed to the remote.
+ * c) Invokes onRemoteUpdated when new remote data is ready. This should generally then be used to
+ *    update the local data source (e.g. using the updateLocal function).
+ *
+ * @receiver A Flow from a local datasource
+ * @param dataLoadParams the base DataLoadParams to use when requesting remote data.
+ * @param remoteFlow a function that returns a flow of the remote data for the given [DataLoadParams].
+ *        The [DataLoadParams] will include If-Modified-Since and If-None-Match headers from the
+ *        local data where available. Recent duplicate emissions from the receiver local flow (as per
+ *        ETag/LastModified headers) will be filtered so that remoteFlow will only be invoked once
+ *        per distinct local data emission.
+ * @return A combined flow of the local and remote data.
+ */
+fun <T: Any, R: Any> Flow<DataLoadState<T>>.asRepoFlow(
     dataLoadParams: DataLoadParams,
-    remoteFlow: (DataLoadParams) -> Flow<DataLoadState<T>>,
-    onRemoteUpdate: suspend (DataReadyState<T>) -> Unit,
+    remoteFlow: (DataLoadParams) -> Flow<DataLoadState<R>>,
+    onRemoteUpdated: suspend (DataReadyState<R>) -> Unit,
 ): Flow<DataLoadState<T>> {
     return channelFlow {
-        val remoteFlowState = MutableStateFlow<DataLoadState<T>>(DataLoadingState())
+        val remoteFlowState = MutableStateFlow<DataLoadState<R>>(DataLoadingState())
 
         val sharedLocal = this@asRepoFlow.shareIn(
             scope = this, started = SharingStarted.Lazily
@@ -47,7 +65,7 @@ fun <T: Any> Flow<DataLoadState<T>>.asRepoFlow(
         }
 
         launch {
-            val remoteLoadedDeck = ArrayDeque<Headers>(LOADED_DECK_SIZE)
+            val remoteLoadedDeque = ArrayDeque<Headers>(LOADED_DEQUE_SIZE)
             sharedLocal.filter { newLocalState ->
                 /* When new remote data is loaded, this normally leads to updating the local
                  * datasource, which then leads to the local flow emitting the new data. We want
@@ -59,7 +77,7 @@ fun <T: Any> Flow<DataLoadState<T>>.asRepoFlow(
                 val newLocalStateEtagAndLastModified = newLocalState.metaInfo.headers
                     .responseETagAndLastModified()
 
-                !remoteLoadedDeck.any { prevRemoteHeaders ->
+                !remoteLoadedDeque.any { prevRemoteHeaders ->
                     prevRemoteHeaders.responseETagAndLastModified().isStillValid(
                         other = newLocalStateEtagAndLastModified
                     )
@@ -71,11 +89,11 @@ fun <T: Any> Flow<DataLoadState<T>>.asRepoFlow(
                     remoteFlowState.value = remoteState
 
                     if(remoteState is DataReadyState) {
-                        onRemoteUpdate(remoteState)
-                        if(remoteLoadedDeck.size > LOADED_DECK_SIZE) {
-                            remoteLoadedDeck.removeLast()
+                        onRemoteUpdated(remoteState)
+                        if(remoteLoadedDeque.size > LOADED_DEQUE_SIZE) {
+                            remoteLoadedDeque.removeLast()
                         }
-                        remoteLoadedDeck.addFirst(remoteState.metaInfo.headers)
+                        remoteLoadedDeque.addFirst(remoteState.metaInfo.headers)
                     }
                 }
             }

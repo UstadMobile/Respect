@@ -1,9 +1,8 @@
 appId: world.respect.app
 
 ---
-- tapOn:
-    id: "nav_classes"
-- tapOn: "TestClass"
+- tapOn: "Classes"
+- tapOn: "New Class"
 # Admin copy invite code to add student
 - tapOn: "Add Student"
 - copyTextFrom:
@@ -71,7 +70,7 @@ appId: world.respect.app
 - assertVisible:
     id: "app_title"
     text: "Classes"
-- tapOn: "TestClass"
+- tapOn: "New Class"
 - assertVisible: "Pending requests.*"
 - assertVisible: "Student User.*"
 - tapOn: "Accept Invite"

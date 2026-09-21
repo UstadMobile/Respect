@@ -13,6 +13,37 @@ val XapiActor.idStr: String?
     }
 
 /**
+ * The inverse functional identifier (IFI) to use for this actor. This is a string following the same
+ * schema as SQL LRS. See:
+ * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#2423-inverse-functional-identifier
+ *
+ * Each Agent or Identified Group must have one and only one IFI. An anonymous group will not have
+ * an IFI.
+ */
+fun XapiActor.ifiOrNull(): String? {
+    return when {
+        mbox != null -> "mbox::$mbox"
+        mbox_sha1sum != null -> "mbox_sha1sum::$mbox_sha1sum"
+        openid != null -> "openid::$openid"
+        account != null -> account?.let { "account::${it.name}@${it.homePage}" }
+        else -> null
+    }
+}
+
+/**
+ * Require an inverse functional identifier (IFI) to use for this actor. This is a string following
+ * the same schema as SQL LRS. See:
+ * https://github.com/adlnet/xAPI-Spec/blob/master/xAPI-Data.md#2423-inverse-functional-identifier
+ *
+ * Each Agent or Identified Group must have one and only one IFI. An anonymous group will not have
+ * an IFI. If this is invoked on an anonymous group, an exception will be thrown.
+ */
+fun XapiActor.requireIfi(): String {
+    return ifiOrNull() ?: throw IllegalStateException("requireIfi: $this has no IFI")
+}
+
+
+/**
  * A list of actors can include Agents, identified groups, and anonymous groups. The same actor may
  * be in the list more than once.
  *

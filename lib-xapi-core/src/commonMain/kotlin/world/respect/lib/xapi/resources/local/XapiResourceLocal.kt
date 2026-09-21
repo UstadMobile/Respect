@@ -12,4 +12,6 @@ interface XapiResourceLocal: XapiResource {
 
     override val activityProfile: XapiActivityProfileResourceLocal
 
+    val state: XapiStateResourceLocal
+
 }

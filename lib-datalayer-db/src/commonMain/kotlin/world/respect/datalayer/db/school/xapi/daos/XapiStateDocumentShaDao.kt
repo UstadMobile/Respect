@@ -4,26 +4,26 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import world.respect.datalayer.db.school.xapi.entities.XapiActivityProfileDocumentShaEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiStateDocumentShaEntity
 
 @Dao
-interface XapiActivityProfileDocumentShaDao {
+interface XapiStateDocumentShaDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(entity: XapiActivityProfileDocumentShaEntity)
+    suspend fun upsert(entity: XapiStateDocumentShaEntity)
 
     @Query(
         """
         SELECT * 
-          FROM activity_profile_document_sha 
+          FROM state_document_sha 
          WHERE doc_id = :docId
         """
     )
-    suspend fun findByDocId(docId: String): XapiActivityProfileDocumentShaEntity?
+    suspend fun findByDocId(docId: String): XapiStateDocumentShaEntity?
 
     @Query(
         """
-        DELETE FROM activity_profile_document_sha
+        DELETE FROM state_document_sha
          WHERE doc_id = :docId
         """
     )

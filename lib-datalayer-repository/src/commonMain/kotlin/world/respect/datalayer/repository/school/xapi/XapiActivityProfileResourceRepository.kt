@@ -8,6 +8,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.copyLoadState
+import world.respect.lib.dataloadstate.ext.takeIfShouldUpdateLocal
 import world.respect.lib.xapi.ext.isJson
 import world.respect.lib.xapi.ext.jsonKeys
 import world.respect.lib.xapi.ext.toParametersFormUrlEncoded
@@ -60,8 +61,8 @@ class XapiActivityProfileResourceRepository(
             dataLoadParams = dataLoadParams.copyToValidateOnRemote(localState.metaInfo)
         )
 
-        if(remoteState is DataReadyState) {
-            local.updateLocal(params, remoteState.data)
+        remoteState.takeIfShouldUpdateLocal(localState)?.also {
+            local.updateLocal(params, it.data)
             return local.get(params, dataLoadParams).copyLoadState(
                 remoteState = remoteState
             )

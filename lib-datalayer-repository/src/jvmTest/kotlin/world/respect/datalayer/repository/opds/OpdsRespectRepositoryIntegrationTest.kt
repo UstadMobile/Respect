@@ -158,7 +158,7 @@ class OpdsRespectRepositoryIntegrationTest {
                 )
             )
         }finally {
-            server.stop()
+            server.stop(100, 1000)
         }
     }
 

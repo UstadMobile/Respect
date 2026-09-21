@@ -125,7 +125,7 @@ class XapiActivityProfileResourceRepositoryTest: AbstractXapiActivityProfileReso
                 params = params,
                 dataLoadParams = DataLoadParams()
             ).filterIsInstance<DataReadyState<XapiDocument>>().test(
-                timeout = 500.seconds
+                timeout = 5.seconds
             ) {
                 assertContentEquals(
                     expected = XapiActivityProfileTestParams.DOC.contentsAsByteArray(),

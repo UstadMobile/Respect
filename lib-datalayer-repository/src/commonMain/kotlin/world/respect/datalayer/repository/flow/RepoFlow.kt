@@ -19,6 +19,7 @@ import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.combineWithRemote
 import world.respect.lib.dataloadstate.ext.responseETagAndLastModified
 import world.respect.lib.dataloadstate.ext.isStillValid
+import world.respect.lib.dataloadstate.ext.takeIfShouldUpdateLocal
 
 const val LOADED_DEQUE_SIZE = 4
 
@@ -88,8 +89,16 @@ fun <T: Any, R: Any> Flow<DataLoadState<T>>.asRepoFlow(
                 ).collect { remoteState ->
                     remoteFlowState.value = remoteState
 
-                    if(remoteState is DataReadyState) {
-                        onRemoteUpdated(remoteState)
+                    /*
+                     * Filter out remote data that is older than the data we have locally. As per
+                     * the HTTP spec when both If-None-Match and If-Not-Modified-Since are provided
+                     * then If-Not-Modified-Since is ignored.
+                     *
+                     * Left unchecked, this would lead to a situation where the older remote data
+                     * would overwrite newer local data.
+                     */
+                    remoteState.takeIfShouldUpdateLocal(localState)?.also {
+                        onRemoteUpdated(it)
                         if(remoteLoadedDeque.size > LOADED_DEQUE_SIZE) {
                             remoteLoadedDeque.removeLast()
                         }

@@ -31,6 +31,10 @@ fun ETagAndLastModified.toResponseHeaders() : Headers {
 /**
  * Validate a new ETagAndLastModified against a previously received ETagAndLastModified.
  *
+ * If both an etag AND last-modified date are present, then the last-modified date will be ignored,
+ * as per:
+ * https://www.rfc-editor.org/info/rfc9110/#name-if-modified-since
+ *
  * @receiver previously stored/received ETagAndLastModified
  * @param other ETagAndLastModified to validate against
  *
@@ -48,5 +52,28 @@ fun ETagAndLastModified.isStillValid(
         } == true
     } else {
         false
+    }
+}
+
+/**
+ * Compare only the last-modified times. Do not consider etags. Used to avoid overwriting newly
+ * updated local data.
+ *
+ * @receiver [ETagAndLastModified] normally from a remote response
+ * @param other [ETagAndLastModified] normally from a local response
+ *
+ * @return true if both the receiver and other parameter have non-null last-modified times and
+ *         the receiver is newer than the other. False if both have a non-null last-modified time
+ *         and the receiver is not newer than the other. Null if either last-modified time is null.
+ */
+fun ETagAndLastModified.isNewer(
+    other: ETagAndLastModified
+) : Boolean? {
+    val otherLastMod = other.lastModified
+    val thisLastMod = lastModified
+    return if (otherLastMod != null && thisLastMod != null) {
+        thisLastMod > otherLastMod
+    } else {
+        null
     }
 }

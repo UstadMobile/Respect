@@ -13,6 +13,7 @@ import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -151,6 +152,56 @@ class RepoFlowTest {
         }
 
         assertEquals(1, remoteInvocationCount)
+    }
+
+    @Test
+    fun givenRemoteDataIsOlder_whenInvoked_thenLocalDataIsEmittedAndOnRemoteUpdatedIsNotCalled() = runBlocking {
+        val localHeaders = headers {
+            append(HttpHeaders.ETag, "\"local-etag\"")
+            append(HttpHeaders.LastModified, "Sun, 06 Sep 2026 08:49:37 GMT")
+        }
+
+        val remoteHeaders = headers {
+            append(HttpHeaders.ETag, "\"remote-etag\"")
+            append(HttpHeaders.LastModified, "Sun, 06 Sep 2026 07:49:37 GMT")
+        }
+
+        val localFlow = flowOf<DataLoadState<String>>(
+            DataReadyState(
+                data = "local-data",
+                metaInfo = DataLoadMetaInfo(headers = localHeaders)
+            )
+        )
+        var onRemoteUpdatedCalled = false
+
+        val repoFlow = localFlow.asRepoFlow(
+            dataLoadParams = DataLoadParams(),
+            remoteFlow = {
+                flowOf(
+                    DataReadyState(
+                        data = "remote-data",
+                        metaInfo = DataLoadMetaInfo(headers = remoteHeaders)
+                    )
+                )
+            },
+            onRemoteUpdated = {
+                onRemoteUpdatedCalled = true
+            }
+        )
+
+        repoFlow.test {
+            val first = awaitItem()
+            assertTrue(first is DataReadyState)
+            assertEquals("local-data", first.data)
+
+            val second = awaitItem()
+            assertTrue(second is DataReadyState)
+            assertEquals("local-data", second.data)
+            assertEquals("remote-data", (second.remoteState as? DataReadyState)?.data)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertFalse(onRemoteUpdatedCalled)
     }
 
 }

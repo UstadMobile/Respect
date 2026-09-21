@@ -4,12 +4,12 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.repository.ext.copyToValidateOnRemote
 import world.respect.datalayer.repository.flow.asRepoFlow
-import world.respect.lib.dataloadstate.DataLoadParams
-import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.DataReadyState
-import world.respect.lib.dataloadstate.ext.combineWithRemote
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.ext.combineWithRemote
+import world.respect.lib.dataloadstate.ext.takeIfShouldUpdateLocal
 import world.respect.lib.opds.model.OpdsFeed
 
 class OpdsFeedDataSourceRepository(
@@ -42,11 +42,11 @@ class OpdsFeedDataSourceRepository(
             params = params.copyToValidateOnRemote(localData.metaInfo)
         )
 
-        return if(remoteData is DataReadyState) {
-            local.updateLocal(url, remoteData)
-            local.getByUrl(url = url, params = params).combineWithRemote(remoteData)
-        }else {
-            localData.combineWithRemote(remoteData)
+        remoteData.takeIfShouldUpdateLocal(localData)?.also {
+            local.updateLocal(url, it)
+            return local.getByUrl(url = url, params = params).combineWithRemote(remoteData)
         }
+
+        return localData.combineWithRemote(remoteData)
     }
 }

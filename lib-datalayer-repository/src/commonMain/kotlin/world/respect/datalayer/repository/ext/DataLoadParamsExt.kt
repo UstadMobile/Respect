@@ -7,8 +7,10 @@ import world.respect.lib.dataloadstate.DataLoadParams
 
 /**
  * Copy the receiver [DataLoadParams] to be used to validate the data from a remote data source.
- * It will add (where available) the IfModifiedSince and IfNonMatch headers to the [DataLoadParams]
- * that are returned
+ * It will add (where available) the IfModifiedSince and IfNoneMatch headers to the
+ * [DataLoadParams.requestHeaders] that are returned. As per RFC 9110 as long as the server supports
+ * ETags it expected to use the IfNoneMatch header and ignore the IfModifiedSince header as per
+ * https://www.rfc-editor.org/info/rfc9110/#name-if-modified-since .
  *
  * @receiver the original [DataLoadParams] e.g. as supplied to a data source function.
  * @param localMetaInfo the [DataLoadMetaInfo] from loading the data locally that needs to be validated

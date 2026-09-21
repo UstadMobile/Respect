@@ -83,6 +83,7 @@ kotlin {
             implementation(libs.androidx.browser)
             implementation(projects.libXapiCore)
             implementation(projects.libXapiIpcShared)
+            implementation(libs.jsoup)
         }
 
         jvmMain.dependencies {

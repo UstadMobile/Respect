@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SmallFloatingActionButton
@@ -46,6 +48,7 @@ fun ExpandableFab(
                             imageVector = when (item.icon) {
                                 ExpandableFabIcon.ADD -> Icons.Default.Add
                                 ExpandableFabIcon.INVITE -> Icons.Default.Share
+                                ExpandableFabIcon.LINK -> Icons.Default.Link
                             },
                             contentDescription = uiTextStringResource(item.text)
                         )
@@ -55,12 +58,19 @@ fun ExpandableFab(
             }
         }
 
-        FloatingActionButton(onClick = onToggle) {
-            Icon(
-                imageVector = if (state.expanded) Icons.Default.Close else Icons.Default.Add,
-                contentDescription = null
+        val fabText = state.text
+        val fabIcon = if (state.expanded) Icons.Default.Close else Icons.Default.Add
+
+        if (fabText != null) {
+            ExtendedFloatingActionButton(
+                onClick = onToggle,
+                icon = { Icon(imageVector = fabIcon, contentDescription = null) },
+                text = { Text(text = uiTextStringResource(fabText)) },
             )
+        } else {
+            FloatingActionButton(onClick = onToggle) {
+                Icon(imageVector = fabIcon, contentDescription = null)
+            }
         }
     }
-
 }

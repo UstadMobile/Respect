@@ -22,7 +22,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.asLangMap
 import world.respect.lib.xapi.composites.XapiAssignmentTaskProgress
 import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
@@ -35,7 +35,7 @@ import world.respect.shared.generated.resources.task_image
 fun AssignmentDetailTaskListItem(
     activity: XapiActivity,
     progress: XapiAssignmentTaskProgress,
-    taskInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>>,
+    taskInfoFlow: (Url) -> Flow<DataLoadState<Publication>>,
     onClickTask: (XapiActivity) -> Unit = { },
 ) {
     val title = activity.definition?.name?.asLangMap()

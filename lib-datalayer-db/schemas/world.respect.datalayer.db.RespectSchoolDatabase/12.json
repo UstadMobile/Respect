@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 12,
-    "identityHash": "3cd745bbc0ddf2c692bd454cbb19fc7f",
+    "identityHash": "89b1fd8e3dba16710e65a114237e7b72",
     "entities": [
       {
         "tableName": "SchoolAppEntity",
@@ -1601,7 +1601,7 @@
       },
       {
         "tableName": "OpdsFeedEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ofeUid` INTEGER NOT NULL, `ofeUrl` TEXT NOT NULL, `ofeUrlHash` INTEGER NOT NULL, `ofeLastModified` INTEGER NOT NULL, `ofeLastModifiedHeader` INTEGER NOT NULL, `ofeEtag` TEXT, `ofeStored` INTEGER NOT NULL, PRIMARY KEY(`ofeUid`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ofeUid` INTEGER NOT NULL, `ofeUrl` TEXT NOT NULL, `ofeUrlHash` INTEGER NOT NULL, `ofeLastModified` INTEGER NOT NULL, `ofeLastModifiedHeader` INTEGER NOT NULL, `ofeEtag` TEXT, `ofeStored` INTEGER NOT NULL, `ofeStatus` INTEGER NOT NULL, PRIMARY KEY(`ofeUid`))",
         "fields": [
           {
             "fieldPath": "ofeUid",
@@ -1641,6 +1641,12 @@
           {
             "fieldPath": "ofeStored",
             "columnName": "ofeStored",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ofeStatus",
+            "columnName": "ofeStatus",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -1737,7 +1743,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3cd745bbc0ddf2c692bd454cbb19fc7f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '89b1fd8e3dba16710e65a114237e7b72')"
     ]
   }
 }

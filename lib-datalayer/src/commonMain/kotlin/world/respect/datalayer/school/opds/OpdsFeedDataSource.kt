@@ -4,7 +4,6 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.datalayer.shared.WritableDataSource
 import world.respect.lib.opds.model.OpdsFeed
 
 /**
@@ -45,7 +44,7 @@ import world.respect.lib.opds.model.OpdsFeed
  * feed from an app developer has poor metadata, the server will NOT transform the original feed. The
  * school admin or school teachers can copy the app's feed, and then modify it.
  */
-interface OpdsFeedDataSource : WritableDataSource<OpdsFeed>{
+interface OpdsFeedDataSource {
 
     /**
      * Load an OPDS Feed from a given URL : essentially the same as getByUid for other data types.
@@ -60,7 +59,6 @@ interface OpdsFeedDataSource : WritableDataSource<OpdsFeed>{
         url: Url,
         params: DataLoadParams
     ): DataLoadState<OpdsFeed>
-
 
     companion object {
 

@@ -8,7 +8,7 @@ import nl.adaptivity.xmlutil.serialization.XML
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.findLaunchableAppLink
 import world.respect.lib.opds.model.findLearningUnitAcquisitionLinks
 import world.respect.lib.opds.model.findTinCanXmlLink
@@ -34,7 +34,7 @@ class GetLaunchOptionsForPublicationUseCase(
 
     data class GetLaunchOptionsResult(
         val options: List<LaunchOption>,
-        val launchableApp: OpdsPublication?,
+        val launchableApp: Publication?,
     )
 
     data class LaunchOption(
@@ -44,7 +44,7 @@ class GetLaunchOptionsForPublicationUseCase(
     )
 
     suspend operator fun invoke(
-        publication: OpdsPublication,
+        publication: Publication,
         publicationUrl: Url,
     ): GetLaunchOptionsResult {
         val launchOptions = mutableListOf<LaunchOption>()

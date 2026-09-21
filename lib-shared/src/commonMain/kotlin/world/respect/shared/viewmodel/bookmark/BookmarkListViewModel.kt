@@ -1,8 +1,9 @@
-package world.respect.shared.viewmodel.bookmark
+package world.respect.shared.viewmodel.catalog.bookmark
 
 import CommonSortOptions
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import io.github.aakira.napier.Napier
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.Flow
@@ -25,7 +26,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.map
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.objectActivityNameOrNull
 import world.respect.lib.xapi.ext.objectActivityOrNull
@@ -34,23 +35,30 @@ import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.bookmark.RemoveBookmarkUseCase
+import world.respect.shared.ext.resultExpected
 import world.respect.shared.ext.tryOrShowSnackbarOnError
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.remove_bookmark
 import world.respect.shared.generated.resources.something_went_wrong
-import world.respect.shared.navigation.LearningUnitDetail
+import world.respect.shared.navigation.BookmarkList
+import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.NavResultReturner
+import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.SortOrderOption
+import world.respect.shared.util.ext.appbarTitleString
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
+import world.respect.shared.viewmodel.catalog.OpdsPickType
+import world.respect.shared.viewmodel.catalog.PublicationsSelection
 
 data class BookmarkListUiState(
     val statements: List<XapiStatement> = emptyList(),
-    val taskInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
+    val taskInfoFlow: (Url) -> Flow<DataLoadState<Publication>> = {
         flowOf(DataLoadingState())
     },
     val activeSortOrderOption: SortOrderOption = CommonSortOptions.DEFAULT,
@@ -61,6 +69,7 @@ class BookmarkListViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
     private val snackBarDispatcher: SnackBarDispatcher,
+    private val resultReturner: NavResultReturner,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
     private val _uiState = MutableStateFlow(BookmarkListUiState())
 
@@ -74,9 +83,14 @@ class BookmarkListViewModel(
 
     private val removeBookmarkUseCase: RemoveBookmarkUseCase by inject()
 
+    val route: BookmarkList = savedStateHandle.toRoute()
+
     init {
         _appUiState.update {
-            it.copy(title = Res.string.home.asUiText())
+            it.copy(
+                title = route.opdsPickType?.appbarTitleString?.asUiText() ?: Res.string.home.asUiText(),
+                hideBottomNavigation = route.resultDest != null,
+            )
         }
 
         _uiState.update {
@@ -125,7 +139,7 @@ class BookmarkListViewModel(
         }
     }
 
-    fun taskInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
+    fun taskInfoFlowFor(url: Url): Flow<DataLoadState<Publication>> {
         return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = url, params = DataLoadParams(), null, null
         ).map { dataLoadState ->
@@ -138,7 +152,7 @@ class BookmarkListViewModel(
             snackBarDispatcher.tryOrShowSnackbarOnError(
                 logMessage = "BookmarkListViewModel: error removing bookmark"
             ) {
-                removeBookmarkUseCase(statements = listOf(statement),)
+                removeBookmarkUseCase(statements = listOf(statement))
 
                 _uiState.update {
                     it.copy(
@@ -164,12 +178,52 @@ class BookmarkListViewModel(
             return
         }
 
-        _navCommandFlow.tryEmit(
-            value = NavCommand.Navigate(
-                LearningUnitDetail.create(
-                    learningUnitManifestUrl = Url(activityId)
+        when {
+            /**
+             * User is picking a publication - return an OpdsPublicationsSelection result
+             */
+            route.resultExpected && route.opdsPickType == OpdsPickType.PUBLICATION -> {
+                viewModelScope.launch {
+                    val manifestUrl = Url(activityId)
+                    val opdsPub = schoolDataSource.opdsPublicationDataSource.getByUrl(
+                        url = manifestUrl,
+                        params = DataLoadParams()
+                    ).dataOrNull()
+
+                    if(opdsPub != null) {
+                        resultReturner.sendResultIfResultExpected(
+                            route = route,
+                            navCommandFlow = _navCommandFlow,
+                            result = PublicationsSelection(
+                                url = manifestUrl,
+                                selectedPublications = listOf(opdsPub),
+                            )
+                        )
+                    }else {
+                        snackBarDispatcher.showSnackBar(
+                            Snack(message = Res.string.something_went_wrong.asUiText())
+                        )
+                    }
+                }
+            }
+
+            /**
+             * User is picking a collection, do nothing, not supoprted at present
+             */
+            route.resultExpected -> {
+                //do nothing - pick type expected is catalog feed
+            }
+
+            else -> {
+                _navCommandFlow.tryEmit(
+                    value = NavCommand.Navigate(
+                        PublicationDetail.create(
+                            learningUnitManifestUrl = Url(activityId)
+                        )
+                    )
                 )
-            )
-        )
+            }
+        }
+
     }
 }

@@ -64,6 +64,4 @@ abstract class OpdsFeedEntityDao {
         urlHashes: List<Long>
     ): List<OpdsFeedEntity>
 
-
-
 }

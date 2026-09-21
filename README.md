@@ -42,7 +42,7 @@ Download and install the Microsoft OpenJDK build from
 
 Run the server from source using Gradle:
 ```
-./gradlew respect-server:run
+./gradlew app-server:run
 ```
 _Note: On the windows command line the ./ should be omitted_
 
@@ -54,22 +54,22 @@ _Note: On the windows command line the ./ should be omitted_
 
 e.g.
 ```
-./gradlew respect-server:run --args='addschool --url http://10.1.2.3:8098/ --name devschool --adminpassword secret' 
+./gradlew app-server:run --args='addschool --url http://10.1.2.3:8098/ --name devschool --adminpassword secret' 
 ```
 Note: localhost _won't_ work on Android emulators and devices because localhost refers to the 
 emulator/device itself _not_ the PC running on the server.
 
 To see all available command line options (including database options etc):
 ```
-./gradlew respect-server:run --args='addschool --help'
+./gradlew app-server:run --args='addschool --help'
 ```
 
 Note: in order for the search by school name to work you must add your server to the app directory
 list (default or local)
-(e.g. http://10.1.2.3:8098/ as above) in [directories](respect-lib-shared/src/androidMain/resources/directories)
+(e.g. http://10.1.2.3:8098/ as above) in [directories](lib-shared/src/androidMain/resources/directories)
 
 * __Step 6: Build/run and Android app__: In Android Studio use the run/debug button to run the 
- ```respect-app-compose``` module. See [respect-app-compose](respect-app-compose/) for further
+ ```app-android``` module. See [app-android](app-android/) for further
  details on running via the command line etc. You can login to your school using the Android app
  by tapping ```Other options```, entering the school URL, then use the username admin and the
  password you set in step 5.

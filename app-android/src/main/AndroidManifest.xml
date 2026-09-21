@@ -26,14 +26,14 @@
             <action android:name="org.openeel.action.LAUNCH" />
             <category android:name="android.intent.category.BROWSABLE" />
 
-            <data android:scheme="https" />
+            <data android:scheme="https" android:host="*" android:pathPrefix="*"/>
         </intent>
 
         <intent>
             <action android:name="org.openeel.action.LAUNCH" />
             <category android:name="android.intent.category.BROWSABLE" />
 
-            <data android:scheme="http" />
+            <data android:scheme="http" android:host="*" android:pathPrefix="*"/>
         </intent>
 
         <!--
@@ -106,6 +106,9 @@
 
                 <data android:host="*.onrespectstaging.app" />
                 <data android:host="onrespectstaging.app" />
+
+                <data android:host="*.respect-testing.ustadmobile.com" />
+                <data android:host="respect-testing.ustadmobile.com" />
             </intent-filter>
         </activity>
 

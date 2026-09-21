@@ -49,14 +49,14 @@ kotlin {
     }
 
     dependencies {
-        api(projects.respectCredentials)
-        implementation(projects.respectLibCache)
+        api(projects.libCredentials)
+        implementation(projects.libCache)
 
-        implementation(projects.respectAppCompose)
-        implementation(projects.respectLibSharedSe)
-        implementation(projects.respectLibXapiIpcServer)
-        implementation(projects.respectDatalayerRepository)
-        implementation(projects.respectLibPrimarykeygen)
+        implementation(projects.libAppuiCompose)
+        implementation(projects.libSharedSe)
+        implementation(projects.libXapiIpcServer)
+        implementation(projects.libDatalayerRepository)
+        implementation(projects.libPrimarykeygen)
         implementation(projects.libHttpIpcServer)
         implementation(projects.libHttpIpcClient)
 
@@ -78,7 +78,7 @@ kotlin {
         implementation(libs.ktor.client.content.negotiation)
         implementation(libs.ktor.serialization.kotlinx.json)
         implementation(libs.compose.material3.window.size.clazz)
-        implementation(projects.respectDatalayerDb)
+        implementation(projects.libDatalayerDb)
         implementation(libs.androidx.room.runtime)
         implementation(libs.androidx.sqlite.bundled)
         implementation(libs.androidx.webkit)
@@ -123,7 +123,7 @@ android {
         applicationId = "world.respect.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 128
+        versionCode = 132
         versionName = project.version.toString()
 
         for(propName in ACRA_PROP_NAMES) {

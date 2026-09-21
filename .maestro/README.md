@@ -7,7 +7,7 @@
 ## Quick run an individual test:
 
 * Build the project as per the main [README](../README.md)
-* Start respect-server and add a school as per the main project README.
+* Start app-server and add a school as per the main project README.
 * Install the APK on the Android Emulator or device being used to run tests
   e.g. run project using Android Studio, drag/drop file onto Android emulator, or install using adb command:
 ```
@@ -17,7 +17,7 @@ adb install ./app-android/build/outputs/apk/debug/app-android-debug.apk
 * Run the server with e2e artifact upload enabled
 
 ```
-./gradlew respect-server:run --args='runserver -P:ktor.e2eartifactupload.enabled=true'
+./gradlew app-server:run --args='runserver -P:ktor.e2eartifactupload.enabled=true'
 ```
 
 * Run test using Maestro CLI (specify the school URL and admin password):

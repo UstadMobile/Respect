@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.ustadmobile.libcache.PublicationPinState
 import com.ustadmobile.libuicompose.theme.black
@@ -135,6 +136,7 @@ fun PublicationDetailScreen(
                     Text(
                         text = lessonDetail?.metadata?.title?.let { langMapString(it) } ?: "",
                         style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.testTag("publication_title"),
                     )
 
                     uiState.appDetail.dataOrNull()?.also { app ->

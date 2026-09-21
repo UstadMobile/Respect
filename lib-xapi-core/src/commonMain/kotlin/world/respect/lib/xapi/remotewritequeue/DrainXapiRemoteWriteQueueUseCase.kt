@@ -38,7 +38,7 @@ class DrainXapiRemoteWriteQueueUseCase(
                 }
 
                 XapiRemoteWriteQueueItem.Resource.ACTIVITY_PROFILE -> {
-                    val params = XapiActivityProfileResource.SingleDocumentParams.fromParams(
+                    val params = XapiActivityProfileResource.SingleDocumentParams.fromParameters(
                         parseQueryString(queueItem.itemId)
                     )
                     val document = localDataSource.activityProfile.get(params).dataOrNull() ?: continue

@@ -29,7 +29,7 @@ class XapiActivityProfileResourceHttpClientTest : AbstractXapiActivityProfileRes
         }
     }
 
-    override suspend fun withXapiActivityProfileResource(
+    override suspend fun withXapiDocumentResource(
         block: suspend (XapiActivityProfileResource) -> Unit
     ) {
         withEmbeddedDataSourceServer(

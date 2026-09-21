@@ -27,7 +27,7 @@ class XapiActivityProfileResourceRepositoryTest: AbstractXapiActivityProfileReso
     @Rule
     val temporaryFolder = TemporaryFolder()
 
-    override suspend fun withXapiActivityProfileResource(
+    override suspend fun withXapiDocumentResource(
         block: suspend (XapiActivityProfileResource) -> Unit
     ) {
         withEmbeddedServerAndRepositoryClients(

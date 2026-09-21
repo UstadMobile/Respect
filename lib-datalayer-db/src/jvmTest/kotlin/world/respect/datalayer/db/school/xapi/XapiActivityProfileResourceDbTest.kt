@@ -27,9 +27,7 @@ class XapiActivityProfileResourceDbTest : AbstractXapiActivityProfileResourceTes
     @JvmField
     val temporaryFolder: TemporaryFolder = TemporaryFolder()
 
-    override suspend fun withXapiActivityProfileResource(
-        block: suspend (XapiActivityProfileResource) -> Unit
-    ) {
+    override suspend fun withXapiDocumentResource(block: suspend (XapiActivityProfileResource) -> Unit) {
         testSchoolDb(temporaryFolder.newFolder()) { db ->
             val dataSource = db.toDataSource(
                 authenticatedUserUid = "1",

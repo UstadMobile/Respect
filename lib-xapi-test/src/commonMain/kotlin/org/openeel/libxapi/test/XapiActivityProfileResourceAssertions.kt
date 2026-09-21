@@ -22,6 +22,12 @@ object XapiActivityProfileTestParams {
         profileId = PROFILE_ID1,
     )
 
+    val SINGLE_DOC_PARAMS2 = XapiActivityProfileResource.SingleDocumentParams(
+        activityId = ACTIVITY_ID1,
+        profileId = PROFILE_ID1,
+    )
+
+
     val SINGLE_DOC_NON_EXISTENT_PARAMS = XapiActivityProfileResource.SingleDocumentParams(
         activityId = ACTIVITY_ID1,
         profileId = PROFILE_ID_NON_EXISTENT,

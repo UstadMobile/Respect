@@ -1,13 +1,10 @@
 package world.respect.datalayer.http.server
 
-import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
-import io.ktor.server.request.receive
 import io.ktor.server.response.header
 import io.ktor.server.response.respond
-import io.ktor.server.response.respondBytes
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
@@ -30,7 +27,7 @@ fun Route.XapiActivityProfileResourceRoute(
         if (profileId != null) {
             call.respondXapiDocument(
                 activityProfileResource(call).get(
-                    params = XapiActivityProfileResource.SingleDocumentParams.fromParams(
+                    params = XapiActivityProfileResource.SingleDocumentParams.fromParameters(
                         params = call.request.queryParameters
                     ),
                     dataLoadParams = DataLoadParams(
@@ -41,7 +38,7 @@ fun Route.XapiActivityProfileResourceRoute(
         } else {
             call.respondDataLoadState(
                 dataLoadState = activityProfileResource(call).getMultipleDocuments(
-                    params = XapiActivityProfileResource.MultiDocParams.fromParams(
+                    params = XapiActivityProfileResource.MultiDocParams.fromParameters(
                         params = call.request.queryParameters
                     ),
                     dataLoadParams = DataLoadParams(
@@ -57,7 +54,7 @@ fun Route.XapiActivityProfileResourceRoute(
 
         try {
             activityProfileResource(call).post(
-                params = XapiActivityProfileResource.SingleDocumentParams.fromParams(
+                params = XapiActivityProfileResource.SingleDocumentParams.fromParameters(
                     params = call.request.queryParameters
                 ),
                 document = call.receiveXapiDocument(),
@@ -73,7 +70,7 @@ fun Route.XapiActivityProfileResourceRoute(
 
         try {
             activityProfileResource(call).put(
-                params = XapiActivityProfileResource.SingleDocumentParams.fromParams(
+                params = XapiActivityProfileResource.SingleDocumentParams.fromParameters(
                     params = call.request.queryParameters
                 ),
                 document = call.receiveXapiDocument(),
@@ -87,7 +84,7 @@ fun Route.XapiActivityProfileResourceRoute(
     delete(XapiActivityProfileResource.ENDPOINT_NAME) {
         call.response.header(HttpHeaders.Vary, HttpHeaders.Authorization)
 
-        val singleParams = XapiActivityProfileResource.SingleDocumentParams.fromParams(
+        val singleParams = XapiActivityProfileResource.SingleDocumentParams.fromParameters(
             params = call.request.queryParameters
         )
 

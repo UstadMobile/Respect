@@ -7,6 +7,7 @@ import world.respect.lib.xapi.resources.XapiActivitiesResource
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiResource
+import world.respect.lib.xapi.resources.XapiStateResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 
@@ -48,6 +49,9 @@ class XapiResourceIpcClient(
         get() = TODO("Not yet implemented")
 
     override val activityProfile: XapiActivityProfileResource
+        get() = TODO("Not yet implemented")
+
+    override val state: XapiStateResource
         get() = TODO("Not yet implemented")
 
     override fun close() {

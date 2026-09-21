@@ -8,6 +8,7 @@ import world.respect.lib.xapi.resources.XapiActivitiesResource
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiResource
+import world.respect.lib.xapi.resources.XapiStateResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
 
 class XapiResourceRepository(
@@ -28,6 +29,9 @@ class XapiResourceRepository(
     override val agents: XapiAgentsResource = local.agents
 
     override val activities: XapiActivitiesResource = local.activities
+
+    override val state: XapiStateResource
+        get() = TODO("Not yet implemented")
 
     override val activityProfile: XapiActivityProfileResource by lazy {
         XapiActivityProfileResourceRepository(

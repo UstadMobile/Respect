@@ -30,8 +30,14 @@ class XapiResourceRepository(
 
     override val activities: XapiActivitiesResource = local.activities
 
-    override val state: XapiStateResource
-        get() = TODO("Not yet implemented")
+    override val state: XapiStateResource by lazy {
+        XapiStateResourceRepository(
+            local = local.state,
+            remote = remote.state,
+            remoteWriteQueue = remoteWriteQueue,
+            json = json,
+        )
+    }
 
     override val activityProfile: XapiActivityProfileResource by lazy {
         XapiActivityProfileResourceRepository(

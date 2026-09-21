@@ -71,7 +71,7 @@ abstract class AbstractXapiDocumentResourceRepositoryIntegrationTest<
     ) = runBlocking {
         withEmbeddedServerAndRepoClients {
             serverContext.datasourceContext.datasource.xapiResource.getTestResource().post(
-                params = params, document = XapiActivityProfileTestParams.DOC
+                params = params, document = document
             )
 
             val clientDocLoadState = clients.first().datasource.getTestResource().get(params = params)

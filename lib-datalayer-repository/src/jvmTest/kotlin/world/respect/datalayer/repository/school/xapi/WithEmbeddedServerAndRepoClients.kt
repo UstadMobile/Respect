@@ -54,6 +54,7 @@ class RepositoryTestClient(
         remoteDataSource = remoteDataSource,
         localDataSource = localDataSource,
         xapiRemoteWriteQueue = xapiRemoteWriteQueue,
+        json = json,
     )
 
     val datasource = XapiResourceRepository(

@@ -1,5 +1,0 @@
-appId: world.respect.app
-
----
-- assertVisible: "Choose a saved passkey for Respect"
-- tapOn: "Cancel"

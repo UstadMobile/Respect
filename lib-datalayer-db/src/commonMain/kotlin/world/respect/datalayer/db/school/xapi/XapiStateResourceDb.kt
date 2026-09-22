@@ -10,9 +10,11 @@ import io.ktor.util.sha1
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 import world.respect.datalayer.db.RespectSchoolDatabase
-import world.respect.datalayer.db.school.xapi.adapters.toXapiActivityProfileDocumentEntity
-import world.respect.datalayer.db.school.xapi.entities.XapiActivityProfileDocumentShaEntity
+import world.respect.datalayer.db.school.xapi.adapters.toXapiStateDocumentEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiStateDocumentShaEntity
 import world.respect.datalayer.db.shared.InstantAsTimestampString
 import world.respect.datalayer.db.shared.toModel
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
@@ -26,69 +28,77 @@ import world.respect.lib.dataloadstate.ext.requestEtagAndLastModified
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.isJson
 import world.respect.lib.xapi.ext.mergeJsonDoc
+import world.respect.lib.xapi.ext.mergeTopLevel
+import world.respect.lib.xapi.ext.requireIfi
 import world.respect.lib.xapi.model.XapiDocument
-import world.respect.lib.xapi.resources.XapiActivityProfileResource
-import world.respect.lib.xapi.resources.local.XapiActivityProfileResourceLocal
+import world.respect.lib.xapi.model.XapiDocumentByteArrayImpl
+import world.respect.lib.xapi.resources.XapiStateResource
+import world.respect.lib.xapi.resources.local.XapiStateResourceLocal
 import kotlin.uuid.Uuid
 
-class XapiActivityProfileResourceDb(
+class XapiStateResourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val json: Json,
-) : XapiActivityProfileResourceLocal {
+) : XapiStateResourceLocal {
 
     override suspend fun updateLocal(
-        params: XapiActivityProfileResource.SingleDocumentParams,
+        params: XapiStateResource.SingleDocumentParams,
         document: XapiDocument
     ) {
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                val existing = schoolDb.getActivityProfileDocumentDao().findByActivityIriAndProfileId(
+                val existing = schoolDb.getStateDocumentDao().findByActivityIriAndAgentIfiAndRegistrationAndStateId(
                     activityIri = params.activityId,
-                    profileId = params.profileId,
+                    agentIfi = params.agent.requireIfi(),
+                    registration = params.registration,
+                    stateId = params.stateId,
                 )
-                val entity = document.toXapiActivityProfileDocumentEntity(
+                val entity = document.toXapiStateDocumentEntity(
                     params = params,
                     id = existing?.document?.id,
                 )
 
-                schoolDb.getActivityProfileDocumentDao().upsert(entity)
-                schoolDb.getActivityProfileDocumentShaDao().upsert(
-                    XapiActivityProfileDocumentShaEntity(
+                schoolDb.getStateDocumentDao().upsert(entity)
+                schoolDb.getStateDocumentShaDao().upsert(
+                    XapiStateDocumentShaEntity(
                         docId = entity.id,
                         sha1digest = sha1(entity.contents).toHexString(),
                     )
                 )
             }
         }
-
     }
 
     override suspend fun getMultipleDocuments(
-        params: XapiActivityProfileResource.MultiDocParams,
+        params: XapiStateResource.MultiDocParams,
         dataLoadParams: DataLoadParams
     ): DataLoadState<List<String>> {
-        val profileIds = schoolDb.getActivityProfileDocumentDao().getProfileIds(
+        val stateIds = schoolDb.getStateDocumentDao().getStateIds(
             activityIri = params.activityId,
+            agentIfi = params.agent.requireIfi(),
+            registration = params.registration,
             since = params.since?.let { InstantAsTimestampString(it) },
         )
-        return DataReadyState(profileIds)
+        return DataReadyState(stateIds)
     }
 
     override suspend fun get(
-        params: XapiActivityProfileResource.SingleDocumentParams,
+        params: XapiStateResource.SingleDocumentParams,
         dataLoadParams: DataLoadParams
     ): DataLoadState<XapiDocument> {
         return schoolDb.useReaderConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
                 val etagAndLastModifiedInDb = schoolDb.takeIf {
                     dataLoadParams.requestHeaders.hasIfNotModifiedHeaders()
-                }?.getActivityProfileDocumentDao()
-                    ?.findETagAndLastModifiedByActivityIriAndProfileId(
+                }?.getStateDocumentDao()
+                    ?.findETagAndLastModifiedByActivityIriAndAgentIfiAndRegistrationAndStateId(
                         activityIri = params.activityId,
-                        profileId = params.profileId
+                        agentIfi = params.agent.requireIfi(),
+                        registration = params.registration,
+                        stateId = params.stateId,
                     )?.toModel()
 
-                if(etagAndLastModifiedInDb != null &&
+                if (etagAndLastModifiedInDb != null &&
                     dataLoadParams.requestHeaders.requestEtagAndLastModified().isStillValid(
                         other = etagAndLastModifiedInDb
                     )
@@ -96,9 +106,11 @@ class XapiActivityProfileResourceDb(
                     return@withTransaction NoDataLoadedState.notModified()
                 }
 
-                val entity = schoolDb.getActivityProfileDocumentDao().findByActivityIriAndProfileId(
+                val entity = schoolDb.getStateDocumentDao().findByActivityIriAndAgentIfiAndRegistrationAndStateId(
                     activityIri = params.activityId,
-                    profileId = params.profileId,
+                    agentIfi = params.agent.requireIfi(),
+                    registration = params.registration,
+                    stateId = params.stateId,
                 )
 
                 if (entity != null) {
@@ -120,43 +132,46 @@ class XapiActivityProfileResourceDb(
     }
 
     override fun getAsFlow(
-        params: XapiActivityProfileResource.SingleDocumentParams,
+        params: XapiStateResource.SingleDocumentParams,
         dataLoadParams: DataLoadParams
     ): Flow<DataLoadState<XapiDocument>> {
         return schoolDb.invalidationTracker.createFlow(
-            "activity_profile_document", emitInitialState = true
+            "state_document", emitInitialState = true
         ).map {
             get(params, dataLoadParams)
         }
     }
 
     override suspend fun post(
-        params: XapiActivityProfileResource.SingleDocumentParams,
+        params: XapiStateResource.SingleDocumentParams,
         document: XapiDocument
     ) {
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                if(!document.isJson())
+                if (!document.isJson())
                     throw XapiException(400, "Cannot post non-JSON document")
 
-                val existing = schoolDb.getActivityProfileDocumentDao().findByActivityIriAndProfileId(
+                val existing = schoolDb.getStateDocumentDao().findByActivityIriAndAgentIfiAndRegistrationAndStateId(
                     activityIri = params.activityId,
-                    profileId = params.profileId,
+                    agentIfi = params.agent.requireIfi(),
+                    registration = params.registration,
+                    stateId = params.stateId,
                 )
                 val existingDoc = existing?.document
 
-                if(existingDoc?.isJson() == false)
+                if (existingDoc?.isJson() == false)
                     throw XapiException(400, "Cannot post when there is an existing non-JSON document")
 
+
                 val entity = (existingDoc?.mergeJsonDoc(document, json) ?: document)
-                    .toXapiActivityProfileDocumentEntity(
+                    .toXapiStateDocumentEntity(
                         params = params,
                         id = existingDoc?.id ?: Uuid.random().toString()
                     )
 
-                schoolDb.getActivityProfileDocumentDao().upsert(entity)
-                schoolDb.getActivityProfileDocumentShaDao().upsert(
-                    XapiActivityProfileDocumentShaEntity(
+                schoolDb.getStateDocumentDao().upsert(entity)
+                schoolDb.getStateDocumentShaDao().upsert(
+                    XapiStateDocumentShaEntity(
                         docId = entity.id,
                         sha1digest = sha1(entity.contents).toHexString(),
                     )
@@ -166,22 +181,24 @@ class XapiActivityProfileResourceDb(
     }
 
     override suspend fun put(
-        params: XapiActivityProfileResource.SingleDocumentParams,
+        params: XapiStateResource.SingleDocumentParams,
         document: XapiDocument
     ) {
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                val existing = schoolDb.getActivityProfileDocumentDao().findByActivityIriAndProfileId(
+                val existing = schoolDb.getStateDocumentDao().findByActivityIriAndAgentIfiAndRegistrationAndStateId(
                     activityIri = params.activityId,
-                    profileId = params.profileId,
+                    agentIfi = params.agent.requireIfi(),
+                    registration = params.registration,
+                    stateId = params.stateId,
                 )
-                val entity = document.toXapiActivityProfileDocumentEntity(
+                val entity = document.toXapiStateDocumentEntity(
                     params = params,
                     id = existing?.document?.id,
                 )
-                schoolDb.getActivityProfileDocumentDao().upsert(entity)
-                schoolDb.getActivityProfileDocumentShaDao().upsert(
-                    XapiActivityProfileDocumentShaEntity(
+                schoolDb.getStateDocumentDao().upsert(entity)
+                schoolDb.getStateDocumentShaDao().upsert(
+                    XapiStateDocumentShaEntity(
                         docId = entity.id,
                         sha1digest = sha1(entity.contents).toHexString(),
                     )
@@ -190,19 +207,23 @@ class XapiActivityProfileResourceDb(
         }
     }
 
-    override suspend fun delete(params: XapiActivityProfileResource.SingleDocumentParams) {
+    override suspend fun delete(params: XapiStateResource.SingleDocumentParams) {
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
-                val existing = schoolDb.getActivityProfileDocumentDao().findByActivityIriAndProfileId(
+                val existing = schoolDb.getStateDocumentDao().findByActivityIriAndAgentIfiAndRegistrationAndStateId(
                     activityIri = params.activityId,
-                    profileId = params.profileId,
+                    agentIfi = params.agent.requireIfi(),
+                    registration = params.registration,
+                    stateId = params.stateId,
                 )
                 existing?.document?.id?.let {
-                    schoolDb.getActivityProfileDocumentShaDao().deleteByDocId(it)
+                    schoolDb.getStateDocumentShaDao().deleteByDocId(it)
                 }
-                schoolDb.getActivityProfileDocumentDao().deleteByActivityIriAndProfileId(
+                schoolDb.getStateDocumentDao().deleteByActivityIriAndAgentIfiAndRegistrationAndStateId(
                     activityIri = params.activityId,
-                    profileId = params.profileId,
+                    agentIfi = params.agent.requireIfi(),
+                    registration = params.registration,
+                    stateId = params.stateId,
                 )
             }
         }

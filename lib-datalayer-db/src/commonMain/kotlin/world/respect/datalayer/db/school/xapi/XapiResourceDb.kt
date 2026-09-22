@@ -12,6 +12,7 @@ import world.respect.lib.xapi.resources.local.XapiActivitiesResourceLocal
 import world.respect.lib.xapi.resources.local.XapiActivityProfileResourceLocal
 import world.respect.lib.xapi.resources.local.XapiAgentsResourceLocal
 import world.respect.lib.xapi.resources.local.XapiResourceLocal
+import world.respect.lib.xapi.resources.local.XapiStateResourceLocal
 import world.respect.lib.xapi.resources.local.XapiStatementsResourceLocal
 
 class XapiResourceDb(
@@ -61,6 +62,13 @@ class XapiResourceDb(
 
     override val activityProfile: XapiActivityProfileResourceLocal by lazy {
         XapiActivityProfileResourceDb(
+            schoolDb = schoolDb,
+            json = json,
+        )
+    }
+
+    override val state: XapiStateResourceLocal by lazy {
+        XapiStateResourceDb(
             schoolDb = schoolDb,
             json = json,
         )

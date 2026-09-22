@@ -8,6 +8,7 @@ import world.respect.lib.xapi.resources.XapiActivitiesResource
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiResource
+import world.respect.lib.xapi.resources.XapiStateResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
 
 class XapiResourceHttpClient(
@@ -31,6 +32,15 @@ class XapiResourceHttpClient(
 
     override val activities: XapiActivitiesResource
         get() = TODO("Not yet implemented")
+
+    override val state: XapiStateResource by lazy {
+        XapiStateResourceHttpClient(
+            xapiUrl = xapiUrl,
+            httpClient = httpClient,
+            tokenProvider = tokenProvider,
+            json = json,
+        )
+    }
 
     override val activityProfile: XapiActivityProfileResource by lazy {
         XapiActivityProfileResourceHttpClient(

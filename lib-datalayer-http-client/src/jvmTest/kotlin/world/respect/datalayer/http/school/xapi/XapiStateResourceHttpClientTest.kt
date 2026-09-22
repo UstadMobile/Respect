@@ -7,15 +7,15 @@ import io.ktor.server.routing.route
 import kotlinx.serialization.json.Json
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import org.openeel.libxapi.test.AbstractXapiActivityProfileResourceTest
-import world.respect.datalayer.http.server.XapiActivityProfileResourceRoute
+import org.openeel.libxapi.test.AbstractXapiStateResourceTest
+import world.respect.datalayer.http.server.XapiStateResourceRoute
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.lib.test.clientservertest.withEmbeddedDataSourceServer
-import world.respect.lib.xapi.resources.XapiActivityProfileResource
+import world.respect.lib.xapi.resources.XapiStateResource
 import world.respect.libutil.util.time.systemTimeInMillis
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationClient
 
-class XapiActivityProfileResourceHttpClientTest : AbstractXapiActivityProfileResourceTest() {
+class XapiStateResourceHttpClientTest : AbstractXapiStateResourceTest() {
 
     @Rule
     @JvmField
@@ -30,28 +30,30 @@ class XapiActivityProfileResourceHttpClientTest : AbstractXapiActivityProfileRes
     }
 
     override suspend fun withXapiDocumentResource(
-        block: suspend (XapiActivityProfileResource) -> Unit
+        block: suspend (XapiStateResource) -> Unit
     ) {
         withEmbeddedDataSourceServer(
             dbDir = temporaryFolder.newFolder(),
             routingConfig = { context ->
                 route("activities") {
-                    XapiActivityProfileResourceRoute(
-                        activityProfileResource = {
-                            context.datasourceContext.datasource.xapiResource.activityProfile
-                        }
+                    XapiStateResourceRoute(
+                        stateResource = {
+                            context.datasourceContext.datasource.xapiResource.state
+                        },
+                        json = json,
                     )
                 }
             }
         ) {
-            val activityProfileResource = XapiActivityProfileResourceHttpClient(
+            val stateResource = XapiStateResourceHttpClient(
                 xapiUrl = { this.schoolUrl },
                 httpClient = httpClient,
                 tokenProvider = {
                     AuthToken("secret", systemTimeInMillis(), 3600)
                 },
+                json = json,
             )
-            block(activityProfileResource)
+            block(stateResource)
         }
     }
 

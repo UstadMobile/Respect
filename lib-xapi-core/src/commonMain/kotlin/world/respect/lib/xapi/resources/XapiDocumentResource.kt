@@ -14,7 +14,7 @@ import world.respect.lib.xapi.model.XapiDocument
  * @param SingleDocParams the params class that is used to get, post, put, or delete a single
  *        document.
  */
-interface XapiDocumentResource<MultiDocParams: Any, SingleDocParams: Any> {
+interface XapiDocumentResource<MultiDocParams: Any, SingleDocParams: ISingleDocumentParams<MultiDocParams>> {
 
     /**
      * Get a list of available document ids e.g. stateIds, profileIds etc.

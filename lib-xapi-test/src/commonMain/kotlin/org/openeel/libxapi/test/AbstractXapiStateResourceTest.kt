@@ -5,18 +5,18 @@ import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.datetime.toGMTDate
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.model.XapiDocumentByteArrayImpl
-import world.respect.lib.xapi.resources.XapiActivityProfileResource
+import world.respect.lib.xapi.resources.XapiStateResource
 import kotlin.test.Test
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
-abstract class AbstractXapiActivityProfileResourceTest: AbstractXapiDocumentResourceTest<XapiActivityProfileResource.MultiDocParams, XapiActivityProfileResource.SingleDocumentParams, XapiActivityProfileResource>() {
+abstract class AbstractXapiStateResourceTest : AbstractXapiDocumentResourceTest<XapiStateResource.MultiDocParams, XapiStateResource.SingleDocumentParams, XapiStateResource>() {
 
     @Test
     override fun givenDocument_whenPut_thenCanBeRetrieved() = runBlocking {
         givenDocument_whenPut_thenCanBeRetrieved(
-            documentParams = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1
         )
     }
 
@@ -31,85 +31,85 @@ abstract class AbstractXapiActivityProfileResourceTest: AbstractXapiDocumentReso
     @Test
     override fun givenDocumentStoredAndNotModified_whenRetrievedWithValidationHeaders_thenReturnsNotModified() = runBlocking {
         givenDocumentStoredAndNotModified_whenRetrievedWithValidationHeaders_thenReturnsNotModified(
-            documentParams = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1,
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1,
         )
     }
 
     /**
-     * Asserts that attempting to retrieve a non-existent activity profile document returns [NoDataLoadedState].
+     * Asserts that attempting to retrieve a non-existent state document returns [NoDataLoadedState].
      */
     @Test
     override fun givenNonExistentDocument_whenGetCalled_thenReturnsNotFound() = runBlocking {
         givenNonExistentDocument_whenGetCalled_thenReturnsNotFound(
-            nonExistentParams = XapiActivityProfileTestParams.SINGLE_DOC_NON_EXISTENT_PARAMS
+            nonExistentParams = XapiStateTestParams.SINGLE_DOC_NON_EXISTENT_PARAMS
         )
     }
 
     /**
-     * Asserts that overwriting an existing activity profile document with [XapiActivityProfileResource.put]
+     * Asserts that overwriting an existing state document with [XapiStateResource.put]
      * replaces the entire document rather than merging properties.
      */
     @Test
     override fun givenExistingDocument_whenOverwrittenWithPut_thenReplacesDocumentCompletely() = runBlocking {
         givenExistingDocument_whenOverwrittenWithPut_thenReplacesDocumentCompletely(
-            documentParams = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1
         )
     }
 
     /**
-     * Asserts that posting to a non-existent activity profile document creates a new document.
+     * Asserts that posting to a non-existent state document creates a new document.
      */
     @Test
     override fun givenNonExistentDocument_whenPosted_thenCreatesNewDocument() = runBlocking {
         givenNonExistentDocument_whenPosted_thenCreatesNewDocument(
-            documentParams = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1
         )
     }
 
     /**
-     * Asserts that posting a JSON document to an existing JSON activity profile document
+     * Asserts that posting a JSON document to an existing JSON state document
      * merges top-level properties according to the xAPI specification.
      */
     @Test
     override fun givenExistingJsonDocument_whenPosted_thenMergesTopLevelProperties() = runBlocking {
         givenExistingJsonDocument_whenPosted_thenMergesTopLevelProperties(
-            documentParams = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1
         )
     }
 
     /**
-     * Asserts that posting a non-JSON document to an existing activity profile document
+     * Asserts that posting a non-JSON document to an existing state document
      * throws a [XapiException] with HTTP 400 Bad Request status.
      */
     @Test
     override fun givenNonJsonDocument_whenPostedToExisting_thenThrowsXapiException() = runBlocking {
         givenNonJsonDocument_whenPostedToExisting_thenThrowsXapiException(
-            documentParams = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1
         )
     }
 
     /**
-     * Asserts that an activity profile document can be deleted via [XapiActivityProfileResource.delete]
-     * and that subsequent calls to [XapiActivityProfileResource.get] return [NoDataLoadedState].
+     * Asserts that a state document can be deleted via [XapiStateResource.delete]
+     * and that subsequent calls to [XapiStateResource.get] return [NoDataLoadedState].
      */
     @Test
     override fun givenDocument_whenDeleted_thenCannotBeRetrieved() = runBlocking {
         givenDocument_whenDeleted_thenCannotBeRetrieved(
-            documentParams = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1
         )
     }
 
     /**
-     * Asserts that [XapiActivityProfileResource.getMultipleDocuments] returns all profile IDs
-     * associated with a given activity ID.
+     * Asserts that [XapiStateResource.getMultipleDocuments] returns all state IDs
+     * associated with a given activity ID, agent, and registration.
      */
     @Test
     override fun givenMultipleDocuments_whenGetMultipleDocumentsCalled_thenReturnsAllProfileIdsForActivity() = runBlocking {
         givenMultipleDocuments_whenGetMultipleDocumentsCalled_thenReturnsAllProfileIdsForActivity(
             documentsAndParams = listOf(
-                XapiActivityProfileTestParams.ACTIVITY_ID1,
-                XapiActivityProfileTestParams.ACTIVITY_ID2,
-            ).flatMapIndexed { docIndex, activityId ->
+                Pair(XapiStateTestParams.ACTIVITY_ID1, XapiStateTestParams.AGENT1),
+                Pair(XapiStateTestParams.ACTIVITY_ID2, XapiStateTestParams.AGENT2),
+            ).flatMapIndexed { docIndex, (activityId, agent) ->
                 (1..2).map { paramNum ->
                     Pair(
                         first = XapiDocumentByteArrayImpl(
@@ -117,9 +117,11 @@ abstract class AbstractXapiActivityProfileResourceTest: AbstractXapiDocumentReso
                             updated = Clock.System.now().toGMTDate(),
                             contents = """{"p": $paramNum}""".encodeToByteArray(),
                         ),
-                        second = XapiActivityProfileResource.SingleDocumentParams(
+                        second = XapiStateResource.SingleDocumentParams(
                             activityId = activityId,
-                            profileId = "p$docIndex-$paramNum",
+                            agent = agent,
+                            registration = XapiStateTestParams.REGISTRATION1,
+                            stateId = "s$docIndex-$paramNum",
                         ),
                     )
                 }
@@ -128,8 +130,8 @@ abstract class AbstractXapiActivityProfileResourceTest: AbstractXapiDocumentReso
     }
 
     /**
-     * Asserts that [XapiActivityProfileResource.getMultipleDocuments] with a `since` parameter
-     * returns only profile IDs for documents updated after the given timestamp.
+     * Asserts that [XapiStateResource.getMultipleDocuments] with a `since` parameter
+     * returns only state IDs for documents updated after the given timestamp.
      */
     @Test
     override fun givenMultipleDocumentsWithTimestamps_whenGetMultipleDocumentsWithSince_thenReturnsOnlyNewerProfileIds() = runBlocking {
@@ -137,9 +139,9 @@ abstract class AbstractXapiActivityProfileResourceTest: AbstractXapiDocumentReso
 
         givenMultipleDocumentsWithTimestamps_whenGetMultipleDocumentsWithSince_thenReturnsOnlyNewerProfileIds(
             documentsAndParams = listOf(
-                XapiActivityProfileTestParams.ACTIVITY_ID1,
-                XapiActivityProfileTestParams.ACTIVITY_ID2,
-            ).flatMapIndexed { docIndex, activityId ->
+                Pair(XapiStateTestParams.ACTIVITY_ID1, XapiStateTestParams.AGENT1),
+                Pair(XapiStateTestParams.ACTIVITY_ID2, XapiStateTestParams.AGENT2),
+            ).flatMapIndexed { docIndex, (activityId, agent) ->
                 (1..3).map { paramNum ->
                     val updated = baseTime + (paramNum * 10).minutes
                     Pair(
@@ -148,9 +150,11 @@ abstract class AbstractXapiActivityProfileResourceTest: AbstractXapiDocumentReso
                             updated = updated.toGMTDate(),
                             contents = """{"p": $paramNum}""".encodeToByteArray(),
                         ),
-                        second = XapiActivityProfileResource.SingleDocumentParams(
+                        second = XapiStateResource.SingleDocumentParams(
                             activityId = activityId,
-                            profileId = "p$docIndex-$paramNum",
+                            agent = agent,
+                            registration = XapiStateTestParams.REGISTRATION1,
+                            stateId = "s$docIndex-$paramNum",
                         ),
                     )
                 }

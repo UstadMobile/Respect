@@ -17,11 +17,11 @@ interface XapiActivityProfileDocumentDao {
 
     @Query(
         """
-        SELECT xapi_activity_profile_document.*, 
-               xapi_activity_profile_document_sha.sha1_digest AS sha1
-          FROM xapi_activity_profile_document 
-               JOIN xapi_activity_profile_document_sha
-                    ON xapi_activity_profile_document_sha.doc_id = xapi_activity_profile_document.id
+        SELECT activity_profile_document.*, 
+               activity_profile_document_sha.sha1_digest AS sha1
+          FROM activity_profile_document 
+               JOIN activity_profile_document_sha
+                    ON activity_profile_document_sha.doc_id = activity_profile_document.id
          WHERE activity_iri = :activityIri 
            AND profile_id = :profileId
         """
@@ -32,11 +32,11 @@ interface XapiActivityProfileDocumentDao {
     ): XapiActivityProfileDocumentAndShaEntities?
 
     @Query("""
-        SELECT xapi_activity_profile_document.last_modified AS lastModified,
-               xapi_activity_profile_document_sha.sha1_digest AS etag
-          FROM xapi_activity_profile_document 
-          LEFT JOIN xapi_activity_profile_document_sha
-            ON xapi_activity_profile_document.id = xapi_activity_profile_document_sha.doc_id
+        SELECT activity_profile_document.last_modified AS lastModified,
+               activity_profile_document_sha.sha1_digest AS etag
+          FROM activity_profile_document 
+          LEFT JOIN activity_profile_document_sha
+            ON activity_profile_document.id = activity_profile_document_sha.doc_id
          WHERE activity_iri = :activityIri 
            AND profile_id = :profileId
     """)
@@ -48,7 +48,7 @@ interface XapiActivityProfileDocumentDao {
     @Query(
         """
         SELECT * 
-          FROM xapi_activity_profile_document 
+          FROM activity_profile_document 
          WHERE id = :id
         """
     )
@@ -57,7 +57,7 @@ interface XapiActivityProfileDocumentDao {
     @Query(
         """
         SELECT profile_id 
-          FROM xapi_activity_profile_document 
+          FROM activity_profile_document 
          WHERE activity_iri = :activityIri 
            AND (:since IS NULL OR last_modified > :since)
         """
@@ -66,7 +66,7 @@ interface XapiActivityProfileDocumentDao {
 
     @Query(
         """
-        DELETE FROM xapi_activity_profile_document
+        DELETE FROM activity_profile_document
          WHERE activity_iri = :activityIri 
            AND profile_id = :profileId
         """

@@ -10,25 +10,28 @@ import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.put
+import kotlinx.serialization.json.Json
 import world.respect.datalayer.http.server.ext.receiveXapiDocument
 import world.respect.datalayer.http.server.ext.respondXapiDocument
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.ktorserver.respondDataLoadState
 import world.respect.lib.xapi.exceptions.XapiException
-import world.respect.lib.xapi.resources.XapiActivityProfileResource
+import world.respect.lib.xapi.resources.XapiStateResource
 
-fun Route.XapiActivityProfileResourceRoute(
-    activityProfileResource: (ApplicationCall) -> XapiActivityProfileResource,
+fun Route.XapiStateResourceRoute(
+    stateResource: (ApplicationCall) -> XapiStateResource,
+    json: Json,
 ) {
-    get(XapiActivityProfileResource.ENDPOINT_NAME) {
+    get(XapiStateResource.ENDPOINT_NAME) {
         call.response.header(HttpHeaders.Vary, HttpHeaders.Authorization)
 
-        val profileId = call.request.queryParameters["profileId"]
-        if (profileId != null) {
+        val stateId = call.request.queryParameters["stateId"]
+        if (stateId != null) {
             call.respondXapiDocument(
-                activityProfileResource(call).get(
-                    params = XapiActivityProfileResource.SingleDocumentParams.fromParameters(
-                        params = call.request.queryParameters
+                stateResource(call).get(
+                    params = XapiStateResource.SingleDocumentParams.fromParameters(
+                        params = call.request.queryParameters,
+                        json = json,
                     ),
                     dataLoadParams = DataLoadParams(
                         requestHeaders = call.request.headers
@@ -37,9 +40,10 @@ fun Route.XapiActivityProfileResourceRoute(
             )
         } else {
             call.respondDataLoadState(
-                dataLoadState = activityProfileResource(call).getMultipleDocuments(
-                    params = XapiActivityProfileResource.MultiDocParams.fromParameters(
-                        params = call.request.queryParameters
+                dataLoadState = stateResource(call).getMultipleDocuments(
+                    params = XapiStateResource.MultiDocParams.fromParameters(
+                        params = call.request.queryParameters,
+                        json = json,
                     ),
                     dataLoadParams = DataLoadParams(
                         requestHeaders = call.request.headers
@@ -49,13 +53,14 @@ fun Route.XapiActivityProfileResourceRoute(
         }
     }
 
-    post(XapiActivityProfileResource.ENDPOINT_NAME) {
+    post(XapiStateResource.ENDPOINT_NAME) {
         call.response.header(HttpHeaders.Vary, HttpHeaders.Authorization)
 
         try {
-            activityProfileResource(call).post(
-                params = XapiActivityProfileResource.SingleDocumentParams.fromParameters(
-                    params = call.request.queryParameters
+            stateResource(call).post(
+                params = XapiStateResource.SingleDocumentParams.fromParameters(
+                    params = call.request.queryParameters,
+                    json = json,
                 ),
                 document = call.receiveXapiDocument(),
             )
@@ -65,13 +70,14 @@ fun Route.XapiActivityProfileResourceRoute(
         }
     }
 
-    put(XapiActivityProfileResource.ENDPOINT_NAME) {
+    put(XapiStateResource.ENDPOINT_NAME) {
         call.response.header(HttpHeaders.Vary, HttpHeaders.Authorization)
 
         try {
-            activityProfileResource(call).put(
-                params = XapiActivityProfileResource.SingleDocumentParams.fromParameters(
-                    params = call.request.queryParameters
+            stateResource(call).put(
+                params = XapiStateResource.SingleDocumentParams.fromParameters(
+                    params = call.request.queryParameters,
+                    json = json,
                 ),
                 document = call.receiveXapiDocument(),
             )
@@ -81,15 +87,16 @@ fun Route.XapiActivityProfileResourceRoute(
         }
     }
 
-    delete(XapiActivityProfileResource.ENDPOINT_NAME) {
+    delete(XapiStateResource.ENDPOINT_NAME) {
         call.response.header(HttpHeaders.Vary, HttpHeaders.Authorization)
 
-        val singleParams = XapiActivityProfileResource.SingleDocumentParams.fromParameters(
-            params = call.request.queryParameters
+        val singleParams = XapiStateResource.SingleDocumentParams.fromParameters(
+            params = call.request.queryParameters,
+            json = json,
         )
 
         try {
-            activityProfileResource(call).delete(
+            stateResource(call).delete(
                 params = singleParams,
             )
             call.respond(HttpStatusCode.NoContent)

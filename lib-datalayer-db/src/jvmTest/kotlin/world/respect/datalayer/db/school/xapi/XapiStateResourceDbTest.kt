@@ -6,7 +6,8 @@ import io.ktor.util.sha1
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import org.openeel.libxapi.test.AbstractXapiActivityProfileResourceTest
+import org.openeel.libxapi.test.AbstractXapiStateResourceTest
+import org.openeel.libxapi.test.XapiStateTestParams
 import world.respect.datalayer.db.school.insertAdmin
 import world.respect.datalayer.db.school.testSchoolDb
 import world.respect.datalayer.db.school.toDataSource
@@ -14,20 +15,20 @@ import world.respect.lib.dataloadstate.datetime.roundToEpochSeconds
 import world.respect.lib.dataloadstate.datetime.toGMTDate
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.model.XapiDocumentByteArrayImpl
-import world.respect.lib.xapi.resources.XapiActivityProfileResource
+import world.respect.lib.xapi.resources.XapiStateResource
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.time.Clock
 
-class XapiActivityProfileResourceDbTest : AbstractXapiActivityProfileResourceTest() {
+class XapiStateResourceDbTest : AbstractXapiStateResourceTest() {
 
     @Rule
     @JvmField
     val temporaryFolder: TemporaryFolder = TemporaryFolder()
 
-    override suspend fun withXapiDocumentResource(block: suspend (XapiActivityProfileResource) -> Unit) {
+    override suspend fun withXapiDocumentResource(block: suspend (XapiStateResource) -> Unit) {
         testSchoolDb(temporaryFolder.newFolder()) { db ->
             val dataSource = db.toDataSource(
                 authenticatedUserUid = "1",
@@ -36,7 +37,7 @@ class XapiActivityProfileResourceDbTest : AbstractXapiActivityProfileResourceTes
                 it.insertAdmin()
             }
 
-            block(dataSource.xapiResource.activityProfile)
+            block(dataSource.xapiResource.state)
         }
     }
 
@@ -50,11 +51,8 @@ class XapiActivityProfileResourceDbTest : AbstractXapiActivityProfileResourceTes
                 it.insertAdmin()
             }
 
-            val resource = dataSource.xapiResource.activityProfile
-            val params = XapiActivityProfileResource.SingleDocumentParams(
-                activityId = "http://example.com/activities/course-1",
-                profileId = "profile-1",
-            )
+            val resource = dataSource.xapiResource.state
+            val params = XapiStateTestParams.SINGLE_DOC_PARAMS1
             val timestamp = Clock.System.now().roundToEpochSeconds()
             val doc = XapiDocumentByteArrayImpl(
                 type = "application/json",

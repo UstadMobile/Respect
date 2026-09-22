@@ -61,6 +61,8 @@ import world.respect.datalayer.db.school.xapi.daos.XapiActivityExtensionDao
 import world.respect.datalayer.db.school.xapi.daos.XapiActivityInteractionDao
 import world.respect.datalayer.db.school.xapi.daos.XapiActivityProfileDocumentDao
 import world.respect.datalayer.db.school.xapi.daos.XapiActivityProfileDocumentShaDao
+import world.respect.datalayer.db.school.xapi.daos.XapiAgentProfileDocumentDao
+import world.respect.datalayer.db.school.xapi.daos.XapiAgentProfileDocumentShaDao
 import world.respect.datalayer.db.school.xapi.daos.XapiStateDocumentDao
 import world.respect.datalayer.db.school.xapi.daos.XapiStateDocumentShaDao
 import world.respect.datalayer.db.school.xapi.daos.XapiActorDao
@@ -78,6 +80,8 @@ import world.respect.datalayer.db.school.xapi.entities.XapiActivityInteractionEn
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntry
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityProfileDocumentEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityProfileDocumentShaEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiAgentProfileDocumentEntity
+import world.respect.datalayer.db.school.xapi.entities.XapiAgentProfileDocumentShaEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiStateDocumentEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiStateDocumentShaEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiActorEntity
@@ -146,11 +150,13 @@ import world.respect.datalayer.school.model.Report
         XapiSessionEntity::class,
         XapiActivityProfileDocumentEntity::class,
         XapiActivityProfileDocumentShaEntity::class,
+        XapiAgentProfileDocumentEntity::class,
+        XapiAgentProfileDocumentShaEntity::class,
         XapiStateDocumentEntity::class,
         XapiStateDocumentShaEntity::class,
         XapiRemoteWriteQueueItemEntity::class,
     ],
-    version = 18,
+    version = 19,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)
@@ -229,6 +235,10 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getActivityProfileDocumentDao(): XapiActivityProfileDocumentDao
 
     abstract fun getActivityProfileDocumentShaDao(): XapiActivityProfileDocumentShaDao
+
+    abstract fun getAgentProfileDocumentDao(): XapiAgentProfileDocumentDao
+
+    abstract fun getAgentProfileDocumentShaDao(): XapiAgentProfileDocumentShaDao
 
     abstract fun getStateDocumentDao(): XapiStateDocumentDao
 

@@ -5,6 +5,7 @@ import kotlinx.serialization.json.Json
 import org.openeel.lib.ipc.messagebridge.IpcMessageBridge
 import world.respect.lib.xapi.resources.XapiActivitiesResource
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
+import world.respect.lib.xapi.resources.XapiAgentProfileResource
 import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.lib.xapi.resources.XapiStateResource
@@ -49,6 +50,9 @@ class XapiResourceIpcClient(
         get() = TODO("Not yet implemented")
 
     override val activityProfile: XapiActivityProfileResource
+        get() = TODO("Not yet implemented")
+
+    override val agentProfile: XapiAgentProfileResource
         get() = TODO("Not yet implemented")
 
     override val state: XapiStateResource

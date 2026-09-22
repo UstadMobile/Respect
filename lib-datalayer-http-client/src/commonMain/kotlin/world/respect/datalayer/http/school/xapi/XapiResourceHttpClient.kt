@@ -6,6 +6,7 @@ import kotlinx.serialization.json.Json
 import world.respect.datalayer.AuthTokenProvider
 import world.respect.lib.xapi.resources.XapiActivitiesResource
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
+import world.respect.lib.xapi.resources.XapiAgentProfileResource
 import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.lib.xapi.resources.XapiStateResource
@@ -47,6 +48,15 @@ class XapiResourceHttpClient(
             xapiUrl = xapiUrl,
             httpClient = httpClient,
             tokenProvider = tokenProvider,
+        )
+    }
+
+    override val agentProfile: XapiAgentProfileResource by lazy {
+        XapiAgentProfileResourceHttpClient(
+            xapiUrl = xapiUrl,
+            httpClient = httpClient,
+            tokenProvider = tokenProvider,
+            json = json,
         )
     }
 

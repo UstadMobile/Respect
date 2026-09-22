@@ -47,6 +47,8 @@ data class XapiRemoteWriteQueueItem(
 
         STATE(3),
 
+        AGENT_PROFILE(4),
+
         ;
 
         companion object {

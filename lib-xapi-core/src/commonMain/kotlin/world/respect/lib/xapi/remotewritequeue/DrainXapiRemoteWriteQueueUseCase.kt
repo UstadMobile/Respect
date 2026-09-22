@@ -4,6 +4,7 @@ import io.ktor.http.parseQueryString
 import kotlinx.serialization.json.Json
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
+import world.respect.lib.xapi.resources.XapiAgentProfileResource
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.lib.xapi.resources.XapiStateResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -78,6 +79,30 @@ class DrainXapiRemoteWriteQueueUseCase(
 
                         XapiRemoteWriteQueueItem.Method.PUT -> {
                             remoteDataSource.state.put(params, document)
+                        }
+
+                        XapiRemoteWriteQueueItem.Method.DELETE -> {
+                            //not implemented yet
+                        }
+                    }
+
+                    xapiRemoteWriteQueue.markSent(listOf(queueItem.xrqItemId))
+                }
+
+                XapiRemoteWriteQueueItem.Resource.AGENT_PROFILE -> {
+                    val params = XapiAgentProfileResource.SingleDocumentParams.fromParameters(
+                        params = parseQueryString(queueItem.itemId),
+                        json = json,
+                    )
+                    val document = localDataSource.agentProfile.get(params).dataOrNull() ?: continue
+
+                    when(queueItem.method) {
+                        XapiRemoteWriteQueueItem.Method.POST -> {
+                            remoteDataSource.agentProfile.post(params, document)
+                        }
+
+                        XapiRemoteWriteQueueItem.Method.PUT -> {
+                            remoteDataSource.agentProfile.put(params, document)
                         }
 
                         XapiRemoteWriteQueueItem.Method.DELETE -> {

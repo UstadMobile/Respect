@@ -10,27 +10,26 @@ import io.ktor.util.sha1
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.toXapiActivityProfileDocumentEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiActivityProfileDocumentShaEntity
 import world.respect.datalayer.db.shared.InstantAsTimestampString
 import world.respect.datalayer.db.shared.toModel
-import world.respect.lib.xapi.resources.local.XapiActivityProfileResourceLocal
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.ext.hasIfNotModifiedHeaders
-import world.respect.lib.dataloadstate.ext.isNotModified
+import world.respect.lib.dataloadstate.ext.isStillValid
+import world.respect.lib.dataloadstate.ext.requestEtagAndLastModified
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.isJson
-import world.respect.lib.xapi.ext.mergeTopLevel
+import world.respect.lib.xapi.ext.mergeJsonDoc
 import world.respect.lib.xapi.model.XapiDocument
-import world.respect.lib.xapi.model.XapiDocumentByteArrayImpl
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
+import world.respect.lib.xapi.resources.local.XapiActivityProfileResourceLocal
+import kotlin.uuid.Uuid
 
 class XapiActivityProfileResourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -81,18 +80,18 @@ class XapiActivityProfileResourceDb(
     ): DataLoadState<XapiDocument> {
         return schoolDb.useReaderConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
-                if(
-                    schoolDb.takeIf {
-                        dataLoadParams.requestHeaders.hasIfNotModifiedHeaders()
-                    }?.getActivityProfileDocumentDao()
-                        ?.findETagAndLastModifiedByActivityIriAndProfileId(
-                            activityIri = params.activityId,
-                            profileId = params.profileId
-                        )?.let {
-                            dataLoadParams.requestHeaders.isNotModified(
-                                it.toModel()
-                            )
-                        } == true
+                val etagAndLastModifiedInDb = schoolDb.takeIf {
+                    dataLoadParams.requestHeaders.hasIfNotModifiedHeaders()
+                }?.getActivityProfileDocumentDao()
+                    ?.findETagAndLastModifiedByActivityIriAndProfileId(
+                        activityIri = params.activityId,
+                        profileId = params.profileId
+                    )?.toModel()
+
+                if(etagAndLastModifiedInDb != null &&
+                    dataLoadParams.requestHeaders.requestEtagAndLastModified().isStillValid(
+                        other = etagAndLastModifiedInDb
+                    )
                 ) {
                     return@withTransaction NoDataLoadedState.notModified()
                 }
@@ -125,7 +124,7 @@ class XapiActivityProfileResourceDb(
         dataLoadParams: DataLoadParams
     ): Flow<DataLoadState<XapiDocument>> {
         return schoolDb.invalidationTracker.createFlow(
-            "xapi_activity_profile_document", emitInitialState = true
+            "activity_profile_document", emitInitialState = true
         ).map {
             get(params, dataLoadParams)
         }
@@ -149,27 +148,11 @@ class XapiActivityProfileResourceDb(
                 if(existingDoc?.isJson() == false)
                     throw XapiException(400, "Cannot post when there is an existing non-JSON document")
 
-                val entity = if(existingDoc != null) {
-                    XapiDocumentByteArrayImpl(
-                        type = document.type,
-                        updated = document.updated,
-                        contents = json.parseToJsonElement(existingDoc.contents.decodeToString())
-                            .jsonObject.mergeTopLevel(
-                                other = json.parseToJsonElement(
-                                    document.contentsAsByteArray().decodeToString()
-                                ).jsonObject
-                            ).let { mergedObj ->
-                                json.encodeToString(
-                                    JsonObject.serializer(), mergedObj
-                                ).encodeToByteArray()
-                            }
-                    ).toXapiActivityProfileDocumentEntity(
+                val entity = (existingDoc?.mergeJsonDoc(document, json) ?: document)
+                    .toXapiActivityProfileDocumentEntity(
                         params = params,
-                        id = existingDoc.id,
+                        id = existingDoc?.id ?: Uuid.random().toString()
                     )
-                }else {
-                    document.toXapiActivityProfileDocumentEntity(params)
-                }
 
                 schoolDb.getActivityProfileDocumentDao().upsert(entity)
                 schoolDb.getActivityProfileDocumentShaDao().upsert(

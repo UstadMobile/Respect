@@ -277,4 +277,30 @@ fun DataLoadState<*>.toPrettyString(): String {
     }
 }
 
-
+/**
+ * Determine if the receiver remote [DataLoadState] should be used to update the local state.
+ *
+ * @receiver [DataLoadState] from the remote source
+ * @param localState [DataLoadState] from the local source
+ * @return the remote [DataLoadState] as [DataReadyState] that should be applied to the local
+ *         source, or null if it should not be applied. This will be true when:
+ *         1. The remote (receiver) [DataLoadState] is [DataReadyState]
+ *         2. The localState is either a) NOT a [DataReadyState] eg because the data has not
+ *            been stored locally yet OR b) the remote (receiver) has a more recent Last-Modified
+ *            than the localState.
+ */
+fun <T: Any> DataLoadState<T>.takeIfShouldUpdateLocal(
+    localState: DataLoadState<*>,
+): DataReadyState<T>? {
+    return when {
+        this !is DataReadyState -> null
+        localState is DataReadyState -> {
+            this.takeIf {
+                this.metaInfo.headers.responseETagAndLastModified().isNewer(
+                    localState.metaInfo.headers.responseETagAndLastModified()
+                ) == true
+            }
+        }
+        else -> this
+    }
+}

@@ -1,4 +1,4 @@
-package world.respect.app.view.bookmark
+package world.respect.app.view.catalog.bookmark
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectListSortHeader
-import world.respect.app.view.learningunit.list.PublicationListItem
+import world.respect.app.view.catalog.opdsfeeddetail.PublicationListItem
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.flowOf
 import world.respect.lib.dataloadstate.DataLoadingState
@@ -38,8 +38,8 @@ import world.respect.shared.generated.resources.bookmark
 import world.respect.shared.generated.resources.msg_see_bookmark
 import world.respect.shared.generated.resources.no_bookmark
 import world.respect.shared.util.SortOrderOption
-import world.respect.shared.viewmodel.bookmark.BookmarkListUiState
-import world.respect.shared.viewmodel.bookmark.BookmarkListViewModel
+import world.respect.shared.viewmodel.catalog.bookmark.BookmarkListUiState
+import world.respect.shared.viewmodel.catalog.bookmark.BookmarkListViewModel
 
 @Composable
 fun BookmarkListScreen(

@@ -39,7 +39,7 @@ kotlin {
             api(libs.androidx.paging.common)
             implementation(libs.atomicfu)
             implementation(libs.napier)
-
+            implementation(libs.urlencoder)
         }
 
         jvmMain.dependencies {

@@ -28,7 +28,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.dataOrNull
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.xapi.composites.AssignmentAndProgress
 import world.respect.lib.xapi.composites.XapiActorAndAssignmentProgress
 import world.respect.lib.xapi.ext.isCompleted
@@ -47,7 +47,7 @@ import world.respect.shared.generated.resources.edit
 import world.respect.shared.generated.resources.invalid_link
 import world.respect.shared.navigation.AssignmentDetail
 import world.respect.shared.navigation.AssignmentEdit
-import world.respect.shared.navigation.LearningUnitDetail
+import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.StatementList
 import world.respect.shared.util.AssignmentStatusFilter
@@ -63,7 +63,7 @@ import kotlin.collections.emptyList
  *
  */
 data class AssignmentDetailUiState(
-    val taskInfoFlow: (Url) -> Flow<DataLoadState<OpdsPublication>> = {
+    val taskInfoFlow: (Url) -> Flow<DataLoadState<Publication>> = {
         flowOf(DataLoadingState())
     },
     val assignmentProgress: DataLoadState<AssignmentAndProgress> = DataLoadingState(),
@@ -296,7 +296,7 @@ class AssignmentDetailViewModel(
         )
     }
 
-    fun taskInfoFlowFor(url: Url): Flow<DataLoadState<OpdsPublication>> {
+    fun taskInfoFlowFor(url: Url): Flow<DataLoadState<Publication>> {
         return schoolDataSource.opdsPublicationDataSource.getByUrlAsFlow(
             url = url, params = DataLoadParams(), null, null
         )
@@ -312,7 +312,7 @@ class AssignmentDetailViewModel(
 
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(
-                LearningUnitDetail.create(
+                PublicationDetail.create(
                     learningUnitManifestUrl = manifestUrl,
                     assignmentActivityId = assignmentActivityId,
                     expectedIdentifier = activity.id,

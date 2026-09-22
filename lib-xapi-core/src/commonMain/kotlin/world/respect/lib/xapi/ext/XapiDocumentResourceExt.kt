@@ -7,10 +7,14 @@ import kotlinx.serialization.json.Json
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.datetime.toGMTDate
 import world.respect.lib.dataloadstate.ext.mapAsync
+import world.respect.lib.xapi.resources.ISingleDocumentParams
 import world.respect.lib.xapi.resources.XapiDocumentResource
 import kotlin.time.Clock
 
-suspend fun <SingleDocParams: Any, T: Any> XapiDocumentResource<*, SingleDocParams>.putJson(
+suspend fun <
+    SingleDocParams: ISingleDocumentParams<*>,
+    T: Any
+> XapiDocumentResource<*, SingleDocParams>.putJson(
     docParams: SingleDocParams,
     document: T,
     json: Json,
@@ -27,7 +31,10 @@ suspend fun <SingleDocParams: Any, T: Any> XapiDocumentResource<*, SingleDocPara
     )
 }
 
-suspend fun <SingleDocParams: Any, T: Any> XapiDocumentResource<*, SingleDocParams>.postJson(
+suspend fun <
+    SingleDocParams: ISingleDocumentParams<*>,
+    T: Any
+> XapiDocumentResource<*, SingleDocParams>.postJson(
     docParams: SingleDocParams,
     document: T,
     json: Json,
@@ -44,7 +51,10 @@ suspend fun <SingleDocParams: Any, T: Any> XapiDocumentResource<*, SingleDocPara
     )
 }
 
-suspend fun <SingleDocParams: Any, T: Any> XapiDocumentResource<*, SingleDocParams>.getJson(
+suspend fun <
+    SingleDocParams: ISingleDocumentParams<*>,
+    T: Any
+> XapiDocumentResource<*, SingleDocParams>.getJson(
     docParams: SingleDocParams,
     json: Json,
     deserializer: DeserializationStrategy<T>,

@@ -26,7 +26,7 @@ interface XapiActivityProfileResource : XapiDocumentResource<XapiActivityProfile
         }
 
         companion object {
-            fun fromParams(params: StringValues): MultiDocParams {
+            fun fromParameters(params: StringValues): MultiDocParams {
                 return MultiDocParams(
                     activityId = params["activityId"] ?: throw XapiException(400, "activityId is required"),
                     since = params["since"]?.let { Instant.parse(it) },
@@ -38,7 +38,21 @@ interface XapiActivityProfileResource : XapiDocumentResource<XapiActivityProfile
     data class SingleDocumentParams(
         val activityId: String,
         val profileId: String,
-    ) {
+    ) : ISingleDocumentParams<MultiDocParams> {
+
+        override val idString: String
+            get() = profileId
+
+        override fun matches(multiDocParams: MultiDocParams): Boolean {
+            return multiDocParams.activityId == activityId
+        }
+
+        override fun toMultiDocParams(
+            since: Instant?,
+        ): MultiDocParams {
+            return MultiDocParams(activityId = activityId, since = since)
+        }
+
         fun toParameters(): StringValues {
             return ParametersBuilder().also { parameters ->
                 parameters.append("activityId", activityId)
@@ -47,7 +61,7 @@ interface XapiActivityProfileResource : XapiDocumentResource<XapiActivityProfile
         }
 
         companion object {
-            fun fromParams(params: StringValues): SingleDocumentParams {
+            fun fromParameters(params: StringValues): SingleDocumentParams {
                 return SingleDocumentParams(
                     activityId = params["activityId"] ?: throw XapiException(400, "activityId is required"),
                     profileId = params["profileId"] ?: throw XapiException(400, "profileId is required"),

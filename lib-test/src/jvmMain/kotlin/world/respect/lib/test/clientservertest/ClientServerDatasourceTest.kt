@@ -287,7 +287,7 @@ suspend fun clientServerDatasourceTest(
     try {
         block(testBuilder)
     }finally {
-        testBuilder.server.stop()
+        testBuilder.server.stop(100, 1000)
         testBuilder.clients.forEach { it.close() }
     }
 }

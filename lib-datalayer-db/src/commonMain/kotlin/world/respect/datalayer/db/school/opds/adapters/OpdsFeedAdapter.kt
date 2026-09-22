@@ -157,7 +157,7 @@ fun OpdsFeedEntities.asModel(
                 langMapEntities = langMapEntities,
                 subjectEntities = subjects,
             ).asModel(json)
-        }
+        },
     )
 }
 

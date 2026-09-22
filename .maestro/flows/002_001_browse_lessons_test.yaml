@@ -65,7 +65,7 @@ onFlowComplete:
 - tapOn: "Examples"
 - tapOn: "Assignment Result Statement Demo"
 - assertVisible:
-    id: "app_title"
+    id: "publication_title"
     text: "Assignment Result Statement Demo"
 - tapOn: "Download"
 - extendedWaitUntil:
@@ -83,7 +83,7 @@ onFlowComplete:
 - tapOn: "Examples"
 - tapOn: "Assignment Result Statement Demo"
 - assertVisible:
-    id: "app_title"
+    id: "publication_title"
     text: "Assignment Result Statement Demo"
 - assertVisible: "Downloaded"
 - tapOn: "Open"
@@ -106,7 +106,7 @@ onFlowComplete:
 - assertVisible: "Example Web App"
 - tapOn: "Bookmarks"
 - assertVisible: "No bookmarks yet"
-- assertVisible: "Bookmark a lesson or a playlist to see it here."
+- assertVisible: "Bookmark a lesson or a collection to see it here."
 - tapOn: "Apps"
 - tapOn: "Example Web App"
 - tapOn: "Examples"

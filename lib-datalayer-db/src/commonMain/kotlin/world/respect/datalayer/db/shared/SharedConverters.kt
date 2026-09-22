@@ -7,6 +7,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.Json
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import kotlin.time.Instant
+import kotlin.uuid.Uuid
 
 class SharedConverters {
 
@@ -88,6 +89,16 @@ class SharedConverters {
     @TypeConverter
     fun toInstantAsTimestampString(value: String?): InstantAsTimestampString? {
         return value?.let { InstantAsTimestampString(Instant.parse(it)) }
+    }
+
+    @TypeConverter
+    fun fromUuid(value: Uuid?): String? {
+        return value?.toString()
+    }
+
+    @TypeConverter
+    fun toUuid(value: String?): Uuid? {
+        return value?.let { Uuid.parse(it) }
     }
 
 }

@@ -39,6 +39,8 @@ object OpenEelXapiConstants {
 
     const val CATEGORY_BOOKMARK_RECIPE = "https://id.openeel.org/recipes/bookmark"
 
+    const val ACTIVITY_PROFILEID_OPDS_COLLECTION = "https://id.openeel.org/profile/activity/opds-collection"
+
     const val EXTENSION_REPORT_QUERY = "https://id.openeel.org/xapi/extension/queries"
 
     const val EXTENSION_REPORT_OPTIONS = "https://id.openeel.org/xapi/extension/report-options"

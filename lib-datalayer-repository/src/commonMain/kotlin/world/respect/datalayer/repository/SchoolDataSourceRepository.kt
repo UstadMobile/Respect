@@ -121,7 +121,6 @@ class SchoolDataSourceRepository(
         OpdsFeedDataSourceRepository(
             local = local.opdsFeedDataSource,
             remote = remote.opdsFeedDataSource,
-            remoteWriteQueue = remoteWriteQueue,
         )
     }
 

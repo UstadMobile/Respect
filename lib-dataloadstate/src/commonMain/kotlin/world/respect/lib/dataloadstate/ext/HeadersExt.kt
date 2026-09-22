@@ -5,7 +5,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.fromHttpToGmtDate
 import world.respect.lib.dataloadstate.ETagAndLastModified
 import world.respect.lib.dataloadstate.datetime.toInstant
-import kotlin.time.Instant
 
 /**
  * Simple short function to check if an incoming request has cache validation parameters.
@@ -15,26 +14,31 @@ fun Headers.hasIfNotModifiedHeaders() : Boolean {
 }
 
 /**
- * Check if the response for a given set of request headers
+ * Gets the Etag and Last-Modified to be validated from request headers; the If-None-Match and
+ * If-Modified-Since headers.
  *
- * @receiver Headers request headers
+ * @receiver Headers from a request
+ * @return [ETagAndLastModified] based on the If-None-Match and If-Modified-Since headers that
+ *         the request is validating against.
  */
-fun Headers.isNotModified(
-    responseETagAndLastModified: ETagAndLastModified,
-): Boolean {
-    /**
-     * ETag takes precendence:
-     */
-    val ifNoneMatch = this[HttpHeaders.IfNoneMatch]
-    val ifModifiedSince = this[HttpHeaders.IfModifiedSince]
-
-    return if (ifNoneMatch != null) {
-        responseETagAndLastModified.etag != null && responseETagAndLastModified.etag == ifNoneMatch
-    } else if (ifModifiedSince != null) {
-        responseETagAndLastModified.lastModified?.let {
-            it <= (ifModifiedSince.fromHttpToGmtDate().toInstant())
-        } == true
-    } else {
-        false
-    }
+fun Headers.requestEtagAndLastModified(): ETagAndLastModified {
+    return ETagAndLastModified(
+        etag = this[HttpHeaders.IfNoneMatch],
+        lastModified = this[HttpHeaders.IfModifiedSince]?.fromHttpToGmtDate()?.toInstant()
+    )
 }
+
+/**
+ * Gets the Etag and Last-Modified from Response Headers (the Last-Modified and ETag headers)
+ * if present.
+ *
+ * @receiver Headers from a response
+ * @return [ETagAndLastModified] based on the etag and Last-Modified as available.
+ */
+fun Headers.responseETagAndLastModified(): ETagAndLastModified {
+    return ETagAndLastModified(
+        etag = this[HttpHeaders.ETag],
+        lastModified = this[HttpHeaders.LastModified]?.fromHttpToGmtDate()?.toInstant()
+    )
+}
+

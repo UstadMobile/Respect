@@ -10,7 +10,7 @@ class OpdsSerializerTest {
         val jsonStr = this::class.java.getResourceAsStream("/lesson001.json")!!.use {
             it.bufferedReader().readText()
         }
-        val opdsPub = Json.decodeFromString<OpdsPublication>(jsonStr)
+        val opdsPub = Json.decodeFromString<Publication>(jsonStr)
     }
 
 }

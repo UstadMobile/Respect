@@ -4,7 +4,7 @@ import io.ktor.http.isSuccess
 import world.respect.shared.domain.respectappmanifest.validator.RespectAppManifestValidator
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.lib.opds.model.OpdsFeed
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.domain.validator.ValidateHttpResponseForUrlUseCase
 import world.respect.domain.validator.ValidateLinkUseCase
@@ -73,7 +73,7 @@ class ValidateLinkUseCaseImpl(
             OpdsFeed.MEDIA_TYPE -> {
                 opdsFeedValidator
             }
-            OpdsPublication.MEDIA_TYPE, OpdsPublication.MEDIA_TYPE_READIUM_MANIFEST -> {
+            Publication.MEDIA_TYPE, Publication.MEDIA_TYPE_READIUM_MANIFEST -> {
                 opdsPublicationValidator
             }
             RespectAppManifest.MIME_TYPE -> {

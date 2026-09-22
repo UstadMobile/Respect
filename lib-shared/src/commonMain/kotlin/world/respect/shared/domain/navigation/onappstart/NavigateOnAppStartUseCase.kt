@@ -15,6 +15,7 @@ import world.respect.shared.navigation.AssignmentList
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Decide where to navigate to when the app is starting. The logic is roughly:
@@ -47,7 +48,7 @@ class NavigateOnAppStartUseCase(
             !settings.getBoolean(KEY_DEFERRED_DEEP_LINK_CHECK_DONE, false)
         ) {
             Napier.i("DeferredDeepLink: NavigateOnAppStartUseCase checking for deferred deep link")
-            withTimeoutOrNull(GET_DEFERRED_LINK_TIMEOUT) {
+            withTimeoutOrNull(GET_DEFERRED_LINK_TIMEOUT.milliseconds) {
                 getDeferredDeepLinkUseCaseVal().also { deferredDeepLink ->
                     Napier.i("DeferredDeepLink: NavigateOnAppStartUseCase invoked: deferredDeepLink=$deferredDeepLink")
                     settings.putBoolean(KEY_DEFERRED_DEEP_LINK_CHECK_DONE, true)

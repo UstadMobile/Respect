@@ -4,7 +4,7 @@ import com.eygraber.uri.Uri
 import io.ktor.http.Url
 import org.openeel.demo.demolaunchableappserver.DemoConstants
 import world.respect.lib.opds.model.LangMapStringValue
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumContributorObject
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ReadiumMetadata
@@ -17,10 +17,10 @@ class MakeDemoAppManifestUseCase(
     operator fun invoke(
         baseUrl: Url,
         langCode: String = "en-US",
-    ) : OpdsPublication {
+    ) : Publication {
         val strings = demoStrings.requireLangMap(langCode)
 
-        return OpdsPublication(
+        return Publication(
             metadata = ReadiumMetadata(
                 title = LangMapStringValue(
                     strings.requireString("app_name")

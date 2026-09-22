@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "xapi_activity_profile_document_sha"
+    tableName = "activity_profile_document_sha"
 )
 /**
  * Table used to cache the SHA-1 digest of XAPI documents. This is kept as a separate table because it is

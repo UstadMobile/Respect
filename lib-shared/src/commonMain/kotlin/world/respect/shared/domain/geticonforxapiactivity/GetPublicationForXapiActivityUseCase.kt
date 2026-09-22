@@ -8,7 +8,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.ext.map
-import world.respect.lib.opds.model.OpdsPublication
+import world.respect.lib.opds.model.Publication
 import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
 import world.respect.lib.xapi.model.XapiActivity
 import world.respect.lib.xapi.model.XapiStatement
@@ -20,7 +20,7 @@ class GetPublicationForXapiActivityUseCase(
 
     operator fun invoke(
         activity: XapiActivity
-    ) : Flow<DataLoadState<OpdsPublication>> {
+    ) : Flow<DataLoadState<Publication>> {
         return activity.definition?.webPubManifestAsUrlOrNull()?.let { publicationUrl ->
             opdsPublicationDataSource.getByUrlAsFlow(
                 url = publicationUrl,
@@ -35,7 +35,7 @@ class GetPublicationForXapiActivityUseCase(
 
     operator fun invoke(
         statement: XapiStatement
-    ): Flow<DataLoadState<OpdsPublication>>  {
+    ): Flow<DataLoadState<Publication>>  {
         return (statement.`object` as? XapiActivity)?.let { invoke(it) }
             ?: flowOf(NoDataLoadedState(NoDataLoadedState.Reason.NOT_FOUND))
     }

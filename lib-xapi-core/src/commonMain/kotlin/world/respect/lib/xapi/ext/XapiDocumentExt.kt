@@ -20,3 +20,25 @@ suspend fun XapiDocument.jsonKeys(
         JsonObject.serializer(), this
     ).keys
 }
+
+
+suspend fun XapiDocument.mergeJsonDoc(
+    other: XapiDocument,
+    json: Json,
+): XapiDocument {
+    return json.decodeFromXapiDocument(
+        JsonObject.serializer(), this
+    ).mergeTopLevel(
+        other = json.decodeFromXapiDocument(
+            JsonObject.serializer(), other
+        )
+    ).let { mergedObj ->
+        json.encodeToXapiDocument(
+            serializer = JsonObject.serializer(),
+            value = mergedObj,
+            updated = other.updated
+        )
+    }
+}
+
+

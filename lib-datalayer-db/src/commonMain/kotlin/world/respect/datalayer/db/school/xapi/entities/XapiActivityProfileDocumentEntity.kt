@@ -13,7 +13,7 @@ import kotlin.uuid.Uuid
  * The id field is a random UUID : same behavior as SQL LRS.
  */
 @Entity(
-    tableName = "xapi_activity_profile_document",
+    tableName = "activity_profile_document",
 )
 data class XapiActivityProfileDocumentEntity(
     @PrimaryKey

@@ -15,7 +15,7 @@ interface XapiActivityProfileDocumentShaDao {
     @Query(
         """
         SELECT * 
-          FROM xapi_activity_profile_document_sha 
+          FROM activity_profile_document_sha 
          WHERE doc_id = :docId
         """
     )
@@ -23,7 +23,7 @@ interface XapiActivityProfileDocumentShaDao {
 
     @Query(
         """
-        DELETE FROM xapi_activity_profile_document_sha
+        DELETE FROM activity_profile_document_sha
          WHERE doc_id = :docId
         """
     )

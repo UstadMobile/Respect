@@ -6,6 +6,7 @@ import world.respect.lib.xapi.remotewritequeue.XapiRemoteWriteQueue
 import world.respect.lib.xapi.resources.local.XapiResourceLocal
 import world.respect.lib.xapi.resources.XapiActivitiesResource
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
+import world.respect.lib.xapi.resources.XapiAgentProfileResource
 import world.respect.lib.xapi.resources.XapiAgentsResource
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.lib.xapi.resources.XapiStateResource
@@ -43,6 +44,15 @@ class XapiResourceRepository(
         XapiActivityProfileResourceRepository(
             local = local.activityProfile,
             remote = remote.activityProfile,
+            remoteWriteQueue = remoteWriteQueue,
+            json = json,
+        )
+    }
+
+    override val agentProfile: XapiAgentProfileResource by lazy {
+        XapiAgentProfileResourceRepository(
+            local = local.agentProfile,
+            remote = remote.agentProfile,
             remoteWriteQueue = remoteWriteQueue,
             json = json,
         )

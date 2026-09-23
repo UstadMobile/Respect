@@ -12,6 +12,8 @@ interface XapiResource {
 
     val activityProfile: XapiActivityProfileResource
 
+    val agentProfile: XapiAgentProfileResource
+
     fun close()
 
 

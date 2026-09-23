@@ -96,7 +96,6 @@ fun managerServerMain(ns: Namespace) {
                                     name = LangMapStringValue(ns.getString("name")),
                                     self = schoolBaseUrl,
                                     xapi = schoolBaseUrl.appendEndpointSegments("api/school/xapi"),
-                                    oneRoster = schoolBaseUrl.appendEndpointSegments("api/school/oneroster"),
                                     respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
                                     //Will be set on server
                                     rpId = rpId,

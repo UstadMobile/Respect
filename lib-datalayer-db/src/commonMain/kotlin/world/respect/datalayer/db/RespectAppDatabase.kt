@@ -9,10 +9,12 @@ import world.respect.datalayer.db.networkvalidation.daos.NetworkValidationInfoEn
 import world.respect.datalayer.db.networkvalidation.entities.NetworkValidationInfoEntity
 import world.respect.datalayer.db.schooldirectory.daos.SchoolConfigEntityDao
 import world.respect.datalayer.db.schooldirectory.daos.SchoolDirectoryEntityDao
+import world.respect.datalayer.db.schooldirectory.daos.SchoolDirectoryEntryAuthOptionEntityDao
 import world.respect.datalayer.db.schooldirectory.daos.SchoolDirectoryEntryEntityDao
 import world.respect.datalayer.db.schooldirectory.daos.SchoolDirectoryEntryLangMapEntityDao
 import world.respect.datalayer.db.schooldirectory.entities.SchoolConfigEntity
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntity
+import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntryAuthOptionEntity
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntryEntity
 import world.respect.datalayer.db.schooldirectory.entities.SchoolDirectoryEntryLangMapEntity
 import world.respect.datalayer.db.shared.SharedConverters
@@ -24,11 +26,12 @@ import world.respect.datalayer.db.shared.SharedConverters
         SchoolDirectoryEntryEntity::class,
         SchoolDirectoryEntryLangMapEntity::class,
         SchoolConfigEntity::class,
+        SchoolDirectoryEntryAuthOptionEntity::class,
 
         //Network validation
         NetworkValidationInfoEntity::class,
     ],
-    version = 9,
+    version = 11,
 )
 @TypeConverters(SharedConverters::class)
 @ConstructedBy(RespectAppDatabaseConstructor::class)
@@ -37,6 +40,8 @@ abstract class RespectAppDatabase : RoomDatabase() {
     abstract fun getSchoolDirectoryEntryEntityDao(): SchoolDirectoryEntryEntityDao
 
     abstract fun getSchoolDirectoryEntryLangMapEntityDao(): SchoolDirectoryEntryLangMapEntityDao
+
+    abstract fun getSchoolDirectoryEntryAuthOptionEntityDao(): SchoolDirectoryEntryAuthOptionEntityDao
 
     abstract fun getSchoolConfigEntityDao(): SchoolConfigEntityDao
 

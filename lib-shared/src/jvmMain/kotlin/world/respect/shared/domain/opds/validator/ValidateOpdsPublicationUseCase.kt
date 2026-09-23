@@ -249,7 +249,7 @@ class ValidateOpdsPublicationUseCase(
     companion object {
         val LEARNING_UNIT_RESERVED_PARAMS = listOf(
             "respectLaunchVersion", "auth", "given_name", "locale", "endpoint",
-            "endpoint_oneroster", "actor", "registration", "activity_id"
+            "actor", "registration", "activity_id"
         )
 
     }

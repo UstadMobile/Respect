@@ -14,8 +14,7 @@ import kotlin.time.Clock
  *           issued student/teacher id number)
  * @property userActive (should be changed to status enum - which may be pending)
  * @property status PersonStatusEnum - can be pending approval.
- * @property relatedPersonUids similar to agents on the OneRoster user class. Used to link a student
- *           to their parent/guardian.
+ * @property relatedPersonUids  Used to link a student to their parent/guardian.
  */
 
 @Serializable

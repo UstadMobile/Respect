@@ -9,8 +9,7 @@ import world.respect.shared.util.di.RespectAccountScopeId
  * Represents a single Respect account
  *
  * The RESPECT Account Manager can provide a Koin Scope for a given account.
- * @property userGuid the guid for this user as per Person.guid . This is essentially the same as
- *           OneRoster's sourcedId.
+ * @property userGuid the guid for this user as per Person.guid .
  */
 @Serializable
 data class RespectAccount(

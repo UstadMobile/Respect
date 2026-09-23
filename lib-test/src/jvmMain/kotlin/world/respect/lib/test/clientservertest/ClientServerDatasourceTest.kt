@@ -147,7 +147,6 @@ class ClientServerDataSourceTestBuilder internal constructor(
         name = LangMapStringValue("test school"),
         self = schoolUrl,
         xapi = schoolUrl.appendEndpointSegments("api/school/xapi"),
-        oneRoster = schoolUrl.appendEndpointSegments("api/school/oneroster"),
         respectExt = schoolUrl.appendEndpointSegments("api/school/respect"),
         rpId = schoolUrl.host,
         lastModified = Clock.System.now(),

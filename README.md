@@ -104,5 +104,4 @@ Documentation: [CC-BY](https://creativecommons.org/licenses/by/4.0/) license.
 Code and all other works: [AGPLv3](LICENSE) license.
 
 ‘RESPECT™’ and ‘RESPECT compatible™’ are trademarks of the Spix Foundation.
-‘OneRoster®’ and ‘LTI®’ are registered trademarks of 1EdTech Consortium Inc.
 All other trademarks and registered trademarks are the properties of their respective owners.

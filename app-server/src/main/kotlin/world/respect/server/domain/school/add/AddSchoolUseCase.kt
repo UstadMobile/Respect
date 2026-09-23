@@ -15,7 +15,7 @@ import world.respect.datalayer.school.ext.newUserInviteUid
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.PersonGenderEnum
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSourceLocal
 import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.server.util.ext.HttpStatusException

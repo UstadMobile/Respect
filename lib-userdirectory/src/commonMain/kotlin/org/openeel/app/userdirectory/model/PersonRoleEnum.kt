@@ -1,4 +1,4 @@
-package world.respect.datalayer.school.model
+package org.openeel.app.userdirectory.model
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable

@@ -1,7 +1,7 @@
 package world.respect.datalayer.school.domain
 
 import world.respect.datalayer.school.model.PermissionFlags
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 
 /**
  * The CheckPersonUseCase is bound (scoped) to a specified authenticated person (the same as the

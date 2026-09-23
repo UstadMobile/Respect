@@ -5,20 +5,17 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import world.respect.datalayer.AuthenticatedUserPrincipalId
-import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
 import world.respect.datalayer.db.school.insertAdmin
 import world.respect.datalayer.db.school.testSchoolDb
 import world.respect.datalayer.db.school.toDataSource
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.ext.primaryRole
-import world.respect.datalayer.school.ext.writePermissionFlag
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertFalse
 

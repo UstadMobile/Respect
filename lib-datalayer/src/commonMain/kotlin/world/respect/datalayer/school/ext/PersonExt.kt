@@ -8,7 +8,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import world.respect.datalayer.exceptions.ForbiddenException
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.lib.xapi.model.XapiAccount
 import world.respect.lib.xapi.model.XapiAgent
 

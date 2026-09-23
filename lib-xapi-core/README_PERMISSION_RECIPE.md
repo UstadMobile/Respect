@@ -4,9 +4,8 @@
 
 DRAFT
 
-Purpose: the general xAPI oAUTH scopes consider permission to update canonical activity and actor 
-information as binary. There are many cases where granular permissions need to be understood 
-e.g. where a teacher can update an activity that represents their own class, but not others.
+Purpose: General xAPI oAUTH scopes consider permission to read and write to the statements resource 
+and other resources as binary: one can either write statements, or you can't. Sometimes your 
 
 ## Statement folders
 
@@ -36,7 +35,7 @@ Grant permission to a folder:
   },
   "authority": {
     "account" : {
-      "name": "student",
+      "name": "adminuser",
       "homePage": "http://school.example.org/"
     }
   },
@@ -44,19 +43,11 @@ Grant permission to a folder:
     "id": "http://id.openeel.org/verb/grant-read-permission"
   },
   "object": {
-    "objectType": "Agent",
-    "account" : {
-      "name": "teacher",
-      "homePage": "http://school.example.org/"
-    }
+    "objectType": "Activity",
+    "id": "statement-storage://agents/student@school.example.org/"
   },
   "context": {
     "contextActivities": {
-       "parent": [
-          {
-            "id": "statement-storage://agents/student@school.example.org/"
-          }
-       ],
        "category": [
           {
             "id": "https://openeel.org/xapi-ns/recipes/granular-permission-management"

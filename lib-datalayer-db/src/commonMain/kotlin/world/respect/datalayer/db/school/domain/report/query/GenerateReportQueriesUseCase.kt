@@ -10,7 +10,7 @@ import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
  * `GenerateReportQueriesUseCase`
  *
  * This class is responsible for generating the SQL queries required to populate a report
- * based on the provided `RunReportUseCase.RunReportRequest`. It handles different database types
+ * based on the provided [RunReportUseCase.RunReportRequest]. It handles different database types
  * (SQLite and Postgres) and various report options such as the x-axis (time-based or categorical),
  * y-axis (metrics), and sub-grouping. This is normally something like 'total usage duration by week'
  * (see ReportOptions2 for available xAxis/yAxis options).

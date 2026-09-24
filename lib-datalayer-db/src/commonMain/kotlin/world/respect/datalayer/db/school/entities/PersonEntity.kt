@@ -8,7 +8,7 @@ import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 
 /**
- * @property pGuid the uid of the person: If following a OneRoster server, this is sourcedId
+ * @property pGuid the uid of the person
  */
 @Entity
 data class PersonEntity(

@@ -1,9 +1,9 @@
 package world.respect.datalayer
 
 /**
- * Each type of data has a uid which needs to support abstract strings (e.g. sourcedId in OneRoster,
- * activity id urls in xAPI, etc). When storing this in a database we want to be able to map this
- * to a number to use as a primary key to make lookups more efficient.
+ * Each type of data has a uid which needs to support abstract strings (e.g. activity id urls in
+ * xAPI, etc). When storing this in a database we want to be able to map this to a number to use
+ * as a primary key to make lookups more efficient.
  *
  * Ids also need to be built to prevent collision (see PrimaryKeyGenerator for further notes).
  *

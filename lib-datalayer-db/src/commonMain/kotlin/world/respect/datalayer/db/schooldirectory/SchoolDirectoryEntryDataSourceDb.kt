@@ -36,9 +36,16 @@ class SchoolDirectoryEntryDataSourceDb(
                         entities.school.reUid
                     )
 
+                    respectAppDb.getSchoolDirectoryEntryAuthOptionEntityDao().deleteByFk(
+                        entities.school.reUid
+                    )
+
                     respectAppDb.getSchoolDirectoryEntryEntityDao().upsert(entities.school)
                     respectAppDb.getSchoolDirectoryEntryLangMapEntityDao().upsert(
                         entities.langMapEntities
+                    )
+                    respectAppDb.getSchoolDirectoryEntryAuthOptionEntityDao().upsert(
+                        entities.authOptionEntities
                     )
                 }
             }

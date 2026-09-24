@@ -42,6 +42,7 @@ import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParam
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.domain.xapi.createBlankReportStatement
+import world.respect.shared.domain.xapi.fillSqlParameters
 import world.respect.shared.domain.xapi.withReportQueries
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.add_a_new_report

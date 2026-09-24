@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material3.FilterChip
@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -29,6 +30,8 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
+import world.respect.lib.dataloadstate.DataLoadingState
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.all
@@ -84,7 +87,7 @@ fun OpdsFeedListScreen(
             }
         }
 
-        if (uiState.showPlaylists.isEmpty()) {
+        if (uiState.statements.isEmpty()) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -102,21 +105,26 @@ fun OpdsFeedListScreen(
             }
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                itemsIndexed(
-                    items = uiState.showPlaylists,
-                    key = { index, feed ->
-                        feed.metadata.identifier?.toString()
-                            ?: "${feed.metadata.title}_$index"
+                items(
+                    items = uiState.statements,
+                    key = { statement -> statement.id.toString() }
+                ) { statement ->
+                    val feedFlow = remember(statement.id) {
+                        uiState.feedFlowForActivity(statement)
                     }
-                ) { _, feed ->
-                    PlaylistListItem(
-                        feed = feed,
-                        ownerUsername = if (feed.links.any {
-                                it.rel?.contains(MakePlaylistOpdsFeedUseCase.REL_OWNER) == true
-                                        && it.href == uiState.activeUserOwnerHref
-                            }) uiState.activeUsername else null,
-                        onClickFeed = { onClickPlaylist(feed) },
-                    )
+                    val feedLoadState by feedFlow.collectAsState(DataLoadingState())
+                    val feed = feedLoadState.dataOrNull()
+
+                    if (feed != null && uiState.matchesActiveFilter(feed)) {
+                        PlaylistListItem(
+                            feed = feed,
+                            ownerUsername = if (feed.links.any {
+                                    it.rel?.contains(MakePlaylistOpdsFeedUseCase.REL_OWNER) == true
+                                            && it.href == uiState.activeUserOwnerHref
+                                }) uiState.activeUsername else null,
+                            onClickFeed = { onClickPlaylist(feed) },
+                        )
+                    }
                 }
             }
         }

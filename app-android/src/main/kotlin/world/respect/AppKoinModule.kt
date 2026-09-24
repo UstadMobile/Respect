@@ -248,6 +248,7 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.catalog.saveopdsfeed.SaveOpdsFeedUseCase
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
+import world.respect.shared.domain.catalog.getopdsfeedforxapiactivity.GetOpdsFeedForXapiActivityUseCase
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
 import world.respect.shared.domain.getlanguageendonym.GetLanguageEndonymUseCase
 import world.respect.shared.domain.launchapp.getlaunchoptionsforpublication.GetLaunchOptionsForPublicationUseCase
@@ -1262,6 +1263,12 @@ val appKoinModule = module {
              )
          }
 
+         scoped<GetOpdsFeedForXapiActivityUseCase> {
+             GetOpdsFeedForXapiActivityUseCase(
+                 opdsFeedDataSource = get<SchoolDataSource>().opdsFeedDataSource,
+             )
+         }
+
          scoped<MakePlaylistOpdsFeedUseCase> {
              val accountScopeId = RespectAccountScopeId.parse(id)
              MakePlaylistOpdsFeedUseCase(
@@ -1273,6 +1280,7 @@ val appKoinModule = module {
         scoped<SaveOpdsFeedUseCase> {
             SaveOpdsFeedUseCase(
                 xapiActivityProfileResource = get<SchoolDataSource>().xapiResource.activityProfile,
+                xapiStatementsResource = get<SchoolDataSource>().xapiResource.statements,
                 opdsFeedDataSourceLocal = get<SchoolDataSourceLocal>().opdsFeedDataSource,
                 json = get(),
             )

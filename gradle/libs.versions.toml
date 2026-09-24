@@ -79,11 +79,13 @@ espressoCore = "3.7.0"
 rules = "1.7.0"
 cache4k = "0.14.0"
 robolectric = "4.13"
+appauth = "0.11.1"
 kotlinStdlib = "2.4.10"
 kotlinTest = "2.4.10"
 
 [libraries]
 argparse4j = { module = "net.sourceforge.argparse4j:argparse4j", version.ref = "argparse4j" }
+appauth = { module = "net.openid:appauth", version.ref = "appauth" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil3" }
 coil3-coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil3" }
 coil3-coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil3" }
@@ -120,6 +122,7 @@ compose-material3-window-size-clazz = { module = "androidx.compose.material3:mat
 
 androidx-webkit = { module = "androidx.webkit:webkit", version.ref = "androidx-webkit" }
 ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
+ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
 ktor-server-openapi = { module = "io.ktor:ktor-server-openapi", version.ref = "ktor" }
 ktor-server-swagger = { module = "io.ktor:ktor-server-swagger", version.ref = "ktor" }
 ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor" }

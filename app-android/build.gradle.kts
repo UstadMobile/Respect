@@ -92,6 +92,7 @@ kotlin {
         implementation(libs.coil.network.okhttp)
         implementation(libs.coil3.coil.compose)
         implementation(libs.napier)
+        implementation(libs.appauth)
 
         implementation(compose.material3)
     }
@@ -125,6 +126,8 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 132
         versionName = project.version.toString()
+
+        manifestPlaceholders["appAuthRedirectScheme"] = "world.respect.oauth"
 
         for(propName in ACRA_PROP_NAMES) {
             buildConfigField(

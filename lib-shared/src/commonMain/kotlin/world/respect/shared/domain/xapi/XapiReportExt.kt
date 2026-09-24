@@ -197,3 +197,19 @@ fun XapiStatement.withReportQueries(queries: List<String>, json: Json): XapiStat
     return copy(`object` = updatedActivity)
 }
 
+/**
+ * Utility function to substitute '?' placeholders in a SQL string with provided parameters.
+ * This is used to create self-contained SQL queries that can be included in xAPI statements.
+ */
+fun fillSqlParameters(sql: String, params: Array<Any>): String {
+    var resultSql = sql
+    params.forEach { param ->
+        val replacement = when (param) {
+            is String -> "'${param.replace("'", "''")}'"
+            is Boolean -> if (param) "1" else "0"
+            else -> param.toString()
+        }
+        resultSql = resultSql.replaceFirst("\\?", replacement)
+    }
+    return resultSql
+}

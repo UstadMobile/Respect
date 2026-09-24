@@ -61,9 +61,9 @@ onFlowComplete:
 - tapOn: "Lessons"
 - tapOn: "Examples"
 - tapOn: "Assignment Result Statement Demo"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Assignment Result Statement Demo"
+- assertVisible:
+    id: "app_title"
+    text: "Assignment Result Statement Demo"
 - tapOn: "Download"
 - extendedWaitUntil:
     visible: "Downloaded"
@@ -79,9 +79,9 @@ onFlowComplete:
 - tapOn: "Lessons"
 - tapOn: "Examples"
 - tapOn: "Assignment Result Statement Demo"
-#- assertVisible:
-#    id: "app_title"
-#    text: "Assignment Result Statement Demo"
+- assertVisible:
+    id: "app_title"
+    text: "Assignment Result Statement Demo"
 - assertVisible: "Downloaded"
 - tapOn: "Open"
 - extendedWaitUntil:
@@ -201,7 +201,7 @@ onFlowComplete:
     text: "Select collection(s)"
 - assertVisible: "Apps"
 - tapOn: "Example Web App"
-- assertVisible: "Examples"
+- tapOn: "Examples"
 - tapOn: "Select this collection"
 - assertVisible:
     id: "app_title"
@@ -236,7 +236,7 @@ onFlowComplete:
     text: "Select unit(s)"
 - tapOn: "Bookmarks"
 - tapOn: "Statement Maker"
-- tapOn: "Select 1 item"
+- tapOn: "Statement Maker"
 - assertVisible:
     id: "app_title"
     text: "Add Collection"

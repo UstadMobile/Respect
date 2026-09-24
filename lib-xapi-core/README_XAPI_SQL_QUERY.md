@@ -107,6 +107,14 @@ LRS/implementer. Potential appraoches include:
     "id": "6690e6c9-3ef0-4ed3-8b37-7f3964730bee",
     "objectType": "StatementRef"
   },
+  "context": {
+    "parent": [
+      {
+        "id": "https://school.example.org/xapi/ns/report-uuid",
+        "objectType": "Activity"
+      }
+    ]
+  },
   "result": {
     "extensions": {
       "https://id.openeel.org/xapi/extension/query-result": [

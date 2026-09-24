@@ -75,7 +75,6 @@ class RegisterSchoolUseCaseImpl(
                         name = LangMapStringValue(request.schoolName),
                         self = parsedUrl,
                         xapi = Url("${request.schoolUrl}/api/school/xapi"),
-                        oneRoster = Url("${request.schoolUrl}/api/school/oneroster"),
                         respectExt = Url("${request.schoolUrl}/api/school/respect"),
                         rpId = parsedUrl.host,
                         lastModified = Clock.System.now(),

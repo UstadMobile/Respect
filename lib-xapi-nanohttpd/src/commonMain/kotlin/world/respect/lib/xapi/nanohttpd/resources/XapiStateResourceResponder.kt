@@ -3,7 +3,7 @@ package world.respect.lib.xapi.nanohttpd.resources
 import fi.iki.elonen.NanoHTTPD
 import kotlinx.serialization.json.Json
 import world.respect.lib.xapi.XapiResourceProvider
-import world.respect.lib.xapi.nanohttpd.ext.headersAsKtorHeaders
+import world.respect.lib.xapi.nanohttpd.ext.parametersAsKtorParams
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.lib.xapi.resources.XapiStateResource
 
@@ -24,14 +24,14 @@ class XapiStateResourceResponder(
 
     override fun NanoHTTPD.IHTTPSession.getMultiDocParams(): XapiStateResource.MultiDocParams {
         return XapiStateResource.MultiDocParams.fromParameters(
-            params = this.headersAsKtorHeaders(),
+            params = parametersAsKtorParams(),
             json = json
         )
     }
 
     override fun NanoHTTPD.IHTTPSession.getSingleDocParams(): XapiStateResource.SingleDocumentParams {
         return XapiStateResource.SingleDocumentParams.fromParameters(
-            params = this.headersAsKtorHeaders(),
+            params = parametersAsKtorParams(),
             json = json
         )
     }

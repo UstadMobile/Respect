@@ -4,6 +4,8 @@ import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.NanoHTTPD.Method
 import io.ktor.http.Headers
 import io.ktor.http.HeadersImpl
+import io.ktor.http.Parameters
+import io.ktor.http.ParametersImpl
 import io.ktor.http.Url
 import io.ktor.http.fromHttpToGmtDate
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
@@ -51,6 +53,14 @@ fun NanoHTTPD.IHTTPSession.endpointUrl(): Url {
 
 fun NanoHTTPD.IHTTPSession.headersAsKtorHeaders(): Headers {
     return HeadersImpl(headers.map { it.key to listOf(it.value) }.toMap())
+}
+
+/**
+ * Convert the query parameters from the receiver IHTTPSession to Ktor
+ * parameters.
+ */
+fun NanoHTTPD.IHTTPSession.parametersAsKtorParams(): Parameters {
+    return ParametersImpl(parameters.toMap())
 }
 
 fun NanoHTTPD.IHTTPSession.bodyAsXapiDocument(): XapiDocument {

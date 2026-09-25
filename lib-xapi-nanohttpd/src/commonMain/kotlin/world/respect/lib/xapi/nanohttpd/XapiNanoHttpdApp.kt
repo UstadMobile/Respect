@@ -11,7 +11,11 @@ import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.nanohttpd.ext.addXapiCORSHeaders
 import world.respect.lib.xapi.nanohttpd.resources.StatementResourceResponder
+import world.respect.lib.xapi.nanohttpd.resources.XapiActivityProfileResourceResponder
+import world.respect.lib.xapi.nanohttpd.resources.XapiAgentProfileResourceResponder
 import world.respect.lib.xapi.nanohttpd.resources.XapiStateResourceResponder
+import world.respect.lib.xapi.resources.XapiActivityProfileResource
+import world.respect.lib.xapi.resources.XapiAgentProfileResource
 import world.respect.lib.xapi.resources.XapiStateResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import java.io.ByteArrayInputStream
@@ -28,6 +32,14 @@ class XapiNanoHttpdApp(
 
     private val stateResourceResponder by lazy {
         XapiStateResourceResponder(xapiResourceProvider, json)
+    }
+
+    private val activityProfileResourceResponder by lazy {
+        XapiActivityProfileResourceResponder(xapiResourceProvider, json)
+    }
+
+    private val agentProfileResourceResponder by lazy {
+        XapiAgentProfileResourceResponder(xapiResourceProvider, json)
     }
 
     /**
@@ -106,6 +118,14 @@ class XapiNanoHttpdApp(
                     (resourceSegment1 == "activities" && resourceSegment2 == XapiStateResource.ENDPOINT_NAME) ||
                         resourceSegment1 == XapiStateResource.ENDPOINT_NAME -> {
                         stateResourceResponder.serveXapiEndpoint(session, pathSegments)
+                    }
+
+                    resourceSegment1 == "activities" && resourceSegment2 == XapiActivityProfileResource.ENDPOINT_NAME -> {
+                        activityProfileResourceResponder.serveXapiEndpoint(session, pathSegments)
+                    }
+
+                    resourceSegment1 == "agents" && resourceSegment2 == XapiAgentProfileResource.ENDPOINT_NAME -> {
+                        agentProfileResourceResponder.serveXapiEndpoint(session, pathSegments)
                     }
 
                     else -> {

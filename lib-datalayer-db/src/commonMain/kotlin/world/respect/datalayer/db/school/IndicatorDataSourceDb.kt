@@ -55,15 +55,4 @@ class IndicatorDataSourceDb(
         schoolDb.getIndicatorEntityDao().updateIndicator(indicatorEntity)
     }
 
-    override suspend fun initializeDefaultIndicators(idGenerator: () -> String) {
-        val existingCount = schoolDb.getIndicatorEntityDao().getIndicatorCount()
-        if (existingCount == 0) {
-            DefaultIndicators.list.forEach { indicator ->
-                val indicatorWithId = indicator.copy(
-                    indicatorId = idGenerator()
-                )
-                putIndicator(indicatorWithId)
-            }
-        }
-    }
 }

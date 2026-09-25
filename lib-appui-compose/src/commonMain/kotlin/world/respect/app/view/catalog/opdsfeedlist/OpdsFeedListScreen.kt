@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
@@ -28,16 +26,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import world.respect.app.components.defaultItemPadding
 import world.respect.datalayer.school.domain.MakePlaylistOpdsFeedUseCase
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.all
 import world.respect.shared.generated.resources.created_by
 import world.respect.shared.generated.resources.empty
-import world.respect.shared.generated.resources.my_collections
 import world.respect.shared.generated.resources.no_collections_yet
 import world.respect.shared.generated.resources.no_collections_yet_description
 import world.respect.shared.generated.resources.sections_and_items
@@ -65,28 +60,6 @@ fun OpdsFeedListScreen(
     onClickPlaylist: (OpdsFeed) -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultItemPadding(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            item {
-                FilterChip(
-                    selected = uiState.activeFilter == OpdsFeedListFilter.ALL,
-                    onClick = { onClickFilter(OpdsFeedListFilter.ALL) },
-                    label = { Text(stringResource(Res.string.all)) },
-                )
-            }
-            item {
-                FilterChip(
-                    selected = uiState.activeFilter == OpdsFeedListFilter.MY_PLAYLISTS,
-                    onClick = { onClickFilter(OpdsFeedListFilter.MY_PLAYLISTS) },
-                    label = { Text(stringResource(Res.string.my_collections)) },
-                )
-            }
-        }
-
         if (uiState.statements.isEmpty()) {
             Column(
                 modifier = Modifier.fillMaxSize(),

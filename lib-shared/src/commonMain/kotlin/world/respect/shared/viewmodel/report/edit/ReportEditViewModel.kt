@@ -18,12 +18,10 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.domain.report.query.GenerateReportQueriesUseCase
 import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
-import world.respect.lib.dataloadstate.DataLoadState
-import world.respect.lib.dataloadstate.DataLoadingState
-import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
 import world.respect.lib.dataloadstate.ext.map
+import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.decodeFromExtensionOrNull
 import world.respect.lib.xapi.ext.encodeWithExtension
@@ -40,7 +38,6 @@ import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource.GetStatementParams
 import world.respect.shared.domain.account.RespectAccountManager
-import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.domain.xapi.createBlankReportStatement
 import world.respect.shared.domain.xapi.fillSqlParameters
 import world.respect.shared.domain.xapi.withReportQueries
@@ -50,7 +47,6 @@ import world.respect.shared.generated.resources.done
 import world.respect.shared.generated.resources.edit_report
 import world.respect.shared.generated.resources.field_required_prompt
 import world.respect.shared.generated.resources.series
-import world.respect.shared.navigation.IndicatorList
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.ReportDetail
@@ -70,21 +66,17 @@ import kotlin.time.Clock
 import kotlin.uuid.Uuid
 
 data class ReportEditUiState(
-    val statementData: DataLoadState<XapiStatement> = DataLoadingState(),
     val reportOptions: ReportOptions = ReportOptions(),
-    val reportTitleError: UiText? = null,
-    val submitted: Boolean = false,
-    val availableIndicators: List<Indicator> = emptyList(),
-    val errorMessage: String? = null,
+    val submitted: Boolean = false
 ) {
     val hasSingleSeries: Boolean
         get() = reportOptions.series.size == 1
 
-    val hasErrors: Boolean
-        get() {
-            if (!submitted) return false
-            return reportTitleError != null
-        }
+    val isTitleError: Boolean
+        get() = submitted && reportOptions.title.isBlank()
+
+    val reportTitleError: UiText?
+        get() = if (isTitleError) StringResourceUiText(resource = Res.string.field_required_prompt) else null
 }
 
 class ReportEditViewModel(
@@ -101,32 +93,22 @@ class ReportEditViewModel(
     private val generateReportQueriesUseCase: GenerateReportQueriesUseCase by inject()
     private val uidNumberMapper: UidNumberMapper by inject()
     private val route: ReportEdit = savedStateHandle.toRoute()
-    private val schoolPrimaryKeyGenerator: SchoolPrimaryKeyGenerator by inject()
 
-    private val entityUid = route.reportActivityUid ?: Uuid.random().toString()
+    private val schoolUrl = accountManager.requireActiveSchoolUrl()
+
+    private val entityUid = route.reportActivityUid ?: run {
+        schoolUrl.appendEndpointSegments(REPORTS, Uuid.random().toString()).toString()
+    }
 
     private val _uiState: MutableStateFlow<ReportEditUiState> =
         MutableStateFlow(ReportEditUiState())
     val uiState: Flow<ReportEditUiState> = _uiState.asStateFlow()
     private val debouncer = LaunchDebouncer(viewModelScope)
+    private var baseStatement: XapiStatement? = null
 
 
     init {
         viewModelScope.launch {
-            try {
-                schoolDataSource.indicatorDataSource.initializeDefaultIndicators {
-                    schoolPrimaryKeyGenerator.primaryKeyGenerator.nextId(
-                        Indicator.TABLE_ID
-                    ).toString()
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        errorMessage = e.message ?: "Error initializing default indicators"
-                    )
-                }
-            }
-
             loadingState = LoadingUiState.INDETERMINATE
             val title = if (route.reportActivityUid == null) {
                 getString(resource = Res.string.add_a_new_report)
@@ -175,19 +157,18 @@ class ReportEditViewModel(
                         }.firstOrNotLoaded()
                     },
                     uiUpdateFn = { entity ->
+                        val statement = entity.dataOrNull()
+                        if (statement != null) {
+                            baseStatement = statement
+                        }
                         _uiState.update { prev ->
                             prev.copy(
-                                statementData = entity,
-                                reportOptions = entity.dataOrNull()
+                                reportOptions = statement
                                     ?.objectActivityOrNull()?.definition?.decodeFromExtensionOrNull(
-                                    json = json,
-                                    extensionIri = OpenEelXapiConstants.EXTENSION_REPORT_OPTIONS,
-                                    deserializer = ReportOptions.serializer()
-                                ) ?: ReportOptions(
-                                    series = listOf(
-                                        ReportSeries()
-                                    )
-                                )
+                                        json = json,
+                                        extensionIri = OpenEelXapiConstants.EXTENSION_REPORT_OPTIONS,
+                                        deserializer = ReportOptions.serializer()
+                                    ) ?: ReportOptions(series = listOf(ReportSeries()))
                             )
                         }
                     }
@@ -201,28 +182,18 @@ class ReportEditViewModel(
                 val actor = accountManager.selectedAccountAndPersonFlow.first()?.xapiAgent
                     ?: return@launchWithLoadingIndicator
 
-                val baseStmt = createBlankReportStatement(
+                baseStatement = createBlankReportStatement(
                     reportActivityId = entityUid,
                     actor = actor,
                     reportOptions = initialOptions,
                     json = json
                 )
-
                 _uiState.update { prev ->
                     prev.copy(
-                        statementData = DataReadyState(baseStmt),
                         reportOptions = initialOptions
                     )
                 }
             }
-        }
-        viewModelScope.launch {
-            schoolDataSource.indicatorDataSource.allIndicatorAsFlow()
-                .collect { dataLoadState ->
-                    _uiState.update { state ->
-                        state.copy(availableIndicators = dataLoadState.dataOrNull() ?: emptyList())
-                    }
-                }
         }
 
         viewModelScope.launch {
@@ -236,25 +207,17 @@ class ReportEditViewModel(
         }
     }
 
-    fun onClickManageIndicator() {
-        _navCommandFlow.tryEmit(
-            NavCommand.Navigate(
-                IndicatorList
-            )
-        )
-    }
-
     fun onClickSave() {
         _uiState.update { prev ->
-            prev.validate()
+            prev.copy(submitted = true)
         }
 
         val currentOptions = _uiState.value.reportOptions
-        if (_uiState.value.hasErrors || currentOptions.series.isEmpty()) {
+        if (_uiState.value.isTitleError || currentOptions.series.isEmpty()) {
             return
         }
 
-        val reportStatement = _uiState.value.statementData.dataOrNull() ?: return
+        val reportStatement = baseStatement ?: return
         launchWithLoadingIndicator {
             val sessionAndPerson = accountManager.selectedAccountAndPersonFlow.first()
             val queries = if (sessionAndPerson != null) {
@@ -294,7 +257,7 @@ class ReportEditViewModel(
     }
 
     fun onEntityChanged(options: ReportOptions) {
-        val currentStmt = _uiState.value.statementData.dataOrNull() ?: return
+        val currentStmt = baseStatement ?: return
         val updatedActivity = currentStmt.objectActivityOrNull()?.let { activity ->
             activity.copy(
                 definition = (activity.definition ?: XapiActivityDefinition()).encodeWithExtension(
@@ -309,29 +272,18 @@ class ReportEditViewModel(
         } ?: currentStmt.`object`
 
         val updatedStmt = currentStmt.copy(`object` = updatedActivity)
+        baseStatement = updatedStmt
 
         _uiState.update { currentState ->
             currentState.copy(
                 reportOptions = options,
-                statementData = DataReadyState(updatedStmt)
-            ).let { state ->
-                if (state.submitted) state.validate() else state
-            }
+            )
         }
 
         debouncer.launch(DEFAULT_SAVED_STATE_KEY) {
             savedStateHandle[DEFAULT_SAVED_STATE_KEY] =
                 json.encodeToString(XapiStatement.serializer(), updatedStmt)
         }
-    }
-
-    private fun ReportEditUiState.validate(): ReportEditUiState {
-        val requiredFieldMessage = StringResourceUiText(resource = Res.string.field_required_prompt)
-        return copy(
-            submitted = true,
-            reportTitleError = if (reportOptions.title.isBlank()
-            ) requiredFieldMessage else null,
-        )
     }
 
     fun onSeriesChanged(index: Int, updatedSeries: ReportSeries) {
@@ -440,5 +392,6 @@ class ReportEditViewModel(
         const val REPORT_EDIT_FILTER_RESULT = "report_filter_result"
         private const val SAVED_STATE_SERIES_INDEX = "seriesIndex"
         private const val SAVED_STATE_FILTER_INDEX = "filterIndex"
+        private const val REPORTS = "reports"
     }
 }

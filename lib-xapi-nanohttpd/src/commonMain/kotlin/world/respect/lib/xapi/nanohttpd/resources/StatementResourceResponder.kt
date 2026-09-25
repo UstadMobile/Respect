@@ -4,7 +4,6 @@ import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.NanoHTTPD.Method
 import fi.iki.elonen.NanoHTTPD.Response
 import fi.iki.elonen.NanoHTTPD.newFixedLengthResponse
-import io.ktor.util.StringValuesImpl
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -20,6 +19,7 @@ import world.respect.lib.xapi.nanohttpd.NanoHttpdXapiResponder
 import world.respect.lib.xapi.nanohttpd.XapiNanoHttpdApp.Companion.ENDPOINT_SEGMENT_INDEX
 import world.respect.lib.xapi.nanohttpd.ext.addXapiCORSHeaders
 import world.respect.lib.xapi.nanohttpd.ext.bodyAsBytes
+import world.respect.lib.xapi.nanohttpd.ext.headersAsKtorHeaders
 import world.respect.lib.xapi.nanohttpd.ext.provideXapiResourceForSession
 import world.respect.lib.xapi.nanohttpd.ext.toFixedLengthResponse
 import world.respect.lib.xapi.nanohttpd.logResponse
@@ -51,10 +51,7 @@ class StatementResourceResponder(
             Method.GET -> {
                 xapiResource.statements.get(
                     listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                        params = StringValuesImpl(
-                            caseInsensitiveName = false,
-                            values = session.parameters
-                        ),
+                        params = session.headersAsKtorHeaders(),
                         json = json,
                     )
                 ).toFixedLengthResponse(

@@ -17,6 +17,9 @@ import kotlinx.serialization.json.Json
 import net.sourceforge.argparse4j.inf.Namespace
 import nl.adaptivity.xmlutil.core.XmlVersion
 import nl.adaptivity.xmlutil.serialization.XML
+import world.respect.datalayer.respect.model.AuthenticationOption
+import world.respect.datalayer.respect.model.BuiltinAuthOptionConfig
+import world.respect.datalayer.respect.model.OpenIdAuthOptionConfig
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.libutil.ext.appendEndpointSegments
@@ -99,6 +102,9 @@ fun managerServerMain(ns: Namespace) {
                                     respectExt = schoolBaseUrl.appendEndpointSegments("api/school/respect"),
                                     //Will be set on server
                                     rpId = rpId,
+                                    authenticationOptions = getAuthenticationOptions(
+                                        ns.getString("openid_issuer")
+                                    ),
                                     lastModified = Clock.System.now(),
                                     stored = Clock.System.now(),
                                     inDirectoryUrl = nsDirUrl?.let { Url(it) },
@@ -150,4 +156,27 @@ fun managerServerMain(ns: Namespace) {
 
         exitProcess(0)
     }
+}
+
+private fun getAuthenticationOptions(
+    openIdIssuerArg: String?
+): List<AuthenticationOption> {
+    val builtinOption = AuthenticationOption(
+        name = AuthenticationOption.BUILTIN_DEFAULT_NAME,
+        provider = BuiltinAuthOptionConfig(),
+    )
+
+    val openIdOptions = openIdIssuerArg
+        ?.split(",")
+        ?.map(String::trim)
+        ?.filter(String::isNotEmpty)
+        ?.map { issuer ->
+            AuthenticationOption(
+                name = issuer,
+                provider = OpenIdAuthOptionConfig(issuer = Url(issuer)),
+            )
+        }
+        .orEmpty()
+
+    return listOf(builtinOption) + openIdOptions
 }

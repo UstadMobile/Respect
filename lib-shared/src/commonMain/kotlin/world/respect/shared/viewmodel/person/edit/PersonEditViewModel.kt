@@ -27,7 +27,7 @@ import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.phonenumber.PhoneNumValidatorUseCase

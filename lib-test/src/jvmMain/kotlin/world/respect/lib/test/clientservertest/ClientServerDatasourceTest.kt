@@ -42,7 +42,7 @@ import world.respect.datalayer.school.model.AuthToken
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.datalayer.school.writequeue.EnqueueDrainRemoteWriteQueueUseCase
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.opds.model.LangMapStringValue

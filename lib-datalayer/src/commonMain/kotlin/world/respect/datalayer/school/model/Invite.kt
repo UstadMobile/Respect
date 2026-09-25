@@ -2,6 +2,7 @@ package world.respect.datalayer.school.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.datalayer.school.model.Invite2.Companion.TYPE_CLASS
 import world.respect.datalayer.school.model.Invite2.Companion.TYPE_FAMILY_MEMBER
 import world.respect.datalayer.school.model.Invite2.Companion.TYPE_NEW_USER

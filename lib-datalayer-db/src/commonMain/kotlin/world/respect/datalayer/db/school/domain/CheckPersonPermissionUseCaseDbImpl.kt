@@ -5,7 +5,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase.PermissionsRequiredByRole
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 
 class CheckPersonPermissionUseCaseDbImpl(
     private val authenticatedUser: AuthenticatedUserPrincipalId,

@@ -1,6 +1,7 @@
 package world.respect.datalayer.school.model
 
 import kotlinx.serialization.Serializable
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.datalayer.shared.ModelWithTimes
 import world.respect.lib.serializers.InstantAsISO8601
 import kotlin.time.Clock

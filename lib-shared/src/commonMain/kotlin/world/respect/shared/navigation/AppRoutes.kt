@@ -11,7 +11,7 @@ import kotlinx.serialization.json.Json
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.lib.xapi.extensions.reportoptions.ReportFilter
 import world.respect.lib.xapi.model.XapiActor
 import world.respect.shared.ext.NextAfterScan

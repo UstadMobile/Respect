@@ -1,6 +1,6 @@
 package world.respect.datalayer.school.domain
 
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 
 class GetWritableRolesListUseCaseImpl: GetWritableRolesListUseCase {
 

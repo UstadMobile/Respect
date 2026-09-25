@@ -13,7 +13,7 @@ import world.respect.datalayer.db.school.domain.CheckPersonPermissionUseCaseDbIm
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.resources.XapiResource

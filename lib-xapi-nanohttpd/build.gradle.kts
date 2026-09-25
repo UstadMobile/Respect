@@ -43,7 +43,19 @@ kotlin {
         }
 
         jvmTest.dependencies {
+            implementation(projects.libDatalayerDb)
+            implementation(projects.libTest)
+            implementation(projects.libTestResources)
+            implementation(projects.libXapiTest)
+            implementation(projects.libDatalayerHttpClient)
 
+            implementation(libs.androidx.sqlite.bundled)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.client.json)
+            implementation(libs.ktor.client.content.negotiation)
+
+            implementation(libs.okhttp)
+            implementation(libs.ktor.client.okhttp)
         }
 
         val commonTest by getting {

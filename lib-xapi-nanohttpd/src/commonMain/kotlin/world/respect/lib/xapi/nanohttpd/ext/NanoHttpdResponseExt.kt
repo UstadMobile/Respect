@@ -13,7 +13,7 @@ fun NanoHTTPD.Response.addXapiCORSHeaders(
     session: NanoHTTPD.IHTTPSession
 ) {
     val origin = session.headers["origin"] ?: session.headers["referer"]
-        ?: throw IllegalArgumentException("No referrer")
+        ?: return
     val originUrl = Url(origin).protocolWithAuthority
 
     addHeader("Access-Control-Allow-Origin", originUrl)

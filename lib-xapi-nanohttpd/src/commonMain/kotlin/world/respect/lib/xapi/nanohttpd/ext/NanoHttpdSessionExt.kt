@@ -2,6 +2,9 @@ package world.respect.lib.xapi.nanohttpd.ext
 
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.NanoHTTPD.Method
+import io.ktor.http.Url
+import net.thauvin.erik.urlencoder.UrlEncoderUtil
+import world.respect.lib.xapi.nanohttpd.XapiNanoHttpdApp.Companion.ENDPOINT_SEGMENT_INDEX
 import java.io.File
 
 fun NanoHTTPD.IHTTPSession.bodyAsBytes(): ByteArray? {
@@ -25,3 +28,18 @@ fun NanoHTTPD.IHTTPSession.bodyAsBytes(): ByteArray? {
         null
     }
 }
+
+/**
+ * Get the endpoint URL for this request - see [world.respect.lib.xapi.nanohttpd.XapiNanoHttpdApp.localUrlForEndpoint]
+ */
+fun NanoHTTPD.IHTTPSession.endpointUrl(): Url {
+    //Remove the first slash, then split into path segments. Because we are looking for the second
+    //segment, the split limit is 3.
+    val pathSegments = uri.substring(1).split("/", limit = 3)
+    return Url(UrlEncoderUtil.decode(
+        pathSegments[ENDPOINT_SEGMENT_INDEX])
+    )
+}
+
+
+

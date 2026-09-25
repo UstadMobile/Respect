@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<journey name="Demo app test">
+    <description xml:space="preserve">Verify that a Respect-compatible app can be added, opened and used to complete a lesson.</description>
+    <actions xml:space="preserve">
+        <action>Check app with id - world.respect.app is installed on the device</action>
+        <action><![CDATA[Check app with id - <TEST_APP_ID> is installed on the device]]></action>
+        <action><![CDATA[Launch the world.respect.app.]]></action>
+        <action>If a "Get Started" screen is displayed, tap the "Get Started" button.</action>
+        <action><![CDATA[On the "Let's get started screen", click on  "Other options" button which is at the bottom.This should take user to - another screen.]]></action>
+        <action>Tap on "Paste the link here"</action>
+        <action><![CDATA[Type the school URL - '<SCHOOL_URL>'  into the text field just above the Next button]]></action>
+        <action>Then tap "Next".</action>
+        <action><![CDATA[Verify user is on the login screen]]></action>
+        <action><![CDATA[Type "<USERNAME>" into the Username field.]]></action>
+        <action><![CDATA[Type "<PASSWORD>"  into the Password field.]]></action>
+        <action>Tap the Login.</action>
+        <action>If a dialog titled "Save password for Respect?" appears, tap "Cancel".</action>
+        <action>Verify the RESPECT home screen is displayed.</action>
+        <action><![CDATA[On the home screen check -"<APP_NAME>" is visible. If yes skip next 10 steps.]]></action>
+        <action>On the home screen, tap the "Add" button.</action>
+        <action>Tap "Add from Link".</action>
+        <action>Verify "Link*" named text field is visible</action>
+        <action><![CDATA[Type '<APP_MANIFEST_LINK>' into the "Link*"  text field.]]></action>
+        <action>Then Tap "Next" button just below.</action>
+        <action>Verify the app details page is displayed.</action>
+        <action><![CDATA[Verify "<APP_NAME>" is shown on the app details page.]]></action>
+        <action>Verify "Lessons" is available on the app details page.</action>
+        <action>Tap "Add to school apps", If already added, skip this step</action>
+        <action>Tap on "Home" button at bottom tab</action>
+        <action><![CDATA[Verify "<APP_NAME>" appears in the Apps list.]]></action>
+        <action><![CDATA[Tap "<APP_NAME>".]]></action>
+        <action>Verify the page title "App detail" is displayed.</action>
+        <action>Tap on "Lessons"  arrow mark.</action>
+        <action>Verify the lesson list is visible.</action>
+        <action>Tap on the first-Grade</action>
+        <action>Verify sub-lesson list is visible</action>
+        <action>Tap on the first-lesson</action>
+        <action>Verify the lesson title is matching the lesson selected</action>
+        <action>Verify the app name is visible</action>
+        <action>Verify "Download" option is available.</action>
+        <action>Tap on "Open" above the download button.</action>
+        <action>Verify user is on screen with title - "Grade 1 learning unit #1".</action>
+        <action>Enter "0.5" into the field located just below "Scaled score".</action>
+        <action>Tap the "Send result statement" button.</action>
+        <action>Tap the "Send completed statement" button.</action>
+        <action>Tap on "Close" icon on the title.</action>
+        <action>Verify the user is back on the lesson detail screen.</action>
+        <action>Repeat step 25 to step 43 replacing first-Grade with third-Grade , first-lesson with third-lesson and "Grade 1 learning unit #1" with "Grade 3 learning unit #3".</action>
+        </actions>
+</journey>

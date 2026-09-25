@@ -11,6 +11,8 @@ import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.nanohttpd.ext.addXapiCORSHeaders
 import world.respect.lib.xapi.nanohttpd.resources.StatementResourceResponder
+import world.respect.lib.xapi.nanohttpd.resources.XapiStateResourceResponder
+import world.respect.lib.xapi.resources.XapiStateResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import java.io.ByteArrayInputStream
 
@@ -22,6 +24,10 @@ class XapiNanoHttpdApp(
 
     private val statementResourceResponder by lazy {
         StatementResourceResponder(xapiResourceProvider, json)
+    }
+
+    private val stateResourceResponder by lazy {
+        XapiStateResourceResponder(xapiResourceProvider, json)
     }
 
     /**
@@ -83,6 +89,7 @@ class XapiNanoHttpdApp(
         }
 
         val resourceSegment1 = pathSegments[firstResourceSegmentIndex]
+        val resourceSegment2 = pathSegments.getOrNull(firstResourceSegmentIndex + 1)
 
         return runBlocking {
             try {
@@ -94,6 +101,11 @@ class XapiNanoHttpdApp(
                 when {
                     resourceSegment1 == XapiStatementsResource.ENDPOINT_NAME -> {
                         statementResourceResponder.serveXapiEndpoint(session, pathSegments)
+                    }
+
+                    (resourceSegment1 == "activities" && resourceSegment2 == XapiStateResource.ENDPOINT_NAME) ||
+                        resourceSegment1 == XapiStateResource.ENDPOINT_NAME -> {
+                        stateResourceResponder.serveXapiEndpoint(session, pathSegments)
                     }
 
                     else -> {

@@ -11,28 +11,44 @@ import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.throwable.unwrapHttpStatusCode
 
+
+suspend fun <T: Any> DataLoadState<T>.toFixedLengthResponse(
+    json: Json,
+    serializer: SerializationStrategy<T>
+): Response  {
+    return toFixedLengthResponse(
+        dataReadyResponse = { dataReady ->
+            newFixedLengthResponse(
+                Response.Status.OK,
+                "application/json",
+                json.encodeToString(serializer, dataReady.data)
+            )
+        }
+    )
+}
+
 /**
  * Note: still needs to handle not modified etc
  */
-fun <T: Any> DataLoadState<T>.toFixedLengthResponse(
-    json: Json,
-    serializer: SerializationStrategy<T>
+suspend fun <T: Any> DataLoadState<T>.toFixedLengthResponse(
+    dataReadyResponse: suspend (DataReadyState<T>) -> Response,
 ): Response {
     return when(this) {
         is DataReadyState -> {
-            val jsonText = json.encodeToString(serializer, this.data)
-            newFixedLengthResponse(
-                Response.Status.OK, "application/json", jsonText
-            )
+            dataReadyResponse(this).also { it.addHeaders(this.metaInfo.headers) }
         }
 
         is NoDataLoadedState -> {
             when(this.reason) {
                 NoDataLoadedState.Reason.NOT_MODIFIED -> {
-                    newFixedLengthResponse(Response.Status.NOT_MODIFIED, "text/plain", "")
+                    newFixedLengthResponse(
+                        Response.Status.NOT_MODIFIED, "text/plain", ""
+                    ).also { it.addHeaders(metaInfo.headers) }
                 }
                 NoDataLoadedState.Reason.NOT_FOUND -> {
-                    newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "not found")
+                    newFixedLengthResponse(
+                        Response.Status.NOT_FOUND, "text/plain", "not found"
+                    ).also { it.addHeaders(metaInfo.headers) }
                 }
             }
         }
@@ -40,7 +56,9 @@ fun <T: Any> DataLoadState<T>.toFixedLengthResponse(
         is DataErrorResult -> {
             val statusCode = this.error.unwrapHttpStatusCode() ?: 500
             val status = Response.Status.lookup(statusCode) ?: Response.Status.INTERNAL_ERROR
-            newFixedLengthResponse(status, "text/plain", this.error.message ?: "")
+            newFixedLengthResponse(
+                status, "text/plain", this.error.message ?: ""
+            ).also { it.addHeaders(metaInfo.headers) }
         }
 
         is DataLoadingState -> {

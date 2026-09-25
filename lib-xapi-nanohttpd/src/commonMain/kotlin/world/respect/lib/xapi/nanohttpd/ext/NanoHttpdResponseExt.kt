@@ -3,6 +3,7 @@ package world.respect.lib.xapi.nanohttpd.ext
 import fi.iki.elonen.NanoHTTPD
 import io.ktor.http.Url
 import io.ktor.http.protocolWithAuthority
+import io.ktor.util.StringValues
 
 /**
  * Add cross-origin headers.
@@ -24,5 +25,15 @@ fun NanoHTTPD.Response.addXapiCORSHeaders(
 
     session.headers["access-control-request-headers"]?.also { requestHeaders ->
         addHeader("Access-Control-Allow-Headers", requestHeaders)
+    }
+}
+
+fun NanoHTTPD.Response.addHeaders(
+    headers: StringValues
+) {
+    headers.forEach { key, values ->
+        values.forEach { value ->
+            addHeader(key, value)
+        }
     }
 }

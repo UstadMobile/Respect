@@ -248,7 +248,6 @@ import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
 import world.respect.shared.domain.catalog.saveopdsfeed.SaveOpdsFeedUseCase
 import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
-import world.respect.shared.domain.catalog.getopdsfeedforxapiactivity.GetOpdsFeedForXapiActivityUseCase
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
 import world.respect.shared.domain.getlanguageendonym.GetLanguageEndonymUseCase
 import world.respect.shared.domain.launchapp.getlaunchoptionsforpublication.GetLaunchOptionsForPublicationUseCase
@@ -1260,12 +1259,6 @@ val appKoinModule = module {
          scoped<GetPublicationForXapiActivityUseCase> {
              GetPublicationForXapiActivityUseCase(
                  opdsPublicationDataSource = get<SchoolDataSource>().opdsPublicationDataSource,
-             )
-         }
-
-         scoped<GetOpdsFeedForXapiActivityUseCase> {
-             GetOpdsFeedForXapiActivityUseCase(
-                 opdsFeedDataSource = get<SchoolDataSource>().opdsFeedDataSource,
              )
          }
 

@@ -67,7 +67,7 @@ class GetLaunchOptionsForPublicationUseCase(
                 it.launch?.value?.also { launchHref ->
                     launchOptions.add(
                         LaunchOption(
-                            url = publicationUrl.resolve(launchHref),
+                            url = tinCanXmlUrl.resolve(launchHref),
                             activityId = it.id,
                             launchType = LaunchType.XAPI_RUSTICI_LAUNCH,
                         )

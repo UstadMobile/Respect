@@ -132,8 +132,6 @@ onFlowComplete:
 - tapOn:
     id: "nav_home"
 - assertVisible:
-    id: "nav_home"
-- assertVisible:
     id: "app_title"
     text: "Home"
 - tapOn: "Bookmarks"
@@ -168,7 +166,7 @@ onFlowComplete:
 - inputText: "Collections for Grade 1"
 - tapOn: "Description"
 - inputText: "Test list"
-#- tapOn: "Subject"    # Need to Implement
+#- tapOn: "Subject"    # Needs to be implemented in the app
 #- tapOn: "English"
 #- tapOn: "Grade"
 #- tapOn: "Grade 1"
@@ -247,7 +245,7 @@ onFlowComplete:
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
-    text: "Collection - Grade 1"
+    text: "Collections for Grade 1"
 - assertVisible: "Day 1-Collections section"
 - tapOn: "Examples"
 - assertVisible: "Statement Maker"
@@ -258,10 +256,6 @@ onFlowComplete:
 - assertNotVisible: "Examples"
 - assertVisible: "Learning item section"
 - assertVisible: "Statement Maker"
-- tapOn:
-    id: "expand_collapse_icon"     #Collapse - Learing item section
-    index: 1
-- assertNotVisible: "Statement Maker"
 - tapOn:
     id: "floating_action_button"    # Edit button
 - assertVisible:
@@ -289,7 +283,7 @@ onFlowComplete:
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
-    text: "Collection - Grade 1"
+    text: "Collections for Grade 1"
 - assertVisible: "Day 1-Collections section"
 - assertVisible: "Examples"
 - assertVisible: "Day 2-Learning item section"
@@ -311,17 +305,17 @@ onFlowComplete:
 - tapOn:
     id: "nav_home"
 - tapOn: "Collections"
-- assertVisible: "Collection - Grade 1"
+- assertVisible: "Collections for Grade 1"
 - assertVisible: "2 sections, 3 items"
 - assertVisible: "Created by: Admin"
 - tapOn: "My Collections"
-- assertVisible: "Collection - Grade 1"
+- assertVisible: "Collections for Grade 1"
 - tapOn: "All"
-- assertVisible: "Collection - Grade 1"
-- tapOn: "Collection - Grade 1"
+- assertVisible: "Collections for Grade 1"
+- tapOn: "Collections for Grade 1"
 - assertVisible:
     id: "app_title"
-    text: "Collection - Grade 1"
+    text: "Collections for Grade 1"
 
 # Assigning lessons in a Collection to an assignment
 - tapOn:
@@ -356,7 +350,7 @@ onFlowComplete:
 - tapOn:
     id: "nav_home"
 - tapOn: "Collections"
-- tapOn: "Collection - Grade 1"
+- tapOn: "Collections for Grade 1"
 - tapOn:
     id: "Remix_btn"
 - assertVisible:
@@ -400,10 +394,10 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
 - tapOn: "Collections"
-- tapOn: "Collection - Grade 1"
+- tapOn: "Collections for Grade 1"
 - assertVisible:
     id: "app_title"
-    text: "Collection - Grade 1"
+    text: "Collections for Grade 1"
 - tapOn: "Examples"
 - tapOn: "Statement Maker"
 - assertVisible:

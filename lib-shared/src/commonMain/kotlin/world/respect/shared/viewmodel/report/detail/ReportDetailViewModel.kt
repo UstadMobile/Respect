@@ -6,7 +6,6 @@ import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -95,31 +94,25 @@ class ReportDetailViewModel(
                 )
             }
         }
-        val queryRequestStatementsFlow = schoolDataSource.xapiResource.statements.getAsFlow(
+        schoolDataSource.xapiResource.statements.getAsFlow(
             listParams = GetStatementParams(
                 activity = reportUid,
-                verb = XapiVerb.ID_REPORT_QUERY_REQUEST,
+                relatedActivities = true,
             ),
             dataLoadParams = DataLoadParams(),
-        )
-
-        val queryResponseStatementsFlow = schoolDataSource.xapiResource.statements.getAsFlow(
-            listParams = GetStatementParams(
-                verb = XapiVerb.ID_REPORT_QUERY_RESPONSE,
-            ),
-            dataLoadParams = DataLoadParams(),
-        )
-
-        combine(
-            queryRequestStatementsFlow,
-            queryResponseStatementsFlow,
-        ) { requestsState, responsesState ->
-            val requests = requestsState.dataOrNull()?.statements ?: emptyList()
-            val responses = responsesState.dataOrNull()?.statements ?: emptyList()
+        ).onEach { loadState ->
+            val statements = loadState.dataOrNull()?.statements ?: emptyList()
+            val requests = statements.filter { it.verb.id == XapiVerb.ID_REPORT_QUERY_REQUEST }
+            val responses = statements.filter { it.verb.id == XapiVerb.ID_REPORT_QUERY_RESPONSE }
 
             val statement = requests
                 .distinctByMostRecentTimestampForActivityId()
-                .firstOrNull() ?: return@combine ReportDetailUiState()
+                .firstOrNull()
+
+            if (statement == null) {
+                _uiState.update { ReportDetailUiState(activeUserPersonUid = _uiState.value.activeUserPersonUid) }
+                return@onEach
+            }
 
             val requestId = statement.id.toString()
             val latestResponse = responses
@@ -167,7 +160,7 @@ class ReportDetailViewModel(
                 )
             }
 
-            ReportDetailUiState(
+            val newState = ReportDetailUiState(
                 title = statement.objectActivityNameOrNull()?.let { LangMapUiText(it) },
                 reportOptions = reportResult?.request?.reportOptions ?: ReportOptions(),
                 reportResult = reportResult,
@@ -176,7 +169,7 @@ class ReportDetailViewModel(
                 subgroupFormatter = subgroupFormatter,
                 activeUserPersonUid = _uiState.value.activeUserPersonUid
             )
-        }.onEach { newState ->
+
             _uiState.update { newState }
             _appUiState.update { prev ->
                 prev.copy(title = newState.title)

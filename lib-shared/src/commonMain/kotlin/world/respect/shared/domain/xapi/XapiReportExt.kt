@@ -136,6 +136,17 @@ fun createReportResponseStatement(
         actor = requestStatement.actor,
         verb = XapiVerb(id = ID_REPORT_QUERY_RESPONSE),
         `object` = XapiStatementRef(id = requestId.toString()),
+        context = XapiContext(
+            contextActivities = XapiContextActivities(
+                parent = listOf(
+                    XapiActivity(
+                        id = requestStatement.objectActivityOrNull()?.id
+                            ?: throw IllegalArgumentException("Request statement must have an ID"),
+                        objectType = XapiObjectType.Activity
+                    )
+                )
+            )
+        ),
         result = XapiResult(
             extensions = mapOf(
                 OpenEelXapiConstants.EXTENSION_REPORT_QUERY_RESULT to json.encodeToJsonElement(

@@ -10,8 +10,6 @@ import io.ktor.util.sha1
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.xapi.adapters.toXapiStateDocumentEntity
 import world.respect.datalayer.db.school.xapi.entities.XapiStateDocumentShaEntity
@@ -25,13 +23,13 @@ import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.ext.hasIfNotModifiedHeaders
 import world.respect.lib.dataloadstate.ext.isStillValid
 import world.respect.lib.dataloadstate.ext.requestEtagAndLastModified
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.isJson
 import world.respect.lib.xapi.ext.mergeJsonDoc
-import world.respect.lib.xapi.ext.mergeTopLevel
 import world.respect.lib.xapi.ext.requireIfi
+import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiDocument
-import world.respect.lib.xapi.model.XapiDocumentByteArrayImpl
 import world.respect.lib.xapi.resources.XapiStateResource
 import world.respect.lib.xapi.resources.local.XapiStateResourceLocal
 import kotlin.uuid.Uuid
@@ -39,6 +37,7 @@ import kotlin.uuid.Uuid
 class XapiStateResourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val json: Json,
+    private val getAuthenticatedXapiAgentsUseCase: GetAuthenticatedXapiAgentsUseCase,
 ) : XapiStateResourceLocal {
 
     override suspend fun updateLocal(
@@ -69,10 +68,22 @@ class XapiStateResourceDb(
         }
     }
 
+    private suspend fun requireAuthenticatedPersonMatchesActor(
+        actor: XapiAgent,
+    ) {
+        val authenticatedPerson = getAuthenticatedXapiAgentsUseCase()
+
+        if(actor.requireIfi() !in authenticatedPerson.map { it.requireIfi() } )
+            throw XapiException(400, "Agent IFI does not match authentication")
+    }
+
+
     override suspend fun getMultipleDocuments(
         params: XapiStateResource.MultiDocParams,
         dataLoadParams: DataLoadParams
     ): DataLoadState<List<String>> {
+        requireAuthenticatedPersonMatchesActor(params.agent)
+
         val stateIds = schoolDb.getStateDocumentDao().getStateIds(
             activityIri = params.activityId,
             agentIfi = params.agent.requireIfi(),
@@ -87,6 +98,7 @@ class XapiStateResourceDb(
         dataLoadParams: DataLoadParams
     ): DataLoadState<XapiDocument> {
         return schoolDb.useReaderConnection { con ->
+            requireAuthenticatedPersonMatchesActor(params.agent)
             con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
                 val etagAndLastModifiedInDb = schoolDb.takeIf {
                     dataLoadParams.requestHeaders.hasIfNotModifiedHeaders()
@@ -151,6 +163,8 @@ class XapiStateResourceDb(
                 if (!document.isJson())
                     throw XapiException(400, "Cannot post non-JSON document")
 
+                requireAuthenticatedPersonMatchesActor(params.agent)
+
                 val existing = schoolDb.getStateDocumentDao().findByActivityIriAndAgentIfiAndRegistrationAndStateId(
                     activityIri = params.activityId,
                     agentIfi = params.agent.requireIfi(),
@@ -186,6 +200,8 @@ class XapiStateResourceDb(
     ) {
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                requireAuthenticatedPersonMatchesActor(params.agent)
+
                 val existing = schoolDb.getStateDocumentDao().findByActivityIriAndAgentIfiAndRegistrationAndStateId(
                     activityIri = params.activityId,
                     agentIfi = params.agent.requireIfi(),
@@ -210,6 +226,8 @@ class XapiStateResourceDb(
     override suspend fun delete(params: XapiStateResource.SingleDocumentParams) {
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                requireAuthenticatedPersonMatchesActor(params.agent)
+
                 val existing = schoolDb.getStateDocumentDao().findByActivityIriAndAgentIfiAndRegistrationAndStateId(
                     activityIri = params.activityId,
                     agentIfi = params.agent.requireIfi(),

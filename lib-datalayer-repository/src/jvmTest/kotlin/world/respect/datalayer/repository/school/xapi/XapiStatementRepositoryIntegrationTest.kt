@@ -35,6 +35,7 @@ class XapiStatementRepositoryIntegrationTest {
         withEmbeddedServerAndRepositoryClients(
             workDir = temporaryFolder.newFolder(),
             start = true,
+            getAuthenticatedXapiAgentsUseCase = { emptyList() },
             routingConfig = { serverContext ->
                 XapiStatementsResourceRoute(
                     statementResource = {

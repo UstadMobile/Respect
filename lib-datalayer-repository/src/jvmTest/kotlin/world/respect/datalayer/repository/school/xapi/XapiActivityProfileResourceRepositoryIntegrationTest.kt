@@ -2,7 +2,9 @@ package world.respect.datalayer.repository.school.xapi
 
 import io.ktor.server.routing.route
 import org.openeel.libxapi.test.XapiActivityProfileTestParams
+import org.openeel.libxapi.test.XapiStateTestParams
 import world.respect.datalayer.http.server.XapiActivityProfileResourceRoute
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import world.respect.lib.xapi.resources.XapiResource
 import kotlin.test.Test
@@ -13,9 +15,13 @@ class XapiActivityProfileResourceRepositoryIntegrationTest: AbstractXapiDocument
 
     override fun XapiResource.getTestResource(): XapiActivityProfileResource = activityProfile
 
-    override suspend fun withEmbeddedServerAndRepoClients(block: suspend RepositoryTestContext.() -> Unit) {
+    override suspend fun withEmbeddedServerAndRepoClients(
+        getAuthenticatedXapiAgentsUseCase: GetAuthenticatedXapiAgentsUseCase,
+        block: suspend RepositoryTestContext.() -> Unit
+    ) {
         withEmbeddedServerAndRepositoryClients(
             workDir = temporaryFolder.newFolder(),
+            getAuthenticatedXapiAgentsUseCase = getAuthenticatedXapiAgentsUseCase,
             routingConfig = { serverContext ->
                 route("activities") {
                     XapiActivityProfileResourceRoute(
@@ -33,7 +39,8 @@ class XapiActivityProfileResourceRepositoryIntegrationTest: AbstractXapiDocument
     fun givenDocumentPostedOnClient_whenGetFlowOnServerCollected_thenIsCollected() {
         givenDocumentPostedOnClient_whenGetFlowOnServerCollected_thenIsCollected(
             params = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1,
-            document = XapiActivityProfileTestParams.DOC
+            document = XapiActivityProfileTestParams.DOC,
+            authenticatedXapiAgents = { listOf(XapiStateTestParams.SINGLE_DOC_PARAMS1.agent) }
         )
     }
 
@@ -41,7 +48,8 @@ class XapiActivityProfileResourceRepositoryIntegrationTest: AbstractXapiDocument
     fun givenDocumentedPostedOnServer_whenGetCalledOnClient_thenMatches() {
         givenDocumentedPostedOnServer_whenGetCalledOnClient_thenMatches(
             params = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1,
-            document = XapiActivityProfileTestParams.DOC
+            document = XapiActivityProfileTestParams.DOC,
+            authenticatedXapiAgents = { listOf(XapiStateTestParams.SINGLE_DOC_PARAMS1.agent) }
         )
     }
 
@@ -49,7 +57,8 @@ class XapiActivityProfileResourceRepositoryIntegrationTest: AbstractXapiDocument
     fun givenDocumentPostedOnServer_whenGetAsFlowCalledOnClient_thenFlowReceivesMatchingData() {
         givenDocumentPostedOnServer_whenGetAsFlowCalledOnClient_thenFlowReceivesMatchingData(
             params = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1,
-            document = XapiActivityProfileTestParams.DOC
+            document = XapiActivityProfileTestParams.DOC,
+            authenticatedXapiAgents = { listOf(XapiStateTestParams.SINGLE_DOC_PARAMS1.agent) }
         )
     }
 }

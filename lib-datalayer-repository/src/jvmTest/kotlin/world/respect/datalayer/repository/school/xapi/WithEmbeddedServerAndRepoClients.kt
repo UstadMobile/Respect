@@ -21,6 +21,7 @@ import world.respect.lib.test.clientservertest.EmbeddedDataSourceServerContext
 import world.respect.lib.test.clientservertest.insertAdminAndDefaultGrants
 import world.respect.lib.test.clientservertest.newLocalSchoolDatabase
 import world.respect.lib.test.clientservertest.withEmbeddedDataSourceServer
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.remotewritequeue.DrainXapiRemoteWriteQueueUseCase
 import world.respect.lib.xapi.remotewritequeue.EnqueueDrainXapiRemoteWriteQueueUseCase
 import world.respect.lib.xapi.resources.XapiResource
@@ -92,6 +93,7 @@ suspend fun withEmbeddedServerAndRepositoryClients(
     routingConfig: Routing.(EmbeddedDataSourceServerContext) -> Unit,
     numClients: Int = 1,
     localAuthenticatedUser: AuthenticatedUserPrincipalId = AuthenticatedUserPrincipalId("1"),
+    getAuthenticatedXapiAgentsUseCase: GetAuthenticatedXapiAgentsUseCase,
     json: Json = Json,
     httpClient: HttpClient = HttpClient(OkHttp) {
         install(ContentNegotiationClient) {
@@ -102,6 +104,7 @@ suspend fun withEmbeddedServerAndRepositoryClients(
 ) {
     withEmbeddedDataSourceServer(
         dbDir = File(workDir, "server").mkdirsIfNotExists(),
+        getAuthenticatedXapiAgentsUseCase = getAuthenticatedXapiAgentsUseCase,
         routingConfig = routingConfig,
         start = start,
     ) {
@@ -114,6 +117,7 @@ suspend fun withEmbeddedServerAndRepositoryClients(
                 dir = clientDir,
                 schoolUrl = schoolUrlVal,
                 localAuthenticatedUser = localAuthenticatedUser,
+                getAuthenticatedXapiAgentsUseCase = getAuthenticatedXapiAgentsUseCase,
             ).also {
                 it.second.insertAdminAndDefaultGrants(
                     schoolDb = it.first,

@@ -13,6 +13,7 @@ import world.respect.datalayer.db.school.toDataSource
 import world.respect.lib.dataloadstate.datetime.roundToEpochSeconds
 import world.respect.lib.dataloadstate.datetime.toGMTDate
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiDocumentByteArrayImpl
 import world.respect.lib.xapi.resources.XapiAgentProfileResource
@@ -28,11 +29,15 @@ class XapiAgentProfileResourceDbTest : AbstractXapiAgentProfileResourceTest() {
     @JvmField
     val temporaryFolder: TemporaryFolder = TemporaryFolder()
 
-    override suspend fun withXapiDocumentResource(block: suspend (XapiAgentProfileResource) -> Unit) {
+    override suspend fun withXapiDocumentResource(
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase,
+        block: suspend (XapiAgentProfileResource) -> Unit
+    ) {
         testSchoolDb(temporaryFolder.newFolder()) { db ->
             val dataSource = db.toDataSource(
                 authenticatedUserUid = "1",
                 schoolUrl = Url("http://localhost:8098/"),
+                authenticatedAgents = authenticatedAgents,
             ).also {
                 it.insertAdmin()
             }
@@ -40,6 +45,7 @@ class XapiAgentProfileResourceDbTest : AbstractXapiAgentProfileResourceTest() {
             block(dataSource.xapiResource.agentProfile)
         }
     }
+
 
     @Test
     fun givenDocument_whenUpdateLocalCalled_thenCanBeRetrieved() = runBlocking {

@@ -13,6 +13,7 @@ import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.datetime.toInstant
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.decodeFromXapiDocument
 import world.respect.lib.xapi.ext.getJson
@@ -38,6 +39,7 @@ abstract class AbstractXapiDocumentResourceTest<
     private val json = Json
 
     abstract suspend fun withXapiDocumentResource(
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase,
         block: suspend (T) -> Unit
     )
 
@@ -52,9 +54,12 @@ abstract class AbstractXapiDocumentResourceTest<
      *
      */
     fun givenDocument_whenPut_thenCanBeRetrieved(
-        documentParams: SingleDocParams
+        documentParams: SingleDocParams,
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase = { emptyList() },
     ) = runBlocking {
-        withXapiDocumentResource { resource ->
+        withXapiDocumentResource(
+            authenticatedAgents = authenticatedAgents,
+        ) { resource ->
             val document = XapiActivityProfileTestParams.DOC
 
             resource.put(documentParams, document)
@@ -87,8 +92,9 @@ abstract class AbstractXapiDocumentResourceTest<
      */
     fun givenDocumentStoredAndNotModified_whenRetrievedWithValidationHeaders_thenReturnsNotModified(
         documentParams: SingleDocParams,
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase = { emptyList() },
     ) = runBlocking {
-        withXapiDocumentResource { resource ->
+        withXapiDocumentResource(authenticatedAgents = authenticatedAgents) { resource ->
             val document = XapiActivityProfileTestParams.DOC
             resource.put(
                 params = documentParams,
@@ -138,8 +144,9 @@ abstract class AbstractXapiDocumentResourceTest<
      */
     fun givenNonExistentDocument_whenGetCalled_thenReturnsNotFound(
         nonExistentParams: SingleDocParams,
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase = { emptyList() },
     ) = runBlocking {
-        withXapiDocumentResource { resource ->
+        withXapiDocumentResource(authenticatedAgents = authenticatedAgents) { resource ->
             val loadState = resource.get(
                 params = nonExistentParams
             )
@@ -156,8 +163,9 @@ abstract class AbstractXapiDocumentResourceTest<
      */
     fun givenExistingDocument_whenOverwrittenWithPut_thenReplacesDocumentCompletely(
         documentParams: SingleDocParams,
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase = { emptyList() },
     ) = runBlocking {
-        withXapiDocumentResource { resource ->
+        withXapiDocumentResource(authenticatedAgents = authenticatedAgents) { resource ->
             val initialDocument = XapiActivityProfileTestParams.DOC_JSON
             val overwritingDocument = XapiActivityProfileTestParams.DOC_UPDATED_JSON
 
@@ -188,8 +196,9 @@ abstract class AbstractXapiDocumentResourceTest<
      */
     fun givenNonExistentDocument_whenPosted_thenCreatesNewDocument(
         documentParams: SingleDocParams,
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase = { emptyList() },
     ) = runBlocking {
-        withXapiDocumentResource { resource ->
+        withXapiDocumentResource(authenticatedAgents = authenticatedAgents) { resource ->
             val document = XapiActivityProfileTestParams.DOC
 
             resource.post(documentParams, document)
@@ -214,8 +223,9 @@ abstract class AbstractXapiDocumentResourceTest<
      */
     fun givenExistingJsonDocument_whenPosted_thenMergesTopLevelProperties(
         documentParams: SingleDocParams,
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase = { emptyList() },
     ) = runBlocking {
-        withXapiDocumentResource { resource ->
+        withXapiDocumentResource(authenticatedAgents = authenticatedAgents) { resource ->
             val initJsonObj = buildJsonObject {
                 put("propA", JsonPrimitive("oldA"))
                 put("propB", JsonPrimitive("keepB"))
@@ -277,8 +287,9 @@ abstract class AbstractXapiDocumentResourceTest<
      */
     fun givenNonJsonDocument_whenPostedToExisting_thenThrowsXapiException(
         documentParams: SingleDocParams,
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase = { emptyList() },
     ) = runBlocking {
-        withXapiDocumentResource { resource ->
+        withXapiDocumentResource(authenticatedAgents = authenticatedAgents) { resource ->
             val document = XapiActivityProfileTestParams.DOC_NON_JSON
 
             resource.put(documentParams, document)
@@ -298,8 +309,9 @@ abstract class AbstractXapiDocumentResourceTest<
      */
     fun givenDocument_whenDeleted_thenCannotBeRetrieved(
         documentParams: SingleDocParams,
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase = { emptyList() },
     ) = runBlocking {
-        withXapiDocumentResource { resource ->
+        withXapiDocumentResource(authenticatedAgents = authenticatedAgents) { resource ->
             val document = XapiActivityProfileTestParams.DOC
 
             resource.put(documentParams, document)
@@ -322,8 +334,9 @@ abstract class AbstractXapiDocumentResourceTest<
     fun givenMultipleDocuments_whenGetMultipleDocumentsCalled_thenReturnsAllProfileIdsForActivity(
         documentsAndParams: List<Pair<XapiDocument, SingleDocParams>>,
         indexToSearch: Int = 0,
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase = { emptyList() },
     ) = runBlocking {
-        withXapiDocumentResource { resource ->
+        withXapiDocumentResource(authenticatedAgents = authenticatedAgents) { resource ->
             documentsAndParams.forEach {
                 resource.put(it.second, it.first)
             }
@@ -352,8 +365,9 @@ abstract class AbstractXapiDocumentResourceTest<
      */
     fun givenMultipleDocumentsWithTimestamps_whenGetMultipleDocumentsWithSince_thenReturnsOnlyNewerProfileIds(
         documentsAndParams: List<Pair<XapiDocument, SingleDocParams>>,
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase = { emptyList() },
     ) = runBlocking {
-        withXapiDocumentResource { resource ->
+        withXapiDocumentResource(authenticatedAgents = authenticatedAgents) { resource ->
             documentsAndParams.forEach { (doc, params) ->
                 resource.put(params, doc)
             }

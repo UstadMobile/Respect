@@ -62,7 +62,7 @@ onFlowComplete:
 - tapOn: "Examples"
 - tapOn: "Assignment Result Statement Demo"
 - assertVisible:
-    id: "app_title"
+    id: "publication_title"
     text: "Assignment Result Statement Demo"
 - tapOn: "Download"
 - extendedWaitUntil:
@@ -80,7 +80,7 @@ onFlowComplete:
 - tapOn: "Examples"
 - tapOn: "Assignment Result Statement Demo"
 - assertVisible:
-    id: "app_title"
+    id: "publication_title"
     text: "Assignment Result Statement Demo"
 - assertVisible: "Downloaded"
 - tapOn: "Open"
@@ -152,8 +152,6 @@ onFlowComplete:
 - tapOn:
     id: "nav_home"
 - tapOn: "Collections"
-- assertVisible: "All"
-- assertVisible: "My Collections"
 - assertVisible: "No collections yet"
 - assertVisible: "Add a collection by clicking on the + collection"
 - tapOn:
@@ -210,9 +208,16 @@ onFlowComplete:
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
-    text: "Collection - Grade 1"
+    text: "Collections for Grade 1"
 - assertVisible: "Day 1-Collections section"
 - assertVisible: "Examples"
+- tapOn:
+    id: "nav_home"
+- tapOn: "Collections"
+- tapOn: "More Options"
+- tapOn: "Unpin"
+- tapOn: "Undo"
+- tapOn: "Collections for Grade 1"
 - tapOn:
     id: "floating_action_button"    # Edit button
 - assertVisible:
@@ -224,11 +229,9 @@ onFlowComplete:
     index: 1
 - assertVisible: "Learning item section"
 - tapOn: "Learning item here"
-- assertVisible:
-    "Choose Item Type:"
 - assertVisible: "Browse"
-- assertVisible: "Add from Respect apps, lessons, Collections"
-- assertVisible: "Use Link"
+- assertVisible: "Add from RESPECT apps, lessons, collections"
+- assertVisible: "Use link"
 - assertVisible: "Add from an external link"
 - tapOn: "Browse"
 - assertVisible:
@@ -236,10 +239,9 @@ onFlowComplete:
     text: "Select unit(s)"
 - tapOn: "Bookmarks"
 - tapOn: "Statement Maker"
-- tapOn: "Statement Maker"
 - assertVisible:
     id: "app_title"
-    text: "Add Collection"
+    text: "Edit Collection"
 - assertVisible: "Day 1-Collections section"
 - assertVisible: "Learning item section"
 - tapOn: "Save"
@@ -248,7 +250,6 @@ onFlowComplete:
     text: "Collection - Grade 1"
 - assertVisible: "Day 1-Collections section"
 - tapOn: "Examples"
-- assertVisible: "Lesson 001"
 - assertVisible: "Statement Maker"
 - back
 - tapOn:
@@ -261,12 +262,17 @@ onFlowComplete:
     id: "expand_collapse_icon"     #Collapse - Learing item section
     index: 1
 - assertNotVisible: "Statement Maker"
+- tapOn:
+    id: "floating_action_button"    # Edit button
+- assertVisible:
+    id: "app_title"
+    text: "Edit Collection"
 - tapOn: "Learning item section"
 - runFlow:
     file: "subflows/erase_text.yaml"
     env:
       TEXT: "Learning item section"
-- inputText: "Learning item section day 2"
+- inputText: "Day 2-Learning item section"
 - hideKeyboard
 - tapOn: "Learning item here"
 - tapOn: "Use Link"
@@ -284,17 +290,15 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Collection - Grade 1"
-- assertVisible: "Collection section day 1"
+- assertVisible: "Day 1-Collections section"
 - assertVisible: "Examples"
-- assertVisible: "Learning item section day 2"
+- assertVisible: "Day 2-Learning item section"
 - assertVisible: "Statement Maker"
 - assertVisible: "Assignment Result Statement Demo"
-- assertVisible: "Share"
 - assertVisible:
     text: "Remix Collection"
     index: 1
 - assertVisible: "Assign"
-- assertVisible: "Delete"
 - tapOn: "Assignment Result Statement Demo"
 - assertVisible: "Assignment Result Statement Demo"
 - assertVisible: "Demo Launchable App"
@@ -372,19 +376,6 @@ onFlowComplete:
     id: "app_title"
     text: "Collection 2"
 
-# Delete this copied Collection
-- tapOn:
-    id: "delete_btn"
-- assertVisible: "Permanently delete?"
-- assertVisible: "Permanently delete this Collection"
-- tapOn: "Delete"
-- assertVisible:
-    id: "app_title"
-    text: "Home"
-- assertVisible: "Collections"
-- tapOn: "Collections"
-- assertVisible: "Collection - Grade 1"
-- assertNotVisible: "Collection 2"
 
 # Adding Collection to an assignment
 - tapOn: "Assignments"

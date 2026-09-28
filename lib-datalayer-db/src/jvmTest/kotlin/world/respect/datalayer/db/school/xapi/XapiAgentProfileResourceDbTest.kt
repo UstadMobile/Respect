@@ -7,6 +7,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.openeel.libxapi.test.AbstractXapiAgentProfileResourceTest
+import org.openeel.libxapi.test.XapiAgentProfileTestParams
 import world.respect.datalayer.db.school.insertAdmin
 import world.respect.datalayer.db.school.testSchoolDb
 import world.respect.datalayer.db.school.toDataSource
@@ -50,18 +51,17 @@ class XapiAgentProfileResourceDbTest : AbstractXapiAgentProfileResourceTest() {
     @Test
     fun givenDocument_whenUpdateLocalCalled_thenCanBeRetrieved() = runBlocking {
         testSchoolDb(temporaryFolder.newFolder()) { db ->
+            val params = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1
+
             val dataSource = db.toDataSource(
                 authenticatedUserUid = "1",
                 schoolUrl = Url("http://localhost:8098/"),
+                authenticatedAgents = { listOf(params.agent) }
             ).also {
                 it.insertAdmin()
             }
 
             val resource = dataSource.xapiResource.agentProfile
-            val params = XapiAgentProfileResource.SingleDocumentParams(
-                agent = XapiAgent(mbox = "mailto:user1@example.com"),
-                profileId = "profile-1",
-            )
             val timestamp = Clock.System.now().roundToEpochSeconds()
             val doc = XapiDocumentByteArrayImpl(
                 type = "application/json",

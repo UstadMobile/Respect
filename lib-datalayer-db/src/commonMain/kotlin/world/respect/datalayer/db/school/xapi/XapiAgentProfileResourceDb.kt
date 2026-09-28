@@ -23,18 +23,22 @@ import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.ext.hasIfNotModifiedHeaders
 import world.respect.lib.dataloadstate.ext.isStillValid
 import world.respect.lib.dataloadstate.ext.requestEtagAndLastModified
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.isJson
 import world.respect.lib.xapi.ext.mergeJsonDoc
 import world.respect.lib.xapi.ext.requireIfi
+import world.respect.lib.xapi.model.XapiAgent
 import world.respect.lib.xapi.model.XapiDocument
 import world.respect.lib.xapi.resources.XapiAgentProfileResource
 import world.respect.lib.xapi.resources.local.XapiAgentProfileResourceLocal
+import kotlin.collections.map
 import kotlin.uuid.Uuid
 
 class XapiAgentProfileResourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val json: Json,
+    private val getAuthenticatedXapiAgentsUseCase: GetAuthenticatedXapiAgentsUseCase,
 ) : XapiAgentProfileResourceLocal {
 
     override suspend fun updateLocal(
@@ -63,10 +67,20 @@ class XapiAgentProfileResourceDb(
         }
     }
 
+    private suspend fun requireAuthenticatedPersonMatchesActor(
+        actor: XapiAgent,
+    ) {
+        val authenticatedPerson = getAuthenticatedXapiAgentsUseCase()
+
+        if(actor.requireIfi() !in authenticatedPerson.map { it.requireIfi() } )
+            throw XapiException(400, "Agent IFI does not match authentication")
+    }
+
     override suspend fun getMultipleDocuments(
         params: XapiAgentProfileResource.MultiDocParams,
         dataLoadParams: DataLoadParams
     ): DataLoadState<List<String>> {
+        requireAuthenticatedPersonMatchesActor(params.agent)
         val profileIds = schoolDb.getAgentProfileDocumentDao().getProfileIds(
             agentIfi = params.agent.requireIfi(),
             since = params.since?.let { InstantAsTimestampString(it) },
@@ -80,6 +94,8 @@ class XapiAgentProfileResourceDb(
     ): DataLoadState<XapiDocument> {
         return schoolDb.useReaderConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.DEFERRED) {
+                requireAuthenticatedPersonMatchesActor(params.agent)
+
                 val etagAndLastModifiedInDb = schoolDb.takeIf {
                     dataLoadParams.requestHeaders.hasIfNotModifiedHeaders()
                 }?.getAgentProfileDocumentDao()
@@ -136,6 +152,8 @@ class XapiAgentProfileResourceDb(
     ) {
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                requireAuthenticatedPersonMatchesActor(params.agent)
+
                 if (!document.isJson())
                     throw XapiException(400, "Cannot post non-JSON document")
 
@@ -171,6 +189,8 @@ class XapiAgentProfileResourceDb(
     ) {
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                requireAuthenticatedPersonMatchesActor(params.agent)
+
                 val existing = schoolDb.getAgentProfileDocumentDao().findByAgentIfiAndProfileId(
                     agentIfi = params.agent.requireIfi(),
                     profileId = params.profileId,
@@ -193,6 +213,8 @@ class XapiAgentProfileResourceDb(
     override suspend fun delete(params: XapiAgentProfileResource.SingleDocumentParams) {
         schoolDb.useWriterConnection { con ->
             con.withTransaction(Transactor.SQLiteTransactionType.IMMEDIATE) {
+                requireAuthenticatedPersonMatchesActor(params.agent)
+
                 val existing = schoolDb.getAgentProfileDocumentDao().findByAgentIfiAndProfileId(
                     agentIfi = params.agent.requireIfi(),
                     profileId = params.profileId,

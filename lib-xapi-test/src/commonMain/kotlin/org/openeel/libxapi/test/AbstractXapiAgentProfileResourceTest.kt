@@ -16,7 +16,8 @@ abstract class AbstractXapiAgentProfileResourceTest: AbstractXapiDocumentResourc
     @Test
     override fun givenDocument_whenPut_thenCanBeRetrieved() = runBlocking {
         givenDocument_whenPut_thenCanBeRetrieved(
-            documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -32,6 +33,7 @@ abstract class AbstractXapiAgentProfileResourceTest: AbstractXapiDocumentResourc
     override fun givenDocumentStoredAndNotModified_whenRetrievedWithValidationHeaders_thenReturnsNotModified() = runBlocking {
         givenDocumentStoredAndNotModified_whenRetrievedWithValidationHeaders_thenReturnsNotModified(
             documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -41,7 +43,8 @@ abstract class AbstractXapiAgentProfileResourceTest: AbstractXapiDocumentResourc
     @Test
     override fun givenNonExistentDocument_whenGetCalled_thenReturnsNotFound() = runBlocking {
         givenNonExistentDocument_whenGetCalled_thenReturnsNotFound(
-            nonExistentParams = XapiAgentProfileTestParams.SINGLE_DOC_NON_EXISTENT_PARAMS
+            nonExistentParams = XapiAgentProfileTestParams.SINGLE_DOC_NON_EXISTENT_PARAMS,
+            authenticatedAgents = { listOf(XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -52,7 +55,8 @@ abstract class AbstractXapiAgentProfileResourceTest: AbstractXapiDocumentResourc
     @Test
     override fun givenExistingDocument_whenOverwrittenWithPut_thenReplacesDocumentCompletely() = runBlocking {
         givenExistingDocument_whenOverwrittenWithPut_thenReplacesDocumentCompletely(
-            documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -62,7 +66,8 @@ abstract class AbstractXapiAgentProfileResourceTest: AbstractXapiDocumentResourc
     @Test
     override fun givenNonExistentDocument_whenPosted_thenCreatesNewDocument() = runBlocking {
         givenNonExistentDocument_whenPosted_thenCreatesNewDocument(
-            documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -73,7 +78,8 @@ abstract class AbstractXapiAgentProfileResourceTest: AbstractXapiDocumentResourc
     @Test
     override fun givenExistingJsonDocument_whenPosted_thenMergesTopLevelProperties() = runBlocking {
         givenExistingJsonDocument_whenPosted_thenMergesTopLevelProperties(
-            documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -84,7 +90,8 @@ abstract class AbstractXapiAgentProfileResourceTest: AbstractXapiDocumentResourc
     @Test
     override fun givenNonJsonDocument_whenPostedToExisting_thenThrowsXapiException() = runBlocking {
         givenNonJsonDocument_whenPostedToExisting_thenThrowsXapiException(
-            documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -95,7 +102,8 @@ abstract class AbstractXapiAgentProfileResourceTest: AbstractXapiDocumentResourc
     @Test
     override fun givenDocument_whenDeleted_thenCannotBeRetrieved() = runBlocking {
         givenDocument_whenDeleted_thenCannotBeRetrieved(
-            documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -123,7 +131,10 @@ abstract class AbstractXapiAgentProfileResourceTest: AbstractXapiDocumentResourc
                         ),
                     )
                 }
-            }
+            },
+            authenticatedAgents = {
+                listOf(XapiAgentProfileTestParams.AGENT1, XapiAgentProfileTestParams.AGENT2)
+            },
         )
     }
 
@@ -154,6 +165,9 @@ abstract class AbstractXapiAgentProfileResourceTest: AbstractXapiDocumentResourc
                         ),
                     )
                 }
+            },
+            authenticatedAgents = {
+                listOf(XapiAgentProfileTestParams.AGENT1, XapiAgentProfileTestParams.AGENT2)
             },
         )
     }

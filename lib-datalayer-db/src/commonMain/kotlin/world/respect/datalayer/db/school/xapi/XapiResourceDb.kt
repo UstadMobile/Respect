@@ -72,6 +72,7 @@ class XapiResourceDb(
         XapiAgentProfileResourceDb(
             schoolDb = schoolDb,
             json = json,
+            getAuthenticatedXapiAgentsUseCase = getAuthenticatedXapiAgentsUseCase,
         )
     }
 

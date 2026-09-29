@@ -25,11 +25,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.getLanguageDisplayText
 import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
 import world.respect.shared.generated.resources.Res
-import world.respect.shared.generated.resources.default_language
 import world.respect.shared.generated.resources.language
-import world.respect.shared.generated.resources.loading
 import world.respect.shared.viewmodel.settings.SettingsUiState
 import world.respect.shared.viewmodel.settings.SettingsViewModel
 
@@ -62,11 +61,7 @@ fun SettingsScreen(
                 ListItem(
                     modifier = Modifier.clickable { onClickLang(lang) },
                     headlineContent = {
-                        if (lang.langCode.isEmpty()) {
-                            Text(stringResource(Res.string.default_language, lang.langDisplay))
-                        } else {
-                            Text(lang.langDisplay)
-                        }
+                        Text(getLanguageDisplayText(lang))
                     }
                 )
             }
@@ -91,14 +86,7 @@ fun SettingsScreen(
                     )
                 },
                 supportingContent = {
-                    uiState.currentLanguage?.let { lang ->
-                        if (lang.langCode.isEmpty()) {
-                            Text(stringResource(Res.string.default_language, lang.langDisplay))
-                        } else {
-                            Text(lang.langDisplay)
-                        }
-                    }
-
+                    Text(getLanguageDisplayText(uiState.currentLanguage))
                 },
                 modifier = Modifier
                     .fillMaxWidth()

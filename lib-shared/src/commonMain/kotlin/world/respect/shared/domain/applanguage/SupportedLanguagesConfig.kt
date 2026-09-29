@@ -109,13 +109,15 @@ class SupportedLanguagesConfig(
     fun selectFirstSupportedLocale(
         preferredLocales: List<String> = systemLocales,
     ): UiLanguage {
-        val supportedLocaleCodes = supportedUiLanguages.map {
-            it.langCode
-        }
+        val selectedLanguageCode = preferredLocales
+            .map { it.take(LANGUAGE_CODE_LENGTH) }
+            .firstOrNull { it in supportedLangMap }
+            ?: fallbackLocaleCode
 
-        return preferredLocales.firstOrNull {
-            it.substring(0, 2) in supportedLocaleCodes
-        }?.let { supportedLangMap[it.substring(0, 2)]!! } ?: supportedLangMap[fallbackLocaleCode]!!
+        return supportedLangMap[selectedLanguageCode]
+            ?: throw IllegalStateException(
+                "Language '$selectedLanguageCode' is not configured as a supported language"
+            )
     }
 
     fun getAvailableLanguages(): List<UiLanguage> {
@@ -130,6 +132,7 @@ class SupportedLanguagesConfig(
         const val PREFKEY_LOCALE = "locale"
         const val DEFAULT_SUPPORTED_LANGUAGES = "en,hi"
         const val LOCALE_USE_SYSTEM = ""
+        const val LANGUAGE_CODE_LENGTH = 2
 
     }
 

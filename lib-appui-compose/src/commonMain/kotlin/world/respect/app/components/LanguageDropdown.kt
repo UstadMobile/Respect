@@ -20,6 +20,7 @@ import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.choose_language
 import world.respect.shared.generated.resources.default_language
+import world.respect.shared.generated.resources.loading
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,10 +71,10 @@ fun LanguageDropdown(
 
 @Composable
 fun getLanguageDisplayText(lang: SupportedLanguagesConfig.UiLanguage?): String {
-    return if(lang?.langCode?.isEmpty() == true)
-        stringResource(Res.string.default_language, lang.langDisplay)
-    else
-        lang?.langDisplay ?: ""
+    return when {
+        lang == null -> stringResource(Res.string.loading)
+        lang.langCode.isEmpty() -> stringResource(Res.string.default_language, lang.langDisplay)
+        else -> lang.langDisplay
+    }
 }
-
 

@@ -23,9 +23,31 @@ onFlowComplete:
 - tapOn:
     id: "choose_language"
 - assertVisible: "Use system default (English)"
-- assertVisible: "हिन्दी"
-- tapOn: "English"
 - assertVisible: "English"
+- tapOn: "हिन्दी"
+- tapOn: "शुरू हो जाओ"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn:
+    id: "username"
+- inputText: "admin"
+- tapOn:
+    id : "password"
+- inputText: ${SCHOOL_ADMIN_PASSWORD}
+- tapOn:
+    text: "लॉग इन करें"
+    index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- assertVisible: "ऐप्स"
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- assertVisible: "Use system default (English)"
 - tapOn: "Get Started"
 - runFlow:
     file: "subflows/get_started_select_school_by_name.yaml"
@@ -37,7 +59,8 @@ onFlowComplete:
 - tapOn:
     id : "password"
 - inputText: ${SCHOOL_ADMIN_PASSWORD}
-- tapOn: "Login"
+- tapOn:
+    text: "Login"
 - assertVisible:
     id: "app_title"
     text: "Home"

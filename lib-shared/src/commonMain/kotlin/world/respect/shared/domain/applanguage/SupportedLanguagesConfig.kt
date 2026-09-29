@@ -128,7 +128,7 @@ class SupportedLanguagesConfig(
     companion object {
 
         const val PREFKEY_LOCALE = "locale"
-        const val DEFAULT_SUPPORTED_LANGUAGES = "en,hi,fa,ps,ar,tg,bn,ne,my,rw,ru"
+        const val DEFAULT_SUPPORTED_LANGUAGES = "en,hi"
         const val LOCALE_USE_SYSTEM = ""
 
     }

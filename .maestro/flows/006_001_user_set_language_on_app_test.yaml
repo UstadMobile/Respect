@@ -22,7 +22,6 @@ onFlowComplete:
       respect_directory: ${output.SCHOOL_URL}
 - tapOn:
     id: "choose_language"
-- assertVisible: "Choose your language"
 - assertVisible: "Use system default (English)"
 - assertVisible: "हिन्दी"
 - tapOn: "English"

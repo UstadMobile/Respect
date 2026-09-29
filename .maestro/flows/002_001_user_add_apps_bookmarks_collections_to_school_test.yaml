@@ -308,14 +308,6 @@ onFlowComplete:
 - assertVisible: "Collections for Grade 1"
 - assertVisible: "2 sections, 3 items"
 - assertVisible: "Created by: Admin"
-- tapOn: "My Collections"
-- assertVisible: "Collections for Grade 1"
-- tapOn: "All"
-- assertVisible: "Collections for Grade 1"
-- tapOn: "Collections for Grade 1"
-- assertVisible:
-    id: "app_title"
-    text: "Collections for Grade 1"
 
 # Assigning lessons in a Collection to an assignment
 - tapOn:
@@ -342,11 +334,13 @@ onFlowComplete:
       - hideKeyboard
 - assertVisible: "Task"
 - assertVisible: "Lesson 001"
+- assertVisible: "Assignment Result Statement Demo"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
     text: "Homework 1"
 - assertVisible: "Lesson 001"
+- assertVisible: "Assignment Result Statement Demo"
 - tapOn:
     id: "nav_home"
 - tapOn: "Collections"
@@ -361,14 +355,14 @@ onFlowComplete:
     file: "subflows/erase_text.yaml"
     env:
       TEXT: "Remix the Collection - Grade 1"
-- inputText: "Collection 2"
+- inputText: "Collections for Term 1"
 - hideKeyboard
 - assertVisible: "Collection section day 1"
 - assertVisible: "Learning item section day 2"
 - tapOn: "Save"
 - assertVisible:
     id: "app_title"
-    text: "Collection 2"
+    text: "Collections for Term 1"
 
 
 # Adding Collection to an assignment

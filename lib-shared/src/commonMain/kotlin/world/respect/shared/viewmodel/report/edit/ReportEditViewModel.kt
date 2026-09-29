@@ -102,13 +102,10 @@ class ReportEditViewModel(
     private val generateReportQueriesUseCase: GenerateReportQueriesUseCase by inject()
     private val uidNumberMapper: UidNumberMapper by inject()
     private val route: ReportEdit = savedStateHandle.toRoute()
-
     private val schoolUrl = accountManager.requireActiveSchoolUrl()
-
     private val entityUid = route.reportActivityUid ?: run {
         schoolUrl.appendEndpointSegments(REPORTS, Uuid.random().toString()).toString()
     }
-
     private val _uiState: MutableStateFlow<ReportEditUiState> =
         MutableStateFlow(ReportEditUiState())
     val uiState: Flow<ReportEditUiState> = _uiState.asStateFlow()

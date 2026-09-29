@@ -48,8 +48,7 @@ data class ReportDetailUiState(
     val reportOptions: ReportOptions = ReportOptions(),
     val xAxisFormatter: GraphFormatter<String>? = null,
     val yAxisFormatter: GraphFormatter<Double>? = null,
-    val subgroupFormatter: GraphFormatter<String>? = null,
-    val activeUserPersonUid: Long = 0L,
+    val subgroupFormatter: GraphFormatter<String>? = null
 )
 
 class ReportDetailViewModel(
@@ -66,33 +65,31 @@ class ReportDetailViewModel(
     private val schoolDataSource: SchoolDataSource by inject()
     private val _uiState = MutableStateFlow(ReportDetailUiState())
     val uiState: Flow<ReportDetailUiState> = _uiState.asStateFlow()
+    private var activeUserPersonUid: Long = 0L
 
     init {
         viewModelScope.launch {
-            launch {
-                accountManager.selectedAccountAndPersonFlow.collect { sessionAndPerson ->
-                    val personUid =
-                        sessionAndPerson?.person?.guid?.let { uidNumberMapper(it) } ?: 0L
-                    _uiState.update { it.copy(activeUserPersonUid = personUid) }
-                }
+            accountManager.selectedAccountAndPersonFlow.collect { sessionAndPerson ->
+                activeUserPersonUid =
+                    sessionAndPerson?.person?.guid?.let { uidNumberMapper(it) } ?: 0L
             }
+        }
 
-            _appUiState.update { prev ->
-                prev.copy(
-                    fabState = FabUiState(
-                        visible = true,
-                        text = Res.string.edit.asUiText(),
-                        icon = FabUiState.FabIcon.EDIT,
-                        onClick = {
-                            _navCommandFlow.tryEmit(
-                                NavCommand.Navigate(
-                                    ReportEdit(reportActivityUid = reportUid)
-                                )
+        _appUiState.update { prev ->
+            prev.copy(
+                fabState = FabUiState(
+                    visible = true,
+                    text = Res.string.edit.asUiText(),
+                    icon = FabUiState.FabIcon.EDIT,
+                    onClick = {
+                        _navCommandFlow.tryEmit(
+                            NavCommand.Navigate(
+                                ReportEdit(reportActivityUid = reportUid)
                             )
-                        },
-                    )
+                        )
+                    },
                 )
-            }
+            )
         }
         schoolDataSource.xapiResource.statements.getAsFlow(
             listParams = GetStatementParams(
@@ -110,7 +107,6 @@ class ReportDetailViewModel(
                 .firstOrNull()
 
             if (statement == null) {
-                _uiState.update { ReportDetailUiState(activeUserPersonUid = _uiState.value.activeUserPersonUid) }
                 return@onEach
             }
 
@@ -124,7 +120,7 @@ class ReportDetailViewModel(
                     timestamp = response.timestamp?.toEpochMilliseconds() ?: 0L,
                     request = statement.asRunReportRequest(
                         json = json,
-                        accountPersonUid = _uiState.value.activeUserPersonUid,
+                        accountPersonUid = activeUserPersonUid,
                         timeZone = TimeZone.currentSystemDefault()
                     ),
                     results = response.toStatementReportRows(json)
@@ -167,7 +163,6 @@ class ReportDetailViewModel(
                 xAxisFormatter = xAxisFormatter,
                 yAxisFormatter = yAxisFormatter,
                 subgroupFormatter = subgroupFormatter,
-                activeUserPersonUid = _uiState.value.activeUserPersonUid
             )
 
             _uiState.update { newState }

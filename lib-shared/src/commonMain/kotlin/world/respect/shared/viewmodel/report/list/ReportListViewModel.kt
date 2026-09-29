@@ -52,8 +52,7 @@ data class ReportListUiState(
     val reportRequests: DataLoadState<List<XapiStatement>> = DataLoadingState(),
     val reportResults: Map<String, RunReportUseCase.RunReportResult> = emptyMap(),
     val xAxisFormatters: Map<String, GraphFormatter<String>> = emptyMap(),
-    val yAxisFormatters: Map<String, GraphFormatter<Double>> = emptyMap(),
-    val activeUserPersonUid: Long = 0L,
+    val yAxisFormatters: Map<String, GraphFormatter<Double>> = emptyMap()
 )
 
 
@@ -164,8 +163,7 @@ class ReportListViewModel(
                 reportRequests = requestsState.map { distinctRequests },
                 reportResults = reportResults,
                 xAxisFormatters = xAxisFormatters,
-                yAxisFormatters = yAxisFormatters,
-                activeUserPersonUid = activeUserPersonUid
+                yAxisFormatters = yAxisFormatters
             )
         }.onEach { newState ->
             _uiState.update { newState }

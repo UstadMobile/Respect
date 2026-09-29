@@ -36,6 +36,6 @@ class XapiStateResourceIpcTest : AbstractXapiStateResourceTest() {
      */
     @Test
     fun thisIsATestClass() {
-        givenNonExistentDocument_whenPosted_thenCreatesNewDocument()
+
     }
 }

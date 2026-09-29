@@ -19,10 +19,12 @@ import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import org.openeel.lib.ipc.messagebridge.MessageData
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
-import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeWhatFlags
 import org.openeel.lib.ipc.messagebridge.IpcMessageBridge
+import world.respect.xapi.ipc.shared.messages.XapiIpcMethodEnum
+import world.respect.xapi.ipc.shared.messages.XapiIpcResourceAndMethod
+import world.respect.xapi.ipc.shared.messages.XapiIpcResourceEnum
 import world.respect.xapi.ipc.shared.messages.ext.putAllFromStringMap
 import world.respect.xapi.ipc.shared.messages.ext.putQueryParameters
 import world.respect.xapi.ipc.shared.messages.ext.toDataLoadState
@@ -57,7 +59,9 @@ class XapiStatementsResourceIpcClient(
                     )
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                arg2 = XapiIpcResourceFlags.POST_STATEMENTS,
+                arg2 = XapiIpcResourceAndMethod(
+                    XapiIpcResourceEnum.STATEMENTS, XapiIpcMethodEnum.POST
+                ).toArg2Int(),
             ),
             json = json,
             deserializer = ListSerializer(Uuid.serializer())
@@ -84,7 +88,9 @@ class XapiStatementsResourceIpcClient(
                     putQueryParameters(listParams.toParameters(json))
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                arg2 = XapiIpcResourceFlags.GET_STATEMENTS,
+                arg2 = XapiIpcResourceAndMethod(
+                    XapiIpcResourceEnum.STATEMENTS, XapiIpcMethodEnum.GET
+                ).toArg2Int(),
             ),
             json = json,
             deserializer = XapiStatementResult.serializer()
@@ -111,7 +117,9 @@ class XapiStatementsResourceIpcClient(
                     putQueryParameters(listParams.toParameters(json))
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                arg2 = XapiIpcResourceFlags.GET_STATEMENTS_FLOW,
+                arg2 = XapiIpcResourceAndMethod(
+                    XapiIpcResourceEnum.STATEMENTS, XapiIpcMethodEnum.GET_AS_FLOW
+                ).toArg2Int(),
             )
         ).map { msg ->
             msg.data.toDataLoadState(json, XapiStatementResult.serializer()).also {

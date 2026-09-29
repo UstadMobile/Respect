@@ -62,7 +62,7 @@ class XapiStateResourceIpcClient(
                     )
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                arg2 = XapiIpcResourceFlags.GET_STATE_MULTIPLE,
+                arg2 = XapiIpcResourceFlags.STATE_GET_MULTIDOC,
             ),
             json = json,
             deserializer = ListSerializer(String.serializer()),
@@ -94,7 +94,7 @@ class XapiStateResourceIpcClient(
                         )
                     },
                     what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                    arg2 = XapiIpcResourceFlags.GET_STATE,
+                    arg2 = XapiIpcResourceFlags.STATE_GET,
                 )
             )
             response.data.toXapiDocumentDataLoadState().also {
@@ -127,7 +127,7 @@ class XapiStateResourceIpcClient(
                     )
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                arg2 = XapiIpcResourceFlags.GET_STATE_FLOW,
+                arg2 = XapiIpcResourceFlags.STATE_GET_FLOW,
             )
         ).map { msg ->
             msg.data.toXapiDocumentDataLoadState().also {
@@ -156,7 +156,7 @@ class XapiStateResourceIpcClient(
                     putAll(docBundle)
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                arg2 = XapiIpcResourceFlags.POST_STATE,
+                arg2 = XapiIpcResourceFlags.STATE_POST,
             )
         )
         val status = response.data.getInt(XapiIpcKeys.KEY_STATUS_CODE)
@@ -182,7 +182,7 @@ class XapiStateResourceIpcClient(
                     putAll(docBundle)
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                arg2 = XapiIpcResourceFlags.PUT_STATE,
+                arg2 = XapiIpcResourceFlags.STATE_PUT,
             )
         )
         val status = response.data.getInt(XapiIpcKeys.KEY_STATUS_CODE)
@@ -205,7 +205,7 @@ class XapiStateResourceIpcClient(
                     putQueryParameters(params.toParameters(json))
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                arg2 = XapiIpcResourceFlags.DELETE_STATE,
+                arg2 = XapiIpcResourceFlags.STATE_DELETE,
             )
         )
         val status = response.data.getInt(XapiIpcKeys.KEY_STATUS_CODE)

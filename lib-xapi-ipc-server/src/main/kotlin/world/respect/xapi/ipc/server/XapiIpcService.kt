@@ -12,7 +12,6 @@ import android.os.Message
 import android.os.Messenger
 import android.util.Log
 import io.ktor.http.Headers
-import io.ktor.http.Parameters
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.util.collections.ConcurrentMap
@@ -38,9 +37,11 @@ import world.respect.lib.xapi.resources.XapiStateResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
-import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeWhatFlags
+import world.respect.xapi.ipc.shared.messages.XapiIpcMethodEnum
+import world.respect.xapi.ipc.shared.messages.XapiIpcResourceAndMethod
+import world.respect.xapi.ipc.shared.messages.XapiIpcResourceEnum
 import world.respect.xapi.ipc.shared.messages.ext.getDeserialized
 import world.respect.xapi.ipc.shared.messages.ext.getQueryParameters
 import world.respect.xapi.ipc.shared.messages.ext.getStringValues
@@ -162,209 +163,225 @@ class XapiIpcService: Service() {
                     xapiResourceProvider.provideXapiResource(scopeEndpoint, auth)
                 }
 
-                when (msg.arg2) {
-                    XapiIpcResourceFlags.POST_STATEMENTS -> {
-                        replyMessage.data = runBlocking {
-                            xapiResource.statements.post(
-                                list = msg.data.getDeserialized(
-                                    key = XapiIpcKeys.KEY_BODY,
+                val resourceAndOp = XapiIpcResourceAndMethod.fromArg2Int(msg.arg2)
+
+                when(resourceAndOp.resource) {
+                    XapiIpcResourceEnum.STATEMENTS -> {
+                        when(resourceAndOp.method) {
+                            XapiIpcMethodEnum.GET -> {
+                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix: get ")
+                                replyMessage.data = runBlocking {
+                                    xapiResource.statements.get(
+                                        listParams = XapiStatementsResource.GetStatementParams.fromParams(
+                                            params = msg.data.getQueryParameters().orEmpty(),
+                                            json = json
+                                        )
+                                    ).also {
+                                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix get: response ${it.toPrettyString()}")
+                                    }.toBundle(XapiStatementResult.serializer(), json)
+                                }
+
+                                msg.replyTo.send(replyMessage)
+                            }
+
+                            XapiIpcMethodEnum.GET_AS_FLOW -> {
+                                scope.launch {
+                                    Log.d(XapiIpcTags.LOGTAG, "$logPrefix #$incomingMessageId getAsFlow")
+                                    xapiResource.statements.getAsFlow(
+                                        listParams = XapiStatementsResource.GetStatementParams.fromParams(
+                                            params = msg.data.getQueryParameters().orEmpty(),
+                                            json = json
+                                        ),
+                                        dataLoadParams = DataLoadParams()
+                                    ).collect {
+                                        val message = Message.obtain()
+                                        message.arg1 = incomingMessageId
+                                        message.what = IpcMessageBridgeWhatFlags.WHAT_FLOW_EMISSION
+                                        message.data = it.toBundle(XapiStatementResult.serializer(), json)
+                                        Log.d(
+                                            XapiIpcTags.LOGTAG,
+                                            "$logPrefix getAsFlow emit ${it.toPrettyString()}"
+                                        )
+                                        replyTo.send(message)
+                                    }
+                                }.also {
+                                    flowCollectors[incomingMessageId] = it
+                                }
+                            }
+
+                            XapiIpcMethodEnum.POST -> {
+                                replyMessage.data = runBlocking {
+                                    xapiResource.statements.post(
+                                        list = msg.data.getDeserialized(
+                                            key = XapiIpcKeys.KEY_BODY,
+                                            json = json,
+                                            deserializer = ListSerializer(
+                                                XapiStatement.serializer()
+                                            ),
+                                        )?.also {
+                                            Log.d(
+                                                XapiIpcTags.LOGTAG,
+                                                "$logPrefix post send ${it.size} statements"
+                                            )
+                                        }?.map {
+                                            it.asAssignmentRecipeStmtIfIdNotNull(assignmentActivityId)
+                                        } ?: throw XapiException(400, "Post statements has no body")
+                                    ).also {
+                                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix post: response ${it.toPrettyString()}")
+                                    }.toBundle(ListSerializer(Uuid.serializer()), json)
+                                }
+
+                                msg.replyTo.send(replyMessage)
+                            }
+
+
+                            else -> {
+                                //Bad request
+                            }
+                        }
+                    }
+
+                    XapiIpcResourceEnum.STATE -> {
+                        when(resourceAndOp.method) {
+                            XapiIpcMethodEnum.GET -> {
+                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix: get state")
+                                val params = XapiStateResource.SingleDocumentParams.fromParameters(
+                                    params = msg.data.getQueryParameters().orEmpty(),
                                     json = json,
-                                    deserializer = ListSerializer(
-                                        XapiStatement.serializer()
-                                    ),
-                                )?.also {
-                                    Log.d(
-                                        XapiIpcTags.LOGTAG,
-                                        "$logPrefix post send ${it.size} statements"
+                                )
+                                val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
+                                    Headers.build { appendAll(it) }
+                                } ?: Headers.Empty
+                                val dataLoadParams = DataLoadParams(requestHeaders = requestHeaders)
+                                replyMessage.data = runBlocking {
+                                    xapiResource.state.get(
+                                        params = params,
+                                        dataLoadParams = dataLoadParams,
+                                    ).also {
+                                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix get state: response ${it.toPrettyString()}")
+                                    }.toBundle(executor)
+                                }
+
+                                msg.replyTo.send(replyMessage)
+                            }
+
+                            XapiIpcMethodEnum.GET_AS_FLOW -> {
+                                val params = XapiStateResource.SingleDocumentParams.fromParameters(
+                                    params = msg.data.getQueryParameters().orEmpty(),
+                                    json = json,
+                                )
+                                val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
+                                    Headers.build { appendAll(it) }
+                                } ?: Headers.Empty
+                                val dataLoadParams = DataLoadParams(requestHeaders = requestHeaders)
+                                scope.launch {
+                                    Log.d(XapiIpcTags.LOGTAG, "$logPrefix #$incomingMessageId getAsFlow state")
+                                    xapiResource.state.getAsFlow(
+                                        params = params,
+                                        dataLoadParams = dataLoadParams,
+                                    ).collect {
+                                        val message = Message.obtain()
+                                        message.arg1 = incomingMessageId
+                                        message.what = IpcMessageBridgeWhatFlags.WHAT_FLOW_EMISSION
+                                        message.data = it.toBundle(executor)
+                                        Log.d(
+                                            XapiIpcTags.LOGTAG,
+                                            "$logPrefix getAsFlow state emit ${it.toPrettyString()}"
+                                        )
+                                        replyTo.send(message)
+                                    }
+                                }.also {
+                                    flowCollectors[incomingMessageId] = it
+                                }
+                            }
+
+                            XapiIpcMethodEnum.GET_MULTIDOC -> {
+                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix: getMultipleDocuments state")
+                                val params = XapiStateResource.MultiDocParams.fromParameters(
+                                    params = msg.data.getQueryParameters().orEmpty(),
+                                    json = json,
+                                )
+                                val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
+                                    Headers.build { appendAll(it) }
+                                } ?: Headers.Empty
+                                val dataLoadParams = DataLoadParams(requestHeaders = requestHeaders)
+                                replyMessage.data = runBlocking {
+                                    xapiResource.state.getMultipleDocuments(
+                                        params = params,
+                                        dataLoadParams = dataLoadParams,
+                                    ).also {
+                                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix getMultipleDocuments state: response ${it.toPrettyString()}")
+                                    }.toBundle(ListSerializer(String.serializer()), json)
+                                }
+
+                                msg.replyTo.send(replyMessage)
+                            }
+
+                            XapiIpcMethodEnum.POST -> {
+                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix: post state")
+                                val params = XapiStateResource.SingleDocumentParams.fromParameters(
+                                    params = msg.data.getQueryParameters().orEmpty(),
+                                    json = json,
+                                )
+                                val document = msg.data.toXapiDocument()
+                                runBlocking {
+                                    xapiResource.state.post(
+                                        params = params,
+                                        document = document,
                                     )
-                                }?.map {
-                                    it.asAssignmentRecipeStmtIfIdNotNull(assignmentActivityId)
-                                } ?: throw XapiException(400, "Post statements has no body")
-                            ).also {
-                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix post: response ${it.toPrettyString()}")
-                            }.toBundle(ListSerializer(Uuid.serializer()), json)
-                        }
+                                }
+                                replyMessage.data = Bundle().apply {
+                                    putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
+                                }
 
-                        msg.replyTo.send(replyMessage)
-                    }
-
-                    XapiIpcResourceFlags.GET_STATEMENTS -> {
-                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix: get ")
-                        replyMessage.data = runBlocking {
-                            xapiResource.statements.get(
-                                listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                                    params = msg.data.getQueryParameters().orEmpty(),
-                                    json = json
-                                )
-                            ).also {
-                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix get: response ${it.toPrettyString()}")
-                            }.toBundle(XapiStatementResult.serializer(), json)
-                        }
-
-                        msg.replyTo.send(replyMessage)
-                    }
-
-                    XapiIpcResourceFlags.GET_STATEMENTS_FLOW -> {
-                        scope.launch {
-                            Log.d(XapiIpcTags.LOGTAG, "$logPrefix #$incomingMessageId getAsFlow")
-                            xapiResource.statements.getAsFlow(
-                                listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                                    params = msg.data.getQueryParameters().orEmpty(),
-                                    json = json
-                                ),
-                                dataLoadParams = DataLoadParams()
-                            ).collect {
-                                val message = Message.obtain()
-                                message.arg1 = incomingMessageId
-                                message.what = IpcMessageBridgeWhatFlags.WHAT_FLOW_EMISSION
-                                message.data = it.toBundle(XapiStatementResult.serializer(), json)
-                                Log.d(
-                                    XapiIpcTags.LOGTAG,
-                                    "$logPrefix getAsFlow emit ${it.toPrettyString()}"
-                                )
-                                replyTo.send(message)
+                                msg.replyTo.send(replyMessage)
                             }
-                        }.also {
-                            flowCollectors[incomingMessageId] = it
-                        }
-                    }
 
-                    XapiIpcResourceFlags.GET_STATE -> {
-                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix: get state")
-                        val params = XapiStateResource.SingleDocumentParams.fromParameters(
-                            params = msg.data.getQueryParameters().orEmpty(),
-                            json = json,
-                        )
-                        val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
-                            Headers.build { appendAll(it) }
-                        } ?: Headers.Empty
-                        val dataLoadParams = DataLoadParams(requestHeaders = requestHeaders)
-                        replyMessage.data = runBlocking {
-                            xapiResource.state.get(
-                                params = params,
-                                dataLoadParams = dataLoadParams,
-                            ).also {
-                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix get state: response ${it.toPrettyString()}")
-                            }.toBundle(executor)
-                        }
-
-                        msg.replyTo.send(replyMessage)
-                    }
-
-                    XapiIpcResourceFlags.GET_STATE_FLOW -> {
-                        val params = XapiStateResource.SingleDocumentParams.fromParameters(
-                            params = msg.data.getQueryParameters().orEmpty(),
-                            json = json,
-                        )
-                        val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
-                            Headers.build { appendAll(it) }
-                        } ?: Headers.Empty
-                        val dataLoadParams = DataLoadParams(requestHeaders = requestHeaders)
-                        scope.launch {
-                            Log.d(XapiIpcTags.LOGTAG, "$logPrefix #$incomingMessageId getAsFlow state")
-                            xapiResource.state.getAsFlow(
-                                params = params,
-                                dataLoadParams = dataLoadParams,
-                            ).collect {
-                                val message = Message.obtain()
-                                message.arg1 = incomingMessageId
-                                message.what = IpcMessageBridgeWhatFlags.WHAT_FLOW_EMISSION
-                                message.data = it.toBundle(executor)
-                                Log.d(
-                                    XapiIpcTags.LOGTAG,
-                                    "$logPrefix getAsFlow state emit ${it.toPrettyString()}"
+                            XapiIpcMethodEnum.PUT -> {
+                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix: put state")
+                                val params = XapiStateResource.SingleDocumentParams.fromParameters(
+                                    params = msg.data.getQueryParameters().orEmpty(),
+                                    json = json,
                                 )
-                                replyTo.send(message)
+                                val document = msg.data.toXapiDocument()
+                                runBlocking {
+                                    xapiResource.state.put(
+                                        params = params,
+                                        document = document,
+                                    )
+                                }
+                                replyMessage.data = Bundle().apply {
+                                    putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
+                                }
+
+                                msg.replyTo.send(replyMessage)
                             }
-                        }.also {
-                            flowCollectors[incomingMessageId] = it
-                        }
-                    }
 
-                    XapiIpcResourceFlags.GET_STATE_MULTIPLE -> {
-                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix: getMultipleDocuments state")
-                        val params = XapiStateResource.MultiDocParams.fromParameters(
-                            params = msg.data.getQueryParameters().orEmpty(),
-                            json = json,
-                        )
-                        val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
-                            Headers.build { appendAll(it) }
-                        } ?: Headers.Empty
-                        val dataLoadParams = DataLoadParams(requestHeaders = requestHeaders)
-                        replyMessage.data = runBlocking {
-                            xapiResource.state.getMultipleDocuments(
-                                params = params,
-                                dataLoadParams = dataLoadParams,
-                            ).also {
-                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix getMultipleDocuments state: response ${it.toPrettyString()}")
-                            }.toBundle(ListSerializer(String.serializer()), json)
-                        }
+                            XapiIpcMethodEnum.DELETE -> {
+                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix: delete state")
+                                val params = XapiStateResource.SingleDocumentParams.fromParameters(
+                                    params = msg.data.getQueryParameters().orEmpty(),
+                                    json = json,
+                                )
+                                runBlocking {
+                                    xapiResource.state.delete(
+                                        params = params,
+                                    )
+                                }
+                                replyMessage.data = Bundle().apply {
+                                    putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
+                                }
 
-                        msg.replyTo.send(replyMessage)
-                    }
-
-                    XapiIpcResourceFlags.POST_STATE -> {
-                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix: post state")
-                        val params = XapiStateResource.SingleDocumentParams.fromParameters(
-                            params = msg.data.getQueryParameters().orEmpty(),
-                            json = json,
-                        )
-                        val document = msg.data.toXapiDocument()
-                        runBlocking {
-                            xapiResource.state.post(
-                                params = params,
-                                document = document,
-                            )
+                                msg.replyTo.send(replyMessage)
+                            }
                         }
-                        replyMessage.data = Bundle().apply {
-                            putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
-                        }
-
-                        msg.replyTo.send(replyMessage)
-                    }
-
-                    XapiIpcResourceFlags.PUT_STATE -> {
-                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix: put state")
-                        val params = XapiStateResource.SingleDocumentParams.fromParameters(
-                            params = msg.data.getQueryParameters().orEmpty(),
-                            json = json,
-                        )
-                        val document = msg.data.toXapiDocument()
-                        runBlocking {
-                            xapiResource.state.put(
-                                params = params,
-                                document = document,
-                            )
-                        }
-                        replyMessage.data = Bundle().apply {
-                            putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
-                        }
-
-                        msg.replyTo.send(replyMessage)
-                    }
-
-                    XapiIpcResourceFlags.DELETE_STATE -> {
-                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix: delete state")
-                        val params = XapiStateResource.SingleDocumentParams.fromParameters(
-                            params = msg.data.getQueryParameters().orEmpty(),
-                            json = json,
-                        )
-                        runBlocking {
-                            xapiResource.state.delete(
-                                params = params,
-                            )
-                        }
-                        replyMessage.data = Bundle().apply {
-                            putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
-                        }
-
-                        msg.replyTo.send(replyMessage)
                     }
 
                     else -> {
-                        super.handleMessage(msg)
+                        //Unsupported operation
                     }
                 }
+
             }catch(e: Throwable) {
                 replyMessage.data = DataErrorResult<String>(
                     error = e,

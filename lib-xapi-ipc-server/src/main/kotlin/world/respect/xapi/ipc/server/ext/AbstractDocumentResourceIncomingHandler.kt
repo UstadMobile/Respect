@@ -3,7 +3,6 @@ package world.respect.xapi.ipc.server.ext
 import android.os.Bundle
 import android.os.Message
 import android.util.Log
-import io.ktor.http.Headers
 import io.ktor.util.collections.ConcurrentMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -24,7 +23,8 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcMethodEnum
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceAndMethod
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
-import world.respect.xapi.ipc.shared.messages.ext.getStringValues
+import world.respect.xapi.ipc.shared.messages.ext.getXapiIpcHeaders
+import world.respect.xapi.ipc.shared.messages.ext.orEmpty
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
 import world.respect.xapi.ipc.shared.messages.ext.toXapiDocument
 import java.util.concurrent.ExecutorService
@@ -71,15 +71,13 @@ abstract class AbstractDocumentResourceIncomingHandler<
         when(XapiIpcResourceAndMethod.fromArg2Int(msg.arg2).method) {
             XapiIpcMethodEnum.GET -> {
                 Log.d(XapiIpcTags.LOGTAG, "$logPrefix: get state")
-                val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
-                    Headers.build { appendAll(it) }
-                } ?: Headers.Empty
 
-                val dataLoadParams = DataLoadParams(requestHeaders = requestHeaders)
                 replyMessage.data = runBlocking {
                     docResource.get(
                         params = bundle.getSingleDocParams(),
-                        dataLoadParams = dataLoadParams,
+                        dataLoadParams = DataLoadParams(
+                            requestHeaders = msg.data.getXapiIpcHeaders().orEmpty()
+                        ),
                     ).also {
                         Log.d(XapiIpcTags.LOGTAG, "$logPrefix get state: response ${it.toPrettyString()}")
                     }.toBundle(executor)
@@ -89,15 +87,13 @@ abstract class AbstractDocumentResourceIncomingHandler<
             }
 
             XapiIpcMethodEnum.GET_AS_FLOW -> {
-                val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
-                    Headers.build { appendAll(it) }
-                } ?: Headers.Empty
-                val dataLoadParams = DataLoadParams(requestHeaders = requestHeaders)
                 scope.launch {
                     Log.d(XapiIpcTags.LOGTAG, "$logPrefix #$incomingMessageId getAsFlow state")
                     docResource.getAsFlow(
                         params = bundle.getSingleDocParams(),
-                        dataLoadParams = dataLoadParams,
+                        dataLoadParams = DataLoadParams(
+                            requestHeaders = msg.data.getXapiIpcHeaders().orEmpty()
+                        ),
                     ).collect { xapiDoc ->
                         val message = Message.obtain()
                         message.arg1 = incomingMessageId
@@ -116,14 +112,13 @@ abstract class AbstractDocumentResourceIncomingHandler<
 
             XapiIpcMethodEnum.GET_MULTIDOC -> {
                 Log.d(XapiIpcTags.LOGTAG, "$logPrefix: getMultipleDocuments state")
-                val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
-                    Headers.build { appendAll(it) }
-                } ?: Headers.Empty
-                val dataLoadParams = DataLoadParams(requestHeaders = requestHeaders)
+
                 replyMessage.data = runBlocking {
                     docResource.getMultipleDocuments(
                         params = bundle.getMultiDocParams(),
-                        dataLoadParams = dataLoadParams,
+                        dataLoadParams = DataLoadParams(
+                            requestHeaders = msg.data.getXapiIpcHeaders().orEmpty()
+                        ),
                     ).also {
                         Log.d(XapiIpcTags.LOGTAG, "$logPrefix getMultipleDocuments state: response ${it.toPrettyString()}")
                     }.toBundle(ListSerializer(String.serializer()), json)

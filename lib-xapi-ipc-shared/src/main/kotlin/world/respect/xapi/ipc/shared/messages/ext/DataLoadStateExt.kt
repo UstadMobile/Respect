@@ -9,7 +9,6 @@ import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.throwable.unwrapHttpStatusCode
-import world.respect.lib.xapi.ext.xapiHttpStatusCodeOrNull
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 
 const val STATUS_LOADING = -2
@@ -35,28 +34,28 @@ fun <T: Any> DataLoadState<T>.toBundle(
         is DataReadyState<T> -> {
             Bundle().apply {
                 putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
+                putXapiIpcHeaders(metaInfo.headers)
                 this@apply.putBody(this@toBundle)
-                putBundle(XapiIpcKeys.KEY_HEADERS, metaInfo.toBundle())
             }
         }
 
         is DataLoadingState<T> -> {
             Bundle().apply {
                 putInt(XapiIpcKeys.KEY_STATUS_CODE, STATUS_LOADING)
-                putBundle(XapiIpcKeys.KEY_HEADERS, metaInfo.toBundle())
+                putXapiIpcHeaders(metaInfo.headers)
             }
         }
 
         is DataErrorResult<T> -> {
             Bundle().also {
                 it.putInt(XapiIpcKeys.KEY_STATUS_CODE, error.unwrapHttpStatusCode() ?: 500)
-                it.putBundle(XapiIpcKeys.KEY_HEADERS, metaInfo.toBundle())
+                it.putXapiIpcHeaders(metaInfo.headers)
             }
         }
 
         is NoDataLoadedState<T> -> {
             Bundle().also {
-                it.putBundle(XapiIpcKeys.KEY_HEADERS, metaInfo.toBundle())
+                it.putXapiIpcHeaders(metaInfo.headers)
                 it.putInt(
                     XapiIpcKeys.KEY_STATUS_CODE,
                     if(reason == NoDataLoadedState.Reason.NOT_MODIFIED) {

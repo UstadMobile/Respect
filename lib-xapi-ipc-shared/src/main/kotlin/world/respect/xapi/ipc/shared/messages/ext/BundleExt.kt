@@ -13,6 +13,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.throwable.HttpErrorResponseException
+import world.respect.xapi.ipc.shared.messages.BundleHeaders
 import world.respect.xapi.ipc.shared.messages.BundleParameters
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 
@@ -53,23 +54,9 @@ fun Bundle.putStringValues(
 }
 
 /**
- * Get a set of StringValues from the given bundle (that was stored using putStringValues).
- *
- * @param key Bundle key to use
- * @return The StringValues, or null if not found
- */
-fun Bundle.getStringValues(
-    key: String
-): StringValues? {
-    val bundle = getBundle(key) ?: return null
-    val caseInsensitive = getBoolean(key + SUFFIX_STR_VALS_CASE_INSENSITIVE)
-    return BundleStringValues(bundle, caseInsensitive)
-}
-
-/**
  * Shorthand to put the query parameters into a sub-bundle with the standard key
  */
-fun Bundle.putQueryParameters(
+fun Bundle.putXapiIpcQueryParameters(
     queryParams: Parameters
 ) {
     putStringValues(key = XapiIpcKeys.KEY_QUERY_PARAMS, value = queryParams)
@@ -78,11 +65,22 @@ fun Bundle.putQueryParameters(
 /**
  * Shorthand to retrieve the query parameters from a sub bundle with the standard key
  */
-fun Bundle.getQueryParameters(): Parameters? {
+fun Bundle.getXapiIpcQueryParameters(): Parameters? {
     return BundleParameters(
         bundle = getBundle(XapiIpcKeys.KEY_QUERY_PARAMS) ?: return null
     )
 }
+
+fun Bundle.putXapiIpcHeaders(headers: Headers) {
+    putStringValues(key = XapiIpcKeys.KEY_HEADERS, value = headers)
+}
+
+fun Bundle.getXapiIpcHeaders(): Headers? {
+    return BundleHeaders(
+        getBundle(XapiIpcKeys.KEY_HEADERS) ?: return null
+    )
+}
+
 
 fun Bundle.putAllFromStringMap(map: Map<String, String>) {
     map.forEach { (key, value) ->
@@ -97,11 +95,7 @@ fun <T: Any> Bundle.toDataLoadState(
 
     return try {
         val metaInfo = DataLoadMetaInfo(
-            headers = Headers.build {
-                this@toDataLoadState.getStringValues(XapiIpcKeys.KEY_HEADERS)?.also { stringVals ->
-                    appendAll(stringVals)
-                }
-            }
+            headers = getXapiIpcHeaders().orEmpty(),
         )
 
         when(status) {

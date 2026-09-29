@@ -7,7 +7,7 @@ import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.lib.xapi.resources.XapiStateResource
 import world.respect.xapi.ipc.server.ext.AbstractDocumentResourceIncomingHandler
-import world.respect.xapi.ipc.shared.messages.ext.getQueryParameters
+import world.respect.xapi.ipc.shared.messages.ext.getXapiIpcQueryParameters
 import world.respect.xapi.ipc.shared.messages.ext.orEmpty
 import java.util.concurrent.ExecutorService
 
@@ -32,14 +32,14 @@ class XapiIpcStateResourceIncomingHandler(
 
     override fun Bundle.getMultiDocParams(): XapiStateResource.MultiDocParams {
         return XapiStateResource.MultiDocParams.fromParameters(
-            params = getQueryParameters().orEmpty(),
+            params = getXapiIpcQueryParameters().orEmpty(),
             json = json,
         )
     }
 
     override fun Bundle.getSingleDocParams(): XapiStateResource.SingleDocumentParams {
         return XapiStateResource.SingleDocumentParams.fromParameters(
-            params = getQueryParameters().orEmpty(),
+            params = getXapiIpcQueryParameters().orEmpty(),
             json = json,
         )
     }

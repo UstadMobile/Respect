@@ -30,7 +30,7 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcMethodEnum
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceAndMethod
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import world.respect.xapi.ipc.shared.messages.ext.getDeserialized
-import world.respect.xapi.ipc.shared.messages.ext.getQueryParameters
+import world.respect.xapi.ipc.shared.messages.ext.getXapiIpcQueryParameters
 import world.respect.xapi.ipc.shared.messages.ext.orEmpty
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
 import kotlin.collections.set
@@ -99,7 +99,7 @@ class StatementsResourceIncomingHandler(
                 replyMessage.data = runBlocking {
                     xapiResource.statements.get(
                         listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                            params = msg.data.getQueryParameters().orEmpty(),
+                            params = msg.data.getXapiIpcQueryParameters().orEmpty(),
                             json = json
                         )
                     ).also {
@@ -115,7 +115,7 @@ class StatementsResourceIncomingHandler(
                     Log.d(XapiIpcTags.LOGTAG, "$logPrefix #$incomingMessageId getAsFlow")
                     xapiResource.statements.getAsFlow(
                         listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                            params = msg.data.getQueryParameters().orEmpty(),
+                            params = msg.data.getXapiIpcQueryParameters().orEmpty(),
                             json = json
                         ),
                         dataLoadParams = DataLoadParams()

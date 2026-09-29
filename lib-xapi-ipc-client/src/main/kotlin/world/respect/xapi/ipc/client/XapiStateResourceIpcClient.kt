@@ -22,7 +22,7 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import world.respect.xapi.ipc.shared.messages.ext.putAllFromStringMap
-import world.respect.xapi.ipc.shared.messages.ext.putQueryParameters
+import world.respect.xapi.ipc.shared.messages.ext.putXapiIpcQueryParameters
 import world.respect.xapi.ipc.shared.messages.ext.putStringValues
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
 import world.respect.xapi.ipc.shared.messages.ext.toXapiDocumentDataLoadState
@@ -55,7 +55,7 @@ class XapiStateResourceIpcClient(
             request = MessageData(
                 data = Bundle().apply {
                     putEndpointAndExtras()
-                    putQueryParameters(params.toParameters(json))
+                    putXapiIpcQueryParameters(params.toParameters(json))
                     putStringValues(
                         key = XapiIpcKeys.KEY_HEADERS,
                         value = dataLoadParams.requestHeaders,
@@ -87,7 +87,7 @@ class XapiStateResourceIpcClient(
                 MessageData(
                     data = Bundle().apply {
                         putEndpointAndExtras()
-                        putQueryParameters(params.toParameters(json))
+                        putXapiIpcQueryParameters(params.toParameters(json))
                         putStringValues(
                             key = XapiIpcKeys.KEY_HEADERS,
                             value = dataLoadParams.requestHeaders,
@@ -120,7 +120,7 @@ class XapiStateResourceIpcClient(
             messageData = MessageData(
                 data = Bundle().apply {
                     putEndpointAndExtras()
-                    putQueryParameters(params.toParameters(json))
+                    putXapiIpcQueryParameters(params.toParameters(json))
                     putStringValues(
                         key = XapiIpcKeys.KEY_HEADERS,
                         value = dataLoadParams.requestHeaders,
@@ -152,7 +152,7 @@ class XapiStateResourceIpcClient(
             MessageData(
                 data = Bundle().apply {
                     putEndpointAndExtras()
-                    putQueryParameters(params.toParameters(json))
+                    putXapiIpcQueryParameters(params.toParameters(json))
                     putAll(docBundle)
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
@@ -178,7 +178,7 @@ class XapiStateResourceIpcClient(
             MessageData(
                 data = Bundle().apply {
                     putEndpointAndExtras()
-                    putQueryParameters(params.toParameters(json))
+                    putXapiIpcQueryParameters(params.toParameters(json))
                     putAll(docBundle)
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
@@ -202,7 +202,7 @@ class XapiStateResourceIpcClient(
             MessageData(
                 data = Bundle().apply {
                     putEndpointAndExtras()
-                    putQueryParameters(params.toParameters(json))
+                    putXapiIpcQueryParameters(params.toParameters(json))
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceFlags.STATE_DELETE,

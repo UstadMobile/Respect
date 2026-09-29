@@ -26,7 +26,7 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcMethodEnum
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceAndMethod
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceEnum
 import world.respect.xapi.ipc.shared.messages.ext.putAllFromStringMap
-import world.respect.xapi.ipc.shared.messages.ext.putQueryParameters
+import world.respect.xapi.ipc.shared.messages.ext.putXapiIpcQueryParameters
 import world.respect.xapi.ipc.shared.messages.ext.toDataLoadState
 import kotlin.uuid.Uuid
 
@@ -85,7 +85,7 @@ class XapiStatementsResourceIpcClient(
             request = MessageData(
                 data = Bundle().apply {
                     putEndpointAndExtras()
-                    putQueryParameters(listParams.toParameters(json))
+                    putXapiIpcQueryParameters(listParams.toParameters(json))
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceAndMethod(
@@ -114,7 +114,7 @@ class XapiStatementsResourceIpcClient(
             messageData = MessageData(
                 data = Bundle().apply {
                     putEndpointAndExtras()
-                    putQueryParameters(listParams.toParameters(json))
+                    putXapiIpcQueryParameters(listParams.toParameters(json))
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceAndMethod(

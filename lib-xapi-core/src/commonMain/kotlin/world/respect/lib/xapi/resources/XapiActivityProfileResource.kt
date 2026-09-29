@@ -1,5 +1,6 @@
 package world.respect.lib.xapi.resources
 
+import io.ktor.http.Parameters
 import io.ktor.http.ParametersBuilder
 import io.ktor.util.StringValues
 import world.respect.lib.xapi.exceptions.XapiException

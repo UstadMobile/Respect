@@ -24,7 +24,7 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeWhatFlags
 import org.openeel.lib.ipc.messagebridge.IpcMessageBridge
 import world.respect.xapi.ipc.shared.messages.ext.putAllFromStringMap
-import world.respect.xapi.ipc.shared.messages.ext.putStringValues
+import world.respect.xapi.ipc.shared.messages.ext.putQueryParameters
 import world.respect.xapi.ipc.shared.messages.ext.toDataLoadState
 import kotlin.uuid.Uuid
 
@@ -81,10 +81,7 @@ class XapiStatementsResourceIpcClient(
             request = MessageData(
                 data = Bundle().apply {
                     putEndpointAndExtras()
-                    putStringValues(
-                        key = XapiIpcKeys.KEY_QUERY_PARAMS,
-                        value = listParams.toParameters(json)
-                    )
+                    putQueryParameters(listParams.toParameters(json))
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceFlags.GET_STATEMENTS,
@@ -111,10 +108,7 @@ class XapiStatementsResourceIpcClient(
             messageData = MessageData(
                 data = Bundle().apply {
                     putEndpointAndExtras()
-                    putStringValues(
-                        key = XapiIpcKeys.KEY_QUERY_PARAMS,
-                        value = listParams.toParameters(json)
-                    )
+                    putQueryParameters(listParams.toParameters(json))
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceFlags.GET_STATEMENTS_FLOW,

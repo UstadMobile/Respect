@@ -2,6 +2,7 @@ package world.respect.xapi.ipc.shared.messages.ext
 
 import android.os.Bundle
 import io.ktor.http.Headers
+import io.ktor.http.Parameters
 import io.ktor.util.StringValues
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
@@ -12,6 +13,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
 import world.respect.lib.dataloadstate.throwable.HttpErrorResponseException
+import world.respect.xapi.ipc.shared.messages.BundleParameters
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 
 fun <T: Any> Bundle.putSerialized(
@@ -62,6 +64,24 @@ fun Bundle.getStringValues(
     val bundle = getBundle(key) ?: return null
     val caseInsensitive = getBoolean(key + SUFFIX_STR_VALS_CASE_INSENSITIVE)
     return BundleStringValues(bundle, caseInsensitive)
+}
+
+/**
+ * Shorthand to put the query parameters into a sub-bundle with the standard key
+ */
+fun Bundle.putQueryParameters(
+    queryParams: Parameters
+) {
+    putStringValues(key = XapiIpcKeys.KEY_QUERY_PARAMS, value = queryParams)
+}
+
+/**
+ * Shorthand to retrieve the query parameters from a sub bundle with the standard key
+ */
+fun Bundle.getQueryParameters(): Parameters? {
+    return BundleParameters(
+        bundle = getBundle(XapiIpcKeys.KEY_QUERY_PARAMS) ?: return null
+    )
 }
 
 fun Bundle.putAllFromStringMap(map: Map<String, String>) {

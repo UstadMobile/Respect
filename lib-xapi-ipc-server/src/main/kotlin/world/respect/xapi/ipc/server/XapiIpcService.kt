@@ -42,7 +42,9 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeWhatFlags
 import world.respect.xapi.ipc.shared.messages.ext.getDeserialized
+import world.respect.xapi.ipc.shared.messages.ext.getQueryParameters
 import world.respect.xapi.ipc.shared.messages.ext.getStringValues
+import world.respect.xapi.ipc.shared.messages.ext.orEmpty
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
 import world.respect.xapi.ipc.shared.messages.ext.toXapiDocument
 import java.util.concurrent.ExecutorService
@@ -191,9 +193,7 @@ class XapiIpcService: Service() {
                         replyMessage.data = runBlocking {
                             xapiResource.statements.get(
                                 listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                                    params = msg.data.getStringValues(
-                                        XapiIpcKeys.KEY_QUERY_PARAMS
-                                    ) ?: Parameters.Empty,
+                                    params = msg.data.getQueryParameters().orEmpty(),
                                     json = json
                                 )
                             ).also {
@@ -209,9 +209,7 @@ class XapiIpcService: Service() {
                             Log.d(XapiIpcTags.LOGTAG, "$logPrefix #$incomingMessageId getAsFlow")
                             xapiResource.statements.getAsFlow(
                                 listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                                    params = msg.data.getStringValues(
-                                        XapiIpcKeys.KEY_QUERY_PARAMS
-                                    ) ?: Parameters.Empty,
+                                    params = msg.data.getQueryParameters().orEmpty(),
                                     json = json
                                 ),
                                 dataLoadParams = DataLoadParams()
@@ -234,7 +232,7 @@ class XapiIpcService: Service() {
                     XapiIpcResourceFlags.GET_STATE -> {
                         Log.d(XapiIpcTags.LOGTAG, "$logPrefix: get state")
                         val params = XapiStateResource.SingleDocumentParams.fromParameters(
-                            params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS) ?: Parameters.Empty,
+                            params = msg.data.getQueryParameters().orEmpty(),
                             json = json,
                         )
                         val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
@@ -255,7 +253,7 @@ class XapiIpcService: Service() {
 
                     XapiIpcResourceFlags.GET_STATE_FLOW -> {
                         val params = XapiStateResource.SingleDocumentParams.fromParameters(
-                            params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS) ?: Parameters.Empty,
+                            params = msg.data.getQueryParameters().orEmpty(),
                             json = json,
                         )
                         val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
@@ -286,7 +284,7 @@ class XapiIpcService: Service() {
                     XapiIpcResourceFlags.GET_STATE_MULTIPLE -> {
                         Log.d(XapiIpcTags.LOGTAG, "$logPrefix: getMultipleDocuments state")
                         val params = XapiStateResource.MultiDocParams.fromParameters(
-                            params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS) ?: Parameters.Empty,
+                            params = msg.data.getQueryParameters().orEmpty(),
                             json = json,
                         )
                         val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
@@ -308,7 +306,7 @@ class XapiIpcService: Service() {
                     XapiIpcResourceFlags.POST_STATE -> {
                         Log.d(XapiIpcTags.LOGTAG, "$logPrefix: post state")
                         val params = XapiStateResource.SingleDocumentParams.fromParameters(
-                            params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS) ?: Parameters.Empty,
+                            params = msg.data.getQueryParameters().orEmpty(),
                             json = json,
                         )
                         val document = msg.data.toXapiDocument()
@@ -328,7 +326,7 @@ class XapiIpcService: Service() {
                     XapiIpcResourceFlags.PUT_STATE -> {
                         Log.d(XapiIpcTags.LOGTAG, "$logPrefix: put state")
                         val params = XapiStateResource.SingleDocumentParams.fromParameters(
-                            params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS) ?: Parameters.Empty,
+                            params = msg.data.getQueryParameters().orEmpty(),
                             json = json,
                         )
                         val document = msg.data.toXapiDocument()
@@ -348,7 +346,7 @@ class XapiIpcService: Service() {
                     XapiIpcResourceFlags.DELETE_STATE -> {
                         Log.d(XapiIpcTags.LOGTAG, "$logPrefix: delete state")
                         val params = XapiStateResource.SingleDocumentParams.fromParameters(
-                            params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS) ?: Parameters.Empty,
+                            params = msg.data.getQueryParameters().orEmpty(),
                             json = json,
                         )
                         runBlocking {
@@ -375,8 +373,6 @@ class XapiIpcService: Service() {
             }
         }
     }
-
-
 
     private val messenger: Messenger by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         Messenger(

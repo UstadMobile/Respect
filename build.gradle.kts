@@ -9,8 +9,18 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.androidKotlinMultiplatformLibrary) apply false
     alias(libs.plugins.kotlinAndroid) apply false
+    alias(libs.plugins.android.lint) apply false
 }
 
 tasks.register("clean", Delete::class) {
     this.delete(project.layout.buildDirectory)
+}
+
+System.getenv("GIT_TAG_NAME")?.also {
+    version = it
+}
+
+subprojects {
+    group = rootProject.group
+    version = rootProject.version
 }

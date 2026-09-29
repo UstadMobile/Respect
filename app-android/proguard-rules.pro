@@ -1,0 +1,76 @@
+
+# Begin XXHash rules
+# XXHash factories uses reflection
+-keep class net.jpountz.xxhash.XXHash32JavaSafe {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+-keep class net.jpountz.xxhash.XXHash32JavaSafe$Factory {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+# XXHash : XXHashFactory uses reflection
+-keep class net.jpountz.xxhash.XXHash64JavaSafe {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+-keep class net.jpountz.xxhash.XXHash64JavaSafe$Factory {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+-keep class net.jpountz.xxhash.StreamingXXHash32JavaSafe {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+-keep class net.jpountz.xxhash.StreamingXXHash32JavaSafe$Factory {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+# XXHash : XXHashFactory uses reflection
+-keep class net.jpountz.xxhash.StreamingXXHash64JavaSafe {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+-keep class net.jpountz.xxhash.StreamingXXHash64JavaSafe$Factory {
+    public <init>(...);
+    public static ** INSTANCE;
+}
+
+# End XXHash rules
+
+
+## Napier bug as per https://github.com/AAkira/Napier/issues/132
+-keep class io.github.aakira.napier.** {
+  *;
+}
+## End Napier rule
+
+# Begin ACRA Rules: ACRA does not cooperate with R8 and has no significant effect on APK size
+#
+#-keepclassmembers class org.acra.config.DefaultRetryPolicy {
+#    public <init>(...);
+#}
+#
+#-keepclassmembers class org.acra.attachment.DefaultAttachmentProvider {
+#    public <init>(...);
+#}
+
+-keep class org.acra.** { *; }
+
+-keep class world.respect.app.BuildConfig
+
+# End ACRA Rules.
+
+# MLKit QR Code scanner rules. Should not be needed, but they didn't bother to ship R8 rules
+# as per their own recommendations.
+# See https://github.com/googlesamples/mlkit/issues/1018
+-keep class com.google.mlkit.** { *; }
+-keep class com.google.android.gms.internal.mlkit_code_scanner.** { *; }
+# End MLKit QR Code scanner rules

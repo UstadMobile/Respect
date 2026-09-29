@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "@type": "https://id.openeel.org/schema/launchable-app",
+    "title": "Demo Launchable App",
+    "description": "This is a demo launchable app along with the lessons.",
+    "author": {
+      "name": "Ustad Mobile FZ-LLC"
+    },
+    "identifier": "https://demo.openeel.org/app",
+    "language": "en",
+    "modified": "2025-09-29T17:00:00Z"
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "https://demo.openeel.org/launchable-app.json",
+      "type": "application/opds-publication+json"
+    },
+    {
+      "rel": "collection",
+      "href": "default-catalog.json",
+      "type": "application/opds+json"
+    },
+    {
+      "rel": "https://id.openeel.org/rel/app-launch-uri",
+      "href": "https://demo.openeel.org/"
+    },
+    {
+      "rel": "https://id.openeel.org/rel/appstore-android",
+      "href": "https://play.google.com/store/apps/details?id=world.respect.app",
+      "title": "Get it on Google Play",
+      "alternate": [
+        {
+          "href": "https://play.google.com/store/apps/details?id=world.respect.app",
+          "title": "Get it from F-Droid"
+        }
+      ]
+    },
+    {
+      "rel": "terms-of-service",
+      "href": "https://demo.openeel.org/terms-privacy.html"
+    },
+    {
+      "rel": "license",
+      "href": "https://opensource.org/license/afl-3-0"
+    },
+    {
+      "rel": "https://id.openeel.org/rel/app-highlight-card",
+      "title": "Case Study",
+      "href": "https://demo.openeel.org/casestudy.html"
+    },
+    {
+      "rel": "https://id.openeel.org/rel/app-highlight-card",
+      "title": "Case Study 2",
+      "href": "https://demo.openeel.org/casestudy2.html"
+    },
+    {
+      "rel": "terms-of-service",
+      "href": "https://demo.openeel.org/terms-privacy.html"
+    },
+    {
+      "rel": "license",
+      "href": "http://opensource.org/licenses/MIT"
+    }
+  ],
+  "images": [
+    {
+      "href": "https://demo.openeel.org/app-icon.png",
+      "type": "image/png"
+    }
+  ]
+}

@@ -13,6 +13,8 @@ function isSetUrl(value) {
 if(isSetUrl(TESTCONTROLLER_URL)) {
     const stopUrl = output.SCHOOL_URL + "api/shutdown";
 
-    const testControllerResponse = http.get(stopUrl);
-    console.log("teardown.js: status="  + testControllerResponse.status + " (" + stopUrl + ")");
+    const testControllerResponse = http.get(
+        TESTCONTROLLER_URL + "testcontroller/stop?port=" + output.SCHOOL_PORT
+    );
+    console.log("test server controller stop response: " + testControllerResponse.status);
 }

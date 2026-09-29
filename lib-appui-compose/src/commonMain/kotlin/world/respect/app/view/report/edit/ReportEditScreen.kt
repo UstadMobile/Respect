@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.HorizontalDivider
@@ -33,7 +33,6 @@ import world.respect.app.components.RespectDateField
 import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.uiTextStringResource
-import world.respect.lib.xapi.extensions.reportoptions.DefaultIndicators
 import world.respect.lib.xapi.extensions.reportoptions.FixedReportTimeRange
 import world.respect.lib.xapi.extensions.reportoptions.RelativeRangeReportPeriod
 import world.respect.lib.xapi.extensions.reportoptions.ReportFilter
@@ -220,21 +219,15 @@ private fun ReportEditScreen(
                 }
 
                 // Y Axis Dropdown
-                val yAxisOptions = if (reportOptions.series.size > 1 && firstIndicatorType != null && seriesIndex > 0) {
-                    DefaultIndicators.list.filter { it.type == firstIndicatorType }
-                } else {
-                    DefaultIndicators.list
-                }
-
                 RespectExposedDropDownMenuField(
                     value = seriesItem.reportSeriesYAxis,
-                    options = yAxisOptions,
+                    options = uiState.availableIndicatorsForNewSeries,
                     onOptionSelected = { selectedYAxis ->
                         val updatedSeries = seriesItem.copy(reportSeriesYAxis = selectedYAxis)
                         onSeriesChanged(seriesIndex, updatedSeries)
                     },
                     label = { Text(stringResource(Res.string.y_axis) + "*") },
-                    itemText = { it.name }
+                    itemText = { stringResource(it.label) }
                 )
 
                 // Subgroup Dropdown

@@ -27,8 +27,7 @@ import world.respect.lib.xapi.ext.decodeFromExtensionOrNull
 import world.respect.lib.xapi.ext.encodeWithExtension
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
 import world.respect.lib.xapi.ext.objectActivityOrNull
-import world.respect.lib.xapi.extensions.reportoptions.DefaultIndicators
-import world.respect.lib.xapi.extensions.reportoptions.Indicator
+import world.respect.lib.xapi.extensions.reportoptions.DefaultIndicator
 import world.respect.lib.xapi.extensions.reportoptions.ReportFilter
 import world.respect.lib.xapi.extensions.reportoptions.ReportOptions
 import world.respect.lib.xapi.extensions.reportoptions.ReportSeries
@@ -77,6 +76,16 @@ data class ReportEditUiState(
 
     val reportTitleError: UiText?
         get() = if (isTitleError) StringResourceUiText(resource = Res.string.field_required_prompt) else null
+
+    val availableIndicatorsForNewSeries: List<DefaultIndicator>
+        get() {
+            val firstIndicatorType = reportOptions.series.firstOrNull()?.reportSeriesYAxis?.type
+            return if (reportOptions.series.size > 1 && firstIndicatorType != null) {
+                DefaultIndicator.entries.filter { it.type == firstIndicatorType }
+            } else {
+                DefaultIndicator.entries
+            }
+        }
 }
 
 class ReportEditViewModel(
@@ -305,13 +314,9 @@ class ReportEditViewModel(
             val requiredType = currentOptions.series.firstOrNull()?.reportSeriesYAxis?.type
 
             // Find a default indicator that matches the required type (or first available if no type restriction)
-            val defaultIndicator = if (requiredType != null) {
-                DefaultIndicators.list.firstOrNull { it.type == requiredType }
-                    ?: DefaultIndicators.list.first()
-            } else {
-                DefaultIndicators.list.first()
+            val defaultIndicator = _uiState.value.availableIndicatorsForNewSeries.first() {
+                it.type == requiredType
             }
-
             val newOptions = currentOptions.copy(
                 series = currentOptions.series + ReportSeries(
                     reportSeriesTitle = getString(resource = Res.string.series) + nextSeriesNum,

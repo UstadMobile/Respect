@@ -314,6 +314,8 @@
     <string name="sql">SQL</string>
     <string name="edit_filters">Edit Filters</string>
     <string name="blank_template">Blank Template</string>>
+    <string name="number_unique_users">Number of Unique Users</string>
+
 
     <!-- Duration Metrics -->
     <string name="total_content_usage_duration">Total Content Usage Duration</string>

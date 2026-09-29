@@ -11,7 +11,6 @@ import world.respect.datalayer.db.school.adapters.toIndicator
 import world.respect.datalayer.db.school.adapters.toIndicatorEntity
 import world.respect.lib.xapi.extensions.reportoptions.Indicator
 import world.respect.datalayer.school.IndicatorDataSource
-import world.respect.lib.xapi.extensions.reportoptions.DefaultIndicators
 
 class IndicatorDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,

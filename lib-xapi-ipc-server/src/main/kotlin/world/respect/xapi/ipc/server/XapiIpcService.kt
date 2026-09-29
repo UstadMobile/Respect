@@ -3,6 +3,7 @@ package world.respect.xapi.ipc.server
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.IBinder
@@ -10,6 +11,7 @@ import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import android.util.Log
+import io.ktor.http.Headers
 import io.ktor.http.Parameters
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
@@ -32,6 +34,7 @@ import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.ext.asAssignmentRecipeStmtIfIdNotNull
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementResult
+import world.respect.lib.xapi.resources.XapiStateResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
@@ -41,6 +44,9 @@ import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeWhatFlags
 import world.respect.xapi.ipc.shared.messages.ext.getDeserialized
 import world.respect.xapi.ipc.shared.messages.ext.getStringValues
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
+import world.respect.xapi.ipc.shared.messages.ext.toXapiDocument
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import kotlin.uuid.Uuid
 
 /**
@@ -68,11 +74,14 @@ class XapiIpcService: Service() {
             it.start()
     }
 
+    private val executor = Executors.newCachedThreadPool()
+
     internal class IncomingHandler(
         looper: Looper,
         private val context: Context,
         private val applicationContext: Context = context.applicationContext,
         private val json: Json,
+        private val executor: ExecutorService,
     ):  Handler(looper) {
 
         private val flowCollectors = ConcurrentMap<Int, Job>()
@@ -89,7 +98,7 @@ class XapiIpcService: Service() {
 
             val callingPackage = msg.data.getString(XapiIpcKeys.KEY_CLIENT_PACKAGE)
 
-            val logPrefix = "XapiIpcService (client=$callingPackage) msg #$incomingMessageId"
+            val logPrefix = "XapiIpcService (client=$callingPackage) msg #$incomingMessageId)"
 
             if(msg.what == IpcMessageBridgeWhatFlags.WHAT_FLOW_COMPLETION) {
                 flowCollectors.remove(incomingMessageId)?.also {
@@ -222,6 +231,138 @@ class XapiIpcService: Service() {
                         }
                     }
 
+                    XapiIpcResourceFlags.GET_STATE -> {
+                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix: get state")
+                        val params = XapiStateResource.SingleDocumentParams.fromParameters(
+                            params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS) ?: Parameters.Empty,
+                            json = json,
+                        )
+                        val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
+                            Headers.build { appendAll(it) }
+                        } ?: Headers.Empty
+                        val dataLoadParams = DataLoadParams(requestHeaders = requestHeaders)
+                        replyMessage.data = runBlocking {
+                            xapiResource.state.get(
+                                params = params,
+                                dataLoadParams = dataLoadParams,
+                            ).also {
+                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix get state: response ${it.toPrettyString()}")
+                            }.toBundle(executor)
+                        }
+
+                        msg.replyTo.send(replyMessage)
+                    }
+
+                    XapiIpcResourceFlags.GET_STATE_FLOW -> {
+                        val params = XapiStateResource.SingleDocumentParams.fromParameters(
+                            params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS) ?: Parameters.Empty,
+                            json = json,
+                        )
+                        val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
+                            Headers.build { appendAll(it) }
+                        } ?: Headers.Empty
+                        val dataLoadParams = DataLoadParams(requestHeaders = requestHeaders)
+                        scope.launch {
+                            Log.d(XapiIpcTags.LOGTAG, "$logPrefix #$incomingMessageId getAsFlow state")
+                            xapiResource.state.getAsFlow(
+                                params = params,
+                                dataLoadParams = dataLoadParams,
+                            ).collect {
+                                val message = Message.obtain()
+                                message.arg1 = incomingMessageId
+                                message.what = IpcMessageBridgeWhatFlags.WHAT_FLOW_EMISSION
+                                message.data = it.toBundle(executor)
+                                Log.d(
+                                    XapiIpcTags.LOGTAG,
+                                    "$logPrefix getAsFlow state emit ${it.toPrettyString()}"
+                                )
+                                replyTo.send(message)
+                            }
+                        }.also {
+                            flowCollectors[incomingMessageId] = it
+                        }
+                    }
+
+                    XapiIpcResourceFlags.GET_STATE_MULTIPLE -> {
+                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix: getMultipleDocuments state")
+                        val params = XapiStateResource.MultiDocParams.fromParameters(
+                            params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS) ?: Parameters.Empty,
+                            json = json,
+                        )
+                        val requestHeaders = msg.data.getStringValues(XapiIpcKeys.KEY_HEADERS)?.let {
+                            Headers.build { appendAll(it) }
+                        } ?: Headers.Empty
+                        val dataLoadParams = DataLoadParams(requestHeaders = requestHeaders)
+                        replyMessage.data = runBlocking {
+                            xapiResource.state.getMultipleDocuments(
+                                params = params,
+                                dataLoadParams = dataLoadParams,
+                            ).also {
+                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix getMultipleDocuments state: response ${it.toPrettyString()}")
+                            }.toBundle(ListSerializer(String.serializer()), json)
+                        }
+
+                        msg.replyTo.send(replyMessage)
+                    }
+
+                    XapiIpcResourceFlags.POST_STATE -> {
+                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix: post state")
+                        val params = XapiStateResource.SingleDocumentParams.fromParameters(
+                            params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS) ?: Parameters.Empty,
+                            json = json,
+                        )
+                        val document = msg.data.toXapiDocument()
+                        runBlocking {
+                            xapiResource.state.post(
+                                params = params,
+                                document = document,
+                            )
+                        }
+                        replyMessage.data = Bundle().apply {
+                            putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
+                        }
+
+                        msg.replyTo.send(replyMessage)
+                    }
+
+                    XapiIpcResourceFlags.PUT_STATE -> {
+                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix: put state")
+                        val params = XapiStateResource.SingleDocumentParams.fromParameters(
+                            params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS) ?: Parameters.Empty,
+                            json = json,
+                        )
+                        val document = msg.data.toXapiDocument()
+                        runBlocking {
+                            xapiResource.state.put(
+                                params = params,
+                                document = document,
+                            )
+                        }
+                        replyMessage.data = Bundle().apply {
+                            putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
+                        }
+
+                        msg.replyTo.send(replyMessage)
+                    }
+
+                    XapiIpcResourceFlags.DELETE_STATE -> {
+                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix: delete state")
+                        val params = XapiStateResource.SingleDocumentParams.fromParameters(
+                            params = msg.data.getStringValues(XapiIpcKeys.KEY_QUERY_PARAMS) ?: Parameters.Empty,
+                            json = json,
+                        )
+                        runBlocking {
+                            xapiResource.state.delete(
+                                params = params,
+                            )
+                        }
+                        replyMessage.data = Bundle().apply {
+                            putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
+                        }
+
+                        msg.replyTo.send(replyMessage)
+                    }
+
                     else -> {
                         super.handleMessage(msg)
                     }
@@ -235,12 +376,15 @@ class XapiIpcService: Service() {
         }
     }
 
+
+
     private val messenger: Messenger by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         Messenger(
             IncomingHandler(
                 looper = handlerThread.looper,
                 context = this,
                 json = json,
+                executor = executor,
             )
         )
     }
@@ -256,5 +400,6 @@ class XapiIpcService: Service() {
         Log.d(XapiIpcTags.LOGTAG, "XapiIpcService: onDestroy")
         super.onDestroy()
         handlerThread.quit()
+        executor.shutdown()
     }
 }

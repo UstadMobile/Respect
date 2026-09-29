@@ -24,6 +24,7 @@ class XapiStatementResourceIpcTest : AbstractXapiStatementResourceTest() {
         withXapiResourceIpcTest(
             serviceRule = serviceRule,
             json = json,
+            authenticatedAgents = { emptyList() },
         ) {
             block(it.statements)
         }

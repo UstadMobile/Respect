@@ -21,6 +21,11 @@ object XapiIpcKeys {
      */
     const val KEY_CLIENT_PACKAGE = "xapiIpcClientPackage"
 
+    /**
+     * Key used to store the file descriptor which holds the body of a
+     * [world.respect.lib.xapi.model.XapiDocument] as per
+     * [world.respect.xapi.ipc.shared.messages.ext.toBundle]
+     */
     const val KEY_XAPI_DOC_FD = "xapiDocFd"
 
     const val KEY_XAPI_DOC_TYPE = "xapiDocType"

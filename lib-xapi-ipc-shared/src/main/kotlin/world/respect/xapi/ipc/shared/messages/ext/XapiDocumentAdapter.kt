@@ -2,8 +2,15 @@ package world.respect.xapi.ipc.shared.messages.ext
 
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import io.ktor.http.Headers
 import io.ktor.util.date.GMTDate
 import kotlinx.coroutines.runBlocking
+import world.respect.lib.dataloadstate.DataErrorResult
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.dataloadstate.throwable.HttpErrorResponseException
 import world.respect.lib.xapi.model.XapiDocument
 import world.respect.lib.xapi.model.XapiDocumentByteArrayImpl
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
@@ -60,5 +67,27 @@ fun Bundle.toXapiDocument(): XapiDocument {
         type = type,
         updated = updated,
         contents = contents
+    )
+}
+
+/**
+ * Convert a [DataLoadState] of [XapiDocument] to a Bundle that can be sent using the IPC.
+ */
+fun DataLoadState<XapiDocument>.toBundle(
+    executor: ExecutorService
+): Bundle {
+    return toBundle(
+        putBody = { data ->
+            putAll(data.data.toBundle(executor))
+        }
+    )
+}
+
+/**
+ * Convert a Bundle back to a [DataLoadState] of [XapiDocument].
+ */
+fun Bundle.toXapiDocumentDataLoadState(): DataLoadState<XapiDocument> {
+    return toDataLoadState(
+        getBody = { it.toXapiDocument() }
     )
 }

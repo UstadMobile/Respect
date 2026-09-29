@@ -11,6 +11,7 @@ import world.respect.lib.xapi.resources.XapiResource
 import world.respect.lib.xapi.resources.XapiStateResource
 import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
+import java.util.concurrent.Executors
 
 /**
  * XapiResourceIpcClient must host an interface implementation for messages for which a reply is
@@ -32,6 +33,8 @@ class XapiResourceIpcClient(
     private val messageExtras = mapOf(
         XapiIpcKeys.KEY_CLIENT_PACKAGE to clientPackageName,
     )
+
+    private val executor = Executors.newCachedThreadPool()
 
     override val statements: XapiStatementsResource by lazy {
         XapiStatementsResourceIpcClient(
@@ -55,11 +58,20 @@ class XapiResourceIpcClient(
     override val agentProfile: XapiAgentProfileResource
         get() = TODO("Not yet implemented")
 
-    override val state: XapiStateResource
-        get() = TODO("Not yet implemented")
+    override val state: XapiStateResource by lazy {
+        XapiStateResourceIpcClient(
+            requestSender = requestSender,
+            json = json,
+            endpoint = endpoint,
+            auth = auth,
+            messageDataExtras = messageExtras,
+            executor = executor,
+        )
+    }
 
     override fun close() {
         requestSender.close()
+        executor.shutdown()
     }
 
 }

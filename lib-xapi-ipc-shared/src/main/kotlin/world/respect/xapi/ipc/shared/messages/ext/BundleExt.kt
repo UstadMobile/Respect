@@ -71,8 +71,7 @@ fun Bundle.putAllFromStringMap(map: Map<String, String>) {
 }
 
 fun <T: Any> Bundle.toDataLoadState(
-    json: Json,
-    deserializer: DeserializationStrategy<T>
+    getBody: (Bundle) -> T
 ): DataLoadState<T> {
     val status = getInt(XapiIpcKeys.KEY_STATUS_CODE)
 
@@ -88,11 +87,7 @@ fun <T: Any> Bundle.toDataLoadState(
         when(status) {
             200 -> {
                 DataReadyState(
-                    data = getDeserialized(
-                        key = XapiIpcKeys.KEY_BODY,
-                        json = json,
-                        deserializer = deserializer,
-                    ) ?: throw IllegalStateException("200 response has no body"),
+                    data = getBody(this),
                     metaInfo = metaInfo,
                 )
             }
@@ -114,4 +109,19 @@ fun <T: Any> Bundle.toDataLoadState(
     }catch (e: Throwable) {
         return DataErrorResult(e)
     }
+}
+
+fun <T: Any> Bundle.toDataLoadState(
+    json: Json,
+    deserializer: DeserializationStrategy<T>
+): DataLoadState<T> {
+    return toDataLoadState(
+        getBody = {
+            it.getDeserialized(
+                key = XapiIpcKeys.KEY_BODY,
+                json = json,
+                deserializer = deserializer,
+            ) ?: throw IllegalStateException("200 response has no body")
+        }
+    )
 }

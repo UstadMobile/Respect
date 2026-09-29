@@ -16,7 +16,7 @@ import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.domain.report.query.GenerateReportQueriesUseCase
 import world.respect.datalayer.db.school.domain.report.query.RunReportUseCase
 import world.respect.datalayer.db.school.domain.report.query.RunReportUseCaseDatabaseImpl
-import world.respect.lib.xapi.extensions.reportoptions.DefaultIndicators
+import world.respect.lib.xapi.extensions.reportoptions.DefaultIndicator
 import world.respect.lib.xapi.extensions.reportoptions.RelativeRangeReportPeriod
 import world.respect.lib.xapi.extensions.reportoptions.ReportOptions
 import world.respect.lib.xapi.extensions.reportoptions.ReportPeriodOption
@@ -70,7 +70,7 @@ class RunReportUseCaseTest {
                         xAxis = ReportXAxis.DAY,
                         series = listOf(
                             ReportSeries(
-                                reportSeriesYAxis = DefaultIndicators.list.first(),
+                                reportSeriesYAxis = DefaultIndicator.entries.first(),
                                 reportSeriesSubGroup = null
                             )
                         ),
@@ -115,7 +115,7 @@ class RunReportUseCaseTest {
                 xAxis = ReportXAxis.WEEK,
                 series = listOf(
                     ReportSeries(
-                        reportSeriesYAxis = DefaultIndicators.list.first(),
+                        reportSeriesYAxis = DefaultIndicator.entries.first(),
                         reportSeriesSubGroup = null
                     )
                 ),
@@ -162,7 +162,7 @@ class RunReportUseCaseTest {
                 xAxis = ReportXAxis.MONTH,
                 series = listOf(
                     ReportSeries(
-                        reportSeriesYAxis = DefaultIndicators.list.first(),
+                        reportSeriesYAxis = DefaultIndicator.entries.first(),
                         reportSeriesSubGroup = null
                     )
                 ),
@@ -200,7 +200,7 @@ class RunReportUseCaseTest {
                 xAxis = ReportXAxis.YEAR,
                 series = listOf(
                     ReportSeries(
-                        reportSeriesYAxis = DefaultIndicators.list.first(),
+                        reportSeriesYAxis = DefaultIndicator.entries.first(),
                         reportSeriesSubGroup = null
                     )
                 ),
@@ -229,7 +229,7 @@ class RunReportUseCaseTest {
         runBlocking { schoolDb.insertStatementsPerDay() }
 
         runBlocking {
-            DefaultIndicators.list.forEach { yAxis ->
+            DefaultIndicator.entries.forEach { yAxis ->
                 ReportXAxis.entries.forEach { xAxis ->
                     try {
                         runReportUseCase(
@@ -275,7 +275,7 @@ class RunReportUseCaseTest {
                         xAxis = ReportXAxis.DAY,
                         series = listOf(
                             ReportSeries(
-                                reportSeriesYAxis = DefaultIndicators.list.first(),
+                                reportSeriesYAxis = DefaultIndicator.entries.first(),
                                 reportSeriesSubGroup = ReportXAxis.CLASS,
                             )
                         ),
@@ -316,7 +316,7 @@ class RunReportUseCaseTest {
                 xAxis = ReportXAxis.DAY,
                 series = listOf(
                     ReportSeries(
-                        reportSeriesYAxis = DefaultIndicators.list.first(),
+                        reportSeriesYAxis = DefaultIndicator.entries.first(),
                         reportSeriesSubGroup = null
                     )
                 ),
@@ -364,7 +364,7 @@ class RunReportUseCaseTest {
                         xAxis = ReportXAxis.DAY,
                         series = listOf(
                             ReportSeries(
-                                reportSeriesYAxis = DefaultIndicators.list.first(),
+                                reportSeriesYAxis = DefaultIndicator.entries.first(),
                                 reportSeriesSubGroup = null
                             )
                         ),

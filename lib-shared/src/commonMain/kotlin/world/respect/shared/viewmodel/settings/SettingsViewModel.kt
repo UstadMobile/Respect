@@ -1,17 +1,15 @@
 package world.respect.shared.viewmodel.settings
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.scope.Scope
 import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.applanguage.GetUiLanguagesUseCase
 import world.respect.shared.domain.applanguage.SetLanguageUseCase
-import world.respect.shared.domain.applanguage.SupportedLanguagesConfig.Companion.LOCALE_USE_SYSTEM
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.settings
 import world.respect.shared.util.ext.asUiText
@@ -30,7 +28,7 @@ data class SettingsUiState(
 class SettingsViewModel(
     savedStateHandle: SavedStateHandle,
     accountManager: RespectAccountManager,
-    private val supportedLangConfig: SupportedLanguagesConfig,
+    private val getUiLanguagesUseCase: GetUiLanguagesUseCase,
     private val setLanguageUseCase: SetLanguageUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
@@ -51,7 +49,13 @@ class SettingsViewModel(
             )
         }
 
-        loadLanguages()
+        val uiLanguages = getUiLanguagesUseCase()
+        _uiState.update {
+            it.copy(
+                availableLanguages = uiLanguages.availableLanguages,
+                currentLanguage = uiLanguages.selectedLanguage,
+            )
+        }
     }
 
     fun onClickLanguage() {
@@ -69,33 +73,13 @@ class SettingsViewModel(
     }
 
     fun onClickLang(lang: SupportedLanguagesConfig.UiLanguage) {
-        _uiState.update { prev ->
-            prev.copy(langDialogVisible = false)
-        }
-
         setLanguageUseCase(uiLang = lang)
 
-        loadLanguages()
-    }
-
-    fun loadLanguages() {
-        viewModelScope.launch {
-
-            val availableLangs = supportedLangConfig.getAvailableLanguages()
-
-            val langSetting = supportedLangConfig.localeSetting ?: LOCALE_USE_SYSTEM
-
-            val currentLang = availableLangs.firstOrNull {
-                it.langCode == langSetting
-            } ?: availableLangs.first()
-
-            _uiState.update {
-                it.copy(
-                    availableLanguages = availableLangs,
-                    currentLanguage = currentLang
-
-                )
-            }
+        _uiState.update { prev ->
+            prev.copy(
+                langDialogVisible = false,
+                currentLanguage = lang,
+            )
         }
     }
 }

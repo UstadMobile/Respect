@@ -8,9 +8,9 @@ import world.respect.shared.viewmodel.RespectViewModel
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import world.respect.shared.domain.applanguage.GetUiLanguagesUseCase
 import world.respect.shared.domain.applanguage.SetLanguageUseCase
 import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
-import world.respect.shared.domain.applanguage.SupportedLanguagesConfig.Companion.LOCALE_USE_SYSTEM
 import world.respect.shared.domain.navigation.onappstart.NavigateOnAppStartUseCase
 import world.respect.shared.domain.onboarding.ShouldShowOnboardingUseCase
 import world.respect.shared.domain.usagereporting.GetUsageReportingEnabledUseCase
@@ -29,7 +29,7 @@ class OnboardingViewModel(
     private val setUsageReportingEnabledUseCase: SetUsageReportingEnabledUseCase,
     private val getUsageReportingEnabledUseCase: GetUsageReportingEnabledUseCase,
     private val navigateOnAppStartUseCase: NavigateOnAppStartUseCase,
-    private val supportedLangConfig: SupportedLanguagesConfig,
+    private val getUiLanguagesUseCase: GetUiLanguagesUseCase,
     private val setLanguageUseCase: SetLanguageUseCase
 ) : RespectViewModel(savedStateHandle) {
 
@@ -44,8 +44,14 @@ class OnboardingViewModel(
                 hideAppBar = true
             )
         }
-        _uiState.update { it.copy(usageStatsOptInChecked = getUsageReportingEnabledUseCase()) }
-        loadLanguages()
+        val uiLanguages = getUiLanguagesUseCase()
+        _uiState.update {
+            it.copy(
+                usageStatsOptInChecked = getUsageReportingEnabledUseCase(),
+                availableLanguages = uiLanguages.availableLanguages,
+                selectedLanguage = uiLanguages.selectedLanguage,
+            )
+        }
     }
 
     fun onToggleUsageStatsOptIn() {
@@ -60,7 +66,6 @@ class OnboardingViewModel(
 
         settings.putString(ShouldShowOnboardingUseCase.KEY_ONBOARDING_SHOWN, true.toString())
         setUsageReportingEnabledUseCase(_uiState.value.usageStatsOptInChecked)
-
         viewModelScope.launch {
             _navCommandFlow.tryEmit(navigateOnAppStartUseCase())
         }
@@ -68,35 +73,7 @@ class OnboardingViewModel(
     }
 
     fun onLanguageSelected(lang: SupportedLanguagesConfig.UiLanguage) {
-        viewModelScope.launch {
-            setLanguageUseCase(uiLang = lang)
-
-            loadLanguages()
-
-            _uiState.update {
-                it.copy(selectedLanguage = lang)
-            }
-        }
-    }
-
-    fun loadLanguages() {
-        viewModelScope.launch {
-
-            val availableLangs = supportedLangConfig.getAvailableLanguages()
-
-            val langSetting = supportedLangConfig.localeSetting ?: LOCALE_USE_SYSTEM
-
-            val currentLang = availableLangs.firstOrNull {
-                it.langCode == langSetting
-            } ?: availableLangs.first()
-
-            _uiState.update {
-                it.copy(
-                    availableLanguages = availableLangs,
-                    selectedLanguage = currentLang
-                )
-            }
-
-        }
+        setLanguageUseCase(uiLang = lang)
+        _uiState.update { it.copy(selectedLanguage = lang) }
     }
 }

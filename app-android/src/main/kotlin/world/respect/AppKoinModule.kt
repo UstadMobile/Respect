@@ -152,6 +152,7 @@ import world.respect.shared.domain.account.username.validateusername.ValidateUse
 import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseCase
 import world.respect.shared.domain.account.validateqrbadge.ValidateQrCodeUseCase
 import world.respect.shared.domain.applanguage.LocaleSettingDelegateAndroid
+import world.respect.shared.domain.applanguage.GetUiLanguagesUseCase
 import world.respect.shared.domain.applanguage.SetLanguageUseCase
 import world.respect.shared.domain.applanguage.SetLanguageUseCaseAndroid
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
@@ -350,6 +351,12 @@ val appKoinModule = module {
     single<SetLanguageUseCase> {
         SetLanguageUseCaseAndroid(
             languagesConfig = get()
+        )
+    }
+
+    single {
+        GetUiLanguagesUseCase(
+            supportedLangConfig = get()
         )
     }
 

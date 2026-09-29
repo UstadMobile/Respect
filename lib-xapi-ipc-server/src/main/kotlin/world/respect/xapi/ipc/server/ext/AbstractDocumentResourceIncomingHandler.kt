@@ -12,6 +12,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeWhatFlags
+import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.ext.toPrettyString
 import world.respect.lib.xapi.XapiResourceProvider
@@ -25,6 +26,8 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcResourceAndMethod
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import world.respect.xapi.ipc.shared.messages.ext.getXapiIpcHeaders
 import world.respect.xapi.ipc.shared.messages.ext.orEmpty
+import world.respect.xapi.ipc.shared.messages.ext.sendResponseErrorMessage
+import world.respect.xapi.ipc.shared.messages.ext.sendResponseMessage
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
 import world.respect.xapi.ipc.shared.messages.ext.toXapiDocument
 import java.util.concurrent.ExecutorService
@@ -50,13 +53,13 @@ abstract class AbstractDocumentResourceIncomingHandler<
     private val flowCollectors = ConcurrentMap<Int, Job>()
 
     override fun handleMessage(msg: Message) {
-        val bundle = msg.data
+        val requestBundle = msg.data
         val replyTo = msg.replyTo
         val incomingMessageId = msg.arg1
-
+        val method = XapiIpcResourceAndMethod.fromArg2Int(msg.arg2).method
 
         val xapiResource = runBlocking {
-            xapiResourceProvider.provideResource(bundle)
+            xapiResourceProvider.provideResource(requestBundle)
         }
 
         val docResource = xapiResource.documentResource()
@@ -68,42 +71,45 @@ abstract class AbstractDocumentResourceIncomingHandler<
             it.arg1 = incomingMessageId
         }
 
-        when(XapiIpcResourceAndMethod.fromArg2Int(msg.arg2).method) {
+        when(method) {
             XapiIpcMethodEnum.GET -> {
                 Log.d(XapiIpcTags.LOGTAG, "$logPrefix: get state")
-
-                replyMessage.data = runBlocking {
-                    docResource.get(
-                        params = bundle.getSingleDocParams(),
-                        dataLoadParams = DataLoadParams(
-                            requestHeaders = msg.data.getXapiIpcHeaders().orEmpty()
-                        ),
-                    ).also {
-                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix get state: response ${it.toPrettyString()}")
-                    }.toBundle(executor)
+                scope.launch {
+                    replyTo.sendResponseMessage(
+                        what = IpcMessageBridgeWhatFlags.WHAT_RESPONSE,
+                        messageId = incomingMessageId,
+                        data = docResource.get(
+                            params = requestBundle.getSingleDocParams(),
+                            dataLoadParams = DataLoadParams(
+                                requestHeaders = requestBundle.getXapiIpcHeaders().orEmpty()
+                            ),
+                        ).also {
+                            Log.d(XapiIpcTags.LOGTAG, "$logPrefix get state: response ${it.toPrettyString()}")
+                        }.toBundle(executor),
+                    )
                 }
-
-                msg.replyTo.send(replyMessage)
             }
 
             XapiIpcMethodEnum.GET_AS_FLOW -> {
                 scope.launch {
                     Log.d(XapiIpcTags.LOGTAG, "$logPrefix #$incomingMessageId getAsFlow state")
+
                     docResource.getAsFlow(
-                        params = bundle.getSingleDocParams(),
+                        params = requestBundle.getSingleDocParams(),
                         dataLoadParams = DataLoadParams(
-                            requestHeaders = msg.data.getXapiIpcHeaders().orEmpty()
+                            requestHeaders = requestBundle.getXapiIpcHeaders().orEmpty()
                         ),
-                    ).collect { xapiDoc ->
-                        val message = Message.obtain()
-                        message.arg1 = incomingMessageId
-                        message.what = IpcMessageBridgeWhatFlags.WHAT_FLOW_EMISSION
-                        message.data = xapiDoc.toBundle(executor)
+                    ).collect { dataLoadState ->
+                        replyTo.sendResponseMessage(
+                            what = IpcMessageBridgeWhatFlags.WHAT_FLOW_EMISSION,
+                            messageId = incomingMessageId,
+                            data = dataLoadState.toBundle(executor),
+                        )
+
                         Log.d(
                             XapiIpcTags.LOGTAG,
-                            "$logPrefix getAsFlow state emit ${xapiDoc.toPrettyString()}"
+                            "$logPrefix getAsFlow state emit ${dataLoadState.toPrettyString()}"
                         )
-                        replyTo.send(message)
                     }
                 }.also {
                     flowCollectors[incomingMessageId] = it
@@ -112,43 +118,57 @@ abstract class AbstractDocumentResourceIncomingHandler<
 
             XapiIpcMethodEnum.GET_MULTIDOC -> {
                 Log.d(XapiIpcTags.LOGTAG, "$logPrefix: getMultipleDocuments state")
-
-                replyMessage.data = runBlocking {
-                    docResource.getMultipleDocuments(
-                        params = bundle.getMultiDocParams(),
-                        dataLoadParams = DataLoadParams(
-                            requestHeaders = msg.data.getXapiIpcHeaders().orEmpty()
+                scope.launch {
+                    replyTo.sendResponseMessage(
+                        what = IpcMessageBridgeWhatFlags.WHAT_RESPONSE,
+                        messageId = incomingMessageId,
+                        data = docResource.getMultipleDocuments(
+                            params = requestBundle.getMultiDocParams(),
+                            dataLoadParams = DataLoadParams(
+                                requestHeaders = requestBundle.getXapiIpcHeaders().orEmpty()
+                            ),
+                        ).also {
+                            Log.d(XapiIpcTags.LOGTAG, "$logPrefix getMultipleDocuments state: response ${it.toPrettyString()}")
+                        }.toBundle(
+                            ListSerializer(String.serializer()), json
                         ),
-                    ).also {
-                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix getMultipleDocuments state: response ${it.toPrettyString()}")
-                    }.toBundle(ListSerializer(String.serializer()), json)
+                    )
                 }
-
-                msg.replyTo.send(replyMessage)
             }
 
             XapiIpcMethodEnum.POST -> {
                 Log.d(XapiIpcTags.LOGTAG, "$logPrefix: post state")
-                val document = msg.data.toXapiDocument()
-                runBlocking {
-                    docResource.post(
-                        params = bundle.getSingleDocParams(),
-                        document = document,
-                    )
-                }
-                replyMessage.data = Bundle().apply {
-                    putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
-                }
+                scope.launch {
+                    try {
+                        docResource.post(
+                            params = requestBundle.getSingleDocParams(),
+                            document = requestBundle.toXapiDocument(),
+                        )
 
-                msg.replyTo.send(replyMessage)
+                        replyTo.sendResponseMessage(
+                            what = IpcMessageBridgeWhatFlags.WHAT_RESPONSE,
+                            messageId = incomingMessageId,
+                            data = Bundle().apply {
+                                putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
+                            }
+                        )
+                    } catch (e: Exception) {
+                        replyTo.sendResponseErrorMessage(
+                            messageId = incomingMessageId,
+                            what = IpcMessageBridgeWhatFlags.WHAT_RESPONSE,
+                            error = e,
+                        )
+                    }
+
+                }
             }
 
             XapiIpcMethodEnum.PUT -> {
                 Log.d(XapiIpcTags.LOGTAG, "$logPrefix: put state")
-                val document = msg.data.toXapiDocument()
+                val document = requestBundle.toXapiDocument()
                 runBlocking {
                     docResource.put(
-                        params = bundle.getSingleDocParams(),
+                        params = requestBundle.getSingleDocParams(),
                         document = document,
                     )
                 }
@@ -163,7 +183,7 @@ abstract class AbstractDocumentResourceIncomingHandler<
                 Log.d(XapiIpcTags.LOGTAG, "$logPrefix: delete state")
                 runBlocking {
                     docResource.delete(
-                        params = bundle.getSingleDocParams(),
+                        params = requestBundle.getSingleDocParams(),
                     )
                 }
                 replyMessage.data = Bundle().apply {

@@ -24,6 +24,7 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import world.respect.xapi.ipc.shared.messages.ext.putAllFromStringMap
 import world.respect.xapi.ipc.shared.messages.ext.putXapiIpcQueryParameters
 import world.respect.xapi.ipc.shared.messages.ext.putStringValues
+import world.respect.xapi.ipc.shared.messages.ext.putXapiIpcHeaders
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
 import world.respect.xapi.ipc.shared.messages.ext.toXapiDocumentDataLoadState
 import java.util.concurrent.ExecutorService
@@ -88,10 +89,7 @@ class XapiStateResourceIpcClient(
                     data = Bundle().apply {
                         putEndpointAndExtras()
                         putXapiIpcQueryParameters(params.toParameters(json))
-                        putStringValues(
-                            key = XapiIpcKeys.KEY_HEADERS,
-                            value = dataLoadParams.requestHeaders,
-                        )
+                        putXapiIpcHeaders(dataLoadParams.requestHeaders)
                     },
                     what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
                     arg2 = XapiIpcResourceFlags.STATE_GET,
@@ -121,10 +119,7 @@ class XapiStateResourceIpcClient(
                 data = Bundle().apply {
                     putEndpointAndExtras()
                     putXapiIpcQueryParameters(params.toParameters(json))
-                    putStringValues(
-                        key = XapiIpcKeys.KEY_HEADERS,
-                        value = dataLoadParams.requestHeaders,
-                    )
+                    putXapiIpcHeaders(dataLoadParams.requestHeaders)
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceFlags.STATE_GET_FLOW,

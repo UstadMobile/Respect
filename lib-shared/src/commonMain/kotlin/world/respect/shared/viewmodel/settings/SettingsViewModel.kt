@@ -14,8 +14,6 @@ import world.respect.shared.domain.applanguage.SetLanguageUseCase
 import world.respect.shared.domain.applanguage.SupportedLanguagesConfig.Companion.LOCALE_USE_SYSTEM
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.settings
-import world.respect.shared.navigation.CurriculumMappingList
-import world.respect.shared.navigation.NavCommand
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 

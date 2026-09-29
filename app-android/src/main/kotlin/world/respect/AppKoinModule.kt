@@ -2,7 +2,7 @@
 package world.respect
 
 import android.content.Context
-import androidx.core.os.LocaleListCompat
+import androidx.core.app.LocaleManagerCompat
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.russhwolf.settings.Settings
@@ -339,8 +339,9 @@ val appKoinModule = module {
 
     single {
         SupportedLanguagesConfig(
-            systemLocales = LocaleListCompat.getAdjustedDefault().let { localeList ->
-                (0 .. localeList.size()).mapNotNull { localeList[it]?.language }
+            //Use the device locales (not the app-specific override) for the system default option
+            systemLocales = LocaleManagerCompat.getSystemLocales(androidContext()).let { localeList ->
+                (0 until localeList.size()).mapNotNull { localeList[it]?.language }
             },
             localeSettingDelegate = LocaleSettingDelegateAndroid()
         )

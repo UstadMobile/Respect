@@ -113,39 +113,6 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SettingsListItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    title: String,
-    onClick: () -> Unit,
-    testTag: String
-) {
-    ListItem(
-        headlineContent = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge
-            )
-        },
-        leadingContent = {
-            Icon(
-                imageVector = icon,
-                contentDescription = stringResource(Res.string.loading),
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        },
-        modifier = Modifier
-            .testTag(testTag)
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        colors = ListItemDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        tonalElevation = 0.dp
-    )
-}
-
-
-@Composable
 fun SettingsDialog(
     onDismissRequest: () -> Unit,
     content: @Composable () -> Unit,

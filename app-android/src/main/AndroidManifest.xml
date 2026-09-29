@@ -75,9 +75,13 @@
         launchMode singleTop is used because the RespectAccountManager models the active user as a
         single account.
         -->
+        <!--
+        locale and layoutDirection are intentionally NOT handled here so that the activity is
+        recreated when the user changes the in-app language (see SetLanguageUseCaseAndroid).
+        -->
         <activity
             android:name="world.respect.MainActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|layoutDirection|locale|mcc|navigation|smallestScreenSize|touchscreen|uiMode"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|mnc|colorMode|density|fontScale|fontWeightAdjustment|keyboard|mcc|navigation|smallestScreenSize|touchscreen|uiMode"
             android:launchMode="singleTop"
             android:exported="true">
             <intent-filter>

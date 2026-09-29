@@ -11,6 +11,7 @@ import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.dataloadstate.throwable.HttpErrorResponseException
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 
 fun <T: Any> Bundle.putSerialized(
@@ -105,7 +106,8 @@ fun <T: Any> Bundle.toDataLoadState(
 
             else -> {
                 DataErrorResult(
-                    error = IllegalStateException()
+                    error = HttpErrorResponseException(status, "HTTP $status"),
+                    metaInfo = metaInfo,
                 )
             }
         }

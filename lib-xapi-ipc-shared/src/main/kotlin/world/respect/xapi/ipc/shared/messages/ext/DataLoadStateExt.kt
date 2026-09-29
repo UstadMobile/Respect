@@ -8,6 +8,7 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
+import world.respect.lib.dataloadstate.throwable.unwrapHttpStatusCode
 import world.respect.lib.xapi.ext.xapiHttpStatusCodeOrNull
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 
@@ -17,16 +18,24 @@ fun <T: Any> DataLoadState<T>.toBundle(
     serializer: SerializationStrategy<T>,
     json: Json,
 ): Bundle {
+    return toBundle { data ->
+        putSerialized(
+            key = XapiIpcKeys.KEY_BODY,
+            json = json,
+            serializer = serializer,
+            value = data.data,
+        )
+    }
+}
+
+fun <T: Any> DataLoadState<T>.toBundle(
+    putBody: Bundle.(DataReadyState<T>) -> Unit,
+): Bundle {
     return when(this) {
         is DataReadyState<T> -> {
             Bundle().apply {
                 putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
-                putSerialized(
-                    key = XapiIpcKeys.KEY_BODY,
-                    json = json,
-                    serializer = serializer,
-                    value = data,
-                )
+                this@apply.putBody(this@toBundle)
                 putBundle(XapiIpcKeys.KEY_HEADERS, metaInfo.toBundle())
             }
         }
@@ -40,7 +49,7 @@ fun <T: Any> DataLoadState<T>.toBundle(
 
         is DataErrorResult<T> -> {
             Bundle().also {
-                it.putInt(XapiIpcKeys.KEY_STATUS_CODE, error.xapiHttpStatusCodeOrNull() ?: 500)
+                it.putInt(XapiIpcKeys.KEY_STATUS_CODE, error.unwrapHttpStatusCode() ?: 500)
                 it.putBundle(XapiIpcKeys.KEY_HEADERS, metaInfo.toBundle())
             }
         }

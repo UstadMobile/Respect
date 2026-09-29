@@ -12,6 +12,9 @@ Android apps using Android Inter-Process Communication (IPC) where one acts as a
 other acts as a client. The Android IPC uses a [bound service Messenger](https://developer.android.com/develop/background-work/services/bound-services#Messenger).
 This is required to support offline usage.
 
+Requests and responses are converted to/from android.os.Bundle and sent/received using bound service
+Messenger.
+
 ## Module guidance
 
 * NEVER use plain unit tests for any test that involves use of parcel file descriptor 

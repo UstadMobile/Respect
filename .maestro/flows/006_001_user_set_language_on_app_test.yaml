@@ -40,7 +40,7 @@ onFlowComplete:
 - tapOn: "Login"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - tapOn:
      id: "Settings"
 - assertVisible:

@@ -19,7 +19,7 @@ import world.respect.lib.xapi.model.XapiStatement
 fun Route.XapiStatementsResourceRoute(
     statementResource: (ApplicationCall) -> XapiStatementsResource,
     json: Json,
-    processStatementsUseCase: (ApplicationCall) -> ProcessXapiStatementsUseCase
+    processStatementsUseCase: ((ApplicationCall) -> ProcessXapiStatementsUseCase)? = null
 ) {
 
     get(XapiStatementsResource.ENDPOINT_NAME) {
@@ -46,13 +46,13 @@ fun Route.XapiStatementsResourceRoute(
 
         val storeResult = statementResource(call).post(statements)
 
-        val useCase = processStatementsUseCase(call)
-
-        call.application.launch {
-            try {
-                useCase(statements)
-            } catch (e: Exception) {
-                println("XapiStatementsResourceRoute: Error processing statements: ${e.message}")
+        processStatementsUseCase?.invoke(call)?.let { useCase ->
+            call.application.launch {
+                try {
+                    useCase(statements)
+                } catch (e: Exception) {
+                    println("XapiStatementsResourceRoute: Error processing statements: ${e.message}")
+                }
             }
         }
 

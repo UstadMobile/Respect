@@ -53,5 +53,6 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(projects.libTestResources)
     androidTestImplementation(projects.libXapiTest)
+    androidTestImplementation(libs.cache4k)
     androidTestImplementation(kotlin("test"))
 }

@@ -33,7 +33,7 @@ interface XapiActivityProfileDocumentDao {
 
     @Query("""
         SELECT activity_profile_document.last_modified AS lastModified,
-               activity_profile_document_sha.sha1_digest AS etag
+               ('"' || activity_profile_document_sha.sha1_digest || '"') AS etag
           FROM activity_profile_document 
           LEFT JOIN activity_profile_document_sha
             ON activity_profile_document.id = activity_profile_document_sha.doc_id

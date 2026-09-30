@@ -5,6 +5,7 @@ import androidx.room.useReaderConnection
 import androidx.room.useWriterConnection
 import io.ktor.http.HttpHeaders
 import io.ktor.http.headersOf
+import io.ktor.http.quote
 import io.ktor.http.toHttpDate
 import io.ktor.util.sha1
 import kotlinx.coroutines.flow.Flow
@@ -108,7 +109,7 @@ class XapiActivityProfileResourceDb(
                             lastModified = entity.document.updated.timestamp,
                             headers = headersOf(
                                 HttpHeaders.LastModified to listOf(entity.document.updated.toHttpDate()),
-                                HttpHeaders.ETag to listOf(entity.sha1)
+                                HttpHeaders.ETag to listOf(entity.sha1.quote())
                             )
                         )
                     )

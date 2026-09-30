@@ -6,11 +6,13 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.routing.route
 import kotlinx.serialization.json.Json
 import org.junit.Rule
+import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.openeel.libxapi.test.AbstractXapiStateResourceTest
 import world.respect.datalayer.http.server.XapiStateResourceRoute
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.lib.test.clientservertest.withEmbeddedDataSourceServer
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.resources.XapiStateResource
 import world.respect.libutil.util.time.systemTimeInMillis
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationClient
@@ -30,10 +32,12 @@ class XapiStateResourceHttpClientTest : AbstractXapiStateResourceTest() {
     }
 
     override suspend fun withXapiDocumentResource(
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase,
         block: suspend (XapiStateResource) -> Unit
     ) {
         withEmbeddedDataSourceServer(
             dbDir = temporaryFolder.newFolder(),
+            getAuthenticatedXapiAgentsUseCase =  authenticatedAgents,
             routingConfig = { context ->
                 route("activities") {
                     XapiStateResourceRoute(
@@ -55,6 +59,11 @@ class XapiStateResourceHttpClientTest : AbstractXapiStateResourceTest() {
             )
             block(stateResource)
         }
+    }
+
+    @Test
+    fun testMe() {
+
     }
 
 }

@@ -7,6 +7,7 @@ import world.respect.datalayer.http.school.xapi.XapiResourceHttpClient
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.lib.test.clientservertest.insertAdminAndDefaultGrants
 import world.respect.lib.test.clientservertest.withSchoolDbDataSource
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.resources.XapiResource
 import world.respect.libutil.findFreePort
 import world.respect.libutil.util.time.systemTimeInMillis
@@ -16,6 +17,7 @@ suspend fun withNanoHttpdXapiResource(
     dbDir: File,
     json: Json,
     httpClient: HttpClient,
+    authenticatedXapiAgents: GetAuthenticatedXapiAgentsUseCase,
     block: suspend (XapiResource) -> Unit
 ) {
     val port = findFreePort()
@@ -24,6 +26,7 @@ suspend fun withNanoHttpdXapiResource(
     withSchoolDbDataSource(
         dbDir = dbDir,
         schoolUrl = schoolUrl,
+        getAuthenticatedXapiAgentsUseCase = authenticatedXapiAgents,
     ) {
         datasource.insertAdminAndDefaultGrants(db)
 

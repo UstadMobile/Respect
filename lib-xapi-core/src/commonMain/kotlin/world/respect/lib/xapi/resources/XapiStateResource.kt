@@ -1,5 +1,6 @@
 package world.respect.lib.xapi.resources
 
+import io.ktor.http.Parameters
 import io.ktor.http.ParametersBuilder
 import io.ktor.util.StringValues
 import kotlinx.serialization.json.Json
@@ -25,7 +26,7 @@ interface XapiStateResource: XapiDocumentResource<XapiStateResource.MultiDocPara
     ) {
 
 
-        fun toParameters(json: Json): StringValues {
+        fun toParameters(json: Json): Parameters {
             return ParametersBuilder().also { parameters ->
                 parameters.append("activityId", activityId)
                 parameters.append("agent", json.encodeToString(XapiAgent.serializer(), agent))
@@ -71,7 +72,7 @@ interface XapiStateResource: XapiDocumentResource<XapiStateResource.MultiDocPara
                     multiDocParams.registration == registration
         }
 
-        fun toParameters(json: Json): StringValues {
+        fun toParameters(json: Json): Parameters {
             return ParametersBuilder().also { parameters ->
                 parameters.append("activityId", activityId)
                 parameters.append("agent", json.encodeToString(XapiAgent.serializer(), agent))

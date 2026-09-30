@@ -16,6 +16,7 @@ import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.shared.XXHashUidNumberMapper
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import java.io.File
@@ -32,6 +33,7 @@ suspend fun withSchoolDbDataSource(
     stringHasher: XXStringHasher = XXStringHasherCommonJvm(),
     localAuthenticatedUser: AuthenticatedUserPrincipalId = AuthenticatedUserPrincipalId("1"),
     uidMapper: UidNumberMapper = XXHashUidNumberMapper(stringHasher),
+    getAuthenticatedXapiAgentsUseCase: GetAuthenticatedXapiAgentsUseCase? = null,
     block: suspend SchoolDbDataSourceContext.() -> Unit,
 ) {
     val schoolDb = Room.databaseBuilder<RespectSchoolDatabase>(
@@ -51,6 +53,7 @@ suspend fun withSchoolDbDataSource(
         defaultAppCatalogUrl = null,
         json = Json { ignoreUnknownKeys = true },
         schoolUrl = schoolUrl,
+        authenticatedXapiAgentsUseCase = getAuthenticatedXapiAgentsUseCase,
     )
 
     block(SchoolDbDataSourceContext(schoolDb, schoolDataSource))
@@ -64,7 +67,8 @@ fun newLocalSchoolDatabase(
     schoolUrl: Url,
     stringHasher: XXStringHasher = XXStringHasherCommonJvm(),
     localAuthenticatedUser: AuthenticatedUserPrincipalId,
-    uidMapper: UidNumberMapper = XXHashUidNumberMapper(stringHasher)
+    uidMapper: UidNumberMapper = XXHashUidNumberMapper(stringHasher),
+    getAuthenticatedXapiAgentsUseCase: GetAuthenticatedXapiAgentsUseCase? = null,
 ): Pair<RespectSchoolDatabase, SchoolDataSourceLocal> {
     val schoolDb = Room.databaseBuilder<RespectSchoolDatabase>(
         name = File(dir, "school.db").absolutePath
@@ -83,6 +87,7 @@ fun newLocalSchoolDatabase(
         defaultAppCatalogUrl = null,
         json = Json { ignoreUnknownKeys = true },
         schoolUrl = schoolUrl,
+        authenticatedXapiAgentsUseCase = getAuthenticatedXapiAgentsUseCase,
     )
 
     return Pair(schoolDb, schoolDataSource)

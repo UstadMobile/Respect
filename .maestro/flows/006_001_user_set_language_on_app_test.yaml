@@ -69,7 +69,7 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Settings"
-- assertVisible: "English"
+- assertVisible: "Use system default (English)"
 - tapOn: "Language"
 - assertVisible: "Use system default (English)"
 - assertVisible: "English"

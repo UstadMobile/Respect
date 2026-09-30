@@ -3,6 +3,7 @@ package org.openeel.libxapi.test
 import app.cash.turbine.test
 import io.ktor.http.HttpHeaders
 import io.ktor.http.headersOf
+import io.ktor.http.quote
 import io.ktor.util.sha1
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.runBlocking
@@ -76,7 +77,7 @@ abstract class AbstractXapiDocumentResourceTest<
                 actual = retrieved
             )
 
-            val expectedEtag = sha1(document.contentsAsByteArray()).toHexString()
+            val expectedEtag = sha1(document.contentsAsByteArray()).toHexString().quote()
             assertEquals(expectedEtag, loadState.metaInfo.headers[HttpHeaders.ETag])
         }
     }
@@ -233,7 +234,7 @@ abstract class AbstractXapiDocumentResourceTest<
                 document.contentsAsByteArray(),
                 retrieved.contentsAsByteArray()
             )
-            val expectedEtag = sha1(document.contentsAsByteArray()).toHexString()
+            val expectedEtag = sha1(document.contentsAsByteArray()).toHexString().quote()
             assertEquals(expectedEtag, loadState.metaInfo.headers[HttpHeaders.ETag])
         }
     }
@@ -296,7 +297,7 @@ abstract class AbstractXapiDocumentResourceTest<
             )
 
             assertEquals(
-                expected = sha1(document.contentsAsByteArray()).toHexString(),
+                expected = sha1(document.contentsAsByteArray()).toHexString().quote(),
                 actual = getResult.metaInfo.headers[HttpHeaders.ETag]
             )
         }

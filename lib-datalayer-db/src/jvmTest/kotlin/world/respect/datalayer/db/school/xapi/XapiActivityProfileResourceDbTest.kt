@@ -2,6 +2,7 @@ package world.respect.datalayer.db.school.xapi
 
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
+import io.ktor.http.quote
 import io.ktor.util.sha1
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
@@ -82,7 +83,7 @@ class XapiActivityProfileResourceDbTest : AbstractXapiActivityProfileResourceTes
             assertEquals(doc.type, retrievedDoc.type)
             assertEquals(timestamp.toGMTDate(), retrievedDoc.updated)
             assertEquals(
-                expected = sha1(doc.contentsAsByteArray()).toHexString(),
+                expected = sha1(doc.contentsAsByteArray()).toHexString().quote(),
                 actual = getResult.metaInfo.headers[HttpHeaders.ETag]
             )
         }

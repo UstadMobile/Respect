@@ -52,11 +52,27 @@ class XapiResourceIpcClient(
     override val activities: XapiActivitiesResource
         get() = TODO("Not yet implemented")
 
-    override val activityProfile: XapiActivityProfileResource
-        get() = TODO("Not yet implemented")
+    override val activityProfile: XapiActivityProfileResource by lazy {
+        XapiActivityProfileResourceIpcClient(
+            requestSender = requestSender,
+            json = json,
+            endpoint = endpoint,
+            auth = auth,
+            messageDataExtras = messageExtras,
+            executor = executor,
+        )
+    }
 
-    override val agentProfile: XapiAgentProfileResource
-        get() = TODO("Not yet implemented")
+    override val agentProfile: XapiAgentProfileResource by lazy {
+        XapiAgentProfileResourceIpcClient(
+            requestSender = requestSender,
+            json = json,
+            endpoint = endpoint,
+            auth = auth,
+            messageDataExtras = messageExtras,
+            executor = executor,
+        )
+    }
 
     override val state: XapiStateResource by lazy {
         XapiStateResourceIpcClient(

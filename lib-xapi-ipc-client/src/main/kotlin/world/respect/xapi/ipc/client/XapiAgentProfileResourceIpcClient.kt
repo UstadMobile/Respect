@@ -17,26 +17,26 @@ import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.ext.toPrettyString
 import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.model.XapiDocument
-import world.respect.lib.xapi.resources.XapiStateResource
+import world.respect.lib.xapi.resources.XapiAgentProfileResource
+import world.respect.xapi.ipc.client.ext.throwXapiExceptionIfStatusNotSuccessful
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import world.respect.xapi.ipc.shared.messages.ext.putAllFromStringMap
-import world.respect.xapi.ipc.shared.messages.ext.putXapiIpcQueryParameters
-import world.respect.xapi.ipc.shared.messages.ext.putStringValues
 import world.respect.xapi.ipc.shared.messages.ext.putXapiIpcHeaders
+import world.respect.xapi.ipc.shared.messages.ext.putXapiIpcQueryParameters
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
 import world.respect.xapi.ipc.shared.messages.ext.toXapiDocumentDataLoadState
 import java.util.concurrent.ExecutorService
 
-class XapiStateResourceIpcClient(
+class XapiAgentProfileResourceIpcClient(
     private val requestSender: IpcMessageBridge,
     private val json: Json,
     private val endpoint: Url,
     private val auth: String,
     private val messageDataExtras: Map<String, String>,
     private val executor: ExecutorService,
-) : XapiStateResource {
+) : XapiAgentProfileResource {
 
     private fun Bundle.putEndpointAndExtras() {
         putString(XapiIpcKeys.KEY_ENDPOINT, endpoint.toString())
@@ -45,12 +45,12 @@ class XapiStateResourceIpcClient(
     }
 
     override suspend fun getMultipleDocuments(
-        params: XapiStateResource.MultiDocParams,
+        params: XapiAgentProfileResource.MultiDocParams,
         dataLoadParams: DataLoadParams,
     ): DataLoadState<List<String>> {
         Log.d(
             XapiIpcTags.LOGTAG,
-            "XapiStateResourceIpcClient: getMultipleDocuments"
+            "XapiAgentProfileResourceIpcClient: getMultipleDocuments"
         )
         return requestSender.executeRequestAsDataLoadState(
             request = MessageData(
@@ -60,25 +60,25 @@ class XapiStateResourceIpcClient(
                     putXapiIpcHeaders(dataLoadParams.requestHeaders)
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                arg2 = XapiIpcResourceFlags.STATE_GET_MULTIDOC,
+                arg2 = XapiIpcResourceFlags.AGENT_PROFILE_GET_MULTIDOC,
             ),
             json = json,
             deserializer = ListSerializer(String.serializer()),
         ).also {
             Log.d(
                 XapiIpcTags.LOGTAG,
-                "XapiStateResourceIpcClient: getMultipleDocuments response ${it.toPrettyString()}"
+                "XapiAgentProfileResourceIpcClient: getMultipleDocuments response ${it.toPrettyString()}"
             )
         }
     }
 
     override suspend fun get(
-        params: XapiStateResource.SingleDocumentParams,
+        params: XapiAgentProfileResource.SingleDocumentParams,
         dataLoadParams: DataLoadParams,
     ): DataLoadState<XapiDocument> {
         Log.d(
             XapiIpcTags.LOGTAG,
-            "XapiStateResourceIpcClient: get"
+            "XapiAgentProfileResourceIpcClient: get"
         )
         return try {
             val response = requestSender.executeForResponse(
@@ -89,13 +89,13 @@ class XapiStateResourceIpcClient(
                         putXapiIpcHeaders(dataLoadParams.requestHeaders)
                     },
                     what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                    arg2 = XapiIpcResourceFlags.STATE_GET,
+                    arg2 = XapiIpcResourceFlags.AGENT_PROFILE_GET,
                 )
             )
             response.data.toXapiDocumentDataLoadState().also {
                 Log.d(
                     XapiIpcTags.LOGTAG,
-                    "XapiStateResourceIpcClient: get response ${it.toPrettyString()}"
+                    "XapiAgentProfileResourceIpcClient: get response ${it.toPrettyString()}"
                 )
             }
         } catch (e: Throwable) {
@@ -104,12 +104,12 @@ class XapiStateResourceIpcClient(
     }
 
     override fun getAsFlow(
-        params: XapiStateResource.SingleDocumentParams,
+        params: XapiAgentProfileResource.SingleDocumentParams,
         dataLoadParams: DataLoadParams,
     ): Flow<DataLoadState<XapiDocument>> {
         Log.d(
             XapiIpcTags.LOGTAG,
-            "XapiStateResourceIpcClient: getAsFlow"
+            "XapiAgentProfileResourceIpcClient: getAsFlow"
         )
         return requestSender.executeForFlow(
             messageData = MessageData(
@@ -119,28 +119,28 @@ class XapiStateResourceIpcClient(
                     putXapiIpcHeaders(dataLoadParams.requestHeaders)
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                arg2 = XapiIpcResourceFlags.STATE_GET_FLOW,
+                arg2 = XapiIpcResourceFlags.AGENT_PROFILE_GET_FLOW,
             )
         ).map { msg ->
             msg.data.toXapiDocumentDataLoadState().also {
                 Log.d(
                     XapiIpcTags.LOGTAG,
-                    "XapiStateResourceIpcClient: getAsFlow emit ${it.toPrettyString()}"
+                    "XapiAgentProfileResourceIpcClient: getAsFlow emit ${it.toPrettyString()}"
                 )
             }
         }
     }
 
     override suspend fun post(
-        params: XapiStateResource.SingleDocumentParams,
+        params: XapiAgentProfileResource.SingleDocumentParams,
         document: XapiDocument,
     ) {
         Log.d(
             XapiIpcTags.LOGTAG,
-            "XapiStateResourceIpcClient: post"
+            "XapiAgentProfileResourceIpcClient: post"
         )
         val docBundle = document.toBundle(executor)
-        val response = requestSender.executeForResponse(
+        requestSender.executeForResponse(
             MessageData(
                 data = Bundle().apply {
                     putEndpointAndExtras()
@@ -148,22 +148,18 @@ class XapiStateResourceIpcClient(
                     putAll(docBundle)
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                arg2 = XapiIpcResourceFlags.STATE_POST,
+                arg2 = XapiIpcResourceFlags.AGENT_PROFILE_POST,
             )
-        )
-        val status = response.data.getInt(XapiIpcKeys.KEY_STATUS_CODE)
-        if (status !in 200..299) {
-            throw XapiException(status, "HTTP $status")
-        }
+        ).throwXapiExceptionIfStatusNotSuccessful()
     }
 
     override suspend fun put(
-        params: XapiStateResource.SingleDocumentParams,
+        params: XapiAgentProfileResource.SingleDocumentParams,
         document: XapiDocument,
     ) {
         Log.d(
             XapiIpcTags.LOGTAG,
-            "XapiStateResourceIpcClient: put"
+            "XapiAgentProfileResourceIpcClient: put"
         )
         val docBundle = document.toBundle(executor)
         val response = requestSender.executeForResponse(
@@ -174,7 +170,7 @@ class XapiStateResourceIpcClient(
                     putAll(docBundle)
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                arg2 = XapiIpcResourceFlags.STATE_PUT,
+                arg2 = XapiIpcResourceFlags.AGENT_PROFILE_PUT,
             )
         )
         val status = response.data.getInt(XapiIpcKeys.KEY_STATUS_CODE)
@@ -184,11 +180,11 @@ class XapiStateResourceIpcClient(
     }
 
     override suspend fun delete(
-        params: XapiStateResource.SingleDocumentParams,
+        params: XapiAgentProfileResource.SingleDocumentParams,
     ) {
         Log.d(
             XapiIpcTags.LOGTAG,
-            "XapiStateResourceIpcClient: delete"
+            "XapiAgentProfileResourceIpcClient: delete"
         )
         val response = requestSender.executeForResponse(
             MessageData(
@@ -197,7 +193,7 @@ class XapiStateResourceIpcClient(
                     putXapiIpcQueryParameters(params.toParameters(json))
                 },
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
-                arg2 = XapiIpcResourceFlags.STATE_DELETE,
+                arg2 = XapiIpcResourceFlags.AGENT_PROFILE_DELETE,
             )
         )
         val status = response.data.getInt(XapiIpcKeys.KEY_STATUS_CODE)

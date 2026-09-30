@@ -58,7 +58,7 @@ fun Bundle.putStringValues(
  * Shorthand to put the query parameters into a sub-bundle with the standard key
  */
 fun Bundle.putXapiIpcQueryParameters(
-    queryParams: Parameters
+    queryParams: StringValues
 ) {
     putStringValues(key = XapiIpcKeys.KEY_QUERY_PARAMS, value = queryParams)
 }

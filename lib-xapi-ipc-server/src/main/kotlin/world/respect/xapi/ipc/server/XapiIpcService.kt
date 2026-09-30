@@ -85,6 +85,24 @@ class XapiIpcService: Service() {
             )
         }
 
+        private val activityProfileResourceHandler by lazy {
+            XapiIpcActivityProfileResourceIncomingHandler(
+                xapiResourceProvider = applicationContext as XapiResourceProvider,
+                json = json,
+                scope = scope,
+                executor = executor,
+            )
+        }
+
+        private val agentProfileResourceHandler by lazy {
+            XapiIpcAgentProfileResourceIncomingHandler(
+                xapiResourceProvider = applicationContext as XapiResourceProvider,
+                json = json,
+                scope = scope,
+                executor = executor,
+            )
+        }
+
         override fun handleMessage(msg: Message) {
             if(msg.what != IpcMessageBridgeWhatFlags.WHAT_REQUEST && msg.what != IpcMessageBridgeWhatFlags.WHAT_FLOW_COMPLETION) {
                 super.handleMessage(msg)
@@ -114,8 +132,12 @@ class XapiIpcService: Service() {
                         stateResourceHandler.handleMessage(msg)
                     }
 
-                    else -> {
-                        //Unsupported operation
+                    XapiIpcResourceEnum.ACTIVITY_PROFILE -> {
+                        activityProfileResourceHandler.handleMessage(msg)
+                    }
+
+                    XapiIpcResourceEnum.AGENT_PROFILE -> {
+                        agentProfileResourceHandler.handleMessage(msg)
                     }
                 }
 

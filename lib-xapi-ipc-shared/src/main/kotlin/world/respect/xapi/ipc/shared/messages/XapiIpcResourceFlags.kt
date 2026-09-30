@@ -23,6 +23,30 @@ object XapiIpcResourceFlags {
 
     const val STATE_DELETE = 9
 
+    const val ACTIVITY_PROFILE_GET = 10
+
+    const val ACTIVITY_PROFILE_GET_FLOW = 11
+
+    const val ACTIVITY_PROFILE_GET_MULTIDOC = 12
+
+    const val ACTIVITY_PROFILE_POST = 13
+
+    const val ACTIVITY_PROFILE_PUT = 14
+
+    const val ACTIVITY_PROFILE_DELETE = 15
+
+    const val AGENT_PROFILE_GET = 16
+
+    const val AGENT_PROFILE_GET_FLOW = 17
+
+    const val AGENT_PROFILE_GET_MULTIDOC = 18
+
+    const val AGENT_PROFILE_POST = 19
+
+    const val AGENT_PROFILE_PUT = 20
+
+    const val AGENT_PROFILE_DELETE = 21
+
     internal val FLAG_TO_ENUMS_MAP = mapOf(
         STATEMENTS_GET to XapiIpcResourceAndMethod(
             XapiIpcResourceEnum.STATEMENTS,
@@ -58,6 +82,54 @@ object XapiIpcResourceFlags {
         ),
         STATE_DELETE to XapiIpcResourceAndMethod(
             XapiIpcResourceEnum.STATE,
+            XapiIpcMethodEnum.DELETE
+        ),
+        ACTIVITY_PROFILE_GET to XapiIpcResourceAndMethod(
+            XapiIpcResourceEnum.ACTIVITY_PROFILE,
+            XapiIpcMethodEnum.GET
+        ),
+        ACTIVITY_PROFILE_GET_FLOW to XapiIpcResourceAndMethod(
+            XapiIpcResourceEnum.ACTIVITY_PROFILE,
+            XapiIpcMethodEnum.GET_AS_FLOW
+        ),
+        ACTIVITY_PROFILE_GET_MULTIDOC to XapiIpcResourceAndMethod(
+            XapiIpcResourceEnum.ACTIVITY_PROFILE,
+            XapiIpcMethodEnum.GET_MULTIDOC
+        ),
+        ACTIVITY_PROFILE_POST to XapiIpcResourceAndMethod(
+            XapiIpcResourceEnum.ACTIVITY_PROFILE,
+            XapiIpcMethodEnum.POST
+        ),
+        ACTIVITY_PROFILE_PUT to XapiIpcResourceAndMethod(
+            XapiIpcResourceEnum.ACTIVITY_PROFILE,
+            XapiIpcMethodEnum.PUT
+        ),
+        ACTIVITY_PROFILE_DELETE to XapiIpcResourceAndMethod(
+            XapiIpcResourceEnum.ACTIVITY_PROFILE,
+            XapiIpcMethodEnum.DELETE
+        ),
+        AGENT_PROFILE_GET to XapiIpcResourceAndMethod(
+            XapiIpcResourceEnum.AGENT_PROFILE,
+            XapiIpcMethodEnum.GET
+        ),
+        AGENT_PROFILE_GET_FLOW to XapiIpcResourceAndMethod(
+            XapiIpcResourceEnum.AGENT_PROFILE,
+            XapiIpcMethodEnum.GET_AS_FLOW
+        ),
+        AGENT_PROFILE_GET_MULTIDOC to XapiIpcResourceAndMethod(
+            XapiIpcResourceEnum.AGENT_PROFILE,
+            XapiIpcMethodEnum.GET_MULTIDOC
+        ),
+        AGENT_PROFILE_POST to XapiIpcResourceAndMethod(
+            XapiIpcResourceEnum.AGENT_PROFILE,
+            XapiIpcMethodEnum.POST
+        ),
+        AGENT_PROFILE_PUT to XapiIpcResourceAndMethod(
+            XapiIpcResourceEnum.AGENT_PROFILE,
+            XapiIpcMethodEnum.PUT
+        ),
+        AGENT_PROFILE_DELETE to XapiIpcResourceAndMethod(
+            XapiIpcResourceEnum.AGENT_PROFILE,
             XapiIpcMethodEnum.DELETE
         ),
     )

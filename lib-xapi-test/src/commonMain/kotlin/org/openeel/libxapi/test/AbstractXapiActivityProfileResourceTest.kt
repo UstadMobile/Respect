@@ -20,6 +20,13 @@ abstract class AbstractXapiActivityProfileResourceTest: AbstractXapiDocumentReso
         )
     }
 
+    @Test
+    override fun givenDocument_whenPut_thenCanBeRetrievedAsFlow() {
+        givenDocument_whenPut_thenCanBeRetrievedAsFlow(
+            documentParams = XapiActivityProfileTestParams.SINGLE_DOC_PARAMS1
+        )
+    }
+
     /**
      * Check if the resource supports validation using the If-Modified-Since header parameter.
      *

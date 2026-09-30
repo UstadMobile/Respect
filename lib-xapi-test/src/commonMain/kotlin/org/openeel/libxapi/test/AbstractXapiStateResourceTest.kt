@@ -21,6 +21,14 @@ abstract class AbstractXapiStateResourceTest : AbstractXapiDocumentResourceTest<
         )
     }
 
+    @Test
+    override fun givenDocument_whenPut_thenCanBeRetrievedAsFlow() {
+        givenDocument_whenPut_thenCanBeRetrievedAsFlow(
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiStateTestParams.SINGLE_DOC_PARAMS1.agent) },
+        )
+    }
+
     /**
      * Check if the resource supports validation using the If-Modified-Since header parameter.
      *

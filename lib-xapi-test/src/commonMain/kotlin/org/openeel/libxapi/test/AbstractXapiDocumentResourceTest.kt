@@ -1,8 +1,10 @@
 package org.openeel.libxapi.test
 
+import app.cash.turbine.test
 import io.ktor.http.HttpHeaders
 import io.ktor.http.headersOf
 import io.ktor.util.sha1
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -29,6 +31,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.time.Duration.Companion.seconds
 
 abstract class AbstractXapiDocumentResourceTest<
         MultiDocParams: Any,
@@ -68,19 +71,39 @@ abstract class AbstractXapiDocumentResourceTest<
             assertIs<DataReadyState<XapiDocument>>(loadState)
 
             val retrieved = loadState.data
-            assertEquals(document.type, retrieved.type)
-            assertContentEquals(
-                document.contentsAsByteArray(),
-                retrieved.contentsAsByteArray()
+            assertXapiDocumentsEqual(
+                expected = document,
+                actual = retrieved
             )
 
-            assertEquals(document.updated, retrieved.updated)
             val expectedEtag = sha1(document.contentsAsByteArray()).toHexString()
             assertEquals(expectedEtag, loadState.metaInfo.headers[HttpHeaders.ETag])
         }
     }
 
     abstract fun givenDocument_whenPut_thenCanBeRetrieved()
+
+    fun givenDocument_whenPut_thenCanBeRetrievedAsFlow(
+        documentParams: SingleDocParams,
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase = { emptyList() },
+    ) = runBlocking {
+        withXapiDocumentResource(authenticatedAgents = authenticatedAgents) { resource ->
+            val document = XapiActivityProfileTestParams.DOC
+            resource.put(documentParams, document)
+
+            resource.getAsFlow(documentParams)
+                .filterIsInstance<DataReadyState<XapiDocument>>()
+                .test(timeout = 5.seconds) {
+                    assertXapiDocumentsEqual(
+                        expected = document,
+                        actual = awaitItem().data,
+                    )
+                    cancelAndIgnoreRemainingEvents()
+                }
+        }
+    }
+
+    abstract fun givenDocument_whenPut_thenCanBeRetrievedAsFlow()
 
     /**
      * Check if the resource supports validation using the If-Modified-Since header parameter.

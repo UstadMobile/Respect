@@ -15,13 +15,14 @@ import world.respect.lib.xapi.resources.XapiResource
 import world.respect.xapi.ipc.client.XapiResourceIpcClient
 import world.respect.xapi.ipc.shared.messages.XapiIpcIntent
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.random.Random
 import kotlin.test.assertNotNull
 
 /**
  * Executes a test block with a bound [XapiResource] IPC client and clean database state.
  */
 
-private val portAtomicInt = AtomicInteger(8000)
+private val portAtomicInt = AtomicInteger(8000 + Random.nextInt(50_000))
 
 suspend fun withXapiResourceIpcTest(
     serviceRule: ServiceTestRule,

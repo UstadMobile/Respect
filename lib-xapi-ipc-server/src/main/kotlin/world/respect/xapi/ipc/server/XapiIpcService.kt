@@ -10,7 +10,6 @@ import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import android.util.Log
-import io.ktor.util.collections.ConcurrentMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -21,7 +20,6 @@ import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeWhatFlags
-import world.respect.xapi.ipc.server.ext.removeCollectorIfFlowCompleted
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceAndMethod
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceEnum
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
@@ -63,8 +61,6 @@ class XapiIpcService: Service() {
         private val json: Json,
         private val executor: ExecutorService,
     ):  Handler(looper) {
-
-        private val flowCollectors = ConcurrentMap<Int, Job>()
 
         private val scope = CoroutineScope(Dispatchers.Default + Job())
 
@@ -114,10 +110,7 @@ class XapiIpcService: Service() {
             val callingPackage = msg.data.getString(XapiIpcKeys.KEY_CLIENT_PACKAGE)
 
             val logPrefix = "XapiIpcService (client=$callingPackage) msg #$incomingMessageId)"
-
-            if(flowCollectors.removeCollectorIfFlowCompleted(msg)) {
-                return
-            }
+            val replyTo = msg.replyTo
 
             try {
 
@@ -142,6 +135,7 @@ class XapiIpcService: Service() {
                 }
 
             }catch(e: Throwable) {
+                Log.e(XapiIpcTags.LOGTAG, "$logPrefix: Error handling message", e)
                 val replyMessage = Message.obtain(
                     this@IncomingHandler, IpcMessageBridgeWhatFlags.WHAT_RESPONSE
                 )
@@ -151,7 +145,7 @@ class XapiIpcService: Service() {
                 replyMessage.data = DataErrorResult<String>(
                     error = e,
                 ).toBundle(String.serializer(), json)
-                msg.replyTo.send(replyMessage)
+                replyTo.send(replyMessage)
             }
         }
     }

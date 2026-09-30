@@ -21,6 +21,14 @@ abstract class AbstractXapiAgentProfileResourceTest: AbstractXapiDocumentResourc
         )
     }
 
+    @Test
+    override fun givenDocument_whenPut_thenCanBeRetrievedAsFlow() {
+        givenDocument_whenPut_thenCanBeRetrievedAsFlow(
+            documentParams = XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiAgentProfileTestParams.SINGLE_DOC_PARAMS1.agent) },
+        )
+    }
+
     /**
      * Check if the resource supports validation using the If-Modified-Since header parameter.
      *

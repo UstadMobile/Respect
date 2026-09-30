@@ -52,6 +52,11 @@ abstract class AbstractDocumentResourceIncomingHandler<
         val requestBundle = msg.data
         val replyTo = msg.replyTo
         val incomingMessageId = msg.arg1
+
+        if(flowCollectors.removeCollectorIfFlowCompleted(msg)) {
+            return
+        }
+
         val method = XapiIpcResourceAndMethod.fromArg2Int(msg.arg2).method
 
         val xapiResource = runBlocking {
@@ -61,10 +66,6 @@ abstract class AbstractDocumentResourceIncomingHandler<
         val docResource = xapiResource.documentResource()
 
         val logPrefix = "XapiIpcService (client=) msg #$incomingMessageId)"
-
-        if(flowCollectors.removeCollectorIfFlowCompleted(msg)) {
-            return
-        }
 
         when(method) {
             XapiIpcMethodEnum.GET -> {

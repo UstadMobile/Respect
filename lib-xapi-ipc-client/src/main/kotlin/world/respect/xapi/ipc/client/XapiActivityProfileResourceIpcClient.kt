@@ -15,9 +15,9 @@ import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.ext.toPrettyString
-import world.respect.lib.xapi.exceptions.XapiException
 import world.respect.lib.xapi.model.XapiDocument
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
+import world.respect.xapi.ipc.client.ext.throwXapiExceptionIfStatusNotSuccessful
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
@@ -139,7 +139,7 @@ class XapiActivityProfileResourceIpcClient(
             "XapiActivityProfileResourceIpcClient: post"
         )
         val docBundle = document.toBundle(executor)
-        val response = requestSender.executeForResponse(
+        requestSender.executeForResponse(
             MessageData(
                 data = Bundle().apply {
                     putEndpointAndExtras()
@@ -149,11 +149,7 @@ class XapiActivityProfileResourceIpcClient(
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceFlags.ACTIVITY_PROFILE_POST,
             )
-        )
-        val status = response.data.getInt(XapiIpcKeys.KEY_STATUS_CODE)
-        if (status !in 200..299) {
-            throw XapiException(status, "HTTP $status")
-        }
+        ).throwXapiExceptionIfStatusNotSuccessful()
     }
 
     override suspend fun put(
@@ -165,7 +161,7 @@ class XapiActivityProfileResourceIpcClient(
             "XapiActivityProfileResourceIpcClient: put"
         )
         val docBundle = document.toBundle(executor)
-        val response = requestSender.executeForResponse(
+        requestSender.executeForResponse(
             MessageData(
                 data = Bundle().apply {
                     putEndpointAndExtras()
@@ -175,11 +171,7 @@ class XapiActivityProfileResourceIpcClient(
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceFlags.ACTIVITY_PROFILE_PUT,
             )
-        )
-        val status = response.data.getInt(XapiIpcKeys.KEY_STATUS_CODE)
-        if (status !in 200..299) {
-            throw XapiException(status, "HTTP $status")
-        }
+        ).throwXapiExceptionIfStatusNotSuccessful()
     }
 
     override suspend fun delete(
@@ -189,7 +181,7 @@ class XapiActivityProfileResourceIpcClient(
             XapiIpcTags.LOGTAG,
             "XapiActivityProfileResourceIpcClient: delete"
         )
-        val response = requestSender.executeForResponse(
+        requestSender.executeForResponse(
             MessageData(
                 data = Bundle().apply {
                     putEndpointAndExtras()
@@ -198,10 +190,6 @@ class XapiActivityProfileResourceIpcClient(
                 what = IpcMessageBridgeWhatFlags.WHAT_REQUEST,
                 arg2 = XapiIpcResourceFlags.ACTIVITY_PROFILE_DELETE,
             )
-        )
-        val status = response.data.getInt(XapiIpcKeys.KEY_STATUS_CODE)
-        if (status !in 200..299) {
-            throw XapiException(status, "HTTP $status")
-        }
+        ).throwXapiExceptionIfStatusNotSuccessful()
     }
 }

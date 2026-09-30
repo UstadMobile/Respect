@@ -32,6 +32,8 @@ fun main(args: Array<String>) {
         it.addArgument("-r", "--rpId").help("Passkey rpId")
         it.addArgument("--openid-issuer")
             .help("Comma separated OpenID urls")
+        it.addArgument("--openid-provider-name")
+            .help("Comma separated OpenID provider names")
         it.addArgument("-i", "--inDirectoryUrl")
             .help("Directory URL: if directories.virtualhost=true in server config, return this " +
                     "entry only if the directory host url matches this"

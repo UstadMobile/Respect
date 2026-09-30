@@ -88,6 +88,32 @@ data class LoginScreen(
 }
 
 @Serializable
+data class OpenIdLogin(
+    val schoolUrlStr: String,
+    val providerName: String,
+    val issuerUrlStr: String,
+) : RespectAppRoute {
+
+    @Transient
+    val schoolUrl = Url(schoolUrlStr)
+
+    @Transient
+    val issuerUrl = Url(issuerUrlStr)
+
+    companion object {
+        fun create(
+            schoolUrl: Url,
+            providerName: String,
+            issuerUrl: Url,
+        ) = OpenIdLogin(
+            schoolUrlStr = schoolUrl.toString(),
+            providerName = providerName,
+            issuerUrlStr = issuerUrl.toString(),
+        )
+    }
+}
+
+@Serializable
 object Home : RespectAppRoute
 
 @Serializable

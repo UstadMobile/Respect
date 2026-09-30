@@ -16,6 +16,7 @@ import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
+import org.openeel.app.userdirectory.model.PersonRole
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.lib.dataloadstate.DataReadyState
@@ -26,7 +27,6 @@ import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.domain.GetWritableRolesListUseCase
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
-import world.respect.datalayer.school.model.PersonRole
 import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.datalayer.shared.params.GetListCommonParams
 import world.respect.shared.domain.account.RespectAccountManager

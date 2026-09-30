@@ -1,7 +1,7 @@
 package world.respect.shared.util
 
+import org.openeel.app.userdirectory.model.PersonRole
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRole
 import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.shared.domain.account.invite.RespectRedeemInviteRequest

@@ -71,6 +71,10 @@
 
         </activity>
 
+        <activity
+            android:name="world.respect.OpenIdAuthorizationActivity"
+            android:exported="false" />
+
         <!--
         launchMode singleTop is used because the RespectAccountManager models the active user as a
         single account.

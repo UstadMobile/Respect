@@ -29,7 +29,7 @@ data class SchoolDirectoryEntry(
     val inDirectoryUrl: Url? = null,
     val authenticationOptions: List<AuthenticationOption> = listOf(
         AuthenticationOption(
-            name = "Builtin-Default",
+            name = AuthenticationOption.BUILTIN_DEFAULT_NAME,
             provider = BuiltinAuthOptionConfig(),
         )
     ),

@@ -17,10 +17,13 @@ import world.respect.credentials.passkey.GetCredentialUseCase
 import world.respect.credentials.passkey.RespectPasskeyCredential
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.credentials.passkey.password.SavePasswordUseCase
-import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.RespectAppDataSource
+import world.respect.datalayer.respect.model.AuthenticationOption
+import world.respect.datalayer.respect.model.BuiltinAuthOptionConfig
+import world.respect.datalayer.respect.model.OpenIdAuthOptionConfig
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.throwable.unwrapHttpStatusCode
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
@@ -33,6 +36,7 @@ import world.respect.shared.navigation.EnterInviteCode
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.OpenIdLogin
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.resources.StringResourceUiText
 import world.respect.shared.resources.StringUiText
@@ -50,6 +54,12 @@ data class LoginUiState(
     val usernameError: StringResourceUiText? = null,
     val passwordError: StringResourceUiText? = null,
     val schoolUrl: Url,
+    val authenticationOptions: List<AuthenticationOption> = listOf(
+        AuthenticationOption(
+            name = AuthenticationOption.BUILTIN_DEFAULT_NAME,
+            provider = BuiltinAuthOptionConfig(),
+        )
+    ),
 )
 
 class LoginViewModel(
@@ -92,10 +102,44 @@ class LoginViewModel(
             try {
                 val school = respectAppDataSource.schoolDirectoryEntryDataSource
                     .getSchoolDirectoryEntryByUrl(route.schoolUrl)
-                val rpId: String? = when (school) {
-                    is DataReadyState -> school.data.rpId
-                    else -> null
+                val schoolEntry = school.dataOrNull()
+                val authenticationOptions = schoolEntry?.authenticationOptions
+                    ?.ifEmpty {
+                        listOf(
+                            AuthenticationOption(
+                                name = AuthenticationOption.BUILTIN_DEFAULT_NAME,
+                                provider = BuiltinAuthOptionConfig(),
+                            )
+                        )
+                    }
+                    ?: uiState.value.authenticationOptions
+
+                _uiState.update { prev ->
+                    prev.copy(
+                        authenticationOptions = authenticationOptions,
+                    )
                 }
+
+                val openIdOption = authenticationOptions.singleOrNull()
+                    ?.takeIf { it.provider is OpenIdAuthOptionConfig }
+
+                if (openIdOption != null) {
+                    val provider = openIdOption.provider as OpenIdAuthOptionConfig
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            destination = OpenIdLogin.create(
+                                schoolUrl = route.schoolUrl,
+                                providerName = openIdOption.name,
+                                issuerUrl = provider.issuer,
+                            ),
+                            popUpTo = route,
+                            popUpToInclusive = true,
+                        )
+                    )
+                    return@launch
+                }
+
+                val rpId: String? = schoolEntry?.rpId
 
                 val isPasskeySupported = checkPasskeySupportUseCase()
 
@@ -246,6 +290,20 @@ class LoginViewModel(
     fun onClickInviteCode() {
         _navCommandFlow.tryEmit(
             NavCommand.Navigate(EnterInviteCode.create(route.schoolUrl))
+        )
+    }
+
+    fun onClickOpenId(option: AuthenticationOption) {
+        val provider = option.provider as? OpenIdAuthOptionConfig ?: return
+
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(
+                OpenIdLogin.create(
+                    schoolUrl = route.schoolUrl,
+                    providerName = option.name,
+                    issuerUrl = provider.issuer,
+                )
+            )
         )
     }
 

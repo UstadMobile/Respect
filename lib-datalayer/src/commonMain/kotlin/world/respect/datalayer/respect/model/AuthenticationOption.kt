@@ -6,4 +6,8 @@ import kotlinx.serialization.Serializable
 data class AuthenticationOption(
     val name: String,
     val provider: AuthOptionConfig,
-)
+) {
+    companion object {
+        const val BUILTIN_DEFAULT_NAME = "Builtin-Default"
+    }
+}

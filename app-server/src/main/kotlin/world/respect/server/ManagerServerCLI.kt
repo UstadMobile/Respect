@@ -103,7 +103,8 @@ fun managerServerMain(ns: Namespace) {
                                     //Will be set on server
                                     rpId = rpId,
                                     authenticationOptions = getAuthenticationOptions(
-                                        ns.getString("openid_issuer")
+                                        openIdIssuerArg = ns.getString("openid_issuer"),
+                                        openIdProviderNameArg = ns.getString("openid_provider_name"),
                                     ),
                                     lastModified = Clock.System.now(),
                                     stored = Clock.System.now(),
@@ -159,24 +160,34 @@ fun managerServerMain(ns: Namespace) {
 }
 
 private fun getAuthenticationOptions(
-    openIdIssuerArg: String?
+    openIdIssuerArg: String?,
+    openIdProviderNameArg: String?,
 ): List<AuthenticationOption> {
     val builtinOption = AuthenticationOption(
         name = AuthenticationOption.BUILTIN_DEFAULT_NAME,
         provider = BuiltinAuthOptionConfig(),
     )
 
-    val openIdOptions = openIdIssuerArg
+    val openIdIssuers = openIdIssuerArg
         ?.split(",")
         ?.map(String::trim)
         ?.filter(String::isNotEmpty)
-        ?.map { issuer ->
-            AuthenticationOption(
-                name = issuer,
-                provider = OpenIdAuthOptionConfig(issuer = Url(issuer)),
-            )
-        }
         .orEmpty()
 
-    return listOf(builtinOption) + openIdOptions
+    val openIdProviderNames = openIdProviderNameArg
+        ?.split(",")
+        ?.map(String::trim)
+        ?.filter(String::isNotEmpty)
+        .orEmpty()
+
+    val openIdOptions = openIdIssuers.mapIndexed { index, issuer ->
+        val providerName = openIdProviderNames.getOrNull(index) ?: issuer
+
+        AuthenticationOption(
+            name = providerName,
+            provider = OpenIdAuthOptionConfig(issuer = Url(issuer)),
+        )
+    }
+
+    return openIdOptions.ifEmpty { listOf(builtinOption) }
 }

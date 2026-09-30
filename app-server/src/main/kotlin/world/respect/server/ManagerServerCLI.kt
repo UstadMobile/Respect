@@ -18,7 +18,6 @@ import net.sourceforge.argparse4j.inf.Namespace
 import nl.adaptivity.xmlutil.core.XmlVersion
 import nl.adaptivity.xmlutil.serialization.XML
 import world.respect.datalayer.respect.model.AuthenticationOption
-import world.respect.datalayer.respect.model.BuiltinAuthOptionConfig
 import world.respect.datalayer.respect.model.OpenIdAuthOptionConfig
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.lib.opds.model.LangMapStringValue
@@ -34,6 +33,7 @@ import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitManifes
 import world.respect.server.domain.school.demoapp.MakeDemoAppLearningUnitTinCanXmlUseCase
 import world.respect.server.domain.school.demoapp.MakeDemoAppManifestUseCase
 import world.respect.server.domain.school.demoapp.SaveDemoAppToStaticFilesUseCase
+import world.respect.server.util.ext.splitCommaSeparatedValues
 import java.io.File
 import java.util.Properties
 import kotlin.system.exitProcess
@@ -163,31 +163,15 @@ private fun getAuthenticationOptions(
     openIdIssuerArg: String?,
     openIdProviderNameArg: String?,
 ): List<AuthenticationOption> {
-    val builtinOption = AuthenticationOption(
-        name = AuthenticationOption.BUILTIN_DEFAULT_NAME,
-        provider = BuiltinAuthOptionConfig(),
-    )
-
-    val openIdIssuers = openIdIssuerArg
-        ?.split(",")
-        ?.map(String::trim)
-        ?.filter(String::isNotEmpty)
-        .orEmpty()
-
-    val openIdProviderNames = openIdProviderNameArg
-        ?.split(",")
-        ?.map(String::trim)
-        ?.filter(String::isNotEmpty)
-        .orEmpty()
+    val openIdIssuers = openIdIssuerArg.splitCommaSeparatedValues()
+    val openIdProviderNames = openIdProviderNameArg.splitCommaSeparatedValues()
 
     val openIdOptions = openIdIssuers.mapIndexed { index, issuer ->
-        val providerName = openIdProviderNames.getOrNull(index) ?: issuer
-
         AuthenticationOption(
-            name = providerName,
+            name = openIdProviderNames.getOrNull(index) ?: issuer,
             provider = OpenIdAuthOptionConfig(issuer = Url(issuer)),
         )
     }
 
-    return openIdOptions.ifEmpty { listOf(builtinOption) }
+    return openIdOptions.ifEmpty { AuthenticationOption.BUILTIN_DEFAULT_OPTIONS }
 }

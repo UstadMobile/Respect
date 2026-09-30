@@ -19,7 +19,6 @@ import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.credentials.passkey.password.SavePasswordUseCase
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.AuthenticationOption
-import world.respect.datalayer.respect.model.BuiltinAuthOptionConfig
 import world.respect.datalayer.respect.model.OpenIdAuthOptionConfig
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.school.model.PersonStatusEnum
@@ -54,12 +53,8 @@ data class LoginUiState(
     val usernameError: StringResourceUiText? = null,
     val passwordError: StringResourceUiText? = null,
     val schoolUrl: Url,
-    val authenticationOptions: List<AuthenticationOption> = listOf(
-        AuthenticationOption(
-            name = AuthenticationOption.BUILTIN_DEFAULT_NAME,
-            provider = BuiltinAuthOptionConfig(),
-        )
-    ),
+    val authenticationOptions: List<AuthenticationOption> =
+        AuthenticationOption.BUILTIN_DEFAULT_OPTIONS,
 )
 
 class LoginViewModel(
@@ -104,15 +99,8 @@ class LoginViewModel(
                     .getSchoolDirectoryEntryByUrl(route.schoolUrl)
                 val schoolEntry = school.dataOrNull()
                 val authenticationOptions = schoolEntry?.authenticationOptions
-                    ?.ifEmpty {
-                        listOf(
-                            AuthenticationOption(
-                                name = AuthenticationOption.BUILTIN_DEFAULT_NAME,
-                                provider = BuiltinAuthOptionConfig(),
-                            )
-                        )
-                    }
-                    ?: uiState.value.authenticationOptions
+                    .orEmpty()
+                    .ifEmpty { AuthenticationOption.BUILTIN_DEFAULT_OPTIONS }
 
                 _uiState.update { prev ->
                     prev.copy(
@@ -121,16 +109,15 @@ class LoginViewModel(
                 }
 
                 val openIdOption = authenticationOptions.singleOrNull()
-                    ?.takeIf { it.provider is OpenIdAuthOptionConfig }
+                val openIdProvider = openIdOption?.provider as? OpenIdAuthOptionConfig
 
-                if (openIdOption != null) {
-                    val provider = openIdOption.provider as OpenIdAuthOptionConfig
+                if (openIdOption != null && openIdProvider != null) {
                     _navCommandFlow.tryEmit(
                         NavCommand.Navigate(
                             destination = OpenIdLogin.create(
                                 schoolUrl = route.schoolUrl,
                                 providerName = openIdOption.name,
-                                issuerUrl = provider.issuer,
+                                issuerUrl = openIdProvider.issuer,
                             ),
                             popUpTo = route,
                             popUpToInclusive = true,

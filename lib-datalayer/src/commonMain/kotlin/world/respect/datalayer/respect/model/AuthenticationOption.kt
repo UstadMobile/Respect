@@ -9,5 +9,12 @@ data class AuthenticationOption(
 ) {
     companion object {
         const val BUILTIN_DEFAULT_NAME = "Builtin-Default"
+
+        val BUILTIN_DEFAULT_OPTIONS = listOf(
+            AuthenticationOption(
+                name = BUILTIN_DEFAULT_NAME,
+                provider = BuiltinAuthOptionConfig(),
+            )
+        )
     }
 }

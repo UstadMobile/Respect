@@ -6,8 +6,6 @@ appId: world.respect.app
 
 - inputText: ${SCHOOL_NAME}
 
-- hideKeyboard
-
 - tapOn:
     id: "school_name_text"
     text: ${SCHOOL_NAME}

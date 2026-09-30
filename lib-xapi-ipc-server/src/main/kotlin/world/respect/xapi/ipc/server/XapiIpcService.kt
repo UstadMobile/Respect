@@ -21,6 +21,7 @@ import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeWhatFlags
+import world.respect.xapi.ipc.server.ext.removeCollectorIfFlowCompleted
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceAndMethod
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceEnum
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
@@ -96,21 +97,9 @@ class XapiIpcService: Service() {
 
             val logPrefix = "XapiIpcService (client=$callingPackage) msg #$incomingMessageId)"
 
-            if(msg.what == IpcMessageBridgeWhatFlags.WHAT_FLOW_COMPLETION) {
-                flowCollectors.remove(incomingMessageId)?.also {
-                    it.cancel()
-                    Log.d(XapiIpcTags.LOGTAG, "$logPrefix Flow cancelled")
-                }
-
+            if(flowCollectors.removeCollectorIfFlowCompleted(msg)) {
                 return
             }
-
-            val replyMessage = Message.obtain(
-                this@IncomingHandler, IpcMessageBridgeWhatFlags.WHAT_RESPONSE
-            )
-
-            //Mark it as a response to the request id received.
-            replyMessage.arg1 = incomingMessageId
 
             try {
 
@@ -131,6 +120,12 @@ class XapiIpcService: Service() {
                 }
 
             }catch(e: Throwable) {
+                val replyMessage = Message.obtain(
+                    this@IncomingHandler, IpcMessageBridgeWhatFlags.WHAT_RESPONSE
+                )
+
+                //Mark it as a response to the request id received.
+                replyMessage.arg1 = incomingMessageId
                 replyMessage.data = DataErrorResult<String>(
                     error = e,
                 ).toBundle(String.serializer(), json)

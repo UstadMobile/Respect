@@ -12,8 +12,6 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeWhatFlags
-import world.respect.lib.dataloadstate.DataErrorResult
-import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.ext.toPrettyString
 import world.respect.lib.xapi.XapiResourceProvider
 import world.respect.lib.xapi.resources.ISingleDocumentParams
@@ -24,14 +22,12 @@ import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.shared.messages.XapiIpcMethodEnum
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceAndMethod
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
-import world.respect.xapi.ipc.shared.messages.ext.getXapiIpcHeaders
-import world.respect.xapi.ipc.shared.messages.ext.orEmpty
+import world.respect.xapi.ipc.shared.messages.ext.getDataLoadParams
 import world.respect.xapi.ipc.shared.messages.ext.sendResponseErrorMessage
 import world.respect.xapi.ipc.shared.messages.ext.sendResponseMessage
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
 import world.respect.xapi.ipc.shared.messages.ext.toXapiDocument
 import java.util.concurrent.ExecutorService
-import kotlin.collections.set
 
 abstract class AbstractDocumentResourceIncomingHandler<
         MultiDocParams: Any,
@@ -66,9 +62,8 @@ abstract class AbstractDocumentResourceIncomingHandler<
 
         val logPrefix = "XapiIpcService (client=) msg #$incomingMessageId)"
 
-        val replyMessage = Message.obtain().also {
-            it.what = IpcMessageBridgeWhatFlags.WHAT_RESPONSE
-            it.arg1 = incomingMessageId
+        if(flowCollectors.removeCollectorIfFlowCompleted(msg)) {
+            return
         }
 
         when(method) {
@@ -80,9 +75,7 @@ abstract class AbstractDocumentResourceIncomingHandler<
                         messageId = incomingMessageId,
                         data = docResource.get(
                             params = requestBundle.getSingleDocParams(),
-                            dataLoadParams = DataLoadParams(
-                                requestHeaders = requestBundle.getXapiIpcHeaders().orEmpty()
-                            ),
+                            dataLoadParams = requestBundle.getDataLoadParams(),
                         ).also {
                             Log.d(XapiIpcTags.LOGTAG, "$logPrefix get state: response ${it.toPrettyString()}")
                         }.toBundle(executor),
@@ -96,9 +89,7 @@ abstract class AbstractDocumentResourceIncomingHandler<
 
                     docResource.getAsFlow(
                         params = requestBundle.getSingleDocParams(),
-                        dataLoadParams = DataLoadParams(
-                            requestHeaders = requestBundle.getXapiIpcHeaders().orEmpty()
-                        ),
+                        dataLoadParams = requestBundle.getDataLoadParams(),
                     ).collect { dataLoadState ->
                         replyTo.sendResponseMessage(
                             what = IpcMessageBridgeWhatFlags.WHAT_FLOW_EMISSION,
@@ -124,9 +115,7 @@ abstract class AbstractDocumentResourceIncomingHandler<
                         messageId = incomingMessageId,
                         data = docResource.getMultipleDocuments(
                             params = requestBundle.getMultiDocParams(),
-                            dataLoadParams = DataLoadParams(
-                                requestHeaders = requestBundle.getXapiIpcHeaders().orEmpty()
-                            ),
+                            dataLoadParams = requestBundle.getDataLoadParams(),
                         ).also {
                             Log.d(XapiIpcTags.LOGTAG, "$logPrefix getMultipleDocuments state: response ${it.toPrettyString()}")
                         }.toBundle(
@@ -165,32 +154,53 @@ abstract class AbstractDocumentResourceIncomingHandler<
 
             XapiIpcMethodEnum.PUT -> {
                 Log.d(XapiIpcTags.LOGTAG, "$logPrefix: put state")
-                val document = requestBundle.toXapiDocument()
-                runBlocking {
-                    docResource.put(
-                        params = requestBundle.getSingleDocParams(),
-                        document = document,
-                    )
-                }
-                replyMessage.data = Bundle().apply {
-                    putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
-                }
+                scope.launch {
+                    try {
+                        docResource.put(
+                            params = requestBundle.getSingleDocParams(),
+                            document = requestBundle.toXapiDocument(),
+                        )
 
-                msg.replyTo.send(replyMessage)
+                        replyTo.sendResponseMessage(
+                            what = IpcMessageBridgeWhatFlags.WHAT_RESPONSE,
+                            messageId = incomingMessageId,
+                            data = Bundle().apply {
+                                putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
+                            }
+                        )
+                    } catch (e: Exception) {
+                        replyTo.sendResponseErrorMessage(
+                            messageId = incomingMessageId,
+                            what = IpcMessageBridgeWhatFlags.WHAT_RESPONSE,
+                            error = e,
+                        )
+                    }
+                }
             }
 
             XapiIpcMethodEnum.DELETE -> {
                 Log.d(XapiIpcTags.LOGTAG, "$logPrefix: delete state")
-                runBlocking {
-                    docResource.delete(
-                        params = requestBundle.getSingleDocParams(),
-                    )
-                }
-                replyMessage.data = Bundle().apply {
-                    putInt(XapiIpcKeys.KEY_STATUS_CODE, 200)
-                }
+                scope.launch {
+                    try {
+                        docResource.delete(
+                            params = requestBundle.getSingleDocParams(),
+                        )
 
-                msg.replyTo.send(replyMessage)
+                        replyTo.sendResponseMessage(
+                            what = IpcMessageBridgeWhatFlags.WHAT_RESPONSE,
+                            messageId = incomingMessageId,
+                            data = Bundle().apply {
+                                putInt(XapiIpcKeys.KEY_STATUS_CODE, 204)
+                            }
+                        )
+                    } catch (e: Exception) {
+                        replyTo.sendResponseErrorMessage(
+                            messageId = incomingMessageId,
+                            what = IpcMessageBridgeWhatFlags.WHAT_RESPONSE,
+                            error = e,
+                        )
+                    }
+                }
             }
         }
     }

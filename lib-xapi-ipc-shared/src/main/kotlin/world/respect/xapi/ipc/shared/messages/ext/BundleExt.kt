@@ -9,6 +9,7 @@ import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import world.respect.lib.dataloadstate.DataErrorResult
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.NoDataLoadedState
@@ -78,6 +79,16 @@ fun Bundle.putXapiIpcHeaders(headers: Headers) {
 fun Bundle.getXapiIpcHeaders(): Headers? {
     return BundleHeaders(
         getBundle(XapiIpcKeys.KEY_HEADERS) ?: return null
+    )
+}
+
+/**
+ * Shorthand to get the dataload parameters. By default this will simply return a DataLoadParams
+ * object with the headers set from getXapiIpcHeaders
+ */
+fun Bundle.getDataLoadParams(): DataLoadParams {
+    return DataLoadParams(
+        requestHeaders = getXapiIpcHeaders().orEmpty()
     )
 }
 

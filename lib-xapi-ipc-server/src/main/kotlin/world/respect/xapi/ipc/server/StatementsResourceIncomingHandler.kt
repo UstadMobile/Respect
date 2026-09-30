@@ -26,12 +26,15 @@ import world.respect.lib.xapi.resources.XapiStatementsResource
 import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
 import world.respect.xapi.ipc.server.ext.provideResource
+import world.respect.xapi.ipc.server.ext.removeCollectorIfFlowCompleted
 import world.respect.xapi.ipc.shared.messages.XapiIpcMethodEnum
 import world.respect.xapi.ipc.shared.messages.XapiIpcResourceAndMethod
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
+import world.respect.xapi.ipc.shared.messages.ext.getDataLoadParams
 import world.respect.xapi.ipc.shared.messages.ext.getDeserialized
 import world.respect.xapi.ipc.shared.messages.ext.getXapiIpcQueryParameters
 import world.respect.xapi.ipc.shared.messages.ext.orEmpty
+import world.respect.xapi.ipc.shared.messages.ext.sendResponseMessage
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
 import kotlin.collections.set
 import kotlin.uuid.Uuid
@@ -48,6 +51,10 @@ class StatementsResourceIncomingHandler(
         val endpoint = msg.data.getString(XapiIpcKeys.KEY_ENDPOINT)?.let {
             Url(it)
         } ?: throw IllegalArgumentException("Message has no endpoint")
+
+        if(flowCollectors.removeCollectorIfFlowCompleted(msg)) {
+            return
+        }
 
         val assignmentSegmentIndex = endpoint.segments.indexOf(
             OpenEelXapiConstants.ASSIGNMENT_XAPI_SEGMENT
@@ -78,36 +85,35 @@ class StatementsResourceIncomingHandler(
             endpoint
         }
 
+        val dataBundle = msg.data
+        val replyTo = msg.replyTo
+        val incomingMessageId = msg.arg1
+
         val xapiResource = runBlocking {
             xapiResourceProvider.provideResource(
-                bundle = msg.data,
+                bundle = dataBundle,
                 endpoint = scopeEndpoint,
             )
         }
 
-        val replyMessage = Message.obtain().also {
-            it.what = IpcMessageBridgeWhatFlags.WHAT_RESPONSE
-            it.arg1 = msg.arg1
-        }
-        val replyTo = msg.replyTo
-
-        val incomingMessageId = msg.arg1
-
         when(XapiIpcResourceAndMethod.fromArg2Int(msg.arg2).method) {
             XapiIpcMethodEnum.GET -> {
                 Log.d(XapiIpcTags.LOGTAG, "$logPrefix: get ")
-                replyMessage.data = runBlocking {
-                    xapiResource.statements.get(
-                        listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                            params = msg.data.getXapiIpcQueryParameters().orEmpty(),
-                            json = json
-                        )
-                    ).also {
-                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix get: response ${it.toPrettyString()}")
-                    }.toBundle(XapiStatementResult.serializer(), json)
+                scope.launch {
+                    replyTo.sendResponseMessage(
+                        what = IpcMessageBridgeWhatFlags.WHAT_RESPONSE,
+                        messageId = incomingMessageId,
+                        data = xapiResource.statements.get(
+                            listParams = XapiStatementsResource.GetStatementParams.fromParams(
+                                params = dataBundle.getXapiIpcQueryParameters().orEmpty(),
+                                json = json
+                            ),
+                            dataLoadParams = dataBundle.getDataLoadParams(),
+                        ).also {
+                            Log.d(XapiIpcTags.LOGTAG, "$logPrefix get: response ${it.toPrettyString()}")
+                        }.toBundle(XapiStatementResult.serializer(), json),
+                    )
                 }
-
-                msg.replyTo.send(replyMessage)
             }
 
             XapiIpcMethodEnum.GET_AS_FLOW -> {
@@ -115,20 +121,20 @@ class StatementsResourceIncomingHandler(
                     Log.d(XapiIpcTags.LOGTAG, "$logPrefix #$incomingMessageId getAsFlow")
                     xapiResource.statements.getAsFlow(
                         listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                            params = msg.data.getXapiIpcQueryParameters().orEmpty(),
+                            params = dataBundle.getXapiIpcQueryParameters().orEmpty(),
                             json = json
                         ),
-                        dataLoadParams = DataLoadParams()
+                        dataLoadParams = dataBundle.getDataLoadParams(),
                     ).collect {
-                        val message = Message.obtain()
-                        message.arg1 = incomingMessageId
-                        message.what = IpcMessageBridgeWhatFlags.WHAT_FLOW_EMISSION
-                        message.data = it.toBundle(XapiStatementResult.serializer(), json)
+                        replyTo.sendResponseMessage(
+                            what = IpcMessageBridgeWhatFlags.WHAT_FLOW_EMISSION,
+                            messageId = incomingMessageId,
+                            data = it.toBundle(XapiStatementResult.serializer(), json),
+                        )
                         Log.d(
                             XapiIpcTags.LOGTAG,
                             "$logPrefix getAsFlow emit ${it.toPrettyString()}"
                         )
-                        replyTo.send(message)
                     }
                 }.also {
                     flowCollectors[incomingMessageId] = it
@@ -136,30 +142,32 @@ class StatementsResourceIncomingHandler(
             }
 
             XapiIpcMethodEnum.POST -> {
-                replyMessage.data = runBlocking {
-                    xapiResource.statements.post(
-                        list = msg.data.getDeserialized(
-                            key = XapiIpcKeys.KEY_BODY,
-                            json = json,
-                            deserializer = ListSerializer(
-                                XapiStatement.serializer()
-                            ),
-                        )?.also {
-                            Log.d(
-                                XapiIpcTags.LOGTAG,
-                                "$logPrefix post send ${it.size} statements"
-                            )
-                        }?.map {
-                            it.asAssignmentRecipeStmtIfIdNotNull(assignmentActivityId)
-                        } ?: throw XapiException(400, "Post statements has no body")
-                    ).also {
-                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix post: response ${it.toPrettyString()}")
-                    }.toBundle(ListSerializer(Uuid.serializer()), json)
+                Log.d(XapiIpcTags.LOGTAG, "$logPrefix: post ")
+                scope.launch {
+                    replyTo.sendResponseMessage(
+                        what = IpcMessageBridgeWhatFlags.WHAT_RESPONSE,
+                        messageId = incomingMessageId,
+                        data = xapiResource.statements.post(
+                            list = dataBundle.getDeserialized(
+                                key = XapiIpcKeys.KEY_BODY,
+                                json = json,
+                                deserializer = ListSerializer(
+                                    XapiStatement.serializer()
+                                ),
+                            )?.also {
+                                Log.d(
+                                    XapiIpcTags.LOGTAG,
+                                    "$logPrefix post send ${it.size} statements"
+                                )
+                            }?.map {
+                                it.asAssignmentRecipeStmtIfIdNotNull(assignmentActivityId)
+                            } ?: throw XapiException(400, "Post statements has no body")
+                        ).also {
+                            Log.d(XapiIpcTags.LOGTAG, "$logPrefix post: response ${it.toPrettyString()}")
+                        }.toBundle(ListSerializer(Uuid.serializer()), json),
+                    )
                 }
-
-                msg.replyTo.send(replyMessage)
             }
-
 
             else -> {
                 //Bad request

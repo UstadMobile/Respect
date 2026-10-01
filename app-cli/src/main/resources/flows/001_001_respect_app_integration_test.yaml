@@ -1,0 +1,92 @@
+appId: world.respect.app
+env:
+  SCHOOL_URL: ${SCHOOL_URL}
+  SCHOOL_NAME: ${SCHOOL_NAME}
+  SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+  TEST_APP_URL: ${TEST_APP_URL}
+  TEST_APP_NAME: ${TEST_APP_NAME}
+  TEST_APP_MODE: ${TEST_APP_MODE}
+  OFFLINE_STATUS: ${OFFLINE_STATUS}
+
+onFlowStart:
+  - startRecording: "001_001_app_integratin_test"
+  - clearState: world.respect.app
+
+onFlowComplete:
+  - stopRecording
+  - setAirplaneMode: disabled
+---
+- launchApp
+- tapOn: "Get Started"
+- assertVisible: "Let's get started"
+- tapOn: "Other options"
+- assertVisible: "Other options"
+- tapOn: "Paste the link here"
+- inputText: ${SCHOOL_URL}
+- tapOn: "Next"
+- assertVisible: "Login"
+- tapOn:
+    id: "username"
+- inputText: "admin"
+- tapOn:
+    id : "password"
+- inputText: ${SCHOOL_ADMIN_PASSWORD}
+- tapOn: "Login"
+- tapOn:
+    id: "floating_action_button"
+- runFlow:
+    when:
+      visible: ${TEST_APP_NAME}
+    commands:
+      - tapOn: ${TEST_APP_NAME}
+- runFlow:
+    when:
+      notVisible: ${TEST_APP_NAME}
+    commands:
+       - tapOn: "Add from Link"
+       - assertVisible: "Enter link"
+       - tapOn: "Link*"
+       - inputText: ${TEST_APP_URL}
+       - tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "App detail"
+- assertVisible: ${TEST_APP_NAME}
+- assertVisible: "Add to school apps"
+# verify App got added to Apps section
+- tapOn: "Add to school apps"
+- tapOn:
+    id: "nav_home"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- assertVisible: ${TEST_APP_NAME}
+- runFlow:
+     file: generated/gotolearningunit.yaml
+     env:
+       TEST_APP_NAME: ${TEST_APP_NAME}
+
+- runFlow:
+    when:
+      true: ${OFFLINE_STATUS === 'true'}
+    file: "subflows/OfflineTrue.yaml"
+
+- tapOn: "Open"
+
+- runFlow:
+    when:
+      true: ${TEST_APP_MODE === 'native'}
+    commands:
+      - assertNotVisible: #This assertion make sure the app is not opened in web-view mode.
+                id: "canvas"
+- runFlow:
+    when:
+      true: ${TEST_APP_MODE === 'webView'}
+    commands:
+      - assertVisible: #This assertion make sure the app is opened in web-view mode.
+          id: "canvas"
+
+- extendedWaitUntil:
+    visible:
+      id: "publication_title"
+    timeout: 1800000

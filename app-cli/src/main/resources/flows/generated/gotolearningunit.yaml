@@ -1,0 +1,12 @@
+appId: world.respect.app
+
+---
+
+- tapOn: "Leap Learning Universe"
+- tapOn: "Lessons"
+- tapOn: "English Literacy"
+- tapOn: "Blending"
+- tapOn: "Spelling First Sound"
+
+
+

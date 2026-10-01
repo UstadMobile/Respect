@@ -44,7 +44,7 @@ onFlowComplete:
       TEST_APP_NAME: ${TEST_APP_NAME}
 - assertVisible: ${TEST_APP_NAME}
 - runFlow:
-     file: generated/gotolearningunit1.yaml
+     file: generated/gotolearningunit.yaml
      env:
        TEST_APP_NAME: ${TEST_APP_NAME}
 
@@ -60,15 +60,16 @@ onFlowComplete:
       true: ${TEST_APP_MODE === 'native'}
     commands:
       - assertNotVisible: #This assertion make sure the app is not opened in web-view mode.
-                id: "WebView"
+                id: "webview_close" 
 - runFlow:
     when:
       true: ${TEST_APP_MODE === 'webview'}
     commands:
-      - assertVisible: #This assertion make sure the app is opened in web-view mode.
-          id: "webView"
+        - assertVisible:
+              id: "webview_close"   #This assertion make sure the app is opened in web-view mode.
 
 - extendedWaitUntil:
     visible:
       id: "publication_title"
     timeout: 1800000
+

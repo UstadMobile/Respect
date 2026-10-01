@@ -8,6 +8,7 @@ import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.ClassDatasourceDb
 import world.respect.datalayer.db.school.EnrollmentDataSourceDb
 import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
+import world.respect.datalayer.db.school.GetAuthenticatedXapiAgentsUseCaseDbImpl
 import world.respect.datalayer.db.school.IndicatorDataSourceDb
 import world.respect.datalayer.db.school.InviteDataSourceDb
 import world.respect.datalayer.db.school.PersonDataSourceDb
@@ -36,6 +37,7 @@ import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.lib.xapi.resources.local.XapiResourceLocal
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 
 /**
  * SchoolDataSource implementation based on a local (Room) database
@@ -46,6 +48,9 @@ import world.respect.lib.primarykeygen.PrimaryKeyGenerator
  *           permission checks as required, except when using putLocal functions (which are used by
  *           the repository to cache data from upstream).
  * @property schoolUrl the schoolUrl used by the Xapi datasource when creating actor objects.
+ * @property getAuthenticatedPersonUseCase Implementation of [GetAuthenticatedXapiAgentsUseCase].
+ *           This is normally GetAuthenticatedXapiAgentsUseCaseDbImpl but can be overridden for
+ *           testing.
  */
 class SchoolDataSourceDb(
     private val schoolDb: RespectSchoolDatabase,
@@ -56,13 +61,15 @@ class SchoolDataSourceDb(
     private val defaultAppCatalogUrl: String?,
     private val primaryKeyGenerator: PrimaryKeyGenerator = PrimaryKeyGenerator(RespectSchoolDatabase.TABLE_IDS),
     private val schoolUrl: Url,
+    authenticatedXapiAgentsUseCase: GetAuthenticatedXapiAgentsUseCase? = null,
 ) : SchoolDataSourceLocal {
 
-    private val getAuthenticatedPersonUseCase by lazy {
-        GetAuthenticatedPersonUseCase(
-            authenticatedUser, schoolDb, uidNumberMapper
-        )
-    }
+    private val getAuthenticatedPersonUseCase = GetAuthenticatedPersonUseCase(
+        authenticatedUser, schoolDb, uidNumberMapper
+    )
+
+    private val getAuthenticatedXapiAgentsUseCase = authenticatedXapiAgentsUseCase ?:
+        GetAuthenticatedXapiAgentsUseCaseDbImpl(getAuthenticatedPersonUseCase, schoolUrl)
 
     override val schoolPermissionGrantDataSource: SchoolPermissionGrantDataSourceLocal by lazy {
         SchoolPermissionGrantDataSourceDb(
@@ -140,9 +147,9 @@ class SchoolDataSourceDb(
             schoolDb = schoolDb,
             uidNumberMapper = uidNumberMapper,
             authenticatedUser = authenticatedUser,
-            checkPersonPermissionUseCase = checkPersonPermissionUseCase,
             json = json,
             schoolUrl = schoolUrl,
+            getAuthenticatedXapiAgentsUseCase = getAuthenticatedXapiAgentsUseCase,
         )
     }
 

@@ -2,6 +2,7 @@ package world.respect.datalayer.db.school.xapi
 
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
+import io.ktor.http.quote
 import io.ktor.util.sha1
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
@@ -14,6 +15,7 @@ import world.respect.datalayer.db.school.toDataSource
 import world.respect.lib.dataloadstate.datetime.roundToEpochSeconds
 import world.respect.lib.dataloadstate.datetime.toGMTDate
 import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.model.XapiDocumentByteArrayImpl
 import world.respect.lib.xapi.resources.XapiStateResource
 import kotlin.test.Test
@@ -28,11 +30,15 @@ class XapiStateResourceDbTest : AbstractXapiStateResourceTest() {
     @JvmField
     val temporaryFolder: TemporaryFolder = TemporaryFolder()
 
-    override suspend fun withXapiDocumentResource(block: suspend (XapiStateResource) -> Unit) {
+    override suspend fun withXapiDocumentResource(
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase,
+        block: suspend (XapiStateResource) -> Unit
+    ) {
         testSchoolDb(temporaryFolder.newFolder()) { db ->
             val dataSource = db.toDataSource(
                 authenticatedUserUid = "1",
                 schoolUrl = Url("http://localhost:8098/"),
+                authenticatedAgents = authenticatedAgents,
             ).also {
                 it.insertAdmin()
             }
@@ -44,15 +50,17 @@ class XapiStateResourceDbTest : AbstractXapiStateResourceTest() {
     @Test
     fun givenDocument_whenUpdateLocalCalled_thenCanBeRetrieved() = runBlocking {
         testSchoolDb(temporaryFolder.newFolder()) { db ->
+            val params = XapiStateTestParams.SINGLE_DOC_PARAMS1
             val dataSource = db.toDataSource(
                 authenticatedUserUid = "1",
                 schoolUrl = Url("http://localhost:8098/"),
+                authenticatedAgents = { listOf(params.agent) },
             ).also {
                 it.insertAdmin()
             }
 
             val resource = dataSource.xapiResource.state
-            val params = XapiStateTestParams.SINGLE_DOC_PARAMS1
+
             val timestamp = Clock.System.now().roundToEpochSeconds()
             val doc = XapiDocumentByteArrayImpl(
                 type = "application/json",
@@ -72,7 +80,7 @@ class XapiStateResourceDbTest : AbstractXapiStateResourceTest() {
             assertEquals(doc.type, retrievedDoc.type)
             assertEquals(timestamp.toGMTDate(), retrievedDoc.updated)
             assertEquals(
-                expected = sha1(doc.contentsAsByteArray()).toHexString(),
+                expected = sha1(doc.contentsAsByteArray()).toHexString().quote(),
                 actual = getResult.metaInfo.headers[HttpHeaders.ETag]
             )
         }

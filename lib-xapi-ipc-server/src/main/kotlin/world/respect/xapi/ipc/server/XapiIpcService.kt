@@ -10,38 +10,22 @@ import android.os.Looper
 import android.os.Message
 import android.os.Messenger
 import android.util.Log
-import io.ktor.http.Parameters
-import io.ktor.http.URLBuilder
-import io.ktor.http.Url
-import io.ktor.util.collections.ConcurrentMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import net.thauvin.erik.urlencoder.UrlEncoderUtil
 import world.respect.lib.dataloadstate.DataErrorResult
-import world.respect.lib.dataloadstate.DataLoadParams
-import world.respect.lib.dataloadstate.ext.toPrettyString
-import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.XapiResourceProvider
-import world.respect.lib.xapi.exceptions.XapiException
-import world.respect.lib.xapi.ext.asAssignmentRecipeStmtIfIdNotNull
-import world.respect.lib.xapi.model.XapiStatement
-import world.respect.lib.xapi.model.XapiStatementResult
-import world.respect.lib.xapi.resources.XapiStatementsResource
-import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.xapi.ipc.shared.messages.XapiIpcKeys
-import world.respect.xapi.ipc.shared.messages.XapiIpcResourceFlags
 import world.respect.xapi.ipc.shared.messages.XapiIpcTags
 import org.openeel.lib.ipc.messagebridge.IpcMessageBridgeWhatFlags
-import world.respect.xapi.ipc.shared.messages.ext.getDeserialized
-import world.respect.xapi.ipc.shared.messages.ext.getStringValues
+import world.respect.xapi.ipc.shared.messages.XapiIpcResourceAndMethod
+import world.respect.xapi.ipc.shared.messages.XapiIpcResourceEnum
 import world.respect.xapi.ipc.shared.messages.ext.toBundle
-import kotlin.uuid.Uuid
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import kotlin.getValue
 
 /**
  * Messenger service (server) that will receive xAPI requests, send them to a given xAPI resource,
@@ -68,16 +52,52 @@ class XapiIpcService: Service() {
             it.start()
     }
 
+    private val executor = Executors.newCachedThreadPool()
+
     internal class IncomingHandler(
         looper: Looper,
         private val context: Context,
         private val applicationContext: Context = context.applicationContext,
         private val json: Json,
+        private val executor: ExecutorService,
     ):  Handler(looper) {
 
-        private val flowCollectors = ConcurrentMap<Int, Job>()
-
         private val scope = CoroutineScope(Dispatchers.Default + Job())
+
+        private val statementsHandler by lazy {
+            StatementsResourceIncomingHandler(
+                xapiResourceProvider = applicationContext as XapiResourceProvider,
+                json = json,
+                scope = scope,
+            )
+        }
+
+        private val stateResourceHandler by lazy {
+            XapiIpcStateResourceIncomingHandler(
+                xapiResourceProvider = applicationContext as XapiResourceProvider,
+                json = json,
+                scope = scope,
+                executor = executor,
+            )
+        }
+
+        private val activityProfileResourceHandler by lazy {
+            XapiIpcActivityProfileResourceIncomingHandler(
+                xapiResourceProvider = applicationContext as XapiResourceProvider,
+                json = json,
+                scope = scope,
+                executor = executor,
+            )
+        }
+
+        private val agentProfileResourceHandler by lazy {
+            XapiIpcAgentProfileResourceIncomingHandler(
+                xapiResourceProvider = applicationContext as XapiResourceProvider,
+                json = json,
+                scope = scope,
+                executor = executor,
+            )
+        }
 
         override fun handleMessage(msg: Message) {
             if(msg.what != IpcMessageBridgeWhatFlags.WHAT_REQUEST && msg.what != IpcMessageBridgeWhatFlags.WHAT_FLOW_COMPLETION) {
@@ -89,148 +109,43 @@ class XapiIpcService: Service() {
 
             val callingPackage = msg.data.getString(XapiIpcKeys.KEY_CLIENT_PACKAGE)
 
-            val logPrefix = "XapiIpcService (client=$callingPackage) msg #$incomingMessageId"
-
-            if(msg.what == IpcMessageBridgeWhatFlags.WHAT_FLOW_COMPLETION) {
-                flowCollectors.remove(incomingMessageId)?.also {
-                    it.cancel()
-                    Log.d(XapiIpcTags.LOGTAG, "$logPrefix Flow cancelled")
-                }
-
-                return
-            }
-
-            val replyMessage = Message.obtain(
-                this@IncomingHandler, IpcMessageBridgeWhatFlags.WHAT_RESPONSE
-            )
-
-            //Mark it as a response to the request id received.
-            replyMessage.arg1 = incomingMessageId
-
+            val logPrefix = "XapiIpcService (client=$callingPackage) msg #$incomingMessageId)"
             val replyTo = msg.replyTo
 
             try {
-                val xapiResourceProvider = applicationContext as? XapiResourceProvider
-                    ?: throw IllegalStateException("No xapi resource provider")
 
-                val endpoint = msg.data.getString(XapiIpcKeys.KEY_ENDPOINT)?.let {
-                    Url(it)
-                } ?: throw IllegalArgumentException("Message has no endpoint")
+                val resourceAndOp = XapiIpcResourceAndMethod.fromArg2Int(msg.arg2)
 
-                val assignmentSegmentIndex = endpoint.segments.indexOf(
-                    OpenEelXapiConstants.ASSIGNMENT_XAPI_SEGMENT
+                when(resourceAndOp.resource) {
+                    XapiIpcResourceEnum.STATEMENTS -> {
+                        statementsHandler.handleMessage(msg)
+                    }
+
+                    XapiIpcResourceEnum.STATE -> {
+                        stateResourceHandler.handleMessage(msg)
+                    }
+
+                    XapiIpcResourceEnum.ACTIVITY_PROFILE -> {
+                        activityProfileResourceHandler.handleMessage(msg)
+                    }
+
+                    XapiIpcResourceEnum.AGENT_PROFILE -> {
+                        agentProfileResourceHandler.handleMessage(msg)
+                    }
+                }
+
+            }catch(e: Throwable) {
+                Log.e(XapiIpcTags.LOGTAG, "$logPrefix: Error handling message", e)
+                val replyMessage = Message.obtain(
+                    this@IncomingHandler, IpcMessageBridgeWhatFlags.WHAT_RESPONSE
                 )
 
-                val assignmentActivityId = if(assignmentSegmentIndex >= 0) {
-                    UrlEncoderUtil.decode(endpoint.segments[assignmentSegmentIndex + 1])
-                }else {
-                    null
-                }
-
-                val scopeEndpoint = if(assignmentActivityId != null){
-                    URLBuilder(endpoint).apply {
-                        //Builder adds a blank segment at the beginning, so this needs done again
-                        val segmentIndex = pathSegments.indexOf(
-                            OpenEelXapiConstants.ASSIGNMENT_XAPI_SEGMENT
-                        )
-
-                        pathSegments = pathSegments.filterIndexed { index, _ ->
-                            index != segmentIndex && index != (segmentIndex + 1)
-                        }
-
-                        normalizeForEndpoint()
-                    }.build()
-                }else {
-                    endpoint
-                }
-
-                val auth = msg.data.getString(XapiIpcKeys.KEY_AUTH)
-                    ?: throw IllegalArgumentException("Message has no auth")
-
-                val xapiResource = runBlocking {
-                    xapiResourceProvider.provideXapiResource(scopeEndpoint, auth)
-                }
-
-                when (msg.arg2) {
-                    XapiIpcResourceFlags.POST_STATEMENTS -> {
-                        replyMessage.data = runBlocking {
-                            xapiResource.statements.post(
-                                list = msg.data.getDeserialized(
-                                    key = XapiIpcKeys.KEY_BODY,
-                                    json = json,
-                                    deserializer = ListSerializer(
-                                        XapiStatement.serializer()
-                                    ),
-                                )?.also {
-                                    Log.d(
-                                        XapiIpcTags.LOGTAG,
-                                        "$logPrefix post send ${it.size} statements"
-                                    )
-                                }?.map {
-                                    it.asAssignmentRecipeStmtIfIdNotNull(assignmentActivityId)
-                                } ?: throw XapiException(400, "Post statements has no body")
-                            ).also {
-                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix post: response ${it.toPrettyString()}")
-                            }.toBundle(ListSerializer(Uuid.serializer()), json)
-                        }
-
-                        msg.replyTo.send(replyMessage)
-                    }
-
-                    XapiIpcResourceFlags.GET_STATEMENTS -> {
-                        Log.d(XapiIpcTags.LOGTAG, "$logPrefix: get ")
-                        replyMessage.data = runBlocking {
-                            xapiResource.statements.get(
-                                listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                                    params = msg.data.getStringValues(
-                                        XapiIpcKeys.KEY_QUERY_PARAMS
-                                    ) ?: Parameters.Empty,
-                                    json = json
-                                )
-                            ).also {
-                                Log.d(XapiIpcTags.LOGTAG, "$logPrefix get: response ${it.toPrettyString()}")
-                            }.toBundle(XapiStatementResult.serializer(), json)
-                        }
-
-                        msg.replyTo.send(replyMessage)
-                    }
-
-                    XapiIpcResourceFlags.GET_STATEMENTS_FLOW -> {
-                        scope.launch {
-                            Log.d(XapiIpcTags.LOGTAG, "$logPrefix #$incomingMessageId getAsFlow")
-                            xapiResource.statements.getAsFlow(
-                                listParams = XapiStatementsResource.GetStatementParams.fromParams(
-                                    params = msg.data.getStringValues(
-                                        XapiIpcKeys.KEY_QUERY_PARAMS
-                                    ) ?: Parameters.Empty,
-                                    json = json
-                                ),
-                                dataLoadParams = DataLoadParams()
-                            ).collect {
-                                val message = Message.obtain()
-                                message.arg1 = incomingMessageId
-                                message.what = IpcMessageBridgeWhatFlags.WHAT_FLOW_EMISSION
-                                message.data = it.toBundle(XapiStatementResult.serializer(), json)
-                                Log.d(
-                                    XapiIpcTags.LOGTAG,
-                                    "$logPrefix getAsFlow emit ${it.toPrettyString()}"
-                                )
-                                replyTo.send(message)
-                            }
-                        }.also {
-                            flowCollectors[incomingMessageId] = it
-                        }
-                    }
-
-                    else -> {
-                        super.handleMessage(msg)
-                    }
-                }
-            }catch(e: Throwable) {
+                //Mark it as a response to the request id received.
+                replyMessage.arg1 = incomingMessageId
                 replyMessage.data = DataErrorResult<String>(
                     error = e,
                 ).toBundle(String.serializer(), json)
-                msg.replyTo.send(replyMessage)
+                replyTo.send(replyMessage)
             }
         }
     }
@@ -241,6 +156,7 @@ class XapiIpcService: Service() {
                 looper = handlerThread.looper,
                 context = this,
                 json = json,
+                executor = executor,
             )
         )
     }
@@ -256,5 +172,6 @@ class XapiIpcService: Service() {
         Log.d(XapiIpcTags.LOGTAG, "XapiIpcService: onDestroy")
         super.onDestroy()
         handlerThread.quit()
+        executor.shutdown()
     }
 }

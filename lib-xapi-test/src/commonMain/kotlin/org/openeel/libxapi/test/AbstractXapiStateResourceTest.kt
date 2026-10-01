@@ -16,7 +16,16 @@ abstract class AbstractXapiStateResourceTest : AbstractXapiDocumentResourceTest<
     @Test
     override fun givenDocument_whenPut_thenCanBeRetrieved() = runBlocking {
         givenDocument_whenPut_thenCanBeRetrieved(
-            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiStateTestParams.SINGLE_DOC_PARAMS1.agent) },
+        )
+    }
+
+    @Test
+    override fun givenDocument_whenPut_thenCanBeRetrievedAsFlow() {
+        givenDocument_whenPut_thenCanBeRetrievedAsFlow(
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiStateTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -32,6 +41,7 @@ abstract class AbstractXapiStateResourceTest : AbstractXapiDocumentResourceTest<
     override fun givenDocumentStoredAndNotModified_whenRetrievedWithValidationHeaders_thenReturnsNotModified() = runBlocking {
         givenDocumentStoredAndNotModified_whenRetrievedWithValidationHeaders_thenReturnsNotModified(
             documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiStateTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -41,7 +51,8 @@ abstract class AbstractXapiStateResourceTest : AbstractXapiDocumentResourceTest<
     @Test
     override fun givenNonExistentDocument_whenGetCalled_thenReturnsNotFound() = runBlocking {
         givenNonExistentDocument_whenGetCalled_thenReturnsNotFound(
-            nonExistentParams = XapiStateTestParams.SINGLE_DOC_NON_EXISTENT_PARAMS
+            nonExistentParams = XapiStateTestParams.SINGLE_DOC_NON_EXISTENT_PARAMS,
+            authenticatedAgents = { listOf(XapiStateTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -52,7 +63,8 @@ abstract class AbstractXapiStateResourceTest : AbstractXapiDocumentResourceTest<
     @Test
     override fun givenExistingDocument_whenOverwrittenWithPut_thenReplacesDocumentCompletely() = runBlocking {
         givenExistingDocument_whenOverwrittenWithPut_thenReplacesDocumentCompletely(
-            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiStateTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -62,7 +74,8 @@ abstract class AbstractXapiStateResourceTest : AbstractXapiDocumentResourceTest<
     @Test
     override fun givenNonExistentDocument_whenPosted_thenCreatesNewDocument() = runBlocking {
         givenNonExistentDocument_whenPosted_thenCreatesNewDocument(
-            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiStateTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -73,7 +86,8 @@ abstract class AbstractXapiStateResourceTest : AbstractXapiDocumentResourceTest<
     @Test
     override fun givenExistingJsonDocument_whenPosted_thenMergesTopLevelProperties() = runBlocking {
         givenExistingJsonDocument_whenPosted_thenMergesTopLevelProperties(
-            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiStateTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -84,7 +98,8 @@ abstract class AbstractXapiStateResourceTest : AbstractXapiDocumentResourceTest<
     @Test
     override fun givenNonJsonDocument_whenPostedToExisting_thenThrowsXapiException() = runBlocking {
         givenNonJsonDocument_whenPostedToExisting_thenThrowsXapiException(
-            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiStateTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -95,7 +110,8 @@ abstract class AbstractXapiStateResourceTest : AbstractXapiDocumentResourceTest<
     @Test
     override fun givenDocument_whenDeleted_thenCannotBeRetrieved() = runBlocking {
         givenDocument_whenDeleted_thenCannotBeRetrieved(
-            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1
+            documentParams = XapiStateTestParams.SINGLE_DOC_PARAMS1,
+            authenticatedAgents = { listOf(XapiStateTestParams.SINGLE_DOC_PARAMS1.agent) },
         )
     }
 
@@ -125,7 +141,12 @@ abstract class AbstractXapiStateResourceTest : AbstractXapiDocumentResourceTest<
                         ),
                     )
                 }
-            }
+            },
+            authenticatedAgents = {
+                listOf(
+                    XapiStateTestParams.AGENT1, XapiStateTestParams.AGENT2
+                )
+            },
         )
     }
 
@@ -159,6 +180,11 @@ abstract class AbstractXapiStateResourceTest : AbstractXapiDocumentResourceTest<
                     )
                 }
             },
+            authenticatedAgents = {
+                listOf(
+                    XapiStateTestParams.AGENT1, XapiStateTestParams.AGENT2
+                )
+            }
         )
     }
 }

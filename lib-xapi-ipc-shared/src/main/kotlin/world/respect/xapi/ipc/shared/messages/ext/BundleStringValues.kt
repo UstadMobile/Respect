@@ -7,7 +7,7 @@ import io.ktor.util.StringValues
  * StringValues implementation based on an Android bundle. Everything in the bundle MUST be a
  * string array as per StringValuesExt.toBundle()
  */
-class BundleStringValues(
+open class BundleStringValues(
     val bundle: Bundle,
     override val caseInsensitiveName: Boolean = false,
 ) : StringValues{

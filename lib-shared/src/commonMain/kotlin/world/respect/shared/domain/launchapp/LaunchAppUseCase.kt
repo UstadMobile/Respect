@@ -15,11 +15,15 @@ interface LaunchAppUseCase {
      *        the assignmentActivityId. This will be used by the embedded xAPI server to modify
      *        statements received to follow the assignment recipe (add assignmentActivityId to
      *        contextActivities).
+     * @param launchableApp if the launchable app publication is already cached/available in
+     *        memory e.g. as is the case when the app is launched from the publication detail
+     *        screen, then this should be provided to avoid needing to go back to the datasource.
      */
     data class LaunchAppRequest(
         val publicationUrl: Url,
         val publication: Publication,
         val assignmentActivityId: String? = null,
+        val launchableApp: Publication? = null,
     )
 
     sealed class LaunchAppResult

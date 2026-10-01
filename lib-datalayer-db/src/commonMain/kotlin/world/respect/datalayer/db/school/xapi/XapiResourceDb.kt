@@ -7,7 +7,7 @@ import world.respect.datalayer.AuthenticatedUserPrincipalId
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.GetAuthenticatedPersonUseCase
-import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.resources.local.XapiActivitiesResourceLocal
 import world.respect.lib.xapi.resources.local.XapiActivityProfileResourceLocal
 import world.respect.lib.xapi.resources.local.XapiAgentProfileResourceLocal
@@ -20,9 +20,9 @@ class XapiResourceDb(
     private val schoolDb: RespectSchoolDatabase,
     private val uidNumberMapper: UidNumberMapper,
     private val authenticatedUser: AuthenticatedUserPrincipalId,
-    private val checkPersonPermissionUseCase: CheckPersonPermissionUseCase,
     private val json: Json,
     private val schoolUrl: Url,
+    private val getAuthenticatedXapiAgentsUseCase: GetAuthenticatedXapiAgentsUseCase,
 ): XapiResourceLocal {
 
     private val getAuthenticatedPersonUseCase by lazy {
@@ -72,6 +72,7 @@ class XapiResourceDb(
         XapiAgentProfileResourceDb(
             schoolDb = schoolDb,
             json = json,
+            getAuthenticatedXapiAgentsUseCase = getAuthenticatedXapiAgentsUseCase,
         )
     }
 
@@ -79,6 +80,7 @@ class XapiResourceDb(
         XapiStateResourceDb(
             schoolDb = schoolDb,
             json = json,
+            getAuthenticatedXapiAgentsUseCase = getAuthenticatedXapiAgentsUseCase,
         )
     }
 

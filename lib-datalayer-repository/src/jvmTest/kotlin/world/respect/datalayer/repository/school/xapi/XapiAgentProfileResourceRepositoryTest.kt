@@ -6,6 +6,7 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.openeel.libxapi.test.AbstractXapiAgentProfileResourceTest
 import world.respect.datalayer.http.server.XapiAgentProfileResourceRoute
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.resources.XapiAgentProfileResource
 
 class XapiAgentProfileResourceRepositoryTest : AbstractXapiAgentProfileResourceTest() {
@@ -17,10 +18,12 @@ class XapiAgentProfileResourceRepositoryTest : AbstractXapiAgentProfileResourceT
     private val json = Json
 
     override suspend fun withXapiDocumentResource(
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase,
         block: suspend (XapiAgentProfileResource) -> Unit
     ) {
         withEmbeddedServerAndRepositoryClients(
             workDir = temporaryFolder.newFolder(),
+            getAuthenticatedXapiAgentsUseCase = authenticatedAgents,
             routingConfig = { serverContext ->
                 route("agents") {
                     XapiAgentProfileResourceRoute(
@@ -35,5 +38,6 @@ class XapiAgentProfileResourceRepositoryTest : AbstractXapiAgentProfileResourceT
             block(clients.first().datasource.agentProfile)
         }
     }
+
 
 }

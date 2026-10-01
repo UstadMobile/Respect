@@ -14,7 +14,7 @@ A localhost embedded server on its own won't work because:
 
 __How xAPI over IPC works__:
 
-
+Using a [Messenger bound service](https://developer.android.com/develop/background-work/services/bound-services#Messenger):
 
 Sending a request:
 Message.what will be XapiIpcWhatFlags.WHAT_REQUEST and Message.arg1 will be the requestId (unique 

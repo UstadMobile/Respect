@@ -4,6 +4,7 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.openeel.libxapi.test.AbstractXapiActivityProfileResourceTest
 import world.respect.datalayer.http.server.XapiActivityProfileResourceRoute
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
 
 
@@ -14,10 +15,12 @@ class XapiActivityProfileResourceRepositoryTest: AbstractXapiActivityProfileReso
     val temporaryFolder = TemporaryFolder()
 
     override suspend fun withXapiDocumentResource(
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase,
         block: suspend (XapiActivityProfileResource) -> Unit
     ) {
         withEmbeddedServerAndRepositoryClients(
             workDir = temporaryFolder.newFolder(),
+            getAuthenticatedXapiAgentsUseCase = authenticatedAgents,
             routingConfig = { serverContext ->
                 XapiActivityProfileResourceRoute(
                     activityProfileResource = {
@@ -29,5 +32,6 @@ class XapiActivityProfileResourceRepositoryTest: AbstractXapiActivityProfileReso
             block(clients.first().datasource.activityProfile)
         }
     }
+
 
 }

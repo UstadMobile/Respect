@@ -1,14 +1,20 @@
 # RESPECT App Maestro tests
 
+These tests let developers of RESPECT-compatible apps verify that their app works with RESPECT.
+Use the latest release from [GitHub Releases](https://github.com/UstadMobile/Respect/releases/latest).
+
 ## Development environment setup:
-* Complete development environment setup as per main [README](../../../../README.md)
 * Install [Maestro CLI](https://github.com/mobile-dev-inc/Maestro/releases).
+* Install [adb](https://developer.android.com/tools/adb) (part of Android platform-tools), and have an
+  Android emulator or device available.
+* Download the following from the [latest RESPECT release](https://github.com/UstadMobile/Respect/releases/latest):
+  * The RESPECT Android APK
+  * The RESPECT app-server package
+* Get the test flows (the `app-cli/src/main/resources/flows` folder) by cloning the repository or downloading it as a zip.
 
 ## Quick run an individual test:
 
-* Build the project as per the main [README](../../../../README.md)
-* Start app-server and add a school as per the main project README.
-* Install the RESPECT APK on the Android Emulator or device being used to run tests
+* Install the RESPECT APK (downloaded from the latest release) on the Android Emulator or device being used to run tests
   e.g. run project using Android Studio, drag/drop file onto Android emulator, or install using adb command:
 ```
 adb install ./app-android/build/outputs/apk/debug/app-android-debug.apk
@@ -26,7 +32,7 @@ adb install ./app-android/build/outputs/apk/debug/app-android-debug.apk
 ./gradlew app-server:run --args='addschool --url <School_Url> --name <School_Name> --adminpassword <Admin_password>'
 ```
 
-* Run test using Maestro CLI (specify the school URL and admin password):
+* Run test using Maestro CLI :
 ```
 cd app-cli/src/main/resources/flows
 
@@ -34,10 +40,10 @@ maestro test \
     -e SCHOOL_URL=http://192.168.1.2:8094/ \
     -e SCHOOL_ADMIN_PASSWORD=adminpassword \
     -e SCHOOL_NAME=TestSchool \
-    -e TEST_APP_URL=https://app_manifest_url \
-    -e TEST_APP_NAME="App Name" \
-    -e TEST_APP_MODE=native|webView \
-    -e OFFLINE_STATUS=true|False \
+    -e TEST_APP_URL=https://demo.openeel.org/en-US/launchable-app-manifest.json \
+    -e TEST_APP_NAME="Demo Launchable App" \
+    -e TEST_APP_MODE=native|webview \
+    -e OFFLINE_STATUS=true|false \
       flow_name.yaml
 ```
 

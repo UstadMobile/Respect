@@ -1,0 +1,29 @@
+appId: world.respect.app
+
+---
+- tapOn:
+    id: "floating_action_button"
+- runFlow:
+    when:
+      visible: ${TEST_APP_NAME}
+    commands:
+      - tapOn: ${TEST_APP_NAME}
+- runFlow:
+    when:
+      notVisible: ${TEST_APP_NAME}
+    commands:
+      - tapOn: "Add from Link"
+      - assertVisible: "Enter link"
+      - tapOn: "Link*"
+      - inputText: ${TEST_APP_URL}
+      - tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "App detail"
+- assertVisible: ${TEST_APP_NAME}
+- tapOn: "Add to school apps"
+- tapOn:
+    id: "nav_home"
+- assertVisible:
+    id: "app_title"
+    text: "Home"

@@ -32,37 +32,19 @@ onFlowComplete:
     id : "password"
 - inputText: ${SCHOOL_ADMIN_PASSWORD}
 - tapOn: "Login"
-- tapOn:
-    id: "floating_action_button"
-- runFlow:
-    when:
-      visible: ${TEST_APP_NAME}
-    commands:
-      - tapOn: ${TEST_APP_NAME}
-- runFlow:
-    when:
-      notVisible: ${TEST_APP_NAME}
-    commands:
-       - tapOn: "Add from Link"
-       - assertVisible: "Enter link"
-       - tapOn: "Link*"
-       - inputText: ${TEST_APP_URL}
-       - tapOn: "Next"
-- assertVisible:
-    id: "app_title"
-    text: "App detail"
-- assertVisible: ${TEST_APP_NAME}
-- assertVisible: "Add to school apps"
-# verify App got added to Apps section
-- tapOn: "Add to school apps"
-- tapOn:
-    id: "nav_home"
 - assertVisible:
     id: "app_title"
     text: "Home"
+
+- runFlow:
+    when:
+      notVisible: ${TEST_APP_NAME}
+    file: "subflows/AddApp.yaml"
+    env:
+      TEST_APP_NAME: ${TEST_APP_NAME}
 - assertVisible: ${TEST_APP_NAME}
 - runFlow:
-     file: generated/gotolearningunit.yaml
+     file: generated/gotolearningunit1.yaml
      env:
        TEST_APP_NAME: ${TEST_APP_NAME}
 
@@ -78,13 +60,13 @@ onFlowComplete:
       true: ${TEST_APP_MODE === 'native'}
     commands:
       - assertNotVisible: #This assertion make sure the app is not opened in web-view mode.
-                id: "canvas"
+                id: "WebView"
 - runFlow:
     when:
-      true: ${TEST_APP_MODE === 'webView'}
+      true: ${TEST_APP_MODE === 'webview'}
     commands:
       - assertVisible: #This assertion make sure the app is opened in web-view mode.
-          id: "canvas"
+          id: "webView"
 
 - extendedWaitUntil:
     visible:

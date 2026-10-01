@@ -1,4 +1,3 @@
-package world.respect.libutil.util.time
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone

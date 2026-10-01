@@ -33,6 +33,9 @@ Examples of unacceptable behavior include:
 * Public or private harassment
 * Publishing others' private information, such as a physical or email
   address, without their explicit permission
+* Submitting AI slop: such as using AI output that you have not or cannot
+  fully check/verify in a comment, issue, or pull request (unless it is
+  an appendix, not the main content and AI output is clearly labeled)
 * Other conduct which could reasonably be considered inappropriate in a
   professional setting
 

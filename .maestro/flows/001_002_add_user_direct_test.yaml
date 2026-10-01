@@ -10,11 +10,14 @@ onFlowStart:
         SCHOOL_URL: ${SCHOOL_URL}
         SCHOOL_NAME: ${SCHOOL_NAME}
         URL_SUBSTITUTION: ${URL_SUBSTITUTION}
-        NAME: "001_002_add_user_direct_test.yaml"
+        NAME: "001_002_add_user_direct_test"
 
 onFlowComplete:
-  - runScript:
-      file: "scripts/teardown.js"
+  - runFlow:
+      file: "subflows/teardown.yaml"
+      env:
+        NAME: "db-final"
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
 ---
 - launchApp:
     arguments:
@@ -55,7 +58,9 @@ onFlowComplete:
 - inputText: "User"
 - tapOn: "Save"
 - assertVisible: "Required field"   # Gender field is mandatory
-- tapOn: "Gender*"
+- tapOn:
+    text: "Gender*"
+    retryTapIfNoChange: true
 - tapOn: "Female"
 - tapOn:
     id: "role"
@@ -163,7 +168,9 @@ onFlowComplete:
 - inputText: "Child"
 - tapOn: "Last name*"
 - inputText: "User"
-- tapOn: "Gender*"
+- tapOn:
+    text: "Gender*"
+    retryTapIfNoChange: true
 - tapOn: "Female"
 - assertVisible:
     id: "app_title"
@@ -241,7 +248,9 @@ onFlowComplete:
 - inputText: "Test"
 - tapOn: "Last name*"
 - inputText: "User"
-- tapOn: "Gender*"
+- tapOn:
+    text: "Gender*"
+    retryTapIfNoChange: true
 - tapOn: "Female"
 - tapOn:
     id: "role"
@@ -310,6 +319,10 @@ onFlowComplete:
 - assertVisible: "QR code badge"
 
 # Validate Parent User login
+- runFlow:
+    file: "subflows/e2e_artifact_upload.yaml"
+    env:
+      NAME: "db-admin-added-users"
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -363,11 +376,16 @@ onFlowComplete:
 - assertVisible:
     id: "app_title"
     text: "Assignments"
-- assertVisible: "Apps"
+- assertVisible:
+       id: "nav_home"
 - assertNotVisible: "Classes"
 - assertNotVisible: "People"
 
 # Validate Child User QR Login using Scan QR/badge
+- runFlow:
+    file: "subflows/e2e_artifact_upload.yaml"
+    env:
+      NAME: "db-parent-logged-in"
 - clearState: world.respect.app
 - launchApp:
     arguments:
@@ -382,10 +400,11 @@ onFlowComplete:
 - tapOn: "Url"
 - inputText:  ${output.SCHOOL_URL}respect_school_link/personqrbadge/id/12312
 - tapOn: "OK"
-- assertVisible: "Apps"
+- assertVisible:
+        id: "nav_home"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - assertVisible: "Assignments"
 - assertVisible: "Classes"
 - assertVisible: "People"

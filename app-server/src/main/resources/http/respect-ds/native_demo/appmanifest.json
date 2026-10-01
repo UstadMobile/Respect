@@ -1,0 +1,22 @@
+{
+  "name": {
+    "en-US": "Native Demo App"
+  },
+  "description": {
+    "en-US": "Short learning app description < 80 chars"
+  },
+  "license": "AGPL-3.0",
+  "website": "https://openeel.org/",
+  "icon": "icon.png",
+  "learningUnits": "index.json",
+  "defaultLaunchUri": "https://demo.openeel.org/",
+
+  "android": {
+    "packageId": "org.openeel.demolaunchableapp",
+    "stores": ["https://play.google.com/store/apps/details?id=org.openeel.demolaunchableapp"],
+    "sourceCode": "https://github.com/UstadMobile/DemoLaunchableApp"
+  },
+  "web" : {
+    "url": "https://demo.openeel.org/"
+  }
+}

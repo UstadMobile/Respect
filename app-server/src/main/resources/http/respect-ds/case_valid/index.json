@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "title": "Main Menu"
+  },
+
+  "links": [
+    { "rel": "self", "href": "index.json", "type": "application/opds+json" }
+  ],
+  "navigation": [
+    {
+      "href": "examples/index.json",
+      "title": "Examples",
+      "type": "application/opds+json",
+      "alternate": [
+        {
+          "href": "examples/icon.png",
+          "rel": "icon",
+          "type": "image/png",
+          "title": "Cabinet"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+# RESPECT lib-datalayer-http-client guide
+
+This file provides guidance for AI agents working with code in this
+module. Always follow the repository guidelines in [../AGENTS.md](../AGENTS.md).
+
+## Module overview
+This is an implementation of the [lib-datalayer module](../lib-datalayer)
+as an HTTP Client.
+
+You should read [lib-datalayer AGENTS.md](../lib-datalayer/AGENTS.md) before working with
+code in this module.
+
+## Datasource Guidance
+
+Example DataSource:
+
+```
+class FooDataSourceHttpClient(
+    override val schoolUrl: Url,
+    override val schoolDirectoryEntryDataSource: SchoolDirectoryEntryDataSource,
+    private val httpClient: HttpClient,
+    private val tokenProvider: AuthTokenProvider,
+    private val json: Json,
+): FooDataSource, SchoolUrlBasedDataSource {
+    
+    private suspend fun GetListParams.urlWithParams(): Url {
+        return URLBuilder(xapiEndpointUrl(FooDataSource.ENDPOINT_NAME)).also {
+            it.parameters.appendAll(this.toParameters())
+        }.build()
+    }
+    
+    override suspend fun get(
+        listParams: GetListParams,
+        dataLoadParams: DataLoadParams = DataLoadParams(),
+    ): DataLoadState<List<Foo>> {
+        return httpClient.getAsDataLoadState<List<Foo>>(
+            url = listParams.urlWithParams(),
+        ) {
+            useTokenProvider(tokenProvider)
+        }
+    }
+  
+    suspend fun getAsFlow(
+        listParams: GetListParams,
+        dataLoadParams: DataLoadParams = DataLoadParams(),
+    ): Flow<DataLoadState<List<Foo>>> {
+         return httpClient.getDataLoadResultAsFlow<List<Foo>>(
+            urlFn = {
+                listParams.urlWithParams()
+            },
+            dataLoadParams = dataLoadParams,
+         ) {
+            useTokenProvider(tokenProvider)
+         }
+    }
+
+    /** 
+     * Write a list of items 
+     */
+    suspend fun post(
+        list: List<Foo>,
+    ): DataLoadState<List<String>> {
+        return httpClient.post(
+            url = xapiEndpointUrl(FooDataSource.ENDPOINT_NAME)
+        ) {
+            useTokenProvider(tokenProvider)
+
+            contentType(ContentType.Application.Json)
+            setBody(list)
+        }.toDataLoadState(typeInfo<List<String>>)
+    }
+}
+```
+
+## Http Client Datasource Anti-patterns: - Never generate these
+
+## 1 Custom headers for xAPI resources
+NEVER: headers["X-Updated"] = updated.toString()
+ALWAYS: headers["Last-Modified"] = GMTDate(updated.epochSeconds * 1000).toHttpDate()
+
+The HTTP-client/server implementation MUST adhere to the Experience API specification
+and should NOT introduce custom headers that are not part of the specification for xapi 
+resources.
+

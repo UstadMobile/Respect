@@ -229,6 +229,7 @@ class PublicationDetailViewModel(
                         publicationUrl = route.learningUnitManifestUrl,
                         publication = lessonPublication,
                         assignmentActivityId = route.assignmentActivityId,
+                        launchableApp = uiState.value.appDetail.dataOrNull(),
                     )
                 )
 

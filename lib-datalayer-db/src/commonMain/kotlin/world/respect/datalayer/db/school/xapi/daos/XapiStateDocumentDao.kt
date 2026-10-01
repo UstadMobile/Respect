@@ -38,7 +38,7 @@ interface XapiStateDocumentDao {
 
     @Query("""
         SELECT state_document.last_modified AS lastModified,
-               state_document_sha.sha1_digest AS etag
+               ('"' || state_document_sha.sha1_digest || '"') AS etag
           FROM state_document 
           LEFT JOIN state_document_sha
             ON state_document.id = state_document_sha.doc_id

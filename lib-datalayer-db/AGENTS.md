@@ -1,4 +1,4 @@
-# RESPECT lib-datalayer-db guide
+# lib-datalayer-db guide
 
 This file provides guidance for AI agents working with code in this
 module. Always follow the repository guidelines in [../AGENTS.md](../AGENTS.md).

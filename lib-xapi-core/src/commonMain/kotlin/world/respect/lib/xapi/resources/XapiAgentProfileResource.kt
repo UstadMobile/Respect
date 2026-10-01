@@ -1,5 +1,6 @@
 package world.respect.lib.xapi.resources
 
+import io.ktor.http.Parameters
 import io.ktor.http.ParametersBuilder
 import io.ktor.util.StringValues
 import kotlinx.serialization.json.Json
@@ -21,7 +22,7 @@ interface XapiAgentProfileResource: XapiDocumentResource<XapiAgentProfileResourc
         val agent: XapiAgent,
         val since: Instant? = null,
     ) {
-        fun toParameters(json: Json): StringValues {
+        fun toParameters(json: Json): Parameters {
             return ParametersBuilder().also { parameters ->
                 parameters.append("agent", json.encodeToString(XapiAgent.serializer(), agent))
                 parameters.appendIfNotNull("since", since?.toString())
@@ -53,7 +54,7 @@ interface XapiAgentProfileResource: XapiDocumentResource<XapiAgentProfileResourc
             return MultiDocParams(agent, since)
         }
 
-        fun toParameters(json: Json): StringValues {
+        fun toParameters(json: Json): Parameters {
             return ParametersBuilder().also { parameters ->
                 parameters.append("agent", json.encodeToString(XapiAgent.serializer(), agent))
                 parameters.append("profileId", profileId)

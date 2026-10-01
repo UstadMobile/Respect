@@ -32,8 +32,8 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
-import world.respect.datalayer.school.model.PersonRole
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRole
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.date_of_birth
 import world.respect.shared.generated.resources.email

@@ -118,6 +118,8 @@ import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
+import world.respect.shared.domain.account.authwithopenid.OpenIdAuthorizationUseCase
+import world.respect.shared.domain.account.authwithopenid.VerifyOpenIdTokenUseCase
 import world.respect.shared.domain.account.RespectTokenManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
@@ -162,6 +164,7 @@ import world.respect.shared.domain.school.LaunchCustomTabUseCaseAndroid
 import world.respect.app.domain.e2eartifactupload.GetDbFilesForE2EArtifactUploadUseCaseAndroid
 import world.respect.datalayer.db.APP_MIGRATION_8_9_CLIENT
 import world.respect.shared.domain.activitycontextjobprocessor.EnqueueActivityContextJobUseCase
+import world.respect.OpenIdAuthorizationUseCaseAndroid
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
 import world.respect.shared.domain.e2eartifactupload.GetDbFilesForE2EArtifactUploadUseCase
@@ -233,6 +236,7 @@ import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
 import world.respect.shared.viewmodel.manageuser.howpasskeywork.HowPasskeyWorksViewModel
 import world.respect.shared.viewmodel.manageuser.enterinvitecode.EnterInviteCodeViewModel
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
+import world.respect.shared.viewmodel.manageuser.login.OpenIdLoginViewModel
 import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
 import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsSignupViewModel
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
@@ -415,6 +419,7 @@ val appKoinModule = module {
     viewModelOf(::AcknowledgementViewModel)
     viewModelOf(::EnterInviteCodeViewModel)
     viewModelOf(::LoginViewModel)
+    viewModelOf(::OpenIdLoginViewModel)
     viewModelOf(::AcceptInviteViewModel)
     viewModelOf(::SignupViewModel)
     viewModelOf(::TermsAndConditionViewModel)
@@ -848,6 +853,18 @@ val appKoinModule = module {
 
     single<EnqueueActivityContextJobUseCase> {
         EnqueueActivityContextJobUseCase()
+    }
+
+    single<OpenIdAuthorizationUseCase> {
+        OpenIdAuthorizationUseCaseAndroid(
+            enqueueActivityContextJobUseCase = get(),
+        )
+    }
+
+    single {
+        VerifyOpenIdTokenUseCase(
+            httpClient = get(),
+        )
     }
 
     single<GoToAppStoreUseCase> {

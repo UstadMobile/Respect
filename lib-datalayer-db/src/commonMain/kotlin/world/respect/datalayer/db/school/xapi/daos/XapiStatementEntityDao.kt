@@ -16,7 +16,7 @@ import world.respect.datalayer.db.school.xapi.entities.XapiActivityLangMapEntryP
 import world.respect.datalayer.db.school.xapi.entities.XapiEntityObjectTypeFlags
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementContextActivityJoinTypeEnum
 import world.respect.datalayer.db.school.xapi.entities.XapiStatementEntity
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.lib.xapi.extensions.reportoptions.StatementReportRow
 
 @Dao

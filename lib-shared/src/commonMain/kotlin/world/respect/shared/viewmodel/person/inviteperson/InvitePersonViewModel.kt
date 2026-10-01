@@ -32,7 +32,7 @@ import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.NewUserInvite
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.libutil.ext.CHAR_POOL_NUMBERS
 import world.respect.libutil.ext.randomString
 import world.respect.libutil.util.time.systemTimeInMillis

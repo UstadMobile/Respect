@@ -3,9 +3,9 @@ package world.respect.server.domain.school.add
 import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
+import org.openeel.app.userdirectory.model.PersonRole
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.schooldirectory.SchoolDirectoryDataSourceLocal
 import world.respect.datalayer.respect.model.SchoolDirectoryEntry
 import world.respect.datalayer.AuthenticatedUserPrincipalId
@@ -15,7 +15,7 @@ import world.respect.datalayer.school.ext.newUserInviteUid
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.PersonGenderEnum
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSourceLocal
 import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.server.util.ext.HttpStatusException

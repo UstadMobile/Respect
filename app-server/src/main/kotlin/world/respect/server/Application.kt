@@ -10,8 +10,10 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.authenticateWith
 import io.ktor.server.auth.basic
 import io.ktor.server.auth.bearer
+import io.ktor.server.auth.oidc.Oidc
 import io.ktor.server.http.content.staticFiles
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -20,6 +22,7 @@ import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.json.Json
+import io.ktor.utils.io.ExperimentalKtorApi
 import org.koin.ktor.ext.getKoin
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
@@ -76,8 +79,9 @@ import world.respect.shared.util.di.SchoolDirectoryEntryScopeId
 
 const val AUTH_CONFIG_SCHOOL = "auth-school-bearer"
 
+@OptIn(ExperimentalKtorApi::class)
 @Suppress("unused") // Used via application.conf
-fun Application.module() {
+suspend fun Application.module() {
     Napier.takeLogarithm()
     Napier.base(LogbackAntiLog())
 
@@ -166,6 +170,26 @@ fun Application.module() {
         }
     }
 
+    //https://ktor.io/docs/server-oidc.html#register
+    val oidcIssuer = environment.config.propertyOrNull("ktor.oidc.issuer")?.getString()
+
+    val oidcProvider = if (oidcIssuer == null) {
+        null
+    } else {
+        val oidcAudience = environment.config.propertyOrNull("ktor.oidc.audience")
+            ?.getString()?:error("oidc audience not provided")
+
+        install(Oidc).identityProvider("respect-keycloak") {
+            issuer = oidcIssuer
+
+            bearer {
+                audience = setOf(oidcAudience)
+            }
+        }
+    }
+
+
+
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             cause.printStackTrace()
@@ -192,6 +216,15 @@ fun Application.module() {
     }
 
     routing {
+        oidcProvider?.let { provider ->
+            authenticateWith(provider.jwtBearer) {
+                get("api/oidc/verify") {
+                    Napier.d(" token verified")
+                    call.respondText("token verified")
+                }
+            }
+        }
+
         get("/") {
             call.respondText("Ktor: ${Greeting().greet()}")
         }

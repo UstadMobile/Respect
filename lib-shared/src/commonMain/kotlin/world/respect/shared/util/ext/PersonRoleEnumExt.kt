@@ -1,7 +1,7 @@
 package world.respect.shared.util.ext
 
 import org.jetbrains.compose.resources.StringResource
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.parent
 import world.respect.shared.generated.resources.site_administrator

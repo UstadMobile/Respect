@@ -45,7 +45,7 @@ import world.respect.app.components.defaultItemPadding
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.approval_not_required_until
 import world.respect.shared.generated.resources.approval_required

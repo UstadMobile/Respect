@@ -6,7 +6,7 @@ import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.FamilyMemberInvite
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.NewUserInvite
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 
 val Invite2.roleLabel: StringResource
     get() = when(this) {

@@ -32,6 +32,7 @@ kotlin {
             api(projects.libXapiCore)
             api(projects.libSerializers)
             api(projects.libUtil)
+            api(projects.libUserdirectory)
             implementation(libs.kotlinx.serialization.json)
             api(libs.uri.kmp)
             api(libs.kotlinx.date.time)

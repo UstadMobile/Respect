@@ -1,12 +1,12 @@
 package world.respect.datalayer.db.school.adapters
 
+import org.openeel.app.userdirectory.model.PersonRole
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.school.entities.PersonEntity
 import world.respect.datalayer.db.school.entities.PersonEntityWithRoles
 import world.respect.datalayer.db.school.entities.PersonRelatedPersonEntity
 import world.respect.datalayer.db.school.entities.PersonRoleEntity
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRole
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 

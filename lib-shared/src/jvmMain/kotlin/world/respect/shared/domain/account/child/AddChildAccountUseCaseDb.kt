@@ -13,7 +13,7 @@ import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
 import world.respect.datalayer.school.model.Person
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.shared.domain.account.child.AddChildAccountUseCase.AddChildAccountRequest
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator

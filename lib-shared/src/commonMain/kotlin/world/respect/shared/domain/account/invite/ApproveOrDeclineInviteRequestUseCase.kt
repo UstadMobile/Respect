@@ -10,7 +10,7 @@ import world.respect.datalayer.school.ext.copyAsApproved
 import world.respect.datalayer.school.ext.inviteCodeOrNull
 import world.respect.datalayer.school.ext.relatedPersonRoleEnum
 import world.respect.datalayer.school.model.ClassInvite
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.datalayer.shared.params.GetListCommonParams

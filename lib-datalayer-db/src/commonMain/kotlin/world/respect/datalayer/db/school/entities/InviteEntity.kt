@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
-import world.respect.datalayer.school.model.PersonRoleEnum
+import org.openeel.app.userdirectory.model.PersonRoleEnum
 import world.respect.datalayer.school.model.StatusEnum
 import kotlin.time.Clock
 import kotlin.time.Instant

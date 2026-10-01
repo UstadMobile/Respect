@@ -42,6 +42,7 @@ import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectExposedDropDownMenuField
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
@@ -138,7 +139,7 @@ fun InvitePersonScreen(
         if (uiState.isSharedDeviceMode) {
             uiState.schoolName?.let {
                 Text(
-                    text = it,
+                    text = uiTextStringResource(it),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
                 )

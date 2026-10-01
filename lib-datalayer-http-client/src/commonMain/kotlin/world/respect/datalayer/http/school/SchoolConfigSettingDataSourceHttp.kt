@@ -9,10 +9,6 @@ import io.ktor.http.Url
 import io.ktor.http.contentType
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.AuthTokenProvider
-import world.respect.datalayer.DataLayerParams
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.ext.firstOrNotLoaded
 import world.respect.datalayer.ext.getAsDataLoadState
 import world.respect.datalayer.ext.getDataLoadResultAsFlow
 import world.respect.datalayer.ext.useTokenProvider
@@ -23,6 +19,11 @@ import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHel
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.model.SchoolConfigSetting
 import world.respect.datalayer.schooldirectory.SchoolDirectoryEntryDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.lib.dataloadstate.DataLayerParams
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.ext.firstOrNotLoaded
 
 class SchoolConfigSettingDataSourceHttp(
     override val schoolUrl: Url,
@@ -67,6 +68,13 @@ class SchoolConfigSettingDataSourceHttp(
             useTokenProvider(tokenProvider)
             useValidationCacheControl(validationHelper)
         }
+    }
+
+    override fun listAsPagingSource(
+        loadParams: DataLoadParams,
+        params: SchoolConfigSettingDataSource.GetListParams
+    ): IPagingSourceFactory<Int, SchoolConfigSetting> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun list(

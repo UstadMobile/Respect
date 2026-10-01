@@ -11,10 +11,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
-import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.db.school.ext.isAdminOrTeacher
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.PersonDataSource
 import world.respect.datalayer.school.ext.newUserInviteUid
 import world.respect.datalayer.school.model.Person
@@ -24,6 +22,8 @@ import world.respect.datalayer.shared.paging.EmptyPagingSource
 import world.respect.datalayer.shared.paging.IPagingSourceFactory
 import world.respect.datalayer.shared.paging.PagingSourceFactoryHolder
 import world.respect.datalayer.shared.params.GetListCommonParams
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.sharedschooldevice.GetSharedDeviceSelfSelectUseCase
 import world.respect.shared.domain.account.sharedschooldevice.SetSharedDeviceSelfSelectUseCase

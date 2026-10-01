@@ -46,7 +46,10 @@ import world.respect.app.components.LocalAppLocale
 import world.respect.app.components.customAppLocale
 import world.respect.app.components.uiTextStringResource
 import world.respect.app.effects.NavControllerLogEffect
+import world.respect.datalayer.db.school.ext.isAdminOrTeacher
 import world.respect.datalayer.db.school.ext.isParent
+import world.respect.datalayer.school.ext.primaryRole
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.navigation.NavCommandEffect
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.biometric.BiometricAuthUseCase
@@ -212,9 +215,9 @@ fun App(
                             navController = navController,
                             topLevelItems = topLevelNavItems,
                             onProfileClick = {
-                                if (activeAccount?.isChild == false) {
+                                if (activeAccount?.isChild == false || activeAccount?.person?.primaryRole() == PersonRoleEnum.STUDENT) {
                                     navController.navigate(AccountList)
-                                }else {
+                                } else {
                                     coroutineScope.launch {
                                         val result = biometricAuthUseCase(
                                             BiometricAuthUseCase.BiometricPromptData(

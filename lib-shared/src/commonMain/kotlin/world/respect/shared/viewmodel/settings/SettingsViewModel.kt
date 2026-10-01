@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.settings
+import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SchoolSettings
 import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel

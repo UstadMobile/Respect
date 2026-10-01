@@ -5,11 +5,6 @@ import androidx.room.useWriterConnection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import world.respect.datalayer.AuthenticatedUserPrincipalId
-import world.respect.datalayer.DataLoadMetaInfo
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.NoDataLoadedState
 import world.respect.datalayer.UidNumberMapper
 import world.respect.datalayer.db.RespectSchoolDatabase
 import world.respect.datalayer.db.school.adapters.asEntity
@@ -21,6 +16,12 @@ import world.respect.datalayer.school.ext.foldToFlag
 import world.respect.datalayer.school.model.SchoolConfigSetting
 import world.respect.datalayer.shared.maxLastModifiedOrNull
 import world.respect.datalayer.shared.maxLastStoredOrNull
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.lib.dataloadstate.DataLoadMetaInfo
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.NoDataLoadedState
 import kotlin.time.Clock
 
 class SchoolConfigSettingDataSourceDb(
@@ -55,6 +56,13 @@ class SchoolConfigSettingDataSourceDb(
                 data = list.map { it.asModel() }
             )
         }
+    }
+
+    override fun listAsPagingSource(
+        loadParams: DataLoadParams,
+        params: SchoolConfigSettingDataSource.GetListParams
+    ): IPagingSourceFactory<Int, SchoolConfigSetting> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun list(

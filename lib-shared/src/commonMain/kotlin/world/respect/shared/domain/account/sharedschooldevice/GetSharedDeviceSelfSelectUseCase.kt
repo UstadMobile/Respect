@@ -1,9 +1,9 @@
 package world.respect.shared.domain.account.sharedschooldevice
 
-import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.ext.dataOrNull
 
 class GetSharedDeviceSelfSelectUseCase(
     private val schoolDataSource: SchoolDataSource

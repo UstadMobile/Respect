@@ -1,10 +1,6 @@
 package world.respect.datalayer.repository.school
 
 import kotlinx.coroutines.flow.Flow
-import world.respect.datalayer.DataLoadParams
-import world.respect.datalayer.DataLoadState
-import world.respect.datalayer.DataReadyState
-import world.respect.datalayer.ext.combineWithRemote
 import world.respect.datalayer.ext.updateFromRemoteIfNeeded
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
@@ -13,6 +9,11 @@ import world.respect.datalayer.school.model.SchoolConfigSetting
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
 import world.respect.datalayer.school.writequeue.WriteQueueItem
 import world.respect.datalayer.shared.RepositoryModelDataSource
+import world.respect.datalayer.shared.paging.IPagingSourceFactory
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.DataLoadState
+import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.dataloadstate.ext.combineWithRemote
 import world.respect.libutil.util.time.systemTimeInMillis
 
 class SchoolConfigSettingDataSourceRepository(
@@ -38,6 +39,13 @@ class SchoolConfigSettingDataSourceRepository(
         params: SchoolConfigSettingDataSource.GetListParams
     ): Flow<DataLoadState<List<SchoolConfigSetting>>> {
         return local.listAsFlow(loadParams, params)
+    }
+
+    override fun listAsPagingSource(
+        loadParams: DataLoadParams,
+        params: SchoolConfigSettingDataSource.GetListParams
+    ): IPagingSourceFactory<Int, SchoolConfigSetting> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun list(

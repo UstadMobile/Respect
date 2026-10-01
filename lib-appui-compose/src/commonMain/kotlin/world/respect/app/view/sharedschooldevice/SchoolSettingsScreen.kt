@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.uiTextStringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.devices
 import world.respect.shared.generated.resources.school_name
@@ -28,7 +29,9 @@ fun SchoolSettingsScreen(
     Column {
         SchoolSettingsScreen(
             title = stringResource(Res.string.school_name),
-            description = uiState.schoolName ?: "",
+            description =   uiState.schoolName?.let {
+                uiTextStringResource(it)
+            } ?: "",
             testTag = "my_school",
         )
         SchoolSettingsScreen(

@@ -43,7 +43,6 @@ import world.respect.datalayer.db.school.daos.InviteEntityDao
 import world.respect.datalayer.db.school.daos.PersonQrBadgeEntityDao
 import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
 import world.respect.datalayer.db.school.daos.PullSyncStatusEntityDao
-import world.respect.datalayer.db.school.daos.SchoolAppEntityDao
 import world.respect.datalayer.db.school.daos.SchoolConfigSettingEntityDao
 import world.respect.datalayer.db.school.daos.WriteQueueItemEntityDao
 import world.respect.datalayer.db.school.entities.ClassEntity
@@ -158,10 +157,9 @@ import world.respect.datalayer.school.model.Report
         XapiStateDocumentEntity::class,
         XapiStateDocumentShaEntity::class,
         XapiRemoteWriteQueueItemEntity::class,
-
         SchoolConfigSettingEntity::class,
     ],
-    version = 19,
+    version = 20,
 )
 @TypeConverters(SharedConverters::class, SchoolTypeConverters::class, OpdsTypeConverters::class)
 @ConstructedBy(RespectSchoolDatabaseConstructor::class)
@@ -250,6 +248,7 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getStateDocumentShaDao(): XapiStateDocumentShaDao
 
     abstract fun getXapiRemoteWriteQueueItemEntityDao(): XapiRemoteWriteQueueItemEntityDao
+
     abstract fun getSchoolConfigSettingEntityDao(): SchoolConfigSettingEntityDao
 
     companion object {

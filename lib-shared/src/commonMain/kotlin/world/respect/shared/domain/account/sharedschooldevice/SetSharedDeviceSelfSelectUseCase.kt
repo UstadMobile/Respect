@@ -1,36 +1,34 @@
-package world.respect.shared.domain.account.sharedschooldevice.setpin
+package world.respect.shared.domain.account.sharedschooldevice
 
-import world.respect.datalayer.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
-import world.respect.datalayer.ext.dataOrNull
 import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.SchoolConfigSetting
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import kotlin.time.Clock
 
-interface SetSharedDevicePINUseCase {
-    suspend operator fun invoke(pin: String)
-}
-
-class SetSharedDevicePINUseCaseImpl(
+class SetSharedDeviceSelfSelectUseCase(
     private val schoolDataSource: SchoolDataSource
-) : SetSharedDevicePINUseCase {
+) {
 
-    override suspend fun invoke(pin: String) {
+    suspend operator fun invoke(enabled: Boolean) {
         val params = DataLoadParams()
         val existingSetting = schoolDataSource.schoolConfigSettingDataSource.findByGuid(
-            params, SchoolConfigSettingDataSource.KEY_SHARED_DEVICE_PIN
+            params, SchoolConfigSettingDataSource.KEY_SHARED_DEVICE_SELF_SELECT
         ).dataOrNull()
 
         val setting = SchoolConfigSetting(
-            key = SchoolConfigSettingDataSource.KEY_SHARED_DEVICE_PIN,
-            value = pin,
+            key = SchoolConfigSettingDataSource.KEY_SHARED_DEVICE_SELF_SELECT,
+            value = enabled.toString(),
             lastModified = Clock.System.now(),
             canRead = existingSetting?.canRead ?: listOf(
                 PersonRoleEnum.SYSTEM_ADMINISTRATOR,
                 PersonRoleEnum.SITE_ADMINISTRATOR,
                 PersonRoleEnum.TEACHER,
-                PersonRoleEnum.SHARED_SCHOOL_DEVICE
+                PersonRoleEnum.STUDENT,
+                PersonRoleEnum.SHARED_SCHOOL_DEVICE,
+                PersonRoleEnum.PARENT
             ),
             canWrite = existingSetting?.canWrite ?: listOf(
                 PersonRoleEnum.SYSTEM_ADMINISTRATOR,

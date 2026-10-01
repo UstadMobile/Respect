@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.NearMe
@@ -45,6 +47,7 @@ import world.respect.app.components.AlternativeLangLinks
 import world.respect.app.components.RespectDataLoadHost
 import world.respect.app.components.RespectOfflineItemStatusIcon
 import world.respect.app.components.RespectQuickActionButton
+import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.defaultScreenPadding
 import world.respect.app.components.langMapString
 import world.respect.app.components.uiTextStringResource
@@ -106,12 +109,12 @@ fun PublicationDetailScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Row(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth().defaultItemPadding(top = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 val iconUrl = lessonDetail?.images?.firstOrNull()?.href
@@ -198,7 +201,7 @@ fun PublicationDetailScreen(
             Button(
                 onClick = onClickOpen,
                 enabled = uiState.openButtonEnabled,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().defaultItemPadding()
             ) {
                 Text(stringResource(Res.string.open))
             }
@@ -206,7 +209,7 @@ fun PublicationDetailScreen(
             HorizontalDivider()
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().defaultScreenPadding(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -249,7 +252,7 @@ fun PublicationDetailScreen(
             HorizontalDivider()
 
             FlowRow(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().defaultItemPadding(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -280,7 +283,7 @@ fun PublicationDetailScreen(
                 AlternativeLangLinks(
                     altLangLinks = altLangLinks,
                     onClickAlternativeLangVersion = onClickAlternativeLangVersion,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().defaultItemPadding(),
                 )
             }
 

@@ -32,6 +32,22 @@ adb install ./app-android/build/outputs/apk/debug/app-android-debug.apk
 ./gradlew app-server:run --args='addschool --url <School_Url> --name <School_Name> --adminpassword <Admin_password>'
 ```
 
+* Set up the learning unit flow (temporary manual step)
+
+The tests open a learning unit in your app using the flow file `gotolearningunit.yaml`
+(in `app-cli/src/main/resources/flows`).
+
+> **Note:** In a future release this file will be generated automatically by the RESPECT app code
+> (Kotlin) based on the lesson you select. Until that is implemented, you need to edit it manually.
+
+**Before running the tests, edit `gotolearningunit.yaml` so it navigates to the lesson you want to
+test in your own app.** The version in the repository navigates through the **Leap Learning Universe**
+app as an example.
+
+Replace the `tapOn` steps with the taps needed to reach your lesson, starting from the RESPECT app
+home screen.
+
+
 * Run test using Maestro CLI :
 ```
 cd app-cli/src/main/resources/flows

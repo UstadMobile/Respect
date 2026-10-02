@@ -20,12 +20,12 @@ import kotlin.system.exitProcess
 
 
 @Suppress("unused")
-class RespectCLI : KoinComponent {
+class OpenEelCLI : KoinComponent {
 
     private val validator: ValidateLinkUseCase by inject()
 
     fun run(args: Array<String>) {
-        val parser = ArgumentParsers.newFor("respect-cli").build()
+        val parser = ArgumentParsers.newFor("app-cli").build()
         val subparsers = parser.addSubparsers()
             .title("subcommands")
             .description("valid subcommands")
@@ -124,6 +124,9 @@ class RespectCLI : KoinComponent {
 
         const val CMD_VALIDATE = "validate"
 
+        const val CMD_TEST_LAUNCHABLE_APP = "test-launchable-app"
+
+
         /**
          * DO NOT ATTEMPT TO RUN USING THE PLAY BUTTON IN ANDROID STUDIO! Resources will not be
          * found and it will not work.
@@ -136,7 +139,7 @@ class RespectCLI : KoinComponent {
                 modules(jvmKoinAppModule)
             }
 
-            RespectCLI().run(args)
+            OpenEelCLI().run(args)
         }
     }
 }

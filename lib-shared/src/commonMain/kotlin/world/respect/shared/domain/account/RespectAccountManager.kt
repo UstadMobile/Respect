@@ -99,7 +99,7 @@ class RespectAccountManager(
                     loadParams = DataLoadParams(),
                     params = PersonDataSource.GetListParams(
                         common = GetListCommonParams(
-                            guid = session.account.userGuid
+                            guid = activePersonUid
                         ),
                         includeRelated = true,
                     )
@@ -160,6 +160,7 @@ class RespectAccountManager(
     suspend fun register(
         redeemInviteRequest: RespectRedeemInviteRequest,
         schoolUrl: Url,
+        useActiveUserAuth: Boolean = true
     ): Person {
         val schoolScopeId = SchoolDirectoryEntryScopeId(
             schoolUrl, null,
@@ -169,7 +170,7 @@ class RespectAccountManager(
         )
 
         val redeemInviteUseCase: RedeemInviteUseCase = schoolScope.get()
-        val authResponse = redeemInviteUseCase(redeemInviteRequest)
+        val authResponse = redeemInviteUseCase(redeemInviteRequest, useActiveUserAuth)
 
         val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource.getSchoolDirectoryEntryByUrl(
             schoolUrl
@@ -279,6 +280,31 @@ class RespectAccountManager(
             schoolScope?.close()
         }
 
+    }
+
+    /**
+     * Logs in a user on a shared device by switching to an existing profile without creating a new account.
+     *
+     * This function is specifically designed for shared device scenarios where:
+     * - Users scan a QR code to access the device
+     * - We want to switch to their existing profile rather than creating a new account
+     * - The device remains shared but the active user context changes
+     **/
+    suspend fun loginAsProfileOnSharedDevice(
+        credential: RespectCredential,
+        schoolUrl: Url,
+    ): AuthResponse {
+        val schoolScopeId = SchoolDirectoryEntryScopeId(schoolUrl, null)
+        val schoolScope = getKoin().getOrCreateScope<SchoolDirectoryEntry>(
+            schoolScopeId.scopeId
+        )
+
+        val authUseCase: GetTokenAndUserProfileWithCredentialUseCase = schoolScope.get()
+        val authResponse = authUseCase(credential)
+
+        switchProfile(authResponse.person.guid)
+
+        return authResponse
     }
 
     fun switchAccount(account: RespectAccount) {

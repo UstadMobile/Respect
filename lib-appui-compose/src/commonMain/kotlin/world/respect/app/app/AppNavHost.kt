@@ -64,6 +64,11 @@ import world.respect.app.view.scanqrcode.ScanQRCodeScreen
 import world.respect.app.view.schooldirectory.edit.SchoolDirectoryEditScreen
 import world.respect.app.view.schooldirectory.list.SchoolDirectoryListScreen
 import world.respect.app.view.settings.SettingsScreen
+import world.respect.app.view.sharedschooldevice.SchoolSettingsScreen
+import world.respect.app.view.sharedschooldevice.SharedDevicesSettingsScreen
+import world.respect.app.view.sharedschooldevice.TeacherPinConfirmationScreen
+import world.respect.app.view.sharedschooldevice.login.SelectClassScreen
+import world.respect.app.view.sharedschooldevice.login.StudentListScreen
 import world.respect.app.view.statement.detail.RawStatementScreen
 import world.respect.app.view.statement.detail.StatementDetailScreen
 import world.respect.app.view.statement.list.StatementListScreen
@@ -124,11 +129,16 @@ import world.respect.shared.navigation.RespectComposeNavController
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.SchoolDirectoryEdit
 import world.respect.shared.navigation.SchoolDirectoryList
+import world.respect.shared.navigation.SchoolSettings
+import world.respect.shared.navigation.SelectClass
 import world.respect.shared.navigation.Settings
 import world.respect.shared.navigation.ShareFeedback
+import world.respect.shared.navigation.SharedDevicesSettings
 import world.respect.shared.navigation.SignupScreen
 import world.respect.shared.navigation.StatementDetail
 import world.respect.shared.navigation.StatementList
+import world.respect.shared.navigation.StudentList
+import world.respect.shared.navigation.TeacherPinConfirmation
 import world.respect.shared.navigation.TermsAndCondition
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.viewmodel.acknowledgement.AcknowledgementViewModel
@@ -626,6 +636,41 @@ fun AppNavHost(
                 )
             )
         }
+        composable<SchoolSettings> {
+            SchoolSettingsScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<SharedDevicesSettings> {
+            SharedDevicesSettingsScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
+        composable<SelectClass> {
+            SelectClassScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+        composable<TeacherPinConfirmation> {
+            TeacherPinConfirmationScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
+
 
         composable<SchoolDirectoryList> {
             val viewModel: SchoolDirectoryListViewModel = respectViewModel(
@@ -697,5 +742,14 @@ fun AppNavHost(
             )
         }
 
+
+        composable<StudentList> {
+            StudentListScreen(
+                viewModel = respectViewModel(
+                    onSetAppUiState = onSetAppUiState,
+                    navController = respectNavController,
+                )
+            )
+        }
     }
 }

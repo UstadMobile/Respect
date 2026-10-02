@@ -57,6 +57,7 @@ import world.respect.server.routes.school.respect.PersonPasswordRoute
 import world.respect.server.routes.school.respect.PersonRoute
 import world.respect.server.routes.school.respect.PlaylistRoute
 import world.respect.server.routes.school.respect.RedeemInviteRoute
+import world.respect.server.routes.school.respect.SchoolConfigSettingRoute
 import world.respect.server.routes.school.respect.SchoolRegistrationRoute
 import world.respect.server.routes.school.respect.SchoolLinkRoute
 import world.respect.server.routes.school.respect.SchoolPermissionGrantRoute
@@ -311,9 +312,11 @@ fun Application.module() {
                         AuthRoute()
                     }
                     route("invite") {
-                        RedeemInviteRoute(
-                            redeemInviteUseCase = { it.getSchoolKoinScope().get() }
-                        )
+                        authenticate(AUTH_CONFIG_SCHOOL, optional = true) {
+                            RedeemInviteRoute(
+                                redeemInviteUseCase = { it.getSchoolKoinScope().get() }
+                            )
+                        }
                         InviteInfoRoute(
                             getInviteInfoUseCase = { it.getSchoolKoinScope().get() }
                         )
@@ -340,6 +343,7 @@ fun Application.module() {
                         ClassRoute()
                         EnrollmentRoute()
                         PersonQrBadgeRoute()
+                        SchoolConfigSettingRoute()
                         AddChildAccountRoute(
                             addChildAccountUseCase = { it.requireAccountScope().get() }
                         )

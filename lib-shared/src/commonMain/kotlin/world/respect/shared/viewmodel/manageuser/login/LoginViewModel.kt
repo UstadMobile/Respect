@@ -31,6 +31,7 @@ import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.generated.resources.invalid_username_password
 import world.respect.shared.navigation.EnterInviteCode
 import world.respect.shared.navigation.Home
+import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.WaitingForApproval
@@ -50,6 +51,7 @@ data class LoginUiState(
     val usernameError: StringResourceUiText? = null,
     val passwordError: StringResourceUiText? = null,
     val schoolUrl: Url,
+    val isSharedDevice: Boolean = false
 )
 
 class LoginViewModel(
@@ -89,6 +91,11 @@ class LoginViewModel(
             }
         }
         viewModelScope.launch {
+            _uiState.update { prev ->
+                prev.copy(
+                    isSharedDevice = route.isSharedDevice == true
+                )
+            }
             try {
                 val school = respectAppDataSource.schoolDirectoryEntryDataSource
                     .getSchoolDirectoryEntryByUrl(route.schoolUrl)
@@ -248,5 +255,9 @@ class LoginViewModel(
             NavCommand.Navigate(EnterInviteCode.create(route.schoolUrl))
         )
     }
-
+    fun onClickSelectAnotherSchool(){
+        _navCommandFlow.tryEmit(
+            NavCommand.Navigate(GetStartedScreen())
+        )
+    }
 }

@@ -16,12 +16,12 @@ import world.respect.datalayer.db.school.PersonPasskeyDataSourceDb
 import world.respect.datalayer.db.school.PersonPasswordDataSourceDb
 import world.respect.datalayer.db.school.PersonQrBadgeDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
+import world.respect.datalayer.db.school.SchoolConfigSettingDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
 import world.respect.datalayer.db.school.opds.OpdsFeedDataSourceDb
 import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
 import world.respect.datalayer.db.school.xapi.XapiResourceDb
 import world.respect.datalayer.school.ClassDataSourceLocal
-import world.respect.datalayer.school.DummySchoolConfigSettingsDataSource
 import world.respect.datalayer.school.EnrollmentDataSourceLocal
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.InviteDataSourceLocal
@@ -30,14 +30,13 @@ import world.respect.datalayer.school.PersonPasskeyDataSourceLocal
 import world.respect.datalayer.school.PersonPasswordDataSourceLocal
 import world.respect.datalayer.school.PersonQrCodeBadgeDataSourceLocal
 import world.respect.datalayer.school.ReportDataSourceLocal
-import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSourceLocal
 import world.respect.datalayer.school.domain.CheckPersonPermissionUseCase
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
-import world.respect.lib.xapi.resources.local.XapiResourceLocal
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
 import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
+import world.respect.lib.xapi.resources.local.XapiResourceLocal
 
 /**
  * SchoolDataSource implementation based on a local (Room) database
@@ -136,9 +135,11 @@ class SchoolDataSourceDb(
         )
     }
 
-    override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {
-        DummySchoolConfigSettingsDataSource(
-            defaultAppCatalogUrl = defaultAppCatalogUrl,
+    override val schoolConfigSettingDataSource by lazy {
+        SchoolConfigSettingDataSourceDb(
+            schoolDb = schoolDb,
+            authenticatedUser = authenticatedUser,
+            uidNumberMapper = uidNumberMapper,
         )
     }
 

@@ -79,6 +79,10 @@ import world.respect.shared.domain.account.passkey.RevokePasskeyUseCase
 import world.respect.shared.domain.account.passkey.RevokePersonPasskeyUseCaseDbImpl
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCase
 import world.respect.shared.domain.account.setpassword.EncryptPersonPasswordUseCaseImpl
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCaseImpl
+import world.respect.shared.domain.account.sharedschooldevice.setpin.SetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.SetSharedDevicePINUseCaseImpl
 import world.respect.shared.domain.account.username.UsernameSuggestionUseCase
 import world.respect.shared.domain.account.username.checkusernameunique.CheckUsernameUniqueUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
@@ -479,7 +483,14 @@ fun serverKoinModule(
             )
         }
 
+        factory<SetSharedDevicePINUseCase> {
+            SetSharedDevicePINUseCaseImpl(schoolDataSource = get())
+        }
+        factory<GetSharedDevicePINUseCase> {
+            GetSharedDevicePINUseCaseImpl(
+                schoolDataSource = get(),
+                setSharedDevicePINUseCase = get()
+            )
+        }
     }
-
-
 }

@@ -35,7 +35,7 @@ data class RespectRedeemInviteRequest(
     data class Account(
         val guid: String,
         val username: String,
-        val credential: RespectCredential,
+        val credential: RespectCredential? = null,
     )
 
     companion object {

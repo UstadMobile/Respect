@@ -1,0 +1,85 @@
+appId: world.respect.app
+onFlowStart:
+  - clearState: world.respect.app
+  - runScript:
+      file: "scripts/school_init.js"
+      env:
+        TESTCONTROLLER_URL: ${TESTCONTROLLER_URL}
+        SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+        DIR_ADMIN_AUTH_HEADER: ${DIR_ADMIN_AUTH_HEADER}
+        SCHOOL_URL: ${SCHOOL_URL}
+        SCHOOL_NAME: ${SCHOOL_NAME}
+        URL_SUBSTITUTION: ${URL_SUBSTITUTION}
+        NAME: "006_001_user_set_language_on_app_test"
+
+onFlowComplete:
+  - runScript:
+      file: "scripts/teardown.js"
+---
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- tapOn:
+    id: "choose_language"
+- assertVisible: "Use system default (English)"
+- assertVisible: "English"
+- tapOn: "हिन्दी"
+- tapOn: "शुरू हो जाओ"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn:
+    id: "username"
+- inputText: "admin"
+- tapOn:
+    id : "password"
+- inputText: ${SCHOOL_ADMIN_PASSWORD}
+- tapOn:
+    text: "लॉग इन करें"
+    index: 1
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- assertVisible: "ऐप्स"
+- clearState: world.respect.app
+- launchApp:
+    arguments:
+      respect_directory: ${output.SCHOOL_URL}
+- assertVisible: "Use system default (English)"
+- tapOn: "Get Started"
+- runFlow:
+    file: "subflows/get_started_select_school_by_name.yaml"
+    env:
+      SCHOOL_NAME: ${SCHOOL_NAME}
+- tapOn:
+    id: "username"
+- inputText: "admin"
+- tapOn:
+    id : "password"
+- inputText: ${SCHOOL_ADMIN_PASSWORD}
+- tapOn:
+    text: "Login"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+- tapOn:
+     id: "Settings"
+- assertVisible:
+    id: "app_title"
+    text: "Settings"
+- assertVisible: "Use system default (English)"
+- tapOn: "Language"
+- assertVisible: "Use system default (English)"
+- assertVisible: "English"
+- tapOn: "हिन्दी"
+- assertVisible:
+    id: "app_title"
+    text: "सेटिंग्स"
+- tapOn: "भाषा"
+- tapOn: "English"
+- assertVisible:
+    id: "app_title"
+    text: "Settings"
+

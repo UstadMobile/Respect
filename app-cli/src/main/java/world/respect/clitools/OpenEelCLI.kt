@@ -1,5 +1,6 @@
 package world.respect.clitools
 
+import io.ktor.http.Url
 import kotlinx.coroutines.runBlocking
 import net.sourceforge.argparse4j.ArgumentParsers
 import net.sourceforge.argparse4j.helper.HelpScreenException
@@ -16,6 +17,8 @@ import world.respect.shared.di.jvmKoinAppModule
 import world.respect.domain.validator.ListAndPrintlnValidatorReporter
 import world.respect.domain.validator.ValidateLinkUseCase
 import world.respect.domain.validator.ValidatorMessage
+import world.respect.shared.domain.testlaunchableapp.TestLaunchableAppUseCase
+import java.io.File
 import kotlin.system.exitProcess
 
 
@@ -23,6 +26,8 @@ import kotlin.system.exitProcess
 class OpenEelCLI : KoinComponent {
 
     private val validator: ValidateLinkUseCase by inject()
+
+    private val testLaunchableApp: TestLaunchableAppUseCase by inject()
 
     fun run(args: Array<String>) {
         val parser = ArgumentParsers.newFor("app-cli").build()
@@ -59,10 +64,29 @@ class OpenEelCLI : KoinComponent {
                         "the RESPECT requirements.")
         }.help("Validate a RESPECT App Manifest or OPDS Feed of Learning Units")
 
+        subparsers.addParser(CMD_TEST_LAUNCHABLE_APP).also {
+            it.addArgument("-m", "--manifest")
+                .required(true)
+                .help("Launchable app manifest URL")
+            it.addArgument("-s", "--serverurl")
+                .required(true)
+                .help("Server URL to test against")
+            it.addArgument("-u", "--username")
+                .required(true)
+                .help("App username for login")
+            it.addArgument("-p", "--password")
+                .required(true)
+                .help("App password for login")
+            it.addArgument("-o", "--outputdir")
+                .required(true)
+                .help("Output directory for test results")
+
+        }.help("Test a launchable app by selecting learning units at random")
+
         val ns: Namespace
         try {
             ns = parser.parseArgs(args)
-            val subCommand = ns?.getString("subparser_name")
+            val subCommand = ns.getString("subparser_name")
             when(subCommand) {
                 CMD_VALIDATE -> {
                     val url = ns.getString("url")
@@ -113,6 +137,22 @@ class OpenEelCLI : KoinComponent {
                         exitProcess(0)
                     }
                 }
+
+                CMD_TEST_LAUNCHABLE_APP -> {
+                    runBlocking {
+                        testLaunchableApp(
+                            request = TestLaunchableAppUseCase.Request(
+                                manifestUrl = Url(ns.getString("manifest")),
+                                serverUrl = Url(ns.getString("serverurl")),
+                                username = ns.getString("username"),
+                                password = ns.getString("password"),
+                                outputDir = File(ns.getString("outputdir")),
+                            )
+                        )
+
+                        exitProcess(0)
+                    }
+                }
             }
         }catch(e : ArgumentParserException) {
             parser.handleError(e)
@@ -137,6 +177,7 @@ class OpenEelCLI : KoinComponent {
         fun main(args: Array<String>) {
             startKoin {
                 modules(jvmKoinAppModule)
+                modules(cliKoinAppModule)
             }
 
             OpenEelCLI().run(args)

@@ -7,8 +7,10 @@ import io.ktor.http.Url
 import kotlinx.serialization.json.Json
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.Publication
+import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ext.allPublications
 import world.respect.libutil.ext.resolve
+import world.respect.shared.ext.selectPreferredString
 import kotlin.random.Random
 
 /**
@@ -43,7 +45,8 @@ class SelectRandomPublicationUseCase(
      */
     data class ClickStep(
         val text: String,
-        val feed: OpdsFeed,
+        val feed: OpdsFeed?,
+        val link: ReadiumLink?,
     )
 
     /**
@@ -71,9 +74,17 @@ class SelectRandomPublicationUseCase(
             val publications = feed.allPublications()
             if (publications.isNotEmpty()) {
                 val selectedPublication = publications.random(random)
+                clickPath.add(
+                    ClickStep(
+                        text = selectedPublication.metadata.title.selectPreferredString(listOf("en")),
+                        link = null,
+                        feed = null,
+                    )
+                )
+
                 return Result(
                     publication = selectedPublication,
-                    clickPath = clickPath,
+                    clickPath = clickPath.toList(),
                 )
             }
 
@@ -84,6 +95,7 @@ class SelectRandomPublicationUseCase(
                     ClickStep(
                         text = selectedNavItem.title ?: "",
                         feed = feed,
+                        link = selectedNavItem,
                     )
                 )
                 currentUrl = currentUrl.resolve(selectedNavItem.href)

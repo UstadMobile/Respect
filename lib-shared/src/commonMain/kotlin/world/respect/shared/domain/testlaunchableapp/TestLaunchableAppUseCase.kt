@@ -1,6 +1,7 @@
 package world.respect.shared.domain.testlaunchableapp
 
 import io.ktor.http.Url
+import java.io.File
 
 /**
  * This test case will select a defined number of learning units at random from the launchable app's
@@ -20,6 +21,7 @@ fun interface TestLaunchableAppUseCase {
         val serverUrl: Url,
         val username: String,
         val password: String,
+        val outputDir: File,
         val numLearningUnits: Int = 6,
     )
 

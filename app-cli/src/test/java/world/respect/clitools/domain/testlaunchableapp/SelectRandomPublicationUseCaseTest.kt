@@ -77,7 +77,61 @@ class SelectRandomPublicationUseCaseTest {
         )
 
         assertEquals(basePublication, result.publication)
-        assertTrue(result.clickPath.isEmpty())
+        assertEquals(1, result.clickPath.size)
+    }
+
+    @Test
+    fun givenMultipleNavigationChoices_whenInvokedWithSpecificSeed_thenSelectsExpectedBranch() = testApplication {
+        val pubA = basePublication.copy(metadata = ReadiumMetadata(title = LangMapStringValue("Publication A")))
+        val pubB = basePublication.copy(metadata = ReadiumMetadata(title = LangMapStringValue("Publication B")))
+
+        application {
+            installServerJson()
+
+            routing {
+                get("/root.json") {
+                    call.respond(
+                        baseFeed.copy(
+                            metadata = OpdsFeedMetadata(title = "Root"),
+                            navigation = listOf(
+                                ReadiumLink(href = "a.json", type = OpdsFeed.MEDIA_TYPE, title = "Option A"),
+                                ReadiumLink(href = "b.json", type = OpdsFeed.MEDIA_TYPE, title = "Option B"),
+                            )
+                        )
+                    )
+                }
+                get("/a.json") {
+                    call.respond(
+                        baseFeed.copy(
+                            metadata = OpdsFeedMetadata(title = "Feed A"),
+                            publications = listOf(pubA),
+                        )
+                    )
+                }
+                get("/b.json") {
+                    call.respond(
+                        baseFeed.copy(
+                            metadata = OpdsFeedMetadata(title = "Feed B"),
+                            publications = listOf(pubB),
+                        )
+                    )
+                }
+            }
+        }
+
+        val result = SelectRandomPublicationUseCase(
+            httpClient = client,
+            json = json,
+            random = Random(1),
+        ).invoke(
+            SelectRandomPublicationUseCase.Request(
+                Url("/root.json")
+            )
+        )
+
+        assertTrue(result.publication == pubA || result.publication == pubB)
+        assertEquals(2, result.clickPath.size)
+        assertTrue(result.clickPath[0].text == "Option A" || result.clickPath[0].text == "Option B")
     }
 
     @Test
@@ -111,7 +165,7 @@ class SelectRandomPublicationUseCaseTest {
         )
 
         assertTrue(result.publication == pub1 || result.publication == pub2)
-        assertTrue(result.clickPath.isEmpty())
+        assertEquals(1, result.clickPath.size)
     }
 
     @Test
@@ -155,9 +209,9 @@ class SelectRandomPublicationUseCaseTest {
         )
 
         assertEquals(basePublication, result.publication)
-        assertEquals(1, result.clickPath.size)
+        assertEquals(2, result.clickPath.size)
         assertEquals("Math", result.clickPath[0].text)
-        assertEquals("Main Menu", result.clickPath[0].feed.metadata.title)
+        assertEquals("Main Menu", result.clickPath[0].feed?.metadata?.title)
     }
 
     @Test
@@ -215,11 +269,11 @@ class SelectRandomPublicationUseCaseTest {
         )
 
         assertEquals(basePublication, result.publication)
-        assertEquals(2, result.clickPath.size)
+        assertEquals(3, result.clickPath.size)
         assertEquals("Math Section", result.clickPath[0].text)
-        assertEquals("Home", result.clickPath[0].feed.metadata.title)
+        assertEquals("Home", result.clickPath[0].feed?.metadata?.title)
         assertEquals("Geometry", result.clickPath[1].text)
-        assertEquals("Math", result.clickPath[1].feed.metadata.title)
+        assertEquals("Math", result.clickPath[1].feed?.metadata?.title)
     }
 
     @Test

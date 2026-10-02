@@ -10,10 +10,15 @@ import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.dataloadstate.datetime.toGMTDate
+import world.respect.lib.opds.model.LangMapStringValue
 import world.respect.lib.opds.model.OpdsFeed
+import world.respect.lib.opds.model.toStringMap
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.encodeToXapiDocument
+import world.respect.lib.xapi.model.XapiActor
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
+import world.respect.lib.xapi.resources.XapiStatementsResource
+import world.respect.shared.domain.xapi.createPinCollectionStatement
 import kotlin.time.Clock
 
 /**
@@ -22,25 +27,37 @@ import kotlin.time.Clock
  *     available on other devices.
  *  2) The OpdsFeedDataSource which needs to be updated so that the OpdsFeed appears as expected
  *     when browsing locally.
+ *  3) An xAPI statement as per the Collections Listing recipe (README_COLLECTIONS_LISTING_RECIPE.md)
+ *     is posted so that the collection is "pinned" and shows up in a listing of available
+ *     collections.
  */
 class SaveOpdsFeedUseCase(
     private val xapiActivityProfileResource: XapiActivityProfileResource,
+    private val xapiStatementsResource: XapiStatementsResource,
     private val opdsFeedDataSourceLocal: OpdsFeedDataSourceLocal,
     private val json: Json,
 ) {
 
-    suspend operator fun invoke(feed: OpdsFeed) {
+    suspend operator fun invoke(feed: OpdsFeed, actor: XapiActor) {
         val feedUrl = feed.requireSelfUrl()
+        val activityId = feedUrl.parameters["activityId"] ?: throw IllegalArgumentException()
 
-        val updated = Clock.System.now().toGMTDate()
+        val now = Clock.System.now()
+        val updated = now.toGMTDate()
+
+        //As per OpdsFeedDataSource.kt: playlists must have metadata.modified set to the time the
+        //user actually clicked save, otherwise OpdsFeedDataSourceDb.updateLocal will skip storing
+        //the update because it is not newer than what is already stored locally.
+        val feedToSave = feed.copy(metadata = feed.metadata.copy(modified = now))
+
         val xapiDocument = json.encodeToXapiDocument(
-            serializer = OpdsFeed.serializer(), value = feed, updated = updated
+            serializer = OpdsFeed.serializer(), value = feedToSave, updated = updated
         )
 
         xapiActivityProfileResource.put(
             params = XapiActivityProfileResource.SingleDocumentParams(
                 profileId = OpenEelXapiConstants.ACTIVITY_PROFILEID_OPDS_COLLECTION,
-                activityId = feedUrl.parameters["activityId"] ?: throw IllegalArgumentException()
+                activityId = activityId,
             ),
             document = xapiDocument,
         )
@@ -48,7 +65,7 @@ class SaveOpdsFeedUseCase(
         opdsFeedDataSourceLocal.updateLocal(
             url = feedUrl,
             dataLoadResult = DataReadyState(
-                data = feed,
+                data = feedToSave,
                 metaInfo = DataLoadMetaInfo(
                     headers = headersOf(
                         HttpHeaders.LastModified to listOf(updated.toHttpDate()),
@@ -57,6 +74,19 @@ class SaveOpdsFeedUseCase(
                 )
             )
         )
-    }
 
+        xapiStatementsResource.post(
+            listOf(
+                createPinCollectionStatement(
+                    collectionActivityId = activityId,
+                    collectionName = LangMapStringValue(feedToSave.metadata.title).toStringMap(),
+                    collectionDescription = feedToSave.metadata.description?.let {
+                        LangMapStringValue(it).toStringMap()
+                    },
+                    opdsCollectionLink = feedUrl.toString(),
+                    actor = actor,
+                )
+            )
+        )
+    }
 }

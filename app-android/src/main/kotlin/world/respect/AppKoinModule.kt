@@ -1280,6 +1280,7 @@ val appKoinModule = module {
         scoped<SaveOpdsFeedUseCase> {
             SaveOpdsFeedUseCase(
                 xapiActivityProfileResource = get<SchoolDataSource>().xapiResource.activityProfile,
+                xapiStatementsResource = get<SchoolDataSource>().xapiResource.statements,
                 opdsFeedDataSourceLocal = get<SchoolDataSourceLocal>().opdsFeedDataSource,
                 json = get(),
             )

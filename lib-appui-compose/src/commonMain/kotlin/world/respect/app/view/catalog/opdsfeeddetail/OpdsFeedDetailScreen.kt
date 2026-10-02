@@ -389,6 +389,8 @@ fun NavigationListItem(
     isSelected: Boolean = false,
     onClickNavigation: (ReadiumLink) -> Unit,
     onLongPress: () -> Unit,
+    description: String? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
 ) {
     FeedListItem(
         title = navigation.title
@@ -397,13 +399,14 @@ fun NavigationListItem(
         iconUrl = navigation.alternate?.find {
             it.rel?.contains(ICON) == true
         }?.href,
-        description = null,
+        description = description,
         language = navigation.language,
         duration = navigation.duration,
         showCheckbox = showCheckbox,
         isSelected = isSelected,
         onClick = { onClickNavigation(navigation) },
         onLongPress = onLongPress,
+        trailingContent = trailingContent,
     )
 }
 

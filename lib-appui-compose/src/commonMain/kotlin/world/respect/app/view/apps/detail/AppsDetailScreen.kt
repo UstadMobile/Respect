@@ -17,7 +17,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
@@ -95,8 +97,10 @@ fun AppsDetailScreen(
 
     val appDetail = (uiState.appDetail as? DataReadyState)?.data
 
-    Column(modifier = Modifier.defaultItemPadding()) {
-        Row {
+    Column(
+        modifier = Modifier.verticalScroll(rememberScrollState())
+    ) {
+        Row(Modifier.defaultItemPadding(top = 16.dp)) {
             appDetail?.findIcons()?.firstOrNull()?.also {
                 RespectAsyncImage(
                     uri = it.href,
@@ -118,7 +122,7 @@ fun AppsDetailScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             maxItemsInEachRow = 4,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.defaultItemPadding().fillMaxWidth()
         ) {
 
             uiState.licenseLink?.also { licenseLink ->
@@ -157,7 +161,7 @@ fun AppsDetailScreen(
             if (!uiState.isAdded && uiState.showAddRemoveButton) {
                 OutlinedButton(
                     onClick = onClickAdd,
-                    modifier = Modifier.weight(1f).padding(vertical = 8.dp),
+                    modifier = Modifier.weight(1f).defaultItemPadding(),
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Add,
@@ -174,7 +178,7 @@ fun AppsDetailScreen(
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
+                modifier = Modifier.fillMaxWidth().defaultItemPadding()
             ) {
 
                 HorizontalDivider(
@@ -223,7 +227,8 @@ fun AppsDetailScreen(
             HorizontalDivider()
             AlternativeLangLinks(
                 altLangLinks = altLangLinks,
-                onClickAlternativeLangVersion = onClickAlternativeLangVersion
+                onClickAlternativeLangVersion = onClickAlternativeLangVersion,
+                modifier = Modifier.defaultItemPadding(),
             )
             HorizontalDivider()
         }
@@ -252,7 +257,8 @@ fun AppsDetailScreen(
         )
 
         LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp)
         ) {
             itemsIndexed(
                 items = uiState.navigation,

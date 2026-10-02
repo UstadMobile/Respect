@@ -2,6 +2,7 @@ package world.respect.shared.ext
 
 import org.jetbrains.compose.resources.StringResource
 import world.respect.lib.xapi.extensions.reportoptions.Comparisons
+import world.respect.lib.xapi.extensions.reportoptions.DefaultIndicator
 import world.respect.lib.xapi.extensions.reportoptions.FilterType
 import world.respect.lib.xapi.extensions.reportoptions.GenderType
 import world.respect.lib.xapi.extensions.reportoptions.ReportPeriodOption
@@ -86,4 +87,13 @@ val Comparisons.label: StringResource
         Comparisons.LESSER -> Res.string.lesser
         Comparisons.GREATER_OR_EQUAL -> Res.string.greater_or_equal
         Comparisons.LESSER_OR_EQUAL -> Res.string.lesser_or_equal
+    }
+
+val DefaultIndicator.label: StringResource
+    get() = when(this) {
+        DefaultIndicator.TOTAL_CONTENT_USAGE_DURATION -> Res.string.total_content_usage_duration
+        DefaultIndicator.AVERAGE_CONTENT_USAGE_DURATION -> Res.string.average_content_usage_duration_per_user
+        DefaultIndicator.SCORE_AVERAGE -> Res.string.average_score
+        DefaultIndicator.SCORE_TOTAL -> Res.string.total_score
+        DefaultIndicator.NUMBER_OF_UNIQUE_USERS -> Res.string.number_unique_users
     }

@@ -35,7 +35,6 @@ import world.respect.datalayer.db.shared.daos.LangMapEntityDao
 import world.respect.datalayer.db.shared.entities.LangMapEntity
 import world.respect.datalayer.db.school.daos.IndicatorEntityDao
 import world.respect.datalayer.db.school.daos.ReportEntityDao
-import world.respect.datalayer.db.realm.entities.IndicatorEntity
 import world.respect.datalayer.db.school.daos.ClassEntityDao
 import world.respect.datalayer.db.school.daos.ClassPermissionEntityDao
 import world.respect.datalayer.db.school.daos.EnrollmentEntityDao
@@ -43,6 +42,7 @@ import world.respect.datalayer.db.school.daos.InviteEntityDao
 import world.respect.datalayer.db.school.daos.PersonQrBadgeEntityDao
 import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
 import world.respect.datalayer.db.school.daos.PullSyncStatusEntityDao
+import world.respect.datalayer.db.school.daos.ReportQueryResultDao
 import world.respect.datalayer.db.school.daos.WriteQueueItemEntityDao
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
@@ -99,7 +99,8 @@ import world.respect.lib.xapi.extensions.reportoptions.Indicator
 import world.respect.datalayer.school.model.Invite2
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.Report
-
+import world.respect.datalayer.db.shared.entities.ReportQueryResultEntity
+import world.respect.datalayer.db.school.entities.IndicatorEntity
 
 /**
  * Contains realm-specific entities and DAOs
@@ -155,6 +156,7 @@ import world.respect.datalayer.school.model.Report
         XapiStateDocumentEntity::class,
         XapiStateDocumentShaEntity::class,
         XapiRemoteWriteQueueItemEntity::class,
+        ReportQueryResultEntity::class,
     ],
     version = 19,
 )
@@ -245,6 +247,8 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getStateDocumentShaDao(): XapiStateDocumentShaDao
 
     abstract fun getXapiRemoteWriteQueueItemEntityDao(): XapiRemoteWriteQueueItemEntityDao
+
+    abstract fun reportQueryResultDao(): ReportQueryResultDao
 
     companion object {
 

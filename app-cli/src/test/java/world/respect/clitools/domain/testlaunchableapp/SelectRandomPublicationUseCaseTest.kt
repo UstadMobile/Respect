@@ -32,12 +32,22 @@ class SelectRandomPublicationUseCaseTest {
 
     private val baseFeed = OpdsFeed(
         metadata = OpdsFeedMetadata(title = "Base Feed"),
-        links = emptyList(),
+        links = listOf(
+            ReadiumLink(
+                rel = listOf("self"),
+                href = "feed.json"
+            )
+        ),
     )
 
     private val basePublication = Publication(
         metadata = ReadiumMetadata(title = LangMapStringValue("Base Publication")),
-        links = emptyList(),
+        links = listOf(
+            ReadiumLink(
+                rel = listOf("self"),
+                href = "publication.json"
+            )
+        ),
     )
 
     private fun Application.installServerJson() {

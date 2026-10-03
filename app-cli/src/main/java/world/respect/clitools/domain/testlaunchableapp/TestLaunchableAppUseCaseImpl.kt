@@ -92,6 +92,7 @@ class TestLaunchableAppUseCaseImpl(
                     launchableAppName = appName,
                     testRequest = request,
                     launchableAppPackageId = launchableAppPackageId,
+                    deviceId = null,
                 )
             ).also {
                 messages.addAll(it.messages)

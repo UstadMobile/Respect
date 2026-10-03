@@ -85,6 +85,13 @@ class OpenEelCLI : KoinComponent {
                 .choices("webview", "native")
                 .required(true)
                 .help("Launch mode to expect: Web technology based lesson or native app")
+            it.addArgument("--device")
+                .help("Device ID to run on e.g. --device emulator-5554")
+            it.addArgument("--numunits")
+                .help("Number of learning units to test")
+                .also { arg ->
+                    arg.default = TestLaunchableAppUseCase.DEFAULT_NUM_LEARNING_UNITS.toString()
+                }
         }.help("Test a launchable app by selecting learning units at random")
 
         val ns: Namespace
@@ -151,6 +158,7 @@ class OpenEelCLI : KoinComponent {
                                 username = ns.getString("username"),
                                 password = ns.getString("password"),
                                 outputDir = File(ns.getString("outputdir")),
+                                deviceId = ns.getString("device"),
                                 mode = TestLaunchableAppModeEnum.forId(ns.getString("mode")),
                             )
                         )

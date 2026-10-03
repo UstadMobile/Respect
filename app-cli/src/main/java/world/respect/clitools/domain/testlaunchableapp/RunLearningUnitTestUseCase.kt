@@ -23,6 +23,7 @@ class RunLearningUnitTestUseCase {
         val launchableAppName: String,
         val launcherPackageId: String = APP_PACKAGE_ID,
         val launchableAppPackageId: String?,
+        val deviceId: String?,
         val testRequest: TestLaunchableAppUseCase.Request,
         val offline: Boolean = Random.nextBoolean(),
     )
@@ -74,10 +75,11 @@ class RunLearningUnitTestUseCase {
             }
         )
 
-        val cmd = listOf(
+        val cmd = listOfNotNull(
             SysPathUtil.findCommandInPath("maestro")?.absolutePath
                 ?: throw IllegalStateException("No Maestro command found"),
             "test",
+            params.deviceId?.let { "--device=$it" },
             "--format=junit",
             "--test-output-dir=${outputDir.absolutePath}",
             "--env=SCHOOL_URL=${params.testRequest.serverUrl}",

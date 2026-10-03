@@ -24,6 +24,7 @@ fun interface TestLaunchableAppUseCase {
         val password: String,
         val outputDir: File,
         val mode: TestLaunchableAppModeEnum,
+        val deviceId: String?,
         val numLearningUnits: Int = 2,
     )
 
@@ -32,5 +33,10 @@ fun interface TestLaunchableAppUseCase {
     )
 
     suspend operator fun invoke(request: Request): Result
+
+    companion object {
+
+        const val DEFAULT_NUM_LEARNING_UNITS = 5
+    }
 
 }

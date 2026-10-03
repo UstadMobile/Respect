@@ -8,6 +8,7 @@ import world.respect.clitools.domain.testlaunchableapp.SelectRandomPublicationUs
 import world.respect.clitools.domain.testlaunchableapp.TestLaunchableAppUseCaseImpl
 import world.respect.datalayer.http.school.opds.OpdsPublicationDataSourceHttpClient
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
+import world.respect.shared.domain.launchapp.GetAndroidPackageIdForLaunchableAppUseCase
 import world.respect.shared.domain.launchapp.getlaunchoptionsforpublication.GetLaunchOptionsForPublicationUseCase
 import world.respect.shared.domain.testlaunchableapp.TestLaunchableAppUseCase
 
@@ -52,6 +53,10 @@ val cliKoinAppModule = module {
         )
     }
 
+    single<GetAndroidPackageIdForLaunchableAppUseCase> {
+        GetAndroidPackageIdForLaunchableAppUseCase()
+    }
+
     single<TestLaunchableAppUseCase>(createdAtStart = true) {
         TestLaunchableAppUseCaseImpl(
             selectRandomPublicationUseCase = get(),
@@ -59,6 +64,7 @@ val cliKoinAppModule = module {
             httpClient = get(),
             getXapiStatementsFromLearningUnitTestUseCase = get(),
             json = get(),
+            getAndroidPackageIdForLaunchableAppUseCase = get(),
         )
     }
 }

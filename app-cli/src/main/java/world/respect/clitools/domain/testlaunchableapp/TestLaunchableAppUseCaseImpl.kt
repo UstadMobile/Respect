@@ -14,6 +14,8 @@ import world.respect.lib.xapi.model.XapiVerb
 import world.respect.libutil.ext.appendEndpointSegments
 import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.account.gettokenanduser.GetTokenAndUserProfileWithCredentialUseCaseClient
+import world.respect.shared.domain.launchapp.GetAndroidPackageIdForLaunchableAppUseCase
+import world.respect.shared.domain.testlaunchableapp.TestLaunchableAppModeEnum
 import world.respect.shared.domain.testlaunchableapp.TestLaunchableAppUseCase
 import world.respect.shared.domain.validator.ValidatorMessage
 import world.respect.shared.ext.selectPreferredString
@@ -37,6 +39,7 @@ class TestLaunchableAppUseCaseImpl(
     private val getXapiStatementsFromLearningUnitTestUseCase: GetXapiStatementsFromLearningUnitTestUseCase,
     private val httpClient: HttpClient,
     private val json: Json,
+    private val getAndroidPackageIdForLaunchableAppUseCase: GetAndroidPackageIdForLaunchableAppUseCase,
 ): TestLaunchableAppUseCase {
 
     override suspend fun invoke(
@@ -49,6 +52,11 @@ class TestLaunchableAppUseCaseImpl(
             request.manifestUrl.resolve(it.href)
         } ?: throw IllegalArgumentException("Manifest does not contain a default collection")
         val appName = manifestPub.metadata.title.selectPreferredString(listOf("en"))
+        val launchableAppPackageId = if(request.mode == TestLaunchableAppModeEnum.NATIVE) {
+            getAndroidPackageIdForLaunchableAppUseCase(manifestPub)
+        }else {
+            null
+        }
 
         val authResponse = GetTokenAndUserProfileWithCredentialUseCaseClient(
             schoolUrl = request.serverUrl,
@@ -83,6 +91,7 @@ class TestLaunchableAppUseCaseImpl(
                     baseDir = learningUnitOutputDir,
                     launchableAppName = appName,
                     testRequest = request,
+                    launchableAppPackageId = launchableAppPackageId,
                 )
             ).also {
                 messages.addAll(it.messages)
@@ -95,8 +104,10 @@ class TestLaunchableAppUseCaseImpl(
                 statementResource = statementResource,
             )
 
-            println("Found ${statements.statements.size} statements")
-            File(learningUnitOutputDir, "statements.json").writeText(
+            File(learningUnitOutputDir, "xapi-statements.json").also {
+                print("Found ${statements.statements.size} xAPI statements: ")
+                println("saving to ${it.absolutePath}")
+            }.writeText(
                 json.encodeToString(
                     XapiStatementResult.serializer(),
                     statements,

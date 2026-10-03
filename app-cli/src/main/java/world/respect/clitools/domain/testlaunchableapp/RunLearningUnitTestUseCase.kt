@@ -21,7 +21,8 @@ class RunLearningUnitTestUseCase {
         val clickSteps: List<SelectRandomPublicationUseCase.ClickStep>,
         val baseDir: File,
         val launchableAppName: String,
-        val appPackageId: String = APP_PACKAGE_ID,
+        val launcherPackageId: String = APP_PACKAGE_ID,
+        val launchableAppPackageId: String?,
         val testRequest: TestLaunchableAppUseCase.Request,
         val offline: Boolean = Random.nextBoolean(),
     )
@@ -43,7 +44,7 @@ class RunLearningUnitTestUseCase {
             )
         }
 
-        listOf("AddApp.yaml", "gotoapp.yaml", "OfflineTrue.yaml").forEach { resName ->
+        listOf("gotoapp.yaml", "download_and_enable_airplanemode.yaml").forEach { resName ->
             this::class.java.copyResourceToFile(
                 "/flows/subflows/$resName",
                 File(subFlowDir, resName)
@@ -62,6 +63,14 @@ class RunLearningUnitTestUseCase {
                     append("    element: ${step.text.quote()}\n")
                     append("- tapOn: ${step.text.quote()}\n")
                 }
+            }
+        )
+
+        File(params.baseDir, "generated/clear_native_app.yaml").writeText(
+            buildString {
+                append("appId: ${params.launchableAppPackageId}\n")
+                append("---\n")
+                append("- clearState: ${params.launchableAppPackageId ?: "na"}\n")
             }
         )
 

@@ -15,6 +15,10 @@ onFlowStart:
 onFlowComplete:
   - stopRecording
 ---
+- runFlow:
+    when:
+      true: ${TEST_APP_MODE === 'native'}
+    file: "generated/clear_native_app.yaml"
 - launchApp
 - tapOn: "Get Started"
 - assertVisible: "Let's get started"
@@ -49,7 +53,7 @@ onFlowComplete:
 - runFlow:
     when:
       true: ${OFFLINE_STATUS === 'true'}
-    file: "subflows/OfflineTrue.yaml"
+    file: "subflows/download_and_enable_airplanemode.yaml"
 
 - tapOn: "Open"
 

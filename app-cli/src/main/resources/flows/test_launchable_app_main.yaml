@@ -1,0 +1,87 @@
+appId: world.respect.app
+env:
+  SCHOOL_URL: ${SCHOOL_URL}
+  SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
+  TEST_APP_URL: ${TEST_APP_URL}
+  TEST_APP_NAME: ${TEST_APP_NAME}
+  TEST_APP_MODE: ${TEST_APP_MODE}
+  OFFLINE_STATUS: ${OFFLINE_STATUS}
+
+onFlowStart:
+  - startRecording:
+      path: "recordings/test_launchable_app"
+  - clearState: world.respect.app
+
+onFlowComplete:
+  - stopRecording
+---
+- runFlow:
+    when:
+      true: ${TEST_APP_MODE === 'native'}
+    file: "generated/clear_native_app.yaml"
+- launchApp
+- tapOn: "Get Started"
+- assertVisible: "Let's get started"
+- tapOn: "Other options"
+- assertVisible: "Other options"
+- tapOn: "Paste the link here"
+- inputText: ${SCHOOL_URL}
+- tapOn: "Next"
+- assertVisible: "Login"
+- tapOn:
+    id: "username"
+- inputText: "admin"
+- tapOn:
+    id : "password"
+- inputText: ${SCHOOL_ADMIN_PASSWORD}
+- tapOn: "Login"
+- assertVisible:
+    id: "app_title"
+    text: "Home"
+
+- runFlow:
+    file: "subflows/gotoapp.yaml"
+    env:
+      TEST_APP_NAME: ${TEST_APP_NAME}
+      TEST_APP_URL: ${TEST_APP_URL}
+- tapOn: "Lessons"
+- runFlow:
+     file: generated/gotolearningunit.yaml
+     env:
+       TEST_APP_NAME: ${TEST_APP_NAME}
+
+- runFlow:
+    when:
+      true: ${OFFLINE_STATUS === 'true'}
+    file: "subflows/download_and_enable_airplanemode.yaml"
+
+- tapOn: "Open"
+
+- runFlow:
+    when:
+      true: ${TEST_APP_MODE === 'native'}
+    commands:
+      - assertNotVisible:
+          id: "webview_close"
+- runFlow:
+    when:
+      true: ${TEST_APP_MODE === 'webview'}
+    commands:
+        - assertVisible:
+              id: "webview_close"   #This assertion make sure the app is opened in web-view mode.
+
+- takeScreenshot:
+    path: "screenshots/lesson_on_open"
+
+- extendedWaitUntil:
+    visible:
+      id: "publication_title"
+    timeout: 1800000
+
+# Turn off airplane mode and wait for all pending remote writes to complete. See AppBar.kt for note
+# on this. Required to ensure that any pending xAPI statements have been sent to the server so
+# GetXapiStatementsFromLearningUnitTestUseCase can find them.
+- setAirplaneMode: disabled
+- assertVisible:
+    id: "pending_write_count"
+    text: "0"

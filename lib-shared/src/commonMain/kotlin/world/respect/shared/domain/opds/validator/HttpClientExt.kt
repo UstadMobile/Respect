@@ -5,8 +5,8 @@ import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
-import world.respect.domain.validator.ValidatorMessage
-import world.respect.domain.validator.ValidatorReporter
+import world.respect.shared.domain.validator.ValidatorMessage
+import world.respect.shared.domain.validator.ValidatorReporter
 
 suspend fun HttpClient.verifyMimeTypeAndGetBodyAsText(
     url: String,

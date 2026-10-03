@@ -2,7 +2,7 @@ appId: world.respect.app
 
 ---
 - tapOn:
-  id: "nav_home"
+    id: "nav_home"
 - tapOn:
     id: "floating_action_button"
 - tapOn: "Add from Link"

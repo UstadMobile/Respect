@@ -23,7 +23,7 @@ fun interface TestLaunchableAppUseCase {
         val password: String,
         val outputDir: File,
         val mode: TestLaunchableAppModeEnum,
-        val numLearningUnits: Int = 6,
+        val numLearningUnits: Int = 2,
     )
 
     suspend operator fun invoke(request: Request)

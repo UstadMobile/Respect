@@ -1,7 +1,6 @@
 appId: world.respect.app
 env:
   SCHOOL_URL: ${SCHOOL_URL}
-  SCHOOL_NAME: ${SCHOOL_NAME}
   SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
   TEST_APP_URL: ${TEST_APP_URL}
   TEST_APP_NAME: ${TEST_APP_NAME}
@@ -37,12 +36,11 @@ onFlowComplete:
     text: "Home"
 
 - runFlow:
-    when:
-      notVisible: ${TEST_APP_NAME}
-    file: "subflows/AddApp.yaml"
+    file: "subflows/gotoapp.yaml"
     env:
       TEST_APP_NAME: ${TEST_APP_NAME}
-- assertVisible: ${TEST_APP_NAME}
+      TEST_APP_URL: ${TEST_APP_URL}
+- tapOn: "Lessons"
 - runFlow:
      file: generated/gotolearningunit.yaml
      env:
@@ -59,8 +57,8 @@ onFlowComplete:
     when:
       true: ${TEST_APP_MODE === 'native'}
     commands:
-      - assertNotVisible: #This assertion make sure the app is not opened in web-view mode.
-                id: "webview_close" 
+      - assertNotVisible:
+          id: "webview_close"
 - runFlow:
     when:
       true: ${TEST_APP_MODE === 'webview'}

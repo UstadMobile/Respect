@@ -17,6 +17,7 @@ import world.respect.shared.di.jvmKoinAppModule
 import world.respect.domain.validator.ListAndPrintlnValidatorReporter
 import world.respect.domain.validator.ValidateLinkUseCase
 import world.respect.domain.validator.ValidatorMessage
+import world.respect.shared.domain.testlaunchableapp.TestLaunchableAppModeEnum
 import world.respect.shared.domain.testlaunchableapp.TestLaunchableAppUseCase
 import java.io.File
 import kotlin.system.exitProcess
@@ -80,7 +81,10 @@ class OpenEelCLI : KoinComponent {
             it.addArgument("-o", "--outputdir")
                 .required(true)
                 .help("Output directory for test results")
-
+            it.addArgument("-n", "--mode")
+                .choices("webview", "native")
+                .required(true)
+                .help("Launch mode to expect: Web technology based lesson or native app")
         }.help("Test a launchable app by selecting learning units at random")
 
         val ns: Namespace
@@ -147,6 +151,7 @@ class OpenEelCLI : KoinComponent {
                                 username = ns.getString("username"),
                                 password = ns.getString("password"),
                                 outputDir = File(ns.getString("outputdir")),
+                                mode = TestLaunchableAppModeEnum.forId(ns.getString("mode")),
                             )
                         )
 
@@ -156,7 +161,7 @@ class OpenEelCLI : KoinComponent {
             }
         }catch(e : ArgumentParserException) {
             parser.handleError(e)
-            System.exit(if(e is HelpScreenException) 0 else 1)
+            exitProcess(if (e is HelpScreenException) 0 else 1)
         }
     }
 

@@ -8,6 +8,7 @@ import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.findCollection
 import world.respect.libutil.ext.resolve
+import world.respect.shared.ext.selectPreferredString
 import java.io.File
 
 /**
@@ -34,6 +35,7 @@ class TestLaunchableAppUseCaseImpl(
         val defaultCollectionUrl = manifestPub.findCollection()?.let {
             request.manifestUrl.resolve(it.href)
         } ?: throw IllegalArgumentException("Manifest does not contain a default collection")
+        val appName = manifestPub.metadata.title.selectPreferredString(listOf("en"))
 
         for(index in 0 until request.numLearningUnits) {
             val learningUnitSelection = selectRandomPublicationUseCase(
@@ -45,6 +47,8 @@ class TestLaunchableAppUseCaseImpl(
                     publication = learningUnitSelection.publication,
                     clickSteps = learningUnitSelection.clickPath,
                     baseDir = File(request.outputDir, "test_$index"),
+                    launchableAppName = appName,
+                    testRequest = request,
                 )
             )
         }

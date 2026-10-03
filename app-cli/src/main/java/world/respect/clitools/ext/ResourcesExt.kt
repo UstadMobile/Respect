@@ -5,7 +5,7 @@ import java.io.FileOutputStream
 
 fun Class<*>.copyResourceToFile(
     resourceName: String,
-    destFile: File
+    destFile: File,
 ) {
     getResourceAsStream(resourceName).use { inputStream ->
         FileOutputStream(destFile).use { outputStream ->

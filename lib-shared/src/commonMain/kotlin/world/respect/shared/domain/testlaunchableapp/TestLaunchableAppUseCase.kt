@@ -22,6 +22,7 @@ fun interface TestLaunchableAppUseCase {
         val username: String,
         val password: String,
         val outputDir: File,
+        val mode: TestLaunchableAppModeEnum,
         val numLearningUnits: Int = 6,
     )
 

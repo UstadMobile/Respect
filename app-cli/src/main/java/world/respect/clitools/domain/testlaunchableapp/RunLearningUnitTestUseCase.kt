@@ -61,6 +61,7 @@ class RunLearningUnitTestUseCase {
                 append("---\n")
                 params.clickSteps.forEach { step ->
                     append("- scrollUntilVisible:\n")
+                    append("    timeout: 60000")
                     append("    element: ${step.text.quote()}\n")
                     append("- tapOn: ${step.text.quote()}\n")
                 }
@@ -69,9 +70,9 @@ class RunLearningUnitTestUseCase {
 
         File(params.baseDir, "generated/clear_native_app.yaml").writeText(
             buildString {
-                append("appId: ${params.launchableAppPackageId}\n")
+                append("appId: ${params.launchableAppPackageId ?: "not.applicable" }\n")
                 append("---\n")
-                append("- clearState: ${params.launchableAppPackageId ?: "na"}\n")
+                append("- clearState: ${params.launchableAppPackageId ?: "not.applicable" }\n")
             }
         )
 

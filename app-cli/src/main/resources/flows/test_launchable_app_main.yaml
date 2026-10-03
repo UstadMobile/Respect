@@ -44,6 +44,8 @@ onFlowComplete:
     env:
       TEST_APP_NAME: ${TEST_APP_NAME}
       TEST_APP_URL: ${TEST_APP_URL}
+- scrollUntilVisible:
+    element: "Lessons"
 - tapOn: "Lessons"
 - runFlow:
      file: generated/gotolearningunit.yaml

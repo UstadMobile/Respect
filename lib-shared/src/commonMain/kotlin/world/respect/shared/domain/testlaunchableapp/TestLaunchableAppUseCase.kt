@@ -1,6 +1,7 @@
 package world.respect.shared.domain.testlaunchableapp
 
 import io.ktor.http.Url
+import world.respect.shared.domain.validator.ValidatorMessage
 import java.io.File
 
 /**
@@ -26,6 +27,10 @@ fun interface TestLaunchableAppUseCase {
         val numLearningUnits: Int = 2,
     )
 
-    suspend operator fun invoke(request: Request)
+    data class Result(
+        val messages: List<ValidatorMessage>,
+    )
+
+    suspend operator fun invoke(request: Request): Result
 
 }

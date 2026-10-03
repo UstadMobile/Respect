@@ -6,6 +6,7 @@ import world.respect.clitools.ext.mkDirsIfNotExists
 import world.respect.clitools.util.SysPathUtil
 import world.respect.lib.opds.model.Publication
 import world.respect.shared.domain.testlaunchableapp.TestLaunchableAppUseCase
+import world.respect.shared.domain.validator.ValidatorMessage
 import java.io.File
 import kotlin.random.Random
 
@@ -25,9 +26,13 @@ class RunLearningUnitTestUseCase {
         val offline: Boolean = Random.nextBoolean(),
     )
 
+    data class Result(
+        val messages: List<ValidatorMessage>
+    )
+
     suspend operator fun invoke(
         params: RunLearningUnitTestParams
-    ) {
+    ): Result {
         val outputDir = File(params.baseDir, "output").mkDirsIfNotExists()
 
         val subFlowDir = params.baseDir.resolve("subflows").mkDirsIfNotExists()
@@ -84,6 +89,18 @@ class RunLearningUnitTestUseCase {
 
         val maestroStatus = ProcessBuilder(cmd).start().waitFor()
         println("Maestro test completed: status=$maestroStatus")
+        return if(maestroStatus == 0) {
+            Result(emptyList())
+        }else {
+            Result(
+                listOf(
+                    ValidatorMessage(
+                        sourceUri = params.clickSteps.last().link.href,
+                        message = "Maestro run failed: status=$maestroStatus"
+                    ).also { println(it.toString()) }
+                )
+            )
+        }
     }
 
     companion object {

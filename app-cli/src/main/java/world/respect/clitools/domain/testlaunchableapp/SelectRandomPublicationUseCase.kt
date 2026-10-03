@@ -9,6 +9,7 @@ import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.lib.opds.model.ext.allPublications
+import world.respect.lib.opds.model.findSelfLinks
 import world.respect.libutil.ext.resolve
 import world.respect.shared.ext.selectPreferredString
 import kotlin.random.Random
@@ -46,7 +47,7 @@ class SelectRandomPublicationUseCase(
     data class ClickStep(
         val text: String,
         val feed: OpdsFeed?,
-        val link: ReadiumLink?,
+        val link: ReadiumLink,
     )
 
     /**
@@ -77,7 +78,11 @@ class SelectRandomPublicationUseCase(
                 clickPath.add(
                     ClickStep(
                         text = selectedPublication.metadata.title.selectPreferredString(listOf("en")),
-                        link = null,
+                        link = ReadiumLink(
+                            href = currentUrl.resolve(
+                                selectedPublication.findSelfLinks().first().href
+                            ).toString()
+                        ),
                         feed = null,
                     )
                 )

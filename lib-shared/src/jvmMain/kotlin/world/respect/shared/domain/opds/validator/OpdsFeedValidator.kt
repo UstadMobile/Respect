@@ -8,8 +8,8 @@ import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.domain.opds.validator.verifyMimeTypeAndGetBodyAsText
 import world.respect.domain.validator.ValidateLinkUseCase
-import world.respect.domain.validator.ValidatorMessage
-import world.respect.domain.validator.ValidatorReporter
+import world.respect.shared.domain.validator.ValidatorMessage
+import world.respect.shared.domain.validator.ValidatorReporter
 
 /**
  * Validate on OPDS Feed

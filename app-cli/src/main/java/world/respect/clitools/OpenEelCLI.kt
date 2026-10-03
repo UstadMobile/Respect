@@ -14,9 +14,9 @@ import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.di.jvmKoinAppModule
-import world.respect.domain.validator.ListAndPrintlnValidatorReporter
+import world.respect.shared.domain.validator.ListAndPrintlnValidatorReporter
 import world.respect.domain.validator.ValidateLinkUseCase
-import world.respect.domain.validator.ValidatorMessage
+import world.respect.shared.domain.validator.ValidatorMessage
 import world.respect.shared.domain.testlaunchableapp.TestLaunchableAppModeEnum
 import world.respect.shared.domain.testlaunchableapp.TestLaunchableAppUseCase
 import java.io.File

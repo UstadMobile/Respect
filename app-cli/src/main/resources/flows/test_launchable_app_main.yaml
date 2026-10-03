@@ -14,7 +14,6 @@ onFlowStart:
 
 onFlowComplete:
   - stopRecording
-  - setAirplaneMode: disabled
 ---
 - launchApp
 - tapOn: "Get Started"
@@ -75,3 +74,10 @@ onFlowComplete:
       id: "publication_title"
     timeout: 1800000
 
+# Turn off airplane mode and wait for all pending remote writes to complete. See AppBar.kt for note
+# on this. Required to ensure that any pending xAPI statements have been sent to the server so
+# GetXapiStatementsFromLearningUnitTestUseCase can find them.
+- setAirplaneMode: disabled
+- assertVisible:
+    id: "pending_write_count"
+    text: "0"

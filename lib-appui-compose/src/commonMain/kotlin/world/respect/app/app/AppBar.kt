@@ -43,6 +43,7 @@ import androidx.navigation.NavController
 import com.ustadmobile.libuicompose.theme.appBarSelectionModeBackgroundColor
 import com.ustadmobile.libuicompose.theme.appBarSelectionModeContentColor
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.getKoin
@@ -52,6 +53,7 @@ import world.respect.app.components.uiTextStringResource
 import world.respect.app.util.ext.toImageVector
 import world.respect.datalayer.db.school.ext.fullName
 import world.respect.datalayer.school.writequeue.RemoteWriteQueue
+import world.respect.lib.xapi.remotewritequeue.XapiRemoteWriteQueue
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.back
@@ -93,15 +95,20 @@ fun RespectAppBar(
      * clearing the app state.
      */
     val koin = getKoin()
-    val writeQueue: Flow<Int> = remember(activeSessionVal?.account?.scopeId) {
+    val writeQueueSizeFlow: Flow<Int> = remember(activeSessionVal?.account?.scopeId) {
         if(activeSessionVal != null) {
-            koin.getScope(activeSessionVal.account.scopeId).get<RemoteWriteQueue>().queueSizeAsFlow()
+            val scope = koin.getScope(activeSessionVal.account.scopeId)
+            scope.get<RemoteWriteQueue>().queueSizeAsFlow().combine(
+                scope.get<XapiRemoteWriteQueue>().queueSizeAsFlow()
+            ) { queueSize, xapiQueueSize ->
+                queueSize + xapiQueueSize
+            }
         }else{
             flowOf(0)
         }
     }
 
-    val pendingWriteCount by writeQueue.collectAsState(1)
+    val pendingWriteCount by writeQueueSizeFlow.collectAsState(1)
 
     var searchActive by remember {
         mutableStateOf(false)

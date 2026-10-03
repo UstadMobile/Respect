@@ -8,7 +8,8 @@ env:
   OFFLINE_STATUS: ${OFFLINE_STATUS}
 
 onFlowStart:
-  - startRecording: "001_001_app_integratin_test"
+  - startRecording:
+      path: "recordings/test_launchable_app"
   - clearState: world.respect.app
 
 onFlowComplete:
@@ -65,6 +66,9 @@ onFlowComplete:
     commands:
         - assertVisible:
               id: "webview_close"   #This assertion make sure the app is opened in web-view mode.
+
+- takeScreenshot:
+    path: "screenshots/lesson_on_open"
 
 - extendedWaitUntil:
     visible:

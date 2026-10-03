@@ -75,12 +75,12 @@ class RunLearningUnitTestUseCase {
             mainFlowFile.absolutePath
         )
 
-        print("Lesson selected to test:")
-        println(params.clickSteps.joinToString(separator = " -> ") {it.text })
-        println("Please wait for the lesson to be opened, then complete the lesson.")
-        println("Once you complete the lesson xAPI statements will be checked")
+        print("\nLesson selected to test:")
+        println(params.clickSteps.joinToString(separator = " -> ") {it.text } + "\n")
+        println("**Please wait for the lesson to be opened, then complete the lesson.**")
+        println("Once you complete the lesson and return to launcher app xAPI statements will be checked\n")
 
-        println("Maestro command: " + cmd.joinToString(separator = " "))
+        println("Running maestro command: " + cmd.joinToString(separator = " "))
 
         val maestroStatus = ProcessBuilder(cmd).start().waitFor()
         println("Maestro test completed: status=$maestroStatus")

@@ -108,7 +108,6 @@ fun OpdsFeedDetailFilters(
             enabled = selectedOptions.isNotEmpty(),
             modifier = Modifier
                 .padding(end = 8.dp)
-                .testTag("feed_filters_clear_all"),
         ) {
             Text(stringResource(Res.string.clear_all))
         }
@@ -130,7 +129,6 @@ fun OpdsFeedDetailFilters(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .testTag("feed_filter_option_$optionId")
                             .toggleable(
                                 value = isSelected,
                                 role = Role.Checkbox,

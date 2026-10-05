@@ -1,7 +1,6 @@
 package world.respect.app.view.catalog.opdsfeeddetail
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -115,62 +114,96 @@ fun OpdsFeedDetailScreen(
 ) {
     val catalog = uiState.feed.dataOrNull()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        OpdsFeedDetailFilters()
-
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-        ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = if (
-                    uiState.showSelectPlaylistButton ||
-                    (uiState.isMultiSelectMode && uiState.selectedCount > 0)
-                ) {
-                    PaddingValues(bottom = 72.dp)
-                } else {
-                    PaddingValues()
-                },
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = if (
+                uiState.showSelectPlaylistButton ||
+                (uiState.isMultiSelectMode && uiState.selectedCount > 0)
             ) {
+                PaddingValues(bottom = 72.dp)
+            } else {
+                PaddingValues()
+            },
+        ) {
 
-                /* Disabled for respect-update 1/Oct/26
-                item(key = "feed_header") {
-                    OpdsFeedDetailHeader(
-                        uiState = uiState,
-                        onClickShare = onClickShare,
-                        onClickCopy = onClickCopy,
-                        onClickDelete = onClickDelete,
-                        onClickAssign = onClickAssignQuickActionButton,
+            /* Disabled for respect-update 1/Oct/26
+            item(key = "feed_header") {
+                OpdsFeedDetailHeader(
+                    uiState = uiState,
+                    onClickShare = onClickShare,
+                    onClickCopy = onClickCopy,
+                    onClickDelete = onClickDelete,
+                    onClickAssign = onClickAssignQuickActionButton,
+                )
+            }
+            */
+
+            catalog?.navigation?.also { navigation ->
+                itemsIndexed(
+                    items = navigation,
+                    key = { index, _ -> "top_nav_$index" }
+                ) { index, navigationItem ->
+                    val feedIndex = OpdsFeedItemIndex(groupIndex = -1, index)
+                    NavigationListItem(
+                        navigation = navigationItem,
+                        showCheckbox = uiState.showNavigationCheckboxes,
+                        isSelected = uiState.isNavigationSelected(feedIndex),
+                        onClickNavigation = { onClickNavigation(feedIndex) },
+                        onLongPress = {
+                            onLongPressNavigation(feedIndex)
+                        }
                     )
                 }
-                */
+            }
 
-                catalog?.navigation?.also { navigation ->
+            catalog?.publications?.also { publications ->
+                itemsIndexed(
+                    items = publications,
+                    key = { index, _ -> "top_pub_$index" }
+                ) { index, publication ->
+                    val feedItemIndex = OpdsFeedItemIndex(groupIndex = -1, index)
+                    PublicationListItem(
+                        publication = publication,
+                        showCheckbox = uiState.showPublicationCheckboxes,
+                        isSelected = uiState.isPublicationSelected(feedItemIndex),
+                        onClickPublication = { onClickPublication(feedItemIndex) },
+                        onLongPressPublication = { onLongPressPublication(feedItemIndex) },
+                    )
+                }
+            }
+
+            catalog?.groups?.forEachIndexed { groupIndex, group ->
+                item(key = "section_$groupIndex") {
+                    FeedSectionHeader(
+                        title = group.metadata.title,
+                        isCollapsed = uiState.isGroupCollapsed(groupIndex),
+                        showAssignButton = group.publications?.isNotEmpty() == true,
+                        onClickToggle = { onClickToggleGroup(groupIndex) },
+                        onClickAssign = { onClickAssignSection(groupIndex) },
+                    )
+                }
+
+                if (!uiState.isGroupCollapsed(groupIndex)) {
                     itemsIndexed(
-                        items = navigation,
-                        key = { index, _ -> "top_nav_$index" }
-                    ) { index, navigationItem ->
-                        val feedIndex = OpdsFeedItemIndex(groupIndex = -1, index)
+                        items = group.navigation ?: emptyList(),
+                        key = { itemIndex, _ -> "nav_${groupIndex}_$itemIndex" }
+                    ) { itemIndex, navigation ->
+                        val feedIndex = OpdsFeedItemIndex(groupIndex = groupIndex, index = itemIndex)
                         NavigationListItem(
-                            navigation = navigationItem,
+                            navigation = navigation,
                             showCheckbox = uiState.showNavigationCheckboxes,
                             isSelected = uiState.isNavigationSelected(feedIndex),
                             onClickNavigation = { onClickNavigation(feedIndex) },
-                            onLongPress = {
-                                onLongPressNavigation(feedIndex)
-                            }
+                            onLongPress = { onLongPressNavigation(feedIndex) },
                         )
                     }
-                }
 
-                catalog?.publications?.also { publications ->
                     itemsIndexed(
-                        items = publications,
-                        key = { index, _ -> "top_pub_$index" }
-                    ) { index, publication ->
-                        val feedItemIndex = OpdsFeedItemIndex(groupIndex = -1, index)
+                        items = group.publications ?: emptyList(),
+                        key = { itemIndex, _ -> "pub_${groupIndex}_$itemIndex" }
+                    ) { itemIndex, publication ->
+                        val feedItemIndex = OpdsFeedItemIndex(groupIndex = groupIndex, index = itemIndex)
                         PublicationListItem(
                             publication = publication,
                             showCheckbox = uiState.showPublicationCheckboxes,
@@ -180,82 +213,42 @@ fun OpdsFeedDetailScreen(
                         )
                     }
                 }
-
-                catalog?.groups?.forEachIndexed { groupIndex, group ->
-                    item(key = "section_$groupIndex") {
-                        FeedSectionHeader(
-                            title = group.metadata.title,
-                            isCollapsed = uiState.isGroupCollapsed(groupIndex),
-                            showAssignButton = group.publications?.isNotEmpty() == true,
-                            onClickToggle = { onClickToggleGroup(groupIndex) },
-                            onClickAssign = { onClickAssignSection(groupIndex) },
-                        )
-                    }
-
-                    if (!uiState.isGroupCollapsed(groupIndex)) {
-                        itemsIndexed(
-                            items = group.navigation ?: emptyList(),
-                            key = { itemIndex, _ -> "nav_${groupIndex}_$itemIndex" }
-                        ) { itemIndex, navigation ->
-                            val feedIndex = OpdsFeedItemIndex(groupIndex = groupIndex, index = itemIndex)
-                            NavigationListItem(
-                                navigation = navigation,
-                                showCheckbox = uiState.showNavigationCheckboxes,
-                                isSelected = uiState.isNavigationSelected(feedIndex),
-                                onClickNavigation = { onClickNavigation(feedIndex) },
-                                onLongPress = { onLongPressNavigation(feedIndex) },
-                            )
-                        }
-
-                        itemsIndexed(
-                            items = group.publications ?: emptyList(),
-                            key = { itemIndex, _ -> "pub_${groupIndex}_$itemIndex" }
-                        ) { itemIndex, publication ->
-                            val feedItemIndex = OpdsFeedItemIndex(groupIndex = groupIndex, index = itemIndex)
-                            PublicationListItem(
-                                publication = publication,
-                                showCheckbox = uiState.showPublicationCheckboxes,
-                                isSelected = uiState.isPublicationSelected(feedItemIndex),
-                                onClickPublication = { onClickPublication(feedItemIndex) },
-                                onLongPressPublication = { onLongPressPublication(feedItemIndex) },
-                            )
-                        }
-                    }
-                }
             }
+        }
 
-            if (uiState.showSelectionBottomButton) {
-                Button(
-                    onClick = onClickConfirmSelection,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .defaultItemPadding()
-                        .testTag("confirm_selection_button"),
-                ) {
-                    Text(
-                        text = stringResource(
-                            Res.string.select_count_items,
-                            uiState.selectedCount,
-                        ),
-                    )
-                }
+        if (uiState.showSelectionBottomButton) {
+            Button(
+                onClick = onClickConfirmSelection,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .defaultItemPadding()
+                    .testTag("confirm_selection_button"),
+            ) {
+                Text(
+                    text = stringResource(
+                        Res.string.select_count_items,
+                        uiState.selectedCount,
+                    ),
+                )
             }
+        }
 
-            if (uiState.showSelectPlaylistButton) {
-                Button(
-                    onClick = onClickSelectPlaylist,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .defaultItemPadding()
-                        .testTag("select_playlist_button"),
-                ) {
-                    Text(text = stringResource(Res.string.select_this_collection))
-                }
+        if (uiState.showSelectPlaylistButton) {
+            Button(
+                onClick = onClickSelectPlaylist,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .defaultItemPadding()
+                    .testTag("select_playlist_button"),
+            ) {
+                Text(text = stringResource(Res.string.select_this_collection))
             }
         }
     }
+
+
 
     if (uiState.showCopyDialog) {
         CopyFeedDialog(

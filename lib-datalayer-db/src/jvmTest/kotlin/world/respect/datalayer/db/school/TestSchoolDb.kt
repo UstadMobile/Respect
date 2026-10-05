@@ -15,6 +15,9 @@ import world.respect.datalayer.school.model.PersonRole
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.shared.XXHashUidNumberMapper
 import world.respect.lib.primarykeygen.PrimaryKeyGenerator
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
+import world.respect.lib.xapi.model.XapiAccount
+import world.respect.lib.xapi.model.XapiAgent
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import java.io.File
 
@@ -58,6 +61,16 @@ fun RespectSchoolDatabase.toDataSource(
     authenticatedUserUid: String,
     schoolUrl: Url,
     uidNumberMapper: UidNumberMapper = XXHashUidNumberMapper(XXStringHasherCommonJvm()),
+    authenticatedAgents: GetAuthenticatedXapiAgentsUseCase = {
+        listOf(
+            XapiAgent(
+                account = XapiAccount(
+                    homePage = schoolUrl.toString(),
+                    name = authenticatedUserUid,
+                )
+            )
+        )
+    },
 ): SchoolDataSourceDb {
     val authenticatedUser = AuthenticatedUserPrincipalId(authenticatedUserUid)
     return SchoolDataSourceDb(
@@ -76,6 +89,7 @@ fun RespectSchoolDatabase.toDataSource(
         primaryKeyGenerator = PrimaryKeyGenerator(RespectSchoolDatabase.TABLE_IDS),
         defaultAppCatalogUrl = "https://respect.world/respect-ds/apps.json",
         schoolUrl = schoolUrl,
+        authenticatedXapiAgentsUseCase = authenticatedAgents,
     )
 }
 

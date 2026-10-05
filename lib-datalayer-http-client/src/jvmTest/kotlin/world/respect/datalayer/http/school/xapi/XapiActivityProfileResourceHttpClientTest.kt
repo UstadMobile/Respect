@@ -11,6 +11,7 @@ import org.openeel.libxapi.test.AbstractXapiActivityProfileResourceTest
 import world.respect.datalayer.http.server.XapiActivityProfileResourceRoute
 import world.respect.datalayer.school.model.AuthToken
 import world.respect.lib.test.clientservertest.withEmbeddedDataSourceServer
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.resources.XapiActivityProfileResource
 import world.respect.libutil.util.time.systemTimeInMillis
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationClient
@@ -30,10 +31,12 @@ class XapiActivityProfileResourceHttpClientTest : AbstractXapiActivityProfileRes
     }
 
     override suspend fun withXapiDocumentResource(
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase,
         block: suspend (XapiActivityProfileResource) -> Unit
     ) {
         withEmbeddedDataSourceServer(
             dbDir = temporaryFolder.newFolder(),
+            getAuthenticatedXapiAgentsUseCase = authenticatedAgents,
             routingConfig = { context ->
                 route("activities") {
                     XapiActivityProfileResourceRoute(

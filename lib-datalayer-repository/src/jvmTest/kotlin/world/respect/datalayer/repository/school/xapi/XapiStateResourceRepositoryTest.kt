@@ -6,6 +6,7 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.openeel.libxapi.test.AbstractXapiStateResourceTest
 import world.respect.datalayer.http.server.XapiStateResourceRoute
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.resources.XapiStateResource
 import kotlin.test.Test
 
@@ -18,10 +19,12 @@ class XapiStateResourceRepositoryTest : AbstractXapiStateResourceTest() {
     private val json = Json
 
     override suspend fun withXapiDocumentResource(
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase,
         block: suspend (XapiStateResource) -> Unit
     ) {
         withEmbeddedServerAndRepositoryClients(
             workDir = temporaryFolder.newFolder(),
+            getAuthenticatedXapiAgentsUseCase = authenticatedAgents,
             routingConfig = { serverContext ->
                 route("activities") {
                     XapiStateResourceRoute(
@@ -35,6 +38,11 @@ class XapiStateResourceRepositoryTest : AbstractXapiStateResourceTest() {
         ) {
             block(clients.first().datasource.state)
         }
+    }
+
+    @Test
+    fun test() {
+
     }
 
 }

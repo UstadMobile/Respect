@@ -250,6 +250,7 @@ import world.respect.shared.domain.createclass.CreateClassUseCase
 import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCase
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
 import world.respect.shared.domain.getlanguageendonym.GetLanguageEndonymUseCase
+import world.respect.shared.domain.launchapp.GetAndroidPackageIdForLaunchableAppUseCase
 import world.respect.shared.domain.launchapp.getlaunchoptionsforpublication.GetLaunchOptionsForPublicationUseCase
 import world.respect.shared.domain.launchapp.getxapilaunchparams.GetXapiLaunchParamsUseCase
 import world.respect.shared.domain.launchapp.getxapilaunchparams.GetXapiLaunchParamsUseCaseAndroid
@@ -859,6 +860,10 @@ val appKoinModule = module {
         GetLanguageEndonymUseCase()
     }
 
+    single<GetAndroidPackageIdForLaunchableAppUseCase> {
+        GetAndroidPackageIdForLaunchableAppUseCase()
+    }
+
     /**
      * The SchoolDirectoryEntry scope might be one instance per school url or one instance per account
      * per url.
@@ -1210,6 +1215,8 @@ val appKoinModule = module {
                 getLaunchOptionsForPublicationUseCase = get(),
                 getXapiLaunchParamsUseCase = get(),
                 json = get(),
+                opdsPublicationDataSource = get<SchoolDataSource>().opdsPublicationDataSource,
+                getAndroidPackageIdForLaunchableAppUseCase = get(),
             )
         }
 

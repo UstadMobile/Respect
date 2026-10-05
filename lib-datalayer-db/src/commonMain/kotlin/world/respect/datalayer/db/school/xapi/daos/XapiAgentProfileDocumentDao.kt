@@ -33,7 +33,7 @@ interface XapiAgentProfileDocumentDao {
 
     @Query("""
         SELECT agent_profile_document.last_modified AS lastModified,
-               agent_profile_document_sha.sha1_digest AS etag
+               ('"' || agent_profile_document_sha.sha1_digest || '"') AS etag
           FROM agent_profile_document 
           LEFT JOIN agent_profile_document_sha
             ON agent_profile_document.id = agent_profile_document_sha.doc_id

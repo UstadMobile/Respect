@@ -48,12 +48,12 @@ fun Publication.findTermsOfServiceLink(): ReadiumLink? =
 
 fun Publication.findAppStoreAndroidLinks() : List<ReadiumLink> {
     return links.filter {
-        it.hasRel("https://id.openeel.org/rel/appstore-android")
+        it.hasRel(OpenEelConstants.REL_ANDROID_APP_STORE)
     }
 }
 
 fun Publication.findAppStoreAndroidLink(): ReadiumLink? =
-    links.firstOrNull { it.rel?.contains("https://id.openeel.org/rel/appstore-android") == true }
+    links.firstOrNull { it.rel?.contains(OpenEelConstants.REL_ANDROID_APP_STORE) == true }
 
 fun Publication.findCollection(): ReadiumLink? =
     links.firstOrNull {

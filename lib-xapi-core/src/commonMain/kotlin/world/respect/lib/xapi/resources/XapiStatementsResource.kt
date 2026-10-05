@@ -1,5 +1,6 @@
 package world.respect.lib.xapi.resources
 
+import io.ktor.http.Parameters
 import io.ktor.http.ParametersBuilder
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
@@ -56,7 +57,7 @@ interface XapiStatementsResource {
         val ascending: Boolean = false,
     ) {
 
-        fun toParameters(json: Json): StringValues {
+        fun toParameters(json: Json): Parameters {
             return ParametersBuilder().also { parameters ->
                 parameters.appendIfNotNull("statementId", statementId)
                 parameters.appendIfNotNull("voidedStatementId", voidedStatementId)

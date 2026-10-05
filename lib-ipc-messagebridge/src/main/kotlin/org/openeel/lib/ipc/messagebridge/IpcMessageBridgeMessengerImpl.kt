@@ -108,6 +108,7 @@ class IpcMessageBridgeMessengerImpl(
                 Message.obtain().also {
                     it.what = IpcMessageBridgeWhatFlags.WHAT_FLOW_COMPLETION
                     it.arg1 = messageId
+                    it.arg2 = messageData.arg2
                 }
             )
 

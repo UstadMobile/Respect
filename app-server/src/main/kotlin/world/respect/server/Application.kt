@@ -64,6 +64,7 @@ import world.respect.server.routes.school.respect.SchoolValidationRoute
 import world.respect.server.routes.e2etestartifactsroute.ReceiveE2EArtifactUploadRoute
 import world.respect.datalayer.http.server.XapiActivityProfileResourceRoute
 import world.respect.datalayer.http.server.XapiAgentProfileResourceRoute
+import world.respect.datalayer.http.server.XapiStateResourceRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.routes.username.checkusernameunique.CheckUsernameUniqueRoute
 import world.respect.server.util.ext.getSchoolKoinScope
@@ -285,6 +286,13 @@ fun Application.module() {
                                 activityProfileResource = { call ->
                                     call.requireAccountScope().get<SchoolDataSource>().xapiResource.activityProfile
                                 }
+                            )
+
+                            XapiStateResourceRoute(
+                                stateResource = { call ->
+                                    call.requireAccountScope().get<SchoolDataSource>().xapiResource.state
+                                },
+                                json = json,
                             )
                         }
                         route("agents") {

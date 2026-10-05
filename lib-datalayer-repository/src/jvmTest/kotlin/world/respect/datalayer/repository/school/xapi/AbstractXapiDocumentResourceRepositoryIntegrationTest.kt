@@ -11,6 +11,7 @@ import org.openeel.libxapi.test.XapiActivityProfileTestParams
 import world.respect.datalayer.http.server.XapiActivityProfileResourceRoute
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataReadyState
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.model.XapiDocument
 import world.respect.lib.xapi.resources.ISingleDocumentParams
 import world.respect.lib.xapi.resources.XapiDocumentResource
@@ -40,14 +41,18 @@ abstract class AbstractXapiDocumentResourceRepositoryIntegrationTest<
 
     //Child classes should set the routing themselves.
     abstract suspend fun withEmbeddedServerAndRepoClients(
+        getAuthenticatedXapiAgentsUseCase: GetAuthenticatedXapiAgentsUseCase,
         block: suspend RepositoryTestContext.() -> Unit
     )
 
     fun givenDocumentPostedOnClient_whenGetFlowOnServerCollected_thenIsCollected(
         params: SingleDocParams,
         document: XapiDocument,
+        authenticatedXapiAgents: GetAuthenticatedXapiAgentsUseCase,
     ) = runBlocking {
-        withEmbeddedServerAndRepoClients {
+        withEmbeddedServerAndRepoClients(
+            getAuthenticatedXapiAgentsUseCase = authenticatedXapiAgents
+        ) {
             clients.first().datasource.getTestResource().post(
                 params = params,
                 document = document,
@@ -68,8 +73,11 @@ abstract class AbstractXapiDocumentResourceRepositoryIntegrationTest<
     fun givenDocumentedPostedOnServer_whenGetCalledOnClient_thenMatches(
         params: SingleDocParams,
         document: XapiDocument,
+        authenticatedXapiAgents: GetAuthenticatedXapiAgentsUseCase,
     ) = runBlocking {
-        withEmbeddedServerAndRepoClients {
+        withEmbeddedServerAndRepoClients(
+            getAuthenticatedXapiAgentsUseCase = authenticatedXapiAgents
+        ) {
             serverContext.datasourceContext.datasource.xapiResource.getTestResource().post(
                 params = params, document = document
             )
@@ -82,8 +90,11 @@ abstract class AbstractXapiDocumentResourceRepositoryIntegrationTest<
     fun givenDocumentPostedOnServer_whenGetAsFlowCalledOnClient_thenFlowReceivesMatchingData(
         params: SingleDocParams,
         document: XapiDocument,
+        authenticatedXapiAgents: GetAuthenticatedXapiAgentsUseCase,
     ) = runBlocking {
-        withEmbeddedServerAndRepoClients {
+        withEmbeddedServerAndRepoClients(
+            getAuthenticatedXapiAgentsUseCase = authenticatedXapiAgents
+        ) {
             serverContext.datasourceContext.datasource.xapiResource.getTestResource().post(
                 params = params, document = document
             )

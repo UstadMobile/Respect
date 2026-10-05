@@ -161,6 +161,7 @@ class OpenEelCLI : KoinComponent {
                                 password = ns.getString("password"),
                                 outputDir = File(ns.getString("outputdir")),
                                 deviceId = ns.getString("device"),
+                                numLearningUnits = ns.getString("numunits").toInt(),
                                 mode = TestLaunchableAppModeEnum.forId(ns.getString("mode")),
                             )
                         ).also {

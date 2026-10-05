@@ -14,14 +14,8 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -36,13 +30,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import world.respect.app.components.RespectBottomSheet
 import world.respect.app.components.RespectBottomSheetOption
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.arabic
 import world.respect.shared.generated.resources.audio
 import world.respect.shared.generated.resources.book
 import world.respect.shared.generated.resources.clear_all
-import world.respect.shared.generated.resources.close
 import world.respect.shared.generated.resources.english
 import world.respect.shared.generated.resources.filter_selected_count
 import world.respect.shared.generated.resources.grade
@@ -61,7 +55,6 @@ data class OpdsFeedFilter(
     val options: List<String>,
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OpdsFeedDetailFilters(
     filters: List<OpdsFeedFilter> = defaultOpdsFeedFilters(),
@@ -122,31 +115,11 @@ fun OpdsFeedDetailFilters(
     }
 
     filters.firstOrNull { it.id == activeFilterId }?.let { filter ->
-        ModalBottomSheet(
+        RespectBottomSheet(
+            title = filter.label,
             onDismissRequest = { activeFilterId = null },
+            closeButtonModifier = Modifier.testTag("feed_filter_close"),
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = filter.label,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.weight(1f),
-                )
-                IconButton(
-                    onClick = { activeFilterId = null },
-                    modifier = Modifier.testTag("feed_filter_close"),
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = stringResource(Res.string.close),
-                    )
-                }
-            }
-            HorizontalDivider()
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 itemsIndexed(filter.options, key = { index, _ -> index }) { index, option ->
                     val optionId = "${filter.id}:$index"

@@ -27,7 +27,6 @@ fun RespectBottomSheet(
     title: String,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    closeButtonModifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     ModalBottomSheet(
@@ -47,7 +46,6 @@ fun RespectBottomSheet(
             )
             IconButton(
                 onClick = onDismissRequest,
-                modifier = closeButtonModifier,
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,

@@ -118,7 +118,6 @@ fun OpdsFeedDetailFilters(
         RespectBottomSheet(
             title = filter.label,
             onDismissRequest = { activeFilterId = null },
-            closeButtonModifier = Modifier.testTag("feed_filter_close"),
         ) {
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 itemsIndexed(filter.options, key = { index, _ -> index }) { index, option ->

@@ -62,7 +62,7 @@ class MakeDemoAppManifestUseCase(
                 ),
                 ReadiumLink(
                     rel = listOf("https://id.openeel.org/rel/appstore-android"),
-                    href = "https://play.google.com/store/apps/details?id=org.openeel.demo",
+                    href = "https://play.google.com/store/apps/details?id=org.openeel.demolaunchableapp",
                     title = "Get it on Google Play",
                 ),
                 ReadiumLink(

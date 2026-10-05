@@ -1,6 +1,7 @@
 package world.respect.domain.validator
 
 import world.respect.lib.opds.model.ReadiumLink
+import world.respect.shared.domain.validator.ValidatorReporter
 
 
 /**

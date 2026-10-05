@@ -48,10 +48,11 @@ onFlowComplete:
       CLASS_NAME: "New Class"
       USERNAME: "teacherauser"
       PASSWORD: "test123"
-- tapOn: "Apps"
+- tapOn:
+    id: "nav_home"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 
 # Enable Shared Mode - Test Device 1
 - tapOn:
@@ -159,10 +160,11 @@ onFlowComplete:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
-- tapOn: "Apps"
+- tapOn:
+    id: "nav_home"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - tapOn:
     id: "Settings"
 - assertVisible:
@@ -234,7 +236,7 @@ onFlowComplete:
     id: "app_title"
     text: "Assignments"
 - assertVisible: "Assignments"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - assertNotVisible: "Class"
 - assertNotVisible: "People"
 - tapOn:
@@ -265,10 +267,11 @@ onFlowComplete:
     when:
       visible: "Save password for Respect?"
     file: "subflows/save_password_prompt_cancel.yaml"
-- tapOn: "Apps"
+- tapOn:
+    id: "nav_home"
 - assertVisible:
     id: "app_title"
-    text: "Apps"
+    text: "Home"
 - tapOn:
     id: "Settings"
 - assertVisible:
@@ -331,7 +334,7 @@ onFlowComplete:
     id: "app_title"
     text: "Assignments"
 - assertVisible: "Assignments"
-- assertVisible: "Apps"
+- assertVisible: "Home"
 - assertNotVisible: "Class"
 - assertNotVisible: "People"
 - tapOn:

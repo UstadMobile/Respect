@@ -46,7 +46,6 @@ onFlowComplete:
       FIRSTNAME: "TeacherA"
       LASTNAME:  "User"
       GENDER: "Male"
-      ROLE:  "Teacher"
       CLASS_NAME: "New Class"
       USERNAME: "teacherauser"
       PASSWORD: "test123"

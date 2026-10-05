@@ -13,9 +13,6 @@ appId: world.respect.app
 - inputText: ${LASTNAME}
 - tapOn: "Gender*"
 - tapOn: ${GENDER}
-- tapOn:
-      id: "role"
-- tapOn: ${ROLE}
 - tapOn: "Save"
 - assertVisible:
       id: "app_title"

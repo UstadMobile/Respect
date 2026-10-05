@@ -746,4 +746,7 @@
     <string name="select_units">Select unit(s)</string>
     <string name="select_collections">Select collection(s)</string>
 
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
+
 </resources>

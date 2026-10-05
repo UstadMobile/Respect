@@ -3,7 +3,7 @@ package world.respect.shared.domain.opds.validator
 import com.networknt.schema.JsonSchema
 import com.networknt.schema.JsonSchemaFactory
 import com.networknt.schema.SpecVersion
-import world.respect.domain.validator.Validator
+import world.respect.shared.domain.validator.Validator
 import java.net.URI
 
 abstract class AbstractJsonSchemaValidator(

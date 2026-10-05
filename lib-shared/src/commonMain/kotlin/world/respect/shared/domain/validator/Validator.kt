@@ -1,4 +1,6 @@
-package world.respect.domain.validator
+package world.respect.shared.domain.validator
+
+import world.respect.domain.validator.ValidateLinkUseCase
 
 interface Validator {
 

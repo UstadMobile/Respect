@@ -1,4 +1,17 @@
 <resources>
+    <string name="grade">Grade</string>
+    <string name="grade_number">Grade %1$d</string>
+    <string name="type">Type</string>
+    <string name="clear_all">Clear all</string>
+    <string name="filter_selected_count">%1$s (%2$d)</string>
+    <string name="english">English</string>
+    <string name="hindi">Hindi</string>
+    <string name="arabic">Arabic</string>
+    <string name="mathematics">Mathematics</string>
+    <string name="science">Science</string>
+    <string name="book">Book</string>
+    <string name="audio">Audio</string>
+    <string name="video">Video</string>
     <string name="empty_list">Empty List</string>
     <string name="empty_list_description">"Add an app from the app list and it will show up here"</string>
     <string name="add_link">Add Link</string>

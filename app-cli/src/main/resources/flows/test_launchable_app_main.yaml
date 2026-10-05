@@ -1,6 +1,7 @@
 appId: world.respect.app
 env:
   SCHOOL_URL: ${SCHOOL_URL}
+  SCHOOL_ADMIN_USER: ${SCHOOL_ADMIN_USER}
   SCHOOL_ADMIN_PASSWORD: ${SCHOOL_ADMIN_PASSWORD}
   TEST_APP_URL: ${TEST_APP_URL}
   TEST_APP_NAME: ${TEST_APP_NAME}
@@ -30,7 +31,7 @@ onFlowComplete:
 - assertVisible: "Login"
 - tapOn:
     id: "username"
-- inputText: "admin"
+- inputText: ${SCHOOL_ADMIN_USER}
 - tapOn:
     id : "password"
 - inputText: ${SCHOOL_ADMIN_PASSWORD}

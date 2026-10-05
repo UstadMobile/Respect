@@ -61,7 +61,7 @@ class RunLearningUnitTestUseCase {
                 append("---\n")
                 params.clickSteps.forEach { step ->
                     append("- scrollUntilVisible:\n")
-                    append("    timeout: 60000")
+                    append("    timeout: 60000\n")
                     append("    element: ${step.text.quote()}\n")
                     append("- tapOn: ${step.text.quote()}\n")
                 }
@@ -84,6 +84,7 @@ class RunLearningUnitTestUseCase {
             "--format=junit",
             "--test-output-dir=${outputDir.absolutePath}",
             "--env=SCHOOL_URL=${params.testRequest.serverUrl}",
+            "--env=SCHOOL_ADMIN_USER=${params.testRequest.username}",
             "--env=SCHOOL_ADMIN_PASSWORD=${params.testRequest.password}",
             "--env=TEST_APP_URL=${params.testRequest.manifestUrl}",
             "--env=TEST_APP_MODE=${params.testRequest.mode.id}",
@@ -93,7 +94,8 @@ class RunLearningUnitTestUseCase {
         )
 
         print("\nLesson selected to test:")
-        println(params.clickSteps.joinToString(separator = " -> ") {it.text } + "\n")
+        println(params.clickSteps.joinToString(separator = " -> ") {it.text })
+        println("Learning unit manifest url: ${params.clickSteps.last().link.href}\n")
         println("**Please wait for the lesson to be opened, then complete the lesson.**")
         println("Once you complete the lesson and return to launcher app xAPI statements will be checked\n")
 

@@ -39,6 +39,7 @@ class OpenEelCLI : KoinComponent {
             .help("additional help")
             .metavar("COMMAND")
 
+        /* 5/Oct: Validator is to be updated, remove from this CLI temporarily
         subparsers.addParser(CMD_VALIDATE).also {
             it.addArgument("-u", "--url")
                 .required(true)
@@ -64,6 +65,7 @@ class OpenEelCLI : KoinComponent {
                         "be set to false to validate only against the OPDS spec, not against " +
                         "the RESPECT requirements.")
         }.help("Validate a RESPECT App Manifest or OPDS Feed of Learning Units")
+         */
 
         subparsers.addParser(CMD_TEST_LAUNCHABLE_APP).also {
             it.addArgument("-m", "--manifest")
@@ -161,9 +163,9 @@ class OpenEelCLI : KoinComponent {
                                 deviceId = ns.getString("device"),
                                 mode = TestLaunchableAppModeEnum.forId(ns.getString("mode")),
                             )
-                        )
-
-                        exitProcess(0)
+                        ).also {
+                            exitProcess(status = if(it.messages.isEmpty()) 0 else 1)
+                        }
                     }
                 }
             }

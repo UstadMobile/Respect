@@ -5,10 +5,12 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.Url
 import kotlinx.serialization.json.Json
+import world.respect.clitools.util.SysPathUtil
 import world.respect.credentials.passkey.RespectPasswordCredential
 import world.respect.datalayer.http.school.xapi.XapiStatementsResourceHttpClient
 import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.findCollection
+import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.libutil.ext.appendEndpointSegments
@@ -42,10 +44,27 @@ class TestLaunchableAppUseCaseImpl(
     private val getAndroidPackageIdForLaunchableAppUseCase: GetAndroidPackageIdForLaunchableAppUseCase,
 ): TestLaunchableAppUseCase {
 
+    val prettyPrintJson = Json {
+        prettyPrint = true
+        encodeDefaults = false
+    }
+
+
     override suspend fun invoke(
         request: TestLaunchableAppUseCase.Request
     ): TestLaunchableAppUseCase.Result {
         val messages = mutableListOf<ValidatorMessage>()
+        if(SysPathUtil.findCommandInPath("maestro") == null) {
+            return TestLaunchableAppUseCase.Result(
+                messages = listOf(
+                    ValidatorMessage(
+                        sourceUri = "local",
+                        message = "Maestro command not found: please install as per " +
+                                "https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli"
+                    )
+                )
+            )
+        }
 
         val manifestPub: Publication = httpClient.get(request.manifestUrl).body()
         val defaultCollectionUrl = manifestPub.findCollection()?.let {
@@ -99,24 +118,26 @@ class TestLaunchableAppUseCaseImpl(
             }
 
             val publicationUrl = Url(learningUnitSelection.clickPath.last().link.href)
-            val statements = getXapiStatementsFromLearningUnitTestUseCase(
+            val stmtResult = getXapiStatementsFromLearningUnitTestUseCase(
                 publicationUrl = publicationUrl,
                 testStartTime = testStartTime,
                 statementResource = statementResource,
             )
 
             File(learningUnitOutputDir, "xapi-statements.json").also {
-                print("Found ${statements.statements.size} xAPI statements: ")
+                print("Found ${stmtResult.allStatements.statements.size} xAPI statements: ")
                 println("saving to ${it.absolutePath}")
             }.writeText(
-                json.encodeToString(
+                prettyPrintJson.encodeToString(
                     XapiStatementResult.serializer(),
-                    statements,
+                    stmtResult.allStatements,
                 )
             )
 
             if(
-                !statements.statements.any {
+                !stmtResult.allStatements.statements.filter {
+                    it.objectActivityOrNull()?.id == stmtResult.activityId
+                }.any {
                     it.verb.id == XapiVerb.ID_COMPLETED || it.verb.id == XapiVerb.ID_PASSED
                             || it.verb.id == XapiVerb.ID_FAILED
                 }
@@ -124,7 +145,8 @@ class TestLaunchableAppUseCaseImpl(
                 messages.add(
                     ValidatorMessage(
                         sourceUri = publicationUrl.toString(),
-                        message = "No complete, passed, or failed Xapi Statement after testing $publicationUrl"
+                        message = "No complete, passed, or failed Xapi Statement for expected " +
+                                "activity id (${stmtResult.activityId}) after testing $publicationUrl"
                     ).also {
                         println(it.toString())
                     }

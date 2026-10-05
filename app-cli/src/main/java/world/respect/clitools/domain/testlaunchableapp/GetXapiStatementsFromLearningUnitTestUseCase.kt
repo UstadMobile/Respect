@@ -17,6 +17,11 @@ class GetXapiStatementsFromLearningUnitTestUseCase(
     private val getLaunchOptionsForPublicationUseCase: GetLaunchOptionsForPublicationUseCase,
 ) {
 
+    data class Result(
+        val allStatements: XapiStatementResult,
+        val activityId: String,
+    )
+
     /**
      *
      * Works as follows:
@@ -29,7 +34,7 @@ class GetXapiStatementsFromLearningUnitTestUseCase(
         publicationUrl: Url,
         testStartTime: Instant,
         statementResource: XapiStatementsResource,
-    ): XapiStatementResult {
+    ): Result {
         val launchOptions = getLaunchOptionsForPublicationUseCase(
             publicationUrl = publicationUrl,
             publication = opdsPublicationDataSource.getByUrl(
@@ -39,12 +44,14 @@ class GetXapiStatementsFromLearningUnitTestUseCase(
         )
         val activityId = launchOptions.options.first().activityId
 
-        return statementResource.get(
-            listParams = XapiStatementsResource.GetStatementParams(
-                activity = activityId,
-                since = testStartTime,
-            )
-        ).dataOrNull() ?: throw IllegalStateException("Could not load statements for publication url $publicationUrl")
+        return Result(
+            allStatements = statementResource.get(
+                listParams = XapiStatementsResource.GetStatementParams(
+                    since = testStartTime,
+                )
+            ).dataOrNull() ?: throw IllegalStateException("Could not load statements for publication url $publicationUrl"),
+            activityId = activityId,
+        )
     }
 
 }

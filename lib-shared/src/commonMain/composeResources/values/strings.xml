@@ -783,8 +783,10 @@
     <string name="select_units">Select unit(s)</string>
     <string name="select_collections">Select collection(s)</string>
 
-    <string name="pin_error">Error: please enter 4 digit number</string>
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
 
+    <string name="pin_error">Error: please enter 4 digit number</string>
     <string name="invalid_pin">Invalid PIN</string>
 
 </resources>

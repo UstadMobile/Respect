@@ -47,7 +47,7 @@ fun HomeScreen(
             SecondaryTabRow(
                 selectedTabIndex = pagerState.currentPage,
             ) {
-                HomeScreenTabs.entries.forEach { tab ->
+                HomeScreenTabs.entries.filter { it != HomeScreenTabs.COLLECTIONS }.forEach { tab ->
                     Tab(
                         selected = pagerState.currentPage == tab.ordinal,
                         onClick = {

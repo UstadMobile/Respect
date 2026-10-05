@@ -49,7 +49,7 @@ import world.respect.shared.generated.resources.subject
 import world.respect.shared.generated.resources.type
 import world.respect.shared.generated.resources.video
 
-data class OpdsFeedFilter(
+data class OpdsFeedDefination(
     val id: String,
     val label: String,
     val options: List<String>,
@@ -57,7 +57,7 @@ data class OpdsFeedFilter(
 
 @Composable
 fun OpdsFeedDetailFilters(
-    filters: List<OpdsFeedFilter> = defaultOpdsFeedFilters(),
+    filters: List<OpdsFeedDefination> = defaultOpdsFeedFilters(),
     modifier: Modifier = Modifier,
 ) {
     var activeFilterId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -151,8 +151,8 @@ fun OpdsFeedDetailFilters(
  * Sample options for the UI only; selections do not change the feed.*/
 
 @Composable
-private fun defaultOpdsFeedFilters(): List<OpdsFeedFilter> = listOf(
-    OpdsFeedFilter(
+private fun defaultOpdsFeedFilters(): List<OpdsFeedDefination> = listOf(
+    OpdsFeedDefination(
         id = "language",
         label = stringResource(Res.string.language),
         options = listOf(
@@ -161,12 +161,12 @@ private fun defaultOpdsFeedFilters(): List<OpdsFeedFilter> = listOf(
             stringResource(Res.string.arabic),
         ),
     ),
-    OpdsFeedFilter(
+    OpdsFeedDefination(
         id = "grade",
         label = stringResource(Res.string.grade),
         options = (1..12).map { stringResource(Res.string.grade_number, it) },
     ),
-    OpdsFeedFilter(
+    OpdsFeedDefination(
         id = "subject",
         label = stringResource(Res.string.subject),
         options = listOf(
@@ -175,7 +175,7 @@ private fun defaultOpdsFeedFilters(): List<OpdsFeedFilter> = listOf(
             stringResource(Res.string.english),
         ),
     ),
-    OpdsFeedFilter(
+    OpdsFeedDefination(
         id = "type",
         label = stringResource(Res.string.type),
         options = listOf(

@@ -3,6 +3,7 @@ package world.respect
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.core.net.toUri
 import io.ktor.http.Url
@@ -16,9 +17,12 @@ import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.ResponseTypeValues
+import net.openid.appauth.connectivity.ConnectionBuilder
 import world.respect.shared.domain.account.authwithopenid.OpenIdAuthorizationResult
 import world.respect.shared.domain.account.authwithopenid.OpenIdAuthorizationUseCase
 import world.respect.shared.domain.activitycontextjobprocessor.EnqueueActivityContextJobUseCase
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
@@ -84,6 +88,7 @@ class OpenIdAuthorizationUseCaseAndroid(
                     )
                 }
             },
+            OpenIdConnectionBuilder,
         )
     }
 
@@ -208,6 +213,7 @@ class OpenIdAuthorizationUseCaseAndroid(
 
     private fun appAuthConfiguration(issuer: Url): AppAuthConfiguration =
         AppAuthConfiguration.Builder()
+            .setConnectionBuilder(OpenIdConnectionBuilder)
             .setSkipIssuerHttpsCheck(issuer.toString().startsWith("http://"))
             .build()
 
@@ -222,4 +228,9 @@ class OpenIdAuthorizationUseCaseAndroid(
         */
         const val REDIRECT_URI = "world.respect.oauth:/oauth2redirect"
     }
+}
+
+private object OpenIdConnectionBuilder : ConnectionBuilder {
+    override fun openConnection(uri: Uri): HttpURLConnection =
+        URL(uri.toString()).openConnection() as HttpURLConnection
 }

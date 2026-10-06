@@ -76,9 +76,6 @@
     <string name="enter_one_field">If you need response, one of the field is required</string>
     <string name="login">Login</string>
     <string name="continue_with_openid">Continue with %1$s</string>
-    <string name="continue_button">Continue</string>
-    <string name="openid_site_content">OpenID site content</string>
-    <string name="openid_login_options_description">Login options as provided by the identity provider, such as username and password, email OTP, phone OTP, or passkey.</string>
     <string name="userId_placeholder">user@school.example.org</string>
     <string name="password_label">Password</string>
 

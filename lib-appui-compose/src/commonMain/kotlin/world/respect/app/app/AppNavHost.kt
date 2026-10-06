@@ -30,7 +30,6 @@ import world.respect.app.view.manageuser.getstarted.GetStartedScreen
 import world.respect.app.view.manageuser.howpasskeywork.HowPasskeyWorksScreen
 import world.respect.app.view.manageuser.enterinvitecode.EnterInviteCodeScreen
 import world.respect.app.view.manageuser.login.LoginScreen
-import world.respect.app.view.manageuser.login.OpenIdLoginScreen
 import world.respect.app.view.manageuser.otheroption.OtherOptionsScreen
 import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScreen
 import world.respect.app.view.manageuser.sharefeedback.ShareFeedbackScreen
@@ -101,7 +100,6 @@ import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.LoginScreen
-import world.respect.shared.navigation.OpenIdLogin
 import world.respect.shared.navigation.ManageAccount
 import world.respect.shared.navigation.Onboarding
 import world.respect.shared.navigation.OtherOption
@@ -150,7 +148,6 @@ import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
 import world.respect.shared.viewmodel.manageuser.howpasskeywork.HowPasskeyWorksViewModel
 import world.respect.shared.viewmodel.manageuser.enterinvitecode.EnterInviteCodeViewModel
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
-import world.respect.shared.viewmodel.manageuser.login.OpenIdLoginViewModel
 import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
 import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsSignupViewModel
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
@@ -206,14 +203,6 @@ fun AppNavHost(
                 navController = respectNavController
             )
             LoginScreen(viewModel)
-        }
-
-        composable<OpenIdLogin> {
-            val viewModel: OpenIdLoginViewModel = respectViewModel(
-                onSetAppUiState = onSetAppUiState,
-                navController = respectNavController,
-            )
-            OpenIdLoginScreen(viewModel)
         }
 
         composable<EnterInviteCode> {

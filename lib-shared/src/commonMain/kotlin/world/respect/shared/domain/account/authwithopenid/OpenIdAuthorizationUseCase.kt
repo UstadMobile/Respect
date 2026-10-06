@@ -14,6 +14,4 @@ data class OpenIdAuthorizationResult(
 interface OpenIdAuthorizationUseCase {
 
     suspend operator fun invoke(issuer: Url): OpenIdAuthorizationResult
-
-    fun publishResult(result: OpenIdAuthorizationResult)
 }

@@ -236,7 +236,6 @@ import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
 import world.respect.shared.viewmodel.manageuser.howpasskeywork.HowPasskeyWorksViewModel
 import world.respect.shared.viewmodel.manageuser.enterinvitecode.EnterInviteCodeViewModel
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
-import world.respect.shared.viewmodel.manageuser.login.OpenIdLoginViewModel
 import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
 import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsSignupViewModel
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
@@ -418,7 +417,6 @@ val appKoinModule = module {
     viewModelOf(::AcknowledgementViewModel)
     viewModelOf(::EnterInviteCodeViewModel)
     viewModelOf(::LoginViewModel)
-    viewModelOf(::OpenIdLoginViewModel)
     viewModelOf(::AcceptInviteViewModel)
     viewModelOf(::SignupViewModel)
     viewModelOf(::TermsAndConditionViewModel)
@@ -854,10 +852,14 @@ val appKoinModule = module {
         EnqueueActivityContextJobUseCase()
     }
 
-    single<OpenIdAuthorizationUseCase> {
+    single {
         OpenIdAuthorizationUseCaseAndroid(
             enqueueActivityContextJobUseCase = get(),
         )
+    }
+
+    single<OpenIdAuthorizationUseCase> {
+        get<OpenIdAuthorizationUseCaseAndroid>()
     }
 
     single {

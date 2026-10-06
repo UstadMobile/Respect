@@ -1,5 +1,6 @@
 package world.respect
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -100,6 +101,20 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
                     clearOthers = true,
                 )
             }
+        }
+
+        handleOpenIdAuthorizationResult(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleOpenIdAuthorizationResult(intent)
+    }
+
+    private fun handleOpenIdAuthorizationResult(intent: Intent) {
+        if (intent.hasExtra(OpenIdAuthorizationUseCaseAndroid.EXTRA_REQUEST_ID)) {
+            getKoin().get<OpenIdAuthorizationUseCaseAndroid>()
+                .handleAuthorizationResult(this, intent)
         }
     }
 

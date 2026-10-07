@@ -3,28 +3,21 @@ package world.respect
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import androidx.core.net.toUri
+import io.github.aakira.napier.Napier
 import io.ktor.http.Url
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.suspendCancellableCoroutine
 import net.openid.appauth.AppAuthConfiguration
-import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationRequest
-import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.ResponseTypeValues
 import net.openid.appauth.connectivity.ConnectionBuilder
-import world.respect.shared.domain.account.authwithopenid.OpenIdAuthorizationResult
 import world.respect.shared.domain.account.authwithopenid.OpenIdAuthorizationUseCase
 import world.respect.shared.domain.activitycontextjobprocessor.EnqueueActivityContextJobUseCase
 import java.net.HttpURLConnection
 import java.net.URL
-import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -32,205 +25,129 @@ class OpenIdAuthorizationUseCaseAndroid(
     private val enqueueActivityContextJobUseCase: EnqueueActivityContextJobUseCase,
 ) : OpenIdAuthorizationUseCase {
 
-    private val pendingResults = ConcurrentHashMap<
-        String,
-        CompletableDeferred<OpenIdAuthorizationResult>,
-    >()
-
-    override suspend operator fun invoke(issuer: Url): OpenIdAuthorizationResult {
-        val requestId = UUID.randomUUID().toString()
-        val result = CompletableDeferred<OpenIdAuthorizationResult>()
-        pendingResults[requestId] = result
-
-        try {
-            val serviceConfiguration = fetchServiceConfiguration(issuer)
-            val authorizationRequest = AuthorizationRequest.Builder(
-                serviceConfiguration,
-                CLIENT_ID,
-                ResponseTypeValues.CODE,
-                REDIRECT_URI.toUri(),
-            )
-                .setScope("openid")
-                .build()
-
-            enqueueActivityContextJobUseCase { activity ->
-                startAuthorization(
-                    activity = activity,
-                    requestId = requestId,
-                    issuer = issuer,
-                    authorizationRequest = authorizationRequest,
-                )
-            }
-
-            return result.await()
-        } catch (cancelled: CancellationException) {
-            throw cancelled
-        } catch (e: Exception) {
-            return errorResult(requestId, issuer, e.message ?: "Unable to start OpenID login")
-        } finally {
-            pendingResults.remove(requestId)
-        }
-    }
-
-    private suspend fun fetchServiceConfiguration(
-        issuer: Url,
-    ): AuthorizationServiceConfiguration = suspendCancellableCoroutine { continuation ->
-        AuthorizationServiceConfiguration.fetchFromIssuer(
-            issuer.toString().toUri(),
-            { serviceConfiguration, exception ->
-                if (serviceConfiguration != null) {
-                    continuation.resume(serviceConfiguration)
-                } else {
-                    continuation.resumeWithException(
-                        IllegalStateException(
-                            exception?.message ?: "Unable to load OpenID configuration"
+    override suspend fun invoke(issuer: Url, schoolUrl: Url) {
+        val issuerUri = issuer.toString().toUri()
+        val serviceConfiguration = suspendCancellableCoroutine { continuation ->
+            // This callback provides the configuration used to build the authorization request.
+            // https://github.com/openid/AppAuth-Android#authorization-service-configuration
+            val configurationCallback =
+                AuthorizationServiceConfiguration.RetrieveConfigurationCallback {
+                    configuration, exception ->
+                    if (configuration != null) {
+                        continuation.resume(value = configuration)
+                    } else {
+                        continuation.resumeWithException(
+                            exception = IllegalStateException(
+                                exception?.message ?: "Unable to load OpenID configuration"
+                            )
                         )
-                    )
+                    }
                 }
-            },
-            OpenIdConnectionBuilder,
-        )
-    }
 
-    private fun startAuthorization(
-        activity: Activity,
-        requestId: String,
-        issuer: Url,
-        authorizationRequest: AuthorizationRequest,
-    ) {
-        val authorizationService = AuthorizationService(
-            activity,
-            appAuthConfiguration(issuer),
-        )
-
-        try {
-            val callback = resultPendingIntent(activity, requestId, issuer)
-            authorizationService.performAuthorizationRequest(
-                authorizationRequest,
-                callback,
-                callback,
-            )
-        } catch (e: Exception) {
-            publishResult(
-                errorResult(requestId, issuer, e.message ?: "Unable to start OpenID login")
-            )
-        } finally {
-            authorizationService.dispose()
-        }
-    }
-
-    private fun resultPendingIntent(
-        activity: Activity,
-        requestId: String,
-        issuer: Url,
-    ): PendingIntent {
-        val requestCode = requestId.hashCode()
-        val callbackIntent = Intent(activity, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            putExtra(EXTRA_REQUEST_ID, requestId)
-            putExtra(EXTRA_ISSUER, issuer.toString())
-        }
-        val flags = PendingIntent.FLAG_UPDATE_CURRENT or (
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
-        )
-
-        return PendingIntent.getActivity(
-            activity,
-            requestCode,
-            callbackIntent,
-            flags,
-        )
-    }
-
-    fun handleAuthorizationResult(
-        activity: Activity,
-        intent: Intent,
-    ) {
-        val requestId = intent.getStringExtra(EXTRA_REQUEST_ID) ?: return
-        val issuer = intent.getStringExtra(EXTRA_ISSUER)?.let(::Url) ?: return
-
-        val authorizationException = AuthorizationException.fromIntent(intent)
-        val authorizationResponse = AuthorizationResponse.fromIntent(intent)
-        if (authorizationResponse == null) {
-            publishResult(
-                errorResult(
-                    requestId,
-                    issuer,
-                    authorizationException?.message ?: "OpenID login failed",
-                )
-            )
-            return
-        }
-
-        val authorizationService = AuthorizationService(
-            activity.applicationContext,
-            appAuthConfiguration(issuer),
-        )
-        try {
-            authorizationService.performTokenRequest(
-                authorizationResponse.createTokenExchangeRequest()
-            ) { tokenResponse, exception ->
-                publishResult(
-                    OpenIdAuthorizationResult(
-                        requestId = requestId,
-                        issuer = issuer,
-                        authorizationCode = authorizationResponse.authorizationCode,
-                        accessToken = tokenResponse?.accessToken,
-                        idToken = tokenResponse?.idToken,
-                        errorMessage = exception?.message,
-                    )
-                )
-                authorizationService.dispose()
+            val connectionBuilder = ConnectionBuilder { uri ->
+                URL(uri.toString()).openConnection() as HttpURLConnection
             }
-        } catch (e: Exception) {
-            authorizationService.dispose()
-            publishResult(
-                errorResult(
-                    requestId,
-                    issuer,
-                    e.message ?: "OpenID token exchange failed",
-                    authorizationCode = authorizationResponse.authorizationCode,
-                )
+
+            // This is a Java API, so Kotlin named arguments are unavailable. The local names
+            // above show what each positional argument represents.
+            AuthorizationServiceConfiguration.fetchFromIssuer(
+                issuerUri,
+                configurationCallback,
+                connectionBuilder,
             )
         }
-    }
 
-    private fun errorResult(
-        requestId: String,
-        issuer: Url,
-        message: String,
-        authorizationCode: String? = null,
-    ) = OpenIdAuthorizationResult(
-        requestId = requestId,
-        issuer = issuer,
-        authorizationCode = authorizationCode,
-        errorMessage = message,
-    )
-
-    private fun publishResult(result: OpenIdAuthorizationResult) {
-        pendingResults.remove(result.requestId)?.complete(result)
-    }
-
-    private fun appAuthConfiguration(issuer: Url): AppAuthConfiguration =
-        AppAuthConfiguration.Builder()
-            .setConnectionBuilder(OpenIdConnectionBuilder)
-            .setSkipIssuerHttpsCheck(issuer.toString().startsWith("http://"))
+        val authorizationRequest = AuthorizationRequest.Builder(
+            serviceConfiguration,
+            CLIENT_ID,
+            ResponseTypeValues.CODE,
+            REDIRECT_URI.toUri(),
+        )
+            .setScope(SCOPE)
+            .setPrompt(PROMPT)
             .build()
 
+        enqueueActivityContextJobUseCase(request = { activity: Activity ->
+            val authorizationService = AuthorizationService(
+                activity,
+                openIdAppAuthConfiguration(issuer = issuer),
+            )
+            val completedIntent = Intent(activity, MainActivity::class.java).apply {
+                action = ACTION_OPENID_AUTHORIZATION_RESULT
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                putExtra(EXTRA_ISSUER, issuer.toString())
+                putExtra(EXTRA_SCHOOL_URL, schoolUrl.toString())
+            }
+            val canceledIntent = Intent(activity, MainActivity::class.java).apply {
+                action = ACTION_OPENID_AUTHORIZATION_CANCELED
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                putExtra(EXTRA_ISSUER, issuer.toString())
+                putExtra(EXTRA_SCHOOL_URL, schoolUrl.toString())
+            }
+
+            // AppAuth adds the authorization response to its completion PendingIntent, so it
+            // must be mutable. Android 12+ requires an explicit mutability flag, older versions
+            // use 0 because they do not require one. UPDATE_CURRENT refreshes the school/provider
+            // extras if Android reuses a PendingIntent.
+            // https://developer.android.com/reference/android/app/PendingIntent#FLAG_UPDATE_CURRENT
+            // https://github.com/openid/AppAuth-Android#obtaining-an-authorization-code
+            val pendingIntentFlags = PendingIntent.FLAG_UPDATE_CURRENT or
+                (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.FLAG_MUTABLE
+                } else {
+                    0
+                })
+
+            val completedPendingIntent = PendingIntent.getActivity(
+                activity,
+                AUTHORIZATION_RESULT_REQUEST_CODE,
+                completedIntent,
+                pendingIntentFlags,
+            )
+            val canceledPendingIntent = PendingIntent.getActivity(
+                activity,
+                AUTHORIZATION_CANCELED_REQUEST_CODE,
+                canceledIntent,
+                pendingIntentFlags,
+            )
+
+            try {
+                authorizationService.performAuthorizationRequest(
+                    authorizationRequest,
+                    completedPendingIntent,
+                    canceledPendingIntent,
+                )
+            } catch (exception: Exception) {
+                Napier.e(
+                    message = "Unable to start OpenID sign-in",
+                    throwable = exception,
+                )
+            } finally {
+                authorizationService.dispose()
+            }
+        })
+    }
+
     companion object {
-        const val EXTRA_REQUEST_ID = "openid_request_id"
+        const val ACTION_OPENID_AUTHORIZATION_RESULT = "world.respect.OPENID_AUTHORIZATION_RESULT"
+        const val ACTION_OPENID_AUTHORIZATION_CANCELED = "world.respect.OPENID_AUTHORIZATION_CANCELED"
         const val EXTRA_ISSUER = "openid_issuer"
+        const val EXTRA_SCHOOL_URL = "openid_school_url"
         const val CLIENT_ID = "respect-android"
-        /* As per https://github.com/openid/AppAuth-Android#capturing-the-authorization-redirect
-          we need to set uri in client setting in Valid redirect URIs:
-          world.respect.oauth:/oauth2redirect
-          otherwise we will get error invalid parameter indirect_uri
-        */
+        const val SCOPE = "openid"
+        const val PROMPT = "login"
+        // Register this redirect URI in the OpenID provider's client settings.
+        // https://github.com/openid/AppAuth-Android#capturing-the-authorization-redirect
         const val REDIRECT_URI = "world.respect.oauth:/oauth2redirect"
+        const val AUTHORIZATION_RESULT_REQUEST_CODE = 0
+        const val AUTHORIZATION_CANCELED_REQUEST_CODE = 1
     }
 }
 
-private object OpenIdConnectionBuilder : ConnectionBuilder {
-    override fun openConnection(uri: Uri): HttpURLConnection =
-        URL(uri.toString()).openConnection() as HttpURLConnection
-}
+internal fun openIdAppAuthConfiguration(issuer: Url): AppAuthConfiguration =
+    AppAuthConfiguration.Builder()
+        .setConnectionBuilder { uri ->
+            URL(uri.toString()).openConnection() as HttpURLConnection
+        }
+        .setSkipIssuerHttpsCheck(issuer.toString().startsWith("http://"))
+        .build()

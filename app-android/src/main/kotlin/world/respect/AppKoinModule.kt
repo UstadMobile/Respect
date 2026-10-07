@@ -868,6 +868,13 @@ val appKoinModule = module {
         )
     }
 
+    single {
+        HandleOpenIdAuthorizationResultUseCaseAndroid(
+            context = androidContext().applicationContext,
+            verifyOpenIdTokenUseCase = get(),
+        )
+    }
+
     single<GoToAppStoreUseCase> {
         GoToAppStoreUseCaseAndroid(
             appContext = androidApplication(),

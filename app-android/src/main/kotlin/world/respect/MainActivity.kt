@@ -5,7 +5,9 @@ import android.os.Bundle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import io.github.aakira.napier.Napier
 import io.ktor.http.Url
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.getKoin
 import org.koin.android.scope.AndroidScopeComponent
@@ -112,9 +114,29 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
     }
 
     private fun handleOpenIdAuthorizationResult(intent: Intent) {
-        if (intent.hasExtra(OpenIdAuthorizationUseCaseAndroid.EXTRA_REQUEST_ID)) {
-            getKoin().get<OpenIdAuthorizationUseCaseAndroid>()
-                .handleAuthorizationResult(this, intent)
+        lifecycleScope.launch {
+            try {
+                val callbackResult = getKoin()
+                    .get<HandleOpenIdAuthorizationResultUseCaseAndroid>()(intent = intent)
+                val logMessage = when (callbackResult) {
+                    HandleOpenIdAuthorizationResultUseCaseAndroid.Result.NotAuthorizationCallback ->
+                        null
+                    HandleOpenIdAuthorizationResultUseCaseAndroid.Result.Canceled ->
+                        "OpenID sign-in was canceled"
+                    is HandleOpenIdAuthorizationResultUseCaseAndroid.Result.Verified ->
+                        "OpenID token verified by school server"
+                }
+                if (logMessage != null) {
+                    Napier.d(message = logMessage)
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (exception: Exception) {
+                Napier.e(
+                    message = "Unable to complete OpenID sign-in",
+                    throwable = exception,
+                )
+            }
         }
     }
 

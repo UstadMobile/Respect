@@ -26,7 +26,6 @@ import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.throwable.unwrapHttpStatusCode
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.authwithopenid.OpenIdAuthorizationUseCase
-import world.respect.shared.domain.account.authwithopenid.VerifyOpenIdTokenUseCase
 import world.respect.shared.domain.account.username.filterusername.FilterUsernameUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.login
@@ -66,7 +65,6 @@ class LoginViewModel(
     private val filterUsernameUseCase: FilterUsernameUseCase,
     private val savePasswordUseCase: SavePasswordUseCase,
     private val openIdAuthorizationUseCase: OpenIdAuthorizationUseCase,
-    private val verifyOpenIdTokenUseCase: VerifyOpenIdTokenUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     private val route: LoginScreen = savedStateHandle.toRoute()
@@ -285,30 +283,10 @@ class LoginViewModel(
             },
         ) {
             _uiState.update { it.copy(errorText = null) }
-
-            val result = openIdAuthorizationUseCase(issuer)
-            val accessToken = result.accessToken
-            if (accessToken == null) {
-                _uiState.update {
-                    it.copy(
-                        errorText = result.errorMessage?.let(::StringUiText)
-                            ?: StringResourceUiText(Res.string.something_went_wrong)
-                    )
-                }
-                return@launchWithLoadingIndicator
-            }
-
-            val serverVerified = verifyOpenIdTokenUseCase(
+            openIdAuthorizationUseCase(
+                issuer = issuer,
                 schoolUrl = route.schoolUrl,
-                accessToken = accessToken,
             )
-            if (!serverVerified) {
-                _uiState.update {
-                    it.copy(errorText = StringResourceUiText(Res.string.something_went_wrong))
-                }
-            } else {
-                Napier.d("OpenID token verified by school server")
-            }
         }
     }
 

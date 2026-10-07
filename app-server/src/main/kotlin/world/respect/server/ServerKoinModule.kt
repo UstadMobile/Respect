@@ -484,11 +484,17 @@ fun serverKoinModule(
         }
 
         factory<SetSharedDevicePINUseCase> {
-            SetSharedDevicePINUseCaseImpl(schoolDataSource = get())
+            SetSharedDevicePINUseCaseImpl(
+                schoolDataSource = get(),
+                respectAccountManager = get(),
+                json = get(),
+            )
         }
         factory<GetSharedDevicePINUseCase> {
             GetSharedDevicePINUseCaseImpl(
                 schoolDataSource = get(),
+                respectAccountManager = get(),
+                json = get(),
                 setSharedDevicePINUseCase = get()
             )
         }

@@ -1151,19 +1151,33 @@ val appKoinModule = module {
         }
 
         scoped<SetSharedDevicePINUseCase> {
-            SetSharedDevicePINUseCaseImpl(schoolDataSource = get())
+            SetSharedDevicePINUseCaseImpl(
+                schoolDataSource = get(),
+                respectAccountManager = get(),
+                json = get(),
+            )
         }
         scoped<GetSharedDevicePINUseCase> {
             GetSharedDevicePINUseCaseImpl(
                 schoolDataSource = get(),
+                respectAccountManager = get(),
+                json = get(),
                 setSharedDevicePINUseCase = get()
             )
         }
         scoped<GetSharedDeviceSelfSelectUseCase> {
-            GetSharedDeviceSelfSelectUseCase(schoolDataSource = get())
+            GetSharedDeviceSelfSelectUseCase(
+                schoolDataSource = get(),
+                respectAccountManager = get(),
+                json = get(),
+            )
         }
         scoped<SetSharedDeviceSelfSelectUseCase> {
-            SetSharedDeviceSelfSelectUseCase(schoolDataSource = get())
+            SetSharedDeviceSelfSelectUseCase(
+                schoolDataSource = get(),
+                respectAccountManager = get(),
+                json = get(),
+            )
         }
         scoped<ApproveOrDeclineInviteRequestUseCase> {
             ApproveOrDeclineInviteRequestUseCase(

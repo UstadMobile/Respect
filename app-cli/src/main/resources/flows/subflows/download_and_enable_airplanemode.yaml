@@ -1,0 +1,9 @@
+appId: world.respect.app
+
+---
+- tapOn: "Download"
+- extendedWaitUntil:
+    visible:
+      text: "Downloaded"
+    timeout: 300000
+- setAirplaneMode: enabled

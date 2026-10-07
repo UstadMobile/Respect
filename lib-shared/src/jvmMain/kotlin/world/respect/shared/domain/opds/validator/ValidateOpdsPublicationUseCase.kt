@@ -9,8 +9,8 @@ import world.respect.lib.opds.model.toStringMap
 import world.respect.datalayer.respect.model.LEARNING_UNIT_MIME_TYPES
 import world.respect.domain.validator.HttpLinkHeader
 import world.respect.shared.domain.validator.ValidateHttpResponseForUrlUseCase
-import world.respect.domain.validator.ValidatorMessage
-import world.respect.domain.validator.ValidatorReporter
+import world.respect.shared.domain.validator.ValidatorMessage
+import world.respect.shared.domain.validator.ValidatorReporter
 import java.net.URI
 
 /**

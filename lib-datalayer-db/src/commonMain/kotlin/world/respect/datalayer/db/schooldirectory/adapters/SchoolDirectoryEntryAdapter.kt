@@ -58,7 +58,7 @@ fun SchoolDirectoryEntry.toEntities(
         authOptionEntities = authenticationOptions.map {
             SchoolDirectoryEntryAuthOptionEntity(
                 sdeAoRdUid = reUid,
-                sdeAoConfigType = it.provider.type,
+                sdeAoConfigType = it.provider.authType,
                 sdeAoName = it.name,
                 sdeAoOpenIdIssuerUrl = (it.provider as? OpenIdAuthOptionConfig)?.issuer,
             )

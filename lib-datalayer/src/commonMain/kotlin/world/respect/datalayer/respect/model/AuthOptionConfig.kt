@@ -9,19 +9,19 @@ import world.respect.datalayer.respect.model.invite.AuthOptionConfigTypeEnum
 @Serializable
 sealed interface AuthOptionConfig {
 
-    val type: AuthOptionConfigTypeEnum
+    val authType: AuthOptionConfigTypeEnum
 
 }
 
 @Serializable
 @SerialName("builtin")
 data class BuiltinAuthOptionConfig(
-    override val type: AuthOptionConfigTypeEnum = AuthOptionConfigTypeEnum.BUILTIN
+    override val authType: AuthOptionConfigTypeEnum = AuthOptionConfigTypeEnum.BUILTIN
 ) : AuthOptionConfig
 @Serializable
 @SerialName("openid")
 data class OpenIdAuthOptionConfig(
-    override val type: AuthOptionConfigTypeEnum = AuthOptionConfigTypeEnum.OPENID,
+    override val authType: AuthOptionConfigTypeEnum = AuthOptionConfigTypeEnum.OPENID,
     val issuer: Url,
 ) : AuthOptionConfig
 

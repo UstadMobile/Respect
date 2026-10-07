@@ -5,7 +5,7 @@ plugins {
 }
 
 application {
-    mainClass = "world.respect.clitools.RespectCLI"
+    mainClass = "world.respect.clitools.OpenEelCLI"
 }
 
 java {
@@ -27,6 +27,13 @@ dependencies {
     implementation(libs.koin.core)
 
     implementation(projects.libShared)
+
+    testImplementation(libs.kotlin.test.junit)
+    testImplementation(libs.ktor.server.core)
+    testImplementation(libs.ktor.server.netty)
+    testImplementation(libs.ktor.server.content.negotiation)
+    testImplementation(projects.libTest)
+    testImplementation(libs.ktor.server.test.host)
 }
 
 

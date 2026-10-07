@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -197,10 +197,12 @@ fun OpdsFeedDetailScreen(
             */
 
             catalog?.navigation?.also { navigation ->
-                itemsIndexed(
-                    items = navigation,
-                    key = { index, _ -> "top_nav_$index" }
-                ) { index, navigationItem ->
+                items(
+                    items = navigation.withIndex().filter {
+                        uiState.matchesSearchFilter(OpdsFeedItemIndex(-1, it.index), false)
+                    },
+                    key = { "top_nav_${it.index}" }
+                ) { (index, navigationItem) ->
                     val feedIndex = OpdsFeedItemIndex(groupIndex = -1, index)
                     NavigationListItem(
                         navigation = navigationItem,
@@ -215,10 +217,12 @@ fun OpdsFeedDetailScreen(
             }
 
             catalog?.publications?.also { publications ->
-                itemsIndexed(
-                    items = publications,
-                    key = { index, _ -> "top_pub_$index" }
-                ) { index, publication ->
+                items(
+                    items = publications.withIndex().filter {
+                        uiState.matchesSearchFilter(OpdsFeedItemIndex(-1, it.index), true)
+                    },
+                    key = { "top_pub_${it.index}" }
+                ) { (index, publication) ->
                     val feedItemIndex = OpdsFeedItemIndex(groupIndex = -1, index)
                     PublicationListItem(
                         publication = publication,
@@ -231,6 +235,8 @@ fun OpdsFeedDetailScreen(
             }
 
             catalog?.groups?.forEachIndexed { groupIndex, group ->
+                if (!uiState.groupMatchesSearchFilter(groupIndex))
+                    return@forEachIndexed
                 item(key = "section_$groupIndex") {
                     FeedSectionHeader(
                         title = group.metadata.title,
@@ -242,10 +248,12 @@ fun OpdsFeedDetailScreen(
                 }
 
                 if (!uiState.isGroupCollapsed(groupIndex)) {
-                    itemsIndexed(
-                        items = group.navigation ?: emptyList(),
-                        key = { itemIndex, _ -> "nav_${groupIndex}_$itemIndex" }
-                    ) { itemIndex, navigation ->
+                    items(
+                        items = group.navigation.orEmpty().withIndex().filter {
+                            uiState.matchesSearchFilter(OpdsFeedItemIndex(groupIndex, it.index), false)
+                        },
+                        key = { "nav_${groupIndex}_${it.index}" }
+                    ) { (itemIndex, navigation) ->
                         val feedIndex = OpdsFeedItemIndex(groupIndex = groupIndex, index = itemIndex)
                         NavigationListItem(
                             navigation = navigation,
@@ -256,10 +264,12 @@ fun OpdsFeedDetailScreen(
                         )
                     }
 
-                    itemsIndexed(
-                        items = group.publications ?: emptyList(),
-                        key = { itemIndex, _ -> "pub_${groupIndex}_$itemIndex" }
-                    ) { itemIndex, publication ->
+                    items(
+                        items = group.publications.orEmpty().withIndex().filter {
+                            uiState.matchesSearchFilter(OpdsFeedItemIndex(groupIndex, it.index), true)
+                        },
+                        key = { "pub_${groupIndex}_${it.index}" }
+                    ) { (itemIndex, publication) ->
                         val feedItemIndex = OpdsFeedItemIndex(groupIndex = groupIndex, index = itemIndex)
                         PublicationListItem(
                             publication = publication,

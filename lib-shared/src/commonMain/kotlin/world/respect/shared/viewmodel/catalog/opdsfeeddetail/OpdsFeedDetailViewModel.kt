@@ -3,15 +3,26 @@ package world.respect.shared.viewmodel.catalog.opdsfeeddetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import androidx.sqlite.SQLiteException
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
+import world.respect.datalayer.school.model.composites.OpdsFeedSearchMatch
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
@@ -37,12 +48,12 @@ import world.respect.shared.generated.resources.language
 import world.respect.shared.generated.resources.not_found
 import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.AssignmentEdit
-import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.OpdsFeedEdit
 import world.respect.shared.navigation.PlaylistShare
+import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.appbarTitleString
@@ -50,6 +61,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.firstSelfLinkOrNull
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
@@ -73,7 +85,20 @@ data class OpdsFeedDetailUiState(
     val copyDialogName: String = "",
     val showDeleteDialog: Boolean = false,
     val pickType: OpdsPickType? = null,
+    val searchMatches: List<OpdsFeedSearchMatch>? = null,
 ) {
+    private val searchMatchSet = searchMatches?.toSet()
+
+    private val matchingGroupIndexes = searchMatches?.map { it.groupIndex }?.toSet()
+
+    fun matchesSearchFilter(index: OpdsFeedItemIndex, isPublication: Boolean): Boolean =
+        searchMatchSet?.contains(
+            OpdsFeedSearchMatch(index.groupIndex, index.index, isPublication)
+        ) ?: true
+
+    fun groupMatchesSearchFilter(groupIndex: Int): Boolean =
+        matchingGroupIndexes?.contains(groupIndex) ?: true
+
     fun isGroupCollapsed(groupIndex: Int) = groupIndex in collapsedGroupIndexes
 
     fun isPublicationSelected(index: OpdsFeedItemIndex): Boolean = index in selectedPublications
@@ -115,6 +140,7 @@ data class OpdsFeedDetailUiState(
 /**
  * Show a list of learning units as provided by an OpdsFeed
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class OpdsFeedDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
@@ -125,6 +151,7 @@ class OpdsFeedDetailViewModel(
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
+    private val schoolDataSourceLocal: SchoolDataSourceLocal by inject()
 
     private val _uiState = MutableStateFlow(OpdsFeedDetailUiState())
 
@@ -143,8 +170,39 @@ class OpdsFeedDetailViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 hideBottomNavigation = route.resultDest != null,
-                title = route.opdsPickType?.appbarTitleString?.asUiText() ?: prev.title
+                title = route.opdsPickType?.appbarTitleString?.asUiText() ?: prev.title,
+                searchState = AppBarSearchUiState(
+                    visible = true,
+                    onSearchTextChanged = ::onSearchTextChanged,
+                ),
             )
+        }
+
+        viewModelScope.launch {
+            _appUiState.map { it.searchState.searchText }.distinctUntilChanged().flatMapLatest { searchQuery ->
+                if (searchQuery.isEmpty()) {
+                    flowOf(searchQuery to null)
+                } else {
+                    schoolDataSourceLocal.opdsFeedDataSource.searchByTitleAsFlow(
+                        url = route.opdsFeedUrl,
+                        listParams = OpdsFeedDataSourceLocal.GetListParams(title = searchQuery),
+                    ).catch { error ->
+                        if (error !is SQLiteException)
+                            throw error
+
+                        Napier.e("Error searching cached feed titles", throwable = error)
+                        if (searchQuery == _appUiState.value.searchState.searchText) {
+                            snackBarDispatcher.showSnackBar(
+                                Snack(Res.string.something_went_wrong.asUiText())
+                            )
+                        }
+                    }.map { matchingItems -> searchQuery to matchingItems }
+                }
+            }.collect { (searchQuery, matchingItems) ->
+                if (searchQuery == _appUiState.value.searchState.searchText) {
+                    _uiState.update { it.copy(searchMatches = matchingItems) }
+                }
+            }
         }
 
         viewModelScope.launch {
@@ -184,6 +242,17 @@ class OpdsFeedDetailViewModel(
 
     fun onSortOrderChanged(sortOption: SortOrderOption) {
         _uiState.update { it.copy(activeSortOrderOption = sortOption) }
+    }
+
+    fun onSearchTextChanged(text: String) {
+        if (text == _appUiState.value.searchState.searchText)
+            return
+        _uiState.update {
+            it.copy(searchMatches = if (text.isEmpty()) null else emptyList())
+        }
+        _appUiState.update {
+            it.copy(searchState = it.searchState.copy(searchText = text))
+        }
     }
 
     fun onClickPublication(index: OpdsFeedItemIndex) {

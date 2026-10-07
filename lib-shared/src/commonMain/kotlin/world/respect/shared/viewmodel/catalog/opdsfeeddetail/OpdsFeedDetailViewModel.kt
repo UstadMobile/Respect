@@ -22,7 +22,7 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.db.school.ext.isAdmin
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
-import world.respect.datalayer.school.model.composites.OpdsFeedSearchMatch
+import world.respect.lib.opds.model.ext.OpdsFeedSearchMatch
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
@@ -244,14 +244,14 @@ class OpdsFeedDetailViewModel(
         _uiState.update { it.copy(activeSortOrderOption = sortOption) }
     }
 
-    fun onSearchTextChanged(text: String) {
-        if (text == _appUiState.value.searchState.searchText)
+    fun onSearchTextChanged(searchQuery: String) {
+        if (searchQuery == _appUiState.value.searchState.searchText)
             return
         _uiState.update {
-            it.copy(searchMatches = if (text.isEmpty()) null else emptyList())
+            it.copy(searchMatches = if (searchQuery.isEmpty()) null else emptyList())
         }
         _appUiState.update {
-            it.copy(searchState = it.searchState.copy(searchText = text))
+            it.copy(searchState = it.searchState.copy(searchText = searchQuery))
         }
     }
 

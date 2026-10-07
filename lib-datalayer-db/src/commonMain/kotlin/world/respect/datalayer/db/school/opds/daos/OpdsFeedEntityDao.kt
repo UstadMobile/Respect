@@ -9,7 +9,7 @@ import world.respect.datalayer.db.school.opds.entities.OpdsFeedEntity
 import world.respect.datalayer.db.school.opds.entities.ReadiumLinkEntity
 import world.respect.datalayer.db.shared.LastModifiedAndETagDb
 import world.respect.datalayer.db.shared.entities.LangMapEntity
-import world.respect.datalayer.school.model.composites.OpdsFeedSearchMatch
+import world.respect.lib.opds.model.ext.OpdsFeedSearchMatch
 
 @Dao
 abstract class OpdsFeedEntityDao {

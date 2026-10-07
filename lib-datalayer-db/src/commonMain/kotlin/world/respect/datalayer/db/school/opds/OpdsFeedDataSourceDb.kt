@@ -19,7 +19,7 @@ import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
-import world.respect.datalayer.school.model.composites.OpdsFeedSearchMatch
+import world.respect.lib.opds.model.ext.OpdsFeedSearchMatch
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadParams

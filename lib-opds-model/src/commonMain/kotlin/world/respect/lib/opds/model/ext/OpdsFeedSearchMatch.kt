@@ -1,4 +1,4 @@
-package world.respect.datalayer.school.model.composites
+package world.respect.lib.opds.model.ext
 
 import kotlinx.serialization.Serializable
 

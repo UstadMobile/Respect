@@ -4,7 +4,7 @@ import io.ktor.http.Url
 import io.ktor.util.StringValues
 import kotlinx.coroutines.flow.Flow
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
-import world.respect.datalayer.school.model.composites.OpdsFeedSearchMatch
+import world.respect.lib.opds.model.ext.OpdsFeedSearchMatch
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.lib.opds.model.OpdsFeed
 

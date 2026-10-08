@@ -4,12 +4,16 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -19,13 +23,17 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.SchoolDataSourceLocal
+import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
+import world.respect.shared.domain.search.ObserveSearchResultsUseCase
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.app
 import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.empty_list_description_admin
 import world.respect.shared.generated.resources.empty_list_description_non_admin
+import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.NavCommand
@@ -41,6 +49,8 @@ import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.findCollection
 import world.respect.lib.xapi.OpenEelXapiConstants
 import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
+import world.respect.lib.xapi.ext.objectActivityOrNull
+import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
 import world.respect.lib.xapi.model.XapiStatement
 import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.model.XapiVerb
@@ -49,6 +59,7 @@ import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.geticonforxapiactivity.GetPublicationForXapiActivityUseCase
 import world.respect.shared.util.ext.appbarTitleString
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 
 data class AppLauncherUiState(
@@ -59,6 +70,7 @@ data class AppLauncherUiState(
     val canRemove: Boolean = false,
     val emptyListDescription: UiText? = null,
     val appMustLoadToBeClickable: Boolean = false,
+    val searchActive: Boolean = false,
 ) {
 
     fun isAppClickable(appState: DataLoadState<Publication>): Boolean {
@@ -71,6 +83,7 @@ class AppLauncherViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val getDevModeEnabledUseCase: GetDevModeEnabledUseCase,
+    private val observeSearchResultsUseCase: ObserveSearchResultsUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -82,6 +95,7 @@ class AppLauncherViewModel(
     private val route: RespectAppLauncher = savedStateHandle.toRoute()
 
     private val schoolDataSource: SchoolDataSource by inject()
+    private val schoolDataSourceLocal: SchoolDataSourceLocal by inject()
 
     private val getPublicationForXapiActivityUseCase: GetPublicationForXapiActivityUseCase by inject()
 
@@ -90,6 +104,11 @@ class AppLauncherViewModel(
             it.copy(
                 title = route.opdsPickType?.appbarTitleString?.asUiText() ?: Res.string.home.asUiText(),
                 onClickSettings = ::onClickSettings,
+                searchState = AppBarSearchUiState(
+                    visible = true,
+                    onSearchTextChanged = ::onSearchTextChanged,
+                    onSearchExpandedChanged = ::setSearchExpanded,
+                ),
                 fabState = FabUiState(
                     icon = FabUiState.FabIcon.ADD,
                     text = Res.string.app.asUiText(),
@@ -108,7 +127,6 @@ class AppLauncherViewModel(
 
         _uiState.update { prev ->
             prev.copy(
-                respectPublicationForXapiStatement = getPublicationForXapiActivityUseCase::invoke,
                 appMustLoadToBeClickable = route.resultDest != null,
             )
         }
@@ -122,7 +140,43 @@ class AppLauncherViewModel(
                 ),
                 dataLoadParams = DataLoadParams(),
             ).collectLatest { state ->
-                _uiState.update { it.copy(apps = state.map { result -> result.statements }) }
+                coroutineScope {
+                    // Load every listed app so search also finds titles outside the visible grid.
+                    val publicationFlows = state.dataOrNull()?.statements.orEmpty().associateWith {
+                        getPublicationForXapiActivityUseCase(it).shareIn(
+                            scope = this,
+                            started = SharingStarted.Eagerly,
+                            replay = 1,
+                        )
+                    }
+                    _uiState.update {
+                        it.copy(
+                            apps = state.map { emptyList() },
+                            respectPublicationForXapiStatement = publicationFlows::getValue,
+                        )
+                    }
+
+                    observeSearchResultsUseCase(
+                        appUiStateFlow = appUiState,
+                        searchFn = { searchQuery ->
+                            schoolDataSourceLocal.opdsPublicationDataSource.searchByTitleAsFlow(
+                                OpdsPublicationDataSourceLocal.GetListParams(title = searchQuery),
+                            ).map { it.toSet() }
+                        },
+                    ).collect { matchingUrls ->
+                        _uiState.update {
+                            it.copy(
+                                apps = state.map { result ->
+                                    result.statements.filter { statement ->
+                                        matchingUrls == null ||
+                                            statement.objectActivityOrNull()?.definition
+                                                ?.webPubManifestAsUrlOrNull() in matchingUrls
+                                    }
+                                },
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -151,6 +205,16 @@ class AppLauncherViewModel(
         }
     }
 
+    fun onSearchTextChanged(searchQuery: String) {
+        updateSearchText(searchQuery) { query ->
+            _uiState.update {
+                it.copy(
+                    apps = it.apps.map { emptyList() },
+                    searchActive = query.isNotEmpty(),
+                )
+            }
+        }
+    }
 
     fun onClickApp(app: DataLoadState<Publication>) {
         val url = app.metaInfo.url ?: return

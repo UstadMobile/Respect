@@ -1,4 +1,4 @@
-package world.respect.app.view.catalog.opdsfeeddetail.sample
+package world.respect.app.components.sample
 
 import androidx.compose.runtime.Composable
 import org.jetbrains.compose.resources.stringResource
@@ -20,7 +20,7 @@ import world.respect.shared.generated.resources.video
 
 // Temporary UI sample data; remove when real filter options are available.
 @Composable
-internal fun defaultOpdsFeedFilters(): List<RespectFilterDefinition> = listOf(
+internal fun defaultContentFilters(): List<RespectFilterDefinition> = listOf(
     RespectFilterDefinition(
         id = "language",
         label = stringResource(Res.string.language),
@@ -33,7 +33,7 @@ internal fun defaultOpdsFeedFilters(): List<RespectFilterDefinition> = listOf(
     RespectFilterDefinition(
         id = "grade",
         label = stringResource(Res.string.grade),
-        options = (1..12).map { stringResource(Res.string.grade_number, it) },
+        options = (1..MAX_GRADE).map { stringResource(Res.string.grade_number, it) },
     ),
     RespectFilterDefinition(
         id = "subject",
@@ -54,3 +54,5 @@ internal fun defaultOpdsFeedFilters(): List<RespectFilterDefinition> = listOf(
         ),
     ),
 )
+
+private const val MAX_GRADE = 12

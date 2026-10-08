@@ -3,16 +3,8 @@ package world.respect.shared.viewmodel.catalog.opdsfeeddetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import androidx.sqlite.SQLiteException
-import io.github.aakira.napier.Napier
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -41,6 +33,7 @@ import world.respect.lib.opds.model.findSelfLinks
 import world.respect.libutil.ext.resolve
 import world.respect.libutil.ext.toggle
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.search.ObserveSearchResultsUseCase
 import world.respect.shared.ext.resultExpected
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
@@ -142,12 +135,12 @@ data class OpdsFeedDetailUiState(
 /**
  * Show a list of learning units as provided by an OpdsFeed
  */
-@OptIn(ExperimentalCoroutinesApi::class)
 class OpdsFeedDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val accountManager: RespectAccountManager,
     private val resultReturner: NavResultReturner,
     private val snackBarDispatcher: SnackBarDispatcher,
+    private val observeSearchResultsUseCase: ObserveSearchResultsUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
@@ -176,37 +169,22 @@ class OpdsFeedDetailViewModel(
                 searchState = AppBarSearchUiState(
                     visible = true,
                     onSearchTextChanged = ::onSearchTextChanged,
+                    onSearchExpandedChanged = ::setSearchExpanded,
                 ),
             )
         }
 
         viewModelScope.launch {
-            // Keep only the latest query active; null matches mean there is no filter.
-            _appUiState.map { it.searchState.searchText }.distinctUntilChanged().flatMapLatest { searchQuery ->
-                if (searchQuery.isEmpty()) {
-                    flowOf(searchQuery to null)
-                } else {
+            observeSearchResultsUseCase(
+                appUiStateFlow = appUiState,
+                searchFn = { searchQuery ->
                     schoolDataSourceLocal.opdsFeedDataSource.searchByTitleAsFlow(
                         url = route.opdsFeedUrl,
                         listParams = OpdsFeedDataSourceLocal.GetListParams(title = searchQuery),
-                    ).catch { error ->
-                        if (error !is SQLiteException)
-                            throw error
-
-                        // Show the error only if this query is still current.
-                        Napier.e("Error searching cached feed titles", throwable = error)
-                        if (searchQuery == _appUiState.value.searchState.searchText) {
-                            snackBarDispatcher.showSnackBar(
-                                Snack(Res.string.something_went_wrong.asUiText())
-                            )
-                        }
-                    }.map { matchingItems -> searchQuery to matchingItems }
-                }
-            }.collect { (searchQuery, matchingItems) ->
-                // Ignore results already superseded by a newer query.
-                if (searchQuery == _appUiState.value.searchState.searchText) {
-                    _uiState.update { it.copy(searchMatches = matchingItems) }
-                }
+                    )
+                },
+            ).collect { matchingItems ->
+                _uiState.update { it.copy(searchMatches = matchingItems) }
             }
         }
 
@@ -250,13 +228,10 @@ class OpdsFeedDetailViewModel(
     }
 
     fun onSearchTextChanged(searchQuery: String) {
-        if (searchQuery == _appUiState.value.searchState.searchText)
-            return
-        _uiState.update {
-            it.copy(searchMatches = if (searchQuery.isEmpty()) null else emptyList())
-        }
-        _appUiState.update {
-            it.copy(searchState = it.searchState.copy(searchText = searchQuery))
+        updateSearchText(searchQuery) { query ->
+            _uiState.update {
+                it.copy(searchMatches = if (query.isEmpty()) null else emptyList())
+            }
         }
     }
 

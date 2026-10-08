@@ -1,7 +1,5 @@
 package world.respect.app.view.catalog.opdsfeeddetail
 
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
@@ -30,19 +27,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import world.respect.app.components.RespectFilterChip
+import world.respect.app.components.RespectContentFilterRow
 import world.respect.app.components.defaultItemPadding
 import world.respect.app.components.langMapString
-import world.respect.app.view.catalog.opdsfeeddetail.sample.defaultOpdsFeedFilters
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.ReadiumLink
@@ -50,7 +42,6 @@ import world.respect.lib.opds.model.ext.OpdsFeedItemIndex
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.assign
 import world.respect.shared.generated.resources.cancel
-import world.respect.shared.generated.resources.clear_all
 import world.respect.shared.generated.resources.copy
 import world.respect.shared.generated.resources.copy_of
 import world.respect.shared.generated.resources.delete
@@ -61,6 +52,7 @@ import world.respect.shared.generated.resources.permanently_delete_description
 import world.respect.shared.generated.resources.select_count_items
 import world.respect.shared.generated.resources.select_this_collection
 import world.respect.shared.util.SortOrderOption
+import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.catalog.opdsfeeddetail.OpdsFeedDetailUiState
 import world.respect.shared.viewmodel.catalog.opdsfeeddetail.OpdsFeedDetailViewModel
 import world.respect.shared.viewmodel.catalog.opdsfeeddetail.OpdsFeedDetailViewModel.Companion.ICON
@@ -70,6 +62,7 @@ fun OpdsFeedDetailScreen(
     viewModel: OpdsFeedDetailViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val appUiState by viewModel.appUiState.collectAsState()
     val copyOfTemplate = stringResource(Res.string.copy_of)
 
     LaunchedEffect(uiState.showCopyDialog) {
@@ -80,6 +73,7 @@ fun OpdsFeedDetailScreen(
 
     OpdsFeedDetailScreen(
         uiState = uiState,
+        searchState = appUiState.searchState,
         onSortOrderChanged = viewModel::onSortOrderChanged,
         onClickPublication = viewModel::onClickPublication,
         onLongPressPublication = viewModel::onLongPressPublication,
@@ -104,6 +98,7 @@ fun OpdsFeedDetailScreen(
 @Composable
 fun OpdsFeedDetailScreen(
     uiState: OpdsFeedDetailUiState = OpdsFeedDetailUiState(),
+    searchState: AppBarSearchUiState = AppBarSearchUiState(),
     @Suppress("unused")
     onSortOrderChanged: (SortOrderOption) -> Unit = { },
     onClickPublication: (OpdsFeedItemIndex) -> Unit = {},
@@ -125,51 +120,10 @@ fun OpdsFeedDetailScreen(
     onDeleteDialogConfirm: () -> Unit = {},
 ) {
     val catalog = uiState.feed.dataOrNull()
-    val filters = defaultOpdsFeedFilters()
-    var selectedOptions by rememberSaveable { mutableStateOf(emptyList<String>()) }
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .horizontalScroll(rememberScrollState())
-                    .padding(16.dp)
-                    .testTag("feed_filter_chips"),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                filters.forEach { filter ->
-                    key(filter.id) {
-                        RespectFilterChip(
-                            filter = filter,
-                            selectedOptionIndices = filter.options.indices.filter {
-                                "${filter.id}:$it" in selectedOptions
-                            },
-                            onOptionCheckedChanged = { index, checked ->
-                                val optionId = "${filter.id}:$index"
-                                selectedOptions = if (checked) {
-                                    (selectedOptions + optionId).distinct()
-                                } else {
-                                    selectedOptions - optionId
-                                }
-                            },
-                        )
-                    }
-                }
-            }
-            TextButton(
-                onClick = { selectedOptions = emptyList() },
-                enabled = selectedOptions.isNotEmpty(),
-                modifier = Modifier
-                    .padding(end = 8.dp)
-            ) {
-                Text(stringResource(Res.string.clear_all))
-            }
-        }
+        RespectContentFilterRow(searchState = searchState)
 
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(

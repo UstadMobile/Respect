@@ -35,11 +35,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
+import world.respect.app.components.RespectContentFilterRow
 import world.respect.app.components.langMapString
 import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.DataLoadState
@@ -52,7 +54,9 @@ import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.empty
 import world.respect.shared.generated.resources.empty_list
 import world.respect.shared.generated.resources.more_info
+import world.respect.shared.generated.resources.no_matching_data_available_yet
 import world.respect.shared.generated.resources.remove
+import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherUiState
 import world.respect.shared.viewmodel.apps.launcher.AppLauncherViewModel
 
@@ -61,8 +65,10 @@ fun AppLauncherScreen(
     viewModel: AppLauncherViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val appUiState by viewModel.appUiState.collectAsState()
     AppLauncherScreen(
         uiState = uiState,
+        searchState = appUiState.searchState,
         onClickApp = { viewModel.onClickApp(it) },
         onClickRemove = { viewModel.onClickRemove(it) },
     )
@@ -71,6 +77,7 @@ fun AppLauncherScreen(
 @Composable
 fun AppLauncherScreen(
     uiState: AppLauncherUiState,
+    searchState: AppBarSearchUiState,
     onClickApp: (DataLoadState<Publication>) -> Unit,
     onClickRemove: (DataLoadState<Publication>) -> Unit,
 ) {
@@ -86,65 +93,71 @@ fun AppLauncherScreen(
         keyboardController?.hide()
     }
 
-    Box(
+    Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        if (apps.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 64.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(Res.drawable.empty),
-                    contentDescription = stringResource(resource = Res.string.empty_list),
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.size(200.dp)
-                )
-                Spacer(
-                    modifier = Modifier.height(16.dp)
-                )
-                Text(
-                    text = uiState.emptyListDescription?.let {
-                        uiTextStringResource(it)
-                    } ?: "",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-
-                items(
-                    count = apps.size,
-                    key = { index -> apps[index].objectActivityOrNull()?.id ?: index.toString() }
-                ) { index ->
-                    val statement = apps[index]
-                    val respectAppFlow = remember(statement, uiState.respectPublicationForXapiStatement) {
-                        uiState.respectPublicationForXapiStatement(statement)
-                    }
-                    val respectApp by respectAppFlow.collectAsState(NoDataLoadedState.notFound())
-
-                    AppGridItem(
-                        app = respectApp,
-                        clickEnabled = uiState.isAppClickable(respectApp),
-                        onClickApp = {
-                            onClickApp(respectApp)
-                        },
-                        onClickRemove = {
-                            onClickRemove(respectApp)
-                        },
-                        showRemove = uiState.canRemove,
+        RespectContentFilterRow(searchState = searchState)
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            if (apps.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 64.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.empty),
+                        contentDescription = stringResource(resource = Res.string.empty_list),
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.size(200.dp)
                     )
+                    Spacer(
+                        modifier = Modifier.height(16.dp)
+                    )
+                    Text(
+                        text = if (uiState.searchActive) {
+                            stringResource(Res.string.no_matching_data_available_yet)
+                        } else {
+                            uiState.emptyListDescription?.let {
+                                uiTextStringResource(it)
+                            } ?: ""
+                        },
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(
+                        count = apps.size,
+                        key = { index -> apps[index].objectActivityOrNull()?.id ?: index.toString() }
+                    ) { index ->
+                        val statement = apps[index]
+                        val respectAppFlow = remember(statement, uiState.respectPublicationForXapiStatement) {
+                            uiState.respectPublicationForXapiStatement(statement)
+                        }
+                        val respectApp by respectAppFlow.collectAsState(NoDataLoadedState.notFound())
+
+                        AppGridItem(
+                            app = respectApp,
+                            clickEnabled = uiState.isAppClickable(respectApp),
+                            onClickApp = {
+                                onClickApp(respectApp)
+                            },
+                            onClickRemove = {
+                                onClickRemove(respectApp)
+                            },
+                            showRemove = uiState.canRemove,
+                        )
+                    }
                 }
             }
         }

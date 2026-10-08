@@ -157,6 +157,7 @@ import world.respect.shared.domain.geolookup.GetCountryForUrlUseCase
 import world.respect.shared.domain.geolookup.GetCountryForUrlUseCaseImpl
 import world.respect.shared.domain.createlink.CreateInviteLinkUseCase
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
+import world.respect.shared.domain.search.ObserveSearchResultsUseCase
 import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCaseAndroid
 import world.respect.app.domain.e2eartifactupload.GetDbFilesForE2EArtifactUploadUseCaseAndroid
@@ -738,6 +739,10 @@ val appKoinModule = module {
 
     single<SnackBarDispatcher> {
         get<SnackBarFlowDispatcher>()
+    }
+
+    single<ObserveSearchResultsUseCase> {
+        ObserveSearchResultsUseCase(snackBarDispatcher = get())
     }
 
     single<ResolveUrlToNavCommandUseCase> {

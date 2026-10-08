@@ -43,7 +43,6 @@ import world.respect.datalayer.db.school.daos.InviteEntityDao
 import world.respect.datalayer.db.school.daos.PersonQrBadgeEntityDao
 import world.respect.datalayer.db.school.daos.PersonRelatedPersonEntityDao
 import world.respect.datalayer.db.school.daos.PullSyncStatusEntityDao
-import world.respect.datalayer.db.school.daos.SchoolConfigSettingEntityDao
 import world.respect.datalayer.db.school.daos.WriteQueueItemEntityDao
 import world.respect.datalayer.db.school.entities.ClassEntity
 import world.respect.datalayer.db.school.entities.EnrollmentEntity
@@ -56,7 +55,6 @@ import world.respect.datalayer.db.school.entities.WriteQueueItemEntity
 import world.respect.datalayer.db.school.daos.SchoolPermissionGrantDao
 import world.respect.datalayer.db.school.entities.ClassPermissionEntity
 import world.respect.datalayer.db.school.entities.PullSyncStatusEntity
-import world.respect.datalayer.db.school.entities.SchoolConfigSettingEntity
 import world.respect.datalayer.db.school.entities.SchoolPermissionGrantEntity
 import world.respect.datalayer.db.school.xapi.daos.XapiActivityEntityDao
 import world.respect.datalayer.db.school.xapi.daos.XapiActivityExtensionDao
@@ -157,7 +155,6 @@ import world.respect.datalayer.school.model.Report
         XapiStateDocumentEntity::class,
         XapiStateDocumentShaEntity::class,
         XapiRemoteWriteQueueItemEntity::class,
-        SchoolConfigSettingEntity::class,
     ],
     version = 20,
 )
@@ -248,8 +245,6 @@ abstract class RespectSchoolDatabase: RoomDatabase() {
     abstract fun getStateDocumentShaDao(): XapiStateDocumentShaDao
 
     abstract fun getXapiRemoteWriteQueueItemEntityDao(): XapiRemoteWriteQueueItemEntityDao
-
-    abstract fun getSchoolConfigSettingEntityDao(): SchoolConfigSettingEntityDao
 
     companion object {
 

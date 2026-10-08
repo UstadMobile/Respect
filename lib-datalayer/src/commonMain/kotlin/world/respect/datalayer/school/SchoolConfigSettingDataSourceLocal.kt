@@ -1,6 +1,0 @@
-package world.respect.datalayer.school
-
-import world.respect.datalayer.school.model.SchoolConfigSetting
-import world.respect.datalayer.shared.LocalModelDataSource
-
-interface SchoolConfigSettingDataSourceLocal: SchoolConfigSettingDataSource, LocalModelDataSource<SchoolConfigSetting>

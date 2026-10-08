@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinScopeComponent
@@ -20,9 +19,7 @@ import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataReadyState
 import world.respect.datalayer.SchoolDataSource
-import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.dataloadstate.ext.map
-import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.lib.opds.model.Publication
 import world.respect.lib.opds.model.findSelfLinks
 import world.respect.shared.domain.account.RespectAccountManager
@@ -50,26 +47,17 @@ class AppListViewModel(
             )
         }
         viewModelScope.launch {
-            schoolDataSource.schoolConfigSettingDataSource.listAsFlow(
-                loadParams = DataLoadParams(),
-                params = SchoolConfigSettingDataSource.GetListParams(
-                    keys = listOf(SchoolConfigSettingDataSource.KEY_APP_CATALOGS)
-                )
-            ).collectLatest { config ->
-                val feedUrl = config.dataOrNull()?.firstOrNull()?.value?.let {
-                    Url(it)
-                } ?: return@collectLatest
-                schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
-                    url = feedUrl,
-                    params = DataLoadParams()
-                ).collect { dataLoad ->
-                    _uiState.update { prev ->
-                        prev.copy(
-                            appList = dataLoad.map {
-                                it.resolve(feedUrl).publications ?: emptyList()
-                            }
-                        )
-                    }
+            val feedUrl = Url(DEFAULT_APP_CATALOG_URL)
+            schoolDataSource.opdsFeedDataSource.getByUrlAsFlow(
+                url = feedUrl,
+                params = DataLoadParams()
+            ).collect { dataLoad ->
+                _uiState.update { prev ->
+                    prev.copy(
+                        appList = dataLoad.map {
+                            it.resolve(feedUrl).publications ?: emptyList()
+                        }
+                    )
                 }
             }
         }
@@ -90,5 +78,9 @@ class AppListViewModel(
                 AppsDetail.create(Url(url))
             )
         )
+    }
+
+    companion object {
+        const val DEFAULT_APP_CATALOG_URL = "https://respect.directory/respect-ds/base.json"
     }
 }

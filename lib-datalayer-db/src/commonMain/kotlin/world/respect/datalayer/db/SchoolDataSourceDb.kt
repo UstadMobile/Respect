@@ -16,7 +16,6 @@ import world.respect.datalayer.db.school.PersonPasskeyDataSourceDb
 import world.respect.datalayer.db.school.PersonPasswordDataSourceDb
 import world.respect.datalayer.db.school.PersonQrBadgeDataSourceDb
 import world.respect.datalayer.db.school.ReportDataSourceDb
-import world.respect.datalayer.db.school.SchoolConfigSettingDataSourceDb
 import world.respect.datalayer.db.school.SchoolPermissionGrantDataSourceDb
 import world.respect.datalayer.db.school.opds.OpdsFeedDataSourceDb
 import world.respect.datalayer.db.school.opds.OpdsPublicationDataSourceDb
@@ -132,14 +131,6 @@ class SchoolDataSourceDb(
             authenticatedUser = authenticatedUser,
             json = json,
             primaryKeyGenerator = primaryKeyGenerator,
-        )
-    }
-
-    override val schoolConfigSettingDataSource by lazy {
-        SchoolConfigSettingDataSourceDb(
-            schoolDb = schoolDb,
-            authenticatedUser = authenticatedUser,
-            uidNumberMapper = uidNumberMapper,
         )
     }
 

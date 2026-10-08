@@ -28,7 +28,6 @@ class WriteQueueItem(
         PERSON_QRBADGE(8),
         INVITE(9),
         XAPI_STATEMENT(11),
-        SCHOOL_CONFIG_SETTING(12),
 
         ;
 

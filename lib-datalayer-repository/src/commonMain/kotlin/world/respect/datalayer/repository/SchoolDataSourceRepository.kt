@@ -13,7 +13,6 @@ import world.respect.datalayer.repository.school.PersonDataSourceRepository
 import world.respect.datalayer.repository.school.PersonPasskeyDataSourceRepository
 import world.respect.datalayer.repository.school.PersonPasswordDataSourceRepository
 import world.respect.datalayer.repository.school.PersonQrCodeBadgeDataSourceRepository
-import world.respect.datalayer.repository.school.SchoolConfigSettingDataSourceRepository
 import world.respect.datalayer.repository.school.SchoolPermissionGrantDataSourceRepository
 import world.respect.datalayer.repository.school.xapi.XapiResourceRepository
 import world.respect.datalayer.school.IndicatorDataSource
@@ -130,15 +129,6 @@ class SchoolDataSourceRepository(
             remote = remote.xapiResource,
             remoteWriteQueue = xapiRemoteWriteQueue,
             json = json,
-        )
-    }
-
-    override val schoolConfigSettingDataSource: SchoolConfigSettingDataSourceRepository by lazy {
-        SchoolConfigSettingDataSourceRepository(
-            local = local.schoolConfigSettingDataSource,
-            remote = remote.schoolConfigSettingDataSource,
-            validationHelper = validationHelper,
-            remoteWriteQueue = remoteWriteQueue,
         )
     }
 }

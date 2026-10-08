@@ -62,10 +62,6 @@ class DrainRemoteWriteQueueUseCase(
                         repository.inviteDataSource.sendToRemote(listOf(item))
                     }
 
-                    WriteQueueItem.Model.SCHOOL_CONFIG_SETTING -> {
-                        repository.schoolConfigSettingDataSource.sendToRemote(listOf(item))
-                    }
-
                     WriteQueueItem.Model.XAPI_STATEMENT -> {
                         val statement = repository.local.xapiResource.statements.getByUuid(
                             Uuid.parse(item.uid)

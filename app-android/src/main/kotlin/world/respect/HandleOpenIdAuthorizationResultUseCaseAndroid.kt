@@ -7,14 +7,15 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.AuthorizationService
-import net.openid.appauth.TokenResponse
-import world.respect.shared.domain.account.authwithopenid.VerifyOpenIdTokenUseCase
+import world.respect.OpenIdAuthorizationUseCaseAndroid.Companion.openIdAppAuthConfiguration
+import world.respect.shared.domain.account.AuthResponse
+import world.respect.shared.domain.account.authwithopenid.GetTokenAndUserProfileWithOpenIdUseCase
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class HandleOpenIdAuthorizationResultUseCaseAndroid(
     context: Context,
-    private val verifyOpenIdTokenUseCase: VerifyOpenIdTokenUseCase,
+    private val getTokenAndUserProfileWithOpenIdUseCase: GetTokenAndUserProfileWithOpenIdUseCase,
 ) {
 
     private val appContext = context.applicationContext
@@ -22,22 +23,18 @@ class HandleOpenIdAuthorizationResultUseCaseAndroid(
     sealed interface Result {
         data object NotAuthorizationCallback : Result
         data object Canceled : Result
-        data class Verified(
-            val issuer: Url,
+        data class Authenticated(
             val schoolUrl: Url,
-            val accessToken: String,
-            val idToken: String?,
+            val authResponse: AuthResponse,
         ) : Result
     }
 
     suspend operator fun invoke(intent: Intent): Result {
-        when (intent.action) {
-            OpenIdAuthorizationUseCaseAndroid.ACTION_OPENID_AUTHORIZATION_CANCELED -> {
-                return Result.Canceled
-            }
-
-            OpenIdAuthorizationUseCaseAndroid.ACTION_OPENID_AUTHORIZATION_RESULT -> Unit
-            else -> return Result.NotAuthorizationCallback
+        if (intent.action == OpenIdAuthorizationUseCaseAndroid.ACTION_OPENID_AUTHORIZATION_CANCELED) {
+            return Result.Canceled
+        }
+        if (intent.action != OpenIdAuthorizationUseCaseAndroid.ACTION_OPENID_AUTHORIZATION_RESULT) {
+            return Result.NotAuthorizationCallback
         }
 
         val issuerText = intent.getStringExtra(OpenIdAuthorizationUseCaseAndroid.EXTRA_ISSUER)
@@ -60,18 +57,17 @@ class HandleOpenIdAuthorizationResultUseCaseAndroid(
             appContext,
             openIdAppAuthConfiguration(issuer = issuer),
         )
-        val tokenResponse = try {
-            suspendCancellableCoroutine<TokenResponse> { continuation ->
-                continuation.invokeOnCancellation {
-                    authorizationService.dispose()
-                }
-
-                val tokenRequest = authorizationResponse.createTokenExchangeRequest()
-                authorizationService.performTokenRequest(tokenRequest) { response, exception ->
-                    authorizationService.dispose()
+        val accessToken = try {
+            suspendCancellableCoroutine<String> { continuation ->
+                // AppAuth returns the token exchange result through this callback.
+                // https://github.com/openid/AppAuth-Android#exchanging-the-authorization-code
+                authorizationService.performTokenRequest(
+                    authorizationResponse.createTokenExchangeRequest()
+                ) { response, exception ->
                     if (continuation.isActive) {
-                        if (response?.accessToken != null) {
-                            continuation.resume(value = response)
+                        val token = response?.accessToken
+                        if (token != null) {
+                            continuation.resume(value = token)
                         } else {
                             continuation.resumeWithException(
                                 exception = IllegalStateException(
@@ -83,22 +79,18 @@ class HandleOpenIdAuthorizationResultUseCaseAndroid(
                     }
                 }
             }
-        } catch (exception: Exception) {
+        } finally {
             authorizationService.dispose()
-            throw exception
         }
 
-        val accessToken = tokenResponse.accessToken
-            ?: throw IllegalStateException("OpenID token exchange returned no access token")
-        if (!verifyOpenIdTokenUseCase(schoolUrl = schoolUrl, accessToken = accessToken)) {
-            throw IllegalStateException("School server rejected the OpenID token")
-        }
-
-        return Result.Verified(
-            issuer = issuer,
+        val authResponse = getTokenAndUserProfileWithOpenIdUseCase(
             schoolUrl = schoolUrl,
             accessToken = accessToken,
-            idToken = tokenResponse.idToken,
+        )
+
+        return Result.Authenticated(
+            schoolUrl = schoolUrl,
+            authResponse = authResponse,
         )
     }
 }

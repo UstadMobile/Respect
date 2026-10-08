@@ -44,6 +44,7 @@ import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
 import world.respect.server.account.invite.GetInviteInfoUseCaseServer
 import world.respect.server.account.invite.username.UsernameSuggestionUseCaseServer
+import world.respect.server.account.openid.GetOpenIdLoginResponseUseCaseServer
 import world.respect.server.account.invite.username.checkusernameunique.CheckUsernameUniqueUseCaseServer
 import world.respect.shared.domain.account.passkey.VerifySignInWithPasskeyUseCase
 import world.respect.server.domain.school.add.AddSchoolUseCase
@@ -306,6 +307,14 @@ fun serverKoinModule(
 
         scoped<ValidateAuthorizationUseCase> {
             ValidateAuthorizationUseCaseDbImpl(schoolDb = get())
+        }
+
+        scoped<GetOpenIdLoginResponseUseCaseServer> {
+            GetOpenIdLoginResponseUseCaseServer(
+                schoolDb = get(),
+                uidNumberMapper = get(),
+                serverAccountScopeManager = get(),
+            )
         }
 
         scoped<GetTokenAndUserProfileWithCredentialUseCase> {

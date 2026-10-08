@@ -1,30 +1,27 @@
 package world.respect.shared.domain.account.authwithopenid
 
 import io.ktor.client.HttpClient
-import io.ktor.client.request.get
+import io.ktor.client.call.body
 import io.ktor.client.request.header
+import io.ktor.client.request.post
 import io.ktor.http.HttpHeaders
 import io.ktor.http.Url
-import io.ktor.http.isSuccess
 import io.ktor.http.appendPathSegments
 import io.ktor.http.takeFrom
+import world.respect.shared.domain.account.AuthResponse
 
-class VerifyOpenIdTokenUseCase(
+class GetTokenAndUserProfileWithOpenIdUseCase(
     private val httpClient: HttpClient,
 ) {
 
     suspend operator fun invoke(
         schoolUrl: Url,
         accessToken: String,
-    ): Boolean {
-        val response = httpClient.get {
-            url {
-                takeFrom(schoolUrl)
-                appendPathSegments("api/oidc/verify")
-            }
-            header(HttpHeaders.Authorization, "Bearer $accessToken")
+    ): AuthResponse = httpClient.post {
+        url {
+            takeFrom(schoolUrl)
+            appendPathSegments("api/oidc/login")
         }
-
-        return response.status.isSuccess()
-    }
+        header(HttpHeaders.Authorization, "Bearer $accessToken")
+    }.body()
 }

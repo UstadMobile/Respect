@@ -134,20 +134,20 @@ class OpenIdAuthorizationUseCaseAndroid(
         const val EXTRA_ISSUER = "openid_issuer"
         const val EXTRA_SCHOOL_URL = "openid_school_url"
         const val CLIENT_ID = "respect-android"
-        const val SCOPE = "openid"
+        const val SCOPE = "openid profile email"
         const val PROMPT = "login"
         // Register this redirect URI in the OpenID provider's client settings.
         // https://github.com/openid/AppAuth-Android#capturing-the-authorization-redirect
         const val REDIRECT_URI = "world.respect.oauth:/oauth2redirect"
         const val AUTHORIZATION_RESULT_REQUEST_CODE = 0
         const val AUTHORIZATION_CANCELED_REQUEST_CODE = 1
+
+        internal fun openIdAppAuthConfiguration(issuer: Url): AppAuthConfiguration =
+            AppAuthConfiguration.Builder()
+                .setConnectionBuilder { uri ->
+                    URL(uri.toString()).openConnection() as HttpURLConnection
+                }
+                .setSkipIssuerHttpsCheck(issuer.toString().startsWith("http://"))
+                .build()
     }
 }
-
-internal fun openIdAppAuthConfiguration(issuer: Url): AppAuthConfiguration =
-    AppAuthConfiguration.Builder()
-        .setConnectionBuilder { uri ->
-            URL(uri.toString()).openConnection() as HttpURLConnection
-        }
-        .setSkipIssuerHttpsCheck(issuer.toString().startsWith("http://"))
-        .build()

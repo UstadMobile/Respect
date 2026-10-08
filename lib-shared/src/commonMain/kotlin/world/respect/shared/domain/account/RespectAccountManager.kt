@@ -142,18 +142,32 @@ class RespectAccountManager(
         val authUseCase: GetTokenAndUserProfileWithCredentialUseCase = schoolScope.get()
         val authResponse = authUseCase(credential)
 
+        startSession(
+            authResponse = authResponse,
+            schoolUrl = schoolUrl,
+        )
+
+        return authResponse
+    }
+
+    suspend fun startSession(
+        authResponse: AuthResponse,
+        schoolUrl: Url,
+    ) {
         val schoolDirectoryEntry = appDataSource.schoolDirectoryEntryDataSource
             .getSchoolDirectoryEntryByUrl(schoolUrl)
             .dataOrNull() ?: throw IllegalStateException()
 
-        val respectAccount = RespectAccount(
-            userGuid = authResponse.person.guid,
-            school = schoolDirectoryEntry,
+        initSession(
+            authResponse = authResponse,
+            session = RespectSession(
+                account = RespectAccount(
+                    userGuid = authResponse.person.guid,
+                    school = schoolDirectoryEntry,
+                ),
+                profilePersonUid = null,
+            ),
         )
-
-        initSession(authResponse, RespectSession(respectAccount, null))
-
-        return authResponse
     }
 
     @Suppress("unused")

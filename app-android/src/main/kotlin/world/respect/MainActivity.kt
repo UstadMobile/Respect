@@ -20,10 +20,15 @@ import world.respect.credentials.passkey.GetCredentialUseCaseAndroidImpl
 import world.respect.credentials.passkey.GetCredentialUseCaseProcessor
 import world.respect.datalayer.RespectAppDataSource
 import world.respect.datalayer.respect.model.RespectSchoolDirectory
+import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.activitycontextjobprocessor.ActivityContextJobProcessor
 import world.respect.shared.domain.activitycontextjobprocessor.EnqueueActivityContextJobUseCase
 import world.respect.shared.domain.biometric.BiometricAuthProcessor
 import world.respect.shared.domain.biometric.BiometricAuthUseCaseAndroidImpl
+import world.respect.shared.navigation.Home
+import world.respect.shared.navigation.NavCommand
+import world.respect.shared.navigation.WaitingForApproval
 import world.respect.view.app.AbstractAppActivity
 
 class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
@@ -118,16 +123,26 @@ class MainActivity : AbstractAppActivity(), AndroidScopeComponent {
             try {
                 val callbackResult = getKoin()
                     .get<HandleOpenIdAuthorizationResultUseCaseAndroid>()(intent = intent)
-                val logMessage = when (callbackResult) {
-                    HandleOpenIdAuthorizationResultUseCaseAndroid.Result.NotAuthorizationCallback ->
-                        null
-                    HandleOpenIdAuthorizationResultUseCaseAndroid.Result.Canceled ->
-                        "OpenID sign-in was canceled"
-                    is HandleOpenIdAuthorizationResultUseCaseAndroid.Result.Verified ->
-                        "OpenID token verified by school server"
-                }
-                if (logMessage != null) {
-                    Napier.d(message = logMessage)
+                if (callbackResult is HandleOpenIdAuthorizationResultUseCaseAndroid.Result.Authenticated) {
+                    val accountManager = getKoin().get<RespectAccountManager>()
+                    accountManager.startSession(
+                        authResponse = callbackResult.authResponse,
+                        schoolUrl = callbackResult.schoolUrl,
+                    )
+
+                    sendNavigationCommand(
+                        NavCommand.Navigate(
+                            destination = if (
+                                callbackResult.authResponse.person.status ==
+                                PersonStatusEnum.PENDING_APPROVAL
+                            ) {
+                                WaitingForApproval()
+                            } else {
+                                Home
+                            },
+                            clearBackStack = true,
+                        )
+                    )
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled

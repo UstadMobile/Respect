@@ -119,7 +119,7 @@ import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
 import world.respect.shared.domain.account.authwithopenid.OpenIdAuthorizationUseCase
-import world.respect.shared.domain.account.authwithopenid.VerifyOpenIdTokenUseCase
+import world.respect.shared.domain.account.authwithopenid.GetTokenAndUserProfileWithOpenIdUseCase
 import world.respect.shared.domain.account.RespectTokenManager
 import world.respect.shared.domain.account.child.AddChildAccountUseCase
 import world.respect.shared.domain.account.authenticatepassword.AuthenticatePasswordUseCase
@@ -863,7 +863,7 @@ val appKoinModule = module {
     }
 
     single {
-        VerifyOpenIdTokenUseCase(
+        GetTokenAndUserProfileWithOpenIdUseCase(
             httpClient = get(),
         )
     }
@@ -871,7 +871,7 @@ val appKoinModule = module {
     single {
         HandleOpenIdAuthorizationResultUseCaseAndroid(
             context = androidContext().applicationContext,
-            verifyOpenIdTokenUseCase = get(),
+            getTokenAndUserProfileWithOpenIdUseCase = get(),
         )
     }
 

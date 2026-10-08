@@ -13,7 +13,9 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.authenticateWith
 import io.ktor.server.auth.basic
 import io.ktor.server.auth.bearer
+import io.ktor.server.auth.principal
 import io.ktor.server.auth.oidc.Oidc
+import io.ktor.server.auth.oidc.OidcToken
 import io.ktor.server.http.content.staticFiles
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -69,6 +71,7 @@ import world.respect.datalayer.http.server.XapiActivityProfileResourceRoute
 import world.respect.datalayer.http.server.XapiAgentProfileResourceRoute
 import world.respect.server.routes.username.UsernameSuggestionRoute
 import world.respect.server.routes.username.checkusernameunique.CheckUsernameUniqueRoute
+import world.respect.server.account.openid.GetOpenIdLoginResponseUseCaseServer
 import world.respect.server.util.ext.getSchoolKoinScope
 import world.respect.server.util.ext.requireAccountScope
 import world.respect.server.util.ext.virtualHost
@@ -215,11 +218,15 @@ suspend fun Application.module() {
     }
 
     routing {
+        // as per https://ktor.io/docs/server-oidc.html#tokens
         oidcProvider?.let { provider ->
             authenticateWith(provider.jwtBearer) {
-                get("api/oidc/verify") {
-                    Napier.d(" token verified")
-                    call.respondText("token verified")
+                post("api/oidc/login") {
+                    val accessToken = call.principal<OidcToken.Access>()
+                        ?: throw IllegalStateException("OpenID token principal missing")
+                    val authResponse = call.getSchoolKoinScope()
+                        .get<GetOpenIdLoginResponseUseCaseServer>()(accessToken)
+                    call.respond(authResponse)
                 }
             }
         }

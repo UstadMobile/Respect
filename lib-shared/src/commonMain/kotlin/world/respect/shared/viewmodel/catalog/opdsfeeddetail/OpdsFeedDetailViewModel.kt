@@ -106,7 +106,7 @@ data class OpdsFeedDetailUiState(
     /**  Keep a group visible only when at least one item in it matched the search.*/
     fun groupMatchesSearchFilter(groupIndex: Int): Boolean =
         matchingGroupIndexes?.contains(groupIndex) ?: true
-    
+
     val isMultiSelectMode: Boolean
         get() = selectedPublications.isNotEmpty() || selectedNavigationLinks.isNotEmpty()
 

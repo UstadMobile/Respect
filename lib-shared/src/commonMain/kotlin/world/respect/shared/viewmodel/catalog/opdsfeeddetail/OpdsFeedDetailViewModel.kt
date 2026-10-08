@@ -91,20 +91,22 @@ data class OpdsFeedDetailUiState(
 
     private val matchingGroupIndexes = searchMatches?.map { it.groupIndex }?.toSet()
 
-    fun matchesSearchFilter(index: OpdsFeedItemIndex, isPublication: Boolean): Boolean =
-        searchMatchSet?.contains(
-            OpdsFeedSearchMatch(index.groupIndex, index.index, isPublication)
-        ) ?: true
-
-    fun groupMatchesSearchFilter(groupIndex: Int): Boolean =
-        matchingGroupIndexes?.contains(groupIndex) ?: true
-
     fun isGroupCollapsed(groupIndex: Int) = groupIndex in collapsedGroupIndexes
 
     fun isPublicationSelected(index: OpdsFeedItemIndex): Boolean = index in selectedPublications
 
     fun isNavigationSelected(index: OpdsFeedItemIndex): Boolean = index in selectedNavigationLinks
 
+    /** Match both the original position and item type because separate feed lists can share indexes.*/
+    fun matchesSearchFilter(index: OpdsFeedItemIndex, isPublication: Boolean): Boolean =
+        searchMatchSet?.contains(
+            OpdsFeedSearchMatch(index.groupIndex, index.index, isPublication)
+        ) ?: true
+
+    /**  Keep a group visible only when at least one item in it matched the search.*/
+    fun groupMatchesSearchFilter(groupIndex: Int): Boolean =
+        matchingGroupIndexes?.contains(groupIndex) ?: true
+    
     val isMultiSelectMode: Boolean
         get() = selectedPublications.isNotEmpty() || selectedNavigationLinks.isNotEmpty()
 
@@ -179,6 +181,7 @@ class OpdsFeedDetailViewModel(
         }
 
         viewModelScope.launch {
+            // Keep only the latest query active; null matches mean there is no filter.
             _appUiState.map { it.searchState.searchText }.distinctUntilChanged().flatMapLatest { searchQuery ->
                 if (searchQuery.isEmpty()) {
                     flowOf(searchQuery to null)
@@ -190,6 +193,7 @@ class OpdsFeedDetailViewModel(
                         if (error !is SQLiteException)
                             throw error
 
+                        // Show the error only if this query is still current.
                         Napier.e("Error searching cached feed titles", throwable = error)
                         if (searchQuery == _appUiState.value.searchState.searchText) {
                             snackBarDispatcher.showSnackBar(
@@ -199,6 +203,7 @@ class OpdsFeedDetailViewModel(
                     }.map { matchingItems -> searchQuery to matchingItems }
                 }
             }.collect { (searchQuery, matchingItems) ->
+                // Ignore results already superseded by a newer query.
                 if (searchQuery == _appUiState.value.searchState.searchText) {
                     _uiState.update { it.copy(searchMatches = matchingItems) }
                 }

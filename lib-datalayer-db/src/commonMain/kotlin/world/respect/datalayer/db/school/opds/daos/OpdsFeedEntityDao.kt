@@ -15,6 +15,7 @@ import world.respect.lib.opds.model.ext.OpdsFeedSearchMatch
 abstract class OpdsFeedEntityDao {
 
     @Query("""
+        -- Search publication titles and return their original feed/group positions.
         SELECT COALESCE(g.ogeIndex, -1) AS groupIndex,
                p.opeIndex AS `index`, 1 AS isPublication
           FROM OpdsPublicationEntity AS p
@@ -25,6 +26,7 @@ abstract class OpdsFeedEntityDao {
            AND t.lmePropType = :titlePropType
            AND t.lmeValue LIKE :titlePattern
         UNION
+        -- Search navigation titles; isPublication distinguishes these from publications.
         SELECT COALESCE(g.ogeIndex, -1) AS groupIndex,
                l.rleIndex AS `index`, 0 AS isPublication
           FROM ReadiumLinkEntity AS l

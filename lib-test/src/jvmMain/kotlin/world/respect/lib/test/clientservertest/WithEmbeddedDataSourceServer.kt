@@ -9,6 +9,7 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.routing
 import kotlinx.serialization.json.Json
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.libutil.findFreePort
 import java.io.File
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationServer
@@ -23,6 +24,7 @@ suspend fun withEmbeddedDataSourceServer(
     dbDir: File,
     start: Boolean = true,
     json: Json = Json,
+    getAuthenticatedXapiAgentsUseCase: GetAuthenticatedXapiAgentsUseCase? = null,
     routingConfig: Routing.(EmbeddedDataSourceServerContext) -> Unit,
     block: suspend EmbeddedDataSourceServerContext.() -> Unit
 ) {
@@ -32,6 +34,7 @@ suspend fun withEmbeddedDataSourceServer(
     withSchoolDbDataSource(
         dbDir = dbDir,
         schoolUrl = schoolUrl,
+        getAuthenticatedXapiAgentsUseCase = getAuthenticatedXapiAgentsUseCase,
     ) {
         datasource.insertAdminAndDefaultGrants(db)
         val context = EmbeddedDataSourceServerContext(

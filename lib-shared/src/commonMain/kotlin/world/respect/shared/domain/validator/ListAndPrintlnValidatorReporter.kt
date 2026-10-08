@@ -1,4 +1,4 @@
-package world.respect.domain.validator
+package world.respect.shared.domain.validator
 
 class ListAndPrintlnValidatorReporter(
     val filter: (ValidatorMessage) -> Boolean = { true }
@@ -9,7 +9,7 @@ class ListAndPrintlnValidatorReporter(
     val messages: List<ValidatorMessage>
         get() = _messages.toList()
 
-    override fun addMessage(message: ValidatorMessage) : ValidatorMessage{
+    override fun addMessage(message: ValidatorMessage) : ValidatorMessage {
         _messages.add(message)
 
         if(filter(message)) {

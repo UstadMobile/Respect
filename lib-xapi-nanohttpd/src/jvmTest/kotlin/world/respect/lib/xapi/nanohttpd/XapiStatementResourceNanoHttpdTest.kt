@@ -31,6 +31,7 @@ class XapiStatementResourceNanoHttpdTest : AbstractXapiStatementResourceTest() {
             dbDir = temporaryFolder.newFolder(),
             json = json,
             httpClient = httpClient,
+            authenticatedXapiAgents = { emptyList() }
         ) {
             block(it.statements)
         }

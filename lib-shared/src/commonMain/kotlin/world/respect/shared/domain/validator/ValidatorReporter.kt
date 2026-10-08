@@ -1,4 +1,4 @@
-package world.respect.domain.validator
+package world.respect.shared.domain.validator
 
 /**
  * Basic interface that handles receiving a ValidatorMessage - this could output to a file,

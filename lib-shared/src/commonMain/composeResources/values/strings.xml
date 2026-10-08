@@ -761,4 +761,7 @@
     <string name="indicator_number_of_unique_users">Number of Unique Users</string>
     <string name="indicator_number_of_unique_users_desc">The count of distinct users who engaged with the learning content during the specified time period</string>
 
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
+
 </resources>

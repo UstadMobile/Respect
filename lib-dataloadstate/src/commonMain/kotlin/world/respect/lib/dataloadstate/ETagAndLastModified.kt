@@ -7,7 +7,7 @@ import kotlin.time.Instant
  * headers (e.g. Etag and Last-Modified Http headers), from request headers (e.g. If-None-Match
  * and If-Modified-Since), or from the local database.
  *
- * @property etag etag string, if any
+ * @property etag etag string, if any, including the quotes
  * @property lastModified last modified timestamp, as an instant, if any
  */
 data class ETagAndLastModified(

@@ -18,8 +18,13 @@ import io.ktor.http.Url
 import io.ktor.http.headersOf
 import kotlinx.serialization.json.Json
 import net.thauvin.erik.urlencoder.UrlEncoderUtil
+import world.respect.datalayer.school.opds.OpdsPublicationDataSource
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.Publication
+import world.respect.lib.opds.model.findLaunchableAppLink
 import world.respect.lib.xapi.model.XapiActor
+import world.respect.libutil.ext.resolve
 import world.respect.shared.domain.launchapp.LaunchAppUseCase.LaunchAppRequest
 import world.respect.shared.domain.launchapp.getlaunchoptionsforpublication.GetLaunchOptionsForPublicationUseCase
 import world.respect.shared.domain.launchapp.getxapilaunchparams.GetXapiLaunchParamsUseCase
@@ -36,6 +41,8 @@ class LaunchAppUseCaseAndroid(
     private val getLaunchOptionsForPublicationUseCase: GetLaunchOptionsForPublicationUseCase,
     private val getXapiLaunchParamsUseCase: GetXapiLaunchParamsUseCase,
     private val json: Json,
+    private val opdsPublicationDataSource: OpdsPublicationDataSource,
+    private val getAndroidPackageIdForLaunchableAppUseCase: GetAndroidPackageIdForLaunchableAppUseCase,
 ): LaunchAppUseCase {
 
     private fun URLBuilder.setXapiLaunchParams(
@@ -90,6 +97,18 @@ class LaunchAppUseCaseAndroid(
             val optionsResult = getLaunchOptionsForPublicationUseCase(
                 request.publication, request.publicationUrl
             )
+
+            val launchableAppManifest = request.launchableApp ?:
+                request.publication.findLaunchableAppLink()?.let { link ->
+                    opdsPublicationDataSource.getByUrl(
+                        url = request.publicationUrl.resolve(link.href),
+                        params = DataLoadParams()
+                    ).dataOrNull()
+                }
+
+            val launchPackageId = launchableAppManifest?.let {
+                getAndroidPackageIdForLaunchableAppUseCase(it)
+            }
 
             for(launchOption in optionsResult.options) {
                 val nativeLaunchParams = getXapiLaunchParamsUseCase(
@@ -148,18 +167,22 @@ class LaunchAppUseCaseAndroid(
                     else -> {
                         /*
                          * If the app supports using the OpenEelIntent.ACTION_LAUNCH action, use that.
+                         *
                          * This allows apps to support URLs that are not directly declared in their
                          * manifest for verified app links (e.g. needed when an app supports
                          * connecting to a server specified by the user).
+                         *
+                         * The package id MUST be extracted from the app store link
                          */
                         val launchActionIntent = Intent(OpenEelIntent.ACTION_LAUNCH).also {
                             it.flags = FLAG_ACTIVITY_NEW_TASK
                             it.data = urlWithNativeParams.toString().toUri()
                             it.addCategory(CATEGORY_BROWSABLE)
+                            it.`package` = launchPackageId
                         }
 
                         if(
-                            appContext.packageManager.queryIntentActivities(
+                            launchPackageId != null && appContext.packageManager.queryIntentActivities(
                                 launchActionIntent, PackageManager.MATCH_DEFAULT_ONLY
                             ).isNotEmpty()
                         ) {

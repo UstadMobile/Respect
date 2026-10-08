@@ -22,7 +22,7 @@ import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 class GetTokenAndUserProfileWithCredentialUseCaseClient(
     private val schoolUrl: Url,
     private val httpClient: HttpClient,
-    private val getDeviceInfoUseCase: GetDeviceInfoUseCase,
+    private val getDeviceInfoUseCase: GetDeviceInfoUseCase?,
 ): GetTokenAndUserProfileWithCredentialUseCase {
 
     override suspend fun invoke(
@@ -39,10 +39,12 @@ class GetTokenAndUserProfileWithCredentialUseCaseClient(
                 appendPathSegments("api/school/respect/auth/auth-with-password")
             }
 
-            header(
-                key = DeviceInfo.HEADER_NAME,
-                value = (deviceInfo ?: getDeviceInfoUseCase()).toHeaderLine(),
-            )
+            (deviceInfo ?: getDeviceInfoUseCase?.invoke())?.also { deviceInfo ->
+                header(
+                    key = DeviceInfo.HEADER_NAME,
+                    value = deviceInfo.toHeaderLine(),
+                )
+            }
 
             contentType(ContentType.Application.Json)
             setBody(credential)

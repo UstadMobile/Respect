@@ -1,5 +1,6 @@
 package world.respect.lib.opds.model
 
+import world.respect.lib.opds.model.ext.filterByHasRel
 import world.respect.lib.opds.model.ext.hasRel
 
 val LEARNING_UNIT_MIME_TYPES = listOf("text/html", "application/xml", "application/html+xml")
@@ -29,9 +30,7 @@ fun Publication.findLearningUnitAcquisitionLinks(): List<ReadiumLink> {
 }
 
 fun Publication.findSelfLinks(): List<ReadiumLink> {
-    return links.filter {
-        it.rel?.contains("self") == true
-    }
+    return links.filterByHasRel("self")
 }
 
 fun Publication.findHighlightCardLinks(): List<ReadiumLink> {
@@ -48,12 +47,12 @@ fun Publication.findTermsOfServiceLink(): ReadiumLink? =
 
 fun Publication.findAppStoreAndroidLinks() : List<ReadiumLink> {
     return links.filter {
-        it.hasRel("https://id.openeel.org/rel/appstore-android")
+        it.hasRel(OpenEelConstants.REL_ANDROID_APP_STORE)
     }
 }
 
 fun Publication.findAppStoreAndroidLink(): ReadiumLink? =
-    links.firstOrNull { it.rel?.contains("https://id.openeel.org/rel/appstore-android") == true }
+    links.firstOrNull { it.rel?.contains(OpenEelConstants.REL_ANDROID_APP_STORE) == true }
 
 fun Publication.findCollection(): ReadiumLink? =
     links.firstOrNull {

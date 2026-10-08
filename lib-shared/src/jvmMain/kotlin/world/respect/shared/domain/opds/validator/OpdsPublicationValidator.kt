@@ -6,8 +6,8 @@ import kotlinx.serialization.json.Json
 import world.respect.lib.opds.model.Publication
 import world.respect.domain.opds.validator.verifyMimeTypeAndGetBodyAsText
 import world.respect.domain.validator.ValidateLinkUseCase
-import world.respect.domain.validator.ValidatorMessage
-import world.respect.domain.validator.ValidatorReporter
+import world.respect.shared.domain.validator.ValidatorMessage
+import world.respect.shared.domain.validator.ValidatorReporter
 
 class OpdsPublicationValidator(
     private val httpClient: HttpClient,

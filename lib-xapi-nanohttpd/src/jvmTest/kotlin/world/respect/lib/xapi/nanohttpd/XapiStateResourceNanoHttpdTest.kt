@@ -7,6 +7,7 @@ import kotlinx.serialization.json.Json
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.openeel.libxapi.test.AbstractXapiStateResourceTest
+import world.respect.lib.xapi.auth.GetAuthenticatedXapiAgentsUseCase
 import world.respect.lib.xapi.resources.XapiStateResource
 import kotlin.test.Test
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ContentNegotiationClient
@@ -25,10 +26,14 @@ class XapiStateResourceNanoHttpdTest : AbstractXapiStateResourceTest() {
         }
     }
 
-    override suspend fun withXapiDocumentResource(block: suspend (XapiStateResource) -> Unit) {
+    override suspend fun withXapiDocumentResource(
+        authenticatedAgents: GetAuthenticatedXapiAgentsUseCase,
+        block: suspend (XapiStateResource) -> Unit
+    ) {
         withNanoHttpdXapiResource(
             dbDir = temporaryFolder.newFolder(),
             json = json,
+            authenticatedXapiAgents = authenticatedAgents,
             httpClient = httpClient,
         ) {
             block(it.state)

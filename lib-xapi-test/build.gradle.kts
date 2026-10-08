@@ -37,6 +37,7 @@ kotlin {
             api(libs.kotlinx.date.time)
             api(libs.ktor.client.core)
             api(libs.xmlutil.serialization)
+            api(libs.turbine)
 
             api(kotlin("test"))
             implementation(libs.kotlin.test.junit)

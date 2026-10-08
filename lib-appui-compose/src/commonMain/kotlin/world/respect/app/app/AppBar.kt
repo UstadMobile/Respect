@@ -110,6 +110,10 @@ fun RespectAppBar(
 
     val pendingWriteCount by writeQueueSizeFlow.collectAsState(1)
 
+    /*
+     * Whether the search box is open. This is held by the ViewModel (not local state) because
+     * screens also use it e.g. to show filter options alongside search.
+     */
     val searchActive = appUiState.searchState.expanded
 
     /*
@@ -197,10 +201,15 @@ fun RespectAppBar(
                                 Icon(imageVector = Icons.Filled.Search, contentDescription = null)
                             },
                             trailingIcon = {
+                                /*
+                                 * Only a compact header can collapse search: on a wide header the
+                                 * search box is always shown, so there would be no way to reopen it.
+                                 */
                                 if(compactHeader) {
                                     IconButton(
                                         modifier = Modifier.testTag("close_search_button"),
                                         onClick = {
+                                            //Cancel search: clear the query and close the box
                                             appUiState.searchState.onSearchTextChanged("")
                                             appUiState.searchState.onSearchExpandedChanged(false)
                                         }
@@ -216,6 +225,7 @@ fun RespectAppBar(
                             onValueChange = appUiState.searchState.onSearchTextChanged,
                         )
                     }else {
+                        //Compact header and search closed: show the icon used to open search
                         IconButton(
                             modifier = Modifier.testTag("expand_search_icon_button"),
                             onClick = {

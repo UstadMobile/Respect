@@ -110,8 +110,24 @@ fun RespectAppBar(
 
     val pendingWriteCount by writeQueueSizeFlow.collectAsState(1)
 
-    var searchActive by remember {
-        mutableStateOf(false)
+    /*
+     * Whether the search box is open. This is held by the ViewModel (not local state) because
+     * screens also use it e.g. to show filter options alongside search.
+     */
+    val searchActive = appUiState.searchState.expanded
+
+    /*
+     * On a wide header the search box is always shown (there is no search icon to click), so the
+     * screen is told that search is expanded. The handler is used as a key so this runs again when
+     * the user moves to another screen that has search.
+     */
+    LaunchedEffect(
+        compactHeader,
+        appUiState.searchState.visible,
+        appUiState.searchState.onSearchExpandedChanged,
+    ) {
+        if(!compactHeader && appUiState.searchState.visible)
+            appUiState.searchState.onSearchExpandedChanged(true)
     }
 
     var searchHasFocus by remember {
@@ -185,12 +201,17 @@ fun RespectAppBar(
                                 Icon(imageVector = Icons.Filled.Search, contentDescription = null)
                             },
                             trailingIcon = {
-                                if(searchActive) {
+                                /*
+                                 * Only a compact header can collapse search: on a wide header the
+                                 * search box is always shown, so there would be no way to reopen it.
+                                 */
+                                if(compactHeader) {
                                     IconButton(
                                         modifier = Modifier.testTag("close_search_button"),
                                         onClick = {
+                                            //Cancel search: clear the query and close the box
                                             appUiState.searchState.onSearchTextChanged("")
-                                            searchActive = false
+                                            appUiState.searchState.onSearchExpandedChanged(false)
                                         }
                                     ) {
                                         Icon(Icons.Default.Close, contentDescription = "")
@@ -204,10 +225,11 @@ fun RespectAppBar(
                             onValueChange = appUiState.searchState.onSearchTextChanged,
                         )
                     }else {
+                        //Compact header and search closed: show the icon used to open search
                         IconButton(
                             modifier = Modifier.testTag("expand_search_icon_button"),
                             onClick = {
-                                searchActive = true
+                                appUiState.searchState.onSearchExpandedChanged(true)
                             }
                         ) {
                             Icon(Icons.Default.Search, contentDescription =

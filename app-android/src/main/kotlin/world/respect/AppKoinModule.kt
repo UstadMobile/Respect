@@ -2,6 +2,7 @@
 package world.respect
 
 import android.content.Context
+import androidx.core.app.LocaleManagerCompat
 import androidx.room.Room
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import com.russhwolf.settings.Settings
@@ -115,6 +116,7 @@ import world.respect.libxxhash.XXHasher64Factory
 import world.respect.libxxhash.XXStringHasher
 import world.respect.libxxhash.jvmimpl.XXHasher64FactoryCommonJvm
 import world.respect.libxxhash.jvmimpl.XXStringHasherCommonJvm
+import world.respect.shared.domain.applanguage.SupportedLanguagesConfig
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
 import world.respect.shared.domain.account.RespectAccountSchoolScopeLink
@@ -149,6 +151,10 @@ import world.respect.shared.domain.account.username.filterusername.FilterUsernam
 import world.respect.shared.domain.account.username.validateusername.ValidateUsernameUseCase
 import world.respect.shared.domain.account.validatepassword.ValidatePasswordUseCase
 import world.respect.shared.domain.account.validateqrbadge.ValidateQrCodeUseCase
+import world.respect.shared.domain.applanguage.LocaleSettingDelegateAndroid
+import world.respect.shared.domain.applanguage.GetUiLanguagesUseCase
+import world.respect.shared.domain.applanguage.SetLanguageUseCase
+import world.respect.shared.domain.applanguage.SetLanguageUseCaseAndroid
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCase
 import world.respect.shared.domain.appversioninfo.GetAppVersionInfoUseCaseAndroid
 import world.respect.shared.domain.clipboard.SetClipboardStringUseCase
@@ -331,6 +337,28 @@ val appKoinModule = module {
     }
     single<LaunchSendEmailUseCase> {
         LaunchSendEmailAndroid(androidContext())
+    }
+
+    single {
+        SupportedLanguagesConfig(
+            //Use the device locales (not the app-specific override) for the system default option
+            systemLocales = LocaleManagerCompat.getSystemLocales(androidContext()).let { localeList ->
+                (0 until localeList.size()).mapNotNull { localeList[it]?.language }
+            },
+            localeSettingDelegate = LocaleSettingDelegateAndroid()
+        )
+    }
+
+    single<SetLanguageUseCase> {
+        SetLanguageUseCaseAndroid(
+            languagesConfig = get()
+        )
+    }
+
+    single {
+        GetUiLanguagesUseCase(
+            supportedLangConfig = get()
+        )
     }
 
     single<GetDeferredDeepLinkUseCase>(createdAtStart = true) {

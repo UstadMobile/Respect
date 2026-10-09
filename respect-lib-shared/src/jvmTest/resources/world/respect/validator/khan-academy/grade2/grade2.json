@@ -1,0 +1,69 @@
+{
+  "metadata": {
+    "title": "Grade 2"
+  },
+
+  "links": [
+    {"rel": "self", "href": "http://192.168.1.10/respect-ds/grade2.json", "type": "application/opds+json"}
+  ],
+
+  "publications": [
+    {
+      "metadata": {
+        "@type": "http://schema.org/Game",
+        "title": "Lesson 001",
+        "author": "Mullah Nasruddin",
+        "identifier": "http://example.app/id/lesson001",
+        "language": "en",
+        "modified": "2015-09-29T17:00:00Z",
+        "subject": [
+          {
+            "name": "Mathematics",
+            "scheme": "https://www.bisg.org/#bisac",
+            "code": "MAT000000"
+          }
+        ]
+      },
+      "links": [
+        {"rel": "self", "href": "http://192.168.1.10/respect-ds/lesson001.json", "type": "application/opds-publication+json"},
+        {
+          "rel": "http://opds-spec.org/acquisition/open-access",
+          "href": "http://192.168.1.10/respect-ds/lesson001.html",
+          "type": "text/html"
+        }
+      ],
+      "images": [
+        {"href": "lesson001/cover.png", "type": "image/png"  }
+      ]
+    },
+
+    {
+      "metadata": {
+        "@type": "http://schema.org/Game",
+        "title": "Lesson 002",
+        "author": "Mullah Nasruddin",
+        "identifier": "http://example.app/id/lesson002",
+        "language": "en",
+        "modified": "2015-09-29T17:00:00Z",
+        "subject": [
+          {
+            "name": "Mathematics",
+            "scheme": "https://www.bisg.org/#bisac",
+            "code": "MAT000000"
+          }
+        ]
+      },
+      "links": [
+        {"rel": "self", "href": "http://192.168.1.10/respect-ds/lesson002.json", "type": "application/opds-publication+json"},
+        {
+          "rel": "http://opds-spec.org/acquisition/open-access",
+          "href": "http://192.168.1.10/respect-ds/lesson002.html",
+          "type": "text/html"
+        }
+      ],
+      "images": [
+        {"href": "lesson001/cover.png", "type": "image/png"  }
+      ]
+    }
+  ]
+}

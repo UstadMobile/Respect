@@ -1,0 +1,15 @@
+appId: world.respect.app
+
+---
+- tapOn:
+    id: "nav_home"
+- tapOn:
+    id: "floating_action_button"
+- tapOn: "Add from Link"
+- tapOn: "Link*"
+- inputText: ${TEST_APP_URL}
+- tapOn: "Next"
+- assertVisible:
+    id: "app_title"
+    text: "App detail"
+- assertVisible: ${TEST_APP_NAME}

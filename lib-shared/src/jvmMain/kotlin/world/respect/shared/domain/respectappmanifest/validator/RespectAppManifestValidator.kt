@@ -7,13 +7,13 @@ import world.respect.domain.getfavicons.GetFavIconUseCase
 import world.respect.domain.licenses.model.SpdxLicenseList
 import world.respect.lib.opds.model.toStringMap
 import world.respect.domain.opds.validator.verifyMimeTypeAndGetBodyAsText
-import world.respect.domain.validator.Validator
+import world.respect.shared.domain.validator.Validator
 import world.respect.datalayer.compatibleapps.model.RespectAppManifest
 import world.respect.lib.opds.model.OpdsFeed
 import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.domain.validator.ValidateHttpResponseForUrlUseCase
-import world.respect.domain.validator.ValidatorMessage
-import world.respect.domain.validator.ValidatorReporter
+import world.respect.shared.domain.validator.ValidatorMessage
+import world.respect.shared.domain.validator.ValidatorReporter
 import world.respect.domain.validator.ValidateLinkUseCase
 import java.net.URI
 

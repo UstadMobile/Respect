@@ -18,8 +18,9 @@ import world.respect.lib.opds.model.ReadiumLink
 import world.respect.shared.di.jvmKoinAppModule
 import world.respect.testutil.copyResourcesToTempDir
 import world.respect.libutil.findFreePort
+import world.respect.shared.domain.validator.ListAndPrintlnValidatorReporter
+import world.respect.shared.domain.validator.ValidatorMessage
 import world.respect.testutil.recursiveFindAndReplace
-import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

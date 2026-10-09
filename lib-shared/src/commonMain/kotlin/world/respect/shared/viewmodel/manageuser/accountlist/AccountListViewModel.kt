@@ -8,13 +8,14 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.datalayer.SchoolDataSource
-import world.respect.lib.dataloadstate.ext.dataOrNull
+import world.respect.datalayer.school.ext.primaryRole
 import world.respect.datalayer.school.model.Person
 import world.respect.datalayer.school.model.PersonGenderEnum
 import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
+import world.respect.lib.dataloadstate.DataLoadParams
+import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.libutil.ext.replaceOrAppend
 import world.respect.shared.domain.account.RespectAccount
 import world.respect.shared.domain.account.RespectAccountManager
@@ -27,6 +28,7 @@ import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.Home
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.PersonDetail
+import world.respect.shared.navigation.SelectClass
 import world.respect.shared.navigation.ShareFeedback
 import world.respect.shared.navigation.WaitingForApproval
 import world.respect.shared.util.ext.asUiText
@@ -41,9 +43,11 @@ import world.respect.shared.viewmodel.RespectViewModel
 data class AccountListUiState(
     val selectedAccount: RespectSessionAndPerson? = null,
     val accounts: List<RespectSessionAndPerson> = emptyList(),
+    val accountOwnerRole: PersonRoleEnum? = null,
 ) {
     val showSelectedAccountProfileButton: Boolean
         get() = selectedAccount?.person?.status != PersonStatusEnum.PENDING_APPROVAL
+                && accountOwnerRole != PersonRoleEnum.SHARED_SCHOOL_DEVICE // Hide for shared device
 
     val familyMembersClickEnabled: Boolean
         get() = selectedAccount?.person?.status != PersonStatusEnum.PENDING_APPROVAL
@@ -71,8 +75,20 @@ class AccountListViewModel(
 
         viewModelScope.launch {
             respectAccountManager.selectedAccountAndPersonFlow.collect { accountAndPerson ->
+                val accountOwnerRole = respectAccountManager.activeAccount?.let { account ->
+                    val accountScope = respectAccountManager.getOrCreateAccountScope(account)
+                    val dataSource: SchoolDataSource = accountScope.get()
+                    dataSource.personDataSource.findByGuid(
+                        DataLoadParams(),
+                        account.userGuid
+                    ).dataOrNull()?.primaryRole()
+                }
+
                 _uiState.update { prev ->
-                    prev.copy(selectedAccount = accountAndPerson)
+                    prev.copy(
+                        selectedAccount = accountAndPerson,
+                        accountOwnerRole = accountOwnerRole
+                    )
                 }
             }
         }
@@ -215,9 +231,52 @@ class AccountListViewModel(
 
 
     fun onClickLogout() {
-        uiState.value.selectedAccount?.also {
+        val isSelectedAccountSharedDevice =
+            uiState.value.accountOwnerRole == PersonRoleEnum.SHARED_SCHOOL_DEVICE
+
+        // Find the shared device account in the accounts list
+        val sharedDeviceAccount = uiState.value.accounts.find { andPerson ->
+            andPerson.person.roles.any { role ->
+                role.roleEnum == PersonRoleEnum.SHARED_SCHOOL_DEVICE
+            }
+        }
+
+        if (isSelectedAccountSharedDevice) {
+            // Currently on shared device account - just go to Select Class
+            uiState.value.selectedAccount?.also { selectedAccount ->
+                viewModelScope.launch {
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            destination = SelectClass.create(deviceGuid = selectedAccount.person.guid),
+                            clearBackStack = true
+                        )
+                    )
+                }
+            }
+        } else if (sharedDeviceAccount?.person?.status == PersonStatusEnum.ACTIVE) {
+            // This is a teacher/admin on a shared device - switch to shared device account first
             viewModelScope.launch {
-                respectAccountManager.removeAccount(it.session.account)
+                // First switch to the shared device account
+                respectAccountManager.switchAccount(sharedDeviceAccount.session.account)
+                _navCommandFlow.tryEmit(
+                    NavCommand.Navigate(
+                        destination = SelectClass.create(deviceGuid = sharedDeviceAccount.person.guid),
+                        clearBackStack = true
+                    )
+                )
+            }
+        } else {
+            // Regular logout - no shared device present
+            uiState.value.selectedAccount?.also {
+                viewModelScope.launch {
+                    respectAccountManager.removeAccount(it.session.account)
+                    _navCommandFlow.tryEmit(
+                        NavCommand.Navigate(
+                            destination = GetStartedScreen(),
+                            clearBackStack = true
+                        )
+                    )
+                }
             }
         }
     }

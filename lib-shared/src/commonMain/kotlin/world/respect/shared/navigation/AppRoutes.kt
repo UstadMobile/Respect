@@ -77,13 +77,15 @@ object SchoolDirectoryEdit : RespectAppRoute
 @Serializable
 data class LoginScreen(
     val schoolUrlStr: String,
+    val isSharedDevice: Boolean? = null,
 ) : RespectAppRoute {
 
     @Transient
     val schoolUrl = Url(schoolUrlStr)
 
     companion object {
-        fun create(schoolUrl: Url) = LoginScreen(schoolUrl.toString())
+        fun create(schoolUrl: Url, isSharedDevice: Boolean? = null) =
+            LoginScreen(schoolUrl.toString(), isSharedDevice)
     }
 }
 
@@ -439,6 +441,7 @@ class AcceptInvite(
     val schoolUrlStr: String,
     val code: String,
     val canGoBack: Boolean = true,
+    val useActiveUserAuth: Boolean? = null,
 ) : RespectAppRoute {
 
     @Transient
@@ -449,10 +452,12 @@ class AcceptInvite(
             schoolUrl: Url,
             code: String,
             canGoBack: Boolean = true,
+            useActiveUserAuth: Boolean? = null,
         ) = AcceptInvite(
             schoolUrlStr = schoolUrl.toString(),
             code = code,
             canGoBack = canGoBack,
+            useActiveUserAuth = useActiveUserAuth,
         )
     }
 }
@@ -742,7 +747,8 @@ data class ScanQRCode(
     val resultDestStr: String? = null,
     private val schoolUrlStr: String? = null,
     val username: String? = null,
-    private val nextAfterScanStr: String? = null
+    private val nextAfterScanStr: String? = null,
+    val isSharedDevice: Boolean = false
 ) : RespectAppRoute, RouteWithResultDest {
 
     @Transient
@@ -762,13 +768,15 @@ data class ScanQRCode(
             resultDest: ResultDest? = null,
             schoolUrl: Url? = null,
             username: String? = null,
-            nextAfterScan: NextAfterScan? = null
+            nextAfterScan: NextAfterScan? = null,
+            isSharedDevice: Boolean = false
         ) = ScanQRCode(
             guid = guid,
             resultDestStr = resultDest?.encodeToJsonStringOrNull(),
             username = username,
             schoolUrlStr = schoolUrl?.toString(),
-            nextAfterScanStr = nextAfterScan?.name
+            nextAfterScanStr = nextAfterScan?.name,
+            isSharedDevice = isSharedDevice
         )
     }
 }
@@ -798,6 +806,46 @@ class PlaylistList private constructor(
         )
     }
 }
+@Serializable
+data object SchoolSettings : RespectAppRoute
+
+@Serializable
+data object SharedDevicesSettings : RespectAppRoute
+
+@Serializable
+data class SelectClass(
+    val deviceGuid: String
+) : RespectAppRoute {
+
+    companion object {
+        fun create(
+            deviceGuid: String
+        ) = SelectClass(
+            deviceGuid = deviceGuid
+        )
+    }
+}
+
+@Serializable
+data object TeacherPinConfirmation : RespectAppRoute
+
+@Serializable
+data class StudentList(
+    val className: String,
+    val guid: String,
+) : RespectAppRoute {
+
+    companion object {
+        fun create(
+            className: String,
+            guid: String,
+        ) = StudentList(
+            className = className,
+            guid = guid,
+        )
+    }
+}
+
 @Serializable
 class OpdsFeedEdit private constructor(
     private val urlStr: String? = null,

@@ -23,12 +23,13 @@ import world.respect.datalayer.school.ext.accepterPersonRole
 import world.respect.datalayer.school.ext.copyWithInviteInfo
 import world.respect.datalayer.school.ext.isApprovalRequiredNow
 import world.respect.datalayer.school.model.AuthToken
-import world.respect.datalayer.school.model.Invite2
-import world.respect.datalayer.school.model.NewUserInvite
 import world.respect.datalayer.school.model.ClassInvite
 import world.respect.datalayer.school.model.ClassInviteModeEnum
 import world.respect.datalayer.school.model.Enrollment
 import world.respect.datalayer.school.model.EnrollmentRoleEnum
+import world.respect.datalayer.school.model.Invite2
+import world.respect.datalayer.school.model.NewUserInvite
+import world.respect.datalayer.school.model.PersonRoleEnum
 import world.respect.datalayer.school.model.PersonStatusEnum
 import world.respect.datalayer.school.model.StatusEnum
 import world.respect.libutil.ext.randomString
@@ -42,7 +43,6 @@ import world.respect.shared.domain.enrollments.UpdateClazzStudentXapiGroupUseCas
 import world.respect.shared.domain.school.SchoolPrimaryKeyGenerator
 import world.respect.shared.util.di.SchoolDataSourceLocalProvider
 import world.respect.shared.util.toPerson
-import java.lang.IllegalArgumentException
 import kotlin.time.Clock
 
 /**
@@ -64,7 +64,8 @@ class RedeemInviteUseCaseDb(
 ) : RedeemInviteUseCase, KoinComponent {
 
     override suspend fun invoke(
-        redeemRequest: RespectRedeemInviteRequest
+        redeemRequest: RespectRedeemInviteRequest,
+        useActiveUserAuth: Boolean
     ): AuthResponse {
         val inviteFromDb = schoolDb.getInviteEntityDao().getInviteByInviteCode(
             redeemRequest.code
@@ -74,8 +75,13 @@ class RedeemInviteUseCaseDb(
 
         val accountGuid = redeemRequest.account.guid
 
-        val approvalRequired = inviteFromDb.isApprovalRequiredNow()
-
+        val isSharedDeviceInvite =
+            redeemRequest.invite.accepterPersonRole == PersonRoleEnum.SHARED_SCHOOL_DEVICE
+        val approvalRequired = if (isSharedDeviceInvite && useActiveUserAuth) {
+            false
+        } else {
+            inviteFromDb.isApprovalRequiredNow()
+        }
         val accountPerson = redeemRequest.accountPersonInfo.toPerson(
             role = redeemRequest.invite.accepterPersonRole,
             username = redeemRequest.account.username,
@@ -88,7 +94,10 @@ class RedeemInviteUseCaseDb(
             },
         ).let {
             if(approvalRequired) {
-                it.copyWithInviteInfo(invite = redeemRequest.invite)
+                it.copyWithInviteInfo(
+                    invite = redeemRequest.invite,
+                    deviceInfo = redeemRequest.deviceInfo
+                )
             }else {
                 it
             }
@@ -199,6 +208,29 @@ class RedeemInviteUseCaseDb(
 
             is RespectQRBadgeCredential -> {
                 throw IllegalArgumentException("Using a QR code badge to redeem invite for new account not yet supported")
+            }
+            null -> {
+                // Handle shared school device case - no credential needed
+                // For shared devices, we just create the person account without authentication credentials
+                val token = AuthToken(
+                    accessToken = randomString(32),
+                    timeCreated = System.currentTimeMillis(),
+                    ttl = GetTokenAndUserProfileWithCredentialDbImpl.TOKEN_DEFAULT_TTL,
+                )
+
+                val personGuidHash = uidNumberMapper(accountPerson.guid)
+                schoolDb.getAuthTokenEntityDao().insert(
+                    token.toEntity(
+                        pGuid = accountPerson.guid,
+                        pGuidHash = personGuidHash,
+                        deviceInfo = redeemRequest.deviceInfo,
+                    )
+                )
+
+                AuthResponse(
+                    token = token,
+                    person = accountPerson,
+                )
             }
         }
         markFirstUserInviteAsDeleted(inviteFromDb, schoolDataSourceVal)

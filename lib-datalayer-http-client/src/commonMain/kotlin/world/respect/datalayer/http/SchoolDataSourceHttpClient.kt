@@ -20,7 +20,6 @@ import world.respect.datalayer.http.school.xapi.XapiResourceHttpClient
 import world.respect.datalayer.networkvalidation.BaseDataSourceValidationHelper
 import world.respect.datalayer.networkvalidation.ExtendedDataSourceValidationHelper
 import world.respect.datalayer.school.ClassDataSource
-import world.respect.datalayer.school.DummySchoolConfigSettingsDataSource
 import world.respect.datalayer.school.EnrollmentDataSource
 import world.respect.datalayer.school.IndicatorDataSource
 import world.respect.datalayer.school.InviteDataSource
@@ -29,7 +28,6 @@ import world.respect.datalayer.school.PersonPasskeyDataSource
 import world.respect.datalayer.school.PersonPasswordDataSource
 import world.respect.datalayer.school.PersonQrBadgeDataSource
 import world.respect.datalayer.school.ReportDataSource
-import world.respect.datalayer.school.SchoolConfigSettingDataSource
 import world.respect.datalayer.school.SchoolPermissionGrantDataSource
 import world.respect.datalayer.school.opds.OpdsFeedDataSource
 import world.respect.datalayer.school.opds.OpdsPublicationDataSource
@@ -145,12 +143,6 @@ class SchoolDataSourceHttpClient(
     override val opdsFeedDataSource: OpdsFeedDataSource by lazy {
         OpdsFeedDataSourceHttpClient(
             httpClient = httpClient,
-        )
-    }
-
-    override val schoolConfigSettingDataSource: SchoolConfigSettingDataSource by lazy {
-        DummySchoolConfigSettingsDataSource(
-            defaultAppCatalogUrl = defaultAppCatalogUrl,
         )
     }
 

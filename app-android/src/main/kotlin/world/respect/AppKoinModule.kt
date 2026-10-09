@@ -161,6 +161,13 @@ import world.respect.shared.domain.devmode.SetDevModeEnabledUseCase
 import world.respect.shared.domain.school.LaunchCustomTabUseCaseAndroid
 import world.respect.app.domain.e2eartifactupload.GetDbFilesForE2EArtifactUploadUseCaseAndroid
 import world.respect.datalayer.db.APP_MIGRATION_8_9_CLIENT
+import world.respect.shared.domain.account.invite.EnableSharedDeviceModeUseCase
+import world.respect.shared.domain.account.sharedschooldevice.GetSharedDeviceSelfSelectUseCase
+import world.respect.shared.domain.account.sharedschooldevice.SetSharedDeviceSelfSelectUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.GetSharedDevicePINUseCaseImpl
+import world.respect.shared.domain.account.sharedschooldevice.setpin.SetSharedDevicePINUseCase
+import world.respect.shared.domain.account.sharedschooldevice.setpin.SetSharedDevicePINUseCaseImpl
 import world.respect.shared.domain.activitycontextjobprocessor.EnqueueActivityContextJobUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCase
 import world.respect.shared.domain.getdeviceinfo.GetDeviceInfoUseCaseAndroid
@@ -302,6 +309,11 @@ import world.respect.shared.viewmodel.statement.detail.StatementDetailViewModel
 import world.respect.shared.viewmodel.statement.list.StatementListViewModel
 import world.respect.shared.domain.xapi.xapinanohttpd.XapiResourceProviderAndroid
 import world.respect.shared.viewmodel.catalog.bookmark.BookmarkListViewModel
+import world.respect.shared.viewmodel.sharedschooldevice.SchoolSettingsViewModel
+import world.respect.shared.viewmodel.sharedschooldevice.SharedDevicesSettingsViewmodel
+import world.respect.shared.viewmodel.sharedschooldevice.TeacherPinConfirmationViewmodel
+import world.respect.shared.viewmodel.sharedschooldevice.login.SelectClassViewModel
+import world.respect.shared.viewmodel.sharedschooldevice.login.StudentListViewModel
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -464,6 +476,11 @@ val appKoinModule = module {
     viewModelOf(::StatementDetailViewModel)
     viewModelOf(::RawStatementViewModel)
     viewModelOf(::BookmarkListViewModel)
+    viewModelOf(::SchoolSettingsViewModel)
+    viewModelOf(::SharedDevicesSettingsViewmodel)
+    viewModelOf(::TeacherPinConfirmationViewmodel)
+    viewModelOf(::SelectClassViewModel)
+    viewModelOf(::StudentListViewModel)
 
     single<LaunchSendWhatsAppUseCase> {
         LaunchSendWhatsAppUseCaseAndroid(androidContext())
@@ -815,6 +832,12 @@ val appKoinModule = module {
             settings = get(),
         )
     }
+    single<EnableSharedDeviceModeUseCase> {
+        EnableSharedDeviceModeUseCase(
+            accountManager = get(),
+            settings = get(),
+        )
+    }
 
     single<XapiNanoHttpdApp>(createdAtStart = true) {
         XapiNanoHttpdApp(
@@ -916,6 +939,7 @@ val appKoinModule = module {
             RedeemInviteUseCaseClient(
                 schoolUrl = SchoolDirectoryEntryScopeId.parse(id).schoolUrl,
                 httpClient = get(),
+                accountManager = get()
             )
         }
         scoped<GetInviteInfoUseCase> {
@@ -1126,6 +1150,35 @@ val appKoinModule = module {
             )
         }
 
+        scoped<SetSharedDevicePINUseCase> {
+            SetSharedDevicePINUseCaseImpl(
+                schoolDataSource = get(),
+                respectAccountManager = get(),
+                json = get(),
+            )
+        }
+        scoped<GetSharedDevicePINUseCase> {
+            GetSharedDevicePINUseCaseImpl(
+                schoolDataSource = get(),
+                respectAccountManager = get(),
+                json = get(),
+                setSharedDevicePINUseCase = get()
+            )
+        }
+        scoped<GetSharedDeviceSelfSelectUseCase> {
+            GetSharedDeviceSelfSelectUseCase(
+                schoolDataSource = get(),
+                respectAccountManager = get(),
+                json = get(),
+            )
+        }
+        scoped<SetSharedDeviceSelfSelectUseCase> {
+            SetSharedDeviceSelfSelectUseCase(
+                schoolDataSource = get(),
+                respectAccountManager = get(),
+                json = get(),
+            )
+        }
         scoped<ApproveOrDeclineInviteRequestUseCase> {
             ApproveOrDeclineInviteRequestUseCase(
                 schoolDataSource = get(),

@@ -92,12 +92,19 @@ val MIGRATION_18_19 = object: Migration(18, 19) {
     }
 }
 
+val MIGRATION_19_20 = object: Migration(19, 20) {
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL("CREATE TABLE IF NOT EXISTS `ReportQueryResultEntity` (`rqrUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `rqrReportUid` TEXT NOT NULL, `rqrLastModified` INTEGER NOT NULL, `rqrLastValidated` INTEGER NOT NULL, `rqrReportSeriesUid` INTEGER NOT NULL, `rqrXAxis` TEXT NOT NULL, `rqrYAxis` REAL NOT NULL, `rqrSubgroup` TEXT NOT NULL, `rqrTimeZone` TEXT NOT NULL)")
+        connection.execSQL("CREATE INDEX IF NOT EXISTS `idx_reportqueryresult_rqrreportuid_rqrtimezone` ON `ReportQueryResultEntity` (`rqrReportUid`, `rqrTimeZone`)")
+    }
+}
+
 fun RoomDatabase.Builder<RespectSchoolDatabase>.addCommonMigrations(
 
 ): RoomDatabase.Builder<RespectSchoolDatabase> {
     return this.addMigrations(
         MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16,
-        MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19,
+        MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20
     )
 }
 

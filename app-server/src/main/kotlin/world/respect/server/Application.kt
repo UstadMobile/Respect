@@ -279,7 +279,8 @@ fun Application.module() {
                             json = json,
                             statementResource = { call ->
                                 call.requireAccountScope().get<SchoolDataSource>().xapiResource.statements
-                            }
+                            },
+                            processStatementsUseCase = { it.requireAccountScope().get() }
                         )
                         route("activities") {
                             XapiActivityProfileResourceRoute(

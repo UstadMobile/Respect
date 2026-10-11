@@ -21,15 +21,24 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.filter_selected_count
 
-data class RespectFilterDefinition(
+/**
+ * @property value the value represented by the option (e.g. a ContentFilterOption).
+ * @property label the text displayed for the option.
+ */
+data class RespectFilterOption<T>(
+    val value: T,
+    val label: String,
+)
+
+data class RespectFilterDefinition<T>(
     val id: String,
     val label: String,
-    val options: List<String>,
+    val options: List<RespectFilterOption<T>>,
 )
 
 @Composable
-fun RespectFilterChip(
-    filter: RespectFilterDefinition,
+fun <T> RespectFilterChip(
+    filter: RespectFilterDefinition<T>,
     selectedOptionIndices: List<Int>,
     onOptionCheckedChanged: (Int, Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -71,7 +80,7 @@ fun RespectFilterChip(
                 itemsIndexed(filter.options, key = { index, _ -> index }) { index, option ->
                     val isSelected = index in selectedOptionIndices
                     RespectBottomSheetOption(
-                        headlineContent = { Text(option) },
+                        headlineContent = { Text(option.label) },
                         trailingContent = {
                             Checkbox(checked = isSelected, onCheckedChange = null)
                         },

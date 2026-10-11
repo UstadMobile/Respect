@@ -4,14 +4,19 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import io.github.aakira.napier.Napier
+import io.ktor.http.Url
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
@@ -26,6 +31,9 @@ import world.respect.datalayer.SchoolDataSource
 import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.school.opds.OpdsPublicationDataSourceLocal
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.contentfilter.ContentFilterOption
+import world.respect.shared.domain.contentfilter.ContentFilterOptions
+import world.respect.shared.domain.contentfilter.ContentFilterSelection
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.search.ObserveSearchResultsUseCase
 import world.respect.shared.generated.resources.Res
@@ -33,7 +41,6 @@ import world.respect.shared.generated.resources.app
 import world.respect.shared.generated.resources.home
 import world.respect.shared.generated.resources.empty_list_description_admin
 import world.respect.shared.generated.resources.empty_list_description_non_admin
-import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.AppsDetail
 import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.NavCommand
@@ -52,6 +59,7 @@ import world.respect.lib.xapi.ext.mostRecentByTimestampOrNull
 import world.respect.lib.xapi.ext.objectActivityOrNull
 import world.respect.lib.xapi.ext.webPubManifestAsUrlOrNull
 import world.respect.lib.xapi.model.XapiStatement
+import world.respect.lib.xapi.model.XapiStatementResult
 import world.respect.lib.xapi.model.XapiStatementRef
 import world.respect.lib.xapi.model.XapiVerb
 import world.respect.lib.xapi.resources.XapiStatementsResource
@@ -71,6 +79,8 @@ data class AppLauncherUiState(
     val emptyListDescription: UiText? = null,
     val appMustLoadToBeClickable: Boolean = false,
     val searchActive: Boolean = false,
+    val contentFilterOptions: ContentFilterOptions = ContentFilterOptions(),
+    val contentFilter: ContentFilterSelection = ContentFilterSelection(),
 ) {
 
     fun isAppClickable(appState: DataLoadState<Publication>): Boolean {
@@ -153,29 +163,37 @@ class AppLauncherViewModel(
                         it.copy(
                             apps = state.map { emptyList() },
                             respectPublicationForXapiStatement = publicationFlows::getValue,
+                            contentFilterOptions = ContentFilterOptions(),
                         )
                     }
 
-                    observeSearchResultsUseCase(
+                    // Loaded publications are used to build the filter options and to match filters.
+                    val loadedPublicationsFlow = if (publicationFlows.isNotEmpty()) {
+                        combine(
+                            publicationFlows.map { (statement, publicationFlow) ->
+                                publicationFlow.map { statement to it.dataOrNull() }
+                            }
+                        ) { it.toMap() }
+                    } else {
+                        flowOf(emptyMap())
+                    }
+
+                    val searchResultsFlow = observeSearchResultsUseCase(
                         appUiStateFlow = appUiState,
                         searchFn = { searchQuery ->
                             schoolDataSourceLocal.opdsPublicationDataSource.searchByTitleAsFlow(
                                 OpdsPublicationDataSourceLocal.GetListParams(title = searchQuery),
                             ).map { it.toSet() }
                         },
-                    ).collect { matchingUrls ->
-                        _uiState.update {
-                            it.copy(
-                                apps = state.map { result ->
-                                    result.statements.filter { statement ->
-                                        matchingUrls == null ||
-                                            statement.objectActivityOrNull()?.definition
-                                                ?.webPubManifestAsUrlOrNull() in matchingUrls
-                                    }
-                                },
-                            )
-                        }
-                    }
+                    )
+
+                    combine(
+                        searchResultsFlow,
+                        loadedPublicationsFlow,
+                        _uiState.map { it.contentFilter }.distinctUntilChanged(),
+                    ) { matchingUrls, loadedPublications, contentFilter ->
+                        updateVisibleApps(state, matchingUrls, loadedPublications, contentFilter)
+                    }.collect()
                 }
             }
         }
@@ -203,6 +221,53 @@ class AppLauncherViewModel(
                 }
             }
         }
+    }
+
+    /**
+     * Show only the apps that match both the search and the selected content filters, and update
+     * the filter options using the publications loaded so far.
+     *
+     * @param matchingUrls manifest urls matching the search, or null if there is no active search
+     * @param loadedPublications the publication for each statement (null if not loaded yet)
+     */
+    private fun updateVisibleApps(
+        statementsState: DataLoadState<XapiStatementResult>,
+        matchingUrls: Set<Url>?,
+        loadedPublications: Map<XapiStatement, Publication?>,
+        contentFilter: ContentFilterSelection,
+    ) {
+        fun XapiStatement.matchesSearch(): Boolean = matchingUrls == null ||
+            objectActivityOrNull()?.definition?.webPubManifestAsUrlOrNull() in matchingUrls
+
+        fun XapiStatement.matchesContentFilter(): Boolean = contentFilter.isEmpty ||
+            loadedPublications[this]?.let { contentFilter.matchesPublication(it) } == true
+
+        _uiState.update {
+            it.copy(
+                apps = statementsState.map { result ->
+                    result.statements.filter { statement ->
+                        statement.matchesSearch() && statement.matchesContentFilter()
+                    }
+                },
+                contentFilterOptions = ContentFilterOptions.fromPublications(
+                    loadedPublications.values.filterNotNull()
+                ),
+            )
+        }
+    }
+
+    fun onToggleContentFilterOption(option: ContentFilterOption) {
+        _uiState.update {
+            it.copy(contentFilter = it.contentFilter.toggle(option))
+        }
+    }
+
+    override fun onSearchCollapsed() {
+        onClearContentFilters()
+    }
+
+    fun onClearContentFilters() {
+        _uiState.update { it.copy(contentFilter = ContentFilterSelection()) }
     }
 
     fun onSearchTextChanged(searchQuery: String) {

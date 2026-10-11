@@ -35,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
@@ -43,6 +42,8 @@ import org.jetbrains.compose.resources.stringResource
 import world.respect.app.app.RespectAsyncImage
 import world.respect.app.components.RespectContentFilterRow
 import world.respect.app.components.langMapString
+import world.respect.app.components.contentFilterDefinitions
+import world.respect.shared.domain.contentfilter.ContentFilterOption
 import world.respect.app.components.uiTextStringResource
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.NoDataLoadedState
@@ -71,6 +72,8 @@ fun AppLauncherScreen(
         searchState = appUiState.searchState,
         onClickApp = { viewModel.onClickApp(it) },
         onClickRemove = { viewModel.onClickRemove(it) },
+        onToggleContentFilterOption = viewModel::onToggleContentFilterOption,
+        onClearContentFilters = viewModel::onClearContentFilters,
     )
 }
 
@@ -80,6 +83,8 @@ fun AppLauncherScreen(
     searchState: AppBarSearchUiState,
     onClickApp: (DataLoadState<Publication>) -> Unit,
     onClickRemove: (DataLoadState<Publication>) -> Unit,
+    onToggleContentFilterOption: (ContentFilterOption) -> Unit = {},
+    onClearContentFilters: () -> Unit = {},
 ) {
     val apps = uiState.apps.dataOrNull() ?: emptyList()
 
@@ -96,7 +101,17 @@ fun AppLauncherScreen(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        RespectContentFilterRow(searchState = searchState)
+        RespectContentFilterRow(
+            searchState = searchState,
+            filters = contentFilterDefinitions(
+                options = uiState.contentFilterOptions,
+                includeType = false,
+            ),
+            isOptionSelected = uiState.contentFilter::isSelected,
+            onToggleOption = onToggleContentFilterOption,
+            clearAllEnabled = !uiState.contentFilter.isEmpty,
+            onClickClearAll = onClearContentFilters,
+        )
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
             if (apps.isEmpty()) {
                 Column(
@@ -116,7 +131,7 @@ fun AppLauncherScreen(
                         modifier = Modifier.height(16.dp)
                     )
                     Text(
-                        text = if (uiState.searchActive) {
+                        text = if (uiState.searchActive || !uiState.contentFilter.isEmpty) {
                             stringResource(Res.string.no_matching_data_available_yet)
                         } else {
                             uiState.emptyListDescription?.let {
@@ -138,7 +153,9 @@ fun AppLauncherScreen(
                 ) {
                     items(
                         count = apps.size,
-                        key = { index -> apps[index].objectActivityOrNull()?.id ?: index.toString() }
+                        key = { index ->
+                            "${index}_${apps[index].id ?: apps[index].objectActivityOrNull()?.id}"
+                        }
                     ) { index ->
                         val statement = apps[index]
                         val respectAppFlow = remember(statement, uiState.respectPublicationForXapiStatement) {

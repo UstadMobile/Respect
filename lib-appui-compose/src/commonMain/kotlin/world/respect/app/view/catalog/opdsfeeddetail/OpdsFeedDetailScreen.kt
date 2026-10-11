@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import world.respect.app.components.RespectContentFilterRow
 import world.respect.app.components.defaultItemPadding
+import world.respect.app.components.contentFilterDefinitions
+import world.respect.shared.domain.contentfilter.ContentFilterOption
 import world.respect.app.components.langMapString
 import world.respect.lib.dataloadstate.ext.dataOrNull
 import world.respect.lib.opds.model.Publication
@@ -92,6 +94,8 @@ fun OpdsFeedDetailScreen(
         onCopyDialogConfirm = viewModel::onCopyDialogConfirm,
         onDeleteDialogDismiss = viewModel::onDeleteDialogDismiss,
         onDeleteDialogConfirm = viewModel::onDeleteDialogConfirm,
+        onToggleContentFilterOption = viewModel::onToggleContentFilterOption,
+        onClearContentFilters = viewModel::onClearContentFilters,
     )
 }
 
@@ -118,12 +122,24 @@ fun OpdsFeedDetailScreen(
     onCopyDialogConfirm: () -> Unit = {},
     onDeleteDialogDismiss: () -> Unit = {},
     onDeleteDialogConfirm: () -> Unit = {},
+    onToggleContentFilterOption: (ContentFilterOption) -> Unit = {},
+    onClearContentFilters: () -> Unit = {},
 ) {
     val catalog = uiState.feed.dataOrNull()
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-        RespectContentFilterRow(searchState = searchState)
+        RespectContentFilterRow(
+            searchState = searchState,
+            filters = contentFilterDefinitions(
+                options = uiState.contentFilterOptions,
+                includeType = true,
+            ),
+            isOptionSelected = uiState.contentFilter::isSelected,
+            onToggleOption = onToggleContentFilterOption,
+            clearAllEnabled = !uiState.contentFilter.isEmpty,
+            onClickClearAll = onClearContentFilters,
+        )
 
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(

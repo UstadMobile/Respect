@@ -9,36 +9,38 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import world.respect.app.components.sample.defaultContentFilters
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.clear_all
 import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 
 /**
- * Filter chips shown with the appbar search. They are shown only while search is expanded, and
- * selections are kept while hidden so that they are not lost if the user closes and reopens search.
+ * Filter chips shown with the appbar search. They are shown only while search is expanded. The
+ * selection is held by the ViewModel, which clears it when search is closed.
  *
  * @param searchState the appbar search state of the screen showing the filters.
+ * @param filters the filters to show (e.g. as built using [contentFilterDefinitions]).
+ * @param isOptionSelected whether the given option value is selected.
+ * @param onToggleOption called when the user checks or unchecks an option.
+ * @param clearAllEnabled true when at least one option is selected.
+ * @param onClickClearAll called when the user clicks clear all.
  */
 @Composable
-fun RespectContentFilterRow(
+fun <T> RespectContentFilterRow(
     searchState: AppBarSearchUiState,
+    filters: List<RespectFilterDefinition<T>>,
+    isOptionSelected: (T) -> Boolean,
+    onToggleOption: (T) -> Unit,
+    clearAllEnabled: Boolean,
+    onClickClearAll: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val filters = defaultContentFilters()
-    var selectedOptions by rememberSaveable { mutableStateOf(emptyList<String>()) }
-
-    if (!searchState.expanded)
+    if (!searchState.expanded || filters.isEmpty())
         return
 
     Row(
@@ -58,23 +60,18 @@ fun RespectContentFilterRow(
                     RespectFilterChip(
                         filter = filter,
                         selectedOptionIndices = filter.options.indices.filter {
-                            "${filter.id}:$it" in selectedOptions
+                            isOptionSelected(filter.options[it].value)
                         },
-                        onOptionCheckedChanged = { index, checked ->
-                            val optionId = "${filter.id}:$index"
-                            selectedOptions = if (checked) {
-                                (selectedOptions + optionId).distinct()
-                            } else {
-                                selectedOptions - optionId
-                            }
+                        onOptionCheckedChanged = { index, _ ->
+                            onToggleOption(filter.options[index].value)
                         },
                     )
                 }
             }
         }
         TextButton(
-            onClick = { selectedOptions = emptyList() },
-            enabled = selectedOptions.isNotEmpty(),
+            onClick = onClickClearAll,
+            enabled = clearAllEnabled,
             modifier = Modifier.padding(end = CLEAR_BUTTON_END_PADDING_DP.dp),
         ) {
             Text(stringResource(Res.string.clear_all))

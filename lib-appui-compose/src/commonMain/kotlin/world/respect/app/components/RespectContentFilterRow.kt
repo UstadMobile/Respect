@@ -51,9 +51,8 @@ fun <T> RespectContentFilterRow(
             modifier = Modifier
                 .weight(1f)
                 .horizontalScroll(rememberScrollState())
-                .padding(FILTER_SPACING_DP.dp)
-                .testTag(FILTER_CHIPS_TEST_TAG),
-            horizontalArrangement = Arrangement.spacedBy(FILTER_SPACING_DP.dp),
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             filters.forEach { filter ->
                 key(filter.id) {
@@ -72,14 +71,10 @@ fun <T> RespectContentFilterRow(
         TextButton(
             onClick = onClickClearAll,
             enabled = clearAllEnabled,
-            modifier = Modifier.padding(end = CLEAR_BUTTON_END_PADDING_DP.dp),
+            modifier = Modifier.padding(end = 8.dp),
         ) {
             Text(stringResource(Res.string.clear_all))
         }
     }
 }
 
-private const val FILTER_SPACING_DP = 16
-private const val CLEAR_BUTTON_END_PADDING_DP = 8
-
-const val FILTER_CHIPS_TEST_TAG = "content_filter_chips"

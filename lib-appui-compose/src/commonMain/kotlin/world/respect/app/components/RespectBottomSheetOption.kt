@@ -15,11 +15,13 @@ fun RespectBottomSheetOption(
     secondaryContent: (@Composable () -> Unit)? = null,
     leadingContent: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
+    trailingContent: (@Composable () -> Unit)? = null,
 ) {
     ListItem(
         headlineContent = headlineContent,
         supportingContent = secondaryContent,
         leadingContent =  leadingContent,
+        trailingContent = trailingContent,
         modifier = modifier,
     )
 }

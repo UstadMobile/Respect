@@ -19,6 +19,7 @@ import world.respect.datalayer.db.shared.adapters.asNetworkValidationInfo
 import world.respect.datalayer.ext.EPOCH
 import world.respect.datalayer.networkvalidation.NetworkValidationInfo
 import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
+import world.respect.lib.opds.model.ext.OpdsFeedSearchMatch
 import world.respect.datalayer.school.opds.ext.requireSelfUrl
 import world.respect.lib.dataloadstate.DataLoadMetaInfo
 import world.respect.lib.dataloadstate.DataLoadParams
@@ -40,6 +41,16 @@ class OpdsFeedDataSourceDb(
     private val json: Json,
     private val primaryKeyGenerator: PrimaryKeyGenerator,
 ) : OpdsFeedDataSourceLocal{
+
+    override fun searchByTitleAsFlow(
+        url: Url,
+        listParams: OpdsFeedDataSourceLocal.GetListParams,
+    ): Flow<List<OpdsFeedSearchMatch>> {
+        return schoolDb.getOpdsFeedEntityDao().searchByTitleAsFlow(
+            feedUid = uidNumberMapper(url.toString()),
+            titlePattern = "${listParams.title}%",
+        )
+    }
 
     private suspend fun OpdsFeedEntity?.toDataLoadState(
         url: Url,

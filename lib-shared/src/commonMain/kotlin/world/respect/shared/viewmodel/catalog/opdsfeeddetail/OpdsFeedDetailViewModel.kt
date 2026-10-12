@@ -11,7 +11,10 @@ import org.koin.core.component.KoinScopeComponent
 import org.koin.core.component.inject
 import org.koin.core.scope.Scope
 import world.respect.datalayer.SchoolDataSource
+import world.respect.datalayer.SchoolDataSourceLocal
 import world.respect.datalayer.db.school.ext.isAdmin
+import world.respect.datalayer.school.opds.OpdsFeedDataSourceLocal
+import world.respect.lib.opds.model.ext.OpdsFeedSearchMatch
 import world.respect.lib.dataloadstate.DataLoadParams
 import world.respect.lib.dataloadstate.DataLoadState
 import world.respect.lib.dataloadstate.DataLoadingState
@@ -30,6 +33,11 @@ import world.respect.lib.opds.model.findSelfLinks
 import world.respect.libutil.ext.resolve
 import world.respect.libutil.ext.toggle
 import world.respect.shared.domain.account.RespectAccountManager
+import world.respect.shared.domain.contentfilter.ContentFilterOption
+import world.respect.shared.domain.contentfilter.ContentFilterOptions
+import world.respect.shared.domain.contentfilter.ContentFilterSelection
+import world.respect.shared.domain.contentfilter.itemsMatching
+import world.respect.shared.domain.search.ObserveSearchResultsUseCase
 import world.respect.shared.ext.resultExpected
 import world.respect.shared.generated.resources.Res
 import world.respect.shared.generated.resources.edit
@@ -37,12 +45,12 @@ import world.respect.shared.generated.resources.language
 import world.respect.shared.generated.resources.not_found
 import world.respect.shared.generated.resources.something_went_wrong
 import world.respect.shared.navigation.AssignmentEdit
-import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.NavResultReturner
 import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.OpdsFeedEdit
 import world.respect.shared.navigation.PlaylistShare
+import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.sendResultIfResultExpected
 import world.respect.shared.util.SortOrderOption
 import world.respect.shared.util.ext.appbarTitleString
@@ -50,6 +58,7 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.util.ext.firstSelfLinkOrNull
 import world.respect.shared.util.ext.resolve
 import world.respect.shared.viewmodel.RespectViewModel
+import world.respect.shared.viewmodel.app.appstate.AppBarSearchUiState
 import world.respect.shared.viewmodel.app.appstate.FabUiState
 import world.respect.shared.viewmodel.app.appstate.Snack
 import world.respect.shared.viewmodel.app.appstate.SnackBarDispatcher
@@ -58,6 +67,11 @@ import world.respect.shared.viewmodel.catalog.OpdsFeedSelection
 import world.respect.shared.viewmodel.catalog.OpdsPickType
 import world.respect.shared.viewmodel.catalog.PublicationsSelection
 
+/**
+ * @property visibleItems items matching both the search and the selected content filters, or null
+ *           when neither is active. Calculated by the ViewModel when the feed, search, or filters
+ *           change.
+ */
 data class OpdsFeedDetailUiState(
     val feed: DataLoadState<OpdsFeed> = DataLoadingState(),
     val sortOptions: List<SortOrderOption> = emptyList(),
@@ -73,12 +87,31 @@ data class OpdsFeedDetailUiState(
     val copyDialogName: String = "",
     val showDeleteDialog: Boolean = false,
     val pickType: OpdsPickType? = null,
+    val searchMatches: List<OpdsFeedSearchMatch>? = null,
+    val contentFilterOptions: ContentFilterOptions = ContentFilterOptions(),
+    val contentFilter: ContentFilterSelection = ContentFilterSelection(),
+    val visibleItems: Set<OpdsFeedSearchMatch>? = null,
 ) {
+    private val visibleGroupIndexes by lazy { visibleItems?.map { it.groupIndex }?.toSet() }
+
     fun isGroupCollapsed(groupIndex: Int) = groupIndex in collapsedGroupIndexes
 
     fun isPublicationSelected(index: OpdsFeedItemIndex): Boolean = index in selectedPublications
 
     fun isNavigationSelected(index: OpdsFeedItemIndex): Boolean = index in selectedNavigationLinks
+
+    /**
+     * Whether the item matches the search and selected content filters. Match both the original
+     * position and item type because separate feed lists can share indexes.
+     */
+    fun matchesSearchFilter(index: OpdsFeedItemIndex, isPublication: Boolean): Boolean =
+        visibleItems?.contains(
+            OpdsFeedSearchMatch(index.groupIndex, index.index, isPublication)
+        ) ?: true
+
+    /** Keep a group visible only when at least one item in it matched the search and filters.*/
+    fun groupMatchesSearchFilter(groupIndex: Int): Boolean =
+        visibleGroupIndexes?.contains(groupIndex) ?: true
 
     val isMultiSelectMode: Boolean
         get() = selectedPublications.isNotEmpty() || selectedNavigationLinks.isNotEmpty()
@@ -120,11 +153,13 @@ class OpdsFeedDetailViewModel(
     private val accountManager: RespectAccountManager,
     private val resultReturner: NavResultReturner,
     private val snackBarDispatcher: SnackBarDispatcher,
+    private val observeSearchResultsUseCase: ObserveSearchResultsUseCase,
 ) : RespectViewModel(savedStateHandle), KoinScopeComponent {
 
     override val scope: Scope = accountManager.requireActiveAccountScope()
 
     private val schoolDataSource: SchoolDataSource by inject()
+    private val schoolDataSourceLocal: SchoolDataSourceLocal by inject()
 
     private val _uiState = MutableStateFlow(OpdsFeedDetailUiState())
 
@@ -143,8 +178,27 @@ class OpdsFeedDetailViewModel(
         _appUiState.update { prev ->
             prev.copy(
                 hideBottomNavigation = route.resultDest != null,
-                title = route.opdsPickType?.appbarTitleString?.asUiText() ?: prev.title
+                title = route.opdsPickType?.appbarTitleString?.asUiText() ?: prev.title,
+                searchState = AppBarSearchUiState(
+                    visible = true,
+                    onSearchTextChanged = ::onSearchTextChanged,
+                    onSearchExpandedChanged = ::setSearchExpanded,
+                ),
             )
+        }
+
+        viewModelScope.launch {
+            observeSearchResultsUseCase(
+                appUiStateFlow = appUiState,
+                searchFn = { searchQuery ->
+                    schoolDataSourceLocal.opdsFeedDataSource.searchByTitleAsFlow(
+                        url = route.opdsFeedUrl,
+                        listParams = OpdsFeedDataSourceLocal.GetListParams(title = searchQuery),
+                    )
+                },
+            ).collect { matchingItems ->
+                updateVisibleItemsInputs { it.copy(searchMatches = matchingItems) }
+            }
         }
 
         viewModelScope.launch {
@@ -169,9 +223,12 @@ class OpdsFeedDetailViewModel(
                 url = route.opdsFeedUrl,
                 params = DataLoadParams()
             ).collect { result ->
-                _uiState.update { prev ->
+                updateVisibleItemsInputs { prev ->
                     prev.copy(
-                        feed = result.map { it.resolve(route.opdsFeedUrl) }
+                        feed = result.map { it.resolve(route.opdsFeedUrl) },
+                        contentFilterOptions = result.dataOrNull()?.let {
+                            ContentFilterOptions.fromPublications(it.allPublications())
+                        } ?: prev.contentFilterOptions,
                     )
                 }
 
@@ -182,8 +239,63 @@ class OpdsFeedDetailViewModel(
         }
     }
 
+    /**
+     * Update the ui state where the change affects which items are visible (the feed,
+     * searchMatches, or contentFilter) and recalculate visibleItems. Other changes (e.g. selection,
+     * dialogs) should use _uiState.update directly to avoid unnecessary recalculation.
+     */
+    private inline fun updateVisibleItemsInputs(
+        transform: (OpdsFeedDetailUiState) -> OpdsFeedDetailUiState
+    ) {
+        _uiState.update { transform(it).withVisibleItems() }
+    }
+
+    /**
+     * Calculate the items matching both the search and the selected content filters. The result is
+     * null when neither search nor filters are active (e.g. everything is visible).
+     */
+    private fun OpdsFeedDetailUiState.withVisibleItems(): OpdsFeedDetailUiState {
+        val searchMatchSet = searchMatches?.toSet()
+
+        val filterMatches = if (contentFilter.isEmpty) {
+            null
+        } else {
+            feed.dataOrNull()?.itemsMatching(contentFilter).orEmpty()
+        }
+
+        return copy(
+            visibleItems = when {
+                filterMatches == null -> searchMatchSet
+                searchMatchSet == null -> filterMatches
+                else -> filterMatches intersect searchMatchSet
+            }
+        )
+    }
+
+    fun onToggleContentFilterOption(option: ContentFilterOption) {
+        updateVisibleItemsInputs {
+            it.copy(contentFilter = it.contentFilter.toggle(option))
+        }
+    }
+
+    override fun onSearchCollapsed() {
+        onClearContentFilters()
+    }
+
+    fun onClearContentFilters() {
+        updateVisibleItemsInputs { it.copy(contentFilter = ContentFilterSelection()) }
+    }
+
     fun onSortOrderChanged(sortOption: SortOrderOption) {
         _uiState.update { it.copy(activeSortOrderOption = sortOption) }
+    }
+
+    fun onSearchTextChanged(searchQuery: String) {
+        updateSearchText(searchQuery) { query ->
+            updateVisibleItemsInputs {
+                it.copy(searchMatches = if (query.isEmpty()) null else emptyList())
+            }
+        }
     }
 
     fun onClickPublication(index: OpdsFeedItemIndex) {

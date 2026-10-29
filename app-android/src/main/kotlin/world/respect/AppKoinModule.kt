@@ -302,6 +302,8 @@ import world.respect.shared.viewmodel.statement.detail.StatementDetailViewModel
 import world.respect.shared.viewmodel.statement.list.StatementListViewModel
 import world.respect.shared.domain.xapi.xapinanohttpd.XapiResourceProviderAndroid
 import world.respect.shared.viewmodel.catalog.bookmark.BookmarkListViewModel
+import world.respect.shared.viewmodel.manageuser.getstarted.NewGetStartedViewModel
+
 
 
 const val SHARED_PREF_SETTINGS_NAME = "respect_settings3_"
@@ -421,6 +423,7 @@ val appKoinModule = module {
     viewModelOf(::WaitingForApprovalViewModel)
     viewModelOf(::CreateAccountViewModel)
     viewModelOf(::GetStartedViewModel)
+    viewModelOf(::NewGetStartedViewModel)
     viewModelOf(::PasskeyListViewModel)
     viewModelOf(::HowPasskeyWorksViewModel)
     viewModelOf(::OtherOptionsViewModel)

@@ -52,6 +52,7 @@ import world.respect.app.view.catalog.opdsfeededitaddlink.OpdsFeedEditAddLinkScr
 import world.respect.app.view.catalog.opdsfeededit.OpdsFeedEditScreen
 import world.respect.app.view.catalog.opdsfeedlist.OpdsFeedListScreen
 import world.respect.app.view.catalog.opdsfeedshare.PlaylistShareScreen
+import world.respect.app.view.manageuser.getstarted.NewGetStartedScreen
 import world.respect.app.view.report.detail.ReportDetailScreen
 import world.respect.app.view.report.edit.ReportEditScreen
 import world.respect.app.view.report.filteredit.ReportFilterEditScreen
@@ -101,6 +102,7 @@ import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.ManageAccount
+import world.respect.shared.navigation.NewGetStartedScreen
 import world.respect.shared.navigation.Onboarding
 import world.respect.shared.navigation.OtherOption
 import world.respect.shared.navigation.OtherOptionsSignup
@@ -147,6 +149,7 @@ import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswo
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
 import world.respect.shared.viewmodel.manageuser.howpasskeywork.HowPasskeyWorksViewModel
 import world.respect.shared.viewmodel.manageuser.enterinvitecode.EnterInviteCodeViewModel
+import world.respect.shared.viewmodel.manageuser.getstarted.NewGetStartedViewModel
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
 import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
 import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsSignupViewModel
@@ -432,6 +435,15 @@ fun AppNavHost(
             )
             GetStartedScreen(viewModel = viewModel)
         }
+
+        composable<NewGetStartedScreen> {
+            val viewModel: NewGetStartedViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            NewGetStartedScreen(viewModel = viewModel)
+        }
+
 
         composable<OtherOption> {
             val viewModel: OtherOptionsViewModel = respectViewModel(

@@ -13,9 +13,9 @@ import world.respect.libutil.ext.normalizeForEndpoint
 import world.respect.shared.domain.devmode.GetDevModeEnabledUseCase
 import world.respect.shared.domain.urltonavcommand.ResolveUrlToNavCommandUseCase
 import world.respect.shared.generated.resources.Res
+import world.respect.shared.generated.resources.connect_existing_learning_space
 import world.respect.shared.generated.resources.invalid_code
 import world.respect.shared.generated.resources.invalid_url
-import world.respect.shared.generated.resources.other_options
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
 import world.respect.shared.navigation.SchoolDirectoryList
@@ -24,27 +24,27 @@ import world.respect.shared.util.ext.asUiText
 import world.respect.shared.viewmodel.RespectViewModel
 
 
-data class OtherOptionsUiState(
+data class ConnectLearningSpaceUiState(
     val link: String = "",
     val errorMessage: StringResourceUiText? = null,
     val manageDirectoriesVisible: Boolean = false,
 )
 
-class OtherOptionsViewModel(
+class ConnectLearningSpaceViewModel(
     savedStateHandle: SavedStateHandle,
     private val respectAppDataSource: RespectAppDataSource,
     private val getDevModeEnabledUseCase: GetDevModeEnabledUseCase,
     private val resolveUrlToNavCommandUseCase: ResolveUrlToNavCommandUseCase,
 ) : RespectViewModel(savedStateHandle) {
 
-    private val _uiState = MutableStateFlow(OtherOptionsUiState())
+    private val _uiState = MutableStateFlow(ConnectLearningSpaceUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
             _appUiState.update { prev ->
                 prev.copy(
-                    title = Res.string.other_options.asUiText(),
+                    title = Res.string.connect_existing_learning_space.asUiText(),
                     hideBottomNavigation = true,
                     userAccountIconVisible = false,
                 )

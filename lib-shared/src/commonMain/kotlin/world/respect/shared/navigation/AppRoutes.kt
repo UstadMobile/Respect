@@ -322,7 +322,7 @@ data class NewGetStartedScreen(
 ) : RespectAppRoute
 
 @Serializable
-object OtherOption : RespectAppRoute
+object ConnectLearningSpace : RespectAppRoute
 
 @Serializable
 object HowPasskeyWorks : RespectAppRoute

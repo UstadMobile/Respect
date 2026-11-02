@@ -317,7 +317,12 @@ data class GetStartedScreen(
 ) : RespectAppRoute
 
 @Serializable
-object OtherOption : RespectAppRoute
+data class NewGetStartedScreen(
+    val canGoBack: Boolean = false,
+) : RespectAppRoute
+
+@Serializable
+object ConnectLearningSpace : RespectAppRoute
 
 @Serializable
 object HowPasskeyWorks : RespectAppRoute

@@ -24,7 +24,7 @@ import world.respect.shared.generated.resources.school_not_found
 import world.respect.shared.navigation.GetStartedScreen
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.NavCommand
-import world.respect.shared.navigation.OtherOption
+import world.respect.shared.navigation.ConnectLearningSpace
 import world.respect.shared.navigation.ScanQRCode
 import world.respect.shared.navigation.SchoolDirectoryList
 import world.respect.shared.resources.UiText
@@ -151,7 +151,7 @@ class GetStartedViewModel(
         _navCommandFlow.tryEmit(NavCommand.Navigate(ScanQRCode()))
     }
     fun onClickOtherOptions() {
-        _navCommandFlow.tryEmit(NavCommand.Navigate(OtherOption))
+        _navCommandFlow.tryEmit(NavCommand.Navigate(ConnectLearningSpace))
     }
 
     fun onDirectorySelected(directory: RespectSchoolDirectory) {

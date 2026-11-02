@@ -1,4 +1,4 @@
-package world.respect.app.view.manageuser.otheroption
+package world.respect.app.view.manageuser.connectlearningspace
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,16 +26,16 @@ import world.respect.shared.generated.resources.enter_school_link
 import world.respect.shared.generated.resources.manage_school_directories
 import world.respect.shared.generated.resources.next
 import world.respect.shared.generated.resources.paste_link_here
-import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsUiState
-import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
+import world.respect.shared.viewmodel.manageuser.otheroption.ConnectLearningSpaceUiState
+import world.respect.shared.viewmodel.manageuser.otheroption.ConnectLearningSpaceViewModel
 
 @Composable
-fun OtherOptionsScreen(
-    viewModel: OtherOptionsViewModel
+fun ConnectLearningSpaceScreen(
+    viewModel: ConnectLearningSpaceViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    OtherOptionsScreen(
+    ConnectLearningSpaceScreen(
         uiState = uiState,
         onLinkChanged = viewModel::onLinkChanged,
         onClickNext = viewModel::onClickNext,
@@ -44,8 +44,8 @@ fun OtherOptionsScreen(
 }
 
 @Composable
-fun OtherOptionsScreen(
-    uiState: OtherOptionsUiState,
+fun ConnectLearningSpaceScreen(
+    uiState: ConnectLearningSpaceUiState,
     onLinkChanged: (String) -> Unit,
     onClickNext: () -> Unit,
     onClickManageSchoolDirectories: () -> Unit,

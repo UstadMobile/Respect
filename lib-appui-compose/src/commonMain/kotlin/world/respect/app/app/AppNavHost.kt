@@ -30,7 +30,7 @@ import world.respect.app.view.manageuser.getstarted.GetStartedScreen
 import world.respect.app.view.manageuser.howpasskeywork.HowPasskeyWorksScreen
 import world.respect.app.view.manageuser.enterinvitecode.EnterInviteCodeScreen
 import world.respect.app.view.manageuser.login.LoginScreen
-import world.respect.app.view.manageuser.otheroption.OtherOptionsScreen
+import world.respect.app.view.manageuser.connectlearningspace.ConnectLearningSpaceScreen
 import world.respect.app.view.manageuser.otheroptionsignup.OtherOptionsSignupScreen
 import world.respect.app.view.manageuser.sharefeedback.ShareFeedbackScreen
 import world.respect.app.view.manageuser.signup.SignupScreen
@@ -52,6 +52,7 @@ import world.respect.app.view.catalog.opdsfeededitaddlink.OpdsFeedEditAddLinkScr
 import world.respect.app.view.catalog.opdsfeededit.OpdsFeedEditScreen
 import world.respect.app.view.catalog.opdsfeedlist.OpdsFeedListScreen
 import world.respect.app.view.catalog.opdsfeedshare.PlaylistShareScreen
+import world.respect.app.view.manageuser.getstarted.NewGetStartedScreen
 import world.respect.app.view.report.detail.ReportDetailScreen
 import world.respect.app.view.report.edit.ReportEditScreen
 import world.respect.app.view.report.filteredit.ReportFilterEditScreen
@@ -101,8 +102,9 @@ import world.respect.shared.navigation.PublicationDetail
 import world.respect.shared.navigation.OpdsFeedDetail
 import world.respect.shared.navigation.LoginScreen
 import world.respect.shared.navigation.ManageAccount
+import world.respect.shared.navigation.NewGetStartedScreen
 import world.respect.shared.navigation.Onboarding
-import world.respect.shared.navigation.OtherOption
+import world.respect.shared.navigation.ConnectLearningSpace
 import world.respect.shared.navigation.OtherOptionsSignup
 import world.respect.shared.navigation.PasskeyList
 import world.respect.shared.navigation.PersonDetail
@@ -147,8 +149,9 @@ import world.respect.shared.viewmodel.manageuser.enterpasswordsignup.EnterPasswo
 import world.respect.shared.viewmodel.manageuser.getstarted.GetStartedViewModel
 import world.respect.shared.viewmodel.manageuser.howpasskeywork.HowPasskeyWorksViewModel
 import world.respect.shared.viewmodel.manageuser.enterinvitecode.EnterInviteCodeViewModel
+import world.respect.shared.viewmodel.manageuser.getstarted.NewGetStartedViewModel
 import world.respect.shared.viewmodel.manageuser.login.LoginViewModel
-import world.respect.shared.viewmodel.manageuser.otheroption.OtherOptionsViewModel
+import world.respect.shared.viewmodel.manageuser.otheroption.ConnectLearningSpaceViewModel
 import world.respect.shared.viewmodel.manageuser.otheroptionsignup.OtherOptionsSignupViewModel
 import world.respect.shared.viewmodel.manageuser.profile.SignupViewModel
 import world.respect.shared.viewmodel.manageuser.signup.CreateAccountViewModel
@@ -433,12 +436,21 @@ fun AppNavHost(
             GetStartedScreen(viewModel = viewModel)
         }
 
-        composable<OtherOption> {
-            val viewModel: OtherOptionsViewModel = respectViewModel(
+        composable<NewGetStartedScreen> {
+            val viewModel: NewGetStartedViewModel = respectViewModel(
                 onSetAppUiState = onSetAppUiState,
                 navController = respectNavController
             )
-            OtherOptionsScreen(viewModel = viewModel)
+            NewGetStartedScreen(viewModel = viewModel)
+        }
+
+
+        composable<ConnectLearningSpace> {
+            val viewModel: ConnectLearningSpaceViewModel = respectViewModel(
+                onSetAppUiState = onSetAppUiState,
+                navController = respectNavController
+            )
+            ConnectLearningSpaceScreen(viewModel = viewModel)
         }
 
         composable<OpdsFeedDetail> {
